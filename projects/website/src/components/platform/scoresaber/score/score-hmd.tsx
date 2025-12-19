@@ -3,7 +3,13 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 
-export function ScoreSaberScoreHMD({ score, children }: { score: ScoreSaberScore; children: React.ReactNode }) {
+export function ScoreSaberScoreHMD({
+  score,
+  children,
+}: {
+  score: ScoreSaberScore;
+  children: React.ReactNode;
+}) {
   return (
     <SimpleTooltip
       display={
@@ -16,7 +22,9 @@ export function ScoreSaberScoreHMD({ score, children }: { score: ScoreSaberScore
           ) : (
             <div>
               <p>An unknown HMD was used (outdated mod?)</p>
-              {score.controllers?.leftController === "Touch" && <p>Likely a Quest variant was used</p>}
+              {score.controllers?.leftController === "Touch" && (
+                <p>Likely a Quest variant was used</p>
+              )}
             </div>
           )}
 

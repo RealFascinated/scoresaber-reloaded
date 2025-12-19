@@ -1,4 +1,5 @@
 import type { HMD } from "./hmds";
+import { validateMap } from "./maps/validators";
 import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
 import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";
 import { LeaderboardStatus } from "./model/leaderboard/leaderboard-status";
@@ -16,13 +17,16 @@ import { parseDate } from "./utils/time-utils";
  *
  * @param token the token to parse
  */
-export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardToken): ScoreSaberLeaderboard {
+export function getScoreSaberLeaderboardFromToken(
+  token: ScoreSaberLeaderboardToken
+): ScoreSaberLeaderboard {
   const difficulty: LeaderboardDifficulty = {
     leaderboardId: token.difficulty.leaderboardId,
     difficulty: getDifficultyFromScoreSaberDifficulty(token.difficulty.difficulty),
     characteristic: token.difficulty.gameMode.replace("Solo", "") as MapCharacteristic,
     difficultyRaw: token.difficulty.difficultyRaw,
   };
+  validateMap(difficulty.difficulty, difficulty.characteristic);
 
   let status: LeaderboardStatus = "Unranked";
   if (token.qualified) {
@@ -43,12 +47,15 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
     difficulties:
       token.difficulties != undefined && token.difficulties.length > 0
         ? token.difficulties.map(difficulty => {
-            return {
+            const diff: LeaderboardDifficulty = {
               leaderboardId: difficulty.leaderboardId,
               difficulty: getDifficultyFromScoreSaberDifficulty(difficulty.difficulty),
               characteristic: difficulty.gameMode.replace("Solo", "") as MapCharacteristic,
               difficultyRaw: difficulty.difficultyRaw,
             };
+
+            validateMap(diff.difficulty, diff.characteristic);
+            return diff;
           })
         : [difficulty],
     maxScore: token.maxScore,

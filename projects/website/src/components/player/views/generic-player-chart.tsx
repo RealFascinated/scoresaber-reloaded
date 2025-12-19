@@ -1,5 +1,6 @@
 "use client";
 
+import { buildChartConfig } from "@/common/chart/build-chart-config";
 import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/api/chart/generic-chart";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
@@ -29,7 +30,12 @@ type Props = {
   daysAmount?: number;
 };
 
-export default function GenericPlayerChart({ id, statisticHistory, datasetConfig, daysAmount = 50 }: Props) {
+export default function GenericPlayerChart({
+  id,
+  statisticHistory,
+  datasetConfig,
+  daysAmount = 50,
+}: Props) {
   const { labels, histories } = useMemo(() => {
     const labels: Date[] = [];
     const histories: Record<string, (number | null)[]> = {};
@@ -95,22 +101,7 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     <div className="flex flex-col items-center">
       <div className="h-[400px] w-full">
         <GenericChart
-          config={{
-            id,
-            datasets: datasetConfig.map(config => ({
-              label: config.title,
-              data: histories[config.field],
-              color: config.color,
-              axisId: config.axisId,
-              type: config.type,
-              pointRadius: config.pointRadius,
-              showLegend: config.showLegend,
-              stack: config.stack,
-              stackOrder: config.stackOrder,
-              labelFormatter: config.labelFormatter,
-            })),
-            axes: Object.fromEntries(datasetConfig.map(config => [config.axisId, config.axisConfig])),
-          }}
+          config={buildChartConfig({ id, datasetConfig, seriesByField: histories })}
           labels={labels}
         />
       </div>

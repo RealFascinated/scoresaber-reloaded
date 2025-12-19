@@ -14,7 +14,10 @@ export function isProduction() {
  * Checks if we're running on the server
  */
 export function isServer() {
-  return env.NEXT_PUBLIC_APPLICATION_NAME === "backend" || (!("window" in globalThis) && typeof window == undefined);
+  return (
+    env.NEXT_PUBLIC_APPLICATION_NAME === "backend" ||
+    (!("window" in globalThis) && typeof window == undefined)
+  );
 }
 
 /**
@@ -86,4 +89,61 @@ export function darkenColor(hex: string, amount: number): string {
   const g = Math.max(0, ((num >> 8) & 0xff) - amount);
   const b = Math.max(0, (num & 0xff) - amount);
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+}
+
+/**
+ * Gets a query params string from an object.
+ *
+ * @param params the object to get the query params from
+ * @returns the query params string
+ */
+export function getQueryParamsFromObject(params: Record<string, string>) {
+  // Filter out undefined values and empty strings from the query params
+  const filteredQueryParams = Object.fromEntries(
+    Object.entries(params || {}).filter(([, value]) => value !== undefined && value !== "")
+  );
+  return filteredQueryParams && Object.keys(filteredQueryParams).length > 0
+    ? `?${new URLSearchParams(params)}`
+    : "";
+}
+
+/**
+ * Converts a MongoDB ObjectId or similar object to a string or number.
+ * Handles ObjectId instances by converting them to strings, and converts to number if the string is numeric.
+ *
+ * @param id the id to convert (can be ObjectId, string, number, or undefined)
+ * @returns the converted id as a string or number, or undefined if id is undefined
+ */
+export function convertObjectId(id: unknown): string | number | undefined {
+  if (id === undefined || id === null) {
+    return undefined;
+  }
+  if (typeof id === "string" || typeof id === "number") {
+    return id;
+  }
+  if (typeof id === "object" && "toString" in id) {
+    const idObj = id as { toString(): string };
+    const idStr = idObj.toString();
+    // Try to convert to number if it's numeric, otherwise use string
+    return /^\d+$/.test(idStr) ? Number(idStr) : idStr;
+  }
+  return String(id);
+}
+
+/**
+ * Chunks an array into smaller arrays.
+ *
+ * @param array the array to chunk
+ * @param size the size of each chunk
+ * @returns the chunks
+ */
+export function chunkArray<T>(array: T[], size: number): T[][] {
+  return array.reduce((result, item, index) => {
+    const chunkIndex = Math.floor(index / size);
+    if (!result[chunkIndex]) {
+      result[chunkIndex] = [];
+    }
+    result[chunkIndex].push(item);
+    return result;
+  }, [] as T[][]);
 }

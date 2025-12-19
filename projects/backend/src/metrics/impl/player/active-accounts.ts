@@ -1,7 +1,7 @@
 import { Point } from "@influxdata/influxdb-client";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
+import { ScoreSaberApiService } from "../../../service/scoresaber-api.service";
 import NumberMetric from "../../number-metric";
 
 export default class ActiveAccountsMetric extends NumberMetric {
@@ -13,7 +13,7 @@ export default class ActiveAccountsMetric extends NumberMetric {
   }
 
   public async collect(): Promise<Point | undefined> {
-    const count = await ApiServiceRegistry.getInstance().getScoreSaberService().lookupActivePlayerCount();
+    const count = await ScoreSaberApiService.lookupActivePlayerCount();
     if (count === undefined) {
       return undefined;
     }

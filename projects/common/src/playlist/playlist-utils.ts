@@ -2,7 +2,6 @@ import { env } from "../env";
 import { encodeSnipePlaylistSettings } from "../snipe/snipe-playlist-utils";
 import { BeatSaberPlaylist } from "./beatsaber/beatsaber-playlist";
 import { Playlist } from "./playlist";
-import { PlaylistSong } from "./playlist-song";
 import { SnipePlaylist } from "./snipe/snipe-playlist";
 
 /**
@@ -22,39 +21,17 @@ export function getPlaylistURL(playlist: Playlist): string {
 /**
  * Converts the playlist to a BeatSaber playlist
  *
- * @returns a BeatSaber playlist
+ * @param playlist the playlist to convert
+ * @returns the converted BeatSaber playlist
  */
-export async function generateBeatSaberPlaylist(playlist: Playlist): Promise<BeatSaberPlaylist> {
-  const deduplicatedSongs = new Map<string, PlaylistSong>();
-  for (const song of playlist.songs) {
-    let existingSong = deduplicatedSongs.get(song.songHash);
-
-    if (existingSong) {
-      // Merge difficulties, avoiding duplicates
-      const newDifficulties = song.difficulties.filter(
-        newDiff =>
-          !existingSong.difficulties.some(
-            existingDiff =>
-              existingDiff.characteristic === newDiff.characteristic && existingDiff.difficulty === newDiff.difficulty
-          )
-      );
-      existingSong.difficulties.push(...newDifficulties);
-    } else {
-      // Create a new song entry with a copy of difficulties
-      deduplicatedSongs.set(song.songHash, {
-        ...song,
-        difficulties: [...song.difficulties],
-      });
-    }
-  }
-
+export async function playlistToBeatSaberPlaylist(playlist: Playlist): Promise<BeatSaberPlaylist> {
   return {
     playlistTitle: playlist.title,
     playlistAuthor: playlist.author,
     customData: {
       syncURL: getPlaylistURL(playlist),
     },
-    songs: Array.from(deduplicatedSongs.values()).map(song => ({
+    songs: playlist.songs.map(song => ({
       songName: song.songName,
       levelAuthorName: song.songAuthor,
       hash: song.songHash,

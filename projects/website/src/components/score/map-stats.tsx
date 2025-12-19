@@ -1,6 +1,6 @@
 import StatValue from "@/components/statistic/stat-value";
 import { CubeIcon } from "@heroicons/react/24/solid";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatTime } from "@ssr/common/utils/time-utils";
 import { BombIcon, BrickWallIcon, DrumIcon, GaugeIcon, MusicIcon, TimerIcon } from "lucide-react";
@@ -18,12 +18,28 @@ export function MapStats({ beatSaver }: MapAndScoreData) {
   return (
     <div className="flex flex-col gap-2">
       {/* Map Stats */}
-      {beatSaver && beatSaver.difficulty && (
+      {beatSaver.difficulty && (
         <div className="flex flex-wrap justify-center gap-2">
-          <StatValue name="Length" icon={<TimerIcon className="h-4 w-4" />} value={formatTime(metadata.duration)} />
-          <StatValue name="BPM" icon={<MusicIcon className="h-4 w-4" />} value={formatNumberWithCommas(metadata.bpm)} />
-          <StatValue name="NPS" icon={<DrumIcon className="h-4 w-4" />} value={beatSaver.difficulty.nps.toFixed(2)} />
-          <StatValue name="NJS" icon={<GaugeIcon className="h-4 w-4" />} value={beatSaver.difficulty.njs.toFixed(2)} />
+          <StatValue
+            name="Length"
+            icon={<TimerIcon className="h-4 w-4" />}
+            value={formatTime(metadata.duration)}
+          />
+          <StatValue
+            name="BPM"
+            icon={<MusicIcon className="h-4 w-4" />}
+            value={formatNumberWithCommas(metadata.bpm)}
+          />
+          <StatValue
+            name="NPS"
+            icon={<DrumIcon className="h-4 w-4" />}
+            value={beatSaver.difficulty.nps.toFixed(2)}
+          />
+          <StatValue
+            name="NJS"
+            icon={<GaugeIcon className="h-4 w-4" />}
+            value={beatSaver.difficulty.njs.toFixed(2)}
+          />
           <StatValue
             name="Notes"
             icon={<CubeIcon className="h-4 w-4" />}

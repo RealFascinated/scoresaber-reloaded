@@ -1,16 +1,13 @@
-import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import { processInBatches } from "@ssr/common/utils/batch-utils";
-import { scoreToObject } from "../../common/score/score.util";
+import { scoreToObject } from "@ssr/common/utils/model-converters";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
-
-const ITEMS_PER_PAGE = 8;
-const MAX_TOTAL_SCORES = 1000;
 
 export class PlayerFriendScoresService {
   /**
@@ -25,50 +22,118 @@ export class PlayerFriendScoresService {
     leaderboardId: number,
     page: number
   ): Promise<Page<ScoreSaberScore>> {
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId + "", {
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId, {
       includeBeatSaver: false,
     });
 
-    // Use aggregation pipeline for better performance
-    const friendScores = await ScoreSaberScoreModel.aggregate([
-      {
-        $match: {
-          playerId: { $in: friendIds },
-          leaderboardId: leaderboardId,
-        },
-      },
-      {
-        $sort: {
-          timestamp: -1,
-          score: -1,
-        },
-      },
-    ]);
+    const totalCount = await ScoreSaberScoreModel.countDocuments({
+      playerId: { $in: friendIds },
+      leaderboardId: leaderboardId,
+    });
 
-    if (!friendScores.length) {
-      throw new NotFoundError(`No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`);
+    if (totalCount === 0) {
+      throw new NotFoundError(
+        `No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`
+      );
     }
 
-    // Process scores in parallel with batching
-    const scores: ScoreSaberScore[] = [];
-    await processInBatches(friendScores, 10, async friendScore => {
-      const processedScore = await ScoreCoreService.insertScoreData(
-        scoreToObject(friendScore),
-        leaderboard.leaderboard,
-        {
-          insertAdditionalData: true,
-          insertPreviousScore: false,
-          insertPlayerInfo: true,
-          removeScoreWeightAndRank: true,
+    const pagination = new Pagination<ScoreSaberScore>()
+      .setTotalItems(totalCount)
+      .setItemsPerPage(8);
+
+    return pagination.getPageWithCursor(page, {
+      sortField: "score",
+      sortDirection: -1,
+      getCursor: (item: { score: number; _id: unknown }) => ({
+        sortValue: item.score,
+        id: item._id,
+      }),
+      buildCursorQuery: cursor => {
+        const baseMatch = {
+          playerId: { $in: friendIds },
+          leaderboardId: leaderboardId,
+        };
+        if (!cursor) return baseMatch;
+        return {
+          ...baseMatch,
+          $or: [
+            { score: { $lt: cursor.sortValue } },
+            { score: cursor.sortValue, _id: { $lt: cursor.id } },
+          ],
+        };
+      },
+      getPreviousPageItem: async () => {
+        // Get the last item from the previous page
+        const previousPageSkip = (page - 1) * pagination.itemsPerPage - 1;
+        if (previousPageSkip < 0) return null;
+        const items = await ScoreSaberScoreModel.aggregate([
+          {
+            $match: {
+              playerId: { $in: friendIds },
+              leaderboardId: leaderboardId,
+            },
+          },
+          {
+            $sort: {
+              score: -1,
+              _id: -1,
+            },
+          },
+          {
+            $skip: previousPageSkip,
+          },
+          {
+            $limit: 1,
+          },
+          {
+            $project: {
+              score: 1,
+              _id: 1,
+            },
+          },
+        ]);
+        return (items[0] as { score: number; _id: unknown }) || null;
+      },
+      fetchItems: async cursorInfo => {
+        const friendScores = await ScoreSaberScoreModel.aggregate([
+          {
+            $match: cursorInfo.query,
+          },
+          {
+            $sort: {
+              score: -1,
+              _id: -1,
+            },
+          },
+          {
+            $limit: cursorInfo.limit,
+          },
+        ]);
+
+        if (!friendScores.length) {
+          return [];
         }
-      );
-      scores.push(processedScore);
+
+        // Process scores in parallel
+        const scores = await Promise.all(
+          friendScores.map(async friendScore => {
+            const processedScore = await ScoreCoreService.insertScoreData(
+              scoreToObject(friendScore),
+              leaderboard.leaderboard,
+              {
+                insertBeatLeaderScore: true,
+                insertPreviousScore: false,
+                insertPlayerInfo: true,
+                removeScoreWeightAndRank: true,
+              }
+            );
+            return processedScore;
+          })
+        );
+
+        return scores;
+      },
     });
-    return new Pagination<ScoreSaberScore>()
-      .setItems(scores.sort((a, b) => b.score - a.score))
-      .setTotalItems(scores.length)
-      .setItemsPerPage(8)
-      .getPage(page);
   }
 
   /**
@@ -81,79 +146,117 @@ export class PlayerFriendScoresService {
   public static async getFriendScores(
     friendIds: string[],
     page: number
-  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
-    const skip = (page - 1) * ITEMS_PER_PAGE;
-    const limit = ITEMS_PER_PAGE;
-
-    // Get total count for pagination
-    const totalCount = Math.min(
-      await ScoreSaberScoreModel.countDocuments({
-        playerId: { $in: friendIds },
-      }),
-      MAX_TOTAL_SCORES
-    );
-
-    return new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
-      .setTotalItems(totalCount)
-      .setItemsPerPage(ITEMS_PER_PAGE)
-      .getPage(page, async () => {
-        // Use aggregation pipeline for better performance
-        const friendScores = await ScoreSaberScoreModel.aggregate([
-          {
-            $match: {
-              playerId: { $in: friendIds },
+  ): Promise<Page<PlayerScore>> {
+    const pagination = new Pagination<PlayerScore>()
+      .setTotalItems(
+        await ScoreSaberScoreModel.countDocuments({
+          playerId: { $in: friendIds },
+        })
+      )
+      .setItemsPerPage(8);
+    return pagination
+      .getPageWithCursor(page, {
+        sortField: "timestamp",
+        sortDirection: -1,
+        getCursor: (item: { timestamp: Date; _id: unknown }) => ({
+          sortValue: item.timestamp,
+          id: item._id,
+        }),
+        buildCursorQuery: cursor => {
+          const baseMatch = { playerId: { $in: friendIds } };
+          if (!cursor) return baseMatch;
+          return {
+            ...baseMatch,
+            $or: [
+              { timestamp: { $lt: cursor.sortValue } },
+              { timestamp: cursor.sortValue, _id: { $lt: cursor.id } },
+            ],
+          };
+        },
+        getPreviousPageItem: async () => {
+          // Get the last item from the previous page
+          const previousPageSkip = (page - 1) * pagination.itemsPerPage - 1;
+          if (previousPageSkip < 0) return null;
+          const items = await ScoreSaberScoreModel.aggregate([
+            {
+              $match: {
+                playerId: { $in: friendIds },
+              },
             },
-          },
-          {
-            $sort: {
-              timestamp: -1,
+            {
+              $sort: {
+                timestamp: -1,
+                _id: -1,
+              },
             },
-          },
-          {
-            $skip: skip,
-          },
-          {
-            $limit: limit,
-          },
-        ]);
+            {
+              $skip: previousPageSkip,
+            },
+            {
+              $limit: 1,
+            },
+            {
+              $project: {
+                timestamp: 1,
+                _id: 1,
+              },
+            },
+          ]);
+          return (items[0] as { timestamp: Date; _id: unknown }) || null;
+        },
+        fetchItems: async cursorInfo => {
+          // Use aggregation pipeline for better performance
+          const friendScores = await ScoreSaberScoreModel.aggregate([
+            {
+              $match: cursorInfo.query,
+            },
+            {
+              $sort: {
+                timestamp: -1,
+                _id: -1,
+              },
+            },
+            {
+              $limit: cursorInfo.limit,
+            },
+          ]);
 
-        if (!friendScores.length) {
-          return [];
-        }
+          if (!friendScores.length) {
+            return [];
+          }
 
-        // Get all leaderboard IDs for the current page
-        const leaderboardIds = friendScores.map(score => score.leaderboardId + "");
+          const leaderboardMap = await LeaderboardCoreService.batchFetchLeaderboards(
+            friendScores,
+            score => score.leaderboardId,
+            { includeBeatSaver: true, beatSaverType: "full" }
+          );
 
-        // Fetch all leaderboards in parallel using getLeaderboards
-        const leaderboardResults = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
-          includeBeatSaver: true,
-          beatSaverType: DetailType.FULL,
-        });
+          // Process scores
+          const scores = await Promise.all(
+            friendScores.map(async friendScore => {
+              const score = scoreToObject(friendScore);
+              const leaderboardResponse = leaderboardMap.get(Number(friendScore.leaderboardId));
+              if (!leaderboardResponse) {
+                return null;
+              }
 
-        // Create a map for quick leaderboard lookup
-        const leaderboardMap = new Map(leaderboardResults.map(result => [result.leaderboard.id, result]));
+              return {
+                score: await ScoreCoreService.insertScoreData(
+                  score,
+                  leaderboardResponse.leaderboard,
+                  {
+                    insertPlayerInfo: true,
+                    removeScoreWeightAndRank: true,
+                  }
+                ),
+                leaderboard: leaderboardResponse.leaderboard,
+                beatSaver: leaderboardResponse.beatsaver,
+              };
+            })
+          );
 
-        // Process scores
-        const scores = await Promise.all(
-          friendScores.map(async friendScore => {
-            const score = scoreToObject(friendScore);
-            const leaderboardResponse = leaderboardMap.get(Number(friendScore.leaderboardId));
-            if (!leaderboardResponse) {
-              return null;
-            }
-
-            return {
-              score: await ScoreCoreService.insertScoreData(score, leaderboardResponse.leaderboard, {
-                insertPlayerInfo: true,
-                removeScoreWeightAndRank: true,
-              }),
-              leaderboard: leaderboardResponse.leaderboard,
-              beatSaver: leaderboardResponse.beatsaver,
-            };
-          })
-        );
-
-        return scores.filter(Boolean) as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>[];
+          return scores.filter(Boolean) as PlayerScore[];
+        },
       });
   }
 }

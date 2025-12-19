@@ -1,89 +1,120 @@
-import { DetailType } from "@ssr/common/detail-type";
-import { LeaderboardResponse } from "@ssr/common/response/leaderboard-response";
-import { PlaysByHmdResponse } from "@ssr/common/response/plays-by-hmd-response";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
-import { t } from "elysia";
-import { Controller, Get } from "elysia-decorators";
+import { Elysia } from "elysia";
+import { z } from "zod";
+import { MapDifficultySchema } from "../../../common/src/score/map-difficulty";
+import { MapCharacteristicSchema } from "../../../common/src/types/map-characteristic";
 import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
 import { LeaderboardHmdService } from "../service/leaderboard/leaderboard-hmd.service";
+import { ScoreSaberApiService } from "../service/scoresaber-api.service";
 
-@Controller("/leaderboard")
-export default class LeaderboardController {
-  @Get("/by-id/:id", {
-    config: {},
-    tags: ["Leaderboard"],
-    params: t.Object({
-      id: t.String({ required: true }),
-    }),
-    query: t.Object({
-      type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
-    }),
-    detail: {
-      description: "Fetch a leaderboard by its id",
-    },
-  })
-  public async getLeaderboard({
-    params: { id },
-    query: { type },
-  }: {
-    params: {
-      id: string;
-    };
-    query: { type: DetailType };
-  }): Promise<LeaderboardResponse> {
-    return await LeaderboardCoreService.getLeaderboard(id, {
-      beatSaverType: type,
-      includeBeatSaver: true,
-      includeStarChangeHistory: true,
-    });
-  }
-
-  @Get("/by-hash/:id/:difficulty/:characteristic", {
-    config: {},
-    tags: ["Leaderboard"],
-    params: t.Object({
-      id: t.String({ required: true }),
-      difficulty: t.String({ required: true }),
-      characteristic: t.String({ required: true }),
-    }),
-    query: t.Object({
-      type: t.Optional(t.Union([t.Literal("basic"), t.Literal("full")], { default: "basic" })),
-    }),
-    detail: {
-      description: "Fetch a leaderboard by its hash, difficulty, and characteristic",
-    },
-  })
-  public async getLeaderboardByHash({
-    params: { id, difficulty, characteristic },
-    query: { type },
-  }: {
-    params: {
-      id: string;
-      difficulty: MapDifficulty;
-      characteristic: MapCharacteristic;
-    };
-    query: { type: DetailType };
-  }): Promise<LeaderboardResponse> {
-    const data = await LeaderboardCoreService.getLeaderboardByHash(id, difficulty, characteristic, {
-      type,
-      includeBeatSaver: true,
-      includeStarChangeHistory: true,
-    });
-    return data;
-  }
-
-  @Get("/plays-by-hmd/:id", {
-    config: {},
-    tags: ["Leaderboard"],
-    params: t.Object({
-      id: t.String({ required: true }),
-    }),
-    detail: {
-      description: "Fetch the per hmd usage for a leaderboard",
-    },
-  })
-  public async getPlaysByHmd({ params: { id } }: { params: { id: string } }): Promise<PlaysByHmdResponse> {
-    return LeaderboardHmdService.getPlaysByHmd(id);
-  }
+export default function leaderboardController(app: Elysia) {
+  return app.group("/leaderboard", app =>
+    app
+      .get(
+        "/search",
+        async ({
+          query: { page, ranked, qualified, verified, category, minStar, maxStar, sort, search },
+        }) => {
+          return await ScoreSaberApiService.lookupLeaderboards(page, {
+            search,
+            ranked,
+            qualified,
+            verified,
+            category,
+            stars: {
+              min: minStar,
+              max: maxStar,
+            },
+            sort,
+          });
+        },
+        {
+          tags: ["Leaderboard"],
+          query: z.object({
+            page: z.coerce.number().default(1),
+            ranked: z.coerce.boolean().optional(),
+            qualified: z.coerce.boolean().optional(),
+            verified: z.coerce.boolean().optional(),
+            category: z.coerce.number().optional(),
+            minStar: z.coerce.number().optional(),
+            maxStar: z.coerce.number().optional(),
+            sort: z.coerce.number().optional(),
+            search: z.coerce.string().optional(),
+          }),
+          detail: {
+            description: "Search ScoreSaber leaderboards",
+          },
+        }
+      )
+      .get(
+        "/ranking-queue",
+        async () => {
+          return await ScoreSaberApiService.lookupRankingRequests();
+        },
+        {
+          tags: ["Leaderboard"],
+          detail: {
+            description: "Fetch the ScoreSaber ranking request queue",
+          },
+        }
+      )
+      .get(
+        "/by-id/:leaderboardId",
+        async ({ params: { leaderboardId } }) => {
+          return await LeaderboardCoreService.getLeaderboard(leaderboardId, {
+            includeBeatSaver: true,
+            includeStarChangeHistory: true,
+          });
+        },
+        {
+          tags: ["Leaderboard"],
+          params: z.object({
+            leaderboardId: z.coerce.number(),
+          }),
+          detail: {
+            description: "Fetch leaderboard details",
+          },
+        }
+      )
+      .get(
+        "/by-hash/:hash/:difficulty/:characteristic",
+        async ({ params: { hash, difficulty, characteristic } }) => {
+          const data = await LeaderboardCoreService.getLeaderboardByHash(
+            hash,
+            difficulty,
+            characteristic,
+            {
+              includeBeatSaver: true,
+              includeStarChangeHistory: true,
+            }
+          );
+          return data;
+        },
+        {
+          tags: ["Leaderboard"],
+          params: z.object({
+            hash: z.string(),
+            difficulty: MapDifficultySchema,
+            characteristic: MapCharacteristicSchema,
+          }),
+          detail: {
+            description: "Fetch leaderboard details",
+          },
+        }
+      )
+      .get(
+        "/play-count-by-hmd/:leaderboardId",
+        async ({ params: { leaderboardId } }) => {
+          return LeaderboardHmdService.getPlayCountByHmd(leaderboardId);
+        },
+        {
+          tags: ["Leaderboard"],
+          params: z.object({
+            leaderboardId: z.coerce.number(),
+          }),
+          detail: {
+            description: "Fetch play count by HMD",
+          },
+        }
+      )
+  );
 }

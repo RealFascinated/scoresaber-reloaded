@@ -35,8 +35,8 @@ export function FriendScores() {
       <div className="mb-(--spacing-lg)">
         <h2 className="text-lg font-semibold">Friend Scores</h2>
         <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
-          The 100 most recent scores from your friends. Score ranks aren&apos;t available as this is based on cached
-          data
+          The 100 most recent scores from your friends. Score ranks aren&apos;t available as this is
+          based on cached data
         </p>
       </div>
 
@@ -58,7 +58,7 @@ export function FriendScores() {
               return (
                 <div key={index} className="flex flex-col">
                   <PlayerScoreHeader player={playerScore.score.playerInfo} />
-                  <div className="bg-card border-border rounded-lg rounded-tl-none border px-(--spacing-sm) md:px-0">
+                  <Card className="rounded-lg rounded-tl-none p-0">
                     <ScoreSaberScoreDisplay
                       key={score.scoreId}
                       score={score}
@@ -68,7 +68,7 @@ export function FriendScores() {
                         hideAccuracyChanger: true,
                       }}
                     />
-                  </div>
+                  </Card>
                 </div>
               );
             })}

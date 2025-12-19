@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.4-alpine AS base
+FROM oven/bun:1.3.5-alpine AS base
 
 # Install dependencies
 FROM base AS depends
@@ -52,13 +52,16 @@ COPY --from=depends /app/package.json* /app/bun.lock* ./
 COPY --from=depends /app/node_modules ./node_modules
 
 # Copy built applications
-COPY --from=runner /app/projects/common/dist ./projects/common/dist
-COPY --from=runner /app/projects/backend/dist ./projects/backend/dist
+COPY --from=runner /app/projects/common ./projects/common
 COPY --from=runner /app/projects/backend/package.json ./projects/backend/
-# Copy font files needed for SSR image generation
-# Copy to both locations to handle different bundling scenarios
-COPY --from=depends /app/projects/backend/src/common/font ./projects/backend/dist/common/font
-COPY --from=depends /app/projects/backend/src/common/font ./projects/backend/dist/font
+COPY --from=runner /app/projects/backend/ssr-backend ./projects/backend/ssr-backend
+
+# Install TypeScript for fromTypes (needs TypeScript compiler API at runtime)
+RUN bun install typescript --global
+
+# Copy for Types used in OpenAPI schema (fromTypes reads TypeScript source files)
+COPY --from=runner /app/projects/backend/src ./projects/backend/src
+COPY --from=runner /app/projects/backend/tsconfig.json ./projects/backend/
 
 ARG PORT=8080
 ENV PORT $PORT
@@ -69,6 +72,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
 
 WORKDIR /app/projects/backend
-CMD ["bun", "dist/index.js"]
+CMD ["./ssr-backend"]
 
 

@@ -13,7 +13,9 @@ export default function ScoreSaberScoreStats({ score, leaderboard, medalsMode }:
   return (
     <div className="flex h-full w-full flex-col justify-center gap-2">
       <MainScoreBadges score={score} leaderboard={leaderboard} medalsMode={medalsMode} />
-      {score.comparisonScore && <ComparisonScoreBadges score={score.comparisonScore} leaderboard={leaderboard} />}
+      {score.comparisonScore && (
+        <ComparisonScoreBadges score={score.comparisonScore} leaderboard={leaderboard} />
+      )}
     </div>
   );
 }

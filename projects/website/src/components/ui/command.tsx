@@ -9,7 +9,10 @@ import { cn } from "@/common/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/contexts/viewport-context";
 
-const Command = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive>) => (
+const Command = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof CommandPrimitive>) => (
   <CommandPrimitive
     className={cn(
       "bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-(--radius-md)",
@@ -39,7 +42,10 @@ const CommandDialog = ({ children, ...props }: DialogProps) => {
   );
 };
 
-const CommandInput = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>) => (
+const CommandInput = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>) => (
   <div
     className="border-border hover:border-primary/50 flex items-center border-b px-3 transition-colors duration-200"
     cmdk-input-wrapper=""
@@ -57,8 +63,14 @@ const CommandInput = ({ className, ...props }: React.ComponentPropsWithoutRef<ty
 
 CommandInput.displayName = CommandPrimitive.Input.displayName;
 
-const CommandList = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>) => (
-  <CommandPrimitive.List className={cn("max-h-[300px] overflow-x-hidden overflow-y-auto", className)} {...props} />
+const CommandList = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof CommandPrimitive.List>) => (
+  <CommandPrimitive.List
+    className={cn("max-h-[300px] overflow-x-hidden overflow-y-auto", className)}
+    {...props}
+  />
 );
 
 CommandList.displayName = CommandPrimitive.List.displayName;
@@ -69,7 +81,10 @@ const CommandEmpty = (props: React.ComponentPropsWithoutRef<typeof CommandPrimit
 
 CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
 
-const CommandGroup = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Group>) => (
+const CommandGroup = ({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Group>) => (
   <CommandPrimitive.Group
     className={cn(
       "text-foreground [&_[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium",
@@ -105,7 +120,12 @@ function CommandItem({ className, ...props }: React.ComponentProps<typeof Comman
 CommandItem.displayName = "CommandItem";
 
 const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
-  return <span className={cn("text-muted-foreground ml-auto text-xs tracking-widest", className)} {...props} />;
+  return (
+    <span
+      className={cn("text-muted-foreground ml-auto text-xs tracking-widest", className)}
+      {...props}
+    />
+  );
 };
 CommandShortcut.displayName = "CommandShortcut";
 

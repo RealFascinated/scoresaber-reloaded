@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, "../../"),
   reactCompiler: true,
   experimental: {
-    turbopackFileSystemCacheForDev: true,
     optimizePackageImports: [
       "@ssr/common",
       "@radix-ui/react-checkbox",

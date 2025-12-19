@@ -8,7 +8,13 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { truncateText } from "@ssr/common/string-utils";
 import { ConfirmationDialog } from "../ui/confirmation-dialog";
-import { DropdownButton, DropdownGroup, DropdownLabel, DropdownSeparator, HoverDropdown } from "../ui/hover-dropdown";
+import {
+  DropdownButton,
+  DropdownGroup,
+  DropdownLabel,
+  DropdownSeparator,
+  HoverDropdown,
+} from "../ui/hover-dropdown";
 
 export default function ProfileButton() {
   const isMobile = useIsMobile("2xl");

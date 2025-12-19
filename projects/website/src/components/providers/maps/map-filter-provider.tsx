@@ -1,7 +1,7 @@
 "use client";
 
-import { Consts } from "@ssr/common/consts";
 import { MapCategory, MapSort } from "@ssr/common/maps/types";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { parseAsBoolean, parseAsFloat, parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { createContext, ReactNode, useContext } from "react";
 
@@ -33,10 +33,16 @@ type FilterContextProps = {
 const MapFilterContext = createContext<FilterContextProps | undefined>(undefined);
 
 export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
-  const [category, setCategory] = useQueryState("category", parseAsInteger.withDefault(defaultCategory));
+  const [category, setCategory] = useQueryState(
+    "category",
+    parseAsInteger.withDefault(defaultCategory)
+  );
   const [sort, setSort] = useQueryState("sort", parseAsInteger.withDefault(defaultSort));
   const [starMin, setStarMin] = useQueryState("starMin", parseAsFloat.withDefault(0));
-  const [starMax, setStarMax] = useQueryState("starMax", parseAsFloat.withDefault(Consts.MAX_STARS));
+  const [starMax, setStarMax] = useQueryState(
+    "starMax",
+    parseAsFloat.withDefault(SHARED_CONSTS.maxStars)
+  );
   const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
 
   const [verified, setVerified] = useQueryState("verified", parseAsBoolean.withDefault(false));
@@ -47,7 +53,7 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
     setCategory(defaultCategory);
     setSort(defaultSort);
     setStarMin(0);
-    setStarMax(Consts.MAX_STARS);
+    setStarMax(SHARED_CONSTS.maxStars);
     setSearch("");
     setVerified(false);
     setRanked(false);
@@ -59,7 +65,7 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
       category !== defaultCategory ||
       sort !== defaultSort ||
       starMin !== 0 ||
-      starMax !== Consts.MAX_STARS ||
+      starMax !== SHARED_CONSTS.maxStars ||
       verified ||
       ranked ||
       qualified ||

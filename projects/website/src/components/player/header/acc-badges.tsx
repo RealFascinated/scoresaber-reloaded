@@ -21,7 +21,12 @@ export default function PlayerAccBadges({ badges }: { badges: AccBadges }) {
             key={name}
             showOnMobile
           >
-            <StatValue name={badge.name} color={badge.color} value={formatNumberWithCommas(count)} className="h-full" />
+            <StatValue
+              name={badge.name}
+              color={badge.color}
+              value={formatNumberWithCommas(count)}
+              className="h-full"
+            />
           </SimpleTooltip>
         );
       })}

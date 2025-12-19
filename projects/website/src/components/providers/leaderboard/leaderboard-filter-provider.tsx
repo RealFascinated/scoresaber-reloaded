@@ -1,7 +1,8 @@
 import { SettingIds } from "@/common/database/database";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { parseAsString, useQueryState } from "nuqs";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import { toast } from "sonner";
 
 type FilterContextProps = {
@@ -13,20 +14,23 @@ type FilterContextProps = {
 };
 const LeaderboardFilterContext = createContext<FilterContextProps | undefined>(undefined);
 
-export const LeaderboardFilterProvider = ({
-  children,
-  initialCountry,
-}: {
-  children: ReactNode;
-  initialCountry?: string;
-}) => {
+export const LeaderboardFilterProvider = ({ children }: { children: ReactNode }) => {
   const database = useDatabase();
-  const defaultCountry = useStableLiveQuery(() => database.getSetting<string>(SettingIds.DefaultLeaderboardCountry));
-  const [country, setCountry] = useState<string | undefined>(initialCountry ?? undefined);
+  const defaultCountry = useStableLiveQuery(() =>
+    database.getSetting<string>(SettingIds.DefaultLeaderboardCountry)
+  );
+  // nuqs uses `null` as the "missing query param" value.
+  // Our app code prefers `undefined`, so we map at the boundary.
+  const [countryQuery, setCountryQuery] = useQueryState("country", parseAsString);
+  const country = countryQuery ?? undefined;
+  const setCountry = (value: string | undefined) => setCountryQuery(value ?? null);
 
   useEffect(() => {
-    setCountry(initialCountry ?? defaultCountry ?? undefined);
-  }, [defaultCountry]);
+    // Keep previous behaviour: if URL has no country, fall back to the saved default.
+    if (countryQuery == null && defaultCountry) {
+      setCountryQuery(defaultCountry);
+    }
+  }, [countryQuery, defaultCountry, setCountryQuery]);
 
   const clearFilters = () => {
     setCountry(undefined);

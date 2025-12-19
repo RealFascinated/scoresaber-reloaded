@@ -1,7 +1,6 @@
 "use client";
 
-import { env } from "@ssr/common/env";
-import { getApiHealth } from "@ssr/common/utils/api-utils";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useIsFirstRender } from "@uidotdev/usehooks";
 import { useEffect, useRef, useState } from "react";
@@ -15,9 +14,9 @@ export function ApiHealth() {
   useQuery({
     queryKey: ["api-health"],
     queryFn: async () => {
-      const status = (await getApiHealth(env.NEXT_PUBLIC_API_URL)).online;
-      setOnline(status);
-      return status;
+      const online = await ssrApi.health();
+      setOnline(online);
+      return online;
     },
     refetchInterval: 1000 * 5,
   });

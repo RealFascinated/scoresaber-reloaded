@@ -1,4 +1,3 @@
-import { AppStats } from "@/components/landing/app-statistics";
 import { SearchButton } from "@/components/landing/search-button";
 import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { ArrowRight, BarChart3, Database, Globe, Heart, Monitor, Star, Users } f
 
 export default async function LandingPage() {
   return (
-    <div className="bg-background min-h-screen w-full">
+    <div className="w-full">
       {/* Hero Section */}
       <section className="mx-auto max-w-6xl px-(--spacing-xl) py-(--spacing-3xl) md:px-(--spacing-2xl)">
         <div className="text-center">
@@ -27,9 +26,9 @@ export default async function LandingPage() {
           </h1>
 
           <p className="text-muted-foreground mx-auto mb-(--spacing-2xl) max-w-2xl text-lg">
-            The ultimate platform for Beat Saber players. Track your progress, compete with friends, and discover
-            detailed insights about your gameplay like never before. Integrates ScoreSaber, AccSaber, and BeatLeader
-            data in one place.
+            The ultimate platform for Beat Saber players. Track your progress, compete with friends,
+            and discover detailed insights about your gameplay like never before. Integrates
+            ScoreSaber, AccSaber, and BeatLeader data in one place.
           </p>
 
           <div className="flex flex-col items-center gap-(--spacing-lg) sm:flex-row sm:justify-center">
@@ -53,8 +52,12 @@ export default async function LandingPage() {
       <section className="py-(--spacing-3xl)">
         <div className="mx-auto max-w-6xl px-(--spacing-xl) md:px-(--spacing-2xl)">
           <div className="mb-(--spacing-3xl) text-center">
-            <h2 className="mb-(--spacing-lg) text-3xl font-bold sm:text-4xl">Why Choose ScoreSaber Reloaded?</h2>
-            <p className="text-muted-foreground text-lg">Everything you need to elevate your Beat Saber experience</p>
+            <h2 className="mb-(--spacing-lg) text-3xl font-bold sm:text-4xl">
+              Why Choose ScoreSaber Reloaded?
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Everything you need to elevate your Beat Saber experience
+            </p>
           </div>
 
           <div className="grid gap-(--spacing-lg) md:grid-cols-2 lg:grid-cols-3">
@@ -95,25 +98,23 @@ export default async function LandingPage() {
             />
           </div>
         </div>
-      </section>
 
-      {/* Statistics Section */}
-      <section className="py-(--spacing-2xl)">
-        <div className="mx-auto px-(--spacing-xl) md:px-(--spacing-2xl)">
-          <div className="mb-(--spacing-2xl) text-center">
-            <h2 className="mb-(--spacing-lg) text-2xl font-bold sm:text-3xl">Platform Statistics</h2>
-            <p className="text-muted-foreground text-lg">Real-time data from our growing community</p>
-          </div>
-          <div className="flex justify-center">
-            <AppStats className="grid w-full max-w-6xl grid-cols-1 gap-(--spacing-lg) md:grid-cols-3" />
-          </div>
-        </div>
+        {/* Buttom Padding */}
+        <div className="h-64" />
       </section>
     </div>
   );
 }
 
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+function FeatureCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
   return (
     <div className="border-border bg-card relative overflow-hidden rounded-xl border p-4 transition-all hover:shadow-xl">
       <div className="relative">

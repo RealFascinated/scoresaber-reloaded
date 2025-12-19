@@ -1,11 +1,13 @@
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page, Pagination } from "@ssr/common/pagination";
+import {
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+} from "@ssr/common/model/score/impl/scoresaber-score";
+import type { Page } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
-import { scoreToObject } from "../../common/score/score.util";
+import { scoreToObject } from "@ssr/common/utils/model-converters";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
-import ScoreSaberService from "../scoresaber.service";
 import { ScoreCoreService } from "./score-core.service";
 
 export class TopScoresService {
@@ -15,85 +17,84 @@ export class TopScoresService {
    * @param page the page number
    * @returns the top scores with pagination metadata
    */
-  public static async getTopScores(
-    page: number = 1
-  ): Promise<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>> {
-    const pagination = new Pagination<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>()
-      .setItemsPerPage(25)
-      .setTotalItems(1000);
+  public static async getTopScores(page: number = 1): Promise<Page<PlayerScore>> {
+    const pagination = new Pagination<PlayerScore>().setItemsPerPage(25).setTotalItems(1000);
 
-    return pagination.getPage(page, async () => {
-      const scoreObjects = (
-        await ScoreSaberScoreModel.aggregate([
+    return pagination.getPageWithCursor(page, {
+      sortField: "pp",
+      sortDirection: -1,
+      getCursor: (item: { pp: number; _id: unknown }) => ({
+        sortValue: item.pp,
+        id: item._id,
+      }),
+      buildCursorQuery: cursor => {
+        if (!cursor) return { pp: { $gt: 0 } };
+        return {
+          $or: [
+            { pp: { $lt: cursor.sortValue } },
+            { pp: cursor.sortValue, _id: { $lt: cursor.id } },
+          ],
+          pp: { $gt: 0 },
+        };
+      },
+      getPreviousPageItem: async () => {
+        // Get the last item from the previous page
+        // For page 2, we want item at position 24 (last item of page 1)
+        // For page 3, we want item at position 49 (last item of page 2)
+        const skip = Math.min((page - 1) * pagination.itemsPerPage - 1, pagination.totalItems - 1);
+        if (skip < 0) return null;
+        const items = await ScoreSaberScoreModel.aggregate([
           { $match: { pp: { $gt: 0 } } },
-          { $sort: { pp: -1 } },
-          { $skip: Math.min((page - 1) * 25, 975) }, // Limit to 1000 scores max
-          { $limit: 25 },
-        ]).hint({ pp: -1 })
-      ).map(scoreToObject);
+          { $sort: { pp: -1, _id: -1 } },
+          { $skip: skip },
+          { $limit: 1 },
+          { $project: { pp: 1, _id: 1 } },
+        ]).hint({ pp: -1, _id: -1 });
+        return (items[0] as { pp: number; _id: unknown }) || null;
+      },
+      fetchItems: async cursorInfo => {
+        const scoreObjects = (
+          await ScoreSaberScoreModel.aggregate([
+            { $match: cursorInfo.query },
+            { $sort: { pp: -1, _id: -1 } },
+            { $limit: cursorInfo.limit },
+          ]).hint({ pp: -1, _id: -1 })
+        ).map(scoreToObject);
 
-      // Batch fetch leaderboards using getLeaderboards
-      const leaderboardIds = scoreObjects.map((score: ScoreSaberScore) => score.leaderboardId.toString());
-      const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
-        includeBeatSaver: true,
-      });
+        if (!scoreObjects.length) {
+          return [];
+        }
 
-      // Batch fetch player info
-      const uniquePlayerIds = [
-        ...new Set(scoreObjects.map((score: ScoreSaberScore) => score.playerId.toString())),
-      ] as string[];
-      const playerPromises = uniquePlayerIds.map(playerId =>
-        ScoreSaberService.getCachedPlayer(playerId).catch(() => undefined)
-      );
-      const players = await Promise.all(playerPromises);
-      const playerMap = new Map(players.filter((p): p is NonNullable<typeof p> => p !== undefined).map(p => [p.id, p]));
+        const leaderboardMap = await LeaderboardCoreService.batchFetchLeaderboards(
+          scoreObjects,
+          (score: ScoreSaberScore) => score.leaderboardId,
+          { includeBeatSaver: true }
+        );
 
-      // Create a map for quick leaderboard lookup
-      const leaderboardMap = new Map(leaderboardResponses.map(response => [response.leaderboard.id, response]));
+        // Process scores in parallel
+        const processedScores = await Promise.all(
+          scoreObjects.map(async (score: ScoreSaberScore) => {
+            const leaderboardResponse = leaderboardMap.get(score.leaderboardId);
+            if (!leaderboardResponse) {
+              return null;
+            }
 
-      // Process scores in parallel
-      const processedScores = await Promise.all(
-        scoreObjects.map(async (score: ScoreSaberScore) => {
-          const leaderboardResponse = leaderboardMap.get(score.leaderboardId);
-          if (!leaderboardResponse) {
-            return null;
-          }
+            const { leaderboard, beatsaver } = leaderboardResponse;
 
-          const { leaderboard, beatsaver } = leaderboardResponse;
-          const player = playerMap.get(score.playerId.toString());
+            const processedScore = await ScoreCoreService.insertScoreData(score, leaderboard, {
+              removeScoreWeightAndRank: true,
+              insertPlayerInfo: true,
+            });
+            return {
+              score: processedScore,
+              leaderboard: leaderboard,
+              beatSaver: beatsaver,
+            } as PlayerScore;
+          })
+        );
 
-          // Skip scores from banned players
-          if (player?.banned) {
-            return null;
-          }
-
-          if (player) {
-            score.playerInfo = {
-              id: player.id,
-              name: player.name,
-            };
-          } else {
-            score.playerInfo = {
-              id: score.playerId.toString(),
-            };
-          }
-
-          const processedScore = await ScoreCoreService.insertScoreData(score, leaderboard, {
-            removeScoreWeightAndRank: true,
-            insertPlayerInfo: true,
-          });
-          return {
-            score: processedScore,
-            leaderboard: leaderboard,
-            beatSaver: beatsaver,
-          } as PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>;
-        })
-      );
-
-      // Filter out any null entries that might result from skipped scores
-      return processedScores.filter(
-        (score): score is PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard> => score !== null
-      );
+        return processedScores.filter(Boolean) as PlayerScore[];
+      },
     });
   }
 

@@ -1,6 +1,10 @@
+import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerModel } from "@ssr/common/model/player/player";
-import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import {
+  getScoreSaberLeaderboardFromToken,
+  getScoreSaberScoreFromToken,
+} from "@ssr/common/token-creators";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
@@ -21,113 +25,116 @@ interface PendingScore {
   player?: ScoreSaberLeaderboardPlayerInfoToken;
   beatLeaderScore?: BeatLeaderScoreToken;
   timestamp: number;
-  timeoutId?: NodeJS.Timeout;
 }
 
 export class ScoreWebsockets implements EventListener {
-  private static readonly SCORE_MATCH_TIMEOUT = TimeUnit.toMillis(TimeUnit.Minute, 1);
+  private static readonly SCORE_MATCH_TIMEOUT = TimeUnit.toMillis(TimeUnit.Minute, 5);
   private static readonly pendingScores = new Map<string, PendingScore>();
 
-  onStop?: () => Promise<void> = async () => {
-    // Process all pending scores and clear their timeouts
-    for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
-      if (pendingScore.timeoutId) {
-        clearTimeout(pendingScore.timeoutId);
-        pendingScore.timeoutId = undefined;
-      }
-
-      // Process the score
-      this.processScore(
-        pendingScore.scoreSaberToken,
-        pendingScore.leaderboardToken,
-        pendingScore.player,
-        pendingScore.beatLeaderScore
-      );
-
-      ScoreWebsockets.pendingScores.delete(key);
-    }
-  };
-
   constructor() {
+    // Start the match timeout interval timer
+    setInterval(
+      () => {
+        const now = Date.now();
+        for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
+          if (now - pendingScore.timestamp >= ScoreWebsockets.SCORE_MATCH_TIMEOUT) {
+            ScoreWebsockets.clearPendingScore(key);
+            if (
+              pendingScore.scoreSaberToken &&
+              pendingScore.leaderboardToken &&
+              pendingScore.player
+            ) {
+              this.processScore(
+                pendingScore.scoreSaberToken,
+                pendingScore.leaderboardToken,
+                pendingScore.player
+              );
+            } else if (pendingScore.beatLeaderScore) {
+              this.processScore(undefined, undefined, undefined, pendingScore.beatLeaderScore);
+            }
+            return;
+          }
+        }
+      },
+      TimeUnit.toMillis(TimeUnit.Minute, 1)
+    );
+
     // Connect to websockets
     connectScoresaberWebsocket({
       onScore: async score => {
-        const player = score.score.leaderboardPlayerInfo;
-        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+        try {
+          const player = score.score.leaderboardPlayerInfo;
+          const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
 
-        const key =
-          `${player.id}-${leaderboard.songHash}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`.toUpperCase();
-        const pendingScore = ScoreWebsockets.pendingScores.get(key);
+          const key =
+            `${player.id}-${leaderboard.songHash}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`.toUpperCase();
+          const pendingScore = ScoreWebsockets.pendingScores.get(key);
 
-        // Logger.info(`[SS-WS] Received score for player ${player.id} with key ${key}`);
+          //Logger.info(`[SS-WS] Received score for player ${player.id} with key ${key}`);
 
-        if (pendingScore?.beatLeaderScore) {
-          // Found a matching BeatLeader score, process both
-          ScoreWebsockets.clearPendingScore(key);
-          await this.processScore(
-            score.score,
-            score.leaderboard,
-            score.score.leaderboardPlayerInfo,
-            pendingScore.beatLeaderScore
-          );
-        } else {
-          // No matching BeatLeader score yet, store this one
-          const timeoutId = setTimeout(() => {
-            const pendingScore = ScoreWebsockets.pendingScores.get(key);
-            if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
-              ScoreWebsockets.clearPendingScore(key);
-              this.processScore(pendingScore.scoreSaberToken, pendingScore.leaderboardToken, pendingScore.player);
-            }
-          }, ScoreWebsockets.SCORE_MATCH_TIMEOUT);
-
-          ScoreWebsockets.pendingScores.set(key, {
-            scoreSaberToken: score.score,
-            leaderboardToken: score.leaderboard,
-            player: score.score.leaderboardPlayerInfo,
-            timestamp: Date.now(),
-            timeoutId,
-          });
+          if (pendingScore?.beatLeaderScore) {
+            // Found a matching BeatLeader score, process both
+            ScoreWebsockets.clearPendingScore(key);
+            await this.processScore(
+              score.score,
+              score.leaderboard,
+              score.score.leaderboardPlayerInfo,
+              pendingScore.beatLeaderScore
+            );
+          } else {
+            // No matching BeatLeader score yet, store this one
+            ScoreWebsockets.pendingScores.set(key, {
+              scoreSaberToken: score.score,
+              leaderboardToken: score.leaderboard,
+              player: score.score.leaderboardPlayerInfo,
+              timestamp: Date.now(),
+            });
+          }
+        } catch (error) {
+          Logger.error("[SS-WS] Error processing ScoreSaber score:", error);
         }
+      },
+      onDisconnect: event => {
+        Logger.warn("[SS-WS] ScoreSaber websocket disconnected:", event);
       },
     });
 
     connectBeatLeaderWebsocket({
       onScore: async beatLeaderScore => {
-        const player = beatLeaderScore.player;
-        const leaderboard = beatLeaderScore.leaderboard;
+        try {
+          const player = beatLeaderScore.player;
+          const leaderboard = beatLeaderScore.leaderboard;
 
-        const key =
-          `${player.id}-${leaderboard.song.hash}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`.toUpperCase();
-        const pendingScore = ScoreWebsockets.pendingScores.get(key);
+          const key =
+            `${player.id}-${leaderboard.song.hash}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`.toUpperCase();
+          const pendingScore = ScoreWebsockets.pendingScores.get(key);
 
-        // Logger.info(
-        //   `[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`
-        // );
+          // Logger.info(
+          //   `[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`
+          // );
 
-        if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
-          // Found a matching ScoreSaber score, process both
-          ScoreWebsockets.clearPendingScore(key);
-          await this.processScore(
-            pendingScore.scoreSaberToken,
-            pendingScore.leaderboardToken,
-            pendingScore.player,
-            beatLeaderScore
-          );
-        } else {
-          // No matching ScoreSaber score yet, store this one
-          const timeoutId = setTimeout(() => {
-            const pendingScore = ScoreWebsockets.pendingScores.get(key);
-            if (pendingScore?.beatLeaderScore) {
-              ScoreWebsockets.clearPendingScore(key);
-              this.processScore(undefined, undefined, undefined, pendingScore.beatLeaderScore);
-            }
-          }, ScoreWebsockets.SCORE_MATCH_TIMEOUT);
-
-          ScoreWebsockets.pendingScores.set(key, {
-            beatLeaderScore,
-            timestamp: Date.now(),
-            timeoutId,
-          });
+          if (
+            pendingScore?.scoreSaberToken &&
+            pendingScore.leaderboardToken &&
+            pendingScore.player
+          ) {
+            // Found a matching ScoreSaber score, process both
+            ScoreWebsockets.clearPendingScore(key);
+            await this.processScore(
+              pendingScore.scoreSaberToken,
+              pendingScore.leaderboardToken,
+              pendingScore.player,
+              beatLeaderScore
+            );
+          } else {
+            // No matching ScoreSaber score yet, store this one
+            ScoreWebsockets.pendingScores.set(key, {
+              beatLeaderScore,
+              timestamp: Date.now(),
+            });
+          }
+        } catch (error) {
+          Logger.error("[BL-WS] Error processing BeatLeader score:", error);
         }
       },
     });
@@ -139,11 +146,6 @@ export class ScoreWebsockets implements EventListener {
    * @param key the key of the pending score to clear.
    */
   private static clearPendingScore(key: string) {
-    const pendingScore = this.pendingScores.get(key);
-    if (pendingScore?.timeoutId) {
-      clearTimeout(pendingScore.timeoutId);
-      pendingScore.timeoutId = undefined;
-    }
     this.pendingScores.delete(key);
   }
 
@@ -181,8 +183,8 @@ export class ScoreWebsockets implements EventListener {
       }
 
       // Fetch the leaderboard if it doesn't exist
-      if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id + ""))) {
-        await LeaderboardCoreService.createLeaderboard(leaderboard.id + "", leaderboardToken);
+      if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id))) {
+        await LeaderboardCoreService.createLeaderboard(leaderboard.id, leaderboardToken);
       } else {
         await ScoreSaberLeaderboardModel.updateOne(
           { _id: leaderboard.id },
@@ -195,4 +197,19 @@ export class ScoreWebsockets implements EventListener {
       });
     }
   }
+
+  onStop: () => Promise<void> = async () => {
+    // Process all pending scores
+    for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
+      // Process the score
+      this.processScore(
+        pendingScore.scoreSaberToken,
+        pendingScore.leaderboardToken,
+        pendingScore.player,
+        pendingScore.beatLeaderScore
+      );
+
+      ScoreWebsockets.pendingScores.delete(key);
+    }
+  };
 }

@@ -8,21 +8,17 @@ import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
-import ProcessCpuUsageMetric from "../metrics/impl/backend/process-cpu-usage";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
-import HmdStatisticMetric from "../metrics/impl/player/daily-hmd-statistic";
 import DailyNewAccountsMetric from "../metrics/impl/player/daily-new-accounts";
 import TotalTrackedScoresMetric from "../metrics/impl/player/total-tracked-scores";
 import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
 import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
 import QueueSizesMetric from "../metrics/impl/queue/queue-sizes";
-import SystemCpuUsageMetric from "../metrics/impl/system/system-cpu-usage";
-import SystemNetworkIoMetric from "../metrics/impl/system/system-network-io";
 import Metric from "../metrics/metric";
 
 const influxClient = new InfluxDB({
@@ -40,23 +36,17 @@ export enum MetricType {
   TRACKED_PLAYERS = "tracked-players",
   UNIQUE_DAILY_PLAYERS = "unique-daily-players",
   ACTIVE_ACCOUNTS = "active-accounts",
-  DAILY_HMD_STATISTIC = "daily-hmd-statistic",
   ACTIVE_PLAYERS_HMD_STATISTIC = "active-players-hmd-statistic",
   TOTAL_TRACKED_SCORES = "total-tracked-scores",
   DAILY_NEW_ACCOUNTS = "daily-new-accounts",
 
   // Backend metrics
-  PROCESS_CPU_USAGE = "process-cpu-usage",
   MEMORY_USAGE = "memory-usage",
   EVENT_LOOP_LAG = "event-loop-lag",
   TOTAL_REQUESTS = "total-requests",
   EVENT_LOOP_TIMERS = "event-loop-timers",
   API_SERVICES = "api-services",
   PROCESS_UPTIME = "process-uptime",
-
-  // System metrics
-  SYSTEM_CPU_USAGE = "system-cpu-usage",
-  SYSTEM_NETWORK_IO = "system-network-io",
 
   // Queue metrics
   QUEUE_SIZES = "queue-sizes",
@@ -96,23 +86,17 @@ export default class MetricsService implements EventListener {
     this.registerMetric(new TrackedPlayersMetric());
     this.registerMetric(new UniqueDailyPlayersMetric());
     this.registerMetric(new ActiveAccountsMetric());
-    this.registerMetric(new HmdStatisticMetric());
     this.registerMetric(new ActivePlayerHmdStatisticMetric());
     this.registerMetric(new TotalTrackedScoresMetric());
     this.registerMetric(new DailyNewAccountsMetric());
 
     // Backend metrics
-    this.registerMetric(new ProcessCpuUsageMetric());
     this.registerMetric(new MemoryUsageMetric());
     this.registerMetric(new EventLoopLagMetric());
     this.registerMetric(new RequestsPerSecondMetric());
     this.registerMetric(new EventLoopTimersMetric());
     this.registerMetric(new ApiServicesMetric());
     this.registerMetric(new ProcessUptimeMetric());
-
-    // System metrics
-    this.registerMetric(new SystemCpuUsageMetric());
-    this.registerMetric(new SystemNetworkIoMetric());
 
     // Queue metrics
     this.registerMetric(new QueueSizesMetric());
@@ -157,7 +141,9 @@ export default class MetricsService implements EventListener {
    */
   private registerMetric(metric: Metric<unknown>): void {
     MetricsService.metrics.push(metric);
-    Logger.debug(`[METRICS] Registered metric ${metric.id} with interval ${formatDuration(metric.options.interval)}`);
+    Logger.debug(
+      `[METRICS] Registered metric ${metric.id} with interval ${formatDuration(metric.options.interval)}`
+    );
   }
 
   /**
@@ -180,7 +166,9 @@ export default class MetricsService implements EventListener {
       const fields = point.fields;
       for (const [key, value] of Object.entries(fields)) {
         if (value === undefined || value === null) {
-          Logger.warn(`[METRICS] Skipping write to InfluxDB - invalid value for field '${key}': ${value}`);
+          Logger.warn(
+            `[METRICS] Skipping write to InfluxDB - invalid value for field '${key}': ${value}`
+          );
           return;
         }
       }
@@ -216,7 +204,10 @@ export default class MetricsService implements EventListener {
    */
   public async cleanup(): Promise<void> {
     for (const metric of MetricsService.metrics) {
-      if ("cleanup" in metric && typeof (metric as { cleanup: () => void }).cleanup === "function") {
+      if (
+        "cleanup" in metric &&
+        typeof (metric as { cleanup: () => void }).cleanup === "function"
+      ) {
         (metric as { cleanup: () => void }).cleanup();
       }
     }

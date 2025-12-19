@@ -1,4 +1,4 @@
-import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
@@ -24,9 +24,12 @@ export class TrackScoreListener implements EventListener {
     const playerInfo = score.playerInfo;
 
     // Track BeatLeader score if available
-    let beatLeaderScore: AdditionalScoreData | undefined;
+    let beatLeaderScore: BeatLeaderScore | undefined;
     if (beatLeaderScoreToken) {
-      beatLeaderScore = await BeatLeaderService.trackBeatLeaderScore(beatLeaderScoreToken, isTop50GlobalScore);
+      beatLeaderScore = await BeatLeaderService.trackBeatLeaderScore(
+        beatLeaderScoreToken,
+        isTop50GlobalScore
+      );
     }
 
     // Track ScoreSaber score
@@ -42,59 +45,52 @@ export class TrackScoreListener implements EventListener {
     }
 
     // Update player daily score stats
-    PlayerHistoryService.updatePlayerDailyScoreStats(score.playerId, leaderboard.stars > 0, hasPreviousScore);
+    PlayerHistoryService.updatePlayerDailyScoreStats(
+      score.playerId,
+      leaderboard.stars > 0,
+      hasPreviousScore
+    );
 
-    // Invalidate caches
-    CacheService.invalidate(`scoresaber:player:${player.id}`);
+    // Invalidate player caches
+    CacheService.invalidate(`scoresaber:temp-cached-player:${player.id}`);
+    CacheService.invalidate(`scoresaber:player:${player.id}:basic`);
+    CacheService.invalidate(`scoresaber:player:${player.id}:full`);
 
-    // Prepare notifications to send
-    const notifications = [];
-
-    // Always send score flood gate notifications
-    notifications.push(
-      sendScoreNotification(
-        DiscordChannels.SCORE_FLOODGATE_FEED,
-        score,
-        leaderboard,
-        player,
-        beatLeaderScore,
-        `${playerInfo.name} just set a rank #${score.rank}!`
-      )
+    sendScoreNotification(
+      DiscordChannels.SCORE_FLOODGATE_FEED,
+      score,
+      leaderboard,
+      player,
+      beatLeaderScore,
+      `${playerInfo.name} just set a rank #${score.rank}!`
     );
 
     // Only send ranked notifications if the map is ranked
     if (leaderboard.stars > 0) {
       // Send #1 notification if applicable
       if (score.rank === 1) {
-        notifications.push(
-          sendScoreNotification(
-            DiscordChannels.NUMBER_ONE_FEED,
-            score,
-            leaderboard,
-            player,
-            beatLeaderScore,
-            `${playerInfo.name} just set a #1!`
-          )
+        sendScoreNotification(
+          DiscordChannels.NUMBER_ONE_FEED,
+          score,
+          leaderboard,
+          player,
+          beatLeaderScore,
+          `${playerInfo.name} just set a #1!`
         );
       }
 
       // Send top 50 notification if applicable
       if (isTop50GlobalScore) {
-        notifications.push(
-          sendScoreNotification(
-            DiscordChannels.TOP_50_SCORES_FEED,
-            score,
-            leaderboard,
-            player,
-            beatLeaderScore,
-            `${playerInfo.name} just set a new top 50 score!`
-          )
+        sendScoreNotification(
+          DiscordChannels.TOP_50_SCORES_FEED,
+          score,
+          leaderboard,
+          player,
+          beatLeaderScore,
+          `${playerInfo.name} just set a new top 50 score!`
         );
       }
     }
-
-    // Send all notifications in parallel
-    await Promise.all(notifications);
 
     // Update metric
     const trackedScoresMetric = (await MetricsService.getMetric(MetricType.TRACKED_SCORES)) as

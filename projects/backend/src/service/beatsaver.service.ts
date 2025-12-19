@@ -1,7 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import { BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
@@ -23,7 +23,7 @@ export default class BeatSaverService {
     hash: string,
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic,
-    type: DetailType = DetailType.BASIC,
+    type: DetailType = "basic",
     token?: BeatSaverMapToken
   ): Promise<BeatSaverMapResponse | undefined> {
     const map =
@@ -47,7 +47,7 @@ export default class BeatSaverService {
       },
     } as BeatSaverMapResponse;
 
-    if (type === DetailType.BASIC) {
+    if (type === "basic") {
       return response;
     }
 
@@ -87,7 +87,9 @@ export default class BeatSaverService {
       map.id = (map as BeatSaverMapToken & { _id?: string })._id ?? map.id;
       return map;
     }
-    const token = await ApiServiceRegistry.getInstance().getBeatSaverService().lookupMap(normalizedHash);
+    const token = await ApiServiceRegistry.getInstance()
+      .getBeatSaverService()
+      .lookupMap(normalizedHash);
     if (!token) {
       return undefined;
     }
@@ -110,7 +112,8 @@ export default class BeatSaverService {
       { _id: map.id },
       { $set: map },
       { upsert: true, new: true }
-    );
+    ).lean();
+
     // Add the id to the map
     newMap.id = (newMap as BeatSaverMapToken & { _id?: string })._id ?? newMap.id;
     return newMap;

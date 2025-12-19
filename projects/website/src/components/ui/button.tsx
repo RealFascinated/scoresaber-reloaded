@@ -43,7 +43,12 @@ export interface ButtonProps
 
 function Button({ className, variant, size, asChild = false, ...props }: ButtonProps) {
   const Comp = asChild ? Slot : "button";
-  return <Comp className={cn(buttonVariants({ variant, size, className }), "cursor-pointer")} {...props} />;
+  return (
+    <Comp
+      className={cn(buttonVariants({ variant, size, className }), "cursor-pointer")}
+      {...props}
+    />
+  );
 }
 Button.displayName = "Button";
 

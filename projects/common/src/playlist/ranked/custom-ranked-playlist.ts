@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { SHARED_CONSTS } from "../../shared-consts";
 
 export const customRankedPlaylistSchema = z.object({
   stars: z.object({
     min: z.number().min(0),
-    max: z.number().max(20),
+    max: z.number().max(SHARED_CONSTS.maxStars),
   }),
   sort: z.enum(["stars", "dateRanked"]),
 });
@@ -24,7 +25,7 @@ export function parseCustomRankedPlaylistSettings(settingsBase64?: string) {
       {
         stars: {
           min: 0,
-          max: 20,
+          max: SHARED_CONSTS.maxStars,
         },
         sort: "stars",
       };
@@ -33,7 +34,7 @@ export function parseCustomRankedPlaylistSettings(settingsBase64?: string) {
   settings.sort = settings.sort ?? "stars";
   settings.stars = {
     min: settings.stars.min < 0 ? 0 : settings.stars.min,
-    max: settings.stars.max > 20 ? 20 : settings.stars.max,
+    max: settings.stars.max > SHARED_CONSTS.maxStars ? SHARED_CONSTS.maxStars : settings.stars.max,
   };
 
   return settings;

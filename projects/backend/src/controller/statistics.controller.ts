@@ -1,19 +1,21 @@
-import { StatisticsResponse } from "@ssr/common/response/platform-statistics-response";
-import { Controller, Get } from "elysia-decorators";
+import { Elysia } from "elysia";
 import StatisticsService from "../service/statistics.service";
 
-@Controller("/statistics")
-export default class StatisticsController {
-  @Get("/scoresaber", {
-    config: {},
-    tags: ["Statistics"],
-    detail: {
-      description: "Fetch the platform statistics for ScoreSaber",
-    },
-  })
-  public async getPlatformStatistics(): Promise<StatisticsResponse> {
-    return {
-      statistics: await StatisticsService.getScoreSaberStatistics(120), // ~4 months
-    };
-  }
+export default function statisticsController(app: Elysia) {
+  return app.group("/statistics", app =>
+    app.get(
+      "/scoresaber",
+      async () => {
+        return {
+          statistics: await StatisticsService.getScoreSaberStatistics(120), // ~4 months
+        };
+      },
+      {
+        tags: ["Statistics"],
+        detail: {
+          description: "Fetch ScoreSaber platform statistics",
+        },
+      }
+    )
+  );
 }

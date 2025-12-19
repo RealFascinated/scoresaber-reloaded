@@ -1,4 +1,4 @@
-import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
+import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -11,7 +11,7 @@ export function useLeaderboardDropdownData(
   leaderboardId: number,
   scoreId: string,
   isExpanded: boolean,
-  additionalData?: { scoreId: number }
+  beatLeaderScore?: { scoreId: number }
 ) {
   const [shouldFetch, setShouldFetch] = useState(false);
 
@@ -33,7 +33,9 @@ export function useLeaderboardDropdownData(
     queryKey: [`leaderboardDropdownData:${leaderboardId}`, leaderboardId, scoreId, isExpanded],
     queryFn: async () => {
       return {
-        scoreStats: additionalData ? await ssrApi.fetchScoreStats(additionalData.scoreId) : undefined,
+        scoreStats: beatLeaderScore
+          ? await ssrApi.fetchScoreStats(beatLeaderScore.scoreId)
+          : undefined,
       };
     },
     staleTime: 30000,

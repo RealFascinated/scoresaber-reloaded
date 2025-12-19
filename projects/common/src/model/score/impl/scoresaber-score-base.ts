@@ -1,5 +1,6 @@
 import { modelOptions, Prop, Severity } from "@typegoose/typegoose";
 import type { HMD } from "../../../hmds";
+import { BeatLeaderScore } from "../../beatleader-score/beatleader-score";
 import { type Controllers } from "../controllers";
 import Score from "../score";
 import { ScoreSaberPreviousScoreOverview } from "./scoresaber-score";
@@ -22,14 +23,12 @@ export class ScoreSaberScoreBase extends Score {
 
   /**
    * The amount of pp for the score.
-   * @private
    */
   @Prop({ required: true })
   public pp!: number;
 
   /**
    * The weight of the score, or undefined if not ranked.
-   * @private
    */
   @Prop()
   public weight?: number;
@@ -56,4 +55,9 @@ export class ScoreSaberScoreBase extends Score {
    * The previous score, if any.
    */
   public previousScore?: ScoreSaberPreviousScoreOverview;
+
+  /**
+   * The BeatLeader score for the score.
+   */
+  public beatLeaderScore?: BeatLeaderScore;
 }

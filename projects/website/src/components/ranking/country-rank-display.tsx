@@ -10,7 +10,12 @@ type CountryRankDisplayProps = {
   flagSize?: number;
 };
 
-export function CountryRankDisplay({ countryRank, country, className, flagSize = 10 }: CountryRankDisplayProps) {
+export function CountryRankDisplay({
+  countryRank,
+  country,
+  className,
+  flagSize = 10,
+}: CountryRankDisplayProps) {
   return (
     <div className={cn("flex items-center", className)}>
       <span

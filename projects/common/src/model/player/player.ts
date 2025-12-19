@@ -6,7 +6,8 @@ import { type PeakRank } from "../../player/peak-rank";
  * The model for a player.
  */
 @modelOptions({ options: { allowMixed: Severity.ALLOW }, schemaOptions: { collection: "players" } })
-@index({ inactive: 1, pp: -1 }) // Compound index for active player queries
+@index({ inactive: 1, pp: -1 })
+@index({ joinedDate: 1 })
 export class Player {
   /**
    * The id of the player.
@@ -47,14 +48,8 @@ export class Player {
   /**
    * Whether this player is banned or not.
    */
-  @prop()
+  @prop({ index: true })
   public banned?: boolean;
-
-  /**
-   * The date the player was last tracked.
-   */
-  @prop()
-  public lastTracked?: Date;
 
   /**
    * The player's HMD (Head Mounted Display).
@@ -102,7 +97,8 @@ export class Player {
    * Gets the number of days tracked for this player.
    */
   public async getDaysTracked(): Promise<number> {
-    const PlayerHistoryEntryModel = (await import("./player-history-entry")).PlayerHistoryEntryModel;
+    const PlayerHistoryEntryModel = (await import("./player-history-entry"))
+      .PlayerHistoryEntryModel;
     return await PlayerHistoryEntryModel.countDocuments({ playerId: this._id });
   }
 }

@@ -1,16 +1,15 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
-import { PlayerRefreshResponse } from "@ssr/common/response/player-refresh-response";
+import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import CacheService, { CacheId } from "../cache.service";
-import ScoreSaberService from "../scoresaber.service";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 
 export const accountCreationLock: Record<string, Promise<Player>> = {};
 
@@ -79,13 +78,16 @@ export class PlayerCoreService {
    * @param playerToken an optional player token
    * @returns the player if successfully tracked, undefined otherwise
    */
-  public static async createPlayer(id: string, playerToken?: ScoreSaberPlayerToken): Promise<Player | undefined> {
+  public static async createPlayer(
+    id: string,
+    playerToken?: ScoreSaberPlayerToken
+  ): Promise<Player | undefined> {
     try {
       if (await PlayerCoreService.playerExists(id)) {
         return undefined;
       }
 
-      playerToken = playerToken || (await ScoreSaberService.getCachedPlayer(id, true));
+      playerToken = playerToken || (await ScoreSaberApiService.lookupPlayer(id));
       if (!playerToken) {
         return undefined;
       }
@@ -102,12 +104,16 @@ export class PlayerCoreService {
             trackedSince: new Date(),
           });
 
-          const seedQueue = QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue;
-          if (!(await seedQueue.hasItem({ id: id, data: id }))) {
-            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
-              id,
-              data: id,
-            });
+          const seedQueue = QueueManager.getQueue(
+            QueueId.PlayerScoreRefreshQueue
+          ) as FetchMissingScoresQueue;
+          if (!(await seedQueue.hasItem({ id: id, data: id })) && !playerToken.banned) {
+            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add(
+              {
+                id,
+                data: id,
+              }
+            );
           }
 
           // Notify in production
@@ -153,7 +159,7 @@ export class PlayerCoreService {
    * @returns the player document if found
    */
   public static async refreshPlayer(id: string): Promise<PlayerRefreshResponse> {
-    const response = await ApiServiceRegistry.getInstance().getScoreSaberService().refreshPlayer(id);
+    const response = await ScoreSaberApiService.refreshPlayer(id);
     if (response !== undefined) {
       CacheService.invalidate(`scoresaber:player:${id}`); // Remove the player from the cache
       return response;
@@ -195,23 +201,5 @@ export class PlayerCoreService {
     }
 
     return player;
-  }
-
-  /**
-   * Gets a player's rank including inactive players.
-   *
-   * @param playerId the id of the player
-   * @returns the rank
-   */
-  public static async getPlayerRankIncludingInactives(playerId: string): Promise<number | null> {
-    const player = await PlayerModel.findById(playerId).select("pp").lean();
-    if (!player || (player.pp ?? 0) <= 0) return null;
-
-    // Count how many players have more medals than this player
-    const rank = await PlayerModel.countDocuments({
-      pp: { $gt: player.pp ?? 0 },
-    });
-
-    return rank + 1; // +1 because rank is 1-indexed
   }
 }

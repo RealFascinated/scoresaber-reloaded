@@ -16,9 +16,9 @@ import { StarIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import ScoreDetailsDropdown from "./score-details-dropdown";
 
 export default function ScoreSaberScoreDisplay({
@@ -56,10 +56,13 @@ export default function ScoreSaberScoreDisplay({
   }, [score]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp = baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
+  const pp =
+    baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
+
+  const isTracked = score.isTracked && score.beatLeaderScore;
 
   return (
-    <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative")}>
+    <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative px-2 lg:pl-0")}>
       <div className="flex items-center">
         <div
           className={cn(
@@ -103,19 +106,27 @@ export default function ScoreSaberScoreDisplay({
             )}
 
             {/* View Leaderboard button */}
-            {detailsExpanded != undefined && setDetailsExpanded != undefined && !settings?.hideDetailsDropdown && (
-              <SimpleTooltip display="View score details and leaderboard scores">
-                <button className="size-6 cursor-pointer" onClick={() => setDetailsExpanded(!detailsExpanded)}>
-                  {isDetailsLoading ? (
-                    <Spinner size="sm" />
-                  ) : (
-                    <ChevronDown
-                      className={cn("size-6 transition-transform duration-200", detailsExpanded ? "" : "rotate-180")}
-                    />
-                  )}
-                </button>
-              </SimpleTooltip>
-            )}
+            {detailsExpanded != undefined &&
+              setDetailsExpanded != undefined &&
+              !settings?.hideDetailsDropdown && (
+                <SimpleTooltip display="View score details and leaderboard scores">
+                  <button
+                    className="size-6 cursor-pointer"
+                    onClick={() => setDetailsExpanded(!detailsExpanded)}
+                  >
+                    {isDetailsLoading ? (
+                      <Spinner size="sm" />
+                    ) : (
+                      <ChevronDown
+                        className={cn(
+                          "size-6 transition-transform duration-200",
+                          detailsExpanded ? "" : "rotate-180"
+                        )}
+                      />
+                    )}
+                  </button>
+                </SimpleTooltip>
+              )}
           </div>
 
           <ScoreSaberScoreStats
@@ -125,12 +136,29 @@ export default function ScoreSaberScoreDisplay({
           />
         </div>
 
+        {/* Score Page */}
         {!isMobile && (
-          <FallbackLink href={score.isTracked ? `/score/${score.scoreId}` : undefined}>
-            <SimpleTooltip display={score.isTracked ? "View score" : "No score data found :("} className="px-1">
-              <ChevronRight
-                className={cn("h-6 w-4", score.isTracked ? "cursor-pointer" : "cursor-not-allowed text-red-400")}
-              />
+          <FallbackLink href={isTracked ? `/score/${score.scoreId}` : undefined}>
+            <SimpleTooltip
+              display={isTracked ? "Open score page" : "No score data found :("}
+              className="pl-1.5"
+            >
+              <svg
+                className={cn(
+                  "h-8 w-3",
+                  isTracked
+                    ? "text-muted-foreground hover:text-primary/80 cursor-pointer transition-colors duration-200"
+                    : "cursor-not-allowed text-red-400"
+                )}
+                fill="none"
+                viewBox="0 0 6 32"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M0.5 2 L7.5 16 L0.5 30" />
+              </svg>
             </SimpleTooltip>
           </FallbackLink>
         )}

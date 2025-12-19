@@ -7,7 +7,7 @@ import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-
 import { useIsMobile } from "@/contexts/viewport-context";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { useMemo } from "react";
 import ScoreEditorButton from "./score-editor-button";
 
@@ -44,18 +44,20 @@ const buttons: ButtonConfig[] = [
   },
   {
     display: ({ score }: Props) => {
-      return score?.additionalData != undefined;
+      return score?.beatLeaderScore != undefined;
     },
     render: ({ score, leaderboard, updateScore }: Props) => {
-      return <ScoreEditorButton score={score!} leaderboard={leaderboard!} updateScore={updateScore!} />;
+      return (
+        <ScoreEditorButton score={score!} leaderboard={leaderboard!} updateScore={updateScore!} />
+      );
     },
   },
   {
     display: ({ score }: Props) => {
-      return score?.additionalData != undefined;
+      return score?.beatLeaderScore != undefined;
     },
     render: ({ score }: Props) => {
-      return <ScoreReplayButton additionalData={score!.additionalData!} />;
+      return <ScoreReplayButton score={score!} />;
     },
   },
   {
@@ -93,7 +95,10 @@ export default function ScoreSaberScoreButtons({
     }),
     [score, leaderboard, beatSaverMap, updateScore, isPreviousScore]
   );
-  const visibleButtons = useMemo(() => buttons.filter(button => button.display(buttonProps)), [buttonProps]);
+  const visibleButtons = useMemo(
+    () => buttons.filter(button => button.display(buttonProps)),
+    [buttonProps]
+  );
 
   return (
     <div

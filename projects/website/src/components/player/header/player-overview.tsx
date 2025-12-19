@@ -6,6 +6,7 @@ import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { pluralize } from "@ssr/common/utils/string.util";
 import { FaMedal } from "react-icons/fa";
 import { ChangeOverTime } from "../../statistic/change-over-time";
 import { DailyChange } from "../../statistic/daily-change";
@@ -37,11 +38,6 @@ const playerData = [
               type={PlayerStatChange.Rank}
               tooltipChildren={
                 <div className="mt-3">
-                  {player.rankIncludingInactives && (
-                    <p>
-                      Rank Including Inactives: <b>#{formatNumberWithCommas(player.rankIncludingInactives)}</b>
-                    </p>
-                  )}
                   {player.rankPercentile && (
                     <p>
                       Rank Percentile: <b>{player.rankPercentile.toFixed(2)}%</b>
@@ -51,7 +47,7 @@ const playerData = [
               }
             >
               <SimpleLink href={`/ranking/${player.rankPages.global}`}>
-                <span className="hover:text-primary/80 m-0 text-sm leading-[1.2] transition-all">
+                <span className="hover:text-primary/80 m-0 text-sm transition-all">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
               </SimpleLink>
@@ -79,7 +75,7 @@ const playerData = [
             />
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
               <SimpleLink href={`/ranking/${player.country}/${player.rankPages.country}`}>
-                <span className="hover:text-primary/80 m-0 text-sm leading-[1.4] transition-all">
+                <span className="hover:text-primary/80 m-0 text-sm transition-all">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
               </SimpleLink>
@@ -96,14 +92,16 @@ const playerData = [
       return (
         <PlayerOverviewItem>
           <FaMedal className="text-muted-foreground size-4" />
-          <FallbackLink href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}>
+          <FallbackLink
+            href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}
+          >
             <span
               className={cn(
                 "m-0 text-sm leading-[1.4]",
                 player.rankPages.medals ? "hover:text-primary/80 cursor-pointer transition-all" : ""
               )}
             >
-              {formatNumberWithCommas(player.medals)} Medals
+              {formatNumberWithCommas(player.medals)} {pluralize(player.medals, "Medal")}
             </span>
           </FallbackLink>
         </PlayerOverviewItem>

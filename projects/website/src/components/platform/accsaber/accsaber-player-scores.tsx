@@ -9,7 +9,7 @@ import {
   AccSaberScoreSort,
   AccSaberScoreType,
 } from "@ssr/common/api-service/impl/accsaber";
-import { Page } from "@ssr/common/pagination";
+import type { Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { useQuery } from "@tanstack/react-query";
@@ -31,7 +31,14 @@ import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect } from "react";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
-import { ButtonGroup, ControlButton, ControlPanel, ControlRow, Tab, TabGroup } from "../../ui/control-panel";
+import {
+  ButtonGroup,
+  ControlButton,
+  ControlPanel,
+  ControlRow,
+  Tab,
+  TabGroup,
+} from "../../ui/control-panel";
 import { EmptyState } from "../../ui/empty-state";
 import PageTransition from "../../ui/page-transition";
 import { usePageTransition } from "../../ui/page-transition-context";

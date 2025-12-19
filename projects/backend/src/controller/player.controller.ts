@@ -1,110 +1,163 @@
-import { DetailType } from "@ssr/common/detail-type";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerRankedPpsResponse } from "@ssr/common/response/player-ranked-pps-response";
-import { PlayerScoresChartResponse } from "@ssr/common/response/player-scores-chart";
-import { PpBoundaryResponse } from "@ssr/common/response/pp-boundary-response";
-import { t } from "elysia";
-import { Controller, Get } from "elysia-decorators";
+import { DetailTypeSchema } from "@ssr/common/detail-type";
+import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
+import { Elysia } from "elysia";
+import { z } from "zod";
+import MiniRankingService from "../service/mini-ranking.service";
 import { PlayerCoreService } from "../service/player/player-core.service";
+import { PlayerHistoryService } from "../service/player/player-history.service";
 import { PlayerRankedService } from "../service/player/player-ranked.service";
+import { PlayerScoreHistoryService } from "../service/player/player-score-history.service";
 import { PlayerScoresService } from "../service/player/player-scores.service";
+import { PlayerSearchService } from "../service/player/player-search.service";
+import { ScoreSaberApiService } from "../service/scoresaber-api.service";
 import ScoreSaberService from "../service/scoresaber.service";
 
-@Controller("/player")
-export default class PlayerController {
-  @Get("/:id", {
-    config: {},
-    tags: ["Player"],
-    params: t.Object({
-      id: t.String({ required: true }),
-    }),
-    query: t.Object({
-      type: t.Optional(t.Union([t.Literal("full"), t.Literal("basic")], { default: "basic" })),
-    }),
-    detail: {
-      description: "Fetch a player by their id",
-    },
-  })
-  public async getPlayer({
-    params: { id },
-    query: { type },
-  }: {
-    params: { id: string };
-    query: { type: DetailType };
-  }): Promise<ScoreSaberPlayer> {
-    const player = await ScoreSaberService.getPlayer(id, type, undefined, {
-      setMedalsRank: true,
-      setInactivesRank: true,
-      getHmdBreakdown: true,
-    });
-    return player;
-  }
-
-  @Get("/pp-boundary/:id/:boundary", {
-    config: {},
-    tags: ["Player"],
-    params: t.Object({
-      id: t.String({ required: true }),
-      boundary: t.Number({ maximum: 100, minimum: 1 }),
-    }),
-    detail: {
-      description: "Fetch the player's pp boundary for a given boundary amount",
-    },
-  })
-  public async getPpBoundary({
-    params: { id, boundary },
-  }: {
-    params: { id: string; boundary: number };
-  }): Promise<PpBoundaryResponse> {
-    return {
-      boundaries: await PlayerRankedService.getPlayerPpBoundary(id, boundary),
-      boundary: boundary,
-    };
-  }
-
-  @Get("/maps-graph/:id", {
-    config: {},
-    tags: ["Player"],
-    params: t.Object({
-      id: t.String({ required: true }),
-    }),
-    detail: {
-      description: "Fetch a player's scores chart data",
-    },
-  })
-  public async getPlayerStarsChartData({
-    params: { id },
-  }: {
-    params: { id: string };
-  }): Promise<PlayerScoresChartResponse> {
-    return await PlayerScoresService.getPlayerScoreChart(id);
-  }
-
-  @Get("/ranked-pps/:id", {
-    config: {},
-    tags: ["Player"],
-    params: t.Object({
-      id: t.String({ required: true }),
-    }),
-    detail: {
-      description: "Fetch a player's ranked pps",
-    },
-  })
-  public async getPlayerRankedPps({ params: { id } }: { params: { id: string } }): Promise<PlayerRankedPpsResponse> {
-    return await PlayerRankedService.getPlayerRankedPps(id);
-  }
-
-  @Get("/refresh/:id", {
-    config: {},
-    tags: ["Player"],
-    params: t.Object({
-      id: t.String({ required: true }),
-    }),
-    detail: {
-      description: "Refresh a player's for ScoreSaber and update their avatar",
-    },
-  })
-  public async refreshPlayer({ params: { id } }: { params: { id: string } }) {
-    return await PlayerCoreService.refreshPlayer(id);
-  }
+export default function playerController(app: Elysia) {
+  return app.group("/player", app =>
+    app
+      .get(
+        "/:playerId",
+        async ({ params: { playerId }, query: { type } }) => {
+          return ScoreSaberService.getPlayer(playerId, type);
+        },
+        {
+          tags: ["Player"],
+          params: z.object({
+            playerId: z.string(),
+          }),
+          query: z.object({
+            type: z.optional(DetailTypeSchema),
+          }),
+          detail: {
+            description: "Fetch ScoreSaber player profile",
+          },
+        }
+      )
+      .get(
+        "/scores-chart/:playerId",
+        async ({ params: { playerId } }) => {
+          return PlayerScoresService.getPlayerScoreChart(playerId);
+        },
+        {
+          tags: ["Player"],
+          params: z.object({
+            playerId: z.string(),
+          }),
+          detail: {
+            description: "Fetch player score chart data",
+          },
+        }
+      )
+      .get(
+        "/pps/:playerId",
+        async ({ params: { playerId } }) => {
+          return PlayerRankedService.getPlayerPps(playerId);
+        },
+        {
+          tags: ["Player"],
+          params: z.object({
+            playerId: z.string(),
+          }),
+          detail: {
+            description: "Fetch player PP values",
+          },
+        }
+      )
+      .get(
+        "/refresh/:playerId",
+        async ({ params: { playerId } }) => {
+          return PlayerCoreService.refreshPlayer(playerId);
+        },
+        {
+          tags: ["Player"],
+          params: z.object({
+            playerId: z.string(),
+          }),
+          detail: {
+            description: "Refresh player data from ScoreSaber",
+          },
+        }
+      )
+      .get(
+        "/mini-ranking/:playerId",
+        async ({ params: { playerId } }) => {
+          return MiniRankingService.getPlayerMiniRankings(playerId);
+        },
+        {
+          tags: ["Player"],
+          params: z.object({
+            playerId: z.string(),
+          }),
+          detail: {
+            description: "Fetch player mini-ranking",
+          },
+        }
+      )
+      .get(
+        "/search",
+        async ({ query: { query } }) => {
+          return {
+            players: await PlayerSearchService.searchPlayers(query),
+          };
+        },
+        {
+          tags: ["Player"],
+          query: z.object({
+            query: z.string().optional(),
+          }),
+          detail: {
+            description: "Search players",
+          },
+        }
+      )
+      .get(
+        "/history/:playerId",
+        async ({ params: { playerId }, query: { startDate, endDate } }) => {
+          const player = await ScoreSaberApiService.lookupPlayer(playerId);
+          if (!player) {
+            throw new NotFoundError(`Player "${playerId}" not found`);
+          }
+          return await PlayerHistoryService.getPlayerStatisticHistories(
+            player,
+            new Date(startDate),
+            new Date(endDate)
+          );
+        },
+        {
+          tags: ["Player"],
+          params: z.object({
+            playerId: z.string(),
+          }),
+          query: z.object({
+            startDate: z.string().default(new Date().toISOString()),
+            endDate: z.string().default(getDaysAgoDate(50).toISOString()),
+          }),
+          detail: {
+            description: "Fetch player statistics history",
+          },
+        }
+      )
+      .get(
+        "/score-history/:playerId/:leaderboardId/:page",
+        async ({ params: { playerId, leaderboardId, page } }) => {
+          return await PlayerScoreHistoryService.getPlayerScoreHistory(
+            playerId,
+            leaderboardId,
+            page
+          );
+        },
+        {
+          tags: ["Player"],
+          params: z.object({
+            playerId: z.string(),
+            leaderboardId: z.coerce.number(),
+            page: z.coerce.number(),
+          }),
+          detail: {
+            description: "Fetch player score history for a leaderboard",
+          },
+        }
+      )
+  );
 }

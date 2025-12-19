@@ -1,5 +1,4 @@
 import Logger from "@ssr/common/logger";
-import { IMessageEvent, w3cwebsocket as WebSocket } from "websocket";
 
 export enum OverlayDataClients {
   HTTPSiraStatus = "HTTPSiraStatus",
@@ -43,8 +42,10 @@ export default abstract class OverlayDataClient {
     };
 
     // Handle connection errors
-    this.ws.onclose = error => {
-      Logger.warn(`Unable to connect to ${this.name}, retrying in ${retryTime / 1000} seconds.`, error);
+    this.ws.onclose = () => {
+      Logger.warn(
+        `Unable to connect to ${this.name}, retrying in ${retryTime / 1000} seconds.`
+      );
 
       setTimeout(() => {
         this.connectWs();
@@ -52,7 +53,7 @@ export default abstract class OverlayDataClient {
     };
 
     // Handle incoming messages
-    this.ws.onmessage = (event: IMessageEvent) => {
+    this.ws.onmessage = (event: MessageEvent) => {
       this.onMessage(event.data as string);
     };
   }

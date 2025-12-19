@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "ES2022",
+    "module": "ESNext",
     "target": "ES2022",
     "outDir": "./dist",
     "declaration": true,
@@ -14,11 +14,8 @@
     "incremental": true,
     "sourceMap": true,
     "declarationMap": true,
-    "baseUrl": "./",
-    "paths": {
-      "@ssr/*": ["dist/*"] // This is crucial for resolving the imports correctly
-    }
+    "baseUrl": "./"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { ChartConfig, DatasetConfig } from "@/common/chart/types";
+import { buildChartConfig } from "@/common/chart/build-chart-config";
+import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/api/chart/generic-chart";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreStatsResponse } from "@ssr/common/response/scorestats-response";
+import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { formatTime } from "@ssr/common/utils/time-utils";
 
 type Props = {
@@ -95,39 +96,11 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
       : []),
   ];
 
-  const config: ChartConfig = {
+  const config = buildChartConfig({
     id: "player-score-accuracy-chart",
-    options: {
-      animation: true,
-    },
-    datasets: datasetConfig.map(config => ({
-      label: config.title,
-      data: histories[config.field],
-      color: config.color,
-      axisId: config.axisId,
-      type: config.type,
-      pointRadius: config.pointRadius,
-      showLegend: config.showLegend,
-      stack: config.stack,
-      stackOrder: config.stackOrder,
-      labelFormatter: config.labelFormatter,
-    })),
-    axes: Object.fromEntries(
-      datasetConfig.map(config => [
-        config.axisId,
-        {
-          display: config.axisConfig?.display ?? true,
-          position: config.axisConfig?.position ?? "left",
-          reverse: config.axisConfig?.reverse ?? false,
-          displayName: config.axisConfig?.displayName ?? config.title,
-          valueFormatter: config.axisConfig?.valueFormatter,
-          min: config.axisConfig?.min,
-          max: config.axisConfig?.max,
-          hideOnMobile: config.axisConfig?.hideOnMobile,
-        },
-      ])
-    ),
-  };
+    datasetConfig,
+    seriesByField: histories,
+  });
 
   return (
     <div className="bg-card border-border flex h-[330px] w-full flex-col items-center justify-center rounded-xl border p-4">

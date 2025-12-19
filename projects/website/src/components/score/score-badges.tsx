@@ -7,7 +7,11 @@ import React from "react";
 export type ScoreBadge<TScore, TLeaderboard> = {
   name: string;
   color?: (score: TScore, leaderboard: TLeaderboard, medalsMode?: boolean) => string | undefined;
-  create: (score: TScore, leaderboard: TLeaderboard, medalsMode?: boolean) => React.ReactNode | undefined;
+  create: (
+    score: TScore,
+    leaderboard: TLeaderboard,
+    medalsMode?: boolean
+  ) => React.ReactNode | undefined;
 };
 
 /**

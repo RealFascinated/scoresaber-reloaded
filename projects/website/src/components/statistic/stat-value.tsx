@@ -46,7 +46,9 @@ export default function StatValue({ name, icon, color, className, value }: Props
           <div className="h-4 w-px bg-white" />
         </>
       )}
-      <div className="flex items-center gap-1">{typeof value === "string" ? <p>{value}</p> : value}</div>
+      <div className="flex items-center gap-1">
+        {typeof value === "string" ? <p>{value}</p> : value}
+      </div>
     </div>
   );
 }

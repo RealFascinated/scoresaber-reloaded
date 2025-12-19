@@ -4,9 +4,9 @@ import ScoreSongInfo from "@/components/score/score-song-info";
 import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDownIcon } from "lucide-react";
@@ -15,7 +15,7 @@ import { useState } from "react";
 export default function RankingQueue() {
   const { data: rankingRequests, isLoading } = useQuery({
     queryKey: ["ranking-queue"],
-    queryFn: async () => ApiServiceRegistry.getInstance().getScoreSaberService().lookupRankingRequests(),
+    queryFn: async () => ssrApi.fetchRankingQueue(),
   });
   const [showOpenRankUnrank, setShowOpenRankUnrank] = useState(false);
 
@@ -81,12 +81,16 @@ export default function RankingQueue() {
         onClick={() => setShowOpenRankUnrank(!showOpenRankUnrank)}
       >
         <ChevronDownIcon
-          className={cn("h-4 w-4 transition-transform duration-200", showOpenRankUnrank ? "rotate-180" : "")}
+          className={cn(
+            "h-4 w-4 transition-transform duration-200",
+            showOpenRankUnrank ? "rotate-180" : ""
+          )}
         />
         {(showOpenRankUnrank ? "Show" : "Hide") + " All Requests"}
       </Button>
 
-      {showOpenRankUnrank && renderRequests("Open rank/unrank requests", rankingRequests?.openRankUnrank || [])}
+      {showOpenRankUnrank &&
+        renderRequests("Open rank/unrank requests", rankingRequests?.openRankUnrank || [])}
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Modifier } from "@ssr/common/score/modifier";
+import { hasModifier, Modifier } from "@ssr/common/score/modifier";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -22,20 +22,29 @@ type ScoreEditorButtonProps = {
 
 const MIN_ACCURACY = 70;
 
-export default function ScoreSaberScoreEditorButton({ score, leaderboard, updateScore }: ScoreEditorButtonProps) {
-  const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
-  const accuracy = (score.score / maxScore) * 100 * (score.modifiers.includes(Modifier.NF) ? 0.5 : 1);
-
+export default function ScoreSaberScoreEditorButton({
+  score,
+  leaderboard,
+  updateScore,
+}: ScoreEditorButtonProps) {
   const isMobile = useIsMobile();
+  const [open, setOpen] = useState(false);
+
+  const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
+  const accuracy =
+    (score.score / maxScore) * 100 * (hasModifier(score.modifiers, Modifier.NF) ? 0.5 : 1);
+
   const [baseValue, setBaseValue] = useState(Math.max(MIN_ACCURACY, Math.floor(accuracy))); // 1, 2, 3, etc.
   const [decimalValue, setDecimalValue] = useState(accuracy - Math.floor(accuracy)); // 0.0, 0.1, 0.2, etc.
 
   const { data: rankedPps } = useQuery({
     queryKey: ["ranked-pps", score.playerId],
-    queryFn: () => ssrApi.getPlayerRankedPps(score.playerId),
+    queryFn: () => ssrApi.getPlayerPps(score.playerId),
+    enabled: open,
   });
 
-  const [modifiedScores, setModifiedScores] = useState<Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]>();
+  const [modifiedScores, setModifiedScores] =
+    useState<Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]>();
 
   const updateScoreAndPP = (accuracy: number) => {
     const newBaseScore = (accuracy / 100) * maxScore;
@@ -57,7 +66,6 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
       }
       newModifiedScores = newModifiedScores.sort((a, b) => b.pp - a.pp);
       updateScoreWeights(newModifiedScores);
-
       setModifiedScores(newModifiedScores);
     }
   };
@@ -86,7 +94,7 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
   };
 
   const setAccuracyToFC = () => {
-    const fcAccuracy = score.additionalData!.fcAccuracy!;
+    const fcAccuracy = score.beatLeaderScore!.fcAccuracy!;
     setBaseValue(Math.max(1, Math.floor(fcAccuracy)));
     setDecimalValue(fcAccuracy - Math.floor(fcAccuracy));
     updateScoreAndPP(fcAccuracy);
@@ -101,12 +109,15 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
   return (
     <div className="relative flex cursor-default items-center justify-center">
       <Popover
+        open={open}
         onOpenChange={open => {
           if (!open) {
             // Reset when closing
             handleSliderReset();
             setModifiedScores(undefined);
           }
+
+          setOpen(open);
         }}
       >
         <PopoverTrigger asChild>
@@ -124,10 +135,13 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
 
                 <div className="flex items-center gap-2">
                   {/* Set to FC Button */}
-                  {score.additionalData !== undefined && !score.fullCombo && (
+                  {score.beatLeaderScore !== undefined && !score.fullCombo && (
                     <SimpleTooltip
                       display={
-                        <p>Set accuracy to FC Accuracy ({formatScoreAccuracy(score.additionalData!.fcAccuracy!)})</p>
+                        <p>
+                          Set accuracy to FC Accuracy (
+                          {formatScoreAccuracy(score.beatLeaderScore!.fcAccuracy!)})
+                        </p>
                       }
                     >
                       <Button onClick={setAccuracyToFC} className="h-fit p-1.5" variant="ghost">
@@ -183,7 +197,8 @@ export default function ScoreSaberScoreEditorButton({ score, leaderboard, update
             {/* PP Gain */}
             {rankedPps && leaderboard.ranked && (
               <p className="text-muted-foreground text-sm">
-                Weighted PP Gain: <b className="text-pp">{ppGain > 0.1 ? ppGain.toFixed(2) : 0}pp</b>
+                Weighted PP Gain:{" "}
+                <b className="text-pp">{ppGain > 0.1 ? ppGain.toFixed(2) : 0}pp</b>
               </p>
             )}
           </div>

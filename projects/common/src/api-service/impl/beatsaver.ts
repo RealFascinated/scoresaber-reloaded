@@ -29,7 +29,9 @@ export class BeatSaverService extends ApiService {
     const before = performance.now();
     this.log(`Looking up map "${hash}"...`);
 
-    const response = await this.fetch<BeatSaverMapToken>(LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", hash));
+    const response = await this.fetch<BeatSaverMapToken>(
+      LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", hash)
+    );
     // Map not found
     if (response == undefined) {
       return undefined;
@@ -61,7 +63,9 @@ export class BeatSaverService extends ApiService {
       return undefined;
     }
 
-    this.log(`Found ${Object.entries(response).length} maps in ${(performance.now() - before).toFixed(0)}ms`);
+    this.log(
+      `Found ${Object.entries(response).length} maps in ${(performance.now() - before).toFixed(0)}ms`
+    );
     return response;
   }
 

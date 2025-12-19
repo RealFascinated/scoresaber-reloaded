@@ -10,14 +10,24 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
+import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { SortDirection, SortField } from "@ssr/common/types/score-query";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import { ArrowDown, ArrowUp, BarChart3, ClockIcon, Hash, SearchIcon, Target, Trophy, XIcon } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  BarChart3,
+  ClockIcon,
+  Hash,
+  SearchIcon,
+  Target,
+  Trophy,
+  XIcon,
+} from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect } from "react";
 import ScoresCard from "../../score/scores-card";
@@ -77,7 +87,13 @@ const MODE_NAME: Record<Mode, string> = {
   medals: "Medals",
 };
 
-export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: ScoreSaberPlayer; mode: Mode }) {
+export default function ScoreSaberPlayerScoresSSR({
+  player,
+  mode,
+}: {
+  player: ScoreSaberPlayer;
+  mode: Mode;
+}) {
   const isMobile = useIsMobile();
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
@@ -87,15 +103,15 @@ export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: Sc
     SortField,
     (value: SortField | null) => void,
   ];
-  const [direction, setDirection] = useQueryState("direction", parseAsString.withDefault(DEFAULT_SORT_DIRECTION)) as [
-    SortDirection,
-    (value: SortDirection | null) => void,
-  ];
+  const [direction, setDirection] = useQueryState(
+    "direction",
+    parseAsString.withDefault(DEFAULT_SORT_DIRECTION)
+  ) as [SortDirection, (value: SortDirection | null) => void];
 
   // Filters
   const [hmdFilter, setHmdFilter] = useQueryState("hmd", parseAsString) as [
-    HMD | undefined,
-    (value: HMD | undefined) => void,
+    HMD | null,
+    (value: HMD | null) => void,
   ];
 
   const sortOptions: SortOption[] = [
@@ -144,8 +160,16 @@ export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: Sc
     isError,
     isLoading,
     isRefetching,
-  } = useQuery<PlayerScoresResponse>({
-    queryKey: ["playerScores:" + mode, player.id, page, sort, debouncedSearchTerm, direction, hmdFilter],
+  } = useQuery<PlayerScoresPageResponse>({
+    queryKey: [
+      "playerScores:" + mode,
+      player.id,
+      page,
+      sort,
+      debouncedSearchTerm,
+      direction,
+      hmdFilter,
+    ],
     queryFn: async () => {
       const response = await ssrApi.fetchPlayerScores(player.id, mode, page, sort, direction, {
         ...(!invalidSearch ? { search: debouncedSearchTerm } : {}),
@@ -208,7 +232,8 @@ export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: Sc
       if (sort !== DEFAULT_SORT) params.set("sort", sort);
       if (direction !== DEFAULT_SORT_DIRECTION) params.set("direction", direction);
       if (pageNum !== 1) params.set("page", String(pageNum));
-      if (debouncedSearchTerm && debouncedSearchTerm.length >= 3) params.set("search", debouncedSearchTerm);
+      if (debouncedSearchTerm && debouncedSearchTerm.length >= 3)
+        params.set("search", debouncedSearchTerm);
 
       const queryString = params.toString();
       return `/player/${player.id}/scoresaber?${queryString}`;
@@ -284,7 +309,9 @@ export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: Sc
                 <ControlButton
                   key={sortOption.value}
                   isActive={sortOption.value === sort}
-                  onClick={() => handleSortChange(sortOption.value, sortOption.defaultOrder as SortDirection)}
+                  onClick={() =>
+                    handleSortChange(sortOption.value, sortOption.defaultOrder as SortDirection)
+                  }
                 >
                   {sortOption.value === sort ? (
                     isLoading || isRefetching ? (
@@ -310,7 +337,10 @@ export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: Sc
                 <Input
                   type="search"
                   placeholder="Query..."
-                  className={cn("h-8 w-full pr-3 pl-8 text-xs sm:w-64", invalidSearch && "border-red-500")}
+                  className={cn(
+                    "h-8 w-full pr-3 pl-8 text-xs sm:w-64",
+                    invalidSearch && "border-red-500"
+                  )}
                   value={search || ""}
                   onChange={e => handleSearchChange(e.target.value)}
                 />
@@ -328,21 +358,12 @@ export default function ScoreSaberPlayerScoresSSR({ player, mode }: { player: Sc
                     value={hmdFilter || "All Hmds"}
                     onValueChange={value => {
                       setIsLoading(true);
-                      setHmdFilter(value === "All Hmds" ? undefined : (value as HMD));
+                      setHmdFilter(value === "All Hmds" ? null : (value as HMD));
                       setPage(1);
                       animateLeft();
                     }}
                   >
-                    <SelectTrigger
-                      className="h-8 w-full text-xs sm:w-42"
-                      showClearButton={hmdFilter !== undefined}
-                      onClear={() => {
-                        setIsLoading(true);
-                        setHmdFilter(undefined);
-                        setPage(1);
-                        animateLeft();
-                      }}
-                    >
+                    <SelectTrigger className="h-8 w-full text-xs sm:w-42">
                       <SelectValue placeholder="HMD Filter" />
                     </SelectTrigger>
                     <SelectContent>

@@ -21,15 +21,15 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
   });
 
   const { data: scoreStats, isLoading: isScoreStatsLoading } = useQuery({
-    queryKey: ["scoreStats", score?.score.additionalData?.scoreId],
-    queryFn: () => ssrApi.fetchScoreStats(Number(score?.score.additionalData?.scoreId)),
-    enabled: !!score?.score.additionalData?.scoreId,
+    queryKey: ["scoreStats", score?.score.beatLeaderScore?.scoreId],
+    queryFn: () => ssrApi.fetchScoreStats(Number(score?.score.beatLeaderScore?.scoreId)),
+    enabled: !!score?.score.beatLeaderScore?.scoreId,
   });
 
   const { data: replay, isLoading: isReplayLoading } = useQuery({
     queryKey: ["replayAnalysis", score],
-    queryFn: () => getDecodedReplay(score?.score.additionalData?.scoreId + ""),
-    enabled: !!score?.score.additionalData?.scoreId,
+    queryFn: () => getDecodedReplay(score?.score.beatLeaderScore?.scoreId.toString()!),
+    enabled: !!score?.score.beatLeaderScore?.scoreId,
   });
 
   if (isError) {
@@ -37,7 +37,9 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
       <Card className="flex flex-col items-center justify-center text-center">
         <AlertCircle className="mb-(--spacing-xl) h-16 w-16 text-red-500" />
         <h2 className="mb-(--spacing-sm) text-xl font-semibold">Score Not Found</h2>
-        <p className="text-muted-foreground">This score has not been tracked or may have been removed.</p>
+        <p className="text-muted-foreground">
+          This score has not been tracked or may have been removed.
+        </p>
       </Card>
     );
   }
@@ -78,11 +80,19 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
             )}
           </div>
 
-          <p className="text-muted-foreground text-sm">Some data may not be available for this score.</p>
+          <p className="text-muted-foreground text-sm">
+            Some data may not be available for this score.
+          </p>
         </Card>
       ) : (
         <>
-          {scoreStats && <ScoreOverview score={score.score} scoreStats={scoreStats} leaderboard={score.leaderboard} />}
+          {scoreStats && (
+            <ScoreOverview
+              score={score.score}
+              scoreStats={scoreStats}
+              leaderboard={score.leaderboard}
+            />
+          )}
 
           {isReplayLoading && <p>Loading replay...</p>}
           {replay && (

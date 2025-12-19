@@ -1,5 +1,12 @@
 import { AutoIncrementID } from "@typegoose/auto-increment";
-import { getModelForClass, index, modelOptions, plugin, ReturnModelType, Severity } from "@typegoose/typegoose";
+import {
+  getModelForClass,
+  index,
+  modelOptions,
+  plugin,
+  ReturnModelType,
+  Severity,
+} from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/leaderboard-player-info";
 import { PreviousScore } from "../previous-score";
@@ -18,12 +25,14 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
   trackerCollection: "increments",
   overwriteModelName: "scoresaber-scores",
 })
-@index({ playerId: 1 })
-@index({ leaderboardId: 1 })
+@index({ playerId: 1, leaderboardId: 1 })
+@index({ playerId: 1, timestamp: -1 })
 @index({ pp: -1 })
+@index({ pp: -1, _id: -1 })
 @index({ timestamp: -1 })
 @index({ playerId: 1, pp: -1 })
-@index({ scoreId: 1 })
+@index({ playerId: 1, accuracy: 1 })
+@index({ scoreId: 1, score: 1 })
 export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
 export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
@@ -41,6 +50,11 @@ export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
    * Whether the score is tracked.
    */
   public isTracked?: boolean;
+
+  /**
+   * Whether the score is a previous score.
+   */
+  public isPreviousScore?: boolean;
 }
 
 export type ScoreSaberPreviousScoreOverview = PreviousScore & {

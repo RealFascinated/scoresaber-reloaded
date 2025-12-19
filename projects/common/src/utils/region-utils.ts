@@ -1,4 +1,4 @@
-let regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
 
 /**
  * Returns the normalized region name

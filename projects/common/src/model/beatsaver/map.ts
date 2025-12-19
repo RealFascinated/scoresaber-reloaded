@@ -1,4 +1,10 @@
-import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import {
+  getModelForClass,
+  modelOptions,
+  prop,
+  ReturnModelType,
+  Severity,
+} from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import BeatSaverMapToken from "../../types/token/beatsaver/map";
 
@@ -20,4 +26,5 @@ export class BeatSaverMap extends BeatSaverMapToken {
 }
 
 export type BeatSaverMapDocument = BeatSaverMap & Document;
-export const BeatSaverMapModel: ReturnModelType<typeof BeatSaverMap> = getModelForClass(BeatSaverMap);
+export const BeatSaverMapModel: ReturnModelType<typeof BeatSaverMap> =
+  getModelForClass(BeatSaverMap);

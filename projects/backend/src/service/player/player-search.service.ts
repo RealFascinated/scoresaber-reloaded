@@ -1,11 +1,9 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { DetailType } from "@ssr/common/detail-type";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerRankingsResponse } from "@ssr/common/response/player-rankings-response";
-import { Metadata } from "@ssr/common/types/metadata";
+import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 import ScoreSaberService from "../scoresaber.service";
 
 export class PlayerSearchService {
@@ -15,10 +13,10 @@ export class PlayerSearchService {
    * @param query the query to search for
    * @returns the players that match the query
    */
-  public static async searchPlayers(query: string): Promise<ScoreSaberPlayer[]> {
+  public static async searchPlayers(query?: string): Promise<ScoreSaberPlayer[]> {
     const [scoreSaberResponse, foundPlayers] = await Promise.all([
-      ApiServiceRegistry.getInstance().getScoreSaberService().searchPlayers(query),
-      query.length > 0
+      ScoreSaberApiService.searchPlayers(query ?? ""),
+      query && query.length > 0
         ? PlayerModel.find({
             name: { $regex: query, $options: "i" },
           })
@@ -30,7 +28,11 @@ export class PlayerSearchService {
 
     const scoreSaberPlayerTokens = scoreSaberResponse?.players;
     const uniquePlayerIds = [
-      ...new Set(foundPlayers.map(player => player._id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])),
+      ...new Set(
+        foundPlayers
+          .map(player => player._id)
+          .concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])
+      ),
     ];
 
     // Get players from ScoreSaber
@@ -39,9 +41,9 @@ export class PlayerSearchService {
         uniquePlayerIds.map(async id =>
           ScoreSaberService.getPlayer(
             id,
-            DetailType.BASIC,
-            scoreSaberPlayerTokens?.find(token => token.id === id) || (await ScoreSaberService.getCachedPlayer(id)), // Use the cache for inactive players
-            { setInactivesRank: false, setMedalsRank: false, getHmdBreakdown: false }
+            "basic",
+            scoreSaberPlayerTokens?.find(token => token.id === id) ||
+              (await ScoreSaberService.getCachedPlayer(id)) // Use the cache for inactive players
           )
         )
       )
@@ -111,19 +113,21 @@ export class PlayerSearchService {
 
     const [foundPlayers, countryCounts] = await Promise.all([
       country
-        ? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayersByCountry(page, country, search)
-        : ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page, search),
+        ? ScoreSaberApiService.lookupPlayersByCountry(page, country, search)
+        : ScoreSaberApiService.lookupPlayers(page, search),
       getPlayerCountryCounts(),
     ]);
 
     return {
       items: foundPlayers?.players ?? [],
-      metadata: new Metadata(
-        Math.ceil((foundPlayers?.metadata.total ?? 0) / (foundPlayers?.metadata.itemsPerPage ?? 0)),
-        foundPlayers?.metadata.total ?? 0,
+      metadata: {
+        totalPages: Math.ceil(
+          (foundPlayers?.metadata.total ?? 0) / (foundPlayers?.metadata.itemsPerPage ?? 0)
+        ),
+        totalItems: foundPlayers?.metadata.total ?? 0,
         page,
-        foundPlayers?.metadata.itemsPerPage ?? 0
-      ),
+        itemsPerPage: foundPlayers?.metadata.itemsPerPage ?? 0,
+      },
       countryMetadata: countryCounts,
     } as PlayerRankingsResponse;
   }

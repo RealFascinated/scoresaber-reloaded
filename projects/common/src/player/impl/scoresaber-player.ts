@@ -28,9 +28,9 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   rankPages: ScoreSaberRankPages;
 
   /**
-   * The amount of pp to gain 1 global pp.
+   * The amount of raw pp needed to gain 1 weighted pp.
    */
-  plusOnePP: number;
+  plusOnePp: number;
 
   /**
    * The acc badges based on the player's scores.
@@ -56,11 +56,6 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    * The player's country medal rank.
    */
   countryMedalsRank: number;
-
-  /**
-   * The player's global rank including inactive players.
-   */
-  rankIncludingInactives: number;
 
   /**
    * The player's hmd breakdown.

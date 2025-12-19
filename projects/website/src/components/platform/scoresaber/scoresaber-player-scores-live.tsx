@@ -10,7 +10,7 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
+import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -28,8 +28,6 @@ import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 import { ScoreSaberScoreModeTabs } from "./scoresaber-score-mode-selector";
 
 const DEFAULT_SORT: ScoreSaberScoreSort = "recent";
-const DEFAULT_PAGE = 1;
-const DEFAULT_SEARCH = "";
 
 const SORT_OPTIONS = [
   { name: "Top", value: "top", icon: <TrendingUpIcon className="h-4 w-4" /> },
@@ -62,7 +60,10 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
   const invalidSearch = search && search.length >= 1 && search.length < 3;
 
   useDocumentTitle(
-    ssrConfig.siteTitleTemplate.replace("%s", `${player.name} / ScoreSaber / ${page} / ${capitalizeFirstLetter(sort)}`)
+    ssrConfig.siteTitleTemplate.replace(
+      "%s",
+      `${player.name} / ScoreSaber / ${page} / ${capitalizeFirstLetter(sort)}`
+    )
   );
 
   useEffect(() => {
@@ -78,8 +79,16 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
     isError,
     isLoading,
     isRefetching,
-  } = useQuery<PlayerScoresResponse>({
-    queryKey: ["playerScores:live", player.id, page, sort, debouncedSearchTerm, mainPlayerId, showScoreComparison],
+  } = useQuery<PlayerScoresPageResponse>({
+    queryKey: [
+      "playerScores:live",
+      player.id,
+      page,
+      sort,
+      debouncedSearchTerm,
+      mainPlayerId,
+      showScoreComparison,
+    ],
     queryFn: async () => {
       const response = await ssrApi.fetchScoreSaberPlayerScores(
         player.id,
@@ -137,7 +146,8 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
       const params = new URLSearchParams();
       if (sort !== DEFAULT_SORT) params.set("sort", sort);
       if (pageNum !== 1) params.set("page", String(pageNum));
-      if (debouncedSearchTerm && debouncedSearchTerm.length >= 3) params.set("search", debouncedSearchTerm);
+      if (debouncedSearchTerm && debouncedSearchTerm.length >= 3)
+        params.set("search", debouncedSearchTerm);
       const queryString = params.toString();
       return `/player/${player.id}/scoresaber${queryString ? `?${queryString}` : ""}`;
     },
@@ -207,7 +217,10 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
                 <Input
                   type="search"
                   placeholder="Query..."
-                  className={cn("h-8 w-full pr-3 pl-8 text-xs sm:w-64", invalidSearch && "border-red-500")}
+                  className={cn(
+                    "h-8 w-full pr-3 pl-8 text-xs sm:w-64",
+                    invalidSearch && "border-red-500"
+                  )}
                   value={search || ""}
                   onChange={e => handleSearchChange(e.target.value)}
                 />

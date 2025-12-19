@@ -6,7 +6,10 @@ import {
   ScoreSaberScore,
   ScoreSaberScoreModel,
 } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page, Pagination } from "@ssr/common/pagination";
+import type { Page } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
+import { normalizeModifiers } from "@ssr/common/score/modifier";
+import { scoreToObject } from "@ssr/common/utils/model-converters";
 import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
@@ -21,24 +24,9 @@ export class PlayerScoreHistoryService {
    */
   public static async getPlayerScoreHistory(
     playerId: string,
-    leaderboardId: string,
+    leaderboardId: number,
     page: number
   ): Promise<Page<ScoreSaberScore>> {
-    const [scoreHistory, currentScores] = await Promise.all([
-      ScoreSaberPreviousScoreModel.find({
-        playerId: playerId,
-        leaderboardId: leaderboardId,
-      }),
-      ScoreSaberScoreModel.find({
-        playerId: playerId,
-        leaderboardId: leaderboardId,
-      }),
-    ]);
-    const scores = [...scoreHistory, ...currentScores].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-    if (scores == null || scores.length == 0) {
-      throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
-    }
-
     // Get leaderboard data once for all scores
     const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(leaderboardId);
     if (leaderboardResponse == undefined) {
@@ -46,21 +34,180 @@ export class PlayerScoreHistoryService {
     }
     const { leaderboard } = leaderboardResponse;
 
-    return new Pagination<ScoreSaberScore>()
+    // Get total count using aggregation
+    const totalCountResult = await ScoreSaberScoreModel.aggregate([
+      {
+        $match: {
+          playerId: playerId,
+          leaderboardId: leaderboardId,
+        },
+      },
+      {
+        $unionWith: {
+          coll: "scoresaber-previous-scores",
+          pipeline: [
+            {
+              $match: {
+                playerId: playerId,
+                leaderboardId: leaderboardId,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $count: "total",
+      },
+    ]);
+
+    const totalScores = totalCountResult[0]?.total ?? 0;
+    if (totalScores === 0) {
+      throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
+    }
+
+    const pagination = new Pagination<ScoreSaberScore>()
       .setItemsPerPage(8)
-      .setTotalItems(scores.length)
-      .getPage(page, async () => {
+      .setTotalItems(totalScores);
+
+    return pagination.getPageWithCursor(page, {
+      sortField: "timestamp",
+      sortDirection: -1,
+      getCursor: (item: { timestamp: Date; _id: unknown }) => ({
+        sortValue: item.timestamp,
+        id: item._id,
+      }),
+      buildCursorQuery: cursor => {
+        const baseMatch = {
+          playerId: playerId,
+          leaderboardId: leaderboardId,
+        };
+        if (!cursor) return baseMatch;
+        return {
+          ...baseMatch,
+          $or: [
+            { timestamp: { $lt: cursor.sortValue } },
+            { timestamp: cursor.sortValue, _id: { $lt: cursor.id } },
+          ],
+        };
+      },
+      getPreviousPageItem: async () => {
+        // Get the last item from the previous page
+        // For page 2, we want item at position 7 (last item of page 1)
+        // For page 3, we want item at position 15 (last item of page 2)
+        const previousPageStart = (page - 1) * 8 - 1;
+        if (previousPageStart < 0) return null;
+
+        const items = await ScoreSaberScoreModel.aggregate([
+          {
+            $match: {
+              playerId: playerId,
+              leaderboardId: leaderboardId,
+            },
+          },
+          {
+            $unionWith: {
+              coll: "scoresaber-previous-scores",
+              pipeline: [
+                {
+                  $match: {
+                    playerId: playerId,
+                    leaderboardId: leaderboardId,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $sort: {
+              timestamp: -1,
+              _id: -1,
+            },
+          },
+          {
+            $skip: previousPageStart,
+          },
+          {
+            $limit: 1,
+          },
+          {
+            $project: {
+              timestamp: 1,
+              _id: 1,
+            },
+          },
+        ]);
+
+        return (items[0] as { timestamp: Date; _id: unknown }) || null;
+      },
+      fetchItems: async cursorInfo => {
+        // Build base pipeline
+        const baseStages = [
+          {
+            $match: {
+              playerId: playerId,
+              leaderboardId: leaderboardId,
+            },
+          },
+          {
+            $unionWith: {
+              coll: "scoresaber-previous-scores",
+              pipeline: [
+                {
+                  $match: {
+                    playerId: playerId,
+                    leaderboardId: leaderboardId,
+                  },
+                },
+              ],
+            },
+          },
+        ];
+
+        // Build cursor match stage if needed
+        const cursorMatchStage = cursorInfo.cursor
+          ? [
+              {
+                $match: {
+                  $or: [
+                    { timestamp: { $lt: cursorInfo.cursor.sortValue } },
+                    { timestamp: cursorInfo.cursor.sortValue, _id: { $lt: cursorInfo.cursor.id } },
+                  ],
+                },
+              },
+            ]
+          : [];
+
+        // Build final stages
+        const finalStages = [
+          {
+            $sort: {
+              timestamp: -1 as const,
+              _id: -1 as const,
+            },
+          },
+          {
+            $limit: cursorInfo.limit,
+          },
+        ];
+
+        // Combine all stages
+        const pipeline = [...baseStages, ...cursorMatchStage, ...finalStages];
+
+        const rawScores = await ScoreSaberScoreModel.aggregate(pipeline);
+
         return await Promise.all(
-          scores.map(async scoreToken => {
-            let score = scoreToken.toObject() as unknown as ScoreSaberScore;
+          rawScores.map(async scoreToken => {
+            let score = scoreToObject(scoreToken as unknown as ScoreSaberScore) as ScoreSaberScore;
             score = await ScoreCoreService.insertScoreData(score, leaderboard, {
               insertPreviousScore: false,
               removeScoreWeightAndRank: true,
             });
+            score.isPreviousScore = true;
             return score;
           })
         );
-      });
+      },
+    });
   }
 
   /**
@@ -97,7 +244,7 @@ export class PlayerScoreHistoryService {
         return {
           score: previousScore.score,
           accuracy: previousScore.accuracy || (score.score / leaderboard.maxScore) * 100,
-          modifiers: previousScore.modifiers,
+          modifiers: normalizeModifiers(previousScore.modifiers),
           misses: previousScore.misses,
           missedNotes: previousScore.missedNotes,
           badCuts: previousScore.badCuts,

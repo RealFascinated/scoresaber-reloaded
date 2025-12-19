@@ -17,6 +17,8 @@ export default class TotalTrackedScoresMetric extends NumberMetric {
     const total = await ScoreSaberScoreModel.estimatedDocumentCount();
     const totalPrevious = await ScoreSaberPreviousScoreModel.estimatedDocumentCount();
 
-    return this.getPointBase().floatField("totalScores", total).floatField("totalPreviousScores", totalPrevious);
+    return this.getPointBase()
+      .floatField("totalScores", total)
+      .floatField("totalPreviousScores", totalPrevious);
   }
 }

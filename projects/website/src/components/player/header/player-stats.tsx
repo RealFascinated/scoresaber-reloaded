@@ -140,7 +140,10 @@ const playerStats: Stat[] = [
               ))}
             </div>
           ) : undefined,
-        value: roles.length > 0 ? <p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p> : undefined,
+        value:
+          roles.length > 0 ? (
+            <p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p>
+          ) : undefined,
       };
     },
   },
@@ -168,7 +171,7 @@ const playerStats: Stat[] = [
     create: (player: ScoreSaberPlayer) => {
       return {
         tooltip: <p>Amount of raw PP required to increase your global pp by 1pp</p>,
-        value: <>{formatPp(player.plusOnePP)}pp</>,
+        value: <>{formatPp(player.plusOnePp)}pp</>,
       };
     },
   },

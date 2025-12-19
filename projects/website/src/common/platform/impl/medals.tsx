@@ -1,4 +1,3 @@
-import { DetailType } from "@ssr/common/detail-type";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Medal } from "lucide-react";
@@ -16,7 +15,7 @@ export class MedalScoresPlatform extends Platform {
     super(PlatformType.MedalScores, "Medals", {
       logo: <Medal className="h-4.5 w-4.5" />,
       displayPredicate: async player => {
-        return ((await ssrApi.getScoreSaberPlayer(player, DetailType.BASIC))?.medals ?? 0) > 0;
+        return ((await ssrApi.getScoreSaberPlayer(player, "basic"))?.medals ?? 0) > 0;
       },
     });
   }

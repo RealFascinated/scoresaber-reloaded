@@ -1,9 +1,16 @@
 "use client";
 
 import { HistoryMode } from "@/common/player/history-mode";
+import Card from "@/components/card";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -15,13 +22,14 @@ import { getDaysAgo, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
+import { cn } from "../../../common/utils";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
-import MapsGraphChart from "./impl/maps-graph-chart";
 import PlayerAccuracyChart from "./impl/player-accuracy-chart";
 import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
 import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
 import PlusPpCalculator from "./impl/plus-pp-calculator";
+import ScoresGraphChart from "./impl/scores-graph-chart";
 
 // Constants
 const DATE_PRESETS = [
@@ -38,17 +46,10 @@ type SelectedView = {
   index: number;
   label: string;
   showDateRangeSelector: boolean;
+  isChart: boolean;
   icon: React.ElementType;
   chart: (player: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => ReactElement;
 };
-
-function Loading() {
-  return (
-    <div className="flex h-[400px] items-center justify-center">
-      <Spinner />
-    </div>
-  );
-}
 
 function ViewSelector({
   views,
@@ -60,7 +61,7 @@ function ViewSelector({
   onViewSelect: (view: SelectedView) => void;
 }) {
   return (
-    <div className="flex items-center justify-center gap-1">
+    <div className="flex flex-wrap items-center justify-center gap-1">
       {views.map(view => (
         <Button
           key={view.index}
@@ -69,15 +70,21 @@ function ViewSelector({
           size="sm"
           className="flex items-center gap-2"
         >
-          <view.icon className="size-5 md:size-4" />
-          <span className="hidden sm:inline">{view.label}</span>
+          <view.icon className="hidden size-4 md:block" />
+          <span>{view.label}</span>
         </Button>
       ))}
     </div>
   );
 }
 
-function DateRangeSelector({ daysAgo, onDaysChange }: { daysAgo: number; onDaysChange: (days: number) => void }) {
+function DateRangeSelector({
+  daysAgo,
+  onDaysChange,
+}: {
+  daysAgo: number;
+  onDaysChange: (days: number) => void;
+}) {
   return (
     <Select
       value={daysAgo === Infinity ? "Infinity" : daysAgo.toString()}
@@ -101,7 +108,6 @@ function DateRangeSelector({ daysAgo, onDaysChange }: { daysAgo: number; onDaysC
   );
 }
 
-// Main component
 export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
   const isMobile = useIsMobile("2xl");
   const database = useDatabase();
@@ -113,40 +119,50 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
   const { data: statisticHistory } = useQuery({
     queryKey: ["player-statistic-history", player.id, daysAgo],
-    queryFn: () => {
-      return ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date());
-    },
+    queryFn: () =>
+      ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date()),
+    placeholderData: data => data,
   });
 
   const views: SelectedView[] = [
-    ...(historyMode === HistoryMode.SIMPLE
-      ? [
-          {
-            index: 0,
-            label: "Ranking",
-            icon: GlobeAmericasIcon,
-            showDateRangeSelector: true,
-            chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => (
-              <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
-            ),
-          },
-        ]
-      : [
-          {
-            index: 0,
-            label: "Ranking",
-            icon: GlobeAmericasIcon,
-            showDateRangeSelector: true,
-            chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => (
-              <PlayerAdvancedRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
-            ),
-          },
-        ]),
+    {
+      index: 0,
+      label: "Ranking",
+      icon: GlobeAmericasIcon,
+      showDateRangeSelector: true,
+      isChart: true,
+      chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => {
+        switch (historyMode) {
+          case HistoryMode.SIMPLE:
+            return (
+              <PlayerSimpleRankingChart
+                statisticHistory={statisticHistory}
+                daysAmount={actualDaysAgo}
+              />
+            );
+          case HistoryMode.ADVANCED:
+            return (
+              <PlayerAdvancedRankingChart
+                statisticHistory={statisticHistory}
+                daysAmount={actualDaysAgo}
+              />
+            );
+          default:
+            return (
+              <PlayerSimpleRankingChart
+                statisticHistory={statisticHistory}
+                daysAmount={actualDaysAgo}
+              />
+            );
+        }
+      },
+    },
     {
       index: 1,
       label: "Accuracy",
       icon: TrendingUpIcon,
       showDateRangeSelector: true,
+      isChart: true,
       chart: (_, statisticHistory) => (
         <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
       ),
@@ -156,43 +172,53 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
       label: "Scores",
       icon: SwordIcon,
       showDateRangeSelector: true,
+      isChart: true,
       chart: (_, statisticHistory) => (
         <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
       ),
     },
     {
       index: 3,
-      label: "Maps Graph",
+      label: "Scores Graph",
       icon: ChartBarIcon,
       showDateRangeSelector: false,
-      chart: player => <MapsGraphChart player={player} />,
+      isChart: true,
+      chart: player => <ScoresGraphChart player={player} />,
     },
     {
       index: 4,
-      label: "+1 PP Calculator",
+      label: "PP Calculator",
       icon: CalculatorIcon,
       showDateRangeSelector: false,
+      isChart: false,
       chart: player => <PlusPpCalculator player={player} />,
     },
   ];
 
   const selectedView = views[selectedViewIndex];
-
-  const handleViewSelect = (view: SelectedView) => {
-    setSelectedViewIndex(view.index);
-  };
-
-  const handleDaysChange = (days: number) => {
-    setDaysAgo(days);
-  };
-
   return (
-    <div className="flex flex-col gap-2">
-      <ViewSelector views={views} selectedView={selectedView} onViewSelect={handleViewSelect} />
-      {statisticHistory && historyMode !== undefined ? selectedView.chart(player, statisticHistory) : <Loading />}
+    <div className="flex flex-col gap-(--spacing-md)">
+      <ViewSelector
+        views={views}
+        selectedView={selectedView}
+        onViewSelect={view => setSelectedViewIndex(view.index)}
+      />
+
+      {statisticHistory && historyMode !== undefined ? (
+        <Card className={cn("bg-chart-card", selectedView.isChart ? "p-2.5" : "")}>
+          {selectedView.chart(player, statisticHistory)}
+        </Card>
+      ) : (
+        <Card className="bg-chart-card p-2.5">
+          <div className="flex h-[400px] items-center justify-center">
+            <Spinner />
+          </div>
+        </Card>
+      )}
+
       {selectedView.showDateRangeSelector && (
         <div className="flex items-center justify-between gap-2">
-          <DateRangeSelector daysAgo={daysAgo} onDaysChange={handleDaysChange} />
+          <DateRangeSelector daysAgo={daysAgo} onDaysChange={days => setDaysAgo(days)} />
           {isMobile && <PlayerRankingsButton player={player} />}
         </div>
       )}

@@ -46,7 +46,7 @@ const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
     name: "Left Hand Accuracy",
     color: () => "bg-hands-left",
     create: (score: ScoreSaberScore) => {
-      if (!score.additionalData) {
+      if (!score.beatLeaderScore) {
         return undefined;
       }
       return <HandAccuracyBadge score={score} hand="left" />;
@@ -56,7 +56,7 @@ const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
     name: "Right Hand Accuracy",
     color: () => "bg-hands-right",
     create: (score: ScoreSaberScore) => {
-      if (!score.additionalData) {
+      if (!score.beatLeaderScore) {
         return undefined;
       }
       return <HandAccuracyBadge score={score} hand="right" />;
@@ -79,7 +79,12 @@ type MainScoreBadgesProps = {
 export function MainScoreBadges({ score, leaderboard, medalsMode }: MainScoreBadgesProps) {
   return (
     <div className="grid w-full grid-cols-3 justify-center gap-1">
-      <ScoreBadges badges={mainBadges} score={score} leaderboard={leaderboard} medalsMode={medalsMode} />
+      <ScoreBadges
+        badges={mainBadges}
+        score={score}
+        leaderboard={leaderboard}
+        medalsMode={medalsMode}
+      />
     </div>
   );
 }

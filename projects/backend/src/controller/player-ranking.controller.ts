@@ -1,55 +1,50 @@
-import { PlayerMedalRankingsResponse } from "@ssr/common/response/player-medal-rankings-response";
-import { PlayerRankingsResponse } from "@ssr/common/response/player-rankings-response";
-import { t } from "elysia";
-import { Controller, Get } from "elysia-decorators";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { PlayerMedalsService } from "../service/player/player-medals.service";
 import { PlayerSearchService } from "../service/player/player-search.service";
 
-@Controller("")
-export default class PlayerRankingController {
-  @Get("/player/search/ranking", {
-    config: {},
-    tags: ["Player"],
-    query: t.Object({
-      page: t.Optional(t.Number({ default: 1 })),
-      country: t.Optional(t.String({ default: "" })),
-      search: t.Optional(t.String({ default: "" })),
-    }),
-    detail: {
-      description: "Fetch a player's ranking",
-    },
-  })
-  public async getPlayerRanking({
-    query: { page, country, search },
-  }: {
-    query: { page: number; country: string; search: string };
-  }): Promise<PlayerRankingsResponse> {
-    return await PlayerSearchService.getPlayerRanking(page, {
-      country: country,
-      search: search,
-    });
-  }
-
-  @Get("/ranking/medals/:page", {
-    config: {},
-    tags: ["Player"],
-    params: t.Object({
-      page: t.Number({ required: true, default: 1 }),
-    }),
-    query: t.Object({
-      country: t.Optional(t.String()),
-    }),
-    detail: {
-      description: "Fetch a player's medal ranking",
-    },
-  })
-  public async getPlayerMedalRanking({
-    params: { page },
-    query: { country },
-  }: {
-    params: { page: number };
-    query: { country?: string };
-  }): Promise<PlayerMedalRankingsResponse> {
-    return await PlayerMedalsService.getPlayerMedalRanking(page, country);
-  }
+export default function playerRankingController(app: Elysia) {
+  return app.group("/ranking", app =>
+    app
+      .get(
+        "/:page",
+        async ({ params: { page }, query: { country, search } }) => {
+          return await PlayerSearchService.getPlayerRanking(page, {
+            country: country,
+            search: search,
+          });
+        },
+        {
+          tags: ["Ranking"],
+          params: z.object({
+            page: z.coerce.number().default(1),
+          }),
+          query: z.object({
+            country: z.string().default("").optional(),
+            search: z.string().default("").optional(),
+          }),
+          detail: {
+            description: "Fetch player ranking",
+          },
+        }
+      )
+      .get(
+        "/medals/:page",
+        async ({ params: { page }, query: { country } }) => {
+          return await PlayerMedalsService.getPlayerMedalRanking(page, country);
+        },
+        {
+          tags: ["Ranking"],
+          params: z.object({
+            page: z.coerce.number().default(1),
+          }),
+          query: z.object({
+            country: z.string().optional(),
+          }),
+          detail: {
+            description: "Fetch medal ranking",
+          },
+        }
+      )
+  );
 }

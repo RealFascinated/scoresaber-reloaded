@@ -2,7 +2,6 @@ import { modelOptions, prop, Severity } from "@typegoose/typegoose";
 import { type MapDifficulty } from "../../score/map-difficulty";
 import { Modifier } from "../../score/modifier";
 import { type MapCharacteristic } from "../../types/map-characteristic";
-import { AdditionalScoreData } from "../additional-score-data/additional-score-data";
 
 /**
  * The model for a score.
@@ -87,11 +86,6 @@ export default class Score {
    */
   @prop({ required: true })
   public readonly fullCombo!: boolean;
-
-  /**
-   * The additional data for the score.
-   */
-  public additionalData?: AdditionalScoreData;
 
   /**
    * The time the score was set.

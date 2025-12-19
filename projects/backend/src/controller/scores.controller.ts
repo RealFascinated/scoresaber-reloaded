@@ -1,129 +1,166 @@
-import { PlayerScoresResponse } from "@ssr/common/response/player-scores-response";
-import { ScoreQuery, SortDirection, SortField } from "@ssr/common/types/score-query";
-import { t } from "elysia";
-import { Controller, Get } from "elysia-decorators";
-import { SuperJSON } from "superjson";
+import { ScoreSaberScoreSortSchema } from "@ssr/common/score/score-sort";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
+import {
+  QuerySchema,
+  SortDirection,
+  SortDirectionSchema,
+  SortField,
+  SortFieldSchema,
+} from "@ssr/common/types/score-query";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { LeaderboardScoresService } from "../service/leaderboard/leaderboard-scores.service";
+import { PlayerFriendScoresService } from "../service/player/player-friend-scores.service";
 import { PlayerScoresService } from "../service/player/player-scores.service";
+import { TopScoresService } from "../service/score/top-scores.service";
 
-@Controller("/scores")
-export default class ScoresController {
-  @Get("/player/scoresaber/:id/:page/:sort", {
-    config: {},
-    tags: ["Scores"],
-    params: t.Object({
-      id: t.String({ required: true }),
-      page: t.Number({ required: true }),
-      sort: t.String({ required: true }),
-    }),
-    query: t.Object({
-      search: t.Optional(t.String()),
-      comparisonPlayerId: t.Optional(t.String()),
-    }),
-    detail: {
-      description: "Fetch a player's scores",
-    },
-  })
-  public async getScores({
-    params: { id, page, sort },
-    query: { search, comparisonPlayerId },
-  }: {
-    params: {
-      id: string;
-      page: number;
-      sort: string;
-    };
-    query: { search?: string; comparisonPlayerId?: string };
-  }): Promise<unknown> {
-    return (
-      await PlayerScoresService.getScoreSaberLivePlayerScores(id, page, sort, search, comparisonPlayerId)
-    ).toJSON();
-  }
+export default function scoresController(app: Elysia) {
+  return app.group("/scores", app =>
+    app
+      .get(
+        "/:scoreId",
+        async ({ params: { scoreId } }) => {
+          return PlayerScoresService.getScore(scoreId);
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            scoreId: z.string(),
+          }),
 
-  @Get("/player/:mode/:id/:field/:direction/:page", {
-    config: {},
-    tags: ["Scores"],
-    params: t.Object({
-      mode: t.String({ required: true }),
-      id: t.String({ required: true }),
-      field: t.String({ required: true }),
-      direction: t.String({ required: true }),
-      page: t.Number({ required: true }),
-    }),
-    query: t.Optional(
-      t.Object({
-        search: t.Optional(t.String()),
-        hmd: t.Optional(t.String()),
-      })
-    ),
-    detail: {
-      description: "Lookup scores for a player",
-    },
-  })
-  public async getSSRScores({
-    params: { mode, id, page, field, direction },
-    query,
-  }: {
-    params: {
-      mode: "ssr" | "medals";
-      id: string;
-      field: SortField;
-      direction: SortDirection;
-      page: number;
-    };
-    query: ScoreQuery;
-  }): Promise<PlayerScoresResponse> {
-    return (await PlayerScoresService.getPlayerScores(mode, id, page, field, direction, query)).toJSON();
-  }
-
-  @Get("/leaderboard/:id/:page", {
-    config: {},
-    tags: ["Scores"],
-    params: t.Object({
-      id: t.String({ required: true }),
-      page: t.Number({ required: true }),
-    }),
-    query: t.Object({
-      country: t.Optional(t.String()),
-    }),
-    detail: {
-      description: "Fetch the scores for a leaderboard",
-    },
-  })
-  public async getLeaderboardScores({
-    params: { id, page },
-    query: { country },
-  }: {
-    params: {
-      id: string;
-      page: number;
-    };
-    query: { country?: string };
-  }): Promise<unknown> {
-    return await LeaderboardScoresService.getLeaderboardScores(id, page, country);
-  }
-
-  @Get("/:id", {
-    config: {},
-    tags: ["Scores"],
-    params: t.Object({
-      id: t.String({ required: true }),
-    }),
-    query: t.Object({
-      superJson: t.Optional(t.Boolean()),
-    }),
-    detail: {
-      description: "Fetch a score by its ID",
-    },
-  })
-  public async getScore({
-    params: { id },
-    query: { superJson },
-  }: {
-    params: { id: string };
-    query: { superJson?: boolean };
-  }): Promise<unknown> {
-    const score = await PlayerScoresService.getScore(id);
-    return superJson ? SuperJSON.stringify(score) : score;
-  }
+          detail: {
+            description: "Fetch a score",
+          },
+        }
+      )
+      .get(
+        "/player/scoresaber/:playerId/:page/:sort",
+        async ({ params: { playerId, page, sort }, query: { search, comparisonPlayerId } }) => {
+          return await PlayerScoresService.getScoreSaberLivePlayerScores(
+            playerId,
+            page,
+            sort,
+            search,
+            comparisonPlayerId
+          );
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            playerId: z.string(),
+            page: z.coerce.number().default(1),
+            sort: ScoreSaberScoreSortSchema,
+          }),
+          query: z.object({
+            search: z.string().optional(),
+            comparisonPlayerId: z.string().optional(),
+          }),
+          detail: {
+            description: "Fetch player scores from ScoreSaber",
+          },
+        }
+      )
+      .get(
+        "/player/:mode/:playerId/:field/:direction/:page",
+        async ({ params: { mode, playerId, page, field, direction }, query }) => {
+          return await PlayerScoresService.getPlayerScores(
+            mode,
+            playerId,
+            page,
+            field as SortField,
+            direction as SortDirection,
+            query
+          );
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            mode: z.enum(["ssr", "medals"]),
+            playerId: z.string(),
+            field: SortFieldSchema,
+            direction: SortDirectionSchema,
+            page: z.coerce.number().default(1),
+          }),
+          query: QuerySchema,
+          detail: {
+            description: "Fetch player scores",
+          },
+        }
+      )
+      .get(
+        "/leaderboard/:leaderboardId/:page",
+        async ({ params: { leaderboardId, page }, query: { country } }) => {
+          return await LeaderboardScoresService.getLeaderboardScores(leaderboardId, page, country);
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            leaderboardId: z.coerce.number(),
+            page: z.coerce.number(),
+          }),
+          query: z.object({
+            country: z.string().optional(),
+          }),
+          detail: {
+            description: "Fetch leaderboard scores",
+          },
+        }
+      )
+      .post(
+        "/friend/leaderboard/:leaderboardId/:page",
+        async ({ params: { leaderboardId, page }, body: { friendIds } }) => {
+          return await PlayerFriendScoresService.getFriendLeaderboardScores(
+            friendIds,
+            leaderboardId,
+            page
+          );
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            leaderboardId: z.coerce.number(),
+            page: z.coerce.number(),
+          }),
+          body: z.object({
+            friendIds: z.array(z.string()).min(1).max(SHARED_CONSTS.maxFriends + 1),
+          }),
+          detail: {
+            description: "Fetch friends' scores for a leaderboard",
+          },
+        }
+      )
+      .post(
+        "/friend/:page",
+        async ({ params: { page }, body: { friendIds } }) => {
+          return await PlayerFriendScoresService.getFriendScores(friendIds, page);
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            page: z.coerce.number(),
+          }),
+          body: z.object({
+            friendIds: z.array(z.string()).min(1).max(SHARED_CONSTS.maxFriends + 1),
+          }),
+          detail: {
+            description: "Fetch friends' scores",
+          },
+        }
+      )
+      .get(
+        "/top/:page",
+        async ({ params: { page } }) => {
+          return await TopScoresService.getTopScores(page);
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            page: z.coerce.number().default(1),
+          }),
+          detail: {
+            description: "Fetch top scores",
+          },
+        }
+      )
+  );
 }

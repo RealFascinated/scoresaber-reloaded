@@ -15,10 +15,10 @@ export type StarFilter = {
   /**
    * The minimum star rating.
    */
-  min: number;
+  min?: number;
 
   /**
    * The maximum star rating.
    */
-  max: number;
+  max?: number;
 };

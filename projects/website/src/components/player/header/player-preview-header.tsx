@@ -17,7 +17,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
       <Avatar
         src={player.avatar}
         size={128}
-        className="pointer-events-none h-32 w-32"
+        className="h-32 w-32"
         alt={`${player.name}'s Profile Picture`}
       />
       <div className="flex w-full flex-col items-center justify-center gap-2 lg:items-start">

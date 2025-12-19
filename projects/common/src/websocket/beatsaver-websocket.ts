@@ -18,7 +18,11 @@ type ScoresaberWebsocket = {
  * @param onScore the onScore callback
  * @param onDisconnect the onDisconnect callback
  */
-export function connectBeatSaverWebsocket({ onMessage, onDisconnect, onMapUpdate }: ScoresaberWebsocket) {
+export function connectBeatSaverWebsocket({
+  onMessage,
+  onDisconnect,
+  onMapUpdate,
+}: ScoresaberWebsocket) {
   return connectWebSocket({
     name: "BeatSaver",
     url: "wss://ws.beatsaver.com/maps",

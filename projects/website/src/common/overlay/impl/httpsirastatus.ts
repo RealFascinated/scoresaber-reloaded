@@ -2,7 +2,6 @@ import { HttpSiraStatus_Status } from "@/common/overlay/types/httpsirastatus/dat
 import { HttpSiraStatusHelloEvent } from "@/common/overlay/types/httpsirastatus/event/hello-event";
 import { HttpSiraStatusScoreChangedEvent } from "@/common/overlay/types/httpsirastatus/event/score-changed-event";
 import { HttpSiraStatusSongStartedEvent } from "@/common/overlay/types/httpsirastatus/event/song-started-event";
-import { DetailType } from "@ssr/common/detail-type";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import OverlayDataClient from "../data-client";
 import { resetOverlayData, useOverlayDataStore } from "../overlay-data-store";
@@ -96,10 +95,14 @@ async function loadStatusData(status: HttpSiraStatus_Status) {
           beatmap.songHash,
           beatmap.difficultyEnum,
           beatmap.characteristic,
-          DetailType.FULL
+          "full"
         ),
         leaderboard: (
-          await ssrApi.fetchLeaderboardByHash(beatmap.songHash, beatmap.difficultyEnum, beatmap.characteristic)
+          await ssrApi.fetchLeaderboardByHash(
+            beatmap.songHash,
+            beatmap.difficultyEnum,
+            beatmap.characteristic
+          )
         )?.leaderboard,
       },
     });

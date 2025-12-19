@@ -1,7 +1,9 @@
 import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
-import { swagger } from "@elysiajs/swagger";
+import { openapi } from "@elysiajs/openapi";
+import { fromTypes } from "@elysiajs/openapi/gen";
+import { AdditionalReferences } from "@elysiajs/openapi/types";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
@@ -9,40 +11,37 @@ import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
+import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
-import { decorators } from "elysia-decorators";
 import { helmet } from "elysia-helmet";
+import fs from "fs";
 import Redis from "ioredis";
-import SuperJSON from "superjson";
+import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app.controller";
 import BeatLeaderController from "./controller/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
-import FriendsController from "./controller/friends.controller";
 import LeaderboardController from "./controller/leaderboard.controller";
-import MiniRankingController from "./controller/mini-ranking.controller";
-import PlayerHistoryController from "./controller/player-history.controller";
 import PlayerRankingController from "./controller/player-ranking.controller";
-import PlayerScoreHistoryController from "./controller/player-score-history.controller";
-import PlayerSearchController from "./controller/player-search.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
-import ReplayController from "./controller/replay.controller";
 import ScoresController from "./controller/scores.controller";
 import StatisticsController from "./controller/statistics.controller";
-import TopScoresController from "./controller/top-scores.controller";
 import { EventsManager } from "./event/events-manager";
 import { metricsPlugin } from "./plugins/metrics.plugin";
 import { QueueManager } from "./queue/queue-manager";
 import BeatSaverService from "./service/beatsaver.service";
 import CacheService from "./service/cache.service";
-import { LeaderboardLeaderboardsService } from "./service/leaderboard/leaderboard-leaderboards.service";
+import { LeaderboardNotificationsService } from "./service/leaderboard/leaderboard-notifications.service";
+import { LeaderboardRankingService } from "./service/leaderboard/leaderboard-ranking.service";
 import MetricsService from "./service/metrics.service";
 import MinioService from "./service/minio.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
+import { PlayerMedalsService } from "./service/player/player-medals.service";
 import PlaylistService from "./service/playlist/playlist.service";
+import { MedalScoresService } from "./service/score/medal-scores.service";
 import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
@@ -50,7 +49,7 @@ import { ScoreWebsockets } from "./websocket/score-websockets";
 Logger.info("Starting SSR Backend...");
 
 // Load .env file
-if (await Bun.file(".env").exists()) {
+if (fs.existsSync(".env")) {
   dotenv.config({
     path: ".env",
     override: true,
@@ -59,9 +58,8 @@ if (await Bun.file(".env").exists()) {
 
 new EventsManager();
 
-// Connect to Mongo
-Logger.info("Connecting to MongoDB...");
 try {
+  Logger.info("Connecting to MongoDB...");
   await mongoose.connect(env.MONGO_CONNECTION_STRING);
   Logger.info("Connected to MongoDB :)");
 } catch (error) {
@@ -73,20 +71,48 @@ Logger.info("Testing Redis connection...");
 export const redisClient = new Redis(env.REDIS_URL);
 Logger.info("Connected to Redis :)");
 
+let typeReferences: AdditionalReferences | undefined;
+if (isProduction()) {
+  Logger.info("Generating type references...");
+  fromTypes("src/index.ts", {
+    projectRoot: process.cwd(),
+    overrideOutputPath: (tempDir: string) => `${tempDir}/dist/backend/src/index.d.ts`,
+    silent: false,
+    debug: true,
+  })();
+}
+
 export const app = new Elysia()
   .use(
-    swagger({
-      autoDarkMode: false,
-      version: await getAppVersion(),
+    logger({
+      enabled: !isProduction(),
+      mode: "combined",
+    })
+  )
+  .use(
+    openapi({
+      path: "/swagger",
+      references: typeReferences,
       documentation: {
         info: {
-          title: "SSR API",
-          description: "API for the SSR Backend",
+          title: "SSR Backend",
+          description: "The API for ScoreSaber Reloaded!",
           version: await getAppVersion(),
         },
+        servers: [
+          {
+            url: env.NEXT_PUBLIC_API_URL,
+            description: isProduction() ? "Production" : "Development",
+          },
+        ],
       },
-      scalarConfig: {
+      scalar: {
         defaultOpenAllTags: true,
+        expandAllModelSections: true,
+        expandAllResponses: true,
+      },
+      mapJsonSchema: {
+        zod: z.toJSONSchema,
       },
     })
   )
@@ -106,7 +132,9 @@ export const app = new Elysia()
         await PlayerHistoryService.updatePlayerStatistics();
         await sendEmbedToChannel(
           DiscordChannels.BACKEND_LOGS,
-          new EmbedBuilder().setDescription(`Updated player statistics in ${formatDuration(Date.now() - before)}`)
+          new EmbedBuilder().setDescription(
+            `Updated player statistics in ${formatDuration(Date.now() - before)}`
+          )
         );
       },
     })
@@ -119,31 +147,26 @@ export const app = new Elysia()
       timezone: "Europe/London",
       protect: true,
       run: async () => {
-        await LeaderboardLeaderboardsService.refreshRankedLeaderboards();
-        await LeaderboardLeaderboardsService.refreshQualifiedLeaderboards();
-
-        const playlist = await PlaylistService.createRankingQueuePlaylist();
-        await PlaylistService.updatePlaylist("scoresaber-ranking-queue-maps", {
-          title: playlist.title,
-          image: playlist.image,
-          songs: playlist.songs,
-        });
+        await LeaderboardNotificationsService.logLeaderboardUpdates(
+          await LeaderboardRankingService.refreshRankedLeaderboards()
+        );
+        await LeaderboardRankingService.refreshQualifiedLeaderboards();
       },
     })
   )
-  // .use(
-  //   cron({
-  //     name: "refresh-medal-scores",
-  //     // pattern: "*/1 * * * *", // Every minute
-  //     pattern: "0 20 * * *", // Every day at 20:00
-  //     timezone: "Europe/London",
-  //     protect: true,
-  //     run: async () => {
-  //       await MedalScoresService.rescanMedalScores(); // Refresh medal scores
-  //       await PlayerMedalsService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
-  //     },
-  //   })
-  // )
+  .use(
+    cron({
+      name: "refresh-medal-scores",
+      // pattern: "*/1 * * * *", // Every minute
+      pattern: "0 20 * * *", // Every day at 20:00
+      timezone: "Europe/London",
+      protect: true,
+      run: async () => {
+        await MedalScoresService.rescanMedalScores(); // Refresh medal scores
+        await PlayerMedalsService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
+      },
+    })
+  )
   .use(
     cron({
       name: "scrape-beatsaver-maps",
@@ -155,9 +178,11 @@ export const app = new Elysia()
         let beforeDate = new Date();
         Logger.info(`Starting to scrape beatsaver maps before ${beforeDate.toISOString()}...`);
         while (shouldScrape) {
-          const latestMaps = await ApiServiceRegistry.getInstance().getBeatSaverService().lookupLatestMaps(false, 100, {
-            before: beforeDate,
-          });
+          const latestMaps = await ApiServiceRegistry.getInstance()
+            .getBeatSaverService()
+            .lookupLatestMaps(false, 100, {
+              before: beforeDate,
+            });
           if (latestMaps == undefined || latestMaps.docs.length === 0) {
             Logger.info(`No maps found before ${beforeDate.toISOString()}!`);
             shouldScrape = false;
@@ -185,121 +210,80 @@ export const app = new Elysia()
         }
       },
     })
-  );
-app.use(metricsPlugin());
-
-/**
- * Custom error handler
- */
-app.onError({ as: "global" }, ({ code, error }) => {
-  // Return default error for type validation
-  if (code === "VALIDATION") {
-    return (error as ValidationError).all;
-  }
-
-  // Assume unknown error is an internal server error
-  if (code === "UNKNOWN") {
-    code = "INTERNAL_SERVER_ERROR";
-  }
-
-  let status: number | undefined = undefined;
-  if (typeof error === "object" && error !== null && "status" in error) {
-    status = (error as { status?: number }).status;
-  }
-
-  if (status === undefined) {
-    switch (code) {
-      case "INTERNAL_SERVER_ERROR":
-        status = 500;
-        break;
-      case "NOT_FOUND":
-        status = 404;
-        break;
-      case "PARSE":
-        status = 400;
-        break;
-      case "INVALID_COOKIE_SIGNATURE":
-        status = 401;
-        break;
+  )
+  .use(metricsPlugin())
+  .onError({ as: "global" }, ({ code, error }) => {
+    // Return default error for type validation
+    if (code === "VALIDATION") {
+      return (error as ValidationError).all;
     }
-  }
 
-  if (code === 500) {
-    console.log(error);
-  }
+    // Assume unknown error is an internal server error
+    if (code === "UNKNOWN") {
+      code = "INTERNAL_SERVER_ERROR";
+    }
 
-  return {
-    ...((status && { statusCode: status }) || { status: code }),
-    // @ts-expect-error - message is not in the error type
-    ...(error.message != code && { message: error.message }),
-    timestamp: new Date().toISOString(),
-  };
-});
+    let status: number | undefined = undefined;
+    if (typeof error === "object" && error !== null && "status" in error) {
+      status = (error as { status?: number }).status;
+    }
 
-/**
- * Global toggle for SuperJSON for all responses
- */
-app.onAfterHandle(({ request, response, set }) => {
-  if (request.headers.get("accept") === "application/superjson") {
-    set.headers["content-type"] = "application/superjson";
-    return SuperJSON.stringify(response);
-  }
-  return response;
-});
+    if (status === undefined) {
+      switch (code) {
+        case "INTERNAL_SERVER_ERROR":
+          status = 500;
+          break;
+        case "NOT_FOUND":
+          status = 404;
+          break;
+        case "PARSE":
+          status = 400;
+          break;
+        case "INVALID_COOKIE_SIGNATURE":
+          status = 401;
+          break;
+      }
+    }
 
-/**
- * Enable CORS
- */
-app.use(cors());
+    if (code === 500) {
+      console.log(error);
+    }
 
-/**
- * Request logger (only in development)
- */
-if (!isProduction()) {
-  app.use(
-    logger({
-      enabled: true,
-      mode: "combined",
+    return {
+      ...((status && { statusCode: status }) || { status: code }),
+      // @ts-expect-error - message is not in the error type
+      ...(error.message != code && { message: error.message }),
+      timestamp: new Date().toISOString(),
+    };
+  })
+  .onAfterHandle(({ request, response, set }) => {
+    if (request.headers.get("accept") === "application/devalue") {
+      set.headers["content-type"] = "application/devalue";
+      return stringify(response);
+    }
+
+    if (response instanceof Object && response !== null) {
+      set.headers["content-type"] = "application/json";
+      return JSON.stringify(response);
+    }
+  })
+  .use(cors())
+  .use(
+    helmet({
+      hsts: false, // Disable HSTS
+      contentSecurityPolicy: false, // Disable CSP
+      dnsPrefetchControl: true, // Enable DNS prefetch
     })
-  );
-}
-
-/**
- * Security settings
- */
-app.use(
-  helmet({
-    hsts: false, // Disable HSTS
-    contentSecurityPolicy: false, // Disable CSP
-    dnsPrefetchControl: true, // Enable DNS prefetch
-  })
-);
-
-/**
- * Controllers
- */
-app.use(
-  decorators({
-    controllers: [
-      AppController,
-      PlayerController,
-      ScoresController,
-      LeaderboardController,
-      StatisticsController,
-      PlaylistController,
-      BeatSaverController,
-      ReplayController,
-      BeatLeaderController,
-      FriendsController,
-      MiniRankingController,
-      PlayerHistoryController,
-      PlayerScoreHistoryController,
-      TopScoresController,
-      PlayerSearchController,
-      PlayerRankingController,
-    ],
-  })
-);
+  )
+  .use(AppController)
+  .use(PlayerController)
+  .use(ScoresController)
+  .use(LeaderboardController)
+  .use(StatisticsController)
+  .use(PlaylistController)
+  .use(BeatSaverController)
+  .use(BeatLeaderController)
+  .use(PlayerRankingController);
 
 app.onStart(async () => {
   EventsManager.getListeners().forEach(listener => {
@@ -308,7 +292,10 @@ app.onStart(async () => {
 
   Logger.info("Listening on port http://localhost:8080");
   await initDiscordBot();
-  sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder().setDescription("Backend started!"));
+  sendEmbedToChannel(
+    DiscordChannels.BACKEND_LOGS,
+    new EmbedBuilder().setDescription("Backend started!")
+  );
 
   // Log all registered routes
   Logger.info("Registered routes:");
@@ -383,30 +370,3 @@ const gracefulShutdown = async (signal: string) => {
 
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
-
-// Print slow queries
-mongoose.connection.on("query", event => {
-  if (event.milliseconds > 50) {
-    const collection = event.query?.collectionName || "unknown";
-    const operation = event.query?.op || "unknown";
-    const query = event.query?.filter || event.query?.query || {};
-    const queryString = JSON.stringify(query, null, 2);
-
-    Logger.warn(`Slow query detected: ${collection}.${operation} took ${event.milliseconds}ms`, queryString);
-
-    sendEmbedToChannel(
-      DiscordChannels.BACKEND_LOGS,
-      new EmbedBuilder()
-        .setTitle("🐌 Slow Query Detected")
-        .setDescription(`**${collection}.${operation}** took **${event.milliseconds}ms**`)
-        .addFields({
-          name: "Query",
-          value: `\`\`\`json\n${queryString.length > 1000 ? queryString.substring(0, 1000) + "..." : queryString}\n\`\`\``,
-        })
-        .setColor(0xffaa00)
-        .setTimestamp()
-    ).catch(error => {
-      Logger.error("Failed to send slow query to Discord:", error);
-    });
-  }
-});

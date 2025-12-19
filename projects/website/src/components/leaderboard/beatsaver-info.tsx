@@ -1,6 +1,6 @@
 import Card from "@/components/card";
 import EmbedLinks from "@/components/embed-links";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { useState } from "react";
 
 type LeaderboardBeatSaverInfoProps = {
@@ -21,7 +21,10 @@ export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverI
   return (
     <Card className="flex h-fit w-full flex-col gap-4 text-sm">
       <div className="bg-muted/30 w-full rounded-lg p-3 break-all">
-        {(showExpandButton && !expanded ? description.slice(0, descriptionMaxSize) + "..." : description)
+        {(showExpandButton && !expanded
+          ? description.slice(0, descriptionMaxSize) + "..."
+          : description
+        )
           .split("\n")
           .map((line, index) => {
             return (

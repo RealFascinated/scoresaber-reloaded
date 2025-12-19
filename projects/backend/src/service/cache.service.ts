@@ -2,14 +2,15 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
-import SuperJSON from "superjson";
+import { parse, stringify } from "devalue";
 import { redisClient } from "../common/redis";
 
 export enum CacheId {
   BeatSaver = "beatSaver",
   ScoreSaber = "scoresaber",
+  ScoreSaberApi = "scoresaberApi",
   Leaderboards = "leaderboards",
-  AdditionalScoreData = "additionalScoreData",
+  BeatLeaderScore = "beatLeaderScore",
   Players = "players",
   ScoreStats = "scoreStats",
   PreviousScore = "previousScore",
@@ -18,9 +19,10 @@ export enum CacheId {
 export default class CacheService {
   public static readonly CACHE_EXPIRY = {
     [CacheId.BeatSaver]: TimeUnit.toSeconds(TimeUnit.Day, 7),
-    [CacheId.ScoreSaber]: TimeUnit.toSeconds(TimeUnit.Minute, 5),
+    [CacheId.ScoreSaber]: TimeUnit.toSeconds(TimeUnit.Minute, 2),
+    [CacheId.ScoreSaberApi]: TimeUnit.toSeconds(TimeUnit.Minute, 2),
     [CacheId.Leaderboards]: TimeUnit.toSeconds(TimeUnit.Hour, 2),
-    [CacheId.AdditionalScoreData]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+    [CacheId.BeatLeaderScore]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
     [CacheId.Players]: TimeUnit.toSeconds(TimeUnit.Minute, 30),
     [CacheId.ScoreStats]: TimeUnit.toSeconds(TimeUnit.Hour, 12),
     [CacheId.PreviousScore]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
@@ -34,7 +36,11 @@ export default class CacheService {
    * @param cacheKey the key used for caching.
    * @param fetchFn the function to fetch data if it's not in cache.
    */
-  public static async fetchWithCache<T>(cache: CacheId, cacheKey: string, fetchFn: () => Promise<T>): Promise<T> {
+  public static async fetchWithCache<T>(
+    cache: CacheId,
+    cacheKey: string,
+    fetchFn: () => Promise<T>
+  ): Promise<T> {
     // Skip cache in development
     if (!isProduction()) {
       return fetchFn();
@@ -49,7 +55,7 @@ export default class CacheService {
     if (cachedData) {
       try {
         // Logger.debug(`[REDIS] Found ${cacheKey} in ${formatDuration(performance.now() - before)}`);
-        return SuperJSON.parse(cachedData) as T;
+        return parse(cachedData) as T;
       } catch {
         Logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
         await redisClient.del(cacheKey);
@@ -60,7 +66,7 @@ export default class CacheService {
     if (data) {
       const result = await redisClient.set(
         cacheKey,
-        SuperJSON.stringify(data),
+        stringify(data),
         "EX", // EX is used to set the TTL for the item
         this.CACHE_EXPIRY[cache] // The TTL of the item
       );

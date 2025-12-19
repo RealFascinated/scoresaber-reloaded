@@ -1,253 +1,377 @@
 "use client";
 
-import SimpleTooltip from "@/components/simple-tooltip";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
-import useDatabase from "@/hooks/use-database";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Spinner } from "../../../spinner";
+import { Button } from "../../../ui/button";
+import { Label } from "../../../ui/label";
+import { Slider } from "../../../ui/slider";
 
-const MAX_STARS = 15;
+const ACCURACY_THRESHOLDS = [92, 93, 94, 95, 96, 97, 98, 99] as const;
+const MIN_DESIRED_PP = 0.5;
+const MAX_DESIRED_PP = 100;
+const DEFAULT_DESIRED_PP = 1;
+const DEFAULT_ACCURACY = 95;
+const DEFAULT_STARS = 10;
+const MIN_STARS = 0.1;
+const MIN_ACCURACY = 75;
 
 export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer }) {
-  const database = useDatabase();
-
-  // State for default accuracy
-  const [defaultAccuracy, setDefaultAccuracy] = useState(95);
-
-  // Load default accuracy from database
-  useEffect(() => {
-    const loadDefaultAccuracy = async () => {
-      const accuracy = await database.getPlusPpDefaultAccuracy();
-      setDefaultAccuracy(accuracy ?? 95);
-    };
-    loadDefaultAccuracy();
-  }, [database]);
-
-  // Update accuracy when defaultAccuracy loads
-  useEffect(() => {
-    setAccuracy(defaultAccuracy);
-  }, [defaultAccuracy]);
-
-  // State
-  const [ppValue, setPpValue] = useState(1);
-  const [accuracy, setAccuracy] = useState(defaultAccuracy);
-  const [stars, setStars] = useState(10);
-  const [isPpUserInput, setIsPpUserInput] = useState(false);
-  const hasInitialized = useRef(false);
-
-  const { data: rankedPps } = useQuery({
-    queryKey: ["ranked-pps", player.id],
-    queryFn: () => ssrApi.getPlayerRankedPps(player.id),
+  const { data: scorePps, isLoading } = useQuery({
+    queryKey: ["scorePps", player.id],
+    queryFn: () => ssrApi.getPlayerPps(player.id),
   });
 
-  const sortedScores = useMemo(
-    () => rankedPps?.scores?.map(score => score.pp).sort((a, b) => b - a) ?? [],
-    [rankedPps?.scores]
-  );
+  const [desiredPpGain, setDesiredPpGain] = useState(DEFAULT_DESIRED_PP);
+  const [accuracy, setAccuracy] = useState(DEFAULT_ACCURACY);
+  const [stars, setStars] = useState(DEFAULT_STARS);
+  const isManualAdjustment = useRef(false);
+  const hasManualStarsAcc = useRef(false);
+  const accuracyRef = useRef(DEFAULT_ACCURACY);
 
-  // Calculate raw PP needed for the current PP value
-  const rawPp = useMemo(() => {
-    if (!sortedScores.length) return 0;
-    return ScoreSaberCurve.calcPpBoundary(sortedScores, ppValue);
-  }, [sortedScores, ppValue]);
+  const scoresPpsArray = useMemo(() => {
+    return scorePps?.scores.map(score => score.pp) ?? [];
+  }, [scorePps]);
 
-  // Calculate stars and adjusted accuracy with constraint
-  const getStarsAndAccuracyForPp = useCallback((rawPp: number, acc: number) => {
-    if (!rawPp || !acc) return { stars: 0, accuracy: acc };
+  const targetRawPp = useMemo(() => {
+    if (scoresPpsArray.length === 0) return null;
+    return ScoreSaberCurve.calcRawPpForExpectedPp(scoresPpsArray, desiredPpGain);
+  }, [scoresPpsArray, desiredPpGain]);
 
-    let calculatedStars = 0;
-    let adjustedAccuracy = acc;
+  const getStarsForAcc = (rawPp: number, acc: number): number => {
+    return rawPp / (ScoreSaberCurve.STAR_MULTIPLIER * ScoreSaberCurve.getModifier(acc));
+  };
 
-    // If the calculated star is more than the max, increase the acc 1% until it's below the max star count
-    do {
-      const ppFactor = ScoreSaberCurve.getModifier(adjustedAccuracy);
-      calculatedStars = rawPp / (ScoreSaberCurve.STAR_MULTIPLIER * ppFactor);
-
-      if (calculatedStars > MAX_STARS && adjustedAccuracy < 100) {
-        adjustedAccuracy += 1;
+  const getAccForStars = (rawPp: number, stars: number): number => {
+    const modifierNeeded = rawPp / (stars * ScoreSaberCurve.STAR_MULTIPLIER);
+    let low = MIN_ACCURACY;
+    let high = 100;
+    for (let i = 0; i < 50; i++) {
+      const mid = (low + high) / 2;
+      const modifier = ScoreSaberCurve.getModifier(mid);
+      if (modifier >= modifierNeeded) {
+        high = mid;
       } else {
-        break;
+        low = mid;
       }
-    } while (calculatedStars > MAX_STARS && adjustedAccuracy < 100);
-
-    return { stars: calculatedStars, accuracy: adjustedAccuracy };
-  }, []);
-
-  // Calculate PP from stars and accuracy
-  const getPpFromStarsAndAcc = useCallback((stars: number, acc: number) => ScoreSaberCurve.getPp(stars, acc), []);
-
-  // Calculate what PP gain you would get from current stars/accuracy
-  const calculatedPpGain = useMemo(() => {
-    if (!sortedScores.length) return 0;
-    const ppFromStars = getPpFromStarsAndAcc(stars, accuracy);
-    return ScoreSaberCurve.getPpBoundaryForRawPp(sortedScores, ppFromStars);
-  }, [sortedScores, stars, accuracy, getPpFromStarsAndAcc]);
-
-  // Calculate max PP
-  const maxPp = useMemo(() => {
-    if (!sortedScores.length) return 100;
-    const maxPossiblePp = ScoreSaberCurve.getPp(MAX_STARS, 100);
-    const maxBoundaryPp = ScoreSaberCurve.getPpBoundaryForRawPp(sortedScores, maxPossiblePp);
-    return Math.min(maxBoundaryPp, 100);
-  }, [sortedScores]);
-
-  // Initialize stars based on 95% accuracy and +1pp when data loads
-  useEffect(() => {
-    if (sortedScores.length > 0 && rawPp > 0 && !hasInitialized.current) {
-      const { stars: initialStars, accuracy: adjustedAccuracy } = getStarsAndAccuracyForPp(rawPp, defaultAccuracy);
-      setStars(initialStars);
-      setAccuracy(adjustedAccuracy);
-      hasInitialized.current = true;
+      if (Math.abs(modifier - modifierNeeded) < 0.0001) break;
     }
-  }, [sortedScores, rawPp, getStarsAndAccuracyForPp]);
+    return Math.round(high * 100) / 100;
+  };
 
-  // Update PP value when accuracy or stars change (unless user is manually adjusting PP)
-  useEffect(() => {
-    if (!isPpUserInput && calculatedPpGain > 0 && hasInitialized.current) {
-      setPpValue(calculatedPpGain);
-    }
-  }, [calculatedPpGain, isPpUserInput]);
-
-  // Update accuracy and stars when PP value changes (when user manually adjusts PP)
-  useEffect(() => {
-    if (isPpUserInput && rawPp > 0 && hasInitialized.current) {
-      // Always use getStarsAndAccuracyForPp to ensure stars stay within MAX_STARS limit
-      const { stars: newStars, accuracy: newAccuracy } = getStarsAndAccuracyForPp(rawPp, accuracy);
-      setStars(newStars);
-      setAccuracy(newAccuracy);
-    }
-  }, [rawPp, isPpUserInput, accuracy, getStarsAndAccuracyForPp]);
-
-  // Handlers
-  const handlePpChange = useCallback((newPp: number) => {
-    setPpValue(newPp);
-    setIsPpUserInput(true);
-  }, []);
-
-  const handleAccuracyChange = useCallback((newAcc: number) => {
+  const updateAccuracy = (newAcc: number) => {
+    accuracyRef.current = newAcc;
     setAccuracy(newAcc);
-    setIsPpUserInput(false);
-  }, []);
+  };
 
-  const handleStarsChange = useCallback((newStars: number) => {
-    setStars(newStars);
-    setIsPpUserInput(false);
-  }, []);
+  const roundStars = (value: number): number => Math.round(value * 10) / 10;
 
-  const handleReset = useCallback(() => {
-    setPpValue(1);
-    setAccuracy(defaultAccuracy);
-    // Recalculate stars based on default accuracy and +1pp
-    const { stars: resetStars } = getStarsAndAccuracyForPp(
-      ScoreSaberCurve.calcPpBoundary(sortedScores, 1),
-      defaultAccuracy
+  useEffect(() => {
+    accuracyRef.current = accuracy;
+  }, [accuracy]);
+
+  useEffect(() => {
+    if (!targetRawPp || isManualAdjustment.current || hasManualStarsAcc.current) return;
+
+    let newStars = getStarsForAcc(targetRawPp, accuracyRef.current);
+
+    if (newStars < 0.5) {
+      newStars = 0.5;
+      updateAccuracy(getAccForStars(targetRawPp, newStars));
+      setStars(newStars);
+    } else if (newStars > SHARED_CONSTS.maxStars) {
+      newStars = SHARED_CONSTS.maxStars;
+      updateAccuracy(getAccForStars(targetRawPp, newStars));
+      setStars(newStars);
+    } else {
+      setStars(roundStars(newStars));
+    }
+  }, [targetRawPp]);
+
+  const adjustForBounds = (
+    weightedGain: number,
+    adjustStars: boolean,
+    currentStars: number,
+    currentAcc: number
+  ): { newStars: number; newAcc: number; newDesiredPp: number } => {
+    if (weightedGain < MIN_DESIRED_PP) {
+      const targetRawPp = ScoreSaberCurve.calcRawPpForExpectedPp(scoresPpsArray, MIN_DESIRED_PP);
+
+      if (adjustStars) {
+        let newStars = getStarsForAcc(targetRawPp, currentAcc);
+        let newAcc = currentAcc;
+
+        if (newStars > SHARED_CONSTS.maxStars) {
+          newStars = SHARED_CONSTS.maxStars;
+          newAcc = getAccForStars(targetRawPp, newStars);
+        }
+
+        return { newStars: roundStars(newStars), newAcc, newDesiredPp: MIN_DESIRED_PP };
+      } else {
+        let newAcc = getAccForStars(targetRawPp, currentStars);
+        let newStars = currentStars;
+
+        if (newAcc > 100) {
+          newAcc = 100;
+          newStars = getStarsForAcc(targetRawPp, 100);
+          if (newStars > SHARED_CONSTS.maxStars) {
+            newStars = SHARED_CONSTS.maxStars;
+          }
+        }
+
+        return { newStars: roundStars(newStars), newAcc, newDesiredPp: MIN_DESIRED_PP };
+      }
+    } else if (weightedGain > MAX_DESIRED_PP) {
+      const targetRawPp = ScoreSaberCurve.calcRawPpForExpectedPp(scoresPpsArray, MAX_DESIRED_PP);
+
+      if (adjustStars) {
+        let newStars = getStarsForAcc(targetRawPp, currentAcc);
+        let newAcc = currentAcc;
+
+        if (newStars < MIN_STARS) {
+          newStars = MIN_STARS;
+          newAcc = getAccForStars(targetRawPp, newStars);
+        }
+
+        return { newStars: roundStars(newStars), newAcc, newDesiredPp: MAX_DESIRED_PP };
+      } else {
+        let newAcc = getAccForStars(targetRawPp, currentStars);
+        let newStars = currentStars;
+
+        if (newAcc < MIN_ACCURACY) {
+          newAcc = MIN_ACCURACY;
+          newStars = getStarsForAcc(targetRawPp, MIN_ACCURACY);
+          if (newStars < MIN_STARS) {
+            newStars = MIN_STARS;
+          }
+        }
+
+        return { newStars: roundStars(newStars), newAcc, newDesiredPp: MAX_DESIRED_PP };
+      }
+    }
+
+    return {
+      newStars: currentStars,
+      newAcc: currentAcc,
+      newDesiredPp: Math.round(weightedGain * 10) / 10,
+    };
+  };
+
+  const handleDesiredPpChange = (value: number) => {
+    hasManualStarsAcc.current = false;
+    setDesiredPpGain(value);
+  };
+
+  const handleReset = () => {
+    hasManualStarsAcc.current = false;
+    setDesiredPpGain(DEFAULT_DESIRED_PP);
+    updateAccuracy(DEFAULT_ACCURACY);
+
+    // Explicitly recalculate stars based on reset values
+    if (scoresPpsArray.length > 0) {
+      const targetRawPp = ScoreSaberCurve.calcRawPpForExpectedPp(
+        scoresPpsArray,
+        DEFAULT_DESIRED_PP
+      );
+      let newStars = getStarsForAcc(targetRawPp, DEFAULT_ACCURACY);
+
+      if (newStars < 0.5) {
+        newStars = 0.5;
+        const newAcc = getAccForStars(targetRawPp, newStars);
+        updateAccuracy(newAcc);
+      } else if (newStars > SHARED_CONSTS.maxStars) {
+        newStars = SHARED_CONSTS.maxStars;
+        const newAcc = getAccForStars(targetRawPp, newStars);
+        updateAccuracy(newAcc);
+      }
+
+      setStars(roundStars(newStars));
+    }
+  };
+
+  const handleAccuracyChange = (value: number) => {
+    if (scoresPpsArray.length === 0) return;
+
+    isManualAdjustment.current = true;
+    hasManualStarsAcc.current = true;
+    updateAccuracy(value);
+
+    const rawPp = ScoreSaberCurve.getPp(stars, value);
+    const weightedGain = ScoreSaberCurve.getRawPpForWeightedPpGain(scoresPpsArray, rawPp);
+    const { newStars, newAcc, newDesiredPp } = adjustForBounds(weightedGain, true, stars, value);
+
+    if (newAcc !== value) updateAccuracy(newAcc);
+    if (newStars !== stars) setStars(newStars);
+    setDesiredPpGain(newDesiredPp);
+
+    setTimeout(() => {
+      isManualAdjustment.current = false;
+    }, 0);
+  };
+
+  const handleStarsChange = (value: number) => {
+    if (scoresPpsArray.length === 0) return;
+
+    isManualAdjustment.current = true;
+    hasManualStarsAcc.current = true;
+    setStars(value);
+
+    const rawPp = ScoreSaberCurve.getPp(value, accuracy);
+    const weightedGain = ScoreSaberCurve.getRawPpForWeightedPpGain(scoresPpsArray, rawPp);
+    const { newStars, newAcc, newDesiredPp } = adjustForBounds(
+      weightedGain,
+      false,
+      value,
+      accuracy
     );
-    setStars(resetStars);
-    setIsPpUserInput(false);
-    hasInitialized.current = false;
-  }, [defaultAccuracy, getStarsAndAccuracyForPp, sortedScores]);
+
+    if (newAcc !== accuracy) updateAccuracy(newAcc);
+    if (newStars !== value) setStars(newStars);
+    setDesiredPpGain(newDesiredPp);
+
+    setTimeout(() => {
+      isManualAdjustment.current = false;
+    }, 0);
+  };
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Main PP Display Card */}
-      <div className="rounded-lg border border-blue-500/20 bg-slate-800 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <span className="text-primary text-xl font-semibold">+{formatPp(ppValue)}pp</span>
-            <span className="text-muted-foreground text-sm">{formatPp(rawPp)}pp Raw</span>
-          </div>
-          <div className="text-muted-foreground flex flex-col items-end gap-1 text-sm">
-            <span className="text-green-400">{accuracy.toFixed(1)}% accuracy</span>
-            <span className="text-yellow-400">{stars.toFixed(2)}★ difficulty</span>
-          </div>
+    <div className="flex w-full flex-col gap-4 md:gap-6">
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Spinner />
         </div>
-      </div>
-
-      {/* Controls Card */}
-      <div className="border-border bg-background/50 rounded-lg border p-4">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Calculator</h3>
-          <SimpleTooltip display={<p>Reset back to the default values</p>}>
-            <button
-              onClick={handleReset}
-              className="text-muted-foreground hover:text-foreground flex items-center text-sm transition-colors"
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />
-              Reset
-            </button>
-          </SimpleTooltip>
-        </div>
-        <div className="space-y-4">
-          {/* PP Slider */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">
-              Desired +PP: <span className="text-primary font-semibold">{formatPp(ppValue)}pp</span>
-            </Label>
-            <Slider
-              value={[ppValue]}
-              onValueChange={([value]) => value !== undefined && handlePpChange(value)}
-              max={maxPp}
-              min={1}
-              step={0.5}
-              className="w-full"
-            />
-          </div>
-
-          <Separator />
-
-          {/* Accuracy Slider */}
-          <div className="space-y-2">
+      ) : (
+        <>
+          {/* Desired +PP Slider */}
+          <div className="flex flex-col gap-3 md:gap-4">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">
-                Accuracy: <span className="font-semibold text-green-400">{accuracy.toFixed(2)}%</span>
+              <Label htmlFor="pp-gain-slider" className="text-sm font-semibold sm:text-base">
+                Desired +PP
               </Label>
-              <SimpleTooltip display={<p>Save current accuracy as your default</p>}>
-                <button
-                  onClick={async () => {
-                    await database.setPlusPpDefaultAccuracy(accuracy);
-                    setDefaultAccuracy(accuracy);
-                  }}
-                  className="text-muted-foreground hover:text-foreground text-xs transition-colors"
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground text-sm font-medium">
+                  +{formatPp(desiredPpGain)}pp
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReset}
+                  className="touch-manipulation"
                 >
-                  Set as Default
-                </button>
-              </SimpleTooltip>
+                  Reset
+                </Button>
+              </div>
             </div>
             <Slider
-              value={[accuracy]}
-              onValueChange={([value]) => value !== undefined && handleAccuracyChange(value)}
-              max={100}
-              min={70}
-              step={0.01}
-              className="w-full"
+              id="pp-gain-slider"
+              value={[desiredPpGain]}
+              onValueChange={value => handleDesiredPpChange(value[0])}
+              min={MIN_DESIRED_PP}
+              max={MAX_DESIRED_PP}
+              step={0.5}
+              labelPosition="none"
+              className="w-full touch-manipulation"
             />
           </div>
 
-          <Separator />
+          {/* Accuracy and Stars Sliders */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
+            <div className="flex flex-col gap-3 md:gap-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="accuracy-slider" className="text-sm font-semibold sm:text-base">
+                  Accuracy
+                </Label>
+                <span className="text-muted-foreground text-sm font-medium">
+                  {accuracy.toFixed(2)}%
+                </span>
+              </div>
+              <Slider
+                id="accuracy-slider"
+                value={[accuracy]}
+                onValueChange={value => handleAccuracyChange(value[0])}
+                min={85}
+                max={100}
+                step={0.01}
+                labelPosition="none"
+                className="w-full touch-manipulation"
+              />
+            </div>
+            <div className="flex flex-col gap-3 md:gap-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="stars-slider" className="text-sm font-semibold sm:text-base">
+                  Stars
+                </Label>
+                <span className="text-muted-foreground text-sm font-medium">
+                  {stars.toFixed(1)}★
+                </span>
+              </div>
+              <Slider
+                id="stars-slider"
+                value={[stars]}
+                onValueChange={value => handleStarsChange(value[0])}
+                min={0}
+                max={SHARED_CONSTS.maxStars}
+                step={0.1}
+                labelPosition="none"
+                className="w-full touch-manipulation"
+              />
+            </div>
+          </div>
 
-          {/* Stars Slider */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">
-              Stars: <span className="font-semibold text-yellow-400">{stars.toFixed(2)}★</span>
+          {/* Raw PP Display */}
+          <div className="bg-muted/50 border-border flex flex-col gap-2 rounded-lg border p-4 md:p-5">
+            <Label className="text-muted-foreground text-xs font-medium sm:text-sm">
+              Raw PP needed for +{formatPp(desiredPpGain)}pp
             </Label>
-            <Slider
-              value={[stars]}
-              onValueChange={([value]) => value !== undefined && handleStarsChange(value)}
-              max={MAX_STARS}
-              min={0.1}
-              step={0.01}
-              className="w-full"
-            />
+            <p className="text-xl font-bold sm:text-2xl">
+              {targetRawPp ? `${formatPp(targetRawPp)}pp` : "Calculating..."}
+            </p>
           </div>
-        </div>
-      </div>
+
+          {targetRawPp && (
+            <div className="bg-muted/30 border-border overflow-hidden rounded-lg border">
+              <div className="-mx-1 overflow-x-auto px-1">
+                <table className="w-full table-fixed border-collapse">
+                  <thead>
+                    <tr className="border-border bg-muted/30 border-b">
+                      {ACCURACY_THRESHOLDS.map(threshold => (
+                        <th
+                          key={threshold}
+                          className="px-2 py-2 text-center text-xs font-medium sm:px-4 sm:py-3 sm:text-sm"
+                        >
+                          {threshold}%
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      {ACCURACY_THRESHOLDS.map(threshold => {
+                        const starsForAcc = getStarsForAcc(targetRawPp, threshold);
+                        return (
+                          <td
+                            key={threshold}
+                            className="px-2 py-2 text-center font-mono text-xs sm:px-4 sm:py-3 sm:text-sm"
+                          >
+                            {starsForAcc > SHARED_CONSTS.maxStars
+                              ? "—"
+                              : `${starsForAcc.toFixed(2)}★`}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

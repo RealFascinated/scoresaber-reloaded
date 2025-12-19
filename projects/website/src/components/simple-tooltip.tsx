@@ -20,12 +20,16 @@ export default function SimpleTooltip({
 }) {
   return (
     <Tooltip
-      content={typeof display === "string" ? <p className="max-w-[400px] text-wrap">{display}</p> : display}
+      content={
+        typeof display === "string" ? <p className="max-w-[400px] text-wrap">{display}</p> : display
+      }
       side={side}
       showOnMobile={showOnMobile}
       closeDelayDuration={closeDelayDuration}
     >
-      <div className={clsx("flex w-full cursor-default items-center justify-center", className)}>{children}</div>
+      <div className={clsx("flex w-full cursor-default items-center justify-center", className)}>
+        {children}
+      </div>
     </Tooltip>
   );
 }

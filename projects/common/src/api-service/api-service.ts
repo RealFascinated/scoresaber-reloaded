@@ -1,5 +1,6 @@
 import { Cooldown, CooldownPriority } from "../cooldown";
 import Logger from "../logger";
+import { CLIENT_PROXY, SERVER_PROXIES } from "../shared-consts";
 import Request, { RequestOptions } from "../utils/request";
 import { isServer } from "../utils/utils";
 import { ApiServiceName } from "./api-service-registry";
@@ -9,12 +10,6 @@ export interface ServiceConfig {
   proxySwitchThreshold: number;
   proxyResetThreshold: number;
 }
-
-export const SERVER_PROXIES = [
-  "", // No proxy
-  "https://proxy.fascinated.cc/",
-];
-export const CLIENT_PROXY = "https://proxy.fascinated.cc/";
 
 export default class ApiService {
   /**
@@ -134,7 +129,9 @@ export default class ApiService {
         const nextIndex = (currentIndex + 1) % SERVER_PROXIES.length;
         const nextProxy = SERVER_PROXIES[nextIndex];
         this.currentProxy = nextProxy;
-        Logger.info(`Rate limit exceeded for ${this.name}, switching to another proxy for api service: ${nextProxy}`);
+        Logger.info(
+          `Rate limit exceeded for ${this.name}, switching to another proxy for api service: ${nextProxy}`
+        );
       }
 
       // Update the last rate limit seen

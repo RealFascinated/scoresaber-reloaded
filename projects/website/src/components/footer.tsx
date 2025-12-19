@@ -4,6 +4,7 @@ import { cn } from "@/common/utils";
 import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
 import SimpleLink from "@/components/simple-link";
+import { env } from "@ssr/common/env";
 import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -54,6 +55,11 @@ const links: {
       href: "https://github.com/RealFascinated/scoresaber-reloaded",
     },
     {
+      name: "API Documentation",
+      shortName: "API",
+      href: `${env.NEXT_PUBLIC_API_URL}/swagger`,
+    },
+    {
       name: "System Status",
       shortName: "Status",
       href: "https://status.fascinated.cc/status/scoresaber-reloaded",
@@ -97,7 +103,13 @@ const socialLinks: SocialLinkType[] = [
   },
 ];
 
-export default function Footer({ buildId, buildTimeShort }: { buildId: string; buildTimeShort: string | undefined }) {
+export default function Footer({
+  buildId,
+  buildTimeShort,
+}: {
+  buildId: string;
+  buildTimeShort: string | undefined;
+}) {
   const isHome: boolean = usePathname() === "/";
   return (
     <footer
@@ -127,7 +139,8 @@ export default function Footer({ buildId, buildTimeShort }: { buildId: string; b
                 <h1 className="text-primary text-xl font-bold">ScoreSaber Reloaded</h1>
               </SimpleLink>
               <p className="max-w-md text-sm opacity-85">
-                ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays
+                ScoreSaber Reloaded is a new way to view your scores and get more stats about you
+                and your plays
               </p>
             </div>
 
@@ -162,7 +175,9 @@ export default function Footer({ buildId, buildTimeShort }: { buildId: string; b
                       target={external ? "_blank" : undefined}
                       draggable={false}
                     >
-                      <span className={cn("hidden sm:flex", !link.shortName && "flex")}>{link.name}</span>
+                      <span className={cn("hidden sm:flex", !link.shortName && "flex")}>
+                        {link.name}
+                      </span>
                       {link.shortName && <span className="flex sm:hidden">{link.shortName}</span>}
                       {external && <ExternalLink className="h-3.5 w-3.5" />}
                     </SimpleLink>

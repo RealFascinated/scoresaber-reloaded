@@ -2,7 +2,13 @@
 
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import PlayerMiniRankings from "../mini-ranking/player-mini-ranking";
 

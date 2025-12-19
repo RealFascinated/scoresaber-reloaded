@@ -1,10 +1,9 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { MiniRankingResponse } from "@ssr/common/response/around-player-response";
+import { MiniRankingResponse } from "@ssr/common/schemas/response/player/around-player";
 import CacheService, { CacheId } from "./cache.service";
 import { PlayerMedalsService } from "./player/player-medals.service";
+import { ScoreSaberApiService } from "./scoresaber-api.service";
 import ScoreSaberService from "./scoresaber.service";
 
 type MiniRankingType = "global" | "country" | "medals";
@@ -16,10 +15,7 @@ export default class MiniRankingService {
    * @param id the player to get around
    */
   public static async getPlayerMiniRankings(id: string): Promise<MiniRankingResponse> {
-    const player = await ScoreSaberService.getPlayer(id, DetailType.BASIC, undefined, {
-      setInactivesRank: false,
-      setMedalsRank: false,
-    });
+    const player = await ScoreSaberService.getPlayer(id, "basic");
     if (player == undefined) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
@@ -76,8 +72,10 @@ export default class MiniRankingService {
     if (type === "medals") {
       const pageResponses = await Promise.all(
         Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
-          CacheService.fetchWithCache(CacheId.ScoreSaber, `scoresaber:mini-ranking:medals:${page}`, async () =>
-            PlayerMedalsService.getPlayerMedalRanking(page)
+          CacheService.fetchWithCache(
+            CacheId.ScoreSaber,
+            `scoresaber:mini-ranking:medals:${page}`,
+            async () => PlayerMedalsService.getPlayerMedalRanking(page)
           )
         )
       );
@@ -100,11 +98,11 @@ export default class MiniRankingService {
       Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
         CacheService.fetchWithCache(
           CacheId.ScoreSaber,
-          `scoresaber:mini-ranking:${type}:${page}${type === "country" ? `:${player.country}` : ""}`,
+          `scoresaber:mini-ranking:${type}${type === "country" ? `:${player.country}` : ""}:${page}`,
           async () =>
             type === "global"
-              ? ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayers(page)
-              : ApiServiceRegistry.getInstance().getScoreSaberService().lookupPlayersByCountry(page, player.country)
+              ? ScoreSaberApiService.lookupPlayers(page)
+              : ScoreSaberApiService.lookupPlayersByCountry(page, player.country)
         )
       )
     );
@@ -113,13 +111,7 @@ export default class MiniRankingService {
     const allPlayers = pageResponses
       .filter((response): response is NonNullable<typeof response> => response !== undefined)
       .flatMap(response => response.players)
-      .map(
-        async player =>
-          await ScoreSaberService.getPlayer(player.id, DetailType.BASIC, player, {
-            setInactivesRank: false,
-            setMedalsRank: false,
-          })
-      );
+      .map(async player => await ScoreSaberService.getPlayer(player.id, "basic", player));
 
     return this.processPlayersAndBuildResult(allPlayers, player, type, getRank);
   }
@@ -170,7 +162,11 @@ export default class MiniRankingService {
     // Add players below to fill up to 5 total players
     const playersBelowNeeded = Math.max(1, 5 - result.length); // At least 1, but more if needed to reach 5
 
-    for (let i = playerIndex + 1; i < Math.min(sortedPlayers.length, playerIndex + 1 + playersBelowNeeded); i++) {
+    for (
+      let i = playerIndex + 1;
+      i < Math.min(sortedPlayers.length, playerIndex + 1 + playersBelowNeeded);
+      i++
+    ) {
       result.push(sortedPlayers[i]);
     }
 

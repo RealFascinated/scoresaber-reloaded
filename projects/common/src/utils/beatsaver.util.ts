@@ -1,4 +1,4 @@
-import { BeatSaverMapResponse } from "../response/beatsaver-map-response";
+import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
 import { MapDifficulty } from "../score/map-difficulty";
 import { MapCharacteristic } from "../types/map-characteristic";
 import BeatSaverMapToken from "../types/token/beatsaver/map";
@@ -32,6 +32,9 @@ export function getBeatSaverDifficulty(
 
   // Fallback to the latest version if the version is undefined
   return (
-    version ?? map.versions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+    version ??
+    map.versions.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )[0]
   ).diffs.find(d => d.difficulty === difficulty && d.characteristic === characteristic);
 }

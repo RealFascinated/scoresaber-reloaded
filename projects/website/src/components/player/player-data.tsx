@@ -4,12 +4,13 @@ import { PlatformRepository, PlatformType } from "@/common/platform/platform-rep
 import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
 import PlayerViews from "@/components/player/views/player-views";
-import SimpleLink from "@/components/simple-link";
-import { useIsMobile, useWindowDimensions } from "@/contexts/viewport-context";
-import { DetailType } from "@ssr/common/detail-type";
+import { useIsMobile } from "@/contexts/viewport-context";
+import { useQueryParamSelector } from "@/hooks/use-query-param-selector";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { parseAsStringEnum } from "nuqs";
+import { useMemo } from "react";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
 import ScoreSaberPlayerScoresSSR from "../platform/scoresaber/scoresaber-player-scores-ssr";
@@ -18,24 +19,30 @@ import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
 
 const platformRepository = PlatformRepository.getInstance();
+const PLATFORM_QUERY = parseAsStringEnum<PlatformType>(Object.values(PlatformType)).withDefault(
+  PlatformType.ScoreSaber
+);
 
 interface PlayerDataProps {
   player: ScoreSaberPlayer;
-  platformType: PlatformType;
 }
 
-export default function PlayerData({ platformType, player }: PlayerDataProps) {
+export default function PlayerData({ player }: PlayerDataProps) {
   const isMobile = useIsMobile("2xl");
-  const { width } = useWindowDimensions();
+
+  const { value: selectedPlatform, setValue: setSelectedPlatform } = useQueryParamSelector({
+    param: "platform",
+    parser: PLATFORM_QUERY,
+    clearOtherParams: true,
+    omitParamWhen: v => v === PlatformType.ScoreSaber,
+  });
 
   const { data: playerData } = useQuery({
     queryKey: ["player", player.id],
-    queryFn: () => ssrApi.getScoreSaberPlayer(player.id, DetailType.FULL),
+    queryFn: () => ssrApi.getScoreSaberPlayer(player.id, "full"),
     initialData: player,
   });
   player = playerData ?? player;
-
-  const showRankings = !isMobile && !player.inactive && !player.banned;
 
   const { data: availablePlatforms = [] } = useQuery({
     queryKey: ["available-platforms", player.id],
@@ -51,21 +58,18 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
     },
   });
 
-  let platform: React.ReactNode;
-  switch (platformType) {
-    case PlatformType.ScoreSaber:
-      platform = <ScoreSaberPlayerScores player={player} />;
-      break;
-    case PlatformType.MedalScores:
-      platform = <ScoreSaberPlayerScoresSSR player={player} mode="medals" />;
-      break;
-    case PlatformType.AccSaber:
-      platform = <AccSaberPlayerScores player={player} />;
-      break;
-    default:
-      platform = <ScoreSaberPlayerScores player={player} />;
-  }
+  const platform = useMemo(() => {
+    switch (selectedPlatform) {
+      case PlatformType.ScoreSaber:
+        return <ScoreSaberPlayerScores player={player} />;
+      case PlatformType.MedalScores:
+        return <ScoreSaberPlayerScoresSSR player={player} mode="medals" />;
+      case PlatformType.AccSaber:
+        return <AccSaberPlayerScores player={player} />;
+    }
+  }, [selectedPlatform, player]);
 
+  const showRankings = !isMobile && !player.inactive && !player.banned;
   return (
     <div className="flex w-full justify-center gap-(--spacing-sm)">
       <article className="flex w-full flex-1 flex-col gap-(--spacing-sm)">
@@ -81,7 +85,7 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
         {/* Player Views */}
         {!player.inactive && (
           <Card>
-            <PlayerViews player={player} />
+            <PlayerViews player={player} key={player.id} />
           </Card>
         )}
 
@@ -91,20 +95,15 @@ export default function PlayerData({ platformType, player }: PlayerDataProps) {
             {/* Platform Selector */}
             <div className="flex">
               {availablePlatforms.map(platform => (
-                <SimpleLink
-                  href={`/player/${player.id}${platform.getType() !== PlatformType.ScoreSaber ? `/${platform.getType()}` : ""}`}
+                <Button
                   key={platform.getDisplayName()}
-                  scroll={false}
+                  variant={selectedPlatform === platform.getType() ? "default" : "secondary"}
+                  className="flex items-center gap-(--spacing-sm) rounded-b-none"
+                  onClick={() => setSelectedPlatform(platform.getType())}
                 >
-                  <Button
-                    key={platform.getDisplayName()}
-                    variant={platformType === platform.getType() ? "default" : "secondary"}
-                    className="flex items-center gap-(--spacing-sm) rounded-b-none"
-                  >
-                    {platform.getLogo()}
-                    <span className="hidden md:block">{platform.getDisplayName()}</span>
-                  </Button>
-                </SimpleLink>
+                  {platform.getLogo()}
+                  <span className="hidden md:block">{platform.getDisplayName()}</span>
+                </Button>
               ))}
             </div>
             {/* Score Component */}

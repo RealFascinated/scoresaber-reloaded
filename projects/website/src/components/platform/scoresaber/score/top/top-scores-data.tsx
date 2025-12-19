@@ -5,19 +5,15 @@ import PlayerScoreHeader from "@/components/score/player-score-header";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
-import { env } from "@ssr/common/env";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page } from "@ssr/common/pagination";
-import { PlayerScore } from "@ssr/common/score/player-score";
-import Request from "@ssr/common/utils/request";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { parseAsInteger, useQueryState } from "nuqs";
 import ScoreSaberScoreDisplay from "../scoresaber-score";
 
 export function TopScoresData() {
   const isMobile = useIsMobile();
-  const [page, setPage] = useState(1);
+
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
   const {
     data: scores,
@@ -25,18 +21,10 @@ export function TopScoresData() {
     isRefetching,
   } = useQuery({
     queryKey: ["top-scores", page],
-    queryFn: async () => {
-      return Request.get<Page<PlayerScore<ScoreSaberScore, ScoreSaberLeaderboard>>>(
-        `${env.NEXT_PUBLIC_API_URL}/scores/top/${page}`
-      );
-    },
+    queryFn: () => ssrApi.fetchTopScores(page),
     refetchInterval: false,
     placeholderData: data => data,
   });
-
-  const handlePageChange = useCallback((newPage: number) => {
-    setPage(newPage);
-  }, []);
 
   return (
     <Card className="flex h-fit w-full flex-col 2xl:w-[75%]">
@@ -62,7 +50,7 @@ export function TopScoresData() {
               <div key={score.scoreId} className="flex flex-col">
                 <PlayerScoreHeader player={player} />
 
-                <div className="bg-card border-border rounded-lg rounded-tl-none border px-(--spacing-sm) md:px-0">
+                <Card className="rounded-lg rounded-tl-none p-0">
                   <ScoreSaberScoreDisplay
                     key={score.scoreId}
                     score={score}
@@ -72,7 +60,7 @@ export function TopScoresData() {
                       hideAccuracyChanger: true,
                     }}
                   />
-                </div>
+                </Card>
               </div>
             );
           })}
@@ -83,7 +71,7 @@ export function TopScoresData() {
             totalItems={scores.metadata.totalItems}
             itemsPerPage={scores.metadata.itemsPerPage}
             loadingPage={isLoading || isRefetching ? page : undefined}
-            onPageChange={handlePageChange}
+            onPageChange={setPage}
             mobilePagination={isMobile}
           />
         </div>

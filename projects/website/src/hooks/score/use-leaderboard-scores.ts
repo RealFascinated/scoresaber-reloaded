@@ -1,7 +1,8 @@
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Page, Pagination } from "@ssr/common/pagination";
+import type { Page } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import useDatabase from "../use-database";
@@ -18,14 +19,30 @@ export const useLeaderboardScores = (
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
 
   return useQuery<Page<ScoreSaberScore> | undefined>({
-    queryKey: ["leaderboardScores", leaderboardId, historyPlayerId, page, mode, country, friendIds, mainPlayer],
+    queryKey: [
+      "leaderboardScores",
+      leaderboardId,
+      historyPlayerId,
+      page,
+      mode,
+      country,
+      friendIds,
+      mainPlayer,
+    ],
     queryFn: async () => {
       switch (mode) {
         case ScoreModeEnum.Global: {
-          const response = await ssrApi.fetchLeaderboardScores(leaderboardId.toString(), page, country);
+          const response = await ssrApi.fetchLeaderboardScores(
+            leaderboardId.toString(),
+            page,
+            country
+          );
 
           if (response) {
-            return new Page(response.scores, response.metadata);
+            return {
+              items: response.scores,
+              metadata: response.metadata,
+            };
           }
 
           return Pagination.empty();
@@ -54,7 +71,11 @@ export const useLeaderboardScores = (
         }
         case ScoreModeEnum.History: {
           if (mainPlayer) {
-            const response = await ssrApi.fetchPlayerScoresHistory(historyPlayerId, leaderboardId.toString(), page);
+            const response = await ssrApi.fetchPlayerScoresHistory(
+              historyPlayerId,
+              leaderboardId.toString(),
+              page
+            );
 
             if (response) {
               return response;

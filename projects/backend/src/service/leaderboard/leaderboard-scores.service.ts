@@ -1,33 +1,40 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import LeaderboardScoresResponse from "@ssr/common/response/leaderboard-scores-response";
+import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import LeaderboardScoresResponse from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { Metadata } from "@ssr/common/types/metadata";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import BeatLeaderService from "../beatleader.service";
+import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
 
 export class LeaderboardScoresService {
   /**
    * Fetches all scores for a specific leaderboard
    */
-  public static async fetchAllLeaderboardScores(leaderboardId: string): Promise<ScoreSaberScoreToken[]> {
+  public static async fetchAllLeaderboardScores(
+    leaderboardId: number
+  ): Promise<ScoreSaberScoreToken[]> {
     const scoreTokens: ScoreSaberScoreToken[] = [];
     let currentPage = 1;
     let hasMoreScores = true;
 
     while (hasMoreScores) {
-      const response = await ApiServiceRegistry.getInstance()
-        .getScoreSaberService()
-        .lookupLeaderboardScores(leaderboardId + "", currentPage);
+      const response = await ScoreSaberApiService.lookupLeaderboardScores(
+        leaderboardId,
+        currentPage
+      );
       if (!response) {
-        Logger.warn(`Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`);
+        Logger.warn(
+          `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
+        );
         currentPage++;
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      Logger.info(`Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`);
+      Logger.info(
+        `Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`
+      );
 
       scoreTokens.push(...response.scores);
       hasMoreScores = currentPage < totalPages;
@@ -46,12 +53,10 @@ export class LeaderboardScoresService {
    * @returns the scores
    */
   public static async getLeaderboardScores(
-    leaderboardId: string,
+    leaderboardId: number,
     page: number,
     country?: string
   ): Promise<LeaderboardScoresResponse | undefined> {
-    let metadata: Metadata = new Metadata(0, 0, 0, 0); // Default values
-
     const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(leaderboardId);
     if (leaderboardResponse == undefined) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
@@ -59,48 +64,58 @@ export class LeaderboardScoresService {
     const leaderboard = leaderboardResponse.leaderboard;
     const beatSaverMap = leaderboardResponse.beatsaver;
 
-    const leaderboardScores = await ApiServiceRegistry.getInstance()
-      .getScoreSaberService()
-      .lookupLeaderboardScores(leaderboardId, page, {
+    const leaderboardScores = await ScoreSaberApiService.lookupLeaderboardScores(
+      leaderboardId,
+      page,
+      {
         country: country,
-      });
+      }
+    );
     if (!leaderboardScores) {
       throw new NotFoundError(`Leaderboard scores for leaderboard "${leaderboardId}" not found`);
     }
 
     // Process scores in parallel
     const scorePromises = leaderboardScores.scores.map(async token => {
-      const score = getScoreSaberScoreFromToken(token, leaderboardResponse.leaderboard, token.leaderboardPlayerInfo.id);
+      const score = getScoreSaberScoreFromToken(
+        token,
+        leaderboardResponse.leaderboard,
+        token.leaderboardPlayerInfo.id
+      );
       if (score == undefined) {
         return undefined;
       }
 
-      const additionalData = await BeatLeaderService.getAdditionalScoreDataFromSong(
+      const beatLeaderScore = await BeatLeaderService.getBeatLeaderScoreFromSong(
         score.playerId,
         leaderboard.songHash,
         leaderboard.difficulty.difficulty,
         leaderboard.difficulty.characteristic,
         score.score
       );
-      if (additionalData !== undefined) {
-        score.additionalData = additionalData;
+      if (beatLeaderScore !== undefined) {
+        score.beatleaderScore = beatLeaderScore;
       }
 
       return score;
     });
 
-    metadata = new Metadata(
-      Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage),
-      leaderboardScores.metadata.total,
-      leaderboardScores.metadata.page,
-      leaderboardScores.metadata.itemsPerPage
+    const totalPages = Math.ceil(
+      leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage
     );
 
     return {
-      scores: await Promise.all(scorePromises),
+      scores: (await Promise.all(scorePromises)).filter(
+        score => score !== undefined
+      ) as ScoreSaberScore[],
       leaderboard: leaderboard,
       beatSaver: beatSaverMap,
-      metadata: metadata,
+      metadata: {
+        totalPages,
+        totalItems: leaderboardScores.metadata.total,
+        page: leaderboardScores.metadata.page,
+        itemsPerPage: leaderboardScores.metadata.itemsPerPage,
+      },
     };
   }
 }

@@ -44,22 +44,6 @@ export const scoreBarsDataset: DatasetConfig[] = [
     labelFormatter: (value: number) => `Ranked Improved: ${formatNumberWithCommas(value)}`,
   },
   {
-    title: "Unranked Improved",
-    field: "unrankedScoresImproved",
-    color: "#ec4899",
-    axisId: "y100",
-    axisConfig: {
-      reverse: false,
-      display: false,
-      displayName: "Unranked Improved",
-      position: "left",
-    },
-    type: "bar",
-    stack: "daily-scores",
-    stackOrder: 1,
-    labelFormatter: (value: number) => `Unranked Improved: ${formatNumberWithCommas(value)}`,
-  },
-  {
     title: "Unranked Scores",
     field: "unrankedScores",
     color: "#6b7280",
@@ -72,8 +56,24 @@ export const scoreBarsDataset: DatasetConfig[] = [
     },
     type: "bar",
     stack: "daily-scores",
-    stackOrder: 0,
+    stackOrder: 3,
     labelFormatter: (value: number) => `Unranked Scores: ${formatNumberWithCommas(value)}`,
+  },
+  {
+    title: "Unranked Improved",
+    field: "unrankedScoresImproved",
+    color: "#464a53",
+    axisId: "y100",
+    axisConfig: {
+      reverse: false,
+      display: false,
+      displayName: "Unranked Improved",
+      position: "left",
+    },
+    type: "bar",
+    stack: "daily-scores",
+    stackOrder: 2,
+    labelFormatter: (value: number) => `Unranked Improved: ${formatNumberWithCommas(value)}`,
   },
 ];
 

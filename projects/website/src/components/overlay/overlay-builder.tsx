@@ -3,18 +3,27 @@
 import { openInNewTab } from "@/common/browser-utils";
 import { SettingIds } from "@/common/database/database";
 import { OverlayDataClients } from "@/common/overlay/data-client";
-import { defaultOverlaySettings, encodeOverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings";
+import {
+  defaultOverlaySettings,
+  encodeOverlaySettings,
+  OverlayViews,
+} from "@/common/overlay/overlay-settings";
 import { cn } from "@/common/utils";
 import Card from "@/components/card";
 import Notice from "@/components/notice";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DetailType } from "@ssr/common/detail-type";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Eye, Monitor, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -143,8 +152,13 @@ export default function OverlayBuilder() {
    *
    * @param replayViewer the new replay viewer
    */
-  async function onSubmit({ playerId, useRealTimeData, dataClient, views }: z.infer<typeof formSchema>) {
-    const player = await ssrApi.getScoreSaberPlayer(playerId, DetailType.BASIC);
+  async function onSubmit({
+    playerId,
+    useRealTimeData,
+    dataClient,
+    views,
+  }: z.infer<typeof formSchema>) {
+    const player = await ssrApi.getScoreSaberPlayer(playerId, "basic");
     if (!player) {
       toast.error("The player id you entered could not be found.");
       return;
@@ -166,17 +180,22 @@ export default function OverlayBuilder() {
       {/* Header Section */}
       <div className="mb-(--spacing-lg)">
         <h1 className="text-2xl font-semibold">Overlay Builder</h1>
-        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">Configure your streaming overlay settings</p>
+        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+          Configure your streaming overlay settings
+        </p>
       </div>
 
       {/* Streamer Warning */}
       <div className="mb-(--spacing-lg)">
-        <Notice>You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.</Notice>
+        <Notice>
+          You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.
+        </Notice>
       </div>
 
       {/* Unknown Account ID Notice */}
       <p className="text-muted-foreground mb-(--spacing-lg) text-sm">
-        If you don&#39;t know your player id, you can link your account and it will be automatically filled in.
+        If you don&#39;t know your player id, you can link your account and it will be automatically
+        filled in.
       </p>
 
       {/* Overlay Settings */}
@@ -188,7 +207,9 @@ export default function OverlayBuilder() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm">Player ID</FormLabel>
-                <FormDescription>The id for the player you want to show in the overlay.</FormDescription>
+                <FormDescription>
+                  The id for the player you want to show in the overlay.
+                </FormDescription>
                 <FormControl>
                   <Input placeholder="Enter your ScoreSaber player ID" {...field} />
                 </FormControl>
@@ -212,7 +233,9 @@ export default function OverlayBuilder() {
                 </FormControl>
                 <div className="space-y-1">
                   <FormLabel className="text-sm">Use Real-Time Data</FormLabel>
-                  <FormDescription>Whether to fetch real-time data from the data client.</FormDescription>
+                  <FormDescription>
+                    Whether to fetch real-time data from the data client.
+                  </FormDescription>
                 </div>
               </FormItem>
             )}
@@ -271,14 +294,22 @@ export default function OverlayBuilder() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center space-y-0 space-x-3">
                       <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} disabled={isDisabled} />
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          disabled={isDisabled}
+                        />
                       </FormControl>
-                      <div className={cn("flex items-center space-x-2", isDisabled && "opacity-50")}>
+                      <div
+                        className={cn("flex items-center space-x-2", isDisabled && "opacity-50")}
+                      >
                         {viewToggle.icon}
                         <FormLabel className="font-normal">
                           {viewToggle.name}
                           {viewToggle.requiresRealTimeData && (
-                            <span className="text-muted-foreground ml-1 text-xs">(requires real-time data)</span>
+                            <span className="text-muted-foreground ml-1 text-xs">
+                              (requires real-time data)
+                            </span>
                           )}
                         </FormLabel>
                       </div>

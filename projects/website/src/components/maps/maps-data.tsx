@@ -54,10 +54,13 @@ export function MapsData({ type }: MapsDataProps) {
     <MapFilterProvider>
       <div className="flex w-full flex-col-reverse items-center gap-2 xl:flex-row xl:items-start xl:justify-center">
         <article className="flex w-full flex-col gap-2 2xl:w-[800px]">
-          <div className="flex w-full gap-2">
+          <div className="flex w-full flex-col gap-2 md:flex-row">
             {categories.map(category => (
               <SimpleLink href={`/maps/${category.id}`} key={category.name} className="w-full">
-                <Button className="w-full" variant={category.name == selectedCategory.name ? "default" : "secondary"}>
+                <Button
+                  className="w-full"
+                  variant={category.name == selectedCategory.name ? "default" : "secondary"}
+                >
                   <span className="flex items-center gap-2">
                     <span className="text-2xl">
                       <category.icon className="h-4 w-4" />
@@ -78,8 +81,15 @@ export function MapsData({ type }: MapsDataProps) {
 
           {/* External Links */}
           <Card>
-            <SimpleTooltip display={<p>Click to open the Ranking Queue on ScoreSaber</p>} side="bottom">
-              <SimpleLink href="https://scoresaber.com/ranking/requests" target="_blank" className="w-full">
+            <SimpleTooltip
+              display={<p>Click to open the Ranking Queue on ScoreSaber</p>}
+              side="bottom"
+            >
+              <SimpleLink
+                href="https://scoresaber.com/ranking/requests"
+                target="_blank"
+                className="w-full"
+              >
                 <Button className="flex w-full items-center justify-center gap-2">
                   <ExternalLinkIcon className="h-4 w-4" />
                   <span>ScoreSaber Ranking Queue</span>

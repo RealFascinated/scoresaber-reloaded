@@ -1,12 +1,11 @@
-import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
-import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberMedalsScore } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { removeObjectFields } from "@ssr/common/object.util";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
-import { BeatSaverMapResponse } from "@ssr/common/response/beatsaver-map-response";
+import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { getModifierLabel } from "@ssr/common/score/modifier";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
@@ -21,19 +20,6 @@ import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
 
 /**
- * Converts a database score to a ScoreSaberScore.
- *
- * @param score the score to convert
- * @returns the converted score
- */
-export function scoreToObject(score: ScoreSaberScore | ScoreSaberMedalsScore): ScoreSaberScore | ScoreSaberMedalsScore {
-  return {
-    ...removeObjectFields<ScoreSaberScore | ScoreSaberMedalsScore>(score, ["_id", "id", "__v"]),
-    id: score._id,
-  } as unknown as ScoreSaberScore | ScoreSaberMedalsScore;
-}
-
-/**
  * Sends a score notification to the number one feed.
  *
  * @param score the score to send
@@ -45,14 +31,14 @@ export async function sendScoreNotification(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
   player: ScoreSaberLeaderboardPlayerInfoToken,
-  beatLeaderScore: AdditionalScoreData | undefined,
+  beatLeaderScore: BeatLeaderScore | undefined,
   title: string
 ) {
   const beatSaver = await BeatSaverService.getMap(
     leaderboard.songHash,
     leaderboard.difficulty.difficulty,
     leaderboard.difficulty.characteristic,
-    DetailType.BASIC
+    "basic"
   );
 
   const previousScore = await PlayerScoreHistoryService.getPlayerPreviousScore(
@@ -93,7 +79,9 @@ export async function sendScoreNotification(
           value: [
             `**Accuracy:** ${accuracy}`,
             ...(score.pp > 0 ? [`**PP:** ${formatPp(score.pp)}pp ${change ? change.pp : ""}`] : []),
-            `**Modifiers:** ${score.modifiers.length > 0 ? score.modifiers.join(", ") : "None"}`,
+            `**Modifiers:** ${
+              score.modifiers.length > 0 ? score.modifiers.map(getModifierLabel).join(", ") : "None"
+            }`,
           ].join("\n"),
           inline: false,
         },
@@ -135,14 +123,14 @@ export async function sendScoreNotification(
 export async function sendMedalScoreNotification(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
-  beatLeaderScore: AdditionalScoreData | undefined,
-  changes: Map<string, number>
+  beatLeaderScore: BeatLeaderScore | undefined,
+  changes: Map<string, MedalChange>
 ) {
   const beatSaver = await BeatSaverService.getMap(
     leaderboard.songHash,
     leaderboard.difficulty.difficulty,
     leaderboard.difficulty.characteristic,
-    DetailType.BASIC
+    "basic"
   );
   const description = [
     `**${leaderboard.fullName}**`,
@@ -151,9 +139,9 @@ export async function sendMedalScoreNotification(
     "**__Changes__**",
   ];
   // Sort the changes by the number of medals gained -> most lost -> least lost
-  for (const [playerId, change] of Array.from(changes.entries()).sort((a, b) => {
-    const changeA = a[1];
-    const changeB = b[1];
+  const sortedChanges = Array.from(changes.entries()).sort((a, b) => {
+    const changeA = a[1].after - a[1].before;
+    const changeB = b[1].after - b[1].before;
     // Positive changes come first
     if (changeA > 0 && changeB < 0) return -1;
     if (changeA < 0 && changeB > 0) return 1;
@@ -161,33 +149,37 @@ export async function sendMedalScoreNotification(
     if (changeA > 0 && changeB > 0) return changeB - changeA;
     // Both negative: sort ascending (most lost first, since -10 < -5)
     return changeA - changeB;
-  })) {
+  });
+
+  for (const [playerId, change] of sortedChanges) {
     const changePlayer = await PlayerCoreService.getPlayer(playerId);
     description.push(
       format(
         `**[%s](%s)** %s %s %s (%s -> %s)`,
         changePlayer.name,
         env.NEXT_PUBLIC_WEBSITE_URL + "/player/" + playerId,
-        change < 0 ? "lost" : "gained",
-        Math.abs(change),
-        pluralize(Math.abs(change), "medal"),
-        formatNumberWithCommas((changePlayer.medals || 0) - change),
-        formatNumberWithCommas(changePlayer.medals || 0)
+        change.after - change.before < 0 ? "lost" : "gained",
+        Math.abs(change.after - change.before),
+        pluralize(Math.abs(change.after - change.before), "medal"),
+        formatNumberWithCommas(change.before),
+        formatNumberWithCommas(change.after)
       )
     );
   }
 
   // Find the player with the highest positive change for the title
-  const sortedChanges = Array.from(changes.entries()).sort((a, b) => b[1] - a[1]);
-  const [topPlayerId, topMedalChange] = sortedChanges.find(([, change]) => change > 0)!;
-
-  const topChangePlayer = await PlayerCoreService.getPlayer(topPlayerId);
-  const title = `${topChangePlayer.name} gained ${formatNumberWithCommas(topMedalChange)} ${pluralize(topMedalChange, "medal")}!`;
+  const topChangePlayerId = Array.from(changes.entries()).find(
+    ([, change]) => change.after - change.before > 0
+  )?.[0];
+  if (!topChangePlayerId) {
+    return;
+  }
+  const topChangePlayer = await PlayerCoreService.getPlayer(topChangePlayerId);
 
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,
     new EmbedBuilder()
-      .setTitle(title)
+      .setTitle(`${topChangePlayer.name} set a #${score.rank}!`)
       .setDescription(description.join("\n").trim())
       .setThumbnail(leaderboard.songArt)
       .setColor(Colors.Green)
@@ -212,7 +204,7 @@ function getScoreButtons(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
   beatSaver: BeatSaverMapResponse | undefined,
-  beatLeaderScore: AdditionalScoreData | undefined
+  beatLeaderScore: BeatLeaderScore | undefined
 ) {
   return [
     {
@@ -246,7 +238,7 @@ function getScoreButtons(
                 .setURL(
                   ReplayViewers.beatleader.generateUrl(
                     beatLeaderScore.scoreId,
-                    getBeatLeaderReplayRedirectUrl(beatLeaderScore)
+                    getBeatLeaderReplayRedirectUrl(score)
                   )
                 ),
             ]

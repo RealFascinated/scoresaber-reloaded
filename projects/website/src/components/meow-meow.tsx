@@ -123,7 +123,11 @@ export default function MeowMeow() {
     const state = stateRef.current;
     state.idleTime += 1;
 
-    if (state.idleTime > 10 && Math.floor(Math.random() * 200) === 0 && state.idleAnimation == null) {
+    if (
+      state.idleTime > 10 &&
+      Math.floor(Math.random() * 200) === 0 &&
+      state.idleAnimation == null
+    ) {
       const availableIdleAnimations = ["sleeping", "scratchSelf"];
       if (state.nekoPosX < 32) {
         availableIdleAnimations.push("scratchWallW");
@@ -137,7 +141,8 @@ export default function MeowMeow() {
       if (state.nekoPosY > window.innerHeight - 32) {
         availableIdleAnimations.push("scratchWallS");
       }
-      state.idleAnimation = availableIdleAnimations[Math.floor(Math.random() * availableIdleAnimations.length)];
+      state.idleAnimation =
+        availableIdleAnimations[Math.floor(Math.random() * availableIdleAnimations.length)];
     }
 
     switch (state.idleAnimation) {

@@ -1,0 +1,78 @@
+import { BeatLeaderScore } from "../model/beatleader-score/beatleader-score";
+import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
+import { PlayerHistoryEntry } from "../model/player/player-history-entry";
+import { ScoreSaberMedalsScore } from "../model/score/impl/scoresaber-medals-score";
+import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
+import { removeObjectFields } from "../object.util";
+import { Playlist } from "../playlist/playlist";
+import { normalizeModifiers } from "../score/modifier";
+import { convertObjectId } from "./utils";
+
+const baseFields = ["_id", "__v"];
+
+/**
+ * Converts a database score to a ScoreSaberScore.
+ *
+ * @param score the score to convert
+ * @returns the converted score
+ */
+export function scoreToObject(
+  score: ScoreSaberScore | ScoreSaberMedalsScore
+): ScoreSaberScore | ScoreSaberMedalsScore {
+  return {
+    ...removeObjectFields<ScoreSaberScore | ScoreSaberMedalsScore>(score, [...baseFields, "id"]),
+    id: convertObjectId(score._id),
+    modifiers: normalizeModifiers(score.modifiers),
+  } as unknown as ScoreSaberScore | ScoreSaberMedalsScore;
+}
+
+/**
+ * Converts a database leaderboard to a ScoreSaberLeaderboard.
+ *
+ * @param leaderboard the leaderboard to convert
+ * @returns the converted leaderboard
+ */
+export function leaderboardToObject(leaderboard: ScoreSaberLeaderboard): ScoreSaberLeaderboard {
+  return {
+    ...removeObjectFields<ScoreSaberLeaderboard>(leaderboard, baseFields),
+    id: leaderboard.id ?? convertObjectId(leaderboard._id),
+  } as ScoreSaberLeaderboard;
+}
+
+/**
+ * Converts a database player history entry to a PlayerHistoryEntry.
+ *
+ * @param history the player history entry to convert
+ * @returns the converted player history entry
+ */
+export function playerHistoryToObject(history: PlayerHistoryEntry): PlayerHistoryEntry {
+  return {
+    ...removeObjectFields<PlayerHistoryEntry>(history, [...baseFields, "playerId", "date"]),
+  } as PlayerHistoryEntry;
+}
+
+/**
+ * Converts a database BeatLeader score data to BeatLeaderScore.
+ *
+ * @param beatLeaderScore the BeatLeader score data to convert
+ * @returns the converted BeatLeader score data
+ */
+export function beatLeaderScoreToObject(
+  beatLeaderScore: BeatLeaderScore
+): BeatLeaderScore {
+  return {
+    ...removeObjectFields<BeatLeaderScore>(beatLeaderScore, baseFields),
+  } as BeatLeaderScore;
+}
+
+/**
+ * Converts a database playlist to a Playlist.
+ *
+ * @param playlist the playlist to convert
+ * @returns the converted playlist
+ */
+export function playlistToObject(playlist: Playlist): Playlist {
+  return {
+    ...removeObjectFields<Playlist>(playlist, baseFields),
+  } as Playlist;
+}
