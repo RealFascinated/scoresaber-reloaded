@@ -24,34 +24,39 @@ interface PendingScore {
   player?: ScoreSaberLeaderboardPlayerInfoToken;
   beatLeaderScore?: BeatLeaderScoreToken;
   timestamp: number;
-  timeoutId?: NodeJS.Timeout;
 }
 
 export class ScoreWebsockets implements EventListener {
   private static readonly SCORE_MATCH_TIMEOUT = TimeUnit.toMillis(TimeUnit.Minute, 5);
   private static readonly pendingScores = new Map<string, PendingScore>();
 
-  onStop?: () => Promise<void> = async () => {
-    // Process all pending scores and clear their timeouts
-    for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
-      if (pendingScore.timeoutId) {
-        clearTimeout(pendingScore.timeoutId);
-        pendingScore.timeoutId = undefined;
-      }
-
-      // Process the score
-      this.processScore(
-        pendingScore.scoreSaberToken,
-        pendingScore.leaderboardToken,
-        pendingScore.player,
-        pendingScore.beatLeaderScore
-      );
-
-      ScoreWebsockets.pendingScores.delete(key);
-    }
-  };
-
   constructor() {
+    // Start the match timeout interval timer
+    setInterval(
+      () => {
+        const now = Date.now();
+        for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
+          if (now - pendingScore.timestamp >= ScoreWebsockets.SCORE_MATCH_TIMEOUT) {
+            ScoreWebsockets.clearPendingScore(key);
+            if (
+              pendingScore.scoreSaberToken &&
+              pendingScore.leaderboardToken &&
+              pendingScore.player
+            ) {
+              this.processScore(
+                pendingScore.scoreSaberToken,
+                pendingScore.leaderboardToken,
+                pendingScore.player
+              );
+            } else if (pendingScore.beatLeaderScore) {
+              this.processScore(undefined, undefined, undefined, pendingScore.beatLeaderScore);
+            }
+          }
+        }
+      },
+      TimeUnit.toMillis(TimeUnit.Minute, 1)
+    );
+
     // Connect to websockets
     connectScoresaberWebsocket({
       onScore: async score => {
@@ -75,28 +80,11 @@ export class ScoreWebsockets implements EventListener {
           );
         } else {
           // No matching BeatLeader score yet, store this one
-          const timeoutId = setTimeout(() => {
-            const pendingScore = ScoreWebsockets.pendingScores.get(key);
-            if (
-              pendingScore?.scoreSaberToken &&
-              pendingScore.leaderboardToken &&
-              pendingScore.player
-            ) {
-              ScoreWebsockets.clearPendingScore(key);
-              this.processScore(
-                pendingScore.scoreSaberToken,
-                pendingScore.leaderboardToken,
-                pendingScore.player
-              );
-            }
-          }, ScoreWebsockets.SCORE_MATCH_TIMEOUT);
-
           ScoreWebsockets.pendingScores.set(key, {
             scoreSaberToken: score.score,
             leaderboardToken: score.leaderboard,
             player: score.score.leaderboardPlayerInfo,
             timestamp: Date.now(),
-            timeoutId,
           });
         }
       },
@@ -126,18 +114,9 @@ export class ScoreWebsockets implements EventListener {
           );
         } else {
           // No matching ScoreSaber score yet, store this one
-          const timeoutId = setTimeout(() => {
-            const pendingScore = ScoreWebsockets.pendingScores.get(key);
-            if (pendingScore?.beatLeaderScore) {
-              ScoreWebsockets.clearPendingScore(key);
-              this.processScore(undefined, undefined, undefined, pendingScore.beatLeaderScore);
-            }
-          }, ScoreWebsockets.SCORE_MATCH_TIMEOUT);
-
           ScoreWebsockets.pendingScores.set(key, {
             beatLeaderScore,
             timestamp: Date.now(),
-            timeoutId,
           });
         }
       },
@@ -150,11 +129,6 @@ export class ScoreWebsockets implements EventListener {
    * @param key the key of the pending score to clear.
    */
   private static clearPendingScore(key: string) {
-    const pendingScore = this.pendingScores.get(key);
-    if (pendingScore?.timeoutId) {
-      clearTimeout(pendingScore.timeoutId);
-      pendingScore.timeoutId = undefined;
-    }
     this.pendingScores.delete(key);
   }
 
@@ -206,4 +180,19 @@ export class ScoreWebsockets implements EventListener {
       });
     }
   }
+
+  onStop: () => Promise<void> = async () => {
+    // Process all pending scores
+    for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
+      // Process the score
+      this.processScore(
+        pendingScore.scoreSaberToken,
+        pendingScore.leaderboardToken,
+        pendingScore.player,
+        pendingScore.beatLeaderScore
+      );
+
+      ScoreWebsockets.pendingScores.delete(key);
+    }
+  };
 }
