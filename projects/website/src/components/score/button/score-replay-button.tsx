@@ -11,13 +11,13 @@ export function ScoreReplayButton({ score }: { score: ScoreSaberScore }) {
   const database = useDatabase();
   const viewer = useStableLiveQuery(async () => database.getReplayViewer());
 
-  if (!viewer || !score.additionalData) {
+  if (!viewer || !score.beatLeaderScore) {
     return null;
   }
 
   return (
     <ScoreButton
-      href={viewer.generateUrl(score.additionalData.scoreId, getBeatLeaderReplayRedirectUrl(score))}
+      href={viewer.generateUrl(score.beatLeaderScore.scoreId, getBeatLeaderReplayRedirectUrl(score))}
       tooltip={<p>Click to view the score replay!</p>}
     >
       <BeatSaberPepeLogo />

@@ -19,7 +19,7 @@ type ScorePpProps = ScoreBadgeProps & {
 
 export function ScorePpBadge({ score, leaderboard, showDifference = true }: ScorePpProps) {
   const previousScore = score.previousScore;
-  const fcAccuracy = score.additionalData?.fcAccuracy;
+  const fcAccuracy = score.beatLeaderScore?.fcAccuracy;
   const pp = score.pp;
   const weight = score.weight;
   if (pp === 0 || pp === undefined) {

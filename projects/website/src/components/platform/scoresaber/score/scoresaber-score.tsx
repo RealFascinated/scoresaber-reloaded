@@ -59,7 +59,7 @@ export default function ScoreSaberScoreDisplay({
   const pp =
     baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
 
-  const isTracked = score.isTracked && score.additionalData;
+  const isTracked = score.isTracked && score.beatLeaderScore;
 
   return (
     <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative px-2 lg:pl-0")}>

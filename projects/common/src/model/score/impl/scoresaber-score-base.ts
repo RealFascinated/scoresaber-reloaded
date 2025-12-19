@@ -59,5 +59,5 @@ export class ScoreSaberScoreBase extends Score {
   /**
    * The BeatLeader score for the score.
    */
-  public beatleaderScore?: BeatLeaderScore;
+  public beatLeaderScore?: BeatLeaderScore;
 }

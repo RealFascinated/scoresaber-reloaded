@@ -34,7 +34,7 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
       {/* Stats */}
       <Card className="flex w-full flex-col items-center justify-center gap-3 rounded-xl md:mb-0 md:max-w-[360px]">
         <div className="flex w-full flex-row flex-wrap items-center justify-center gap-2">
-          {score.additionalData && <StatValue value={score.additionalData.pauses} name="Pauses" />}
+          {score.beatLeaderScore && <StatValue value={score.beatLeaderScore.pauses} name="Pauses" />}
           {scoreStats && (
             <StatValue value={scoreStats.current.winTracker.jumpDistance.toFixed(2)} name="JD" />
           )}
@@ -42,11 +42,11 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
             value={formatNumberWithCommas(scoreStats.current.hitTracker.maxCombo)}
             name="Max Combo"
           />
-          {!score.fullCombo && score.additionalData && (
+          {!score.fullCombo && score.beatLeaderScore && (
             <StatValue
               value={
                 <div className="flex items-center gap-2">
-                  <p>{score.additionalData.fcAccuracy.toFixed(2)}%</p>
+                  <p>{score.beatLeaderScore.fcAccuracy.toFixed(2)}%</p>
                 </div>
               }
               name="FC Acc"

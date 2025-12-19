@@ -21,15 +21,15 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
   });
 
   const { data: scoreStats, isLoading: isScoreStatsLoading } = useQuery({
-    queryKey: ["scoreStats", score?.score.additionalData?.scoreId],
-    queryFn: () => ssrApi.fetchScoreStats(Number(score?.score.additionalData?.scoreId)),
-    enabled: !!score?.score.additionalData?.scoreId,
+    queryKey: ["scoreStats", score?.score.beatLeaderScore?.scoreId],
+    queryFn: () => ssrApi.fetchScoreStats(Number(score?.score.beatLeaderScore?.scoreId)),
+    enabled: !!score?.score.beatLeaderScore?.scoreId,
   });
 
   const { data: replay, isLoading: isReplayLoading } = useQuery({
     queryKey: ["replayAnalysis", score],
-    queryFn: () => getDecodedReplay(score?.score.additionalData?.scoreId.toString()!),
-    enabled: !!score?.score.additionalData?.scoreId,
+    queryFn: () => getDecodedReplay(score?.score.beatLeaderScore?.scoreId.toString()!),
+    enabled: !!score?.score.beatLeaderScore?.scoreId,
   });
 
   if (isError) {

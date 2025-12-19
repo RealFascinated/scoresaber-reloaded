@@ -15,6 +15,7 @@ import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import { beatLeaderScoreToObject } from "@ssr/common/utils/model-converters";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
+import mongoose from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import CacheService, { CacheId } from "./cache.service";
@@ -204,9 +205,11 @@ export default class BeatLeaderService {
       return beatLeaderScoreToObject(existingScore);
     }
 
-    await BeatLeaderScoreModel.create(data);
+    await BeatLeaderScoreModel.create({
+      ...data,
+      _id: new mongoose.Types.ObjectId(), // Generate a new _id
+    });
     Logger.info(`Tracked BeatLeader score "${score.id}" for "${player.name}"(${playerId})`);
-
     return data;
   }
 

@@ -37,7 +37,7 @@ export default function ScoreDetailsDropdown({
     leaderboard.id,
     score.scoreId,
     isExpanded,
-    score.additionalData
+    score.beatLeaderScore
   );
 
   useEffect(() => {

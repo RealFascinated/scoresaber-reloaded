@@ -153,7 +153,7 @@ export class ScoreCoreService {
       return score;
     }
 
-    const [isScoreTracked, beatleaderScore, previousScore, playerInfo, comparisonScore] =
+    const [isScoreTracked, beatLeaderScore, previousScore, playerInfo, comparisonScore] =
       await Promise.all([
         ScoreCoreService.scoreExists(score.scoreId),
         options?.insertBeatLeaderScore
@@ -187,8 +187,8 @@ export class ScoreCoreService {
 
     score.isTracked = isScoreTracked;
 
-    if (beatleaderScore !== undefined) {
-      score.beatleaderScore = beatleaderScore;
+    if (beatLeaderScore !== undefined) {
+      score.beatLeaderScore = beatLeaderScore;
     }
 
     if (previousScore !== undefined) {

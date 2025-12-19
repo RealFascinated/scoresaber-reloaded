@@ -94,7 +94,7 @@ export default function ScoreSaberScoreEditorButton({
   };
 
   const setAccuracyToFC = () => {
-    const fcAccuracy = score.additionalData!.fcAccuracy!;
+    const fcAccuracy = score.beatLeaderScore!.fcAccuracy!;
     setBaseValue(Math.max(1, Math.floor(fcAccuracy)));
     setDecimalValue(fcAccuracy - Math.floor(fcAccuracy));
     updateScoreAndPP(fcAccuracy);
@@ -135,12 +135,12 @@ export default function ScoreSaberScoreEditorButton({
 
                 <div className="flex items-center gap-2">
                   {/* Set to FC Button */}
-                  {score.additionalData !== undefined && !score.fullCombo && (
+                  {score.beatLeaderScore !== undefined && !score.fullCombo && (
                     <SimpleTooltip
                       display={
                         <p>
                           Set accuracy to FC Accuracy (
-                          {formatScoreAccuracy(score.additionalData!.fcAccuracy!)})
+                          {formatScoreAccuracy(score.beatLeaderScore!.fcAccuracy!)})
                         </p>
                       }
                     >

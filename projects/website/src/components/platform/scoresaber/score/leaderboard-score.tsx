@@ -130,14 +130,14 @@ export default function ScoreSaberLeaderboardScore({
 
         {/* Score Replay */}
         <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[37px]")}>
-          {score.additionalData && (
+          {score.beatLeaderScore && (
             <div className="flex justify-center">
               <ScoreReplayButton score={score} />
             </div>
           )}
         </td>
 
-        {score.additionalData && (
+        {score.beatLeaderScore && (
           <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[45px] pr-3")}>
             <SimpleTooltip display="View score details">
               <button

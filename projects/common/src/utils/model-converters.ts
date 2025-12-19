@@ -52,10 +52,10 @@ export function playerHistoryToObject(history: PlayerHistoryEntry): PlayerHistor
 }
 
 /**
- * Converts a database additional score data to BeatLeaderScore.
+ * Converts a database BeatLeader score data to BeatLeaderScore.
  *
- * @param additionalData the additional score data to convert
- * @returns the converted additional score data
+ * @param beatLeaderScore the BeatLeader score data to convert
+ * @returns the converted BeatLeader score data
  */
 export function beatLeaderScoreToObject(
   beatLeaderScore: BeatLeaderScore

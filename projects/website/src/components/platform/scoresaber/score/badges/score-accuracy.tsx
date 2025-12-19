@@ -17,7 +17,7 @@ type ScoreAccuracyBadgeProps = ScoreBadgeProps & {
 export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccuracyBadgeProps) {
   const previousScore = score.previousScore;
 
-  const fcAccuracy = score.additionalData?.fcAccuracy;
+  const fcAccuracy = score.beatLeaderScore?.fcAccuracy;
   const scoreBadge = getScoreBadgeFromAccuracy(score.accuracy);
 
   const failed = hasModifier(score.modifiers, Modifier.NF);

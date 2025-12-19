@@ -26,14 +26,14 @@ export default function ScoreMissesAndPausesBadge({
   showDifference = true,
 }: ScoreMissesBadgeProps) {
   const previousScore = score.previousScore;
-  const additionalData = score.additionalData;
-  const previousMisses = additionalData?.misses;
+  const beatLeaderScore = score.beatLeaderScore;
+  const previousMisses = beatLeaderScore?.misses;
 
   const misses = score.misses + (previousMisses?.bombCuts ?? 0) + (previousMisses?.wallsHit ?? 0);
   const previousMissCount =
     (previousScore?.misses ?? 0) +
-    (additionalData?.misses?.bombCuts ?? 0) +
-    (additionalData?.misses?.wallsHit ?? 0);
+    (beatLeaderScore?.misses?.bombCuts ?? 0) +
+    (beatLeaderScore?.misses?.wallsHit ?? 0);
 
   return (
     <div className="flex w-full flex-row items-center justify-center gap-1">
@@ -42,7 +42,7 @@ export default function ScoreMissesAndPausesBadge({
         badCuts={score.badCuts}
         bombCuts={previousMisses?.bombCuts ?? undefined}
         wallsHit={previousMisses?.wallsHit ?? undefined}
-        pauses={additionalData?.pauses ?? undefined}
+        pauses={beatLeaderScore?.pauses ?? undefined}
         fullCombo={score.fullCombo}
       >
         <span>
@@ -61,8 +61,8 @@ export default function ScoreMissesAndPausesBadge({
           bombCuts={previousMisses?.bombCuts ?? undefined}
           wallsHit={previousMisses?.wallsHit ?? undefined}
           pauses={
-            additionalData !== undefined && additionalData.scoreImprovement?.pauses !== undefined
-              ? additionalData?.pauses - additionalData.scoreImprovement.pauses
+            beatLeaderScore !== undefined && beatLeaderScore.scoreImprovement?.pauses !== undefined
+              ? beatLeaderScore?.pauses - beatLeaderScore.scoreImprovement.pauses
               : undefined
           }
           fullCombo={previousScore.fullCombo}

@@ -7,12 +7,12 @@ import { BeatLeaderScore } from "../model/beatleader-score/beatleader-score";
 /**
  * Get the redirect URL of a BeatLeader replay.
  *
- * @param additionalData the additional score data
+ * @param score the score data
  * @returns the URL of the replay
  */
 export function getBeatLeaderReplayRedirectUrl(score: ScoreSaberScore): string | undefined {
-  if (score.beatleaderScore && score.beatleaderScore.savedReplay && !!score.isPreviousScore) {
-    return `${env.NEXT_PUBLIC_API_URL}/beatleader/replay/${score.beatleaderScore?.scoreId}.bsor`;
+  if (score.beatLeaderScore && score.beatLeaderScore.savedReplay && !!score.isPreviousScore) {
+    return `${env.NEXT_PUBLIC_API_URL}/beatleader/replay/${score.beatLeaderScore?.scoreId}.bsor`;
   }
   return undefined;
 }
@@ -30,7 +30,7 @@ export function getBeatLeaderReplayId(score: BeatLeaderScore): string {
 /**
  * Get the CDN URL of a BeatLeader replay.
  *
- * @param additionalData the additional score data
+ * @param beatLeaderScore the BeatLeader score data
  * @returns the CDN URL of the replay
  */
 export function getBeatLeaderReplayCdnUrl(additionalData: BeatLeaderScore): string {

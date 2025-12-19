@@ -11,11 +11,11 @@ type HandAccuracyProps = ScoreBadgeProps & {
 };
 
 export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
-  if (!score.additionalData) {
+  if (!score.beatLeaderScore) {
     return undefined;
   }
-  const { handAccuracy } = score.additionalData;
-  const scoreImprovement = score.additionalData.scoreImprovement;
+  const { handAccuracy } = score.beatLeaderScore;
+  const scoreImprovement = score.beatLeaderScore.scoreImprovement;
   const currentHandAccuracy = handAccuracy[hand];
   const previousHandAccuracy = scoreImprovement
     ? handAccuracy[hand] - scoreImprovement.handAccuracy[hand]

@@ -11,14 +11,14 @@ export default function ReplayButton({ score }: { score: ScoreSaberScore }) {
   const database = useDatabase();
   const viewer = useStableLiveQuery(async () => database.getReplayViewer());
 
-  if (!viewer || !score.additionalData) {
+  if (!viewer || !score.beatLeaderScore) {
     return null;
   }
 
   return (
     <SimpleLink
       href={viewer.generateUrl(
-        score.additionalData?.scoreId,
+        score.beatLeaderScore?.scoreId,
         getBeatLeaderReplayRedirectUrl(score)
       )}
     >

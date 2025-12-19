@@ -11,7 +11,7 @@ export function useLeaderboardDropdownData(
   leaderboardId: number,
   scoreId: string,
   isExpanded: boolean,
-  additionalData?: { scoreId: number }
+  beatLeaderScore?: { scoreId: number }
 ) {
   const [shouldFetch, setShouldFetch] = useState(false);
 
@@ -33,8 +33,8 @@ export function useLeaderboardDropdownData(
     queryKey: [`leaderboardDropdownData:${leaderboardId}`, leaderboardId, scoreId, isExpanded],
     queryFn: async () => {
       return {
-        scoreStats: additionalData
-          ? await ssrApi.fetchScoreStats(additionalData.scoreId)
+        scoreStats: beatLeaderScore
+          ? await ssrApi.fetchScoreStats(beatLeaderScore.scoreId)
           : undefined,
       };
     },

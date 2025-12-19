@@ -44,7 +44,7 @@ const buttons: ButtonConfig[] = [
   },
   {
     display: ({ score }: Props) => {
-      return score?.additionalData != undefined;
+      return score?.beatLeaderScore != undefined;
     },
     render: ({ score, leaderboard, updateScore }: Props) => {
       return (
@@ -54,7 +54,7 @@ const buttons: ButtonConfig[] = [
   },
   {
     display: ({ score }: Props) => {
-      return score?.additionalData != undefined;
+      return score?.beatLeaderScore != undefined;
     },
     render: ({ score }: Props) => {
       return <ScoreReplayButton score={score!} />;
