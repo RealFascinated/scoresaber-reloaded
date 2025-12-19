@@ -1,7 +1,7 @@
 import * as dotenv from "@dotenvx/dotenvx";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { AdditionalScoreDataModel } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { AdditionalScoreDataModel } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { mongoose } from "@typegoose/typegoose";
 
 dotenv.config();

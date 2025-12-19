@@ -13,7 +13,7 @@ import { HandAccuracy } from "./hand-accuracy";
 import { Misses } from "./misses";
 
 /**
- * The model for additional score data.
+ * The model for BeatLeader score.
  */
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },
@@ -21,9 +21,9 @@ import { Misses } from "./misses";
     collection: "additional-score-data",
   },
 })
-export class AdditionalScoreData {
+export class BeatLeaderScore {
   /**
-   * The of the player who set the score.
+   * The id of the player who set the score.
    */
   @prop({ required: true, index: true })
   public playerId!: string;
@@ -148,6 +148,6 @@ export class AdditionalScoreData {
   public scoreStats?: ScoreStatsToken;
 }
 
-export type AdditionalScoreDataDocument = AdditionalScoreData & Document;
-export const AdditionalScoreDataModel: ReturnModelType<typeof AdditionalScoreData> =
-  getModelForClass(AdditionalScoreData);
+export type AdditionalScoreDataDocument = BeatLeaderScore & Document;
+export const AdditionalScoreDataModel: ReturnModelType<typeof BeatLeaderScore> =
+  getModelForClass(BeatLeaderScore);

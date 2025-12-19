@@ -1,4 +1,4 @@
-import { AdditionalScoreDataModel } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { AdditionalScoreDataModel } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";

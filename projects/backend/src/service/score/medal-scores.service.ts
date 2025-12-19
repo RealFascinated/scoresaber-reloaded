@@ -1,7 +1,7 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
-import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
@@ -15,7 +15,7 @@ import { ScoreSaberApiService } from "../scoresaber-api.service";
 
 type MedalScoresQueueItem = {
   score: ScoreSaberScore;
-  beatLeaderScore: AdditionalScoreData | undefined;
+  beatLeaderScore: BeatLeaderScore | undefined;
 };
 
 export class MedalScoresService {
@@ -102,7 +102,7 @@ export class MedalScoresService {
    */
   public static async handleIncomingMedalsScoreUpdate(
     score: ScoreSaberScore,
-    beatLeaderScore: AdditionalScoreData | undefined
+    beatLeaderScore: BeatLeaderScore | undefined
   ) {
     // Invalid score
     if (score.rank > 10 || score.pp <= 0) {

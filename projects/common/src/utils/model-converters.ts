@@ -1,4 +1,4 @@
-import { AdditionalScoreData } from "../model/additional-score-data/additional-score-data";
+import { BeatLeaderScore } from "../model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerHistoryEntry } from "../model/player/player-history-entry";
 import { ScoreSaberMedalsScore } from "../model/score/impl/scoresaber-medals-score";
@@ -52,17 +52,17 @@ export function playerHistoryToObject(history: PlayerHistoryEntry): PlayerHistor
 }
 
 /**
- * Converts a database additional score data to AdditionalScoreData.
+ * Converts a database additional score data to BeatLeaderScore.
  *
  * @param additionalData the additional score data to convert
  * @returns the converted additional score data
  */
 export function additionalScoreDataToObject(
-  additionalData: AdditionalScoreData
-): AdditionalScoreData {
+  additionalData: BeatLeaderScore
+): BeatLeaderScore {
   return {
-    ...removeObjectFields<AdditionalScoreData>(additionalData, baseFields),
-  } as AdditionalScoreData;
+    ...removeObjectFields<BeatLeaderScore>(additionalData, baseFields),
+  } as BeatLeaderScore;
 }
 
 /**

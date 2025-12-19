@@ -3,9 +3,9 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { MinioBucket } from "@ssr/common/minio-buckets";
 import {
-  AdditionalScoreData,
   AdditionalScoreDataModel,
-} from "@ssr/common/model/additional-score-data/additional-score-data";
+  BeatLeaderScore,
+} from "@ssr/common/model/beatleader-score/beatleader-score";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
@@ -22,21 +22,22 @@ import MinioService from "./minio.service";
 
 export default class BeatLeaderService {
   /**
-   * Gets the additional score data for a player's score.
+   * Gets the BeatLeader score for a player's score.
    *
    * @param playerId the id of the player
    * @param songHash the hash of the map
    * @param songDifficulty the difficulty of the map
+   * @param songCharacteristic the characteristic of the map
    * @param songScore the score of the play
-   * @private
+   * @returns the BeatLeader score, or undefined if none
    */
-  public static async getAdditionalScoreDataFromSong(
+  public static async getBeatLeaderScoreFromSong(
     playerId: string,
     songHash: string,
     songDifficulty: string,
     songCharacteristic: string,
     songScore: number
-  ): Promise<AdditionalScoreData | undefined> {
+  ): Promise<BeatLeaderScore | undefined> {
     return CacheService.fetchWithCache(
       CacheId.AdditionalScoreData,
       `additional-score-data:${playerId}-${songHash}-${songDifficulty}-${songScore}`,
@@ -57,14 +58,14 @@ export default class BeatLeaderService {
   }
 
   /**
-   * Gets the additional score data for a player's score.
+   * Gets the BeatLeader score for a player's score.
    *
    * @param scoreId the id of the score
-   * @private
+   * @returns the BeatLeader score, or undefined if none
    */
-  public static async getAdditionalScoreData(
+  public static async getBeatLeaderScore(
     scoreId: number
-  ): Promise<AdditionalScoreData | undefined> {
+  ): Promise<BeatLeaderScore | undefined> {
     return CacheService.fetchWithCache(
       CacheId.AdditionalScoreData,
       `additional-score-data:${scoreId}`,
@@ -88,7 +89,7 @@ export default class BeatLeaderService {
   public static async trackBeatLeaderScore(
     score: BeatLeaderScoreToken,
     isTop50GlobalScore?: boolean
-  ): Promise<AdditionalScoreData | undefined> {
+  ): Promise<BeatLeaderScore | undefined> {
     const { playerId, leaderboard } = score;
     const player: Player | null = await CacheService.fetchWithCache(
       CacheId.Players,
@@ -132,7 +133,7 @@ export default class BeatLeaderService {
         right: score.accRight,
       },
       timestamp: new Date(Number(score.timeset) * 1000),
-    } as AdditionalScoreData;
+    } as BeatLeaderScore;
 
     if (rawScoreImprovement && rawScoreImprovement.score > 0) {
       data.scoreImprovement = {
@@ -230,12 +231,12 @@ export default class BeatLeaderService {
    * @throws NotFoundError if the score stats are not found
    */
   public static async getScoresFullScoreStats(scoreId: number): Promise<ScoreStatsResponse> {
-    const current = await this.getAdditionalScoreData(scoreId);
+    const current = await this.getBeatLeaderScore(scoreId);
     if (current == undefined) {
       throw new NotFoundError(`Score ${scoreId} not found`);
     }
 
-    const previous = await this.getPreviousAdditionalScoreData(
+    const previous = await this.getPreviousBeatLeaderScore(
       current.playerId,
       current.songHash,
       current.leaderboardId,
@@ -257,21 +258,21 @@ export default class BeatLeaderService {
   }
 
   /**
-   * Gets the player's previous additional score data for a map.
+   * Gets the player's previous BeatLeader score for a map.
    *
-   * @param playerId the player's id to get the previous additional score data for
-   * @param songHash the hash of the map to get the previous additional score data for
-   * @param leaderboardId the leaderboard id to get the previous additional score data for
-   * @param timestamp the timestamp to get the previous additional score data for
-   * @returns the additional score data, or undefined if none
+   * @param playerId the player's id to get the previous BeatLeader score for
+   * @param songHash the hash of the map to get the previous BeatLeader score for
+   * @param leaderboardId the leaderboard id to get the previous BeatLeader score for
+   * @param timestamp the timestamp to get the previous BeatLeader score for
+   * @returns the BeatLeader score, or undefined if none
    */
-  public static async getPreviousAdditionalScoreData(
+  public static async getPreviousBeatLeaderScore(
     playerId: string,
     songHash: string,
     leaderboardId: string,
     timestamp: Date
-  ): Promise<AdditionalScoreData | undefined> {
-    const scores: AdditionalScoreData[] = await AdditionalScoreDataModel.find({
+  ): Promise<BeatLeaderScore | undefined> {
+    const scores: BeatLeaderScore[] = await AdditionalScoreDataModel.find({
       playerId: playerId,
       songHash: songHash.toUpperCase(),
       leaderboardId: leaderboardId,

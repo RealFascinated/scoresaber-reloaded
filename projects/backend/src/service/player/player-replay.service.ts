@@ -10,7 +10,7 @@ export class PlayerReplayService {
    * @returns the replay URL
    */
   public static async getPlayerReplayUrl(scoreId: string): Promise<string> {
-    const beatleaderScore = await BeatLeaderService.getAdditionalScoreData(
+    const beatleaderScore = await BeatLeaderService.getBeatLeaderScore(
       parseInt(scoreId.replace(".bsor", ""))
     );
     if (!beatleaderScore) {

@@ -1,5 +1,5 @@
 import { env } from "@ssr/common/env";
-import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
@@ -31,7 +31,7 @@ export async function sendScoreNotification(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
   player: ScoreSaberLeaderboardPlayerInfoToken,
-  beatLeaderScore: AdditionalScoreData | undefined,
+  beatLeaderScore: BeatLeaderScore | undefined,
   title: string
 ) {
   const beatSaver = await BeatSaverService.getMap(
@@ -123,7 +123,7 @@ export async function sendScoreNotification(
 export async function sendMedalScoreNotification(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
-  beatLeaderScore: AdditionalScoreData | undefined,
+  beatLeaderScore: BeatLeaderScore | undefined,
   changes: Map<string, MedalChange>
 ) {
   const beatSaver = await BeatSaverService.getMap(
@@ -204,7 +204,7 @@ function getScoreButtons(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
   beatSaver: BeatSaverMapResponse | undefined,
-  beatLeaderScore: AdditionalScoreData | undefined
+  beatLeaderScore: BeatLeaderScore | undefined
 ) {
   return [
     {

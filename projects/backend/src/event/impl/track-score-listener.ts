@@ -1,4 +1,4 @@
-import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
@@ -24,7 +24,7 @@ export class TrackScoreListener implements EventListener {
     const playerInfo = score.playerInfo;
 
     // Track BeatLeader score if available
-    let beatLeaderScore: AdditionalScoreData | undefined;
+    let beatLeaderScore: BeatLeaderScore | undefined;
     if (beatLeaderScoreToken) {
       beatLeaderScore = await BeatLeaderService.trackBeatLeaderScore(
         beatLeaderScoreToken,

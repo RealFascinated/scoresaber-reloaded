@@ -1,5 +1,5 @@
 import Logger from "@ssr/common/logger";
-import { AdditionalScoreData } from "@ssr/common/model/additional-score-data/additional-score-data";
+import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import {
@@ -33,7 +33,7 @@ export class ScoreCoreService {
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
     player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken,
-    beatLeaderScore?: AdditionalScoreData,
+    beatLeaderScore?: BeatLeaderScore,
     newScore: boolean = false
   ): Promise<{
     score: ScoreSaberScore | undefined;
@@ -153,11 +153,11 @@ export class ScoreCoreService {
       return score;
     }
 
-    const [isScoreTracked, additionalData, previousScore, playerInfo, comparisonScore] =
+    const [isScoreTracked, beatleaderScore, previousScore, playerInfo, comparisonScore] =
       await Promise.all([
         ScoreCoreService.scoreExists(score.scoreId),
         options?.insertAdditionalData
-          ? BeatLeaderService.getAdditionalScoreDataFromSong(
+          ? BeatLeaderService.getBeatLeaderScoreFromSong(
               score.playerId,
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
@@ -187,8 +187,8 @@ export class ScoreCoreService {
 
     score.isTracked = isScoreTracked;
 
-    if (additionalData !== undefined) {
-      score.additionalData = additionalData;
+    if (beatleaderScore !== undefined) {
+      score.beatleaderScore = beatleaderScore;
     }
 
     if (previousScore !== undefined) {

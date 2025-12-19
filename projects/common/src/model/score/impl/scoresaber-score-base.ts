@@ -1,6 +1,6 @@
 import { modelOptions, Prop, Severity } from "@typegoose/typegoose";
 import type { HMD } from "../../../hmds";
-import { AdditionalScoreData } from "../../additional-score-data/additional-score-data";
+import { BeatLeaderScore } from "../../beatleader-score/beatleader-score";
 import { type Controllers } from "../controllers";
 import Score from "../score";
 import { ScoreSaberPreviousScoreOverview } from "./scoresaber-score";
@@ -57,7 +57,7 @@ export class ScoreSaberScoreBase extends Score {
   public previousScore?: ScoreSaberPreviousScoreOverview;
 
   /**
-   * The additional data for the score.
+   * The BeatLeader score for the score.
    */
-  public additionalData?: AdditionalScoreData;
+  public beatleaderScore?: BeatLeaderScore;
 }
