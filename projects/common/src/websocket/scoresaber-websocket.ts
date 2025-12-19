@@ -27,6 +27,11 @@ export function connectScoresaberWebsocket({
     name: "Scoresaber",
     url: "wss://scoresaber.com/ws",
     onMessage: (message: unknown) => {
+      // ScoreSaber sends a plain text welcome message on connect, ignore it
+      if (typeof message === "string" && message.includes("Connected to the ScoreSaber")) {
+        return;
+      }
+
       const command = message as ScoreSaberWebsocketMessageToken;
       if (typeof command !== "object" || command === null) {
         return;
