@@ -128,7 +128,7 @@ export class ScoreCoreService {
     leaderboard?: ScoreSaberLeaderboard,
     options?: {
       comparisonPlayer?: ScoreSaberPlayer;
-      insertAdditionalData?: boolean;
+      insertBeatLeaderScore?: boolean;
       insertPreviousScore?: boolean;
       insertPlayerInfo?: boolean;
       isComparisonPlayerScore?: boolean;
@@ -136,7 +136,7 @@ export class ScoreCoreService {
     }
   ) {
     options = {
-      insertAdditionalData: true,
+      insertBeatLeaderScore: true,
       insertPreviousScore: true,
       insertPlayerInfo: true,
       isComparisonPlayerScore: false,
@@ -156,7 +156,7 @@ export class ScoreCoreService {
     const [isScoreTracked, beatleaderScore, previousScore, playerInfo, comparisonScore] =
       await Promise.all([
         ScoreCoreService.scoreExists(score.scoreId),
-        options?.insertAdditionalData
+        options?.insertBeatLeaderScore
           ? BeatLeaderService.getBeatLeaderScoreFromSong(
               score.playerId,
               leaderboard.songHash,
@@ -211,7 +211,7 @@ export class ScoreCoreService {
         leaderboard,
         {
           comparisonPlayer: options.comparisonPlayer,
-          insertAdditionalData: options.insertAdditionalData,
+          insertBeatLeaderScore: options.insertBeatLeaderScore,
           insertPreviousScore: options.insertPreviousScore,
           insertPlayerInfo: options.insertPlayerInfo,
           isComparisonPlayerScore: true,

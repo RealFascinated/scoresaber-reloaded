@@ -376,7 +376,7 @@ export class PlayerScoresService {
       leaderboardResponse.leaderboard,
       {
         insertPlayerInfo: true,
-        insertAdditionalData: true,
+        insertBeatLeaderScore: true,
         removeScoreWeightAndRank: true,
       }
     );

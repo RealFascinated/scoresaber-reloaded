@@ -1,7 +1,7 @@
 import * as dotenv from "@dotenvx/dotenvx";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { AdditionalScoreDataModel } from "@ssr/common/model/beatleader-score/beatleader-score";
+import { BeatLeaderScoreModel } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { mongoose } from "@typegoose/typegoose";
 
 dotenv.config();
@@ -233,7 +233,7 @@ async function main() {
   try {
     await processDuplicates(
       "additional-score-data",
-      AdditionalScoreDataModel as unknown as ModelLike<AnyDoc>,
+      BeatLeaderScoreModel as unknown as ModelLike<AnyDoc>,
       opts
     );
   } finally {

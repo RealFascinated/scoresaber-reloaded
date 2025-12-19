@@ -1,4 +1,4 @@
-import { AdditionalScoreDataModel } from "@ssr/common/model/beatleader-score/beatleader-score";
+import { BeatLeaderScoreModel } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
@@ -21,7 +21,7 @@ export class AppService {
     ] = await Promise.all([
       ScoreSaberScoreModel.estimatedDocumentCount(),
       ScoreSaberPreviousScoreModel.estimatedDocumentCount(),
-      AdditionalScoreDataModel.countDocuments({
+      BeatLeaderScoreModel.countDocuments({
         savedReplay: true,
       }),
       PlayerModel.countDocuments({

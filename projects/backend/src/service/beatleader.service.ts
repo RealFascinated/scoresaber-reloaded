@@ -3,8 +3,8 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { MinioBucket } from "@ssr/common/minio-buckets";
 import {
-  AdditionalScoreDataModel,
   BeatLeaderScore,
+  BeatLeaderScoreModel,
 } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
@@ -12,7 +12,7 @@ import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/types/token/beatleader/score/score-improvement";
 import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
-import { additionalScoreDataToObject } from "@ssr/common/utils/model-converters";
+import { beatLeaderScoreToObject } from "@ssr/common/utils/model-converters";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
@@ -39,20 +39,20 @@ export default class BeatLeaderService {
     songScore: number
   ): Promise<BeatLeaderScore | undefined> {
     return CacheService.fetchWithCache(
-      CacheId.AdditionalScoreData,
-      `additional-score-data:${playerId}-${songHash}-${songDifficulty}-${songScore}`,
+      CacheId.BeatLeaderScore,
+      `beatleader-score:${playerId}-${songHash}-${songDifficulty}-${songScore}`,
       async () => {
-        const additionalData = await AdditionalScoreDataModel.findOne({
+        const beatLeaderScore = await BeatLeaderScoreModel.findOne({
           playerId: playerId,
           songHash: songHash.toUpperCase(),
           songDifficulty: songDifficulty,
           songCharacteristic: songCharacteristic,
           songScore: songScore,
         }).lean();
-        if (!additionalData) {
+        if (!beatLeaderScore) {
           return undefined;
         }
-        return additionalScoreDataToObject(additionalData);
+        return beatLeaderScoreToObject(beatLeaderScore);
       }
     );
   }
@@ -67,16 +67,16 @@ export default class BeatLeaderService {
     scoreId: number
   ): Promise<BeatLeaderScore | undefined> {
     return CacheService.fetchWithCache(
-      CacheId.AdditionalScoreData,
-      `additional-score-data:${scoreId}`,
+      CacheId.BeatLeaderScore,
+      `beatleader-score:${scoreId}`,
       async () => {
-        const additionalData = await AdditionalScoreDataModel.findOne({
+        const beatLeaderScore = await BeatLeaderScoreModel.findOne({
           scoreId: scoreId,
         }).lean();
-        if (!additionalData) {
+        if (!beatLeaderScore) {
           return undefined;
         }
-        return additionalScoreDataToObject(additionalData);
+        return beatLeaderScoreToObject(beatLeaderScore);
       }
     );
   }
@@ -196,15 +196,15 @@ export default class BeatLeaderService {
     }
 
     // Check if score already exists
-    const existingScore = await AdditionalScoreDataModel.findOne({
+    const existingScore = await BeatLeaderScoreModel.findOne({
       scoreId: score.id,
     }).lean();
 
     if (existingScore) {
-      return additionalScoreDataToObject(existingScore);
+      return beatLeaderScoreToObject(existingScore);
     }
 
-    await AdditionalScoreDataModel.create(data);
+    await BeatLeaderScoreModel.create(data);
     Logger.info(`Tracked BeatLeader score "${score.id}" for "${player.name}"(${playerId})`);
 
     return data;
@@ -272,7 +272,7 @@ export default class BeatLeaderService {
     leaderboardId: string,
     timestamp: Date
   ): Promise<BeatLeaderScore | undefined> {
-    const scores: BeatLeaderScore[] = await AdditionalScoreDataModel.find({
+    const scores: BeatLeaderScore[] = await BeatLeaderScoreModel.find({
       playerId: playerId,
       songHash: songHash.toUpperCase(),
       leaderboardId: leaderboardId,
@@ -284,10 +284,10 @@ export default class BeatLeaderService {
       return undefined;
     }
 
-    const additionalData = scores.find(score => score.timestamp.getTime() < timestamp.getTime());
-    if (additionalData == undefined) {
+    const beatLeaderScore = scores.find(score => score.timestamp.getTime() < timestamp.getTime());
+    if (beatLeaderScore == undefined) {
       return undefined;
     }
-    return additionalScoreDataToObject(additionalData);
+    return beatLeaderScoreToObject(beatLeaderScore);
   }
 }

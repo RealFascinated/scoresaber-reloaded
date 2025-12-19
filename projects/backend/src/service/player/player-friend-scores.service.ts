@@ -121,7 +121,7 @@ export class PlayerFriendScoresService {
               scoreToObject(friendScore),
               leaderboard.leaderboard,
               {
-                insertAdditionalData: true,
+                insertBeatLeaderScore: true,
                 insertPreviousScore: false,
                 insertPlayerInfo: true,
                 removeScoreWeightAndRank: true,

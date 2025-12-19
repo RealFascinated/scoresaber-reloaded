@@ -86,15 +86,15 @@ export class LeaderboardScoresService {
         return undefined;
       }
 
-      const additionalData = await BeatLeaderService.getBeatLeaderScoreFromSong(
+      const beatLeaderScore = await BeatLeaderService.getBeatLeaderScoreFromSong(
         score.playerId,
         leaderboard.songHash,
         leaderboard.difficulty.difficulty,
         leaderboard.difficulty.characteristic,
         score.score
       );
-      if (additionalData !== undefined) {
-        score.additionalData = additionalData;
+      if (beatLeaderScore !== undefined) {
+        score.beatleaderScore = beatLeaderScore;
       }
 
       return score;

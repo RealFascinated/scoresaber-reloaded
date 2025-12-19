@@ -148,6 +148,6 @@ export class BeatLeaderScore {
   public scoreStats?: ScoreStatsToken;
 }
 
-export type AdditionalScoreDataDocument = BeatLeaderScore & Document;
-export const AdditionalScoreDataModel: ReturnModelType<typeof BeatLeaderScore> =
+export type BeatLeaderScoreDocument = BeatLeaderScore & Document;
+export const BeatLeaderScoreModel: ReturnModelType<typeof BeatLeaderScore> =
   getModelForClass(BeatLeaderScore);
