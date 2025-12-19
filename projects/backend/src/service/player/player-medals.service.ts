@@ -186,7 +186,9 @@ export class PlayerMedalsService {
           };
         },
         getPreviousPageItem: async () => {
-          const previousPageStart = (page - 2) * pagination.itemsPerPage;
+          // Get the last item from the previous page
+          const previousPageStart = (page - 1) * pagination.itemsPerPage - 1;
+          if (previousPageStart < 0) return null;
           const items = await PlayerModel.aggregate([
             { $match: filter },
             { $sort: { medals: -1, _id: 1 } },

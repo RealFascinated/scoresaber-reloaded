@@ -91,7 +91,10 @@ export class PlayerScoreHistoryService {
         };
       },
       getPreviousPageItem: async () => {
-        const previousPageStart = (page - 2) * 8;
+        // Get the last item from the previous page
+        // For page 2, we want item at position 7 (last item of page 1)
+        // For page 3, we want item at position 15 (last item of page 2)
+        const previousPageStart = (page - 1) * 8 - 1;
         if (previousPageStart < 0) return null;
 
         const items = await ScoreSaberScoreModel.aggregate([

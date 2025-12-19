@@ -115,7 +115,9 @@ export class PlayerFriendScoresService {
           };
         },
         getPreviousPageItem: async () => {
-          const previousPageSkip = (page - 2) * ITEMS_PER_PAGE;
+          // Get the last item from the previous page
+          const previousPageSkip = (page - 1) * ITEMS_PER_PAGE - 1;
+          if (previousPageSkip < 0) return null;
           const items = await ScoreSaberScoreModel.aggregate([
             {
               $match: {
