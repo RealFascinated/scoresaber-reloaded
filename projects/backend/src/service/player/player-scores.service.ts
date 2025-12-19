@@ -322,11 +322,6 @@ export class PlayerScoresService {
           preserveNullAndEmptyArrays: false,
         },
       },
-      {
-        $sort: {
-          timestamp: -1,
-        },
-      },
     ]);
 
     if (!scores.length) {
