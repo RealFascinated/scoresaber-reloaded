@@ -287,20 +287,7 @@ export class PlayerScoresService {
         $match: {
           playerId: playerId,
           pp: { $gt: 0 },
-        },
-      },
-      {
-        $lookup: {
-          from: "scoresaber-leaderboards",
-          localField: "leaderboardId",
-          foreignField: "_id",
-          as: "leaderboard",
-        },
-      },
-      {
-        $unwind: {
-          path: "$leaderboard",
-          preserveNullAndEmptyArrays: false,
+          leaderboardId: { $ne: null },
         },
       },
       {
@@ -309,7 +296,30 @@ export class PlayerScoresService {
           pp: 1,
           timestamp: 1,
           leaderboardId: 1,
-          leaderboard: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: "scoresaber-leaderboards",
+          localField: "leaderboardId",
+          foreignField: "_id",
+          as: "leaderboard",
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                stars: 1,
+                fullName: 1,
+                "difficulty.difficulty": 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $unwind: {
+          path: "$leaderboard",
+          preserveNullAndEmptyArrays: false,
         },
       },
       {
