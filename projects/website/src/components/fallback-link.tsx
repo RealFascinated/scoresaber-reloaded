@@ -1,5 +1,5 @@
 import { clsx } from "clsx";
-import NextLink from "next/link";
+import SimpleLink from "./simple-link";
 
 type Props = {
   /**
@@ -20,9 +20,9 @@ type Props = {
 
 export default function FallbackLink({ href, children, className, ...props }: Props) {
   return href ? (
-    <NextLink href={href} target="_blank" className={clsx("w-fit", className)} {...props}>
+    <SimpleLink href={href} target="_blank" className={clsx("w-fit", className)} {...props}>
       {children}
-    </NextLink>
+    </SimpleLink>
   ) : (
     <>{children}</>
   );
