@@ -47,7 +47,7 @@
     "framer-motion": "^12.23.26",
     "globals": "^16.5.0",
     "js-cookie": "^3.0.5",
-    "lucide-react": "^0.561.0",
+    "lucide-react": "^0.562.0",
     "next": "^16.1.0",
     "next-themes": "^0.4.6",
     "nuqs": "^2.8.5",
