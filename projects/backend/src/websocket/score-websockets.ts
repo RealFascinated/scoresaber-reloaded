@@ -1,3 +1,4 @@
+import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import {
@@ -60,64 +61,75 @@ export class ScoreWebsockets implements EventListener {
     // Connect to websockets
     connectScoresaberWebsocket({
       onScore: async score => {
-        const player = score.score.leaderboardPlayerInfo;
-        const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
+        try {
+          const player = score.score.leaderboardPlayerInfo;
+          const leaderboard = getScoreSaberLeaderboardFromToken(score.leaderboard);
 
-        const key =
-          `${player.id}-${leaderboard.songHash}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`.toUpperCase();
-        const pendingScore = ScoreWebsockets.pendingScores.get(key);
+          const key =
+            `${player.id}-${leaderboard.songHash}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`.toUpperCase();
+          const pendingScore = ScoreWebsockets.pendingScores.get(key);
 
-        // Logger.info(`[SS-WS] Received score for player ${player.id} with key ${key}`);
+          Logger.info(`[SS-WS] Received score for player ${player.id} with key ${key}`);
 
-        if (pendingScore?.beatLeaderScore) {
-          // Found a matching BeatLeader score, process both
-          ScoreWebsockets.clearPendingScore(key);
-          await this.processScore(
-            score.score,
-            score.leaderboard,
-            score.score.leaderboardPlayerInfo,
-            pendingScore.beatLeaderScore
-          );
-        } else {
-          // No matching BeatLeader score yet, store this one
-          ScoreWebsockets.pendingScores.set(key, {
-            scoreSaberToken: score.score,
-            leaderboardToken: score.leaderboard,
-            player: score.score.leaderboardPlayerInfo,
-            timestamp: Date.now(),
-          });
+          if (pendingScore?.beatLeaderScore) {
+            // Found a matching BeatLeader score, process both
+            ScoreWebsockets.clearPendingScore(key);
+            await this.processScore(
+              score.score,
+              score.leaderboard,
+              score.score.leaderboardPlayerInfo,
+              pendingScore.beatLeaderScore
+            );
+          } else {
+            // No matching BeatLeader score yet, store this one
+            ScoreWebsockets.pendingScores.set(key, {
+              scoreSaberToken: score.score,
+              leaderboardToken: score.leaderboard,
+              player: score.score.leaderboardPlayerInfo,
+              timestamp: Date.now(),
+            });
+          }
+        } catch (error) {
+          Logger.error("[SS-WS] Error processing ScoreSaber score:", error);
         }
+      },
+      onDisconnect: event => {
+        Logger.warn("[SS-WS] ScoreSaber websocket disconnected:", event);
       },
     });
 
     connectBeatLeaderWebsocket({
       onScore: async beatLeaderScore => {
-        const player = beatLeaderScore.player;
-        const leaderboard = beatLeaderScore.leaderboard;
+        try {
+          const player = beatLeaderScore.player;
+          const leaderboard = beatLeaderScore.leaderboard;
 
-        const key =
-          `${player.id}-${leaderboard.song.hash}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`.toUpperCase();
-        const pendingScore = ScoreWebsockets.pendingScores.get(key);
+          const key =
+            `${player.id}-${leaderboard.song.hash}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`.toUpperCase();
+          const pendingScore = ScoreWebsockets.pendingScores.get(key);
 
-        // Logger.info(
-        //   `[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`
-        // );
-
-        if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
-          // Found a matching ScoreSaber score, process both
-          ScoreWebsockets.clearPendingScore(key);
-          await this.processScore(
-            pendingScore.scoreSaberToken,
-            pendingScore.leaderboardToken,
-            pendingScore.player,
-            beatLeaderScore
+          Logger.info(
+            `[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`
           );
-        } else {
-          // No matching ScoreSaber score yet, store this one
-          ScoreWebsockets.pendingScores.set(key, {
-            beatLeaderScore,
-            timestamp: Date.now(),
-          });
+
+          if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
+            // Found a matching ScoreSaber score, process both
+            ScoreWebsockets.clearPendingScore(key);
+            await this.processScore(
+              pendingScore.scoreSaberToken,
+              pendingScore.leaderboardToken,
+              pendingScore.player,
+              beatLeaderScore
+            );
+          } else {
+            // No matching ScoreSaber score yet, store this one
+            ScoreWebsockets.pendingScores.set(key, {
+              beatLeaderScore,
+              timestamp: Date.now(),
+            });
+          }
+        } catch (error) {
+          Logger.error("[BL-WS] Error processing BeatLeader score:", error);
         }
       },
     });
