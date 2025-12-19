@@ -21,65 +21,77 @@ export class TopScoresService {
   public static async getTopScores(page: number = 1): Promise<Page<PlayerScore>> {
     const pagination = new Pagination<PlayerScore>().setItemsPerPage(25).setTotalItems(1000);
 
-    return pagination.getPage(page, async () => {
-      const scoreObjects = (
-        await ScoreSaberScoreModel.aggregate([
+    return pagination.getPageWithCursor(page, {
+      sortField: "pp",
+      sortDirection: -1,
+      getCursor: (item: { pp: number; _id: unknown }) => ({
+        sortValue: item.pp,
+        id: item._id,
+      }),
+      buildCursorQuery: (cursor) => {
+        if (!cursor) return { pp: { $gt: 0 } };
+        return {
+          pp: { $lt: cursor.sortValue, $gt: 0 },
+        };
+      },
+      getPreviousPageItem: async () => {
+        const skip = Math.min((page - 2) * 25, pagination.totalItems - pagination.itemsPerPage);
+        if (skip < 0) return null;
+        const items = await ScoreSaberScoreModel.aggregate([
           { $match: { pp: { $gt: 0 } } },
           { $sort: { pp: -1 } },
-          { $skip: Math.min((page - 1) * 25, 975) }, // Limit to 1000 scores max
-          { $limit: 25 },
-        ]).hint({ pp: -1 })
-      ).map(scoreToObject);
+          { $skip: skip },
+          { $limit: 1 },
+          { $project: { pp: 1, _id: 1 } },
+        ]).hint({ pp: -1 });
+        return (items[0] as { pp: number; _id: unknown }) || null;
+      },
+      fetchItems: async (cursorInfo) => {
+        const scoreObjects = (
+          await ScoreSaberScoreModel.aggregate([
+            { $match: cursorInfo.query },
+            { $sort: { pp: -1 } },
+            { $limit: cursorInfo.limit },
+          ]).hint({ pp: -1 })
+        ).map(scoreToObject);
 
-      // Batch fetch leaderboards using getLeaderboards
-      const leaderboardIds = scoreObjects.map((score: ScoreSaberScore) => score.leaderboardId);
-      const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
-        includeBeatSaver: true,
-      });
+        if (!scoreObjects.length) {
+          return [];
+        }
 
-      // Batch fetch player info
-      const uniquePlayerIds = [
-        ...new Set(scoreObjects.map((score: ScoreSaberScore) => score.playerId.toString())),
-      ] as string[];
-      const playerPromises = uniquePlayerIds.map(playerId =>
-        ScoreSaberService.getCachedPlayer(playerId).catch(() => undefined)
-      );
-      const players = await Promise.all(playerPromises);
-      const playerMap = new Map(
-        players.filter((p): p is NonNullable<typeof p> => p !== undefined).map(p => [p.id, p])
-      );
+        const leaderboardMap = await LeaderboardCoreService.batchFetchLeaderboards(
+          scoreObjects,
+          (score: ScoreSaberScore) => score.leaderboardId,
+          { includeBeatSaver: true }
+        );
 
-      // Create a map for quick leaderboard lookup
-      const leaderboardMap = new Map(
-        leaderboardResponses.map(response => [response.leaderboard.id, response])
-      );
+        // Batch fetch player info to check banned status
+        const uniquePlayerIds = [
+          ...new Set(scoreObjects.map((score: ScoreSaberScore) => score.playerId.toString())),
+        ] as string[];
+        const playerPromises = uniquePlayerIds.map(playerId =>
+          ScoreSaberService.getCachedPlayer(playerId).catch(() => undefined)
+        );
+        const players = await Promise.all(playerPromises);
+        const playerMap = new Map(
+          players.filter((p): p is NonNullable<typeof p> => p !== undefined).map(p => [p.id, p])
+        );
 
-      // Process scores in parallel
-      const processedScores = await Promise.all(
-        scoreObjects.map(async (score: ScoreSaberScore) => {
+        // Process scores in parallel
+        const processedScores = await Promise.all(
+          scoreObjects.map(async (score: ScoreSaberScore) => {
+            const player = playerMap.get(score.playerId.toString());
+
+            // Skip scores from banned players
+            if (player?.banned) {
+              return null;
+            }
           const leaderboardResponse = leaderboardMap.get(score.leaderboardId);
           if (!leaderboardResponse) {
             return null;
           }
 
           const { leaderboard, beatsaver } = leaderboardResponse;
-          const player = playerMap.get(score.playerId.toString());
-
-          // Skip scores from banned players
-          if (player?.banned) {
-            return null;
-          }
-
-          if (player) {
-            score.playerInfo = {
-              id: player.id,
-              name: player.name,
-            };
-          } else {
-            score.playerInfo = {
-              id: score.playerId.toString(),
-            };
-          }
 
           const processedScore = await ScoreCoreService.insertScoreData(score, leaderboard, {
             removeScoreWeightAndRank: true,
@@ -90,11 +102,11 @@ export class TopScoresService {
             leaderboard: leaderboard,
             beatSaver: beatsaver,
           } as PlayerScore;
-        })
-      );
+          })
+        );
 
-      // Filter out any null entries that might result from skipped scores
-      return processedScores.filter((score): score is PlayerScore => score !== null);
+        return processedScores.filter(Boolean) as PlayerScore[];
+      },
     });
   }
 

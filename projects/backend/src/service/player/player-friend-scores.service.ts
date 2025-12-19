@@ -85,9 +85,6 @@ export class PlayerFriendScoresService {
     friendIds: string[],
     page: number
   ): Promise<Page<PlayerScore>> {
-    const skip = (page - 1) * ITEMS_PER_PAGE;
-    const limit = ITEMS_PER_PAGE;
-
     // Get total count for pagination
     const totalCount = Math.min(
       await ScoreSaberScoreModel.countDocuments({
@@ -99,43 +96,78 @@ export class PlayerFriendScoresService {
     return new Pagination<PlayerScore>()
       .setTotalItems(totalCount)
       .setItemsPerPage(ITEMS_PER_PAGE)
-      .getPage(page, async () => {
-        // Use aggregation pipeline for better performance
-        const friendScores = await ScoreSaberScoreModel.aggregate([
-          {
-            $match: {
-              playerId: { $in: friendIds },
+      .getPageWithCursor(page, {
+        sortField: "timestamp",
+        sortDirection: -1,
+        getCursor: (item: { timestamp: Date; _id: unknown }) => ({
+          sortValue: item.timestamp,
+          id: item._id,
+        }),
+        buildCursorQuery: (cursor) => {
+          const baseMatch = { playerId: { $in: friendIds } };
+          if (!cursor) return baseMatch;
+          return {
+            ...baseMatch,
+            $or: [
+              { timestamp: { $lt: cursor.sortValue } },
+              { timestamp: cursor.sortValue, _id: { $lt: cursor.id } },
+            ],
+          };
+        },
+        getPreviousPageItem: async () => {
+          const previousPageSkip = (page - 2) * ITEMS_PER_PAGE;
+          const items = await ScoreSaberScoreModel.aggregate([
+            {
+              $match: {
+                playerId: { $in: friendIds },
+              },
             },
-          },
-          {
-            $sort: {
-              timestamp: -1,
+            {
+              $sort: {
+                timestamp: -1,
+                _id: -1,
+              },
             },
-          },
-          {
-            $skip: skip,
-          },
-          {
-            $limit: limit,
-          },
-        ]);
+            {
+              $skip: previousPageSkip,
+            },
+            {
+              $limit: 1,
+            },
+            {
+              $project: {
+                timestamp: 1,
+                _id: 1,
+              },
+            },
+          ]);
+          return (items[0] as { timestamp: Date; _id: unknown }) || null;
+        },
+        fetchItems: async (cursorInfo) => {
+          // Use aggregation pipeline for better performance
+          const friendScores = await ScoreSaberScoreModel.aggregate([
+            {
+              $match: cursorInfo.query,
+            },
+            {
+              $sort: {
+                timestamp: -1,
+                _id: -1,
+              },
+            },
+            {
+              $limit: cursorInfo.limit,
+            },
+          ]);
 
         if (!friendScores.length) {
           return [];
         }
 
-        // Get all leaderboard IDs for the current page
-        const leaderboardIds = friendScores.map(score => score.leaderboardId);
-
-        // Fetch all leaderboards in parallel using getLeaderboards
-        const leaderboardResults = await LeaderboardCoreService.getLeaderboards(leaderboardIds, {
-          includeBeatSaver: true,
-          beatSaverType: "full",
-        });
-
-        // Create a map for quick leaderboard lookup
-        const leaderboardMap = new Map(
-          leaderboardResults.map(result => [result.leaderboard.id, result])
+        const leaderboardMap = await LeaderboardCoreService.batchFetchLeaderboards(
+          friendScores,
+          score => score.leaderboardId,
+          { includeBeatSaver: true, beatSaverType: "full" }
         );
 
         // Process scores
@@ -163,6 +195,7 @@ export class PlayerFriendScoresService {
         );
 
         return scores.filter(Boolean) as PlayerScore[];
-      });
+      },
+    });
   }
 }

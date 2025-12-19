@@ -1,8 +1,6 @@
-import { PlatformType } from "@/common/platform/platform-repository";
 import NotFound from "@/components/not-found";
 import PlayerData from "@/components/player/player-data";
 import { env } from "@ssr/common/env";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
@@ -17,14 +15,6 @@ type Props = {
   params: Promise<{
     id: string;
   }>;
-};
-
-type PlayerData = {
-  player: ScoreSaberPlayer | undefined;
-  platformType: PlatformType;
-  searchParams: {
-    [key: string]: string | undefined;
-  };
 };
 
 export async function generateMetadata(props: Props): Promise<Metadata> {

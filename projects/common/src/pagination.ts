@@ -2,10 +2,15 @@ import { NotFoundError } from "./error/not-found-error";
 import { Metadata } from "./types/metadata";
 
 type FetchItemsFunction<T> = (fetchItems: FetchItems) => Promise<T[]>;
+type FetchItemsWithCursorFunction<T, TQuery = unknown> = (
+  cursorInfo: CursorInfo<TQuery>
+) => Promise<T[]>;
+type GetCursorFunction<TItem> = (item: TItem) => Cursor;
+type BuildCursorQueryFunction<TQuery> = (cursor: Cursor | null) => TQuery;
 
 export class Pagination<T> {
   public itemsPerPage: number = 0;
-  private totalItems: number = 0;
+  public totalItems: number = 0;
   private items: T[] | null = null; // Optional array to hold set items
 
   /**
@@ -79,6 +84,59 @@ export class Pagination<T> {
     };
   }
 
+  /**
+   * Gets a page of items using cursor-based pagination for better performance on large datasets.
+   * This method automatically handles cursor retrieval from previous pages and query building.
+   * @param page - The page number to retrieve.
+   * @param options - Cursor pagination options
+   * @returns A promise resolving to the page of items.
+   * @throws throws an error if the page number is invalid.
+   */
+  async getPageWithCursor<TItem = unknown, TQuery = unknown>(
+    page: number,
+    options: {
+      fetchItems: FetchItemsWithCursorFunction<T, TQuery>;
+      getCursor: GetCursorFunction<TItem>;
+      buildCursorQuery: BuildCursorQueryFunction<TQuery>;
+      getPreviousPageItem: (query: TQuery) => Promise<TItem | null>;
+      sortField: string;
+      sortDirection: 1 | -1;
+    }
+  ): Promise<Page<T>> {
+    const totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+
+    if (page < 1 || page > totalPages) {
+      throw new NotFoundError("Invalid page number");
+    }
+
+    let cursor: Cursor | null = null;
+
+    // For pages beyond the first, get cursor from previous page
+    if (page > 1) {
+      const previousPageQuery = options.buildCursorQuery(null);
+      const previousPageItem = await options.getPreviousPageItem(previousPageQuery);
+      if (previousPageItem) {
+        cursor = options.getCursor(previousPageItem);
+      }
+    }
+
+    // Build query with cursor and fetch items
+    const cursorQuery = options.buildCursorQuery(cursor);
+    const pageItems = await options.fetchItems(
+      new CursorInfo<TQuery>(cursor, cursorQuery, this.itemsPerPage)
+    );
+
+    return {
+      items: pageItems,
+      metadata: {
+        totalPages,
+        totalItems: this.totalItems,
+        page,
+        itemsPerPage: this.itemsPerPage,
+      },
+    };
+  }
+
   public static empty<T>(): Page<T> {
     return {
       items: [],
@@ -101,6 +159,23 @@ class FetchItems {
     this.end = end;
   }
 }
+
+export class CursorInfo<TQuery = unknown> {
+  readonly cursor: Cursor | null;
+  readonly query: TQuery;
+  readonly limit: number;
+
+  constructor(cursor: Cursor | null, query: TQuery, limit: number) {
+    this.cursor = cursor;
+    this.query = query;
+    this.limit = limit;
+  }
+}
+
+export type Cursor = {
+  readonly sortValue: unknown;
+  readonly id: unknown;
+};
 
 export type Page<T> = {
   items: T[];

@@ -525,38 +525,85 @@ export class PlayerScoresService {
 
     const pagination = new Pagination<PlayerScore>().setItemsPerPage(8).setTotalItems(totalScores);
 
-    return pagination.getPage(page, async ({ start, end }) => {
-      const rawScores = (await (model as typeof ScoreSaberScoreModel)
-        .find(query)
-        .sort({ [FIELDS_MAP[sort]]: direction === "asc" ? 1 : -1 })
-        .skip(start)
-        .limit(end - start)
-        .lean()) as unknown as ScoreSaberScore[];
+    const sortField = FIELDS_MAP[sort];
+    const sortOrder = direction === "asc" ? 1 : -1;
 
-      return (
-        await Promise.all(
-          rawScores.map(async rawScore => {
-            const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(
-              rawScore.leaderboardId,
-              {
-                includeBeatSaver: true,
+    return pagination.getPageWithCursor(page, {
+      sortField,
+      sortDirection: sortOrder,
+      getCursor: (item: Record<string, unknown>) => ({
+        sortValue: item[sortField],
+        id: item._id,
+      }),
+      buildCursorQuery: (cursor) => {
+        if (!cursor) return query;
+        if (direction === "asc") {
+          return {
+            ...query,
+            $or: [
+              { [sortField]: { $gt: cursor.sortValue } },
+              { [sortField]: cursor.sortValue, _id: { $gt: cursor.id } },
+            ],
+          };
+        } else {
+          return {
+            ...query,
+            $or: [
+              { [sortField]: { $lt: cursor.sortValue } },
+              { [sortField]: cursor.sortValue, _id: { $lt: cursor.id } },
+            ],
+          };
+        }
+      },
+      getPreviousPageItem: async (query) => {
+        const previousPageStart = (page - 2) * 8;
+        const items = await (model as typeof ScoreSaberScoreModel)
+          .find(query)
+          .sort({ [sortField]: sortOrder, _id: sortOrder })
+          .skip(previousPageStart)
+          .limit(1)
+          .select({ [sortField]: 1, _id: 1 })
+          .lean();
+        return (items[0] as Record<string, unknown>) || null;
+      },
+      fetchItems: async (cursorInfo) => {
+        const rawScores = (await (model as typeof ScoreSaberScoreModel)
+          .find(cursorInfo.query)
+          .sort({ [sortField]: sortOrder, _id: sortOrder })
+          .limit(cursorInfo.limit)
+          .lean()) as unknown as ScoreSaberScore[];
+
+        if (!rawScores.length) {
+          return [];
+        }
+
+        const leaderboardMap = await LeaderboardCoreService.batchFetchLeaderboards(
+          rawScores,
+          score => score.leaderboardId,
+          { includeBeatSaver: true }
+        );
+
+        // Process scores in parallel
+        return (
+          await Promise.all(
+            rawScores.map(async rawScore => {
+              const leaderboardResponse = leaderboardMap.get(rawScore.leaderboardId);
+              if (!leaderboardResponse) {
+                return null;
               }
-            );
-            if (!leaderboardResponse) {
-              return null;
-            }
 
-            const { leaderboard, beatsaver } = leaderboardResponse;
-            return {
-              score: await ScoreCoreService.insertScoreData(scoreToObject(rawScore), leaderboard, {
-                removeScoreWeightAndRank: mode === "ssr",
-              }),
-              leaderboard: leaderboard,
-              beatSaver: beatsaver,
-            } as PlayerScore;
-          })
-        )
-      ).filter(Boolean) as PlayerScore[];
+              const { leaderboard, beatsaver } = leaderboardResponse;
+              return {
+                score: await ScoreCoreService.insertScoreData(scoreToObject(rawScore), leaderboard, {
+                  removeScoreWeightAndRank: mode === "ssr",
+                }),
+                leaderboard: leaderboard,
+                beatSaver: beatsaver,
+              } as PlayerScore;
+            })
+          )
+        ).filter(Boolean) as PlayerScore[];
+      },
     });
   }
 }

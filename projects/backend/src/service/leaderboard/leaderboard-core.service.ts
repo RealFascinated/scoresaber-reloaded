@@ -457,4 +457,29 @@ export class LeaderboardCoreService {
       }
     );
   }
+
+  /**
+   * Batch fetches leaderboards for items and returns a Map for O(1) lookups.
+   *
+   * @param items - Array of items that have a leaderboardId property
+   * @param getId - Function to extract the leaderboard ID from an item
+   * @param options - Options to pass to getLeaderboards
+   * @returns A Map keyed by leaderboard ID to LeaderboardResponse
+   */
+  public static async batchFetchLeaderboards<T>(
+    items: T[],
+    getId: (item: T) => number,
+    options?: LeaderboardOptions
+  ): Promise<Map<number, LeaderboardResponse>> {
+    if (items.length === 0) {
+      return new Map();
+    }
+
+    const leaderboardIds = items.map(getId);
+    const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, options);
+
+    return new Map(
+      leaderboardResponses.map(response => [response.leaderboard.id, response])
+    );
+  }
 }
