@@ -79,7 +79,10 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       if ((await this.getSize()) !== 0) {
         return;
       }
-      const players = await PlayerModel.find({ seededScores: { $in: [null, false] } })
+      const players = await PlayerModel.find({
+        seededScores: { $in: [null, false] },
+        banned: false,
+      })
         .select("_id")
         .lean();
       const playerIds = players.map(p => p._id);

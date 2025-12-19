@@ -65,6 +65,18 @@ export class PlayerScoresService {
     totalPagesFetched: number;
     timeTaken: number;
   }> {
+    if (player.banned) {
+      if (!player.seededScores) {
+        await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
+      }
+      return {
+        missingScores: 0,
+        totalScores: 0,
+        totalPagesFetched: 0,
+        timeTaken: 0,
+      };
+    }
+
     const startTime = performance.now();
     const playerId = playerToken.id;
     const playerScoresCount = await ScoreSaberScoreModel.countDocuments({

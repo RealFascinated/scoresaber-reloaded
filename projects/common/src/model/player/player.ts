@@ -48,7 +48,7 @@ export class Player {
   /**
    * Whether this player is banned or not.
    */
-  @prop()
+  @prop({ index: true })
   public banned?: boolean;
 
   /**

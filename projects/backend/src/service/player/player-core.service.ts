@@ -107,7 +107,7 @@ export class PlayerCoreService {
           const seedQueue = QueueManager.getQueue(
             QueueId.PlayerScoreRefreshQueue
           ) as FetchMissingScoresQueue;
-          if (!(await seedQueue.hasItem({ id: id, data: id }))) {
+          if (!(await seedQueue.hasItem({ id: id, data: id })) && !playerToken.banned) {
             (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add(
               {
                 id,
