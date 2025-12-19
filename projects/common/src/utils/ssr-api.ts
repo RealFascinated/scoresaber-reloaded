@@ -441,6 +441,16 @@ class SSRApi {
   async fetchRankingQueue() {
     return await this.request<ScoreSaberRankingRequestsResponse>(`/leaderboard/ranking-queue`);
   }
+
+  /**
+   * Fetches the top scores.
+   *
+   * @param page the page
+   * @returns the top scores
+   */
+  async fetchTopScores(page: number) {
+    return await this.request<Page<PlayerScore>>(`/scores/top/${page}`);
+  }
 }
 
 export const ssrApi = new SSRApi();

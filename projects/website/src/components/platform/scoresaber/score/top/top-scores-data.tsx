@@ -5,10 +5,7 @@ import PlayerScoreHeader from "@/components/score/player-score-header";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
-import { env } from "@ssr/common/env";
-import type { Page } from "@ssr/common/pagination";
-import { PlayerScore } from "@ssr/common/score/player-score";
-import Request from "@ssr/common/utils/request";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import ScoreSaberScoreDisplay from "../scoresaber-score";
@@ -24,7 +21,7 @@ export function TopScoresData() {
   } = useQuery({
     queryKey: ["top-scores", page],
     queryFn: async () => {
-      return Request.get<Page<PlayerScore>>(`${env.NEXT_PUBLIC_API_URL}/scores/top/${page}`);
+      return ssrApi.fetchTopScores(page);
     },
     refetchInterval: false,
     placeholderData: data => data,
