@@ -194,6 +194,15 @@ export default class BeatLeaderService {
       data.savedReplay = savedReplay;
     }
 
+    // Check if score already exists
+    const existingScore = await AdditionalScoreDataModel.findOne({
+      scoreId: score.id,
+    }).lean();
+
+    if (existingScore) {
+      return additionalScoreDataToObject(existingScore);
+    }
+
     await AdditionalScoreDataModel.create(data);
     Logger.info(`Tracked BeatLeader score "${score.id}" for "${player.name}"(${playerId})`);
 

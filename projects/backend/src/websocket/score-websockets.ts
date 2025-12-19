@@ -69,7 +69,7 @@ export class ScoreWebsockets implements EventListener {
             `${player.id}-${leaderboard.songHash}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`.toUpperCase();
           const pendingScore = ScoreWebsockets.pendingScores.get(key);
 
-          // Logger.info(`[SS-WS] Received score for player ${player.id} with key ${key}`);
+          //Logger.info(`[SS-WS] Received score for player ${player.id} with key ${key}`);
 
           if (pendingScore?.beatLeaderScore) {
             // Found a matching BeatLeader score, process both
