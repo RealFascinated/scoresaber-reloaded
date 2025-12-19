@@ -435,15 +435,6 @@ export class PlayerScoresService {
             return undefined;
           }
 
-          // Track missing scores
-          ScoreCoreService.trackScoreSaberScore(
-            score,
-            leaderboard,
-            await ScoreSaberService.getCachedPlayer(playerId),
-            undefined,
-            false
-          );
-
           return {
             score: await ScoreCoreService.insertScoreData(score, leaderboard, {
               comparisonPlayer: comparisonPlayer,
