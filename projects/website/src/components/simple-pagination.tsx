@@ -3,7 +3,6 @@
 import { cn } from "@/common/utils";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import clsx from "clsx";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,26 +15,6 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
-const PAGES_TO_SHOW = 5;
-
-type PaginationItemWrapperProps = {
-  isLoadingPage: boolean;
-  children: React.ReactNode;
-};
-
-const PaginationItemWrapper = React.memo(
-  ({ isLoadingPage, children }: PaginationItemWrapperProps) => (
-    <div
-      className={clsx("relative", isLoadingPage ? "cursor-not-allowed" : "cursor-pointer")}
-      aria-disabled={isLoadingPage}
-      tabIndex={isLoadingPage ? -1 : undefined}
-    >
-      {children}
-    </div>
-  )
-);
-PaginationItemWrapper.displayName = "PaginationItemWrapper";
-
 type PageSelectorProps = {
   totalPages: number;
   onPageSelect: (page: number) => void;
@@ -45,19 +24,33 @@ type PageSelectorProps = {
 const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSelectorProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
+  const [error, setError] = React.useState("");
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      const pageNum = parseInt(inputValue);
-      if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
-        onPageSelect(pageNum);
-        setIsOpen(false);
-        setInputValue("");
+      const trimmedValue = inputValue.trim();
+      if (!trimmedValue) {
+        setError("Please enter a page number");
+        return;
       }
+      const pageNum = Number(trimmedValue);
+      if (!Number.isInteger(pageNum) || isNaN(pageNum) || pageNum < 1 || pageNum > totalPages) {
+        setError(`Please enter a number between 1 and ${formatNumberWithCommas(totalPages)}`);
+        return;
+      }
+      setError("");
+      onPageSelect(pageNum);
+      setIsOpen(false);
+      setInputValue("");
     },
     [inputValue, totalPages, onPageSelect]
   );
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    setError("");
+  }, []);
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -72,7 +65,7 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-48" align="center">
+      <PopoverContent className="w-64" align="center">
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4">
             <div className="space-y-1.5 text-center">
@@ -81,20 +74,29 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
                 Max: {formatNumberWithCommas(totalPages)}
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min={1}
-                max={totalPages}
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                placeholder="Page..."
-                className="w-full"
-                autoFocus
-              />
-              <Button type="submit" size="icon">
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  placeholder={`1-${formatNumberWithCommas(totalPages)}`}
+                  className={cn("w-full", error && "border-destructive")}
+                  autoFocus
+                  aria-invalid={Boolean(error)}
+                  aria-describedby={error ? "page-error" : undefined}
+                />
+                <Button type="submit" size="icon" className="shrink-0">
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+              {error && (
+                <p id="page-error" className="text-destructive text-xs text-center">
+                  {error}
+                </p>
+              )}
             </div>
           </div>
         </form>
@@ -127,6 +129,7 @@ const PageButton = React.memo(
     onClick,
   }: PageButtonProps) => {
     const isButtonLoading = loadingPage === buttonPage;
+    const isCurrentPage = buttonPage === currentPage;
 
     return (
       <Button
@@ -134,15 +137,19 @@ const PageButton = React.memo(
         variant={isActive ? "primary" : "ghost"}
         size="sm"
         className={cn(
-          "relative h-9 min-w-[2.5rem] px-2 transition-opacity duration-200",
+          "relative h-9 min-w-10 px-3 transition-all duration-200",
+          "whitespace-nowrap",
           isButtonLoading && "cursor-not-allowed opacity-50",
-          buttonPage === currentPage && "cursor-not-allowed"
+          isCurrentPage && "cursor-not-allowed",
+          !isActive && !isButtonLoading && "hover:shadow-sm"
         )}
+        aria-current={isCurrentPage ? "page" : undefined}
       >
         <a
           href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
           onClick={e => onClick(buttonPage, e)}
-          aria-disabled={isLoading || buttonPage === currentPage}
+          aria-disabled={isLoading || isCurrentPage}
+          aria-label={`Go to page ${buttonPage}`}
           className="flex items-center justify-center"
         >
           <span className={cn(isButtonLoading && "blur-[2px]")}>{children}</span>
@@ -181,7 +188,18 @@ const NavigationButton = React.memo(
       variant="ghost"
       size="icon"
       disabled={disabled || isLoading}
-      className={cn("transition-opacity duration-200", disabled && "cursor-not-allowed opacity-50")}
+      className={cn(
+        "transition-all duration-200",
+        disabled && "cursor-not-allowed opacity-50",
+        !disabled && !isLoading && "hover:shadow-sm"
+      )}
+      aria-label={
+        buttonPage === 1
+          ? "Go to first page"
+          : buttonPage > 0
+            ? `Go to page ${buttonPage}`
+            : "Go to previous page"
+      }
     >
       <a
         href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
@@ -247,7 +265,7 @@ export default function SimplePagination({
   const renderPageNumbers = useCallback(() => {
     if (mobilePagination) return [];
 
-    const maxPagesToShow = PAGES_TO_SHOW;
+    const maxPagesToShow = page > 999 ? 3 : 5;
     const pageNumbers = [];
 
     let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
@@ -349,20 +367,33 @@ export default function SimplePagination({
       {showStats && (
         <div
           className={cn(
-            "text-muted-foreground text-sm select-none",
+            "text-muted-foreground text-sm select-none transition-opacity duration-200",
             !statsBelow && "left-0 lg:absolute"
           )}
+          aria-live="polite"
+          aria-atomic="true"
         >
           <p>
-            {formatNumberWithCommas(Math.min((page - 1) * itemsPerPage + 1, totalItems))} -{" "}
-            {formatNumberWithCommas(Math.min(page * itemsPerPage, totalItems))} /{" "}
-            {formatNumberWithCommas(totalItems)}
+            <span className="font-medium text-foreground">
+              {formatNumberWithCommas(Math.min((page - 1) * itemsPerPage + 1, totalItems))}
+            </span>{" "}
+            to{" "}
+            <span className="font-medium text-foreground">
+              {formatNumberWithCommas(Math.min(page * itemsPerPage, totalItems))}
+            </span>{" "}
+            of{" "}
+            <span className="font-medium text-foreground">
+              {formatNumberWithCommas(totalItems)}
+            </span>
           </p>
         </div>
       )}
 
       {/* Pagination Buttons */}
-      <div className="flex items-center gap-1">
+      <nav
+        className="flex items-center gap-1.5 flex-wrap justify-center"
+        aria-label="Pagination navigation"
+      >
         {mobilePagination && (
           <NavigationButton
             page={1}
@@ -404,7 +435,7 @@ export default function SimplePagination({
             <ChevronsRight className="h-4 w-4" />
           </NavigationButton>
         )}
-      </div>
+      </nav>
     </div>
   );
 }
