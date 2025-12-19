@@ -122,7 +122,7 @@ export default function scoresController(app: Elysia) {
             page: z.coerce.number(),
           }),
           body: z.object({
-            friendIds: z.array(z.string()),
+            friendIds: z.array(z.string()).min(1).max(SHARED_CONSTS.maxFriends + 1),
           }),
           detail: {
             description: "Fetch friends' scores for a leaderboard",
@@ -140,7 +140,7 @@ export default function scoresController(app: Elysia) {
             page: z.coerce.number(),
           }),
           body: z.object({
-            friendIds: z.array(z.string()).min(1).max(SHARED_CONSTS.maxFriends),
+            friendIds: z.array(z.string()).min(1).max(SHARED_CONSTS.maxFriends + 1),
           }),
           detail: {
             description: "Fetch friends' scores",
