@@ -7,12 +7,13 @@ import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { parseAsInteger, useQueryState } from "nuqs";
 import ScoreSaberScoreDisplay from "../scoresaber-score";
 
 export function TopScoresData() {
   const isMobile = useIsMobile();
-  const [page, setPage] = useState(1);
+
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
   const {
     data: scores,
@@ -20,16 +21,10 @@ export function TopScoresData() {
     isRefetching,
   } = useQuery({
     queryKey: ["top-scores", page],
-    queryFn: async () => {
-      return ssrApi.fetchTopScores(page);
-    },
+    queryFn: () => ssrApi.fetchTopScores(page),
     refetchInterval: false,
     placeholderData: data => data,
   });
-
-  const handlePageChange = useCallback((newPage: number) => {
-    setPage(newPage);
-  }, []);
 
   return (
     <Card className="flex h-fit w-full flex-col 2xl:w-[75%]">
@@ -76,7 +71,7 @@ export function TopScoresData() {
             totalItems={scores.metadata.totalItems}
             itemsPerPage={scores.metadata.itemsPerPage}
             loadingPage={isLoading || isRefetching ? page : undefined}
-            onPageChange={handlePageChange}
+            onPageChange={setPage}
             mobilePagination={isMobile}
           />
         </div>
