@@ -76,7 +76,7 @@ export class PlayerScoreHistoryService {
         sortValue: item.timestamp,
         id: item._id,
       }),
-      buildCursorQuery: (cursor) => {
+      buildCursorQuery: cursor => {
         const baseMatch = {
           playerId: playerId,
           leaderboardId: leaderboardId,
@@ -136,7 +136,7 @@ export class PlayerScoreHistoryService {
 
         return (items[0] as { timestamp: Date; _id: unknown }) || null;
       },
-      fetchItems: async (cursorInfo) => {
+      fetchItems: async cursorInfo => {
         // Build base pipeline
         const baseStages = [
           {

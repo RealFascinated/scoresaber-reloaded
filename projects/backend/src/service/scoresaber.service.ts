@@ -2,6 +2,7 @@ import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
+import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
@@ -46,6 +47,11 @@ export default class ScoreSaberService {
       async () => {
         const account = await PlayerCoreService.getPlayer(id, player).catch(() => undefined);
         const isOculusAccount = player.id.length === 16;
+
+        // delete players scores if banned so they don't fuck up top scores
+        if (player.banned) {
+          await ScoreSaberScoreModel.deleteMany({ playerId: id });
+        }
 
         const basePlayer = {
           id: player.id,

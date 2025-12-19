@@ -476,10 +476,11 @@ export class LeaderboardCoreService {
     }
 
     const leaderboardIds = items.map(getId);
-    const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, options);
-
-    return new Map(
-      leaderboardResponses.map(response => [response.leaderboard.id, response])
+    const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(
+      leaderboardIds,
+      options
     );
+
+    return new Map(leaderboardResponses.map(response => [response.leaderboard.id, response]));
   }
 }

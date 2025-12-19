@@ -535,7 +535,7 @@ export class PlayerScoresService {
         sortValue: item[sortField],
         id: item._id,
       }),
-      buildCursorQuery: (cursor) => {
+      buildCursorQuery: cursor => {
         if (!cursor) return query;
         if (direction === "asc") {
           return {
@@ -555,7 +555,7 @@ export class PlayerScoresService {
           };
         }
       },
-      getPreviousPageItem: async (query) => {
+      getPreviousPageItem: async query => {
         const previousPageStart = (page - 2) * 8;
         const items = await (model as typeof ScoreSaberScoreModel)
           .find(query)
@@ -566,7 +566,7 @@ export class PlayerScoresService {
           .lean();
         return (items[0] as Record<string, unknown>) || null;
       },
-      fetchItems: async (cursorInfo) => {
+      fetchItems: async cursorInfo => {
         const rawScores = (await (model as typeof ScoreSaberScoreModel)
           .find(cursorInfo.query)
           .sort({ [sortField]: sortOrder, _id: sortOrder })
@@ -594,9 +594,13 @@ export class PlayerScoresService {
 
               const { leaderboard, beatsaver } = leaderboardResponse;
               return {
-                score: await ScoreCoreService.insertScoreData(scoreToObject(rawScore), leaderboard, {
-                  removeScoreWeightAndRank: mode === "ssr",
-                }),
+                score: await ScoreCoreService.insertScoreData(
+                  scoreToObject(rawScore),
+                  leaderboard,
+                  {
+                    removeScoreWeightAndRank: mode === "ssr",
+                  }
+                ),
                 leaderboard: leaderboard,
                 beatSaver: beatsaver,
               } as PlayerScore;

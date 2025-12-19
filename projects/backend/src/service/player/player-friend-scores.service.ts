@@ -103,7 +103,7 @@ export class PlayerFriendScoresService {
           sortValue: item.timestamp,
           id: item._id,
         }),
-        buildCursorQuery: (cursor) => {
+        buildCursorQuery: cursor => {
           const baseMatch = { playerId: { $in: friendIds } };
           if (!cursor) return baseMatch;
           return {
@@ -143,7 +143,7 @@ export class PlayerFriendScoresService {
           ]);
           return (items[0] as { timestamp: Date; _id: unknown }) || null;
         },
-        fetchItems: async (cursorInfo) => {
+        fetchItems: async cursorInfo => {
           // Use aggregation pipeline for better performance
           const friendScores = await ScoreSaberScoreModel.aggregate([
             {
@@ -160,42 +160,42 @@ export class PlayerFriendScoresService {
             },
           ]);
 
-        if (!friendScores.length) {
-          return [];
-        }
+          if (!friendScores.length) {
+            return [];
+          }
 
-        const leaderboardMap = await LeaderboardCoreService.batchFetchLeaderboards(
-          friendScores,
-          score => score.leaderboardId,
-          { includeBeatSaver: true, beatSaverType: "full" }
-        );
+          const leaderboardMap = await LeaderboardCoreService.batchFetchLeaderboards(
+            friendScores,
+            score => score.leaderboardId,
+            { includeBeatSaver: true, beatSaverType: "full" }
+          );
 
-        // Process scores
-        const scores = await Promise.all(
-          friendScores.map(async friendScore => {
-            const score = scoreToObject(friendScore);
-            const leaderboardResponse = leaderboardMap.get(Number(friendScore.leaderboardId));
-            if (!leaderboardResponse) {
-              return null;
-            }
+          // Process scores
+          const scores = await Promise.all(
+            friendScores.map(async friendScore => {
+              const score = scoreToObject(friendScore);
+              const leaderboardResponse = leaderboardMap.get(Number(friendScore.leaderboardId));
+              if (!leaderboardResponse) {
+                return null;
+              }
 
-            return {
-              score: await ScoreCoreService.insertScoreData(
-                score,
-                leaderboardResponse.leaderboard,
-                {
-                  insertPlayerInfo: true,
-                  removeScoreWeightAndRank: true,
-                }
-              ),
-              leaderboard: leaderboardResponse.leaderboard,
-              beatSaver: leaderboardResponse.beatsaver,
-            };
-          })
-        );
+              return {
+                score: await ScoreCoreService.insertScoreData(
+                  score,
+                  leaderboardResponse.leaderboard,
+                  {
+                    insertPlayerInfo: true,
+                    removeScoreWeightAndRank: true,
+                  }
+                ),
+                leaderboard: leaderboardResponse.leaderboard,
+                beatSaver: leaderboardResponse.beatsaver,
+              };
+            })
+          );
 
-        return scores.filter(Boolean) as PlayerScore[];
-      },
-    });
+          return scores.filter(Boolean) as PlayerScore[];
+        },
+      });
   }
 }

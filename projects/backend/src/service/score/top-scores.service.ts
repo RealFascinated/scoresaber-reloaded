@@ -8,7 +8,6 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { scoreToObject } from "@ssr/common/utils/model-converters";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
-import ScoreSaberService from "../scoresaber.service";
 import { ScoreCoreService } from "./score-core.service";
 
 export class TopScoresService {
@@ -28,7 +27,7 @@ export class TopScoresService {
         sortValue: item.pp,
         id: item._id,
       }),
-      buildCursorQuery: (cursor) => {
+      buildCursorQuery: cursor => {
         if (!cursor) return { pp: { $gt: 0 } };
         return {
           pp: { $lt: cursor.sortValue, $gt: 0 },
@@ -46,7 +45,7 @@ export class TopScoresService {
         ]).hint({ pp: -1 });
         return (items[0] as { pp: number; _id: unknown }) || null;
       },
-      fetchItems: async (cursorInfo) => {
+      fetchItems: async cursorInfo => {
         const scoreObjects = (
           await ScoreSaberScoreModel.aggregate([
             { $match: cursorInfo.query },
@@ -65,43 +64,25 @@ export class TopScoresService {
           { includeBeatSaver: true }
         );
 
-        // Batch fetch player info to check banned status
-        const uniquePlayerIds = [
-          ...new Set(scoreObjects.map((score: ScoreSaberScore) => score.playerId.toString())),
-        ] as string[];
-        const playerPromises = uniquePlayerIds.map(playerId =>
-          ScoreSaberService.getCachedPlayer(playerId).catch(() => undefined)
-        );
-        const players = await Promise.all(playerPromises);
-        const playerMap = new Map(
-          players.filter((p): p is NonNullable<typeof p> => p !== undefined).map(p => [p.id, p])
-        );
-
         // Process scores in parallel
         const processedScores = await Promise.all(
           scoreObjects.map(async (score: ScoreSaberScore) => {
-            const player = playerMap.get(score.playerId.toString());
-
-            // Skip scores from banned players
-            if (player?.banned) {
+            const leaderboardResponse = leaderboardMap.get(score.leaderboardId);
+            if (!leaderboardResponse) {
               return null;
             }
-          const leaderboardResponse = leaderboardMap.get(score.leaderboardId);
-          if (!leaderboardResponse) {
-            return null;
-          }
 
-          const { leaderboard, beatsaver } = leaderboardResponse;
+            const { leaderboard, beatsaver } = leaderboardResponse;
 
-          const processedScore = await ScoreCoreService.insertScoreData(score, leaderboard, {
-            removeScoreWeightAndRank: true,
-            insertPlayerInfo: true,
-          });
-          return {
-            score: processedScore,
-            leaderboard: leaderboard,
-            beatSaver: beatsaver,
-          } as PlayerScore;
+            const processedScore = await ScoreCoreService.insertScoreData(score, leaderboard, {
+              removeScoreWeightAndRank: true,
+              insertPlayerInfo: true,
+            });
+            return {
+              score: processedScore,
+              leaderboard: leaderboard,
+              beatSaver: beatsaver,
+            } as PlayerScore;
           })
         );
 
