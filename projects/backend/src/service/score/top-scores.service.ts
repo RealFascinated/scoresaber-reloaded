@@ -30,28 +30,35 @@ export class TopScoresService {
       buildCursorQuery: cursor => {
         if (!cursor) return { pp: { $gt: 0 } };
         return {
-          pp: { $lt: cursor.sortValue, $gt: 0 },
+          $or: [
+            { pp: { $lt: cursor.sortValue } },
+            { pp: cursor.sortValue, _id: { $lt: cursor.id } },
+          ],
+          pp: { $gt: 0 },
         };
       },
       getPreviousPageItem: async () => {
-        const skip = Math.min((page - 2) * 25, pagination.totalItems - pagination.itemsPerPage);
+        // Get the last item from the previous page
+        // For page 2, we want item at position 24 (last item of page 1)
+        // For page 3, we want item at position 49 (last item of page 2)
+        const skip = Math.min((page - 1) * pagination.itemsPerPage - 1, pagination.totalItems - 1);
         if (skip < 0) return null;
         const items = await ScoreSaberScoreModel.aggregate([
           { $match: { pp: { $gt: 0 } } },
-          { $sort: { pp: -1 } },
+          { $sort: { pp: -1, _id: -1 } },
           { $skip: skip },
           { $limit: 1 },
           { $project: { pp: 1, _id: 1 } },
-        ]).hint({ pp: -1 });
+        ]).hint({ pp: -1, _id: -1 });
         return (items[0] as { pp: number; _id: unknown }) || null;
       },
       fetchItems: async cursorInfo => {
         const scoreObjects = (
           await ScoreSaberScoreModel.aggregate([
             { $match: cursorInfo.query },
-            { $sort: { pp: -1 } },
+            { $sort: { pp: -1, _id: -1 } },
             { $limit: cursorInfo.limit },
-          ]).hint({ pp: -1 })
+          ]).hint({ pp: -1, _id: -1 })
         ).map(scoreToObject);
 
         if (!scoreObjects.length) {
