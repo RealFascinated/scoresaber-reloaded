@@ -41,14 +41,7 @@ export class ScoreCoreService {
     tracked: boolean;
   }> {
     const before = performance.now();
-    // Skip saving the score if characteristic is missing
-    if (!score.characteristic) {
-      Logger.warn(
-        `Skipping ScoreSaber score "${score.scoreId}" for "${player.name}"(${player.id}) due to missing characteristic: "${score.characteristic}"`
-      );
-      return { score: undefined, hasPreviousScore: false, tracked: false };
-    }
-
+    
     // Check if score exists and get previous score in parallel
     const [scoreExists, previousScore] = await Promise.all([
       ScoreCoreService.scoreExists(score.scoreId, score.score),
@@ -87,17 +80,19 @@ export class ScoreCoreService {
       await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
     }
 
-    Logger.info(
-      `Tracked %s ScoreSaber score "%s" for "%s" on "%s" [%s / %s]%s in %s`,
-      newScore ? "New" : "Missing",
-      score.scoreId,
-      player.name,
-      leaderboard.songName,
-      leaderboard.difficulty.difficulty,
-      leaderboard.difficulty.characteristic,
-      isImprovement ? ` (improvement)` : "",
-      formatDuration(performance.now() - before)
-    );
+    if (newScore) {
+      Logger.info(
+        `Tracked %s ScoreSaber score "%s" for "%s" on "%s" [%s / %s]%s in %s`,
+        newScore ? "New" : "Missing",
+        score.scoreId,
+        player.name,
+        leaderboard.songName,
+        leaderboard.difficulty.difficulty,
+        leaderboard.difficulty.characteristic,
+        isImprovement ? ` (improvement)` : "",
+        formatDuration(performance.now() - before)
+      );
+    }
     return { score: score, hasPreviousScore: isImprovement, tracked: true };
   }
 

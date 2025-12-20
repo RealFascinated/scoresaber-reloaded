@@ -1,5 +1,4 @@
 import Logger from "@ssr/common/logger";
-import { isProduction } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
 import { redisClient } from "../common/redis";
 import { QueueId } from "./queue-manager";
@@ -70,9 +69,8 @@ export abstract class Queue<T> {
    * Processes the queue
    */
   public async processQueue() {
-    // Don't process the queue if it's locked,
-    // stopped, or we're not in production
-    if (this.lock || this.isStopped || !isProduction()) {
+    // Don't process the queue if it's locked or stopped
+    if (this.lock || this.isStopped) {
       return;
     }
 

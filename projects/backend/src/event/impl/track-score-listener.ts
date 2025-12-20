@@ -22,8 +22,7 @@ export class TrackScoreListener implements EventListener {
     isTop50GlobalScore: boolean
   ) {
     const playerInfo = score.playerInfo;
-
-    // Track BeatLeader score if available
+    
     let beatLeaderScore: BeatLeaderScore | undefined;
     if (beatLeaderScoreToken) {
       beatLeaderScore = await BeatLeaderService.trackBeatLeaderScore(
@@ -32,7 +31,6 @@ export class TrackScoreListener implements EventListener {
       );
     }
 
-    // Track ScoreSaber score
     const { score: trackedScore, hasPreviousScore } = await ScoreCoreService.trackScoreSaberScore(
       score,
       leaderboard,

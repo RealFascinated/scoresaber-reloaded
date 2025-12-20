@@ -3,7 +3,6 @@ import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { isProduction } from "@ssr/common/utils/utils";
 import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
 import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
@@ -13,9 +12,6 @@ import { QueueId } from "../queue-manager";
 export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   constructor() {
     super(QueueId.LeaderboardScoreSeedQueue, "lifo");
-    if (!isProduction()) {
-      return;
-    }
 
     setImmediate(() => this.insertLeaderboards());
     setInterval(() => this.insertLeaderboards(), TimeUnit.toMillis(TimeUnit.Hour, 1));

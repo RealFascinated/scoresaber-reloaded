@@ -213,8 +213,7 @@ export class PlayerHistoryService {
       date: targetDate,
     })
       .select(projection ? { date: 1, ...projection } : {})
-      .lean()
-      .hint({ playerId: 1, date: -1 });
+      .lean();
 
     if (entry) {
       history[dateKey] = playerHistoryToObject(entry);
@@ -285,8 +284,7 @@ export class PlayerHistoryService {
         },
       })
         .sort({ date: -1 })
-        .lean()
-        .hint({ playerId: 1, date: -1 }), // Force use of compound index
+        .lean(),
       parseRankHistory(player),
     ]);
 

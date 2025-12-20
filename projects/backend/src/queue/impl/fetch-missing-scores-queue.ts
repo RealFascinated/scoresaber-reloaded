@@ -3,7 +3,6 @@ import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
-import { isProduction } from "@ssr/common/utils/utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { PlayerCoreService } from "../../service/player/player-core.service";
@@ -15,9 +14,6 @@ import { QueueId } from "../queue-manager";
 export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
   constructor() {
     super(QueueId.PlayerScoreRefreshQueue, "lifo");
-    if (!isProduction()) {
-      return;
-    }
 
     setImmediate(() => this.addPlayersToQueue());
     setInterval(() => this.addPlayersToQueue(), TimeUnit.toMillis(TimeUnit.Hour, 1));
