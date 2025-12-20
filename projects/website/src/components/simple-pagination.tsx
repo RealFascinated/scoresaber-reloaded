@@ -93,7 +93,7 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
                 </Button>
               </div>
               {error && (
-                <p id="page-error" className="text-destructive text-xs text-center">
+                <p id="page-error" className="text-destructive text-center text-xs">
                   {error}
                 </p>
               )}
@@ -367,22 +367,22 @@ export default function SimplePagination({
       {showStats && (
         <div
           className={cn(
-            "text-muted-foreground text-sm select-none transition-opacity duration-200",
+            "text-muted-foreground text-sm transition-opacity duration-200 select-none",
             !statsBelow && "left-0 lg:absolute"
           )}
           aria-live="polite"
           aria-atomic="true"
         >
           <p>
-            <span className="font-medium text-foreground">
+            <span className="text-foreground font-medium">
               {formatNumberWithCommas(Math.min((page - 1) * itemsPerPage + 1, totalItems))}
             </span>{" "}
             to{" "}
-            <span className="font-medium text-foreground">
+            <span className="text-foreground font-medium">
               {formatNumberWithCommas(Math.min(page * itemsPerPage, totalItems))}
             </span>{" "}
             of{" "}
-            <span className="font-medium text-foreground">
+            <span className="text-foreground font-medium">
               {formatNumberWithCommas(totalItems)}
             </span>
           </p>
@@ -391,7 +391,7 @@ export default function SimplePagination({
 
       {/* Pagination Buttons */}
       <nav
-        className="flex items-center gap-1.5 flex-wrap justify-center"
+        className="flex flex-wrap items-center justify-center gap-1.5"
         aria-label="Pagination navigation"
       >
         {mobilePagination && (

@@ -245,6 +245,8 @@ class SSRApi {
    * @param sort the sort
    * @param search the search
    * @param comparisonPlayerId the player to compare scores with
+   * @param includePlayers the players to include in the scores
+   * @returns the scores
    */
   async fetchScoreSaberPlayerScores(
     id: string,
@@ -278,9 +280,15 @@ class SSRApi {
     direction: SortDirection,
     filters: ScoreQuery
   ) {
+    const queryParams: Record<string, string> = {};
+    if (filters.search) queryParams.search = filters.search;
+    if (filters.hmd) queryParams.hmd = filters.hmd;
+    if (filters.includePlayers && filters.includePlayers.length > 0) {
+      queryParams.includePlayers = filters.includePlayers.join(",");
+    }
     return await this.request<PlayerScoresPageResponse>(
       `/scores/player/${mode}/${id}/${sort}/${direction}/${page}`,
-      filters
+      queryParams
     );
   }
 

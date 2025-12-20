@@ -27,6 +27,7 @@ export function TabGroup({ children, className }: { children: ReactNode; classNa
     </div>
   );
 }
+
 export function Tab({
   children,
   isActive,

@@ -64,9 +64,7 @@ export default class BeatLeaderService {
    * @param scoreId the id of the score
    * @returns the BeatLeader score, or undefined if none
    */
-  public static async getBeatLeaderScore(
-    scoreId: number
-  ): Promise<BeatLeaderScore | undefined> {
+  public static async getBeatLeaderScore(scoreId: number): Promise<BeatLeaderScore | undefined> {
     return CacheService.fetchWithCache(
       CacheId.BeatLeaderScore,
       `beatleader-score:${scoreId}`,

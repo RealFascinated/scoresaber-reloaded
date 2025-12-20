@@ -14,6 +14,10 @@ export const SortDirectionSchema = z.enum(["asc", "desc"]);
 export const QuerySchema = z.object({
   search: z.string().optional(),
   hmd: HmdSchema.optional(),
+  includePlayers: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform(v => (typeof v === "string" ? v.split(",") : v)),
 });
 
 export type SortField = z.infer<typeof SortFieldSchema>;

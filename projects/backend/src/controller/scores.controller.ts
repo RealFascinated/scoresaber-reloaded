@@ -122,28 +122,13 @@ export default function scoresController(app: Elysia) {
             page: z.coerce.number(),
           }),
           body: z.object({
-            friendIds: z.array(z.string()).min(1).max(SHARED_CONSTS.maxFriends + 1),
+            friendIds: z
+              .array(z.string())
+              .min(1)
+              .max(SHARED_CONSTS.maxFriends + 1),
           }),
           detail: {
             description: "Fetch friends' scores for a leaderboard",
-          },
-        }
-      )
-      .post(
-        "/friend/:page",
-        async ({ params: { page }, body: { friendIds } }) => {
-          return await PlayerFriendScoresService.getFriendScores(friendIds, page);
-        },
-        {
-          tags: ["Scores"],
-          params: z.object({
-            page: z.coerce.number(),
-          }),
-          body: z.object({
-            friendIds: z.array(z.string()).min(1).max(SHARED_CONSTS.maxFriends + 1),
-          }),
-          detail: {
-            description: "Fetch friends' scores",
           },
         }
       )

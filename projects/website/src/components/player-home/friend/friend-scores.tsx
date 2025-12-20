@@ -15,6 +15,7 @@ import { Spinner } from "../../spinner";
 export function FriendScores() {
   const isMobile = useIsMobile();
   const database = useDatabase();
+  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
   const friendIds = useStableLiveQuery(async () => database.getFriendIds(true));
 
   const [page, setPage] = useState(1);
@@ -24,9 +25,12 @@ export function FriendScores() {
     isLoading,
     isFetching,
   } = useQuery({
-    queryKey: ["friend-scores", friendIds, page],
-    queryFn: async () => ssrApi.getFriendScores(friendIds!, page),
-    enabled: friendIds !== undefined && friendIds.length > 0,
+    queryKey: ["friend-scores", friendIds, page, mainPlayerId],
+    queryFn: async () =>
+      ssrApi.fetchPlayerScores(mainPlayerId!, "ssr", page, "date", "desc", {
+        includePlayers: friendIds,
+      }),
+    enabled: friendIds !== undefined && friendIds.length > 0 && mainPlayerId !== undefined,
     placeholderData: prev => prev,
   });
 
@@ -34,10 +38,6 @@ export function FriendScores() {
     <Card className="flex h-fit flex-col">
       <div className="mb-(--spacing-lg)">
         <h2 className="text-lg font-semibold">Friend Scores</h2>
-        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
-          The 100 most recent scores from your friends. Score ranks aren&apos;t available as this is
-          based on cached data
-        </p>
       </div>
 
       {/* Loading */}

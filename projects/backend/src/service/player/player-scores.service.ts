@@ -490,16 +490,10 @@ export class PlayerScoresService {
      * @param matchingLeaderboardIds the leaderboard ids to include in the query
      * @returns the score query
      */
-    function buildScoreQuery(
-      mode: "ssr" | "medals",
-      playerId: string,
-      sort: SortField,
-      filters: ScoreQuery,
-      matchingLeaderboardIds: number[]
-    ): FilterQuery<ScoreSaberScore> {
+    function buildScoreQuery(): FilterQuery<ScoreSaberScore> {
+      const uniquePlayerIds = Array.from(new Set([playerId, ...(filters.includePlayers || [])]));
       const queryConditions: FilterQuery<ScoreSaberScore>[] = [
-        { playerId },
-        { leaderboardId: { $exists: true, $ne: null } },
+        { playerId: { $in: uniquePlayerIds } },
       ];
 
       // Filter out invalid accuracies (null, undefined, Infinity, etc.)
@@ -515,8 +509,8 @@ export class PlayerScoresService {
       }
 
       // Search was used in the query
-      if (matchingLeaderboardIds.length > 0) {
-        queryConditions.push({ leaderboardId: { $in: matchingLeaderboardIds } });
+      if (leaderboardIds && leaderboardIds.length > 0) {
+        queryConditions.push({ leaderboardId: { $in: leaderboardIds } });
       }
 
       // HMD filter was used in the query
@@ -527,7 +521,7 @@ export class PlayerScoresService {
       return { $and: queryConditions };
     }
 
-    const query = buildScoreQuery(mode, playerId, sort, filters, leaderboardIds);
+    const query = buildScoreQuery();
     const totalScores = await model.countDocuments(query);
 
     const pagination = new Pagination<PlayerScore>().setItemsPerPage(8).setTotalItems(totalScores);

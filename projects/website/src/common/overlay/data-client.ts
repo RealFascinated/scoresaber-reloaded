@@ -43,9 +43,7 @@ export default abstract class OverlayDataClient {
 
     // Handle connection errors
     this.ws.onclose = () => {
-      Logger.warn(
-        `Unable to connect to ${this.name}, retrying in ${retryTime / 1000} seconds.`
-      );
+      Logger.warn(`Unable to connect to ${this.name}, retrying in ${retryTime / 1000} seconds.`);
 
       setTimeout(() => {
         this.connectWs();

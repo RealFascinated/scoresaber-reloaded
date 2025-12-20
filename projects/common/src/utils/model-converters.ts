@@ -57,9 +57,7 @@ export function playerHistoryToObject(history: PlayerHistoryEntry): PlayerHistor
  * @param beatLeaderScore the BeatLeader score data to convert
  * @returns the converted BeatLeader score data
  */
-export function beatLeaderScoreToObject(
-  beatLeaderScore: BeatLeaderScore
-): BeatLeaderScore {
+export function beatLeaderScoreToObject(beatLeaderScore: BeatLeaderScore): BeatLeaderScore {
   return {
     ...removeObjectFields<BeatLeaderScore>(beatLeaderScore, baseFields),
   } as BeatLeaderScore;
