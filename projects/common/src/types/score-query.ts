@@ -15,9 +15,9 @@ export const QuerySchema = z.object({
   search: z.string().optional(),
   hmd: HmdSchema.optional(),
   includePlayers: z
-    .union([z.string(), z.array(z.string())])
-    .optional()
-    .transform(v => (typeof v === "string" ? v.split(",") : v)),
+    .union([z.string(), z.array(z.string()), z.undefined()])
+    .transform((v): string[] | undefined => (v === undefined ? undefined : typeof v === "string" ? v.split(",") : v))
+    .optional(),
 });
 
 export type SortField = z.infer<typeof SortFieldSchema>;
