@@ -42,6 +42,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         Logger.warn(
           `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
         );
+        currentPage++;
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);

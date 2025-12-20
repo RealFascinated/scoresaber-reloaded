@@ -1,49 +1,12 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import Logger from "@ssr/common/logger";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import LeaderboardScoresResponse from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import BeatLeaderService from "../beatleader.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
 
 export class LeaderboardScoresService {
-  /**
-   * Fetches all scores for a specific leaderboard
-   */
-  public static async fetchAllLeaderboardScores(
-    leaderboardId: number
-  ): Promise<ScoreSaberScoreToken[]> {
-    const scoreTokens: ScoreSaberScoreToken[] = [];
-    let currentPage = 1;
-    let hasMoreScores = true;
-
-    while (hasMoreScores) {
-      const response = await ScoreSaberApiService.lookupLeaderboardScores(
-        leaderboardId,
-        currentPage
-      );
-      if (!response) {
-        Logger.warn(
-          `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
-        );
-        currentPage++;
-        continue;
-      }
-      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      Logger.info(
-        `Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`
-      );
-
-      scoreTokens.push(...response.scores);
-      hasMoreScores = currentPage < totalPages;
-      currentPage++;
-    }
-
-    return scoreTokens;
-  }
-
   /**
    * Gets scores for a leaderboard.
    *
@@ -94,7 +57,7 @@ export class LeaderboardScoresService {
         score.score
       );
       if (beatLeaderScore !== undefined) {
-        score.beatleaderScore = beatLeaderScore;
+        score.beatLeaderScore = beatLeaderScore;
       }
 
       return score;
