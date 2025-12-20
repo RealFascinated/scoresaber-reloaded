@@ -463,8 +463,9 @@ export class PlayerScoresService {
    * @param mode the mode to get
    * @param playerId the player id
    * @param page the page number
-   * @param options the sort options
-   * @param search the search term
+   * @param sort the sort to get
+   * @param direction the direction to sort
+   * @param filters the filters to apply to the query
    * @returns the scores
    */
   public static async getPlayerScores(
@@ -562,13 +563,22 @@ export class PlayerScoresService {
         // For page 3, we want item at position 15 (last item of page 2)
         const previousPageStart = (page - 1) * 8 - 1;
         if (previousPageStart < 0) return null;
-        const items = await (model as typeof ScoreSaberScoreModel)
+        const queryBuilder = (model as typeof ScoreSaberScoreModel)
           .find(query)
           .sort({ [sortField]: sortOrder, _id: sortOrder })
           .skip(previousPageStart)
           .limit(1)
           .select({ [sortField]: 1, _id: 1 })
           .lean();
+        
+        // Use index hints for known indexes to optimize skip performance
+        if (sortField === "pp") {
+          queryBuilder.hint({ pp: sortOrder, _id: sortOrder });
+        } else if (sortField === "timestamp") {
+          queryBuilder.hint({ playerId: 1, timestamp: sortOrder, _id: sortOrder });
+        }
+        
+        const items = await queryBuilder;
         return (items[0] as Record<string, unknown>) || null;
       },
       fetchItems: async cursorInfo => {

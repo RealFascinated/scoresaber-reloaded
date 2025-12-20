@@ -135,7 +135,7 @@ export class PlayerScoreHistoryService {
               _id: 1,
             },
           },
-        ]);
+        ]).hint({ playerId: 1, timestamp: -1, _id: -1 });
 
         return (items[0] as { timestamp: Date; _id: unknown }) || null;
       },

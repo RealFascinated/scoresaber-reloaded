@@ -11,11 +11,12 @@ type BuildCursorQueryFunction<TQuery> = (cursor: Cursor | null) => TQuery;
 export class Pagination<T> {
   public itemsPerPage: number = 0;
   public totalItems: number = 0;
-  private items: T[] | null = null; // Optional array to hold set items
+  private items: T[] | null = null;
 
   /**
    * Sets the number of items per page.
-   * @param itemsPerPage - The number of items per page.
+   * 
+   * @param itemsPerPage the number of items per page.
    * @returns the pagination
    */
   setItemsPerPage(itemsPerPage: number): Pagination<T> {
@@ -25,7 +26,8 @@ export class Pagination<T> {
 
   /**
    * Sets the items to paginate.
-   * @param items - The items to paginate.
+   * 
+   * @param items the items to paginate.
    * @returns the pagination
    */
   setItems(items: T[]): Pagination<T> {
@@ -36,7 +38,8 @@ export class Pagination<T> {
 
   /**
    * Sets the total number of items.
-   * @param totalItems - Total number of items.
+   * 
+   * @param totalItems the total number of items.
    * @returns the pagination
    */
   setTotalItems(totalItems: number): Pagination<T> {
@@ -46,9 +49,10 @@ export class Pagination<T> {
 
   /**
    * Gets a page of items, using either static items or a dynamic fetchItems callback.
-   * @param page - The page number to retrieve.
-   * @param fetchItems - The async function to fetch items if setItems was not used.
-   * @returns A promise resolving to the page of items.
+   * 
+   * @param page the page number to retrieve.
+   * @param fetchItems the async function to fetch items if setItems was not used.
+   * @returns a promise resolving to the page of items.
    * @throws throws an error if the page number is invalid.
    */
   async getPage(page: number, fetchItems?: FetchItemsFunction<T>): Promise<Page<T>> {
@@ -87,8 +91,9 @@ export class Pagination<T> {
   /**
    * Gets a page of items using cursor-based pagination for better performance on large datasets.
    * This method automatically handles cursor retrieval from previous pages and query building.
-   * @param page - The page number to retrieve.
-   * @param options - Cursor pagination options
+   *
+   * @param page the page number to retrieve.
+   * @param options the cursor pagination options
    * @returns A promise resolving to the page of items.
    * @throws throws an error if the page number is invalid.
    */
@@ -109,16 +114,28 @@ export class Pagination<T> {
       throw new NotFoundError("Invalid page number");
     }
 
-    let cursor: Cursor | null = null;
+    // For page 1, skip cursor retrieval entirely
+    if (page === 1) {
+      const cursorQuery = options.buildCursorQuery(null);
+      const pageItems = await options.fetchItems(
+        new CursorInfo<TQuery>(null, cursorQuery, this.itemsPerPage)
+      );
+
+      return {
+        items: pageItems,
+        metadata: {
+          totalPages,
+          totalItems: this.totalItems,
+          page,
+          itemsPerPage: this.itemsPerPage,
+        },
+      };
+    }
 
     // For pages beyond the first, get cursor from previous page
-    if (page > 1) {
-      const previousPageQuery = options.buildCursorQuery(null);
-      const previousPageItem = await options.getPreviousPageItem(previousPageQuery);
-      if (previousPageItem) {
-        cursor = options.getCursor(previousPageItem);
-      }
-    }
+    const previousPageQuery = options.buildCursorQuery(null);
+    const previousPageItem = await options.getPreviousPageItem(previousPageQuery);
+    const cursor = previousPageItem ? options.getCursor(previousPageItem) : null;
 
     // Build query with cursor and fetch items
     const cursorQuery = options.buildCursorQuery(cursor);
@@ -137,6 +154,12 @@ export class Pagination<T> {
     };
   }
 
+  /**
+   * Gets an empty page.
+   * 
+   * @param T the type of items in the page.
+   * @returns the empty page.
+   */
   public static empty<T>(): Page<T> {
     return {
       items: [],
