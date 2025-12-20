@@ -34,7 +34,7 @@ export default function scoresController(app: Elysia) {
         }
       )
       .get(
-        "/player/scoresaber/:playerId/:page/:sort",
+        "/player/scoresaber/:playerId/:sort/:page",
         async ({ params: { playerId, page, sort }, query: { search, comparisonPlayerId } }) => {
           return await PlayerScoresService.getScoreSaberLivePlayerScores(
             playerId,

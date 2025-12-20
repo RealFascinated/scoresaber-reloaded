@@ -181,18 +181,6 @@ class SSRApi {
   }
 
   /**
-   * Get the scores for a list of friends
-   *
-   * @param friendIds the friends to lookup
-   * @param page the page
-   */
-  async getFriendScores(friendIds: string[], page: number) {
-    return await this.request<Page<PlayerScore>>(`/scores/friend/${page}`, undefined, {
-      friendIds: friendIds,
-    });
-  }
-
-  /**
    * Looks up a ScoreSaber player
    *
    * @param playerId the player to lookup
@@ -256,7 +244,7 @@ class SSRApi {
     comparisonPlayerId?: string
   ) {
     return await this.request<PlayerScoresPageResponse>(
-      `/scores/player/scoresaber/${id}/${page}/${sort}`,
+      `/scores/player/scoresaber/${id}/${sort}/${page}`,
       {
         ...(search ? { search: search } : {}),
         ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
