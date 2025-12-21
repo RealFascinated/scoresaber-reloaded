@@ -52,7 +52,7 @@ export function MapsData({ type }: MapsDataProps) {
 
   return (
     <MapFilterProvider>
-      <div className="flex w-full flex-col-reverse items-center gap-2 xl:flex-row xl:items-start xl:justify-center">
+      <div className="flex w-full flex-col items-center gap-2 xl:flex-row xl:items-start xl:justify-center">
         <article className="flex w-full flex-col gap-2 2xl:w-[800px]">
           <div className="flex w-full flex-col gap-2 md:flex-row">
             {categories.map(category => (
@@ -75,31 +75,33 @@ export function MapsData({ type }: MapsDataProps) {
           {/* Category Render */}
           {selectedCategory.render()}
         </article>
-        <div className="flex w-full flex-col gap-2 xl:w-[430px]">
-          {/* Playlists */}
-          <Playlists />
-
-          {/* External Links */}
-          <Card>
-            <SimpleTooltip
-              display={<p>Click to open the Ranking Queue on ScoreSaber</p>}
-              side="bottom"
-            >
-              <SimpleLink
-                href="https://scoresaber.com/ranking/requests"
-                target="_blank"
-                className="w-full"
-              >
-                <Button className="flex w-full items-center justify-center gap-2">
-                  <ExternalLinkIcon className="h-4 w-4" />
-                  <span>ScoreSaber Ranking Queue</span>
-                </Button>
-              </SimpleLink>
-            </SimpleTooltip>
-          </Card>
-
+        <div className="flex w-full flex-col gap-2 xl:w-[430px] xl:flex-col-reverse">
           {/* Map Filters */}
           {selectedCategory.showFilter && <MapFilters />}
+
+          {/* External Links */}
+          {selectedCategory.id === "ranking-queue" && (
+            <Card>
+              <SimpleTooltip
+                display={<p>Click to open the Ranking Queue on ScoreSaber</p>}
+                side="bottom"
+              >
+                <SimpleLink
+                  href="https://scoresaber.com/ranking/requests"
+                  target="_blank"
+                  className="w-full"
+                >
+                  <Button className="flex w-full items-center justify-center gap-2">
+                    <ExternalLinkIcon className="h-4 w-4" />
+                    <span>ScoreSaber Ranking Queue</span>
+                  </Button>
+                </SimpleLink>
+              </SimpleTooltip>
+            </Card>
+          )}
+
+          {/* Playlists */}
+          <Playlists />
         </div>
       </div>
     </MapFilterProvider>
