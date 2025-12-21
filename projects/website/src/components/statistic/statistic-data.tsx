@@ -38,7 +38,7 @@ export default function StatisticData() {
         {statistics && appStatistics ? (
           <Card className="gap-(--spacing-md)">
             <div className="space-y-1">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="text-foreground text-lg font-semibold">Game Statistics</h3>
                 <SimpleLink
                   href="https://ssr-grafana.fascinated.cc/public-dashboards/19a90072026f442fafa6c371192dddff"
@@ -53,7 +53,7 @@ export default function StatisticData() {
 
             <AppStats
               statistics={appStatistics}
-              className="grid grid-cols-1 gap-(--spacing-lg) md:grid-cols-2 lg:grid-cols-6"
+              className="grid grid-cols-1 gap-(--spacing-lg) sm:grid-cols-2 lg:grid-cols-6"
             />
             <ScoreSaberStatisticsChart statistics={statistics.statistics} />
             <HmdUsageChart hmdUsage={statistics.statistics.hmdUsage} />

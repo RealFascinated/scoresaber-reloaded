@@ -1,6 +1,7 @@
 "use client";
 
 import Card from "@/components/card";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { ArcElement, Chart as ChartJS, ChartOptions, Legend, Tooltip } from "chart.js";
 import { Pie } from "react-chartjs-2";
 
@@ -12,6 +13,8 @@ type Props = {
 };
 
 export default function HmdUsageChart({ hmdUsage }: Props) {
+  const isMobile = useIsMobile("md");
+
   if (!hmdUsage || Object.keys(hmdUsage).length === 0) {
     return (
       <div className="flex justify-center">
@@ -61,10 +64,10 @@ export default function HmdUsageChart({ hmdUsage }: Props) {
     },
     plugins: {
       legend: {
-        position: "right" as const,
+        position: isMobile ? ("bottom" as const) : ("right" as const),
         labels: {
           color: "white",
-          padding: 20,
+          padding: isMobile ? 10 : 20,
           filter: legendItem => {
             return legendItem.text !== "Others";
           },
@@ -85,7 +88,7 @@ export default function HmdUsageChart({ hmdUsage }: Props) {
 
   return (
     <Card>
-      <div className="h-[360px] w-full">
+      <div className="h-[320px] w-full sm:h-[360px]">
         <Pie data={data} options={options} />
       </div>
     </Card>
