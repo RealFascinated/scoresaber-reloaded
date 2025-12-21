@@ -1,7 +1,7 @@
 "use client";
 
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
-import { usePageTransition } from "@/components/ui/page-transition-context";
+import { usePageTransition } from "@/contexts/page-transition-context";
 import { useQueryParamSelector } from "@/hooks/use-query-param-selector";
 import { ScoreSaberScoreDataMode } from "@ssr/common/types/score-data-mode";
 import { TrendingUpIcon } from "lucide-react";

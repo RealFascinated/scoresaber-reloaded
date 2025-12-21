@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { ReactNode, useEffect, useRef } from "react";
-import { usePageTransition } from "./page-transition-context";
+import { usePageTransition } from "../../contexts/page-transition-context";
 
 const containerVariants = {
   enter: (direction: number) => ({

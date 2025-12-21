@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect } from "react";
+import { usePageTransition } from "../../../contexts/page-transition-context";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
 import {
@@ -41,7 +42,6 @@ import {
 } from "../../ui/control-panel";
 import { EmptyState } from "../../ui/empty-state";
 import PageTransition from "../../ui/page-transition";
-import { usePageTransition } from "../../ui/page-transition-context";
 import AccSaberScoreComponent from "./score/accsaber-score";
 
 const DEFAULT_SORT: AccSaberScoreSort = "date";

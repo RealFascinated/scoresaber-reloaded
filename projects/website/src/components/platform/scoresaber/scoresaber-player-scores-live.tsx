@@ -4,7 +4,7 @@ import { cn } from "@/common/utils";
 import { Spinner } from "@/components/spinner";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/ui/page-transition";
-import { usePageTransition } from "@/components/ui/page-transition-context";
+import { usePageTransition } from "@/contexts/page-transition-context";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";

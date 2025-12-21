@@ -1,8 +1,8 @@
 import { Colors } from "@/common/colors";
 import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
-import { PageTransitionProvider } from "@/components/ui/page-transition-context";
 import { Toaster } from "@/components/ui/sonner";
+import { PageTransitionProvider } from "@/contexts/page-transition-context";
 import { ViewportProvider } from "@/contexts/viewport-context";
 import { env } from "@ssr/common/env";
 import { ssrConfig } from "config";
