@@ -55,22 +55,38 @@ export class Playlist {
     title: string,
     author: string,
     image: string,
-    songs: ScoreSaberLeaderboard[],
+    leaderboards: ScoreSaberLeaderboard[],
     category?: PlaylistCategory
   ) {
     this.id = id;
     this.title = title;
     this.author = author;
     this.image = image;
-    this.songs = songs.map(song => ({
-      songName: song.songName,
-      songAuthor: song.songAuthorName,
-      songHash: song.songHash,
-      difficulties: song.difficulties.map(difficulty => ({
-        difficulty: difficulty.difficulty,
-        characteristic: difficulty.characteristic,
-      })),
-    }));
+
+    const playlistSongs: Map<string, PlaylistSong> = new Map();
+    for (const leaderboard of leaderboards) {
+      const song = playlistSongs.get(leaderboard.songHash);
+      if (!song) {
+        playlistSongs.set(leaderboard.songHash, {
+          songName: leaderboard.songName,
+          songAuthor: leaderboard.songAuthorName,
+          songHash: leaderboard.songHash,
+          difficulties: [
+            {
+              difficulty: leaderboard.difficulty.difficulty,
+              characteristic: leaderboard.difficulty.characteristic,
+            },
+          ],
+        });
+        continue;
+      }
+      song.difficulties.push({
+        difficulty: leaderboard.difficulty.difficulty,
+        characteristic: leaderboard.difficulty.characteristic,
+      });
+    }
+    this.songs = Array.from(playlistSongs.values());
+
     this.category = category;
   }
 }

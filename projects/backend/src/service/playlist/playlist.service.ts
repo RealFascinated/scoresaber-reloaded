@@ -3,7 +3,10 @@ import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import {
+  ScoreSaberLeaderboard,
+  ScoreSaberLeaderboardModel,
+} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import {
   ScoreSaberScore,
   ScoreSaberScoreModel,
@@ -11,7 +14,6 @@ import {
 import { Playlist, PlaylistModel } from "@ssr/common/playlist/playlist";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
-import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { playlistToObject } from "@ssr/common/utils/model-converters";
@@ -203,93 +205,141 @@ export default class PlaylistService {
         );
       }
 
-      const rawScores = (await ScoreSaberScoreModel.find({
-        playerId: toSnipe,
-      })
-        .sort({
-          [settings?.sort || "pp"]: settings?.sortDirection || "desc",
-        })
-        .select({
-          pp: 1,
-          accuracy: 1,
-          timestamp: 1,
-          leaderboardId: 1,
-          playerId: 1,
-        })
-        .lean()) as unknown as ScoreSaberScore[];
+      if (user === toSnipe) {
+        throw new BadRequestError("You cannot snipe yourself");
+      }
 
-      if (rawScores.length === 0) {
+      const sortField = settings?.sort || "pp";
+      const sortDirection = settings?.sortDirection || "desc";
+
+      async function getScores(playerId: string) {
+        const pipeline = [
+          {
+            $match: {
+              playerId: playerId,
+            },
+          },
+          {
+            $project: {
+              pp: 1,
+              accuracy: 1,
+              timestamp: 1,
+              leaderboardId: 1,
+              playerId: 1,
+              score: 1,
+            },
+          },
+          {
+            $lookup: {
+              from: "scoresaber-leaderboards",
+              localField: "leaderboardId",
+              foreignField: "_id",
+              as: "leaderboard",
+            },
+          },
+          {
+            $unwind: {
+              path: "$leaderboard",
+              preserveNullAndEmptyArrays: false,
+            },
+          },
+          {
+            $match: {
+              // Apply ranked status filtering
+              ...(settings?.rankedStatus === "ranked" ? { pp: { $gt: 0 } } : {}),
+              ...(settings?.rankedStatus === "unranked" ? { pp: { $lte: 0 } } : {}),
+              // Apply star range filtering
+              ...(settings?.starRange?.min !== undefined && settings?.starRange?.max !== undefined
+                ? {
+                    $and: [
+                      { "leaderboard.stars": { $gt: 0 } },
+                      { "leaderboard.stars": { $gte: settings.starRange.min } },
+                      { "leaderboard.stars": { $lte: settings.starRange.max } },
+                    ],
+                  }
+                : {}),
+            },
+          },
+          {
+            $sort: {
+              [sortField]: sortDirection === "desc" ? -1 : 1,
+            },
+          },
+        ];
+
+        const results = (await ScoreSaberScoreModel.aggregate(
+          pipeline as Parameters<typeof ScoreSaberScoreModel.aggregate>[0]
+        )) as Array<ScoreSaberScore & { leaderboard: ScoreSaberLeaderboard }>;
+
+        if (results.length === 0) {
+          throw new NotFoundError(
+            `Unable to create a snipe playlist for ${toSnipe} as they have no scores.`
+          );
+        }
+
+        return results.map(result => ({
+          score: {
+            pp: result.pp,
+            accuracy: result.accuracy,
+            timestamp: result.timestamp,
+            leaderboardId: result.leaderboardId,
+            playerId: result.playerId,
+            score: result.score,
+          } as ScoreSaberScore,
+          leaderboard: result.leaderboard,
+        }));
+      }
+
+      const [userScores, toSnipeScores] = await Promise.all([getScores(user), getScores(toSnipe)]);
+
+      if (userScores.length === 0 || toSnipeScores.length === 0) {
         throw new NotFoundError(
-          `Unable to create a snipe playlist for ${toSnipe} as they have no scores.`
+          `Unable to create a snipe playlist for ${toSnipe} as one of the users has no scores.`
         );
       }
 
-      // Apply some filters early to reduce the amount of leaderboards we need to fetch
-      const scores = rawScores.filter(score => {
-        // Apply ranked status filtering
-        if (settings?.rankedStatus === "ranked" && score.pp <= 0) return false;
-        if (settings?.rankedStatus === "unranked" && score.pp > 0) return false;
-
-        // Apply accuracy range filtering
-        if (
-          settings?.accuracyRange?.min !== undefined &&
-          settings?.accuracyRange?.max !== undefined
-        ) {
-          if (
-            score.accuracy < settings.accuracyRange.min ||
-            score.accuracy > settings.accuracyRange.max
-          ) {
-            return false;
-          }
+      // Include scores where:
+      // 1. toSnipe has a better score than the user (toSnipe's score > user's score)
+      // 2. toSnipe has a score and the user doesn't have one
+      const userScoreMap = new Map<number, { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>();
+      for (const userScore of userScores) {
+        const leaderboardId = userScore.leaderboard.id;
+        // Only keep the first score if there are duplicates (shouldn't happen, but defensive)
+        if (!userScoreMap.has(leaderboardId)) {
+          userScoreMap.set(leaderboardId, userScore);
         }
-
-        return true;
-      });
-
-      // Fetch leaderboards for the scores
-      const leaderboards = await LeaderboardCoreService.getLeaderboards(
-        scores.map(score => score.leaderboardId),
-        {
-          includeBeatSaver: false,
+      }
+      
+      const filteredScores: Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }> = [];
+      
+      for (const toSnipeScore of toSnipeScores) {
+        const leaderboardId = toSnipeScore.leaderboard.id;
+        const userScore = userScoreMap.get(leaderboardId);
+        
+        // Include if user doesn't have a score on this map
+        if (!userScore) {
+          filteredScores.push(toSnipeScore);
+          continue;
         }
-      );
+        
+        // Only include if toSnipe has a better score than the user
+        const userScoreValue = userScore.score.score;
+        const toSnipeScoreValue = toSnipeScore.score.score;
+        
+        // Only include if toSnipe's score is strictly greater than user's score
+        if (toSnipeScoreValue > userScoreValue) {
+          filteredScores.push(toSnipeScore);
+        }
+      }
 
-      // Star range filtering
-      const filteredScores = scores
-        .map(playerScore => ({
-          score: playerScore,
-          leaderboard: leaderboards.find(
-            leaderboard => leaderboard.leaderboard.id == playerScore.leaderboardId
-          )?.leaderboard,
-        }))
-        .filter(({ leaderboard }) => {
-          if (!leaderboard) return false;
-
-          // Apply star range filtering if star range is specified and leaderboard has valid stars
-          if (
-            settings?.starRange?.min !== undefined &&
-            settings?.starRange?.max !== undefined &&
-            leaderboard.stars > 0 &&
-            leaderboard.stars <= SHARED_CONSTS.maxStars
-          ) {
-            if (
-              leaderboard.stars < settings.starRange.min ||
-              leaderboard.stars > settings.starRange.max
-            ) {
-              return false;
-            }
-          }
-
-          return true;
-        });
+      const player = await ScoreSaberService.getPlayer(toSnipe, "basic");
 
       return new SnipePlaylist(
         toSnipe,
         user,
         settings,
-        settings.name ||
-          `Snipe - ${truncateText((await ScoreSaberService.getPlayer(toSnipe, "basic")).name, 16)} (${capitalizeFirstLetter(settings.sort || "pp")})`,
-        filteredScores.slice(0, settings.limit).map(({ leaderboard }) => leaderboard!),
+         `Snipe - ${truncateText(player.name ?? "", 16)} / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars`,
+        filteredScores.map(({ leaderboard }) => leaderboard),
         this.PLAYLIST_IMAGE_BASE64
       );
     } catch (error) {

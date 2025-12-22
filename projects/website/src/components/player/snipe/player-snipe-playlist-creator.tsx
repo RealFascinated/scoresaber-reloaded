@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -52,11 +51,8 @@ import { Controller, useForm } from "react-hook-form";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 
 const SCORE_LIMIT_MIN = 25;
-const SCORE_LIMIT_MAX = 250;
+const SCORE_LIMIT_MAX = 500;
 const SCORE_LIMIT_STEP = 25;
-const ACCURACY_MIN = 70;
-const ACCURACY_MAX = 100;
-const ACCURACY_STEP = 0.1;
 const STAR_STEP = 1;
 
 const SORT_OPTIONS = {
@@ -91,9 +87,8 @@ function generateFilename(toSnipeId: string, data: SnipeSettings): string {
     data.rankedStatus === "ranked" && data.starRange
       ? `-${data.starRange.min}-${data.starRange.max}⭐`
       : "";
-  const accRange = `-${data.accuracyRange.min}-${data.accuracyRange.max}%`;
   const sortInfo = `${data.sort}-${data.sortDirection ?? "desc"}`;
-  return `ssr-snipe-${toSnipeId}-${scoreType}${starRange}${accRange}-${sortInfo}.bplist`;
+  return `ssr-snipe-${toSnipeId}-${scoreType}${starRange}-${sortInfo}.bplist`;
 }
 
 export default function SnipePlaylistCreator({ toSnipe }: Props) {
@@ -104,20 +99,17 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
   const form = useForm<SnipeSettings>({
     resolver: zodResolver(snipeSettingsSchema),
     defaultValues: {
-      name: `Snipe ${toSnipe.name}`,
       sort: "pp",
       sortDirection: "desc",
-      limit: 150,
+      limit: 250,
       rankedStatus: "ranked",
       starRange: { min: 0, max: SHARED_CONSTS.maxStars },
-      accuracyRange: { min: ACCURACY_MIN, max: ACCURACY_MAX },
     },
   });
 
   const rankedStatus = form.watch("rankedStatus");
   const sort = form.watch("sort");
   const sortDirection = form.watch("sortDirection");
-  const formValues = form.watch();
 
   const availableSorts = useMemo(() => {
     const all = Object.entries(SORT_OPTIONS).map(([value, opt]) => ({
@@ -162,10 +154,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
     }
   }, [rankedStatus, form]);
 
-  if (!playerId) return null;
-
-  const previewUrl = `${env.NEXT_PUBLIC_API_URL}/playlist/snipe/preview?toSnipe=${toSnipe.id}&settings=${encodeSnipePlaylistSettings(formValues)}`;
-  const currentSortOpt = SORT_OPTIONS[sort];
+  if (!playerId) {
+    return null;
+  }
 
   return (
     <Dialog>
@@ -212,28 +203,6 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                         <span>Basic Settings</span>
                       </div>
                       <div className="space-y-1">
-                        <Controller
-                          name="name"
-                          control={form.control}
-                          render={({ field, fieldState }) => (
-                            <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
-                              <div className="flex-1 space-y-0 md:pr-4">
-                                <FormLabel className="text-sm leading-tight font-normal">
-                                  Playlist Name
-                                </FormLabel>
-                              </div>
-                              <FormControl>
-                                <Input
-                                  {...field}
-                                  placeholder="Snipe Playlist"
-                                  className="w-full md:w-52"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
                         <Controller
                           name="limit"
                           control={form.control}
@@ -369,40 +338,6 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                             }}
                           />
                         )}
-
-                        <Controller
-                          name="accuracyRange"
-                          control={form.control}
-                          render={({ field, fieldState }) => {
-                            const val = field.value;
-                            return (
-                              <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
-                                <div className="flex-1 space-y-0 md:pr-4">
-                                  <FormLabel className="text-sm leading-tight font-normal">
-                                    Accuracy Range
-                                  </FormLabel>
-                                </div>
-                                <FormControl>
-                                  <div className="flex w-full items-center gap-3 md:w-52">
-                                    <DualRangeSlider
-                                      min={ACCURACY_MIN}
-                                      max={ACCURACY_MAX}
-                                      step={ACCURACY_STEP}
-                                      label={v => <span className="text-xs">{v}%</span>}
-                                      value={[val.min, val.max]}
-                                      showLabelOnHover={false}
-                                      onValueChange={vals =>
-                                        field.onChange({ min: vals[0], max: vals[1] })
-                                      }
-                                      className="pt-10 pb-1"
-                                    />
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            );
-                          }}
-                        />
                       </div>
                     </div>
                   </div>
