@@ -209,8 +209,8 @@ export default class PlaylistService {
         throw new BadRequestError("You cannot snipe yourself");
       }
 
-      const sortField = settings?.sort || "pp";
-      const sortDirection = settings?.sortDirection || "desc";
+      const sortField = settings.sort;
+      const sortDirection = settings.sortDirection;
 
       // Map sort field names to actual property names on the score object
       const getSortValue = (score: ScoreSaberScore, field: string): number => {
@@ -262,13 +262,12 @@ export default class PlaylistService {
           {
             $match: {
               // Apply ranked status filtering
-              ...(settings?.rankedStatus === "ranked" ? { pp: { $gt: 0 } } : {}),
-              ...(settings?.rankedStatus === "unranked" ? { pp: { $lte: 0 } } : {}),
+              ...(settings.rankedStatus === "ranked" ? { pp: { $gt: 0 } } : {}),
+              ...(settings.rankedStatus === "unranked" ? { pp: { $lte: 0 } } : {}),
               // Apply star range filtering
-              ...(settings?.starRange?.min !== undefined && settings?.starRange?.max !== undefined
+              ...(settings.rankedStatus === "ranked" && settings.starRange.min !== undefined && settings.starRange.max !== undefined
                 ? {
                     $and: [
-                      { "leaderboard.stars": { $gt: 0 } },
                       { "leaderboard.stars": { $gte: settings.starRange.min } },
                       { "leaderboard.stars": { $lte: settings.starRange.max } },
                     ],
