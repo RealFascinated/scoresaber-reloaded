@@ -212,6 +212,22 @@ export default class PlaylistService {
       const sortField = settings?.sort || "pp";
       const sortDirection = settings?.sortDirection || "desc";
 
+      // Map sort field names to actual property names on the score object
+      const getSortValue = (score: ScoreSaberScore, field: string): number => {
+        switch (field) {
+          case "pp":
+            return score.pp;
+          case "score":
+            return score.score;
+          case "acc":
+            return score.accuracy;
+          case "date":
+            return score.timestamp.getTime();
+          default:
+            return score.pp;
+        }
+      };
+
       async function getScores(playerId: string) {
         const pipeline = [
           {
@@ -258,11 +274,6 @@ export default class PlaylistService {
                     ],
                   }
                 : {}),
-            },
-          },
-          {
-            $sort: {
-              [sortField]: sortDirection === "desc" ? -1 : 1,
             },
           },
         ];
@@ -315,6 +326,11 @@ export default class PlaylistService {
       for (const toSnipeScore of toSnipeScores) {
         const leaderboardId = toSnipeScore.leaderboard.id;
         const userScore = userScoreMap.get(leaderboardId);
+
+        // Skip if the score is outside the accuracy range
+        if (settings.accuracyRange && (toSnipeScore.score.accuracy < settings.accuracyRange.min || toSnipeScore.score.accuracy > settings.accuracyRange.max)) {
+          continue;
+        }
         
         // Include if user doesn't have a score on this map
         if (!userScore) {
@@ -338,8 +354,14 @@ export default class PlaylistService {
         toSnipe,
         user,
         settings,
-         `Snipe - ${truncateText(player.name ?? "", 16)} / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars`,
-        filteredScores.map(({ leaderboard }) => leaderboard),
+         `Snipe - ${truncateText(player.name ?? "", 16)} / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
+        filteredScores.sort((a,b) => {
+          const scoreA = a.score;
+          const scoreB = b.score;
+          const valueA = getSortValue(scoreA, sortField);
+          const valueB = getSortValue(scoreB, sortField);
+          return sortDirection === "desc" ? valueB - valueA : valueA - valueB;
+        }).map(({ leaderboard }) => leaderboard),
         this.PLAYLIST_IMAGE_BASE64
       );
     } catch (error) {

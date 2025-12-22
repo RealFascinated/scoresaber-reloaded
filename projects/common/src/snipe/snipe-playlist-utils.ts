@@ -12,20 +12,23 @@ export function parseSnipePlaylistSettings(settingsBase64?: string) {
     ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
     : // Default values
       {
-        limit: 100,
         sort: "pp",
         sortDirection: "desc",
         starRange: {
           min: 0,
           max: SHARED_CONSTS.maxStars,
         },
+        accuracyRange: {
+          min: 0,
+          max: 100,
+        },
       };
 
   // Enforce limitations
-  settings.limit = (settings?.limit > 250 ? 250 : settings?.limit) ?? 100;
   settings.sort = settings?.sort ?? "pp";
   settings.sortDirection = settings?.sortDirection ?? "desc";
   settings.rankedStatus = settings?.rankedStatus ?? "all";
+  settings.accuracyRange = settings?.accuracyRange ?? { min: 0, max: 100 };
 
   return settings;
 }
