@@ -301,7 +301,7 @@ export class PlayerScoresService {
               $project: {
                 _id: 1,
                 stars: 1,
-                fullName: 1,
+                songName: 1,
                 "difficulty.difficulty": 1,
               },
             },
@@ -334,7 +334,7 @@ export class PlayerScoresService {
         pp: score.pp,
         timestamp: score.timestamp,
         leaderboardId: leaderboard._id,
-        leaderboardName: leaderboard.fullName,
+        leaderboardName: leaderboard.songName,
         leaderboardDifficulty: getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty)),
       });
     }
