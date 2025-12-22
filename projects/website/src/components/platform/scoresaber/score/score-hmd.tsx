@@ -22,9 +22,7 @@ export function ScoreSaberScoreHMD({
           ) : (
             <div>
               <p>An unknown HMD was used (outdated mod?)</p>
-              {score.controllers?.leftController === "Touch" && (
-                <p>Likely a Quest variant was used</p>
-              )}
+              {score.controllers?.leftController === "Touch" && <p>Likely a Quest variant was used</p>}
             </div>
           )}
 

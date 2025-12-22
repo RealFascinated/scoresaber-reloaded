@@ -58,7 +58,7 @@ export function PlayerLink({ url, name, playerName, icon, children }: PlayerLink
 
 export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) {
   const database = useDatabase();
-  const hasMainPlayer = useStableLiveQuery(() => database.hasMainPlayer());
+  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
 
   const twitchName = ssrConfig.playerTwitchAccounts[player.id];
 
@@ -95,7 +95,7 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
       )}
 
       {/* Divider */}
-      {hasMainPlayer && (
+      {mainPlayerId && player.id !== mainPlayerId && (
         <>
           <div className="flex items-center">
             <div className="bg-border h-7 w-px" />

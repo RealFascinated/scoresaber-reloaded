@@ -9,9 +9,9 @@ import { parseAsStringLiteral } from "nuqs";
 import { Tab, TabGroup } from "../../ui/control-panel";
 
 const ALLOWED_SCORE_SABER_SCORE_MODES = ["live", "ssr"] as const;
-const SCORE_SABER_SCORE_MODE_QUERY = parseAsStringLiteral(
-  ALLOWED_SCORE_SABER_SCORE_MODES
-).withDefault("live");
+const SCORE_SABER_SCORE_MODE_QUERY = parseAsStringLiteral(ALLOWED_SCORE_SABER_SCORE_MODES).withDefault(
+  "live"
+);
 
 export const SCORES_MODES: Record<
   ScoreSaberScoreDataMode,
@@ -20,8 +20,7 @@ export const SCORES_MODES: Record<
   ssr: {
     name: "SSR",
     icon: <ScoresaberLogo className="h-4 w-4" />,
-    tooltip:
-      "SSR scores are the scores that are stored in SSR. They may be missing or out of date.",
+    tooltip: "SSR scores are the scores that are stored in SSR. They may be missing or out of date.",
   },
   live: {
     name: "Live",

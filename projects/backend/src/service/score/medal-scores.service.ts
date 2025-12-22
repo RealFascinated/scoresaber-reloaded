@@ -36,9 +36,7 @@ export class MedalScoresService {
       await this.rescanLeaderboard(leaderboard.id);
 
       if (index % 100 === 0) {
-        Logger.info(
-          `[MEDAL SCORES] Refreshed ${index} of ${rankedLeaderboards.length} ranked leaderboards`
-        );
+        Logger.info(`[MEDAL SCORES] Refreshed ${index} of ${rankedLeaderboards.length} ranked leaderboards`);
       }
     }
 
@@ -85,11 +83,7 @@ export class MedalScoresService {
 
       // Create a new medal score
       new ScoreSaberMedalsScoreModel({
-        ...getScoreSaberScoreFromToken(
-          score,
-          leaderboard.leaderboard,
-          score.leaderboardPlayerInfo.id
-        ),
+        ...getScoreSaberScoreFromToken(score, leaderboard.leaderboard, score.leaderboardPlayerInfo.id),
         medals: MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS],
       }).save();
     }
@@ -205,9 +199,7 @@ export class MedalScoresService {
         .select("_id medals")
         .lean();
 
-      const medalsBefore = Object.fromEntries(
-        playersBefore.map(p => [p._id.toString(), p.medals ?? 0])
-      );
+      const medalsBefore = Object.fromEntries(playersBefore.map(p => [p._id.toString(), p.medals ?? 0]));
       const medalsAfter = await PlayerMedalsService.updatePlayerMedalCounts(...affectedPlayerIds);
 
       const changes = new Map<string, MedalChange>();
@@ -231,9 +223,7 @@ export class MedalScoresService {
     const changes = await getChanges(medalChanges);
 
     Logger.info(
-      `[MEDAL SCORES] Medal changes on leaderboard ${score.leaderboardId}: ${Array.from(
-        changes.entries()
-      )
+      `[MEDAL SCORES] Medal changes on leaderboard ${score.leaderboardId}: ${Array.from(changes.entries())
         .map(([playerId, change]) => `${playerId}: ${change.before} -> ${change.after}`)
         .join(", ")}`
     );

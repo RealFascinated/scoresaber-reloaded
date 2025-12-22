@@ -28,10 +28,7 @@ interface EmptyStateProps {
 export function EmptyState({ icon, title, description, className }: EmptyStateProps) {
   return (
     <div
-      className={cn(
-        "bg-secondary/90 flex min-h-[200px] flex-col items-center justify-center p-8",
-        className
-      )}
+      className={cn("bg-secondary/90 flex min-h-[200px] flex-col items-center justify-center p-8", className)}
     >
       <div className="mb-6">
         {icon || <ChartBarIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />}

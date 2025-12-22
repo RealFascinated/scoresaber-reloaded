@@ -32,14 +32,7 @@ import { useCallback, useEffect } from "react";
 import { usePageTransition } from "../../../contexts/page-transition-context";
 import ScoresCard from "../../score/scores-card";
 import SimplePagination from "../../simple-pagination";
-import {
-  ButtonGroup,
-  ControlButton,
-  ControlPanel,
-  ControlRow,
-  Tab,
-  TabGroup,
-} from "../../ui/control-panel";
+import { ButtonGroup, ControlButton, ControlPanel, ControlRow, Tab, TabGroup } from "../../ui/control-panel";
 import { EmptyState } from "../../ui/empty-state";
 import PageTransition from "../../ui/page-transition";
 import AccSaberScoreComponent from "./score/accsaber-score";

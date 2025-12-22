@@ -56,8 +56,7 @@ export default function ScoreSaberScoreDisplay({
   }, [score]);
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp =
-    baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
+  const pp = baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
 
   const isTracked = score.isTracked && score.beatLeaderScore;
 

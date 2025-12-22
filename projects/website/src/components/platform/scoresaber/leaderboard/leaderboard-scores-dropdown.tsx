@@ -72,12 +72,8 @@ export default function LeaderboardScoresDropdown({
                 <tr className="border-border bg-muted/30 border-b">
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Rank</th>
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Player</th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
-                    Date Set
-                  </th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
-                    Accuracy
-                  </th>
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Date Set</th>
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Accuracy</th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Misses</th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
                     {leaderboard.stars > 0 ? "PP" : "Score"}

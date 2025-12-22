@@ -87,9 +87,7 @@ export default class BeatSaverService {
       map.id = (map as BeatSaverMapToken & { _id?: string })._id ?? map.id;
       return map;
     }
-    const token = await ApiServiceRegistry.getInstance()
-      .getBeatSaverService()
-      .lookupMap(normalizedHash);
+    const token = await ApiServiceRegistry.getInstance().getBeatSaverService().lookupMap(normalizedHash);
     if (!token) {
       return undefined;
     }

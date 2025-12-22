@@ -1,10 +1,4 @@
-import {
-  getModelForClass,
-  modelOptions,
-  prop,
-  ReturnModelType,
-  Severity,
-} from "@typegoose/typegoose";
+import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import type { MapDifficulty } from "../../score/map-difficulty";
 import type { MapCharacteristic } from "../../types/map-characteristic";

@@ -65,9 +65,7 @@ export class PlayerScoreHistoryService {
       throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
     }
 
-    const pagination = new Pagination<ScoreSaberScore>()
-      .setItemsPerPage(8)
-      .setTotalItems(totalScores);
+    const pagination = new Pagination<ScoreSaberScore>().setItemsPerPage(8).setTotalItems(totalScores);
 
     return pagination.getPageWithCursor(page, {
       sortField: "timestamp",

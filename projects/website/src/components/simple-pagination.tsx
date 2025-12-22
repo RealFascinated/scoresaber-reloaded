@@ -3,13 +3,7 @@
 import { cn } from "@/common/utils";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  MoreHorizontal,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, MoreHorizontal } from "lucide-react";
 import React, { useCallback } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -70,9 +64,7 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
           <div className="grid gap-4">
             <div className="space-y-1.5 text-center">
               <h4 className="leading-none font-medium">Go to Page</h4>
-              <p className="text-muted-foreground text-sm">
-                Max: {formatNumberWithCommas(totalPages)}
-              </p>
+              <p className="text-muted-foreground text-sm">Max: {formatNumberWithCommas(totalPages)}</p>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -175,14 +167,7 @@ type NavigationButtonProps = {
 };
 
 const NavigationButton = React.memo(
-  ({
-    page: buttonPage,
-    disabled,
-    isLoading,
-    children,
-    generatePageUrl,
-    onClick,
-  }: NavigationButtonProps) => (
+  ({ page: buttonPage, disabled, isLoading, children, generatePageUrl, onClick }: NavigationButtonProps) => (
     <Button
       asChild
       variant="ghost"
@@ -343,15 +328,7 @@ export default function SimplePagination({
     }
 
     return pageNumbers;
-  }, [
-    mobilePagination,
-    page,
-    totalPages,
-    loadingState,
-    handleLinkClick,
-    generatePageUrl,
-    handlePageChange,
-  ]);
+  }, [mobilePagination, page, totalPages, loadingState, handleLinkClick, generatePageUrl, handlePageChange]);
 
   // Calculate page numbers before render to ensure consistent timing
   const pageNumbers = renderPageNumbers();
@@ -381,19 +358,13 @@ export default function SimplePagination({
             <span className="text-foreground font-medium">
               {formatNumberWithCommas(Math.min(page * itemsPerPage, totalItems))}
             </span>{" "}
-            of{" "}
-            <span className="text-foreground font-medium">
-              {formatNumberWithCommas(totalItems)}
-            </span>
+            of <span className="text-foreground font-medium">{formatNumberWithCommas(totalItems)}</span>
           </p>
         </div>
       )}
 
       {/* Pagination Buttons */}
-      <nav
-        className="flex flex-wrap items-center justify-center gap-1.5"
-        aria-label="Pagination navigation"
-      >
+      <nav className="flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination navigation">
         {mobilePagination && (
           <NavigationButton
             page={1}

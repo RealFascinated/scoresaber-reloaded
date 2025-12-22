@@ -174,10 +174,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
 
     // Explicitly recalculate stars based on reset values
     if (scoresPpsArray.length > 0) {
-      const targetRawPp = ScoreSaberCurve.calcRawPpForExpectedPp(
-        scoresPpsArray,
-        DEFAULT_DESIRED_PP
-      );
+      const targetRawPp = ScoreSaberCurve.calcRawPpForExpectedPp(scoresPpsArray, DEFAULT_DESIRED_PP);
       let newStars = getStarsForAcc(targetRawPp, DEFAULT_ACCURACY);
 
       if (newStars < 0.5) {
@@ -223,12 +220,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
 
     const rawPp = ScoreSaberCurve.getPp(value, accuracy);
     const weightedGain = ScoreSaberCurve.getRawPpForWeightedPpGain(scoresPpsArray, rawPp);
-    const { newStars, newAcc, newDesiredPp } = adjustForBounds(
-      weightedGain,
-      false,
-      value,
-      accuracy
-    );
+    const { newStars, newAcc, newDesiredPp } = adjustForBounds(weightedGain, false, value, accuracy);
 
     if (newAcc !== accuracy) updateAccuracy(newAcc);
     if (newStars !== value) setStars(newStars);
@@ -257,12 +249,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
                 <span className="text-muted-foreground text-sm font-medium">
                   +{formatPp(desiredPpGain)}pp
                 </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleReset}
-                  className="touch-manipulation"
-                >
+                <Button variant="outline" size="sm" onClick={handleReset} className="touch-manipulation">
                   Reset
                 </Button>
               </div>
@@ -286,9 +273,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
                 <Label htmlFor="accuracy-slider" className="text-sm font-semibold sm:text-base">
                   Accuracy
                 </Label>
-                <span className="text-muted-foreground text-sm font-medium">
-                  {accuracy.toFixed(2)}%
-                </span>
+                <span className="text-muted-foreground text-sm font-medium">{accuracy.toFixed(2)}%</span>
               </div>
               <Slider
                 id="accuracy-slider"
@@ -306,9 +291,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
                 <Label htmlFor="stars-slider" className="text-sm font-semibold sm:text-base">
                   Stars
                 </Label>
-                <span className="text-muted-foreground text-sm font-medium">
-                  {stars.toFixed(1)}★
-                </span>
+                <span className="text-muted-foreground text-sm font-medium">{stars.toFixed(1)}★</span>
               </div>
               <Slider
                 id="stars-slider"
@@ -358,9 +341,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
                             key={threshold}
                             className="px-2 py-2 text-center font-mono text-xs sm:px-4 sm:py-3 sm:text-sm"
                           >
-                            {starsForAcc > SHARED_CONSTS.maxStars
-                              ? "—"
-                              : `${starsForAcc.toFixed(2)}★`}
+                            {starsForAcc > SHARED_CONSTS.maxStars ? "—" : `${starsForAcc.toFixed(2)}★`}
                           </td>
                         );
                       })}

@@ -35,9 +35,7 @@ export default function LeaderboardScores({
 
   const [mode, setMode] = useQueryState(
     "mode",
-    parseAsStringLiteral<ScoreModeEnum>(Object.values(ScoreModeEnum)).withDefault(
-      ScoreModeEnum.Global
-    )
+    parseAsStringLiteral<ScoreModeEnum>(Object.values(ScoreModeEnum)).withDefault(ScoreModeEnum.Global)
   );
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
@@ -46,13 +44,7 @@ export default function LeaderboardScores({
     isError,
     isLoading,
     isRefetching,
-  } = useLeaderboardScores(
-    leaderboard.id,
-    mainPlayerId ?? "",
-    page,
-    mode,
-    filter.country ?? undefined
-  );
+  } = useLeaderboardScores(leaderboard.id, mainPlayerId ?? "", page, mode, filter.country ?? undefined);
 
   useEffect(() => {
     setPage(1);
@@ -65,9 +57,7 @@ export default function LeaderboardScores({
   return (
     <div className="flex flex-col gap-(--spacing-md)">
       <div
-        className={
-          "flex flex-col flex-wrap items-center justify-center gap-4 sm:flex-row sm:justify-between"
-        }
+        className={"flex flex-col flex-wrap items-center justify-center gap-4 sm:flex-row sm:justify-between"}
       >
         <ScoreModeSwitcher initialMode={mode} onModeChange={setMode} />
 
@@ -77,9 +67,7 @@ export default function LeaderboardScores({
               key={index}
               {...difficultyData}
               selectedId={leaderboard.id}
-              inGameDifficulty={
-                beatSaver?.difficultyLabels?.[difficultyData.difficulty] ?? undefined
-              }
+              inGameDifficulty={beatSaver?.difficultyLabels?.[difficultyData.difficulty] ?? undefined}
             />
           ))}
         </div>
@@ -97,12 +85,8 @@ export default function LeaderboardScores({
                 <tr className="border-border bg-muted/30 border-b">
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Rank</th>
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Player</th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
-                    Date Set
-                  </th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
-                    Accuracy
-                  </th>
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Date Set</th>
+                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Accuracy</th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Misses</th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
                     {leaderboard.stars > 0 ? "PP" : "Score"}

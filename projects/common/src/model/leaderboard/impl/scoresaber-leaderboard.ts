@@ -1,10 +1,4 @@
-import {
-  getModelForClass,
-  modelOptions,
-  Prop,
-  ReturnModelType,
-  Severity,
-} from "@typegoose/typegoose";
+import { getModelForClass, modelOptions, Prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import Leaderboard from "../leaderboard";
 import { type LeaderboardStatus } from "../leaderboard-status";

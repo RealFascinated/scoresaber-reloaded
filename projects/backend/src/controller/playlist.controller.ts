@@ -28,9 +28,7 @@ export default function playlistController(app: Elysia) {
       .get(
         "/scoresaber-custom-ranked-maps",
         async ({ query: { config } }) => {
-          return playlistToBeatSaberPlaylist(
-            await PlaylistService.createCustomRankedPlaylist(config)
-          );
+          return playlistToBeatSaberPlaylist(await PlaylistService.createCustomRankedPlaylist(config));
         },
         {
           tags: ["Playlist"],
@@ -45,9 +43,7 @@ export default function playlistController(app: Elysia) {
       .get(
         "/snipe",
         async ({ query: { user, toSnipe, settings } }) => {
-          return playlistToBeatSaberPlaylist(
-            await PlaylistService.getSnipePlaylist(user, toSnipe, settings)
-          );
+          return playlistToBeatSaberPlaylist(await PlaylistService.getSnipePlaylist(user, toSnipe, settings));
         },
         {
           tags: ["Playlist"],

@@ -52,25 +52,19 @@ export class LeaderboardNotificationsService {
 
     // Newly ranked maps
     changelog = addChanges(changelog, newlyRankedMaps, update => {
-      const difficulty = getDifficultyName(
-        getDifficulty(update.newLeaderboard.difficulty.difficulty)
-      );
+      const difficulty = getDifficultyName(getDifficulty(update.newLeaderboard.difficulty.difficulty));
       return `now ranked ${update.newLeaderboard.fullName} (${difficulty}) mapped by ${update.newLeaderboard.levelAuthorName} at ${update.newLeaderboard.stars} stars\n`;
     });
 
     // Buffed maps
     changelog = addChanges(changelog, buffedMaps, update => {
-      const difficulty = getDifficultyName(
-        getDifficulty(update.newLeaderboard.difficulty.difficulty)
-      );
+      const difficulty = getDifficultyName(getDifficulty(update.newLeaderboard.difficulty.difficulty));
       return `changed (buffed) ${update.newLeaderboard.fullName} (${difficulty}) mapped by ${update.newLeaderboard.levelAuthorName} from ${update.previousLeaderboard?.stars} to ${update.newLeaderboard.stars} stars\n`;
     });
 
     // Nerfed maps
     changelog = addChanges(changelog, nerfedMaps, update => {
-      const difficulty = getDifficultyName(
-        getDifficulty(update.newLeaderboard.difficulty.difficulty)
-      );
+      const difficulty = getDifficultyName(getDifficulty(update.newLeaderboard.difficulty.difficulty));
       return `nerfed (nerf) ${update.newLeaderboard.fullName} (${difficulty}) mapped by ${update.newLeaderboard.levelAuthorName} from ${update.previousLeaderboard?.stars} to ${update.newLeaderboard.stars} stars\n`;
     });
 

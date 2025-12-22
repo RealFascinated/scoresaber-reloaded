@@ -60,10 +60,7 @@ export default async function PlayerPage(props: Props) {
   const player = await ssrApi.getScoreSaberPlayer(id, "full");
   if (player == undefined) {
     return (
-      <NotFound
-        title="Player Not Found"
-        description="The player you were looking for could not be found"
-      />
+      <NotFound title="Player Not Found" description="The player you were looking for could not be found" />
     );
   }
 

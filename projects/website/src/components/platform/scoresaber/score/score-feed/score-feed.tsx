@@ -4,10 +4,7 @@ import Avatar from "@/components/avatar";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
 import SimpleLink from "@/components/simple-link";
 import Logger from "@ssr/common/logger";
-import {
-  getScoreSaberLeaderboardFromToken,
-  getScoreSaberScoreFromToken,
-} from "@ssr/common/token-creators";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import { ScoreSaberWebsocketMessageToken } from "@ssr/common/types/token/scoresaber/websocket/websocket-message";
 import { parseDate } from "@ssr/common/utils/time-utils";
@@ -64,14 +61,9 @@ export default function ScoreFeed() {
                 alt={`${player.name}'s Profile Picture`}
               />
               <SimpleLink href={`/player/${player.id}`}>
-                <span className="text-primary hover:text-primary/80 transition-all">
-                  {player.name}
-                </span>
+                <span className="text-primary hover:text-primary/80 transition-all">{player.name}</span>
               </SimpleLink>
-              <p className="text-xs text-gray-400">
-                {" "}
-                on {scoreToken.score.deviceHmd || "Unknown Device"}
-              </p>
+              <p className="text-xs text-gray-400"> on {scoreToken.score.deviceHmd || "Unknown Device"}</p>
             </div>
             <ScoreSaberScoreDisplay
               key={score.scoreId}

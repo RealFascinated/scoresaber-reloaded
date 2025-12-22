@@ -3,13 +3,7 @@
 import { cn } from "@/common/utils";
 import ScoreSettings from "@/components/settings/category/score-settings";
 import WebsiteSettings from "@/components/settings/category/website-settings";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CubeIcon, GlobeAmericasIcon, UserIcon } from "@heroicons/react/24/solid";
 import { ReactNode, useState } from "react";
 import { IconType } from "react-icons";

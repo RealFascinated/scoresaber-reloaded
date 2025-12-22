@@ -6,22 +6,11 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ControlButton } from "@/components/ui/control-panel";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -72,15 +61,9 @@ interface Props {
 
 function generateFilename(toSnipeId: string, data: SnipeSettings): string {
   const scoreType =
-    data.rankedStatus === "all"
-      ? "all"
-      : data.rankedStatus === "ranked"
-        ? "ranked-only"
-        : "unranked-only";
+    data.rankedStatus === "all" ? "all" : data.rankedStatus === "ranked" ? "ranked-only" : "unranked-only";
   const starRange =
-    data.rankedStatus === "ranked" && data.starRange
-      ? `-${data.starRange.min}-${data.starRange.max}⭐`
-      : "";
+    data.rankedStatus === "ranked" && data.starRange ? `-${data.starRange.min}-${data.starRange.max}⭐` : "";
   const sortInfo = `${data.sort}-${data.sortDirection ?? "desc"}`;
   const accuracyRange = data.accuracyRange ? `-${data.accuracyRange.min}-${data.accuracyRange.max}%` : "";
   return `ssr-snipe-${toSnipeId}-${scoreType}${starRange}${accuracyRange}-${sortInfo}.bplist`;
@@ -99,6 +82,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
       accuracyRange: { min: 0, max: 100 },
       rankedStatus: "ranked",
       starRange: { min: 0, max: SHARED_CONSTS.maxStars },
+      requireBothScores: false,
     },
   });
 
@@ -118,10 +102,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
     (newSort: SortOption) => {
       const opt = SORT_OPTIONS[newSort];
       form.setValue("sort", newSort);
-      form.setValue(
-        "sortDirection",
-        sort === newSort && sortDirection === "desc" ? "asc" : opt.defaultOrder
-      );
+      form.setValue("sortDirection", sort === newSort && sortDirection === "desc" ? "asc" : opt.defaultOrder);
     },
     [form, sort, sortDirection]
   );
@@ -194,8 +175,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                     {availableSorts.map(opt => {
                       const isActive = opt.value === sort;
                       const Icon = opt.icon;
-                      const DirectionIcon =
-                        isActive && sortDirection === "desc" ? ArrowDown : ArrowUp;
+                      const DirectionIcon = isActive && sortDirection === "desc" ? ArrowDown : ArrowUp;
                       return (
                         <ControlButton
                           key={opt.value}
@@ -203,11 +183,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                           onClick={() => handleSort(opt.value)}
                           type="button"
                         >
-                          {isActive ? (
-                            <DirectionIcon className="h-4 w-4" />
-                          ) : (
-                            <Icon className="h-4 w-4" />
-                          )}
+                          {isActive ? <DirectionIcon className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                           {opt.name}
                         </ControlButton>
                       );
@@ -221,9 +197,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                       control={form.control}
                       render={({ field, fieldState }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-sm font-normal">
-                            Score Type
-                          </FormLabel>
+                          <FormLabel className="text-sm font-normal">Score Type</FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
                               <SelectTrigger className="w-full">
@@ -257,22 +231,20 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                           const val = field.value ?? { min: 0, max: SHARED_CONSTS.maxStars };
                           return (
                             <FormItem className="space-y-2">
-                              <FormLabel className="text-sm font-normal">
-                                Star Range
-                              </FormLabel>
+                              <FormLabel className="text-sm font-normal">Star Range</FormLabel>
                               <FormControl>
-                                <DualRangeSlider
-                                  min={0}
-                                  max={SHARED_CONSTS.maxStars}
-                                  step={1}
-                                  label={v => <span className="text-xs">{v}</span>}
-                                  value={[val.min, val.max]}
-                                  showLabelOnHover={false}
-                                  onValueChange={vals =>
-                                    field.onChange({ min: vals[0], max: vals[1] })
-                                  }
-                                  className="pt-10 pb-1 w-full"
-                                />
+                                <div className="w-full">
+                                  <DualRangeSlider
+                                    min={0}
+                                    max={SHARED_CONSTS.maxStars}
+                                    step={1}
+                                    label={v => <span className="text-xs">{v}</span>}
+                                    value={[val.min, val.max]}
+                                    showLabelOnHover={false}
+                                    onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
+                                    className="w-full pt-10 pb-1"
+                                  />
+                                </div>
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -288,26 +260,22 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                         const val = field.value ?? { min: 0, max: 100 };
                         return (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-sm font-normal">
-                              Accuracy Range
-                            </FormLabel>
+                            <FormLabel className="text-sm font-normal">Accuracy Range</FormLabel>
                             <FormControl>
-                              <DualRangeSlider
-                                min={0}
-                                max={100}
-                                step={0.1}
-                                label={v => (
-                                  <span className="text-xs">
-                                    {v !== undefined ? v.toFixed(0) : "0.0"}%
-                                  </span>
-                                )}
-                                value={[val.min, val.max]}
-                                showLabelOnHover={false}
-                                onValueChange={vals =>
-                                  field.onChange({ min: vals[0], max: vals[1] })
-                                }
-                                className="pt-10 pb-1 w-full"
-                              />
+                              <div className="w-full">
+                                <DualRangeSlider
+                                  min={0}
+                                  max={100}
+                                  step={0.1}
+                                  label={v => (
+                                    <span className="text-xs">{v !== undefined ? v.toFixed(0) : "0.0"}%</span>
+                                  )}
+                                  value={[val.min, val.max]}
+                                  showLabelOnHover={false}
+                                  onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
+                                  className="w-full pt-10 pb-1"
+                                />
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -315,6 +283,21 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                       }}
                     />
                   </div>
+
+                  <Controller
+                    name="requireBothScores"
+                    control={form.control}
+                    render={({ field }) => (
+                      <FormItem className="mt-(--spacing-xl) flex flex-row items-center justify-between">
+                        <FormLabel className="text-sm font-normal">
+                          Require Both Players Have Scores on a Leaderboard
+                        </FormLabel>
+                        <FormControl>
+                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </form>
               </Form>
             </div>
@@ -322,12 +305,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
 
           {/* Footer */}
           <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
-            <Button
-              type="submit"
-              form="snipe-playlist-form"
-              className="gap-2"
-              disabled={downloading}
-            >
+            <Button type="submit" form="snipe-playlist-form" className="gap-2" disabled={downloading}>
               {downloading ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
               <span>Download Playlist</span>
             </Button>

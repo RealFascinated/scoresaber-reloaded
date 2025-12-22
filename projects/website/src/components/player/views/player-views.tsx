@@ -4,13 +4,7 @@ import { HistoryMode } from "@/common/player/history-mode";
 import Card from "@/components/card";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -119,8 +113,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
   const { data: statisticHistory } = useQuery({
     queryKey: ["player-statistic-history", player.id, daysAgo],
-    queryFn: () =>
-      ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date()),
+    queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date()),
     placeholderData: data => data,
   });
 
@@ -135,24 +128,15 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
         switch (historyMode) {
           case HistoryMode.SIMPLE:
             return (
-              <PlayerSimpleRankingChart
-                statisticHistory={statisticHistory}
-                daysAmount={actualDaysAgo}
-              />
+              <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
             );
           case HistoryMode.ADVANCED:
             return (
-              <PlayerAdvancedRankingChart
-                statisticHistory={statisticHistory}
-                daysAmount={actualDaysAgo}
-              />
+              <PlayerAdvancedRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
             );
           default:
             return (
-              <PlayerSimpleRankingChart
-                statisticHistory={statisticHistory}
-                daysAmount={actualDaysAgo}
-              />
+              <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
             );
         }
       },

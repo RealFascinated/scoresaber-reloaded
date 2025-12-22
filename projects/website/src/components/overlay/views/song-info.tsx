@@ -36,9 +36,7 @@ export default function OverlaySongInfoView({ overlayData }: OverlaySongInfoProp
         <div>
           <p className="font-bold">{beatSaverMap.metadata.songName}</p>
           {beatSaverMap.metadata.songAuthorName && (
-            <p className="text-muted-foreground text-sm">
-              by {beatSaverMap.metadata.songAuthorName}
-            </p>
+            <p className="text-muted-foreground text-sm">by {beatSaverMap.metadata.songAuthorName}</p>
           )}
           <p className="text-muted-foreground text-sm">
             Mapped by {truncateText(beatSaverMap.metadata.levelAuthorName, 48)}

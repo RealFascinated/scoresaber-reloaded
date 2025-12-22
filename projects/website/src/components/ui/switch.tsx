@@ -3,10 +3,7 @@ import * as React from "react";
 
 import { cn } from "@/common/utils";
 
-function Switch({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>) {
+function Switch({ className, ...props }: React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>) {
   return (
     <SwitchPrimitives.Root
       className={cn(

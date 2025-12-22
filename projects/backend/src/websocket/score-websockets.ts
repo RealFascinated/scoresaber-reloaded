@@ -1,10 +1,7 @@
 import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerModel } from "@ssr/common/model/player/player";
-import {
-  getScoreSaberLeaderboardFromToken,
-  getScoreSaberScoreFromToken,
-} from "@ssr/common/token-creators";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
@@ -39,11 +36,7 @@ export class ScoreWebsockets implements EventListener {
         for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
           if (now - pendingScore.timestamp >= ScoreWebsockets.SCORE_MATCH_TIMEOUT) {
             ScoreWebsockets.clearPendingScore(key);
-            if (
-              pendingScore.scoreSaberToken &&
-              pendingScore.leaderboardToken &&
-              pendingScore.player
-            ) {
+            if (pendingScore.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
               this.processScore(
                 pendingScore.scoreSaberToken,
                 pendingScore.leaderboardToken,
@@ -113,11 +106,7 @@ export class ScoreWebsockets implements EventListener {
           //   `[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`
           // );
 
-          if (
-            pendingScore?.scoreSaberToken &&
-            pendingScore.leaderboardToken &&
-            pendingScore.player
-          ) {
+          if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
             // Found a matching ScoreSaber score, process both
             ScoreWebsockets.clearPendingScore(key);
             await this.processScore(

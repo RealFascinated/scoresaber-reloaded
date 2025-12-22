@@ -292,10 +292,7 @@ app.onStart(async () => {
 
   Logger.info("Listening on port http://localhost:8080");
   await initDiscordBot();
-  sendEmbedToChannel(
-    DiscordChannels.BACKEND_LOGS,
-    new EmbedBuilder().setDescription("Backend started!")
-  );
+  sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder().setDescription("Backend started!"));
 
   // Log all registered routes
   Logger.info("Registered routes:");

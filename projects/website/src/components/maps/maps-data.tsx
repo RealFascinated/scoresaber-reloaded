@@ -82,15 +82,8 @@ export function MapsData({ type }: MapsDataProps) {
           {/* External Links */}
           {selectedCategory.id === "ranking-queue" && (
             <Card>
-              <SimpleTooltip
-                display={<p>Click to open the Ranking Queue on ScoreSaber</p>}
-                side="bottom"
-              >
-                <SimpleLink
-                  href="https://scoresaber.com/ranking/requests"
-                  target="_blank"
-                  className="w-full"
-                >
+              <SimpleTooltip display={<p>Click to open the Ranking Queue on ScoreSaber</p>} side="bottom">
+                <SimpleLink href="https://scoresaber.com/ranking/requests" target="_blank" className="w-full">
                   <Button className="flex w-full items-center justify-center gap-2">
                     <ExternalLinkIcon className="h-4 w-4" />
                     <span>ScoreSaber Ranking Queue</span>

@@ -78,9 +78,7 @@ export const BACKGROUND_COVERS: BackgroundCover[] = [
   },
 ];
 
-const ALL_IMAGES = BACKGROUND_COVERS.filter(cover => cover.type === "image").map(
-  cover => cover.value
-);
+const ALL_IMAGES = BACKGROUND_COVERS.filter(cover => cover.type === "image").map(cover => cover.value);
 
 const getRandomIndex = (excludeIndex?: number): number => {
   if (ALL_IMAGES.length === 0) return 0;
@@ -146,9 +144,7 @@ export default function BackgroundCover() {
   }
 
   const imageUrl =
-    cover.type === "rotating-images" || cover.type === "random"
-      ? ALL_IMAGES[currentImageIndex]
-      : cover.value;
+    cover.type === "rotating-images" || cover.type === "random" ? ALL_IMAGES[currentImageIndex] : cover.value;
 
   return (
     <img

@@ -4,10 +4,7 @@ import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
-import {
-  ScoreSaberScore,
-  ScoreSaberScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import {
@@ -17,10 +14,7 @@ import {
 import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
-import {
-  getScoreSaberLeaderboardFromToken,
-  getScoreSaberScoreFromToken,
-} from "@ssr/common/token-creators";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { ScoreQuery, SortDirection, SortField } from "@ssr/common/types/score-query";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
@@ -111,9 +105,7 @@ export class PlayerScoresService {
      * @param page the page to get
      * @returns the scores page
      */
-    async function getScoresPage(
-      page: number
-    ): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
+    async function getScoresPage(page: number): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
       return ScoreSaberApiService.lookupPlayerScores({
         playerId: playerId,
         page: page,
@@ -364,13 +356,10 @@ export class PlayerScoresService {
       throw new NotFoundError("Score not found");
     }
 
-    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(
-      rawScore.leaderboardId,
-      {
-        includeBeatSaver: true,
-        beatSaverType: "full",
-      }
-    );
+    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(rawScore.leaderboardId, {
+      includeBeatSaver: true,
+      beatSaverType: "full",
+    });
     if (!leaderboardResponse) {
       throw new NotFoundError("Leaderboard not found");
     }
@@ -493,9 +482,7 @@ export class PlayerScoresService {
      */
     function buildScoreQuery(): FilterQuery<ScoreSaberScore> {
       const uniquePlayerIds = Array.from(new Set([playerId, ...(filters.includePlayers || [])]));
-      const queryConditions: FilterQuery<ScoreSaberScore>[] = [
-        { playerId: { $in: uniquePlayerIds } },
-      ];
+      const queryConditions: FilterQuery<ScoreSaberScore>[] = [{ playerId: { $in: uniquePlayerIds } }];
 
       // Filter out invalid accuracies (null, undefined, Infinity, etc.)
       if (sort === "acc") {
@@ -570,14 +557,14 @@ export class PlayerScoresService {
           .limit(1)
           .select({ [sortField]: 1, _id: 1 })
           .lean();
-        
+
         // Use index hints for known indexes to optimize skip performance
         if (sortField === "pp") {
           queryBuilder.hint({ pp: sortOrder, _id: sortOrder });
         } else if (sortField === "timestamp") {
           queryBuilder.hint({ playerId: 1, timestamp: sortOrder, _id: sortOrder });
         }
-        
+
         const items = await queryBuilder;
         return (items[0] as Record<string, unknown>) || null;
       },
@@ -609,13 +596,9 @@ export class PlayerScoresService {
 
               const { leaderboard, beatsaver } = leaderboardResponse;
               return {
-                score: await ScoreCoreService.insertScoreData(
-                  scoreToObject(rawScore),
-                  leaderboard,
-                  {
-                    removeScoreWeightAndRank: mode === "ssr",
-                  }
-                ),
+                score: await ScoreCoreService.insertScoreData(scoreToObject(rawScore), leaderboard, {
+                  removeScoreWeightAndRank: mode === "ssr",
+                }),
                 leaderboard: leaderboard,
                 beatSaver: beatsaver,
               } as PlayerScore;

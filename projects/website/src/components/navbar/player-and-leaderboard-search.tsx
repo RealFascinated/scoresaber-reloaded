@@ -177,8 +177,7 @@ export default function PlayerAndLeaderboardSearch() {
                             <span
                               className="font-medium"
                               style={{
-                                color:
-                                  getDifficulty(leaderboard.difficulty.difficulty).color + "f0",
+                                color: getDifficulty(leaderboard.difficulty.difficulty).color + "f0",
                               }}
                             >
                               {getDifficultyName(leaderboard.difficulty.difficulty)}
@@ -187,9 +186,7 @@ export default function PlayerAndLeaderboardSearch() {
                               <>
                                 <span className="text-muted-foreground/60">·</span>
                                 <div className="text-pp flex items-center gap-1">
-                                  <span className="font-medium">
-                                    {leaderboard.stars.toFixed(2)}
-                                  </span>
+                                  <span className="font-medium">{leaderboard.stars.toFixed(2)}</span>
                                   <StarIcon className="w-3.5" />
                                 </div>
                               </>

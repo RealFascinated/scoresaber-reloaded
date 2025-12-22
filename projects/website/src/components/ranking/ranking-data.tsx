@@ -111,10 +111,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
         <Card className="h-fit w-full gap-4">
           {!rankingData && !isError && (
-            <FancyLoader
-              title="Loading Players"
-              description="Please wait while we fetch the players..."
-            />
+            <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
           )}
 
           {isError && (

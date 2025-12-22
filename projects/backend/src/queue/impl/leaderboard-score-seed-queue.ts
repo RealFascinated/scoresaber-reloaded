@@ -49,9 +49,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
       // Log every 10 pages, the first page, and the last page
       if (currentPage % 10 === 0 || currentPage === 1 || currentPage === totalPages) {
-        Logger.info(
-          `Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`
-        );
+        Logger.info(`Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`);
       }
 
       for (const rawScore of response.scores) {
@@ -64,13 +62,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           continue;
         }
 
-        await ScoreCoreService.trackScoreSaberScore(
-          score,
-          leaderboard,
-          score.playerInfo,
-          undefined,
-          false
-        );
+        await ScoreCoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo, undefined, false);
         processedAnyScores = true;
       }
 
@@ -80,15 +72,10 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
     // Update the seeded scores status only if we processed at least one score
     if (processedAnyScores) {
-      await ScoreSaberLeaderboardModel.updateOne(
-        { _id: leaderboardId },
-        { $set: { seededScores: true } }
-      );
+      await ScoreSaberLeaderboardModel.updateOne({ _id: leaderboardId }, { $set: { seededScores: true } });
       Logger.info(`Updated seeded scores status for leaderboard "${leaderboardId}"`);
     } else {
-      Logger.warn(
-        `Skipping seeded flag for leaderboard "${leaderboardId}" because no scores were processed`
-      );
+      Logger.warn(`Skipping seeded flag for leaderboard "${leaderboardId}" because no scores were processed`);
     }
   }
 

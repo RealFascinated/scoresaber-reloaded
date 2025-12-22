@@ -1,7 +1,4 @@
-import {
-  ScoreSaberScore,
-  ScoreSaberScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -30,10 +27,7 @@ export class TopScoresService {
       buildCursorQuery: cursor => {
         if (!cursor) return { pp: { $gt: 0 } };
         return {
-          $or: [
-            { pp: { $lt: cursor.sortValue } },
-            { pp: cursor.sortValue, _id: { $lt: cursor.id } },
-          ],
+          $or: [{ pp: { $lt: cursor.sortValue } }, { pp: cursor.sortValue, _id: { $lt: cursor.id } }],
           pp: { $gt: 0 },
         };
       },

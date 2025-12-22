@@ -43,10 +43,7 @@ export class LeaderboardCoreService {
    * @param options the options to use for the fetch
    * @returns the fetched leaderboard
    */
-  public static async getLeaderboard(
-    id: number,
-    options?: LeaderboardOptions
-  ): Promise<LeaderboardResponse> {
+  public static async getLeaderboard(id: number, options?: LeaderboardOptions): Promise<LeaderboardResponse> {
     const defaultOptions = {
       ...DEFAULT_OPTIONS,
       ...options,
@@ -114,10 +111,7 @@ export class LeaderboardCoreService {
     }
 
     const data = LeaderboardCoreService.processLeaderboard(
-      await LeaderboardCoreService.saveLeaderboard(
-        id,
-        getScoreSaberLeaderboardFromToken(leaderboardToken)
-      )
+      await LeaderboardCoreService.saveLeaderboard(id, getScoreSaberLeaderboardFromToken(leaderboardToken))
     );
 
     (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
@@ -230,12 +224,10 @@ export class LeaderboardCoreService {
           getScoreSaberLeaderboardFromToken(leaderboardToken)
         );
 
-        (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add(
-          {
-            id: leaderboard.id.toString(),
-            data: leaderboard.id,
-          }
-        );
+        (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
+          id: leaderboard.id.toString(),
+          data: leaderboard.id,
+        });
 
         Logger.info(
           `Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`
@@ -300,9 +292,7 @@ export class LeaderboardCoreService {
       }
 
       if (logProgress && (page % 10 === 0 || page === 1 || page >= totalPages)) {
-        Logger.info(
-          `Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`
-        );
+        Logger.info(`Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`);
       }
 
       page++;
@@ -366,10 +356,7 @@ export class LeaderboardCoreService {
    * @param beatSaverType the type of BeatSaver data to fetch
    * @returns the BeatSaver data
    */
-  public static async fetchBeatSaverData(
-    leaderboard: ScoreSaberLeaderboard,
-    beatSaverType?: DetailType
-  ) {
+  public static async fetchBeatSaverData(leaderboard: ScoreSaberLeaderboard, beatSaverType?: DetailType) {
     try {
       return await BeatSaverService.getMap(
         leaderboard.songHash,
@@ -414,14 +401,10 @@ export class LeaderboardCoreService {
    * Gets all the ranked leaderboards
    */
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetchWithCache(
-      CacheId.Leaderboards,
-      "leaderboard:ranked-leaderboards",
-      async () => {
-        const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true }).lean();
-        return leaderboards.map(leaderboard => leaderboardToObject(leaderboard));
-      }
-    );
+    return CacheService.fetchWithCache(CacheId.Leaderboards, "leaderboard:ranked-leaderboards", async () => {
+      const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true }).lean();
+      return leaderboards.map(leaderboard => leaderboardToObject(leaderboard));
+    });
   }
 
   /**
@@ -442,20 +425,14 @@ export class LeaderboardCoreService {
    * Gets the ranking queue leaderboards
    */
   public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetchWithCache(
-      CacheId.Leaderboards,
-      "leaderboard:ranking-queue-maps",
-      async () => {
-        const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
-        if (!rankingQueueTokens) {
-          return [];
-        }
-
-        return rankingQueueTokens.all.map(token =>
-          getScoreSaberLeaderboardFromToken(token.leaderboardInfo)
-        );
+    return CacheService.fetchWithCache(CacheId.Leaderboards, "leaderboard:ranking-queue-maps", async () => {
+      const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
+      if (!rankingQueueTokens) {
+        return [];
       }
-    );
+
+      return rankingQueueTokens.all.map(token => getScoreSaberLeaderboardFromToken(token.leaderboardInfo));
+    });
   }
 
   /**
@@ -476,10 +453,7 @@ export class LeaderboardCoreService {
     }
 
     const leaderboardIds = items.map(getId);
-    const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(
-      leaderboardIds,
-      options
-    );
+    const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, options);
 
     return new Map(leaderboardResponses.map(response => [response.leaderboard.id, response]));
   }

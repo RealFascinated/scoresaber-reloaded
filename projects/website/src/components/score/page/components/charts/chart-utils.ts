@@ -43,11 +43,7 @@ export function createHandDatasets(
   ];
 }
 
-export function createTimeChartConfig(
-  id: string,
-  datasets: ChartDataset[],
-  yAxisName: string
-): ChartConfig {
+export function createTimeChartConfig(id: string, datasets: ChartDataset[], yAxisName: string): ChartConfig {
   return {
     id,
     datasets,

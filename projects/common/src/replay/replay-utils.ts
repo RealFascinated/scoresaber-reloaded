@@ -1,8 +1,4 @@
-import {
-  CutDistribution,
-  DecodedReplayResponse,
-  SwingSpeed,
-} from "../types/decoded-replay-response";
+import { CutDistribution, DecodedReplayResponse, SwingSpeed } from "../types/decoded-replay-response";
 import { NoteCutInfo, Replay, ReplayDecoder } from "./replay-decoder";
 
 /**
@@ -61,10 +57,7 @@ export function getCutScore(cutInfo: NoteCutInfo): number {
   const followThroughScore = Math.max(0, Math.min(30, cutInfo.afterCutRating * 30));
 
   // cutDistanceToCenter: 15 * (1 - Clamp01(cutDistanceToCenter / 0.3f))
-  const centerCutScore = Math.max(
-    0,
-    Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3)))
-  );
+  const centerCutScore = Math.max(0, Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3))));
 
   const totalCutScore = Math.round(approachScore + followThroughScore + centerCutScore);
   return Math.max(0, Math.min(115, totalCutScore));
@@ -78,10 +71,7 @@ export function getCutScore(cutInfo: NoteCutInfo): number {
  */
 export function getDistanceToCenterScore(cutInfo: NoteCutInfo): number {
   // cutDistanceToCenter: 15 * (1 - Clamp01(cutDistanceToCenter / 0.3f))
-  const centerCutScore = Math.max(
-    0,
-    Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3)))
-  );
+  const centerCutScore = Math.max(0, Math.min(15, 15 * (1 - Math.min(1, cutInfo.cutDistanceToCenter / 0.3))));
 
   return Math.round(centerCutScore);
 }

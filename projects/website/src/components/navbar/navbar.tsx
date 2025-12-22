@@ -16,24 +16,9 @@ import { FaMedal } from "react-icons/fa";
 
 const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
-  <SimpleNavLink
-    key="ranking"
-    name="Ranking"
-    icon={<TrendingUpIcon className="size-5" />}
-    href="/ranking"
-  />,
-  <SimpleNavLink
-    key="medals"
-    name="Medals"
-    icon={<FaMedal className="size-4.5" />}
-    href="/medals"
-  />,
-  <SimpleNavLink
-    key="maps"
-    name="Maps"
-    icon={<MusicIcon className="size-5" />}
-    href="/maps/leaderboards"
-  />,
+  <SimpleNavLink key="ranking" name="Ranking" icon={<TrendingUpIcon className="size-5" />} href="/ranking" />,
+  <SimpleNavLink key="medals" name="Medals" icon={<FaMedal className="size-4.5" />} href="/medals" />,
+  <SimpleNavLink key="maps" name="Maps" icon={<MusicIcon className="size-5" />} href="/maps/leaderboards" />,
   <SimpleNavLink
     key="overlay"
     name="Overlay"

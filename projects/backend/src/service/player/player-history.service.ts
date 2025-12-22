@@ -1,9 +1,6 @@
 import Logger from "@ssr/common/logger";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
-import {
-  PlayerHistoryEntry,
-  PlayerHistoryEntryModel,
-} from "@ssr/common/model/player/player-history-entry";
+import { PlayerHistoryEntry, PlayerHistoryEntryModel } from "@ssr/common/model/player/player-history-entry";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
@@ -83,10 +80,7 @@ export class PlayerHistoryService {
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
           (async () => {
-            PlayerModel.updateOne(
-              { _id: foundPlayer._id },
-              { $set: { inactive: player.inactive } }
-            );
+            PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } });
             redisClient.del(`scoresaber:cached-player:${foundPlayer._id}`);
           })(),
       ]);
@@ -181,9 +175,7 @@ export class PlayerHistoryService {
       );
     }
 
-    Logger.info(
-      `Tracked player "${foundPlayer._id}" in ${(performance.now() - before).toFixed(0)}ms`
-    );
+    Logger.info(`Tracked player "${foundPlayer._id}" in ${(performance.now() - before).toFixed(0)}ms`);
   }
 
   /**
@@ -270,9 +262,7 @@ export class PlayerHistoryService {
 
     // Ensure start date is before end date
     const [queryStart, queryEnd] =
-      startTimestamp > endTimestamp
-        ? [endTimestamp, startTimestamp]
-        : [startTimestamp, endTimestamp];
+      startTimestamp > endTimestamp ? [endTimestamp, startTimestamp] : [startTimestamp, endTimestamp];
 
     // Run queries in parallel
     const [entries, playerRankHistory] = await Promise.all([
@@ -294,8 +284,7 @@ export class PlayerHistoryService {
       history[date] = playerHistoryToObject(entry);
     }
 
-    const daysDiff =
-      Math.abs(Math.ceil((endTimestamp - startTimestamp) / (1000 * 60 * 60 * 24))) + 1;
+    const daysDiff = Math.abs(Math.ceil((endTimestamp - startTimestamp) / (1000 * 60 * 60 * 24))) + 1;
 
     // `parseRankHistory()` includes today's rank (playerToken.rank) as the last element.
     // ScoreSaber's `histories` string ends at yesterday, so we start at "yesterday"
@@ -330,11 +319,7 @@ export class PlayerHistoryService {
           { rank },
           { upsert: true }
         );
-        Logger.info(
-          `Created missing history entry for %s on %s`,
-          player.name ?? player.id,
-          dateKey
-        );
+        Logger.info(`Created missing history entry for %s on %s`, player.name ?? player.id, dateKey);
       }
     }
 
@@ -429,8 +414,7 @@ export class PlayerHistoryService {
       rankedScoresImproved: existingEntry?.rankedScoresImproved ?? 0,
       unrankedScoresImproved: existingEntry?.unrankedScoresImproved ?? 0,
       totalScores: playerToken.scoreStats.totalPlayCount,
-      totalUnrankedScores:
-        playerToken.scoreStats.totalPlayCount - playerToken.scoreStats.rankedPlayCount,
+      totalUnrankedScores: playerToken.scoreStats.totalPlayCount - playerToken.scoreStats.rankedPlayCount,
       totalRankedScores: playerToken.scoreStats.rankedPlayCount,
       totalScore: playerToken.scoreStats.totalScore,
       totalRankedScore: playerToken.scoreStats.totalRankedScore,
@@ -451,10 +435,7 @@ export class PlayerHistoryService {
     isRanked: boolean,
     isImprovement: boolean
   ): Promise<void> {
-    const getCounterToIncrement = (
-      isRanked: boolean,
-      isImprovement: boolean
-    ): keyof PlayerHistoryEntry => {
+    const getCounterToIncrement = (isRanked: boolean, isImprovement: boolean): keyof PlayerHistoryEntry => {
       if (isRanked) {
         return isImprovement ? "rankedScoresImproved" : "rankedScores";
       }

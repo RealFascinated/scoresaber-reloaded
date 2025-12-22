@@ -36,13 +36,7 @@ export function Change({ change, formatValue, className, isPp, showColors }: Cha
   }
 
   return (
-    <p
-      className={clsx(
-        "text-sm",
-        showColors && (change > 0 ? "text-green-400" : "text-red-400"),
-        className
-      )}
-    >
+    <p className={clsx("text-sm", showColors && (change > 0 ? "text-green-400" : "text-red-400"), className)}>
       {formatted}
     </p>
   );

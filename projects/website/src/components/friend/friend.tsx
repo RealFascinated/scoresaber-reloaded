@@ -49,9 +49,7 @@ export default function Friend({ player, onClick }: FriendProps) {
         </div>
       </SimpleLink>
       <SimpleTooltip
-        display={
-          <p className="pointer-events-none cursor-default">Remove {name} from your friends</p>
-        }
+        display={<p className="pointer-events-none cursor-default">Remove {name} from your friends</p>}
       >
         <div onClick={() => removeFriend()}>
           <XIcon className="h-5 w-5" />

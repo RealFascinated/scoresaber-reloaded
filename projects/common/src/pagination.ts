@@ -2,9 +2,7 @@ import { NotFoundError } from "./error/not-found-error";
 import { Metadata } from "./types/metadata";
 
 type FetchItemsFunction<T> = (fetchItems: FetchItems) => Promise<T[]>;
-type FetchItemsWithCursorFunction<T, TQuery = unknown> = (
-  cursorInfo: CursorInfo<TQuery>
-) => Promise<T[]>;
+type FetchItemsWithCursorFunction<T, TQuery = unknown> = (cursorInfo: CursorInfo<TQuery>) => Promise<T[]>;
 type GetCursorFunction<TItem> = (item: TItem) => Cursor;
 type BuildCursorQueryFunction<TQuery> = (cursor: Cursor | null) => TQuery;
 
@@ -15,7 +13,7 @@ export class Pagination<T> {
 
   /**
    * Sets the number of items per page.
-   * 
+   *
    * @param itemsPerPage the number of items per page.
    * @returns the pagination
    */
@@ -26,7 +24,7 @@ export class Pagination<T> {
 
   /**
    * Sets the items to paginate.
-   * 
+   *
    * @param items the items to paginate.
    * @returns the pagination
    */
@@ -38,7 +36,7 @@ export class Pagination<T> {
 
   /**
    * Sets the total number of items.
-   * 
+   *
    * @param totalItems the total number of items.
    * @returns the pagination
    */
@@ -49,7 +47,7 @@ export class Pagination<T> {
 
   /**
    * Gets a page of items, using either static items or a dynamic fetchItems callback.
-   * 
+   *
    * @param page the page number to retrieve.
    * @param fetchItems the async function to fetch items if setItems was not used.
    * @returns a promise resolving to the page of items.
@@ -156,7 +154,7 @@ export class Pagination<T> {
 
   /**
    * Gets an empty page.
-   * 
+   *
    * @param T the type of items in the page.
    * @returns the empty page.
    */

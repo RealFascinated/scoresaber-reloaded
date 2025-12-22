@@ -109,11 +109,7 @@ export default function scoresController(app: Elysia) {
       .post(
         "/friend/leaderboard/:leaderboardId/:page",
         async ({ params: { leaderboardId, page }, body: { friendIds } }) => {
-          return await PlayerFriendScoresService.getFriendLeaderboardScores(
-            friendIds,
-            leaderboardId,
-            page
-          );
+          return await PlayerFriendScoresService.getFriendLeaderboardScores(friendIds, leaderboardId, page);
         },
         {
           tags: ["Scores"],

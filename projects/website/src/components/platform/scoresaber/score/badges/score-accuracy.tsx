@@ -71,9 +71,7 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
                   {score.previousScore && (
                     <p>Accuracy: {formatScoreAccuracy(score.previousScore.accuracy)}</p>
                   )}
-                  {!score.fullCombo && fcAccuracy && (
-                    <p>Full Combo: {formatScoreAccuracy(fcAccuracy)}</p>
-                  )}
+                  {!score.fullCombo && fcAccuracy && <p>Full Combo: {formatScoreAccuracy(fcAccuracy)}</p>}
                 </div>
 
                 {previousModCount > 0 && score.previousScore && (

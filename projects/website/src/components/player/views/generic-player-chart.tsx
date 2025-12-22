@@ -30,12 +30,7 @@ type Props = {
   daysAmount?: number;
 };
 
-export default function GenericPlayerChart({
-  id,
-  statisticHistory,
-  datasetConfig,
-  daysAmount = 50,
-}: Props) {
+export default function GenericPlayerChart({ id, statisticHistory, datasetConfig, daysAmount = 50 }: Props) {
   const { labels, histories } = useMemo(() => {
     const labels: Date[] = [];
     const histories: Record<string, (number | null)[]> = {};

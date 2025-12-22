@@ -57,9 +57,5 @@ export function DifficultyButton({
     </SimpleLink>
   );
 
-  return inGameDifficulty ? (
-    <SimpleTooltip display={inGameDifficulty}>{button}</SimpleTooltip>
-  ) : (
-    button
-  );
+  return inGameDifficulty ? <SimpleTooltip display={inGameDifficulty}>{button}</SimpleTooltip> : button;
 }

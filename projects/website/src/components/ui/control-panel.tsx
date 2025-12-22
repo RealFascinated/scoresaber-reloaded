@@ -4,19 +4,11 @@ import SimpleTooltip from "../simple-tooltip";
 
 export function ControlPanel({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn("border-border bg-background/50 rounded-lg border p-4", className)}>
-      {children}
-    </div>
+    <div className={cn("border-border bg-background/50 rounded-lg border p-4", className)}>{children}</div>
   );
 }
 
-export function ControlRow({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+export function ControlRow({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <div className={cn("mb-3 flex justify-center", className)}>{children}</div>;
 }
 
@@ -61,13 +53,7 @@ export function Tab({
   return button;
 }
 
-export function ButtonGroup({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+export function ButtonGroup({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <div className={cn("flex flex-wrap justify-center gap-1.5", className)}>{children}</div>;
 }
 

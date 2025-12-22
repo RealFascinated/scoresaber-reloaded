@@ -1,8 +1,5 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import {
-  ScoreSaberScore,
-  ScoreSaberScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { scoreToObject } from "@ssr/common/utils/model-converters";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
@@ -36,9 +33,7 @@ export class PlayerFriendScoresService {
       );
     }
 
-    const pagination = new Pagination<ScoreSaberScore>()
-      .setTotalItems(totalCount)
-      .setItemsPerPage(8);
+    const pagination = new Pagination<ScoreSaberScore>().setTotalItems(totalCount).setItemsPerPage(8);
 
     return pagination.getPageWithCursor(page, {
       sortField: "score",
@@ -55,10 +50,7 @@ export class PlayerFriendScoresService {
         if (!cursor) return baseMatch;
         return {
           ...baseMatch,
-          $or: [
-            { score: { $lt: cursor.sortValue } },
-            { score: cursor.sortValue, _id: { $lt: cursor.id } },
-          ],
+          $or: [{ score: { $lt: cursor.sortValue } }, { score: cursor.sortValue, _id: { $lt: cursor.id } }],
         };
       },
       getPreviousPageItem: async () => {

@@ -14,12 +14,7 @@ type PlayerPreviewHeaderProps = {
 export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps) {
   return (
     <div className="relative flex flex-col items-center gap-4 text-center select-none lg:flex-row">
-      <Avatar
-        src={player.avatar}
-        size={128}
-        className="h-32 w-32"
-        alt={`${player.name}'s Profile Picture`}
-      />
+      <Avatar src={player.avatar} size={128} className="h-32 w-32" alt={`${player.name}'s Profile Picture`} />
       <div className="flex w-full flex-col items-center justify-center gap-2 lg:items-start">
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-center gap-2 lg:justify-start">

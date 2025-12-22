@@ -53,10 +53,7 @@ export default function ScoreSaberLeaderboardScore({
 
         {/* Player */}
         <td
-          className={cn(
-            TABLE_CELL_WIDTH,
-            "flex w-full min-w-[300px] items-center gap-2 whitespace-nowrap"
-          )}
+          className={cn(TABLE_CELL_WIDTH, "flex w-full min-w-[300px] items-center gap-2 whitespace-nowrap")}
         >
           {scorePlayer ? (
             <>
@@ -140,10 +137,7 @@ export default function ScoreSaberLeaderboardScore({
         {score.beatLeaderScore && (
           <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[45px] pr-3")}>
             <SimpleTooltip display="View score details">
-              <button
-                className="size-6 cursor-pointer"
-                onClick={() => setDetailsExpanded(!detailsExpanded)}
-              >
+              <button className="size-6 cursor-pointer" onClick={() => setDetailsExpanded(!detailsExpanded)}>
                 {isDetailsLoading ? (
                   <Spinner size="sm" />
                 ) : (

@@ -36,9 +36,7 @@ export default function ScoreSongInfo({
   imageSize = 64,
 }: ScoreSongInfoProps) {
   const mappersProfile =
-    beatSaverMap != undefined
-      ? `https://beatsaver.com/profile/${beatSaverMap.author.id}`
-      : undefined;
+    beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap.author.id}` : undefined;
 
   const diff = getDifficulty(level.difficulty);
   const WorthIcon = worth?.icon;

@@ -269,11 +269,7 @@ export class ReplayDecoder {
 
     const replay: Partial<Replay> = {};
 
-    for (
-      let a = 0;
-      a <= StructType.customData && (dataView as any).pointer < dataView.byteLength;
-      a++
-    ) {
+    for (let a = 0; a <= StructType.customData && (dataView as any).pointer < dataView.byteLength; a++) {
       const type = this.DecodeUint8(dataView);
       switch (type) {
         case StructType.info:
@@ -341,10 +337,7 @@ export class ReplayDecoder {
 
     for (let i = 0; i < length; i++) {
       const frame = this.DecodeFrame(dataView);
-      if (
-        frame.time !== 0 &&
-        (result.length === 0 || frame.time !== result[result.length - 1].time)
-      ) {
+      if (frame.time !== 0 && (result.length === 0 || frame.time !== result[result.length - 1].time)) {
         result.push(frame);
       }
     }
@@ -434,10 +427,7 @@ export class ReplayDecoder {
       const key = this.DecodeString(dataView);
       const customDataLength = this.DecodeInt(dataView);
       const value = new Int8Array(
-        dataView.buffer.slice(
-          (dataView as any).pointer,
-          customDataLength + (dataView as any).pointer
-        )
+        dataView.buffer.slice((dataView as any).pointer, customDataLength + (dataView as any).pointer)
       );
       result[key] = value;
       (dataView as any).pointer += customDataLength;

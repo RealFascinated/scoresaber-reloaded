@@ -35,16 +35,16 @@ export class LeaderboardRankingService {
     const before = performance.now();
 
     Logger.info(`[RANKED UPDATES] Refreshing ranked leaderboards...`);
-    const { leaderboards, leaderboardDifficulties } =
-      await LeaderboardCoreService.fetchLeaderboardsFromAPI("ranked", true);
+    const { leaderboards, leaderboardDifficulties } = await LeaderboardCoreService.fetchLeaderboardsFromAPI(
+      "ranked",
+      true
+    );
     Logger.info(`[RANKED UPDATES] Found ${leaderboards.length} ranked leaderboards.`);
 
     // todo: handle leaderboards that are no longer ranked
 
     async function reweightHistoryScores(leaderboard: ScoreSaberLeaderboard) {
-      Logger.info(
-        `[RANKED UPDATES] Reweighting history scores for leaderboard "${leaderboard.id}"...`
-      );
+      Logger.info(`[RANKED UPDATES] Reweighting history scores for leaderboard "${leaderboard.id}"...`);
 
       const scores = await ScoreSaberPreviousScoreModel.find({ leaderboardId: leaderboard.id })
         .select({ pp: 1, accuracy: 1 })
@@ -110,13 +110,15 @@ export class LeaderboardRankingService {
       );
     }
 
-    const rankedLeaderboards: Map<number, ScoreSaberLeaderboard> =
-      (await ScoreSaberLeaderboardModel.find({ ranked: true })
-        .select({ _id: 1, stars: 1, ranked: 1, qualified: 1 })
-        .lean()
-        .then(
-          leaderboards => new Map(leaderboards.map(leaderboard => [leaderboard._id, leaderboard]))
-        )) as Map<number, ScoreSaberLeaderboard>;
+    const rankedLeaderboards: Map<number, ScoreSaberLeaderboard> = (await ScoreSaberLeaderboardModel.find({
+      ranked: true,
+    })
+      .select({ _id: 1, stars: 1, ranked: 1, qualified: 1 })
+      .lean()
+      .then(leaderboards => new Map(leaderboards.map(leaderboard => [leaderboard._id, leaderboard])))) as Map<
+      number,
+      ScoreSaberLeaderboard
+    >;
 
     const leaderboardBulkWrite: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];
     const updatedLeaderboards: LeaderboardUpdate[] = [];
@@ -237,8 +239,10 @@ export class LeaderboardRankingService {
     const before = performance.now();
 
     Logger.info(`[RANKED UPDATES] Refreshing qualified leaderboards...`);
-    const { leaderboards, leaderboardDifficulties } =
-      await LeaderboardCoreService.fetchLeaderboardsFromAPI("qualified", true);
+    const { leaderboards, leaderboardDifficulties } = await LeaderboardCoreService.fetchLeaderboardsFromAPI(
+      "qualified",
+      true
+    );
     Logger.info(`[RANKED UPDATES] Found ${leaderboards.length} qualified leaderboards.`);
 
     const leaderboardBulkWrite: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];

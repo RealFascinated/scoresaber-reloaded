@@ -9,10 +9,7 @@ import { cn } from "@/common/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/contexts/viewport-context";
 
-const Command = ({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof CommandPrimitive>) => (
+const Command = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive>) => (
   <CommandPrimitive
     className={cn(
       "bg-popover text-popover-foreground flex h-full w-full flex-col overflow-hidden rounded-(--radius-md)",
@@ -121,10 +118,7 @@ CommandItem.displayName = "CommandItem";
 
 const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
-    <span
-      className={cn("text-muted-foreground ml-auto text-xs tracking-widest", className)}
-      {...props}
-    />
+    <span className={cn("text-muted-foreground ml-auto text-xs tracking-widest", className)} {...props} />
   );
 };
 CommandShortcut.displayName = "CommandShortcut";

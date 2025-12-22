@@ -10,13 +10,7 @@ interface SliderProps extends React.ComponentProps<typeof SliderPrimitive.Root> 
   showLabelOnHover?: boolean;
 }
 
-function Slider({
-  className,
-  label,
-  labelPosition = "top",
-  showLabelOnHover = true,
-  ...props
-}: SliderProps) {
+function Slider({ className, label, labelPosition = "top", showLabelOnHover = true, ...props }: SliderProps) {
   const [isHovering, setIsHovering] = React.useState(false);
   const [isDragging, setIsDragging] = React.useState(false);
 
@@ -28,10 +22,7 @@ function Slider({
 
   return (
     <SliderPrimitive.Root
-      className={cn(
-        "relative flex w-full touch-none items-center pt-2 text-[15px] select-none",
-        className
-      )}
+      className={cn("relative flex w-full touch-none items-center pt-2 text-[15px] select-none", className)}
       onKeyDown={handleKeyDown}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}

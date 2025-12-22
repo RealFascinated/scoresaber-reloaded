@@ -12,6 +12,7 @@ export function parseSnipePlaylistSettings(settingsBase64?: string) {
     sort: "pp",
     sortDirection: "desc",
     rankedStatus: "all",
+    requireBothScores: false,
     starRange: {
       min: 0,
       max: SHARED_CONSTS.maxStars,

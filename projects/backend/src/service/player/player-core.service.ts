@@ -104,16 +104,12 @@ export class PlayerCoreService {
             trackedSince: new Date(),
           });
 
-          const seedQueue = QueueManager.getQueue(
-            QueueId.PlayerScoreRefreshQueue
-          ) as FetchMissingScoresQueue;
+          const seedQueue = QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue;
           if (!(await seedQueue.hasItem({ id: id, data: id })) && !playerToken.banned) {
-            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add(
-              {
-                id,
-                data: id,
-              }
-            );
+            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
+              id,
+              data: id,
+            });
           }
 
           // Notify in production

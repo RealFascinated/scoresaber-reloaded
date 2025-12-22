@@ -94,10 +94,7 @@ export default function FriendAction({
 
   return (
     <SimpleTooltip display={tooltipText} side={"bottom"}>
-      <div
-        onClick={isFriend ? removeFriend : addFriend}
-        className={cn("w-fit cursor-pointer", className)}
-      >
+      <div onClick={isFriend ? removeFriend : addFriend} className={cn("w-fit cursor-pointer", className)}>
         {iconOnly ? icon : <Button variant={"outline"}>{icon}</Button>}
       </div>
     </SimpleTooltip>

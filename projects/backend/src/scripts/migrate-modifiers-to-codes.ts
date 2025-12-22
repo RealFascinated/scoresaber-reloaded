@@ -110,9 +110,7 @@ async function migrateModel(modelName: string, model: ModelLike<AnyDoc>, opts: C
     modifiers: { $elemMatch: { $in: legacyLabels } },
   };
 
-  Logger.info(
-    `[${modelName}] scanning collection "${model.collection.collectionName}" for legacy labels...`
-  );
+  Logger.info(`[${modelName}] scanning collection "${model.collection.collectionName}" for legacy labels...`);
 
   let scanned = 0;
   let matched = 0;
@@ -237,11 +235,7 @@ async function main() {
   Logger.info("Connected to MongoDB");
 
   try {
-    await migrateModel(
-      "scoresaber-scores",
-      ScoreSaberScoreModel as unknown as ModelLike<AnyDoc>,
-      opts
-    );
+    await migrateModel("scoresaber-scores", ScoreSaberScoreModel as unknown as ModelLike<AnyDoc>, opts);
     await migrateModel(
       "scoresaber-previous-scores",
       ScoreSaberPreviousScoreModel as unknown as ModelLike<AnyDoc>,

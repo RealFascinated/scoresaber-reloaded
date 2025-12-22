@@ -34,15 +34,14 @@ export function ScoreSaberLeaderboardData({ leaderboardData }: LeaderboardDataPr
               <LeaderboardScores leaderboard={leaderboard} beatSaver={beatsaver} />
 
               {/* Star Change History */}
-              {leaderboardData.starChangeHistory &&
-                leaderboardData.starChangeHistory.length > 0 && (
-                  <div className="pt-2">
-                    <LeaderboardStarChangeHistory
-                      key={leaderboard.id}
-                      starChangeHistory={leaderboardData.starChangeHistory}
-                    />
-                  </div>
-                )}
+              {leaderboardData.starChangeHistory && leaderboardData.starChangeHistory.length > 0 && (
+                <div className="pt-2">
+                  <LeaderboardStarChangeHistory
+                    key={leaderboard.id}
+                    starChangeHistory={leaderboardData.starChangeHistory}
+                  />
+                </div>
+              )}
             </Card>
           </div>
 

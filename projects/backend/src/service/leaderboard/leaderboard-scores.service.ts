@@ -27,13 +27,9 @@ export class LeaderboardScoresService {
     const leaderboard = leaderboardResponse.leaderboard;
     const beatSaverMap = leaderboardResponse.beatsaver;
 
-    const leaderboardScores = await ScoreSaberApiService.lookupLeaderboardScores(
-      leaderboardId,
-      page,
-      {
-        country: country,
-      }
-    );
+    const leaderboardScores = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page, {
+      country: country,
+    });
     if (!leaderboardScores) {
       throw new NotFoundError(`Leaderboard scores for leaderboard "${leaderboardId}" not found`);
     }
@@ -63,14 +59,10 @@ export class LeaderboardScoresService {
       return score;
     });
 
-    const totalPages = Math.ceil(
-      leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage
-    );
+    const totalPages = Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage);
 
     return {
-      scores: (await Promise.all(scorePromises)).filter(
-        score => score !== undefined
-      ) as ScoreSaberScore[],
+      scores: (await Promise.all(scorePromises)).filter(score => score !== undefined) as ScoreSaberScore[],
       leaderboard: leaderboard,
       beatSaver: beatSaverMap,
       metadata: {

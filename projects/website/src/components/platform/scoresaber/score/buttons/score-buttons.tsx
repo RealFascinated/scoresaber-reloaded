@@ -47,9 +47,7 @@ const buttons: ButtonConfig[] = [
       return score?.beatLeaderScore != undefined;
     },
     render: ({ score, leaderboard, updateScore }: Props) => {
-      return (
-        <ScoreEditorButton score={score!} leaderboard={leaderboard!} updateScore={updateScore!} />
-      );
+      return <ScoreEditorButton score={score!} leaderboard={leaderboard!} updateScore={updateScore!} />;
     },
   },
   {
@@ -95,10 +93,7 @@ export default function ScoreSaberScoreButtons({
     }),
     [score, leaderboard, beatSaverMap, updateScore, isPreviousScore]
   );
-  const visibleButtons = useMemo(
-    () => buttons.filter(button => button.display(buttonProps)),
-    [buttonProps]
-  );
+  const visibleButtons = useMemo(() => buttons.filter(button => button.display(buttonProps)), [buttonProps]);
 
   return (
     <div

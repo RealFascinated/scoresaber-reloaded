@@ -146,8 +146,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
       const params = new URLSearchParams();
       if (sort !== DEFAULT_SORT) params.set("sort", sort);
       if (pageNum !== 1) params.set("page", String(pageNum));
-      if (debouncedSearchTerm && debouncedSearchTerm.length >= 3)
-        params.set("search", debouncedSearchTerm);
+      if (debouncedSearchTerm && debouncedSearchTerm.length >= 3) params.set("search", debouncedSearchTerm);
       const queryString = params.toString();
       return `/player/${player.id}/scoresaber${queryString ? `?${queryString}` : ""}`;
     },
@@ -217,10 +216,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
                 <Input
                   type="search"
                   placeholder="Query..."
-                  className={cn(
-                    "h-8 w-full pr-3 pl-8 text-xs sm:w-64",
-                    invalidSearch && "border-red-500"
-                  )}
+                  className={cn("h-8 w-full pr-3 pl-8 text-xs sm:w-64", invalidSearch && "border-red-500")}
                   value={search || ""}
                   onChange={e => handleSearchChange(e.target.value)}
                 />

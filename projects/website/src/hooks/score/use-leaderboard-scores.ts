@@ -32,11 +32,7 @@ export const useLeaderboardScores = (
     queryFn: async () => {
       switch (mode) {
         case ScoreModeEnum.Global: {
-          const response = await ssrApi.fetchLeaderboardScores(
-            leaderboardId.toString(),
-            page,
-            country
-          );
+          const response = await ssrApi.fetchLeaderboardScores(leaderboardId.toString(), page, country);
 
           if (response) {
             return {

@@ -25,15 +25,7 @@ import { useState } from "react";
 import { Line } from "react-chartjs-2";
 import PlayerSearch from "../../player-search";
 
-Chart.register(
-  LineController,
-  ScatterController,
-  LineElement,
-  PointElement,
-  LinearScale,
-  Tooltip,
-  Legend
-);
+Chart.register(LineController, ScatterController, LineElement, PointElement, LinearScale, Tooltip, Legend);
 
 const TOP_SCORE_COUNT = 500;
 const MAX_COMPARISON_PLAYERS = 3;
@@ -118,10 +110,8 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
 
   const minStar = Math.floor(Math.min(...starValues) / STAR_TICK_SIZE) * STAR_TICK_SIZE;
   const maxStar = Math.ceil(Math.max(...starValues) / STAR_TICK_SIZE) * STAR_TICK_SIZE;
-  const minAccuracy =
-    Math.floor(Math.min(...accuracyValues) / ACCURACY_TICK_SIZE) * ACCURACY_TICK_SIZE;
-  const maxAccuracy =
-    Math.ceil(Math.max(...accuracyValues) / ACCURACY_TICK_SIZE) * ACCURACY_TICK_SIZE;
+  const minAccuracy = Math.floor(Math.min(...accuracyValues) / ACCURACY_TICK_SIZE) * ACCURACY_TICK_SIZE;
+  const maxAccuracy = Math.ceil(Math.max(...accuracyValues) / ACCURACY_TICK_SIZE) * ACCURACY_TICK_SIZE;
 
   const scales = {
     x: {
@@ -369,9 +359,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
                       size="icon"
                       className="hover:bg-primary/20 h-5 w-5 shrink-0"
                       onClick={() =>
-                        setComparisonPlayers(players =>
-                          players.filter(p => p.id !== comparisonPlayer.id)
-                        )
+                        setComparisonPlayers(players => players.filter(p => p.id !== comparisonPlayer.id))
                       }
                     >
                       <X className="h-3 w-3" />

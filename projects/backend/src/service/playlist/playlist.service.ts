@@ -7,16 +7,13 @@ import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardModel,
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import {
-  ScoreSaberScore,
-  ScoreSaberScoreModel,
-} from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Playlist, PlaylistModel } from "@ssr/common/playlist/playlist";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
-import { playlistToObject } from "@ssr/common/utils/model-converters";
+import { leaderboardToObject, playlistToObject } from "@ssr/common/utils/model-converters";
 import { formatDate, formatDateMinimal, TimeUnit } from "@ssr/common/utils/time-utils";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerCoreService } from "../player/player-core.service";
@@ -194,19 +191,16 @@ export default class PlaylistService {
   ): Promise<Playlist> {
     const settings = parseSnipePlaylistSettings(settingsBase64);
 
+    if (user === toSnipe) {
+      throw new BadRequestError("You cannot snipe yourself");
+    }
+
     try {
       // Validate users exist
-      if (
-        !(await PlayerCoreService.playerExists(user)) ||
-        !(await PlayerCoreService.playerExists(toSnipe))
-      ) {
+      if (!(await PlayerCoreService.playerExists(user)) || !(await PlayerCoreService.playerExists(toSnipe))) {
         throw new NotFoundError(
           `Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`
         );
-      }
-
-      if (user === toSnipe) {
-        throw new BadRequestError("You cannot snipe yourself");
       }
 
       const sortField = settings.sort;
@@ -265,7 +259,9 @@ export default class PlaylistService {
               ...(settings.rankedStatus === "ranked" ? { pp: { $gt: 0 } } : {}),
               ...(settings.rankedStatus === "unranked" ? { pp: { $lte: 0 } } : {}),
               // Apply star range filtering
-              ...(settings.rankedStatus === "ranked" && settings.starRange.min !== undefined && settings.starRange.max !== undefined
+              ...(settings.rankedStatus === "ranked" &&
+              settings.starRange.min !== undefined &&
+              settings.starRange.max !== undefined
                 ? {
                     $and: [
                       { "leaderboard.stars": { $gte: settings.starRange.min } },
@@ -282,9 +278,7 @@ export default class PlaylistService {
         )) as Array<ScoreSaberScore & { leaderboard: ScoreSaberLeaderboard }>;
 
         if (results.length === 0) {
-          throw new NotFoundError(
-            `Unable to create a snipe playlist for ${toSnipe} as they have no scores.`
-          );
+          throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
         }
 
         return results.map(result => ({
@@ -296,7 +290,7 @@ export default class PlaylistService {
             playerId: result.playerId,
             score: result.score,
           } as ScoreSaberScore,
-          leaderboard: result.leaderboard,
+          leaderboard: leaderboardToObject(result.leaderboard),
         }));
       }
 
@@ -308,42 +302,51 @@ export default class PlaylistService {
         );
       }
 
-      // Include scores where:
-      // 1. toSnipe has a better score than the user (toSnipe's score > user's score)
-      // 2. toSnipe has a score and the user doesn't have one
+      // Build a map of user scores by leaderboard ID for quick lookup
       const userScoreMap = new Map<number, { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>();
       for (const userScore of userScores) {
         const leaderboardId = userScore.leaderboard.id;
-        // Only keep the first score if there are duplicates (shouldn't happen, but defensive)
         if (!userScoreMap.has(leaderboardId)) {
           userScoreMap.set(leaderboardId, userScore);
         }
       }
-      
+
       const filteredScores: Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }> = [];
-      
+
       for (const toSnipeScore of toSnipeScores) {
         const leaderboardId = toSnipeScore.leaderboard.id;
         const userScore = userScoreMap.get(leaderboardId);
 
         // Skip if the score is outside the accuracy range
-        if (settings.accuracyRange && (toSnipeScore.score.accuracy < settings.accuracyRange.min || toSnipeScore.score.accuracy > settings.accuracyRange.max)) {
+        if (
+          settings.accuracyRange &&
+          (toSnipeScore.score.accuracy < settings.accuracyRange.min ||
+            toSnipeScore.score.accuracy > settings.accuracyRange.max)
+        ) {
           continue;
         }
-        
-        // Include if user doesn't have a score on this map
-        if (!userScore) {
-          filteredScores.push(toSnipeScore);
-          continue;
-        }
-        
-        // Only include if toSnipe has a better score than the user
-        const userScoreValue = userScore.score.score;
-        const toSnipeScoreValue = toSnipeScore.score.score;
-        
-        // Only include if toSnipe's score is strictly greater than user's score
-        if (toSnipeScoreValue > userScoreValue) {
-          filteredScores.push(toSnipeScore);
+
+        if (settings.requireBothScores) {
+          // Only include if both players have scores AND toSnipe has a higher score
+          if (!userScore) {
+            continue;
+          }
+          const userScoreValue = userScore.score.score;
+          const toSnipeScoreValue = toSnipeScore.score.score;
+          if (toSnipeScoreValue > userScoreValue) {
+            filteredScores.push(toSnipeScore);
+          }
+        } else {
+          // Normal snipe behavior: include if user doesn't have a score OR toSnipe has a better score
+          if (!userScore) {
+            filteredScores.push(toSnipeScore);
+          } else {
+            const userScoreValue = userScore.score.score;
+            const toSnipeScoreValue = toSnipeScore.score.score;
+            if (toSnipeScoreValue > userScoreValue) {
+              filteredScores.push(toSnipeScore);
+            }
+          }
         }
       }
 
@@ -353,14 +356,16 @@ export default class PlaylistService {
         toSnipe,
         user,
         settings,
-         `${truncateText(player.name ?? "", 16)} / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
-        filteredScores.sort((a,b) => {
-          const scoreA = a.score;
-          const scoreB = b.score;
-          const valueA = getSortValue(scoreA, sortField);
-          const valueB = getSortValue(scoreB, sortField);
-          return sortDirection === "desc" ? valueB - valueA : valueA - valueB;
-        }).map(({ leaderboard }) => leaderboard),
+        `${truncateText(player.name ?? "", 16)} / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
+        filteredScores
+          .sort((a, b) => {
+            const scoreA = a.score;
+            const scoreB = b.score;
+            const valueA = getSortValue(scoreA, sortField);
+            const valueB = getSortValue(scoreB, sortField);
+            return sortDirection === "desc" ? valueB - valueA : valueA - valueB;
+          })
+          .map(({ leaderboard }) => leaderboard),
         this.PLAYLIST_IMAGE_BASE64
       );
     } catch (error) {

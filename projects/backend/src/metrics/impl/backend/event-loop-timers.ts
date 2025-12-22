@@ -31,11 +31,7 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
 
     // Override setTimeout
     const originalSetTimeout = global.setTimeout;
-    global.setTimeout = ((
-      callback: (...args: unknown[]) => void,
-      ms: number,
-      ...args: unknown[]
-    ) => {
+    global.setTimeout = ((callback: (...args: unknown[]) => void, ms: number, ...args: unknown[]) => {
       const timer = originalSetTimeout(() => {
         this.activeTimers.delete(timer);
         callback(...args);
@@ -46,11 +42,7 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
 
     // Override setInterval
     const originalSetInterval = global.setInterval;
-    global.setInterval = ((
-      callback: (...args: unknown[]) => void,
-      ms: number,
-      ...args: unknown[]
-    ) => {
+    global.setInterval = ((callback: (...args: unknown[]) => void, ms: number, ...args: unknown[]) => {
       const timer = originalSetInterval(() => {
         callback(...args);
       }, ms);

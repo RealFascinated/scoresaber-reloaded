@@ -10,9 +10,7 @@ export class AccSaberPlatform extends Platform {
     super(PlatformType.AccSaber, "AccSaber", {
       logo: <AccSaberLogo className="h-4.5 w-4.5" />,
       displayPredicate: async (playerId: string) => {
-        return await ApiServiceRegistry.getInstance()
-          .getAccSaberService()
-          .checkPlayerExists(playerId);
+        return await ApiServiceRegistry.getInstance().getAccSaberService().checkPlayerExists(playerId);
       },
     });
   }

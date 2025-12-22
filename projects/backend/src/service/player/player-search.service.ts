@@ -29,9 +29,7 @@ export class PlayerSearchService {
     const scoreSaberPlayerTokens = scoreSaberResponse?.players;
     const uniquePlayerIds = [
       ...new Set(
-        foundPlayers
-          .map(player => player._id)
-          .concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])
+        foundPlayers.map(player => player._id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])
       ),
     ];
 

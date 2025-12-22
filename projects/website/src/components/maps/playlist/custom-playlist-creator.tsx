@@ -5,13 +5,7 @@ import Card from "@/components/card";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ControlButton } from "@/components/ui/control-panel";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -106,9 +100,7 @@ export default function CustomPlaylistCreator() {
                         render={({ field }) => (
                           <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
                             <div className="flex-1 space-y-0 md:pr-4">
-                              <FormLabel className="text-sm leading-tight font-normal">
-                                Star Range
-                              </FormLabel>
+                              <FormLabel className="text-sm leading-tight font-normal">Star Range</FormLabel>
                             </div>
                             <FormControl>
                               <div className="flex w-full items-center gap-3 md:w-52">
@@ -119,9 +111,7 @@ export default function CustomPlaylistCreator() {
                                   label={v => <span className="text-xs">{v}</span>}
                                   value={[field.value.min, field.value.max]}
                                   showLabelOnHover={false}
-                                  onValueChange={vals =>
-                                    field.onChange({ min: vals[0], max: vals[1] })
-                                  }
+                                  onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
                                   className="pt-10 pb-1 md:w-52"
                                 />
                               </div>
@@ -139,10 +129,7 @@ export default function CustomPlaylistCreator() {
                       <span>Sort</span>
                     </div>
                     <ButtonGroup className="justify-start">
-                      <ControlButton
-                        isActive={sort === "stars"}
-                        onClick={() => handleSort("stars")}
-                      >
+                      <ControlButton isActive={sort === "stars"} onClick={() => handleSort("stars")}>
                         <Star className="h-4 w-4" />
                         Stars
                       </ControlButton>
@@ -162,12 +149,7 @@ export default function CustomPlaylistCreator() {
 
           {/* Footer */}
           <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
-            <Button
-              type="submit"
-              form="custom-playlist-form"
-              className="gap-2"
-              disabled={downloading}
-            >
+            <Button type="submit" form="custom-playlist-form" className="gap-2" disabled={downloading}>
               {downloading ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
               <span>Download Playlist</span>
             </Button>

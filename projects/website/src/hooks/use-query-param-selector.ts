@@ -69,16 +69,7 @@ export function useQueryParamSelector<T extends NonNullable<unknown>>(
       // Keep nuqs state in-sync (default values won't be written to URL)
       setQueryState(shouldOmit ? null : next);
     },
-    [
-      onStartTransition,
-      omitParamWhen,
-      parser,
-      clearOtherParams,
-      searchParams,
-      param,
-      pathname,
-      setQueryState,
-    ]
+    [onStartTransition, omitParamWhen, parser, clearOtherParams, searchParams, param, pathname, setQueryState]
   );
 
   return { value, setValue };

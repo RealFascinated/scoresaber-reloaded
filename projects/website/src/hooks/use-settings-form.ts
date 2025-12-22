@@ -24,9 +24,7 @@ export function useSettingsForm<T extends FieldValues>(
       Path<T>,
       () => Promise<T[Path<T>] | undefined> | T[Path<T>] | undefined,
     ][];
-    const results = await Promise.all(
-      entries.map(async ([key, getter]) => [key, await getter()] as const)
-    );
+    const results = await Promise.all(entries.map(async ([key, getter]) => [key, await getter()] as const));
     return Object.fromEntries(results) as Partial<T>;
   }, []);
 

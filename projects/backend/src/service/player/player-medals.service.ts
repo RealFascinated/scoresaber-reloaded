@@ -80,9 +80,7 @@ export class PlayerMedalsService {
    *
    * @param playerIds the ids of the players
    */
-  public static async updatePlayerMedalCounts(
-    ...playerIds: string[]
-  ): Promise<Record<string, number>> {
+  public static async updatePlayerMedalCounts(...playerIds: string[]): Promise<Record<string, number>> {
     const before = performance.now();
     const medalCounts = await ScoreSaberMedalsScoreModel.aggregate([
       {
@@ -162,9 +160,7 @@ export class PlayerMedalsService {
       } as PlayerMedalRankingsResponse;
     }
 
-    const pagination = new Pagination<ScoreSaberPlayer>()
-      .setItemsPerPage(50)
-      .setTotalItems(totalPlayers);
+    const pagination = new Pagination<ScoreSaberPlayer>().setItemsPerPage(50).setTotalItems(totalPlayers);
 
     const [pageData, countryMetadata] = await Promise.all([
       pagination.getPageWithCursor(page, {
@@ -246,12 +242,8 @@ export class PlayerMedalsService {
           ]);
 
           // Create lookup maps
-          const globalRankMap = new Map(
-            globalRankings.map(r => [r.playerId.toString(), r.globalRank])
-          );
-          const countryRankMap = new Map(
-            countryRankings.map(r => [r.playerId.toString(), r.countryRank])
-          );
+          const globalRankMap = new Map(globalRankings.map(r => [r.playerId.toString(), r.globalRank]));
+          const countryRankMap = new Map(countryRankings.map(r => [r.playerId.toString(), r.countryRank]));
 
           const result = await Promise.all(
             players.map(async player => {

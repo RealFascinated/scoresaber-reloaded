@@ -36,10 +36,7 @@ export function useUrlBuilder(config: UrlBuilderConfig) {
     const queryString = queryParams
       .filter(
         param =>
-          param.condition !== false &&
-          param.value !== undefined &&
-          param.value !== null &&
-          param.value !== ""
+          param.condition !== false && param.value !== undefined && param.value !== null && param.value !== ""
       )
       .map(param => `${param.key}=${encodeURIComponent(String(param.value))}`)
       .join("&");

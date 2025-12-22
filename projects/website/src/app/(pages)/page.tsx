@@ -26,9 +26,9 @@ export default async function LandingPage() {
           </h1>
 
           <p className="text-muted-foreground mx-auto mb-(--spacing-2xl) max-w-2xl text-lg">
-            The ultimate platform for Beat Saber players. Track your progress, compete with friends,
-            and discover detailed insights about your gameplay like never before. Integrates
-            ScoreSaber, AccSaber, and BeatLeader data in one place.
+            The ultimate platform for Beat Saber players. Track your progress, compete with friends, and
+            discover detailed insights about your gameplay like never before. Integrates ScoreSaber, AccSaber,
+            and BeatLeader data in one place.
           </p>
 
           <div className="flex flex-col items-center gap-(--spacing-lg) sm:flex-row sm:justify-center">

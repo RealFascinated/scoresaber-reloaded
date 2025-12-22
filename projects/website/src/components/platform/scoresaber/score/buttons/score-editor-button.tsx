@@ -31,8 +31,7 @@ export default function ScoreSaberScoreEditorButton({
   const [open, setOpen] = useState(false);
 
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
-  const accuracy =
-    (score.score / maxScore) * 100 * (hasModifier(score.modifiers, Modifier.NF) ? 0.5 : 1);
+  const accuracy = (score.score / maxScore) * 100 * (hasModifier(score.modifiers, Modifier.NF) ? 0.5 : 1);
 
   const [baseValue, setBaseValue] = useState(Math.max(MIN_ACCURACY, Math.floor(accuracy))); // 1, 2, 3, etc.
   const [decimalValue, setDecimalValue] = useState(accuracy - Math.floor(accuracy)); // 0.0, 0.1, 0.2, etc.
@@ -197,8 +196,7 @@ export default function ScoreSaberScoreEditorButton({
             {/* PP Gain */}
             {rankedPps && leaderboard.ranked && (
               <p className="text-muted-foreground text-sm">
-                Weighted PP Gain:{" "}
-                <b className="text-pp">{ppGain > 0.1 ? ppGain.toFixed(2) : 0}pp</b>
+                Weighted PP Gain: <b className="text-pp">{ppGain > 0.1 ? ppGain.toFixed(2) : 0}pp</b>
               </p>
             )}
           </div>

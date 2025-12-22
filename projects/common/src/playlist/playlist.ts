@@ -1,10 +1,4 @@
-import {
-  getModelForClass,
-  modelOptions,
-  prop,
-  ReturnModelType,
-  Severity,
-} from "@typegoose/typegoose";
+import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
 import type { PlaylistCategory } from "./playlist-category";
 import { PlaylistSong } from "./playlist-song";

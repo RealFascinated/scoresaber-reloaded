@@ -213,9 +213,7 @@ async function processDuplicates(modelName: string, model: ModelLike<AnyDoc>, op
   }
 
   Logger.info(
-    `[${modelName}] done. found=${duplicates.length} ${
-      opts.apply ? "deleted" : "wouldDelete"
-    }=${deleted}`
+    `[${modelName}] done. found=${duplicates.length} ${opts.apply ? "deleted" : "wouldDelete"}=${deleted}`
   );
 }
 
