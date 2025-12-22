@@ -6,8 +6,10 @@ import { ScoreOverview } from "@/components/platform/scoresaber/score/score-view
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, BarChart3, FileX } from "lucide-react";
+import { AlertCircle, BarChart3, FileX, Loader2 } from "lucide-react";
 import CutDistributionChart from "./components/charts/cut-distribution-chart";
+import SwingSpeedChart from "./components/charts/swing-speed-chart";
+import HitTrackerStats from "./components/hit-tracker-stats";
 import ScoreDetails from "./components/score-details";
 
 export default function ScorePageData({ scoreId }: { scoreId: string }) {
@@ -56,22 +58,29 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
     <div className="w-full space-y-4">
       <ScoreDetails score={score} />
 
+      {isAnyDataLoading && (
+        <Card className="flex flex-col items-center justify-center gap-4 py-8">
+          <Loader2 className="text-primary h-8 w-8 animate-spin" />
+          <p className="text-muted-foreground">Loading additional score data...</p>
+        </Card>
+      )}
+
       {!hasAnyAdditionalData && !isAnyDataLoading ? (
-        <Card className="flex flex-col items-center justify-center text-center">
-          <div className="mb-(--spacing-2xl) flex flex-col items-center gap-(--spacing-xl)">
+        <Card className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="mb-6 flex flex-col items-center gap-4">
             <AlertCircle className="h-16 w-16 text-amber-500" />
             <h2 className="text-xl font-semibold">Limited Score Data</h2>
           </div>
 
-          <div className="mb-(--spacing-lg) flex flex-col gap-(--spacing-lg) text-left">
+          <div className="mb-6 flex flex-col gap-3 text-left">
             {!hasScoreStats && (
-              <div className="flex items-center gap-(--spacing-lg)">
+              <div className="flex items-center gap-3">
                 <BarChart3 className="text-muted-foreground h-5 w-5" />
                 <span className="text-muted-foreground">Score statistics unavailable</span>
               </div>
             )}
             {!hasReplay && (
-              <div className="flex items-center gap-(--spacing-lg)">
+              <div className="flex items-center gap-3">
                 <FileX className="text-muted-foreground h-5 w-5" />
                 <span className="text-muted-foreground">Replay analysis data unavailable</span>
               </div>
@@ -81,18 +90,24 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
           <p className="text-muted-foreground text-sm">Some data may not be available for this score.</p>
         </Card>
       ) : (
-        <>
+        <div className="space-y-4">
           {scoreStats && (
-            <ScoreOverview score={score.score} scoreStats={scoreStats} leaderboard={score.leaderboard} />
+            <>
+              <ScoreOverview score={score.score} scoreStats={scoreStats} leaderboard={score.leaderboard} />
+              <HitTrackerStats hitTracker={scoreStats.current.hitTracker} />
+            </>
           )}
 
-          {isReplayLoading && <p>Loading replay...</p>}
           {replay && (
-            <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:flex-row">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <CutDistributionChart cutDistribution={replay.cutDistribution} />
+              <SwingSpeedChart
+                swingSpeed={replay.swingSpeed}
+                replayLengthSeconds={replay.replayLengthSeconds}
+              />
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
