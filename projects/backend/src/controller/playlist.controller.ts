@@ -45,17 +45,9 @@ export default function playlistController(app: Elysia) {
       .get(
         "/snipe",
         async ({ query: { user, toSnipe, settings } }) => {
-          const response = new Response(
-            JSON.stringify(
-              await playlistToBeatSaberPlaylist(
-                await PlaylistService.getSnipePlaylist(user, toSnipe, settings)
-              ),
-              null,
-              2
-            )
+          return playlistToBeatSaberPlaylist(
+            await PlaylistService.getSnipePlaylist(user, toSnipe, settings)
           );
-          response.headers.set("Content-Type", "application/json");
-          return response;
         },
         {
           tags: ["Playlist"],
