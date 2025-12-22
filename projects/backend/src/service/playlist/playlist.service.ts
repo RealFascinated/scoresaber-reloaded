@@ -353,7 +353,7 @@ export default class PlaylistService {
         toSnipe,
         user,
         settings,
-         `Snipe - ${truncateText(player.name ?? "", 16)} / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
+         `${truncateText(player.name ?? "", 16)} / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
         filteredScores.sort((a,b) => {
           const scoreA = a.score;
           const scoreB = b.score;
