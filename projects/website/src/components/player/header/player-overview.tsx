@@ -45,7 +45,7 @@ const playerData = [
                   )}
                   {player.rankWithInactives && (
                     <p>
-                      Rank Including Inactives: <b>{formatNumberWithCommas(player.rankWithInactives)}</b>
+                      Rank Including Inactives: <b>#{formatNumberWithCommas(player.rankWithInactives)}</b>
                     </p>
                   )}
                 </div>
