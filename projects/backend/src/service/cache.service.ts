@@ -14,6 +14,7 @@ export enum CacheId {
   Players = "players",
   ScoreStats = "scoreStats",
   PreviousScore = "previousScore",
+  ScoreHistoryGraph = "scoreHistoryGraph",
 }
 
 export default class CacheService {
@@ -26,6 +27,7 @@ export default class CacheService {
     [CacheId.Players]: TimeUnit.toSeconds(TimeUnit.Minute, 30),
     [CacheId.ScoreStats]: TimeUnit.toSeconds(TimeUnit.Hour, 12),
     [CacheId.PreviousScore]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+    [CacheId.ScoreHistoryGraph]: TimeUnit.toSeconds(TimeUnit.Hour, 1),
   };
 
   /**

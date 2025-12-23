@@ -11,6 +11,7 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { LeaderboardScoresService } from "../service/leaderboard/leaderboard-scores.service";
 import { PlayerFriendScoresService } from "../service/player/player-friend-scores.service";
+import { PlayerScoreHistoryService } from "../service/player/player-score-history.service";
 import { PlayerScoresService } from "../service/player/player-scores.service";
 import { TopScoresService } from "../service/score/top-scores.service";
 
@@ -84,6 +85,22 @@ export default function scoresController(app: Elysia) {
           query: QuerySchema,
           detail: {
             description: "Fetch player scores",
+          },
+        }
+      )
+      .get(
+        "/history-graph/:playerId/:leaderboardId",
+        async ({ params: { playerId, leaderboardId } }) => {
+          return await PlayerScoreHistoryService.getPlayerScoreHistoryGraph(playerId, leaderboardId);
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            playerId: z.string(),
+            leaderboardId: z.coerce.number(),
+          }),
+          detail: {
+            description: "Fetch player score history graph",
           },
         }
       )

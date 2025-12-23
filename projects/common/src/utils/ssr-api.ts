@@ -19,6 +19,7 @@ import { PlayerSearchResponse } from "../schemas/response/player/player-search";
 import { PlayerScoresChartResponse } from "../schemas/response/player/scores-chart";
 import { PlayerMedalRankingsResponse } from "../schemas/response/ranking/medal-rankings";
 import { PlayerScoresPageResponse } from "../schemas/response/score/player-scores";
+import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph";
 import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
 import { MapDifficulty } from "../score/map-difficulty";
@@ -217,6 +218,17 @@ class SSRApi {
    */
   async fetchScoreStats(scoreId: number) {
     return await this.request<ScoreStatsResponse>(`/beatleader/scorestats/${scoreId}`);
+  }
+
+  /**
+   * Fetches the score history graph for a player and leaderboard.
+   *
+   * @param playerId the player's id to get the score history graph for
+   * @param leaderboardId the leaderboard to get the score history graph for
+   * @returns the score history graph
+   */
+  async fetchScoreHistoryGraph(playerId: string, leaderboardId: number) {
+    return await this.request<ScoreHistoryGraph>(`/scores/history-graph/${playerId}/${leaderboardId}`);
   }
 
   /**

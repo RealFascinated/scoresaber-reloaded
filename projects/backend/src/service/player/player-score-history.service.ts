@@ -8,6 +8,7 @@ import {
 } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
+import { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-history-graph";
 import { normalizeModifiers } from "@ssr/common/score/modifier";
 import { scoreToObject } from "@ssr/common/utils/model-converters";
 import CacheService, { CacheId } from "../cache.service";
@@ -264,6 +265,61 @@ export class PlayerScoreHistoryService {
             maxCombo: score.maxCombo - previousScore.maxCombo,
           },
         } as ScoreSaberPreviousScoreOverview;
+      }
+    );
+  }
+
+  /**
+   * Gets the player's score history graph for a map.
+   *
+   * @param playerId the player's id to get the score history graph for
+   * @param leaderboardId the leaderboard to get the score history graph for
+   * @returns the score history graph
+   */
+  public static async getPlayerScoreHistoryGraph(
+    playerId: string,
+    leaderboardId: number
+  ): Promise<ScoreHistoryGraph> {
+    return CacheService.fetchWithCache(
+      CacheId.ScoreHistoryGraph,
+      `score-history-graph:${playerId}-${leaderboardId}`,
+      async () => {
+        const scores = await ScoreSaberScoreModel.aggregate([
+          {
+            $match: {
+              playerId: playerId,
+              leaderboardId: leaderboardId,
+            },
+          },
+          {
+            $unionWith: {
+              coll: "scoresaber-previous-scores",
+              pipeline: [
+                {
+                  $match: {
+                    playerId: playerId,
+                    leaderboardId: leaderboardId,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $sort: {
+              timestamp: 1,
+            },
+          },
+          {
+            $project: {
+              timestamp: 1,
+              accuracy: 1,
+            },
+          },
+        ]);
+        return scores.map(score => ({
+          timestamp: score.timestamp as Date,
+          accuracy: score.accuracy as number,
+        })) as ScoreHistoryGraph;
       }
     );
   }

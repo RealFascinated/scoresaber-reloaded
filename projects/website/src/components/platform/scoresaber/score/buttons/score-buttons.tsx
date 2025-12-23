@@ -10,9 +10,10 @@ import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { useMemo } from "react";
 import ScoreEditorButton from "./score-editor-button";
+import ScoreHistoryGraphButton from "./score-history-graph-buton";
 
 type Props = {
-  score?: ScoreSaberScore;
+  score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMapResponse;
   isLeaderboardLoading?: boolean;
@@ -48,6 +49,14 @@ const buttons: ButtonConfig[] = [
     },
     render: ({ score, leaderboard, updateScore }: Props) => {
       return <ScoreEditorButton score={score!} leaderboard={leaderboard!} updateScore={updateScore!} />;
+    },
+  },
+  {
+    display: () => {
+      return true;
+    },
+    render: ({ score }: Props) => {
+      return <ScoreHistoryGraphButton score={score} />;
     },
   },
   {
