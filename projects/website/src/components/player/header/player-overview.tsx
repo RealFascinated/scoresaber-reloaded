@@ -43,6 +43,11 @@ const playerData = [
                       Rank Percentile: <b>{player.rankPercentile.toFixed(2)}%</b>
                     </p>
                   )}
+                  {player.rankWithInactives && (
+                    <p>
+                      Rank Including Inactives: <b>{formatNumberWithCommas(player.rankWithInactives)}</b>
+                    </p>
+                  )}
                 </div>
               }
             >

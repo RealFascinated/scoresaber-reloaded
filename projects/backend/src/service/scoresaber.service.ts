@@ -2,6 +2,7 @@ import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
+import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
@@ -85,7 +86,7 @@ export default class ScoreSaberService {
         return await PlayerHistoryService.getPlayerStatisticHistory(player, date, true);
       }
 
-      const [, plusOnePp, accBadges, hmdBreakdown, medalsRank, dailyChanges, weeklyChanges, monthlyChanges] =
+      const [, plusOnePp, accBadges, hmdBreakdown, medalsRank, dailyChanges, weeklyChanges, monthlyChanges, rankWithInactives] =
         await Promise.all([
           account ? PlayerCoreService.updatePeakRank(account, player) : undefined,
           account ? PlayerRankedService.getPlayerWeightedPpGainForRawPp(id) : 0,
@@ -107,6 +108,7 @@ export default class ScoreSaberService {
           account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},
           account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(7)), 7) : {},
           account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(30)), 30) : {},
+          account ? (await PlayerModel.countDocuments({ pp: { $gt: player.pp } })) + 1 : 0,
         ]);
 
       return {
@@ -138,6 +140,7 @@ export default class ScoreSaberService {
         rankPercentile:
           (player.rank / ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) ||
             1) * 100,
+        rankWithInactives
       } as ScoreSaberPlayer;
     });
   }
