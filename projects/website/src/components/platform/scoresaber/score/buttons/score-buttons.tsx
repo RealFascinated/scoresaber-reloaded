@@ -52,8 +52,8 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
-    display: () => {
-      return true;
+    display: ({ score }: Props) => {
+      return score.previousScore != undefined;
     },
     render: ({ score }: Props) => {
       return <ScoreHistoryGraphButton score={score} />;
