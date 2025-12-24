@@ -26,6 +26,7 @@ export default function PlayerAccBadges({ badges }: { badges: AccBadges }) {
               color={badge.color}
               value={formatNumberWithCommas(count)}
               className="h-full"
+              size="lg"
             />
           </SimpleTooltip>
         );

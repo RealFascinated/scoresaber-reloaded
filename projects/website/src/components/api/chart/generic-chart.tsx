@@ -294,8 +294,8 @@ const GenericChart = ({ config, labels }: Props) => {
   return (
     <div className="relative flex h-full w-full">
       {showNoData && (
-        <div className="bg-muted absolute top-1/2 left-1/2 z-9999 -translate-x-1/2 -translate-y-1/2 rounded-md p-2 text-center">
-          <p className="text-red-500">No data available :(</p>
+        <div className="bg-muted/90 border-border absolute top-1/2 left-1/2 z-9999 -translate-x-1/2 -translate-y-1/2 rounded-md border p-4 text-center">
+          <p className="text-muted-foreground text-sm">No data available</p>
         </div>
       )}
       <div className="relative block h-full w-full">

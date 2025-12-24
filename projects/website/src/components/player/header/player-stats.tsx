@@ -188,10 +188,10 @@ export default function PlayerStats({ player }: Props) {
           return undefined;
         }
         const { tooltip, value } = toRender;
-        const stat = <StatValue color={badge.color?.(player)} name={badge.name} value={value} />;
+        const stat = <StatValue color={badge.color?.(player)} name={badge.name} value={value} size="lg" />;
 
         return (
-          <div key={index}>
+          <div key={`player-stat-${badge.name}`}>
             {tooltip ? (
               <SimpleTooltip display={tooltip} side="bottom" showOnMobile>
                 {stat}

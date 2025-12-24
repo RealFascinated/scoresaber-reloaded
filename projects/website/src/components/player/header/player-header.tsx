@@ -19,12 +19,12 @@ type PlayerHeaderProps = {
 
 export default function PlayerHeader({ player }: PlayerHeaderProps) {
   return (
-    <Card className="flex gap-(--spacing-sm)">
-      <div className="relative flex flex-col items-center gap-(--spacing-lg) text-center select-none lg:flex-row lg:items-start lg:text-start">
+    <Card className="flex flex-col gap-6">
+      <div className="relative flex flex-col items-center gap-6 text-center select-none lg:flex-row lg:items-start lg:text-start">
         <PlayerAvatar player={player} />
-        <div className="flex w-full flex-col items-center justify-center gap-(--spacing-sm) lg:items-start lg:justify-start">
-          <div className="flex flex-col gap-(--spacing-xs)">
-            <div className="flex items-center justify-center gap-(--spacing-sm) lg:justify-start">
+        <div className="flex w-full flex-col items-center justify-center gap-3 lg:items-start lg:justify-start">
+          <div className="flex flex-col w-full">
+            <div className="flex items-center justify-center gap-3 lg:justify-start">
               <SimpleLink
                 href={`https://steamcommunity.com/profiles/${player.id}`}
                 target="_blank"
@@ -36,10 +36,18 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 {player.name}
               </SimpleLink>
             </div>
-            <div className="flex flex-col">
-              <div>
-                {player.inactive && <p className="text-inactive-account">Inactive Account</p>}
-                {player.banned && <p className="text-red-500">Banned Account</p>}
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
+                {player.inactive && (
+                  <span className="bg-(--inactive-account)/20 text-inactive-account border border-(--inactive-account)/30 px-2.5 py-1 rounded-md text-xs font-medium">
+                    Inactive Account
+                  </span>
+                )}
+                {player.banned && (
+                  <span className="bg-destructive/20 text-destructive-foreground border border-destructive/30 px-2.5 py-1 rounded-md text-xs font-medium">
+                    Banned Account
+                  </span>
+                )}
               </div>
               <PlayerOverview player={player} />
             </div>
@@ -47,7 +55,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
 
           <PlayerStats player={player} />
 
-          <div className="absolute top-0 right-0 flex flex-col gap-(--spacing-sm) lg:flex-row">
+          <div className="absolute top-0 right-0 flex flex-col gap-2 lg:flex-row">
             <AddFriend player={player} />
             <ClaimProfile playerId={player.id} />
           </div>
@@ -55,7 +63,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
       </div>
 
       {/* Player Footer */}
-      <div className="flex flex-col-reverse items-center gap-(--spacing-sm) md:flex-row md:justify-between">
+      <div className="border-t border-border/50 pt-4 flex flex-col-reverse items-center gap-4 md:flex-row md:justify-between">
         <PlayerActions player={player} />
         <PlayerAccBadges badges={player.accBadges} />
       </div>

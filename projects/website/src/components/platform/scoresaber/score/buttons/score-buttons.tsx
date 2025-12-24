@@ -22,12 +22,14 @@ type Props = {
 };
 
 type ButtonConfig = {
+  id: string;
   display: (props: Props) => boolean;
   render: (props: Props) => React.ReactNode;
 };
 
 const buttons: ButtonConfig[] = [
   {
+    id: "copy-bsr",
     display: ({ beatSaverMap, isPreviousScore }: Props) => {
       return beatSaverMap != undefined && !isPreviousScore;
     },
@@ -36,6 +38,7 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
+    id: "beat-saver-map",
     display: ({ beatSaverMap, isPreviousScore }: Props) => {
       return beatSaverMap != undefined && !isPreviousScore;
     },
@@ -44,6 +47,7 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
+    id: "score-editor",
     display: ({ score }: Props) => {
       return score?.beatLeaderScore != undefined;
     },
@@ -52,6 +56,7 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
+    id: "score-history",
     display: ({ score }: Props) => {
       return score.previousScore != undefined;
     },
@@ -60,6 +65,7 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
+    id: "replay",
     display: ({ score }: Props) => {
       return score?.beatLeaderScore != undefined;
     },
@@ -68,6 +74,7 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
+    id: "youtube",
     display: ({ leaderboard, isPreviousScore }: Props) => {
       return leaderboard != undefined && !isPreviousScore;
     },
@@ -113,8 +120,8 @@ export default function ScoreSaberScoreButtons({
     >
       {visibleButtons
         .filter(button => button.display(buttonProps))
-        .map((button, index) => (
-          <div key={index} className="shrink-0">
+        .map(button => (
+          <div key={button.id} className="shrink-0">
             {button.render(buttonProps)}
           </div>
         ))}

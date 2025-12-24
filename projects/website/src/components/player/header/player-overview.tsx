@@ -14,7 +14,7 @@ import CountryFlag from "../../ui/country-flag";
 
 function PlayerOverviewItem({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-background border-border flex h-8 items-center gap-2 rounded-lg border px-3 py-2 text-gray-300">
+    <div className="bg-background/80 border-border flex h-9 items-center gap-2 rounded-lg border px-3 py-1.5 text-gray-300 shadow-sm backdrop-blur-sm">
       {children}
     </div>
   );
@@ -30,7 +30,7 @@ const playerData = [
       return (
         <PlayerOverviewItem>
           <div className="flex items-center gap-1">
-            <SimpleTooltip display={<span>Global Rank</span>}>
+            <SimpleTooltip display={<span>Global Rank</span>} side="bottom">
               <GlobeAmericasIcon className="text-muted-foreground h-5 w-5" />
             </SimpleTooltip>
             <ChangeOverTime
@@ -52,7 +52,7 @@ const playerData = [
               }
             >
               <SimpleLink href={`/ranking/${player.rankPages.global}`}>
-                <span className="hover:text-primary/80 m-0 text-sm transition-all">
+                <span className="hover:text-primary/80 focus-visible:outline-2 focus-visible:outline-primary/50 focus-visible:outline-offset-2 focus-visible:rounded m-0 text-sm transition-all">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
               </SimpleLink>
@@ -76,11 +76,12 @@ const playerData = [
               code={player.country}
               size={10}
               className="rounded-sm"
+              tooltipSide="bottom"
               tooltip={name => `Country Rank in ${name}`}
             />
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
               <SimpleLink href={`/ranking/${player.country}/${player.rankPages.country}`}>
-                <span className="hover:text-primary/80 m-0 text-sm transition-all">
+                <span className="hover:text-primary/80 focus-visible:outline-2 focus-visible:outline-primary/50 focus-visible:outline-offset-2 focus-visible:rounded m-0 text-sm transition-all">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
               </SimpleLink>
@@ -149,7 +150,11 @@ export default function PlayerOverview({ player }: PlayerOverviewProps) {
           return null;
         }
 
-        return <div key={index}>{subName.render && subName.render(player)}</div>;
+        return (
+          <div key={`player-overview-${index}-${subName.showWhenInactiveOrBanned}`}>
+            {subName.render && subName.render(player)}
+          </div>
+        );
       })}
     </div>
   );

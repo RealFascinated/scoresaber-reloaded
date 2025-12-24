@@ -44,11 +44,12 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
         alt={`${player.name}'s Profile Picture`}
       />
       <div className="absolute top-[3px] right-[3px] z-10">
-        <SimpleTooltip display="Refresh player">
+        <SimpleTooltip display={isRefreshing ? "Refreshing..." : "Refresh player"}>
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="bg-muted/90 hover:bg-muted flex size-7 cursor-pointer items-center justify-center rounded-md"
+            aria-label="Refresh player data"
+            className="bg-muted/90 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors duration-200"
           >
             <ArrowPathIcon className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
           </button>

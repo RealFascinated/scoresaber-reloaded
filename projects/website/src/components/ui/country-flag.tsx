@@ -9,9 +9,10 @@ type Props = {
   size?: number;
   className?: string;
   tooltip?: (formattedName: string) => string;
+  tooltipSide?: "top" | "bottom" | "left" | "right";
 };
 
-export default function CountryFlag({ code, size = 24, className, tooltip }: Props) {
+export default function CountryFlag({ code, size = 24, className, tooltip, tooltipSide = "top" }: Props) {
   const [flagSrc, setFlagSrc] = useState(`https://cdn.fascinated.cc/assets/flags/${code.toLowerCase()}.png`);
 
   const handleError = () => {
@@ -23,6 +24,7 @@ export default function CountryFlag({ code, size = 24, className, tooltip }: Pro
     <SimpleTooltip
       display={<p>{tooltip ? tooltip(normalizedRegionName(code)) : normalizedRegionName(code)}</p>}
       className={className}
+      side={tooltipSide}
     >
       <div
         className="flex items-center justify-center"
