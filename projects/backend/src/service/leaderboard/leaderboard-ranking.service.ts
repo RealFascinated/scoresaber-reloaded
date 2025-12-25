@@ -137,19 +137,26 @@ export class LeaderboardRankingService {
         dbLeaderboard?.qualified !== apiLeaderboard.qualified ||
         dbLeaderboard?.stars !== apiLeaderboard.stars;
 
-      // Update or create the leaderboard
-      leaderboardBulkWrite.push({
-        updateOne: {
-          filter: { _id: apiLeaderboard.id },
-          update: {
-            $set: {
-              ...apiLeaderboard,
-              difficulties: leaderboardDifficulties.get(apiLeaderboard.songHash) ?? [],
+      // Update or create the leaderboard if the leaderboard has been updated or the daily/plays have changed
+      if (
+        !dbLeaderboard ||
+        leaderboardUpdated ||
+        dbLeaderboard.dailyPlays !== apiLeaderboard.dailyPlays ||
+        dbLeaderboard.plays !== apiLeaderboard.plays
+      ) {
+        leaderboardBulkWrite.push({
+          updateOne: {
+            filter: { _id: apiLeaderboard.id },
+            update: {
+              $set: {
+                ...apiLeaderboard,
+                difficulties: leaderboardDifficulties.get(apiLeaderboard.songHash) ?? [],
+              },
             },
+            upsert: true,
           },
-          upsert: true,
-        },
-      });
+        });
+      }
 
       if (!leaderboardUpdated) {
         continue;
