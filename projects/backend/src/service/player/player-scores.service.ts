@@ -562,7 +562,7 @@ export class PlayerScoresService {
         if (sortField === "pp") {
           queryBuilder.hint({ pp: sortOrder, _id: sortOrder });
         } else if (sortField === "timestamp") {
-          queryBuilder.hint({ playerId: 1, timestamp: sortOrder, _id: sortOrder });
+          queryBuilder.hint({ playerId: 1, timestamp: sortOrder });
         }
 
         const items = await queryBuilder;

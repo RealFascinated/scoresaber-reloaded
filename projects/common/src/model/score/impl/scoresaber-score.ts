@@ -27,8 +27,6 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 })
 @index({ playerId: 1, leaderboardId: 1 })
 @index({ playerId: 1, timestamp: -1 })
-@index({ playerId: 1, timestamp: -1, _id: -1 })
-@index({ pp: -1 })
 @index({ pp: -1, _id: -1 })
 @index({ timestamp: -1 })
 @index({ playerId: 1, pp: -1 })
