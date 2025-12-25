@@ -2,11 +2,13 @@ import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
 import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
+import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { isProduction } from "@ssr/common/utils/utils";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
@@ -28,19 +30,28 @@ export class MedalScoresService {
   public static async rescanMedalScores() {
     MedalScoresService.IGNORE_SCORES = true;
 
-    // Delete all of the old scores
-    await ScoreSaberMedalsScoreModel.deleteMany({});
-
     const rankedLeaderboards = await LeaderboardCoreService.getRankedLeaderboards();
+    let updatedCount = 0;
+    let skippedCount = 0;
+
     for (const [index, leaderboard] of rankedLeaderboards.entries()) {
-      await this.rescanLeaderboard(leaderboard.id);
+      const needsUpdate = await this.rescanLeaderboardIfChanged(leaderboard.id);
+      if (needsUpdate) {
+        updatedCount++;
+      } else {
+        skippedCount++;
+      }
 
       if (index % 100 === 0) {
-        Logger.info(`[MEDAL SCORES] Refreshed ${index} of ${rankedLeaderboards.length} ranked leaderboards`);
+        Logger.info(
+          `[MEDAL SCORES] Processed ${index} of ${rankedLeaderboards.length} ranked leaderboards (${updatedCount} updated, ${skippedCount} skipped)`
+        );
       }
     }
 
-    Logger.info(`[MEDAL SCORES] Refreshed all ranked leaderboards`);
+    Logger.info(
+      `[MEDAL SCORES] Refreshed all ranked leaderboards: ${updatedCount} updated, ${skippedCount} skipped`
+    );
     MedalScoresService.IGNORE_SCORES = false;
 
     // Process the scores queue
@@ -48,6 +59,99 @@ export class MedalScoresService {
       await MedalScoresService.handleIncomingMedalsScoreUpdate(item.score, item.beatLeaderScore);
     }
     MedalScoresService.SCORES_INGEST_QUEUE.clear();
+  }
+
+  /**
+   * Rescans the medal scores for a leaderboard only if they have changed.
+   *
+   * @param leaderboardId the leaderboard id to rescan.
+   * @returns true if scores were updated, false if they were unchanged
+   */
+  public static async rescanLeaderboardIfChanged(leaderboardId: number): Promise<boolean> {
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId, {
+      includeBeatSaver: false,
+      includeStarChangeHistory: false,
+    });
+    if (!leaderboard) {
+      return false;
+    }
+
+    const page = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1, {
+      priority: isProduction() ? CooldownPriority.BACKGROUND : CooldownPriority.NORMAL,
+    });
+    if (!page) {
+      return false;
+    }
+
+    // Get top 10 scores from API
+    const top10ApiScores = page.scores
+      .filter(score => score.rank <= 10)
+      .map(score => ({
+        scoreId: String(score.id),
+        playerId: score.leaderboardPlayerInfo.id,
+        score: score.baseScore,
+        rank: score.rank,
+      }))
+      .sort((a, b) => a.rank - b.rank);
+
+    // Get existing medal scores from database
+    const existingScores = await ScoreSaberMedalsScoreModel.find({ leaderboardId })
+      .select("scoreId playerId score rank")
+      .lean()
+      .sort({ rank: 1 });
+
+    // Compare scores - check if they're different
+    if (existingScores.length !== top10ApiScores.length) {
+      // Different number of scores, needs update
+      await ScoreSaberMedalsScoreModel.deleteMany({ leaderboardId });
+      await this.insertMedalScores(page.scores, leaderboard.leaderboard);
+      return true;
+    }
+
+    // Compare each score by scoreId and rank
+    const scoresChanged = top10ApiScores.some((apiScore, index) => {
+      const existingScore = existingScores[index];
+      return (
+        !existingScore ||
+        existingScore.scoreId !== apiScore.scoreId ||
+        existingScore.rank !== apiScore.rank ||
+        existingScore.playerId !== apiScore.playerId
+      );
+    });
+
+    if (scoresChanged) {
+      // Scores have changed, delete and re-insert
+      await ScoreSaberMedalsScoreModel.deleteMany({ leaderboardId });
+      await this.insertMedalScores(page.scores, leaderboard.leaderboard);
+      return true;
+    }
+
+    // No changes, skip update
+    return false;
+  }
+
+  /**
+   * Inserts medal scores for a leaderboard.
+   *
+   * @param scores the scores from the API
+   * @param leaderboard the leaderboard object
+   */
+  private static async insertMedalScores(
+    scores: ScoreSaberScoreToken[],
+    leaderboard: ScoreSaberLeaderboard
+  ): Promise<void> {
+    for (const score of scores) {
+      // Ignore scores that aren't top 10
+      if (score.rank > 10) {
+        continue;
+      }
+
+      // Create a new medal score
+      await new ScoreSaberMedalsScoreModel({
+        ...getScoreSaberScoreFromToken(score, leaderboard, score.leaderboardPlayerInfo.id),
+        medals: MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS],
+      }).save();
+    }
   }
 
   /**
@@ -75,18 +179,7 @@ export class MedalScoresService {
       return;
     }
 
-    for (const score of page.scores) {
-      // Ignore scores that aren't top 10
-      if (score.rank > 10) {
-        continue;
-      }
-
-      // Create a new medal score
-      new ScoreSaberMedalsScoreModel({
-        ...getScoreSaberScoreFromToken(score, leaderboard.leaderboard, score.leaderboardPlayerInfo.id),
-        medals: MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS],
-      }).save();
-    }
+    await this.insertMedalScores(page.scores, leaderboard.leaderboard);
   }
 
   /**
