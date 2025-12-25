@@ -73,7 +73,7 @@ export default class MetricsService implements EventListener {
       () => {
         this.saveMetrics();
       },
-      TimeUnit.toMillis(TimeUnit.Second, 10)
+      TimeUnit.toMillis(TimeUnit.Second, 60)
     );
   }
 
@@ -185,6 +185,12 @@ export default class MetricsService implements EventListener {
       // Check if the metric needs to be saved to the db
       if (metric.options.fetchAndStore) {
         const before = performance.now();
+        // Check if value has changed before updating
+        const existingMetric = await MetricValueModel.findOne({ _id: metric.id }).lean();
+        if (existingMetric && JSON.stringify(existingMetric.value) === JSON.stringify(metric.value)) {
+          // Value hasn't changed, skip write
+          continue;
+        }
         await MetricValueModel.findOneAndUpdate(
           { _id: metric.id },
           { value: metric.value },

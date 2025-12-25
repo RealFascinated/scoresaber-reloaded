@@ -49,18 +49,34 @@ export class LeaderboardRankingService {
       const scores = await ScoreSaberPreviousScoreModel.find({ leaderboardId: leaderboard.id })
         .select({ pp: 1, accuracy: 1 })
         .lean();
-      await ScoreSaberPreviousScoreModel.bulkWrite(
-        scores.map(score => ({
-          updateOne: {
-            filter: { _id: score._id },
-            update: { $set: { pp: ScoreSaberCurve.getPp(leaderboard.stars, score.accuracy) } },
-          },
-        }))
-      );
-
-      Logger.info(
-        `[RANKED UPDATES] Reweighted ${scores.length} history scores for leaderboard "${leaderboard.id}".`
-      );
+      
+      // Only update scores where PP actually changed
+      const updates = scores
+        .map(score => {
+          const newPp = ScoreSaberCurve.getPp(leaderboard.stars, score.accuracy);
+          // Only include in bulk write if PP changed
+          if (score.pp !== newPp) {
+            return {
+              updateOne: {
+                filter: { _id: score._id },
+                update: { $set: { pp: newPp } },
+              },
+            };
+          }
+          return null;
+        })
+        .filter((update): update is NonNullable<typeof update> => update !== null);
+      
+      if (updates.length > 0) {
+        await ScoreSaberPreviousScoreModel.bulkWrite(updates);
+        Logger.info(
+          `[RANKED UPDATES] Reweighted ${updates.length} of ${scores.length} history scores for leaderboard "${leaderboard.id}".`
+        );
+      } else {
+        Logger.info(
+          `[RANKED UPDATES] No PP changes needed for ${scores.length} history scores for leaderboard "${leaderboard.id}".`
+        );
+      }
     }
 
     async function updateLeaderboardScores(leaderboard: ScoreSaberLeaderboard) {
@@ -83,6 +99,13 @@ export class LeaderboardRankingService {
             scoreToken.leaderboardPlayerInfo.id
           );
           if (!score) {
+            continue;
+          }
+
+          // Check if score already exists with same data to avoid unnecessary writes
+          const existingScore = await ScoreSaberScoreModel.findOne({ scoreId: score.scoreId }).lean();
+          if (existingScore && existingScore.score === score.score && existingScore.rank === score.rank) {
+            // Score exists and hasn't changed, skip write
             continue;
           }
 
@@ -115,10 +138,7 @@ export class LeaderboardRankingService {
     })
       .select({ _id: 1, stars: 1, ranked: 1, qualified: 1 })
       .lean()
-      .then(leaderboards => new Map(leaderboards.map(leaderboard => [leaderboard._id, leaderboard])))) as Map<
-      number,
-      ScoreSaberLeaderboard
-    >;
+      .then(leaderboards => new Map(leaderboards.map(leaderboard => [leaderboard._id, leaderboard]))));
 
     const leaderboardBulkWrite: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];
     const updatedLeaderboards: LeaderboardUpdate[] = [];

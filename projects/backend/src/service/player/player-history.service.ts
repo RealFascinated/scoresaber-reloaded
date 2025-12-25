@@ -80,7 +80,7 @@ export class PlayerHistoryService {
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
           (async () => {
-            PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } });
+            await PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } });
             redisClient.del(`scoresaber:cached-player:${foundPlayer._id}`);
           })(),
       ]);
@@ -168,6 +168,30 @@ export class PlayerHistoryService {
         player,
         existingEntry ?? undefined
       );
+      
+      // Only update if data has actually changed
+      if (existingEntry) {
+        const hasChanged = 
+          existingEntry.pp !== updatedHistory.pp ||
+          existingEntry.rank !== updatedHistory.rank ||
+          existingEntry.countryRank !== updatedHistory.countryRank ||
+          existingEntry.averageRankedAccuracy !== updatedHistory.averageRankedAccuracy ||
+          existingEntry.averageUnrankedAccuracy !== updatedHistory.averageUnrankedAccuracy ||
+          existingEntry.averageAccuracy !== updatedHistory.averageAccuracy ||
+          existingEntry.totalScores !== updatedHistory.totalScores ||
+          existingEntry.totalRankedScores !== updatedHistory.totalRankedScores ||
+          existingEntry.totalUnrankedScores !== updatedHistory.totalUnrankedScores ||
+          existingEntry.totalScore !== updatedHistory.totalScore ||
+          existingEntry.totalRankedScore !== updatedHistory.totalRankedScore ||
+          existingEntry.plusOnePp !== updatedHistory.plusOnePp ||
+          existingEntry.medals !== updatedHistory.medals;
+        
+        if (!hasChanged) {
+          // No changes, skip write
+          return;
+        }
+      }
+      
       await PlayerHistoryEntryModel.findOneAndUpdate(
         { playerId: foundPlayer._id, date: getMidnightAlignedDate(trackTime) },
         updatedHistory,

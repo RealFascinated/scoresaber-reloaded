@@ -170,6 +170,11 @@ export class PlayerCoreService {
    * @param name the new name
    */
   public static async updatePlayerName(playerId: string, name: string) {
+    // Only update if name has changed
+    const player = await PlayerModel.findById(playerId).select("name").lean();
+    if (player && player.name === name) {
+      return; // Name hasn't changed, skip write
+    }
     await PlayerModel.updateOne({ _id: playerId }, { $set: { name } });
   }
 

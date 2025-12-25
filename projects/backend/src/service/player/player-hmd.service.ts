@@ -13,6 +13,11 @@ export class PlayerHmdService {
     const hmds = await this.getPlayerHmdBreakdown(playerId, 10);
     const mostCommonHmd = Object.keys(hmds)[0] ?? undefined;
     if (mostCommonHmd) {
+      // Only update if HMD has changed
+      const player = await PlayerModel.findById(playerId).select("hmd").lean();
+      if (player && player.hmd === mostCommonHmd) {
+        return; // HMD hasn't changed, skip write
+      }
       await PlayerModel.updateOne({ _id: playerId }, { $set: { hmd: mostCommonHmd } });
     }
   }
