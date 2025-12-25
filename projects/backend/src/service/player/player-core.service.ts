@@ -181,10 +181,14 @@ export class PlayerCoreService {
   /**
    * Updates the player's peak rank.
    *
-   * @param playerId the player's id
    * @param playerToken the player's token
    */
-  public static async updatePeakRank(player: Player, playerToken: ScoreSaberPlayerToken) {
+  public static async updatePeakRank(playerToken: ScoreSaberPlayerToken) {
+    const player = await PlayerModel.findById(playerToken.id).select("peakRank").lean();
+    if (!player) {
+      return;
+    }
+
     if (playerToken.rank == 0) {
       return player;
     }

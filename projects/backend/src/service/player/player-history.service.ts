@@ -139,19 +139,25 @@ export class PlayerHistoryService {
    * Tracks and updates a player's statistics for a specific date.
    * This method handles both new and existing players, updating their statistics
    * and handling inactive status.
+   * 
+   * @param foundPlayer the player to track the history for
+   * @param trackTime the time to track the history for
+   * @param player the player token to track the history for
    */
   public static async trackPlayerHistory(
     foundPlayer: Player,
     trackTime: Date,
-    playerToken?: ScoreSaberPlayerToken
+    player: ScoreSaberPlayerToken
   ): Promise<void> {
     const before = performance.now();
-    const player = playerToken ?? (await ScoreSaberApiService.lookupPlayer(foundPlayer._id));
 
     // Don't track inactive players
     if (!player || player.inactive) {
       return;
     }
+
+    // Update the player's peak rank
+    await PlayerCoreService.updatePeakRank(player);
 
     const daysTracked = await PlayerHistoryService.getDaysTracked(foundPlayer._id);
     if (daysTracked === 0) {

@@ -86,9 +86,8 @@ export default class ScoreSaberService {
         return await PlayerHistoryService.getPlayerStatisticHistory(player, date, true);
       }
 
-      const [, plusOnePp, accBadges, hmdBreakdown, medalsRank, dailyChanges, weeklyChanges, monthlyChanges, rankWithInactives] =
+      const [plusOnePp, accBadges, hmdBreakdown, medalsRank, dailyChanges, weeklyChanges, monthlyChanges, rankWithInactives] =
         await Promise.all([
-          account ? PlayerCoreService.updatePeakRank(account, player) : undefined,
           account ? PlayerRankedService.getPlayerWeightedPpGainForRawPp(id) : 0,
           account ? PlayerAccuraciesService.getAccBadges(id) : {},
           // todo: cleanup this mess
