@@ -6,7 +6,7 @@ import {
 } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberLeaderboardStarChangeModel } from "@ssr/common/model/leaderboard/leaderboard-star-change";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
@@ -49,7 +49,7 @@ export class LeaderboardRankingService {
       const scores = await ScoreSaberPreviousScoreModel.find({ leaderboardId: leaderboard.id })
         .select({ pp: 1, accuracy: 1 })
         .lean();
-      
+
       // Only update scores where PP actually changed
       const updates = scores
         .map(score => {
@@ -66,7 +66,7 @@ export class LeaderboardRankingService {
           return null;
         })
         .filter((update): update is NonNullable<typeof update> => update !== null);
-      
+
       if (updates.length > 0) {
         await ScoreSaberPreviousScoreModel.bulkWrite(updates);
         Logger.info(
@@ -84,7 +84,9 @@ export class LeaderboardRankingService {
       let hasMorePages = true;
       let page = 1;
       let updatedScoresCount = 0;
+      const scoreOps: Array<{ score: ScoreSaberScore; op: AnyBulkWriteOperation<ScoreSaberScore> }> = [];
 
+      // Collect all scores first
       while (hasMorePages) {
         const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboard.id, page);
         if (!response) {
@@ -102,43 +104,71 @@ export class LeaderboardRankingService {
             continue;
           }
 
-          // Check if score already exists with same data to avoid unnecessary writes
-          const existingScore = await ScoreSaberScoreModel.findOne({ scoreId: score.scoreId }).lean();
-          if (existingScore && existingScore.score === score.score && existingScore.rank === score.rank) {
-            // Score exists and hasn't changed, skip write
-            continue;
-          }
-
-          // Update or create the score
-          await ScoreSaberScoreModel.findOneAndUpdate(
-            { scoreId: score.scoreId },
-            { $set: { ...score } },
-            { upsert: true }
-          );
-          updatedScoresCount++;
+          scoreOps.push({
+            score,
+            op: {
+              updateOne: {
+                filter: { scoreId: score.scoreId },
+                update: { $set: score },
+                upsert: true,
+              },
+            },
+          });
         }
 
         const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
         if (page % 10 === 0 || page === 1 || page >= totalPages) {
           Logger.info(
-            `[RANKED UPDATES] Updated ${updatedScoresCount} scores for leaderboard "${leaderboard.id}" on page ${page}/${totalPages}.`
+            `[RANKED UPDATES] Queued scores for leaderboard "${leaderboard.id}" on page ${page}/${totalPages}.`
           );
         }
 
         page++;
         hasMorePages = page < totalPages;
       }
-      Logger.info(
-        `[RANKED UPDATES] Updated ${updatedScoresCount} scores for leaderboard "${leaderboard.id}".`
-      );
+
+      // Batch check which scores actually need updating
+      if (scoreOps.length > 0) {
+        const scoreIds = scoreOps.map(so => so.score.scoreId);
+        const existingScores = await ScoreSaberScoreModel.find({
+          scoreId: { $in: scoreIds },
+          leaderboardId: leaderboard.id,
+        })
+          .select("scoreId score rank")
+          .lean();
+
+        const existingScoreMap = new Map(
+          existingScores.map(s => [s.scoreId, { score: s.score, rank: s.rank }])
+        );
+
+        // Filter out scores that haven't changed
+        const opsToWrite = scoreOps
+          .filter(({ score }) => {
+            const existing = existingScoreMap.get(score.scoreId);
+            return !existing || existing.score !== score.score || existing.rank !== score.rank;
+          })
+          .map(({ op }) => op);
+
+        if (opsToWrite.length > 0) {
+          const result = await ScoreSaberScoreModel.bulkWrite(opsToWrite, { ordered: false });
+          updatedScoresCount = result.upsertedCount + result.modifiedCount;
+          Logger.info(
+            `[RANKED UPDATES] Updated ${updatedScoresCount} of ${scoreOps.length} scores for leaderboard "${leaderboard.id}" (${result.upsertedCount} inserted, ${result.modifiedCount} modified, ${scoreOps.length - opsToWrite.length} skipped).`
+          );
+        } else {
+          Logger.info(
+            `[RANKED UPDATES] No score changes needed for leaderboard "${leaderboard.id}" (${scoreOps.length} scores checked).`
+          );
+        }
+      }
     }
 
-    const rankedLeaderboards: Map<number, ScoreSaberLeaderboard> = (await ScoreSaberLeaderboardModel.find({
+    const rankedLeaderboards: Map<number, ScoreSaberLeaderboard> = await ScoreSaberLeaderboardModel.find({
       ranked: true,
     })
       .select({ _id: 1, stars: 1, ranked: 1, qualified: 1 })
       .lean()
-      .then(leaderboards => new Map(leaderboards.map(leaderboard => [leaderboard._id, leaderboard]))));
+      .then(leaderboards => new Map(leaderboards.map(leaderboard => [leaderboard._id, leaderboard])));
 
     const leaderboardBulkWrite: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];
     const updatedLeaderboards: LeaderboardUpdate[] = [];
@@ -157,7 +187,7 @@ export class LeaderboardRankingService {
         dbLeaderboard?.qualified !== apiLeaderboard.qualified ||
         dbLeaderboard?.stars !== apiLeaderboard.stars;
 
-      // Update or create the leaderboard if the leaderboard has been updated or the daily/plays have changed
+      // Update the leaderboard if it has changed
       if (
         !dbLeaderboard ||
         leaderboardUpdated ||

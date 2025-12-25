@@ -333,7 +333,6 @@ export class LeaderboardCoreService {
       {
         ...leaderboard,
         _id: id,
-        lastRefreshed: new Date(),
       },
       {
         upsert: true,

@@ -91,13 +91,6 @@ export default class Leaderboard {
   @Prop({ required: true })
   readonly timestamp!: Date;
 
-  /**
-   * The date the leaderboard was last refreshed.
-   * @private
-   */
-  @Prop({ required: true })
-  lastRefreshed?: Date;
-
   get id(): number {
     return this._id ?? 0;
   }

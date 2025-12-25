@@ -14,14 +14,14 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../../../../u
 
 export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberScore }) {
   const [open, setOpen] = useState(false);
-  
+
   const { data: scoreHistoryGraph } = useQuery<ScoreHistoryGraph | undefined>({
     queryKey: ["score-history-graph", score.playerId, score.leaderboardId],
     queryFn: async () => ssrApi.fetchScoreHistoryGraph(score.playerId, score.leaderboardId),
     enabled: open,
   });
 
-  const labels = scoreHistoryGraph?.map((point) => point.timestamp) || [];
+  const labels = scoreHistoryGraph?.map(point => point.timestamp) || [];
 
   const chartConfig = buildChartConfig({
     id: "score-history-graph",
@@ -39,7 +39,7 @@ export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberSc
       },
     ],
     seriesByField: {
-      accuracy: scoreHistoryGraph?.map((point) => point.accuracy) || [],
+      accuracy: scoreHistoryGraph?.map(point => point.accuracy) || [],
     },
   });
 

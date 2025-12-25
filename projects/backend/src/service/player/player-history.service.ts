@@ -139,7 +139,7 @@ export class PlayerHistoryService {
    * Tracks and updates a player's statistics for a specific date.
    * This method handles both new and existing players, updating their statistics
    * and handling inactive status.
-   * 
+   *
    * @param foundPlayer the player to track the history for
    * @param trackTime the time to track the history for
    * @param player the player token to track the history for
@@ -174,10 +174,10 @@ export class PlayerHistoryService {
         player,
         existingEntry ?? undefined
       );
-      
+
       // Only update if data has actually changed
       if (existingEntry) {
-        const hasChanged = 
+        const hasChanged =
           existingEntry.pp !== updatedHistory.pp ||
           existingEntry.rank !== updatedHistory.rank ||
           existingEntry.countryRank !== updatedHistory.countryRank ||
@@ -191,13 +191,13 @@ export class PlayerHistoryService {
           existingEntry.totalRankedScore !== updatedHistory.totalRankedScore ||
           existingEntry.plusOnePp !== updatedHistory.plusOnePp ||
           existingEntry.medals !== updatedHistory.medals;
-        
+
         if (!hasChanged) {
           // No changes, skip write
           return;
         }
       }
-      
+
       await PlayerHistoryEntryModel.findOneAndUpdate(
         { playerId: foundPlayer._id, date: getMidnightAlignedDate(trackTime) },
         updatedHistory,

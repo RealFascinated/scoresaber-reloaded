@@ -23,7 +23,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
       <div className="relative flex flex-col items-center gap-6 text-center select-none lg:flex-row lg:items-start lg:text-start">
         <PlayerAvatar player={player} />
         <div className="flex w-full flex-col items-center justify-center gap-3 lg:items-start lg:justify-start">
-          <div className="flex flex-col w-full">
+          <div className="flex w-full flex-col">
             <div className="flex items-center justify-center gap-3 lg:justify-start">
               <SimpleLink
                 href={`https://steamcommunity.com/profiles/${player.id}`}
@@ -39,12 +39,12 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
                 {player.inactive && (
-                  <span className="bg-(--inactive-account)/20 text-inactive-account border border-(--inactive-account)/30 px-2.5 py-1 rounded-md text-xs font-medium">
+                  <span className="text-inactive-account rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2.5 py-1 text-xs font-medium">
                     Inactive Account
                   </span>
                 )}
                 {player.banned && (
-                  <span className="bg-destructive/20 text-destructive-foreground border border-destructive/30 px-2.5 py-1 rounded-md text-xs font-medium">
+                  <span className="bg-destructive/20 text-destructive-foreground border-destructive/30 rounded-md border px-2.5 py-1 text-xs font-medium">
                     Banned Account
                   </span>
                 )}
@@ -63,7 +63,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
       </div>
 
       {/* Player Footer */}
-      <div className="border-t border-border/50 pt-4 flex flex-col-reverse items-center gap-4 md:flex-row md:justify-between">
+      <div className="border-border/50 flex flex-col-reverse items-center gap-4 border-t pt-4 md:flex-row md:justify-between">
         <PlayerActions player={player} />
         <PlayerAccBadges badges={player.accBadges} />
       </div>

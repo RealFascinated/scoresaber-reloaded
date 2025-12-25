@@ -49,7 +49,7 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
             onClick={handleRefresh}
             disabled={isRefreshing}
             aria-label="Refresh player data"
-            className="bg-muted/90 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors duration-200"
+            className="bg-muted/90 hover:bg-muted focus-visible:ring-primary/50 flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ArrowPathIcon className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
           </button>
