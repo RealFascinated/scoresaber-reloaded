@@ -70,7 +70,7 @@ export class ScoreCoreService {
     delete score.playerInfo;
 
     await ScoreSaberScoreModel.create(score);
-    await PlayerHmdService.updatePlayerHmd(player.id);
+    await PlayerHmdService.updatePlayerHmd(player.id, score);
 
     // Handle score for medal updates
     if (leaderboard.ranked && score.rank <= 10) {

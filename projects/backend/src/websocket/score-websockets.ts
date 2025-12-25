@@ -175,10 +175,20 @@ export class ScoreWebsockets implements EventListener {
       if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id))) {
         await LeaderboardCoreService.createLeaderboard(leaderboard.id, leaderboardToken);
       } else {
-        await ScoreSaberLeaderboardModel.updateOne(
-          { _id: leaderboard.id },
-          { $set: { plays: leaderboard.plays, dailyPlays: leaderboard.dailyPlays } }
-        );
+        // Only update if plays/dailyPlays actually changed to avoid unnecessary writes
+        const existingLeaderboard = await ScoreSaberLeaderboardModel.findById(leaderboard.id)
+          .select("plays dailyPlays")
+          .lean();
+        if (
+          existingLeaderboard &&
+          (existingLeaderboard.plays !== leaderboard.plays ||
+            existingLeaderboard.dailyPlays !== leaderboard.dailyPlays)
+        ) {
+          await ScoreSaberLeaderboardModel.updateOne(
+            { _id: leaderboard.id },
+            { $set: { plays: leaderboard.plays, dailyPlays: leaderboard.dailyPlays } }
+          );
+        }
       }
 
       EventsManager.getListeners().forEach(listener => {

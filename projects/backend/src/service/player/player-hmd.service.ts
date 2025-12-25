@@ -1,6 +1,6 @@
 import { HMD } from "@ssr/common/hmds";
 import { PlayerModel } from "@ssr/common/model/player/player";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 
 export class PlayerHmdService {
   /**
@@ -9,17 +9,17 @@ export class PlayerHmdService {
    * @param playerId the player's id
    * @param hmd the player's HMD
    */
-  public static async updatePlayerHmd(playerId: string): Promise<void> {
-    const hmds = await this.getPlayerHmdBreakdown(playerId, 10);
-    const mostCommonHmd = Object.keys(hmds)[0] ?? undefined;
-    if (mostCommonHmd) {
-      // Only update if HMD has changed
-      const player = await PlayerModel.findById(playerId).select("hmd").lean();
-      if (player && player.hmd === mostCommonHmd) {
-        return; // HMD hasn't changed, skip write
-      }
-      await PlayerModel.updateOne({ _id: playerId }, { $set: { hmd: mostCommonHmd } });
+  public static async updatePlayerHmd(playerId: string, score: ScoreSaberScore): Promise<void> {
+    if (!score.hmd) {
+      return;
     }
+
+    const player = await PlayerModel.findById(playerId).select("hmd").lean();
+    if (!player || player.hmd == score.hmd) {
+      return;
+    }
+
+    await PlayerModel.updateOne({ _id: playerId }, { $set: { hmd: score.hmd } });
   }
 
   /**
