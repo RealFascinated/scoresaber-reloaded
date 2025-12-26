@@ -43,7 +43,7 @@ export default class ScoreSaberLeaderboardInternal extends Leaderboard {
   /**
    * The date the leaderboard was ranked.
    */
-  @Prop({ required: false, index: true })
+  @Prop({ required: false })
   readonly dateRanked?: Date;
 
   /**
