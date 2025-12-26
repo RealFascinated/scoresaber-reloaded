@@ -8,7 +8,7 @@ import type { Document } from "mongoose";
   options: { allowMixed: Severity.ALLOW },
   schemaOptions: { collection: "player-history" },
 })
-@index({ playerId: 1, date: -1 }) // Compound index for time-series queries
+@index({ playerId: 1, date: -1 })
 export class PlayerHistoryEntry {
   /**
    * The id of the history entry.
@@ -19,13 +19,13 @@ export class PlayerHistoryEntry {
   /**
    * The id of the player this history entry belongs to.
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public playerId!: string;
 
   /**
    * The date this history entry is for.
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public date!: Date;
 
   /**
