@@ -1,28 +1,29 @@
 import { Point } from "@influxdata/influxdb-client";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
-import NumberMetric from "../../number-metric";
+import Metric from "../../metric";
 
-export default class UniqueDailyPlayersMetric extends NumberMetric {
+type UniqueDailyPlayersData = {
+  lastScore: Date;
+  playerIds: string[];
+};
+
+export default class UniqueDailyPlayersMetric extends Metric<UniqueDailyPlayersData> {
   constructor() {
-    super(MetricType.UNIQUE_DAILY_PLAYERS, 0, {
-      fetchAndStore: false,
-      interval: TimeUnit.toMillis(TimeUnit.Minute, 1),
-    });
+    super(
+      MetricType.UNIQUE_DAILY_PLAYERS,
+      {
+        lastScore: getMidnightAlignedDate(new Date()),
+        playerIds: [],
+      },
+      {
+        fetchAndStore: true,
+        interval: TimeUnit.toMillis(TimeUnit.Minute, 1),
+      }
+    );
   }
 
-  public async collect(): Promise<Point | undefined> {
-    const statsResponse = await ScoreSaberScoreModel.aggregate([
-      { $match: { timestamp: { $gte: getMidnightAlignedDate(new Date()) } } },
-      {
-        $facet: {
-          uniquePlayers: [{ $group: { _id: "$playerId" } }, { $count: "uniquePlayers" }],
-        },
-      },
-    ]);
-
-    const uniquePlayersCount = statsResponse[0]?.uniquePlayers?.[0]?.uniquePlayers ?? 0;
-    return this.getPointBase().intField("value", uniquePlayersCount);
+  public collect(): Promise<Point | undefined> {
+    return Promise.resolve(this.getPointBase().intField("value", this.value.playerIds.length));
   }
 }

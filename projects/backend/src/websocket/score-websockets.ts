@@ -4,12 +4,14 @@ import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/s
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
-import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
+import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
 import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
+import MetricsService, { MetricType } from "../service/metrics.service";
 import { PlayerCoreService } from "../service/player/player-core.service";
 import { TopScoresService } from "../service/score/top-scores.service";
 import ScoreSaberService from "../service/scoresaber.service";
@@ -23,15 +25,26 @@ interface PendingScore {
 }
 
 export class ScoreWebsockets implements EventListener {
+  private static CURRENT_DAY = getMidnightAlignedDate(new Date()).getTime();
+  
   private static readonly SCORE_MATCH_TIMEOUT = TimeUnit.toMillis(TimeUnit.Minute, 5);
-  private static readonly pendingScores = new Map<string, PendingScore>();
+  private static readonly PENDING_SCORES = new Map<string, PendingScore>();
 
   constructor() {
+    // Initialize and reset unique daily players at midnight
+    this.initializeUniqueDailyPlayers();
+    setInterval(
+      () => {
+        ScoreWebsockets.resetUniqueDailyPlayersIfNewDay();
+      },
+      TimeUnit.toMillis(TimeUnit.Minute, 1)
+    );
+
     // Start the match timeout interval timer
     setInterval(
       () => {
         const now = Date.now();
-        for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
+        for (const [key, pendingScore] of ScoreWebsockets.PENDING_SCORES.entries()) {
           if (now - pendingScore.timestamp >= ScoreWebsockets.SCORE_MATCH_TIMEOUT) {
             ScoreWebsockets.clearPendingScore(key);
             if (pendingScore.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
@@ -59,7 +72,7 @@ export class ScoreWebsockets implements EventListener {
 
           const key =
             `${player.id}-${leaderboard.songHash}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`.toUpperCase();
-          const pendingScore = ScoreWebsockets.pendingScores.get(key);
+          const pendingScore = ScoreWebsockets.PENDING_SCORES.get(key);
 
           //Logger.info(`[SS-WS] Received score for player ${player.id} with key ${key}`);
 
@@ -74,7 +87,7 @@ export class ScoreWebsockets implements EventListener {
             );
           } else {
             // No matching BeatLeader score yet, store this one
-            ScoreWebsockets.pendingScores.set(key, {
+            ScoreWebsockets.PENDING_SCORES.set(key, {
               scoreSaberToken: score.score,
               leaderboardToken: score.leaderboard,
               player: score.score.leaderboardPlayerInfo,
@@ -98,7 +111,7 @@ export class ScoreWebsockets implements EventListener {
 
           const key =
             `${player.id}-${leaderboard.song.hash}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`.toUpperCase();
-          const pendingScore = ScoreWebsockets.pendingScores.get(key);
+          const pendingScore = ScoreWebsockets.PENDING_SCORES.get(key);
 
           // Logger.info(
           //   `[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`
@@ -115,7 +128,7 @@ export class ScoreWebsockets implements EventListener {
             );
           } else {
             // No matching ScoreSaber score yet, store this one
-            ScoreWebsockets.pendingScores.set(key, {
+            ScoreWebsockets.PENDING_SCORES.set(key, {
               beatLeaderScore,
               timestamp: Date.now(),
             });
@@ -133,7 +146,7 @@ export class ScoreWebsockets implements EventListener {
    * @param key the key of the pending score to clear.
    */
   private static clearPendingScore(key: string) {
-    this.pendingScores.delete(key);
+    this.PENDING_SCORES.delete(key);
   }
 
   /**
@@ -176,15 +189,66 @@ export class ScoreWebsockets implements EventListener {
         });
       }
 
+      // Track unique daily players
+      await ScoreWebsockets.resetUniqueDailyPlayersIfNewDay();
+      const metric = await ScoreWebsockets.getUniqueDailyPlayersMetric();
+      if (metric && !metric.value.playerIds.includes(player.id)) {
+        metric.value.playerIds.push(player.id);
+        metric.value.lastScore = new Date();
+      }
+
       EventsManager.getListeners().forEach(listener => {
         listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);
       });
     }
   }
 
+  /**
+   * Gets the unique daily players metric
+   */
+  private static async getUniqueDailyPlayersMetric(): Promise<UniqueDailyPlayersMetric | undefined> {
+    return (await MetricsService.getMetric(MetricType.UNIQUE_DAILY_PLAYERS)) as
+      | UniqueDailyPlayersMetric
+      | undefined;
+  }
+
+  /**
+   * Resets unique daily players if it's a new day
+   */
+  private static async resetUniqueDailyPlayersIfNewDay() {
+    const now = getMidnightAlignedDate(new Date()).getTime();
+    if (now !== ScoreWebsockets.CURRENT_DAY) {
+      ScoreWebsockets.CURRENT_DAY = now;
+      const metric = await ScoreWebsockets.getUniqueDailyPlayersMetric();
+      if (metric) {
+        metric.value = {
+          lastScore: getMidnightAlignedDate(new Date()),
+          playerIds: [],
+        };
+      }
+    }
+  }
+
+  /**
+   * Initialize unique daily players from stored metric
+   */
+  private async initializeUniqueDailyPlayers() {
+    const metric = await ScoreWebsockets.getUniqueDailyPlayersMetric();
+    if (metric) {
+      const storedDay = getMidnightAlignedDate(metric.value.lastScore).getTime();
+      const today = getMidnightAlignedDate(new Date()).getTime();
+      if (storedDay !== today) {
+        metric.value = {
+          lastScore: getMidnightAlignedDate(new Date()),
+          playerIds: [],
+        };
+      }
+    }
+  }
+
   onStop: () => Promise<void> = async () => {
     // Process all pending scores
-    for (const [key, pendingScore] of ScoreWebsockets.pendingScores.entries()) {
+    for (const [key, pendingScore] of ScoreWebsockets.PENDING_SCORES.entries()) {
       // Process the score
       this.processScore(
         pendingScore.scoreSaberToken,
@@ -193,7 +257,7 @@ export class ScoreWebsockets implements EventListener {
         pendingScore.beatLeaderScore
       );
 
-      ScoreWebsockets.pendingScores.delete(key);
+      ScoreWebsockets.PENDING_SCORES.delete(key);
     }
   };
 }
