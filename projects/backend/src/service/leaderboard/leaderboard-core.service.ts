@@ -14,8 +14,9 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { leaderboardToObject } from "@ssr/common/utils/model-converters";
-import { formatDuration } from "@ssr/common/utils/time-utils";
+import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { parse } from "devalue";
+import { AnyBulkWriteOperation } from "mongoose";
 import { redisClient } from "../../common/redis";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
@@ -36,6 +37,60 @@ const DEFAULT_OPTIONS: LeaderboardOptions = {
 };
 
 export class LeaderboardCoreService {
+  public static pendingLeaderboardUpdates: Map<number, Partial<ScoreSaberLeaderboard>> = new Map();
+
+  constructor() {
+    // Start the leaderboard update interval timer
+    setInterval(
+      async () => {
+        const before = performance.now();
+        const updateOps: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];
+        for (const [
+          leaderboardId,
+          leaderboard,
+        ] of LeaderboardCoreService.pendingLeaderboardUpdates.entries()) {
+          updateOps.push({
+            updateOne: {
+              filter: { _id: leaderboardId },
+              update: { $set: leaderboard },
+            },
+          });
+        }
+        if (updateOps.length > 0) {
+          LeaderboardCoreService.pendingLeaderboardUpdates.clear();
+          await ScoreSaberLeaderboardModel.bulkWrite(updateOps);
+          Logger.info(`Pushed ${updateOps.length} leaderboard updates to the database in ${formatDuration(performance.now() - before)}`);
+        }
+      },
+      TimeUnit.toMillis(TimeUnit.Minute, 10)
+    );
+  }
+
+  /**
+   * Updates a leaderboard in the database.
+   *
+   * @param leaderboardId the ID of the leaderboard to update
+   * @param leaderboard the leaderboard to update
+   */
+  public static async updateLeaderboard(
+    leaderboardId: number,
+    leaderboard: Partial<ScoreSaberLeaderboard>
+  ): Promise<void> {
+    // Merge the existing leaderboard updates with the new leaderboard updates
+    if (LeaderboardCoreService.pendingLeaderboardUpdates.has(leaderboardId)) {
+      const existingLeaderboard = LeaderboardCoreService.pendingLeaderboardUpdates.get(leaderboardId);
+      if (existingLeaderboard) {
+        LeaderboardCoreService.pendingLeaderboardUpdates.set(leaderboardId, {
+          ...existingLeaderboard,
+          ...leaderboard,
+        });
+      }
+    } else {
+      // Set the new leaderboard updates
+      LeaderboardCoreService.pendingLeaderboardUpdates.set(leaderboardId, leaderboard);
+    }
+  }
+
   /**
    * Gets a ScoreSaber leaderboard by ID.
    *

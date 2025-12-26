@@ -1,6 +1,4 @@
 import Logger from "@ssr/common/logger";
-import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { PlayerModel } from "@ssr/common/model/player/player";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
@@ -163,9 +161,6 @@ export class ScoreWebsockets implements EventListener {
           // Update the player's name last
           player.name ? PlayerCoreService.updatePlayerName(player.id, player.name) : undefined,
 
-          // Update the player's last score date
-          PlayerModel.updateOne({ _id: player.id }, { $set: { lastScore: new Date() } }),
-
           // Update cached player in Redis
           ScoreSaberService.updateCachedPlayer(player.id, player),
         ]);
@@ -175,20 +170,10 @@ export class ScoreWebsockets implements EventListener {
       if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id))) {
         await LeaderboardCoreService.createLeaderboard(leaderboard.id, leaderboardToken);
       } else {
-        // Only update if plays/dailyPlays actually changed to avoid unnecessary writes
-        const existingLeaderboard = await ScoreSaberLeaderboardModel.findById(leaderboard.id)
-          .select("plays dailyPlays")
-          .lean();
-        if (
-          existingLeaderboard &&
-          (existingLeaderboard.plays !== leaderboard.plays ||
-            existingLeaderboard.dailyPlays !== leaderboard.dailyPlays)
-        ) {
-          await ScoreSaberLeaderboardModel.updateOne(
-            { _id: leaderboard.id },
-            { $set: { plays: leaderboard.plays, dailyPlays: leaderboard.dailyPlays } }
-          );
-        }
+        await LeaderboardCoreService.updateLeaderboard(leaderboard.id, {
+          plays: leaderboard.plays,
+          dailyPlays: leaderboard.dailyPlays,
+        });
       }
 
       EventsManager.getListeners().forEach(listener => {
