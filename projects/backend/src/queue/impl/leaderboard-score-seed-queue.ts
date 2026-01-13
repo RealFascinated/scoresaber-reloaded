@@ -30,6 +30,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     let currentPage = 1;
     let hasMoreScores = true;
     let processedAnyScores = false;
+    let lastSuccessfulPage = 1;
     while (hasMoreScores) {
       const response = await ScoreSaberApiService.lookupLeaderboardScores(
         Number(leaderboardId),
@@ -43,6 +44,12 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
         );
         currentPage++;
+
+        if (currentPage > lastSuccessfulPage + 5) {
+          Logger.warn(`Skipping leaderboard "${leaderboardId}" because it has too many failed pages`);
+          return;
+        }
+
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
@@ -68,6 +75,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
       hasMoreScores = currentPage < totalPages;
       currentPage++;
+      lastSuccessfulPage = currentPage;
     }
 
     // Update the seeded scores status only if we processed at least one score
