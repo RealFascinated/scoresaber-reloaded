@@ -20,7 +20,7 @@
     "@ssr/common": "workspace:common",
     "@tqman/nice-logger": "^1.1.1",
     "@typegoose/auto-increment": "^4.13.2",
-    "@typegoose/typegoose": "^12.21.0",
+    "@typegoose/typegoose": "^13.0.0",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
     "devalue": "^5.6.1",
