@@ -80,7 +80,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
     // Update the seeded scores status only if we processed at least one score
     if (processedAnyScores) {
-      await LeaderboardCoreService.updateLeaderboard(leaderboardId, { seededScores: true });
+      await ScoreSaberLeaderboardModel.updateOne({ _id: leaderboardId }, { $set: { seededScores: true } }).lean();
       Logger.info(`Updated seeded scores status for leaderboard "${leaderboardId}"`);
     } else {
       Logger.warn(`Skipping seeded flag for leaderboard "${leaderboardId}" because no scores were processed`);
