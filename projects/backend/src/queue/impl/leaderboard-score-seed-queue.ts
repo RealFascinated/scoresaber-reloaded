@@ -47,9 +47,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
         if (currentPage > lastSuccessfulPage + 5) {
           Logger.warn(`Skipping leaderboard "${leaderboardId}" because it has too many failed pages`);
-          return;
+          processedAnyScores = true;
+          break;
         }
-
         continue;
       }
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
@@ -91,7 +91,8 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
    * Inserts leaderboards that need to be seeded into the queue
    */
   private async insertLeaderboards() {
-    if ((await this.getSize()) > 0) {
+    // If there are already items in the queue, don't add more
+    if ((await this.getSize()) !== 0) {
       return;
     }
     try {
