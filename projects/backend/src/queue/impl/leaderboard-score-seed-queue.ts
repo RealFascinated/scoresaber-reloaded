@@ -91,6 +91,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
    * Inserts leaderboards that need to be seeded into the queue
    */
   private async insertLeaderboards() {
+    if ((await this.getSize()) > 0) {
+      return;
+    }
     try {
       const leaderboards = await ScoreSaberLeaderboardModel.find({
         seededScores: { $in: [null, false] },
