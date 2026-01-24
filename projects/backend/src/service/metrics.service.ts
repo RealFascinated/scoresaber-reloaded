@@ -22,7 +22,7 @@ import QueueSizesMetric from "../metrics/impl/queue/queue-sizes";
 import Metric from "../metrics/metric";
 
 
-const influxClient = new InfluxDBClient({
+export const influxClient = new InfluxDBClient({
   host: env.INFLUXDB_URL,
   token: env.INFLUXDB_TOKEN,
   database: env.INFLUXDB_DATABASE,

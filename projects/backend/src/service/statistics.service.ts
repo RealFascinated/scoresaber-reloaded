@@ -1,14 +1,13 @@
-import { InfluxDB } from "@influxdata/influxdb-client";
-import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { Statistic } from "@ssr/common/model/statistics/statistic";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { influxClient } from "./metrics.service";
 import { PlayerHmdService } from "./player/player-hmd.service";
 
 interface InfluxRow {
-  _time: string;
-  _value: number;
-  _field: string;
+  time: string;
+  value: number;
+  field?: string;
 }
 
 interface DailyStatistics {
@@ -23,54 +22,77 @@ export interface StatisticsData {
   hmdUsage: Record<string, number>;
 }
 
-const influxClient = new InfluxDB({
-  url: env.INFLUXDB_URL,
-  token: env.INFLUXDB_TOKEN,
-});
+/**
+ * Run a FlightSQL query and collect rows
+ */
+const runQuery = async <T>(query: string): Promise<T[]> => {
+  const rows: T[] = [];
+  for await (const row of influxClient.queryPoints(query)) {
+    rows.push(row as T);
+  }
+  return rows;
+};
 
-const queryApi = influxClient.getQueryApi(env.INFLUXDB_ORG);
-
-const createQuery = (measurement: string, aggregation: string, days: number) => {
-  if (measurement === "active-players-hmd-statistic") {
+/**
+ * Build SQL queries
+ */
+const createSqlQuery = (
+  measurement: string,
+  aggregation: "max" | "mean",
+  days: number
+): string => {
+  if (measurement === "active_players_hmd_statistic") {
     return `
-      from(bucket: "${env.INFLUXDB_BUCKET}")
-        |> range(start: -${days}d)
-        |> filter(fn: (r) => r["_measurement"] == "${measurement}")
-        |> last()
-        |> yield(name: "latest")
+      SELECT *
+      FROM ${measurement}
+      ORDER BY time DESC
+      LIMIT 1
     `;
   }
 
+  const aggFn = aggregation === "max" ? "MAX" : "AVG";
+
   return `
-    from(bucket: "${env.INFLUXDB_BUCKET}")
-      |> range(start: -${days}d)
-      |> filter(fn: (r) => r["_measurement"] == "${measurement}")
-      |> filter(fn: (r) => r["_field"] == "value")
-      |> aggregateWindow(every: 1d, fn: ${aggregation}, createEmpty: false)
-      |> fill(usePrevious: true)
-      |> yield(name: "${aggregation}")
+    SELECT
+      DATE_TRUNC('day', time) AS time,
+      ${aggFn}(value) AS value
+    FROM ${measurement}
+    WHERE time >= NOW() - INTERVAL '${days} days'
+    GROUP BY time
+    ORDER BY time
   `;
 };
 
 const QUERIES = {
   [Statistic.DailyUniquePlayers]: {
-    measurement: "unique-daily-players",
+    measurement: "unique_daily_players",
     aggregation: "max",
   },
   [Statistic.ActiveAccounts]: {
-    measurement: "active-accounts",
+    measurement: "active_accounts",
     aggregation: "mean",
   },
 } as const;
 
 export default class StatisticsService {
-  public static async getScoreSaberStatistics(previousDays: number): Promise<StatisticsData> {
+  public static async getScoreSaberStatistics(
+    previousDays: number
+  ): Promise<StatisticsData> {
     try {
       const queryResults = await Promise.all(
-        Object.entries(QUERIES).map(async ([statistic, { measurement, aggregation }]) => {
-          const query = createQuery(measurement, aggregation, previousDays);
-          const result = await queryApi.collectRows(query);
-          return { statistic: statistic as Statistic, data: result as InfluxRow[] };
+        Object.entries(QUERIES).map(async ([statistic, cfg]) => {
+          const query = createSqlQuery(
+            cfg.measurement,
+            cfg.aggregation,
+            previousDays
+          );
+
+          const data = await runQuery<InfluxRow>(query);
+
+          return {
+            statistic: statistic as Statistic,
+            data,
+          };
         })
       );
 
@@ -79,12 +101,15 @@ export default class StatisticsService {
         hmdUsage: {},
       };
 
-      // Initialize all dates with default values
+      // Collect all dates
       const allDates = new Set<string>();
       queryResults.forEach(({ data }) => {
-        data.forEach(row => allDates.add(formatDateMinimal(new Date(row._time))));
+        data.forEach(row =>
+          allDates.add(formatDateMinimal(new Date(row.time)))
+        );
       });
 
+      // Initialize dates
       allDates.forEach(date => {
         result.daily[date] = {
           [Statistic.DailyUniquePlayers]: 0,
@@ -92,36 +117,23 @@ export default class StatisticsService {
         };
       });
 
-      // Process all results
+      // Fill values
       queryResults.forEach(({ statistic, data }) => {
-        if (statistic === Statistic.ActivePlayerHmdUsage) {
-          try {
-            // Each row represents a single HMD type with its count
-            result.hmdUsage = data.reduce(
-              (acc, row) => {
-                acc[row._field] = row._value;
-                return acc;
-              },
-              {} as Record<string, number>
-            );
-          } catch (error) {
-            Logger.error("Failed to process HMD usage data:", error);
-            result.hmdUsage = {};
-          }
-        } else {
-          data.forEach(row => {
-            const date = formatDateMinimal(new Date(row._time));
-            result.daily[date][statistic] = Math.round(row._value) || 0;
-          });
-        }
+        data.forEach(row => {
+          const date = formatDateMinimal(new Date(row.time));
+          result.daily[date][statistic as keyof DailyStatistics] = Math.round(row.value) || 0;
+        });
       });
 
-      // Get hmd usage
+      // HMD usage comes from separate service
       result.hmdUsage = await PlayerHmdService.getActiveHmdUsage();
 
       return result;
     } catch (error) {
-      Logger.error("Failed to get ScoreSaber statistics from InfluxDB:", error);
+      Logger.error(
+        "Failed to get ScoreSaber statistics from InfluxDB (SQL):",
+        error
+      );
       throw error;
     }
   }
