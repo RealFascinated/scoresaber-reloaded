@@ -106,7 +106,7 @@ export function getScoreSaberScoreFromToken(
     playerId: playerId || token.leaderboardPlayerInfo.id,
     leaderboardId: leaderboard.id,
     difficulty: leaderboard.difficulty.difficulty,
-    characteristic: leaderboard.difficulty.characteristic,
+    characteristic: leaderboard.difficulty.characteristic ?? "Standard",
     score: token.baseScore,
     accuracy: leaderboard.maxScore ? (token.baseScore / leaderboard.maxScore) * 100 : Infinity,
     rank: token.rank,
@@ -123,5 +123,5 @@ export function getScoreSaberScoreFromToken(
     playerInfo: token.leaderboardPlayerInfo,
     hmd: (token.deviceHmd as HMD) ?? (ScoreSaberHMDs[token.hmd] as HMD | undefined),
     controllers: controllers,
-  };
+  } as ScoreSaberScore;
 }

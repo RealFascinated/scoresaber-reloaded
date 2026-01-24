@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { MetricType } from "../service/metrics.service";
 
 export interface MetricOptions {
@@ -49,6 +49,6 @@ export default abstract class Metric<T> {
    * @private
    */
   protected getPointBase(): Point {
-    return new Point(this.id);
+    return Point.measurement(this.id).setTimestamp(new Date());
   }
 }

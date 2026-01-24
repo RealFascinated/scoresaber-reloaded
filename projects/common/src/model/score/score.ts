@@ -31,7 +31,7 @@ export default class Score {
   /**
    * The characteristic of the map.
    */
-  @prop({ required: true })
+  @prop({ required: true, default: "Standard" as MapCharacteristic })
   public readonly characteristic!: MapCharacteristic;
 
   /**

@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
@@ -16,6 +16,6 @@ export default class DailyNewAccountsMetric extends NumberMetric {
     const count = await PlayerModel.countDocuments({
       joinedDate: { $gte: getMidnightAlignedDate(new Date()) }, // Today
     });
-    return this.getPointBase().intField("value", count);
+    return this.getPointBase().setIntegerField("value", count);
   }
 }

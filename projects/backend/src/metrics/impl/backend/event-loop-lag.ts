@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import Metric from "../../metric";
@@ -28,12 +28,12 @@ export default class EventLoopLagMetric extends Metric<number> {
     }, 1000);
   }
 
-  async collect(): Promise<Point> {
+  async collect(): Promise<Point | undefined> {
     // Update the metric value
     this.value = this.lag;
 
     // Create a point for InfluxDB using the base point
-    return this.getPointBase().floatField("lag_ms", this.lag);
+    return this.getPointBase().setFloatField("lag_ms", this.lag);
   }
 
   public cleanup() {

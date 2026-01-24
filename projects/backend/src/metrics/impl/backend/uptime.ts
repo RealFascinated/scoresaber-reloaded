@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
@@ -12,6 +12,6 @@ export default class ProcessUptimeMetric extends NumberMetric {
   }
 
   public async collect(): Promise<Point | undefined> {
-    return this.getPointBase().floatField("value", process.uptime());
+    return this.getPointBase().setFloatField("value", process.uptime());
   }
 }

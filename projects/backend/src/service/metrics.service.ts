@@ -1,4 +1,4 @@
-import { InfluxDB, Point } from "@influxdata/influxdb-client";
+import { InfluxDBClient, Point } from '@influxdata/influxdb3-client';
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
@@ -21,38 +21,36 @@ import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-player
 import QueueSizesMetric from "../metrics/impl/queue/queue-sizes";
 import Metric from "../metrics/metric";
 
-const influxClient = new InfluxDB({
-  url: env.INFLUXDB_URL,
+
+const influxClient = new InfluxDBClient({
+  host: env.INFLUXDB_URL,
   token: env.INFLUXDB_TOKEN,
+  database: env.INFLUXDB_DATABASE,
 });
-const writeApi = influxClient.getWriteApi(env.INFLUXDB_ORG, env.INFLUXDB_BUCKET);
 
 export enum MetricType {
-  // General metrics
-  POINTS_PER_SECOND = "points-per-second",
-
   // Player metrics
-  TRACKED_SCORES = "tracked-scores",
-  TRACKED_PLAYERS = "tracked-players",
-  UNIQUE_DAILY_PLAYERS = "unique-daily-players",
-  ACTIVE_ACCOUNTS = "active-accounts",
-  ACTIVE_PLAYERS_HMD_STATISTIC = "active-players-hmd-statistic",
-  TOTAL_TRACKED_SCORES = "total-tracked-scores",
-  DAILY_NEW_ACCOUNTS = "daily-new-accounts",
+  TRACKED_SCORES = "tracked_scores",
+  TRACKED_PLAYERS = "tracked_players",
+  UNIQUE_DAILY_PLAYERS = "unique_daily_players",
+  ACTIVE_ACCOUNTS = "active_accounts",
+  ACTIVE_PLAYERS_HMD_STATISTIC = "active_players_hmd_statistic",
+  TOTAL_TRACKED_SCORES = "total_tracked_scores",
+  DAILY_NEW_ACCOUNTS = "daily_new_accounts",
 
   // Backend metrics
-  MEMORY_USAGE = "memory-usage",
-  EVENT_LOOP_LAG = "event-loop-lag",
-  TOTAL_REQUESTS = "total-requests",
-  EVENT_LOOP_TIMERS = "event-loop-timers",
-  API_SERVICES = "api-services",
-  PROCESS_UPTIME = "process-uptime",
+  MEMORY_USAGE = "memory_usage",
+  EVENT_LOOP_LAG = "event_loop_lag",
+  TOTAL_REQUESTS = "total_requests",
+  EVENT_LOOP_TIMERS = "event_loop_timers",
+  API_SERVICES = "api_services",
+  PROCESS_UPTIME = "process_uptime",
 
   // Queue metrics
-  QUEUE_SIZES = "queue-sizes",
+  QUEUE_SIZES = "queue_sizes",
 
   // Database metrics
-  MONGO_DB_SIZE = "mongo-db-size",
+  MONGO_DB_SIZE = "mongo_db_size",
 }
 
 export default class MetricsService implements EventListener {
@@ -163,15 +161,7 @@ export default class MetricsService implements EventListener {
    */
   private async writePoint(point: Point): Promise<void> {
     try {
-      const fields = point.fields;
-      for (const [key, value] of Object.entries(fields)) {
-        if (value === undefined || value === null) {
-          Logger.warn(`[METRICS] Skipping write to InfluxDB - invalid value for field '${key}': ${value}`);
-          return;
-        }
-      }
-
-      writeApi.writePoint(point);
+      await influxClient.write(point);
     } catch (error) {
       Logger.error("[METRICS] Failed to write point for InfluxDB:", error);
     }
@@ -218,7 +208,7 @@ export default class MetricsService implements EventListener {
 
   onStop(): Promise<void> {
     this.saveMetrics();
-    writeApi.flush(); // Flush remaining points
+    influxClient.close(); // Flush remaining points
 
     return Promise.resolve();
   }

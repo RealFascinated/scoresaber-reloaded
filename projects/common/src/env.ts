@@ -16,8 +16,7 @@ export const env = createEnv({
     MINIO_REGION: z.string(),
 
     INFLUXDB_URL: z.string(),
-    INFLUXDB_BUCKET: z.string(),
-    INFLUXDB_ORG: z.string(),
+    INFLUXDB_DATABASE: z.string(),
     INFLUXDB_TOKEN: z.string(),
 
     DISCORD_BOT_TOKEN: z.string().optional(),
@@ -44,9 +43,6 @@ export const env = createEnv({
 
     NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: z.string().optional(),
     NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: z.string().optional(),
-
-    NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
-    NEXT_PUBLIC_POSTHOG_HOST: z.string().optional(),
   },
 
   /**
@@ -87,8 +83,7 @@ export const env = createEnv({
 
     // InfluxDB
     INFLUXDB_URL: process.env.INFLUXDB_URL,
-    INFLUXDB_BUCKET: process.env.INFLUXDB_BUCKET,
-    INFLUXDB_ORG: process.env.INFLUXDB_ORG,
+    INFLUXDB_DATABASE: process.env.INFLUXDB_DATABASE,
     INFLUXDB_TOKEN: process.env.INFLUXDB_TOKEN,
 
     // Misc
@@ -100,10 +95,6 @@ export const env = createEnv({
     // Analytics
     NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: process.env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID,
     NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL,
-
-    // PostHog
-    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
-    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   },
 
   /**

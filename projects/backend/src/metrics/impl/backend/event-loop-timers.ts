@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import Metric from "../../metric";
@@ -79,9 +79,9 @@ export default class EventLoopTimersMetric extends Metric<TimerCleanupValue> {
     };
 
     return this.getPointBase()
-      .floatField("active_timers", activeTimers)
-      .floatField("active_intervals", activeIntervals)
-      .floatField("total_timers", activeTimers + activeIntervals)
-      .floatField("total_intervals", activeIntervals);
+      .setFloatField("active_timers", activeTimers)
+      .setFloatField("active_intervals", activeIntervals)
+      .setFloatField("total_timers", activeTimers + activeIntervals)
+      .setFloatField("total_intervals", activeIntervals);
   }
 }

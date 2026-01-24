@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
@@ -12,6 +12,6 @@ export default class RequestsPerSecondMetric extends NumberMetric {
   }
 
   public async collect(): Promise<Point | undefined> {
-    return this.getPointBase().floatField("total_requests", this.value);
+    return this.getPointBase().setFloatField("total_requests", this.value);
   }
 }

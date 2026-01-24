@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import { ScoreSaberApiService } from "../../../service/scoresaber-api.service";
@@ -18,6 +18,6 @@ export default class ActiveAccountsMetric extends NumberMetric {
       return undefined;
     }
     this.value = count;
-    return this.getPointBase().intField("value", count ?? 0);
+    return this.getPointBase().setIntegerField("value", count ?? 0);
   }
 }

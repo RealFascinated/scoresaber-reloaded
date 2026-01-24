@@ -33,10 +33,6 @@ export function ViewportProvider({ children }: { children: ReactNode }) {
         height: dimensions.height,
       };
 
-      if (process.env.NODE_ENV !== "production") {
-        console.debug("[Viewport] resize", next);
-      }
-
       setViewport(next);
     };
 

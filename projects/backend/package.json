@@ -16,7 +16,7 @@
     "@elysiajs/openapi": "^1.4.12",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
-    "@influxdata/influxdb-client": "^1.35.0",
+    "@influxdata/influxdb3-client": "^2.0.0",
     "@ssr/common": "workspace:common",
     "@tqman/nice-logger": "^1.1.1",
     "@typegoose/auto-increment": "^4.13.1",

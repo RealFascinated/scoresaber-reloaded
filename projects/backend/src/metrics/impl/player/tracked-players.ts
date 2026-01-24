@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
@@ -17,7 +17,7 @@ export default class TrackedPlayersMetric extends NumberMetric {
     const inactiveCount = await PlayerModel.countDocuments({ inactive: true });
 
     return this.getPointBase()
-      .intField("value", count ?? 0)
-      .intField("inactive", inactiveCount ?? 0);
+      .setIntegerField("value", count ?? 0)
+      .setIntegerField("inactive", inactiveCount ?? 0);
   }
 }

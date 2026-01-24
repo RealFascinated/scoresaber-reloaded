@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
@@ -18,10 +18,10 @@ export class ApiServicesMetric extends NumberMetric {
 
     for (const [name, service] of ApiServiceRegistry.getInstance().getAllServices()) {
       const totalCalls = service.getCallCount();
-      point.floatField(name, totalCalls);
+      point.setFloatField(name, totalCalls);
     }
 
-    point.floatField("scoresaber", ScoreSaberApiService.totalRequests);
+    point.setFloatField("scoresaber", ScoreSaberApiService.totalRequests);
     return point;
   }
 }

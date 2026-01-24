@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { heapStats } from "bun:jsc";
 import { MetricType } from "../../../service/metrics.service";
@@ -16,7 +16,7 @@ export default class MemoryUsageMetric extends NumberMetric {
     const stats = heapStats();
 
     return this.getPointBase()
-      .floatField("value", stats.heapSize / (1024 * 1024))
-      .floatField("total", stats.heapCapacity / (1024 * 1024));
+      .setFloatField("value", stats.heapSize / (1024 * 1024))
+      .setFloatField("total", stats.heapCapacity / (1024 * 1024));
   }
 }

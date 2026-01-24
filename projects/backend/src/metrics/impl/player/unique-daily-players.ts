@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import Metric from "../../metric";
@@ -24,6 +24,6 @@ export default class UniqueDailyPlayersMetric extends Metric<UniqueDailyPlayersD
   }
 
   public collect(): Promise<Point | undefined> {
-    return Promise.resolve(this.getPointBase().intField("value", this.value.playerIds.length));
+    return Promise.resolve(this.getPointBase().setIntegerField("value", this.value.playerIds.length));
   }
 }

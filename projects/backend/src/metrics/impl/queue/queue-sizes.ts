@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { QueueManager } from "../../../queue/queue-manager";
 import { MetricType } from "../../../service/metrics.service";
@@ -16,7 +16,7 @@ export default class QueueSizesMetric extends NumberMetric {
     const point = this.getPointBase();
 
     for (const queue of QueueManager.getQueues()) {
-      point.floatField(queue.id, await queue.getSize());
+      point.setIntegerField(queue.id, await queue.getSize());
     }
 
     return point;

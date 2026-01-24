@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { mongoose } from "@typegoose/typegoose";
@@ -22,11 +22,11 @@ export default class MongoDbSizeMetric extends NumberMetric {
 
       const stats = await mongoose.connection.db.command({ dbStats: 1 });
 
-      return new Point(MetricType.MONGO_DB_SIZE)
-        .floatField("total", stats.storageSize + stats.indexSize) // Compressed total size in bytes
-        .floatField("index", stats.indexSize) // Compressed index size in bytes
-        .floatField("collections", stats.storageSize) // Compressed data size in bytes
-        .timestamp(new Date());
+      return Point.measurement(MetricType.MONGO_DB_SIZE)
+        .setFloatField("total", stats.storageSize + stats.indexSize) // Compressed total size in bytes
+        .setFloatField("index", stats.indexSize) // Compressed index size in bytes
+        .setFloatField("collections", stats.storageSize) // Compressed data size in bytes
+        .setTimestamp(new Date());
     } catch (error) {
       Logger.error("Failed to collect MongoDB size metric:", error);
       return undefined;

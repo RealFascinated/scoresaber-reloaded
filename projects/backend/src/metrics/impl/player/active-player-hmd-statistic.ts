@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
 import { PlayerHmdService } from "../../../service/player/player-hmd.service";
@@ -16,7 +16,7 @@ export default class ActivePlayerHmdStatisticMetric extends NumberMetric {
     const hmdUsage = await PlayerHmdService.getActiveHmdUsage();
     const point = this.getPointBase();
     for (const [hmd, count] of Object.entries(hmdUsage)) {
-      point.intField(hmd, count);
+      point.setIntegerField(hmd, count);
     }
     return point;
   }

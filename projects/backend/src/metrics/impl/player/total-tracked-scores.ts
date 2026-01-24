@@ -1,4 +1,4 @@
-import { Point } from "@influxdata/influxdb-client";
+import { Point } from "@influxdata/influxdb3-client";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
@@ -18,7 +18,7 @@ export default class TotalTrackedScoresMetric extends NumberMetric {
     const totalPrevious = await ScoreSaberPreviousScoreModel.estimatedDocumentCount();
 
     return this.getPointBase()
-      .floatField("totalScores", total)
-      .floatField("totalPreviousScores", totalPrevious);
+      .setFloatField("totalScores", total)
+      .setFloatField("totalPreviousScores", totalPrevious);
   }
 }
