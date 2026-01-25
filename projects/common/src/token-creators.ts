@@ -18,10 +18,11 @@ import { parseDate } from "./utils/time-utils";
  * @param token the token to parse
  */
 export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardToken): ScoreSaberLeaderboard {
+  const characteristic = token.difficulty.gameMode.replace("Solo", "");
   const difficulty: LeaderboardDifficulty = {
     leaderboardId: token.difficulty.leaderboardId,
     difficulty: getDifficultyFromScoreSaberDifficulty(token.difficulty.difficulty),
-    characteristic: token.difficulty.gameMode.replace("Solo", "") as MapCharacteristic,
+    characteristic: characteristic == "" || characteristic == undefined ? "Standard" : characteristic as MapCharacteristic,
     difficultyRaw: token.difficulty.difficultyRaw,
   };
   validateMap(difficulty.difficulty, difficulty.characteristic);
@@ -45,10 +46,11 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
     difficulties:
       token.difficulties != undefined && token.difficulties.length > 0
         ? token.difficulties.map(difficulty => {
+            const characteristic = difficulty.gameMode.replace("Solo", "");
             const diff: LeaderboardDifficulty = {
               leaderboardId: difficulty.leaderboardId,
               difficulty: getDifficultyFromScoreSaberDifficulty(difficulty.difficulty),
-              characteristic: difficulty.gameMode.replace("Solo", "") as MapCharacteristic,
+              characteristic: characteristic == "" || characteristic == undefined ? "Standard" : characteristic as MapCharacteristic,
               difficultyRaw: difficulty.difficultyRaw,
             };
 

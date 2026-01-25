@@ -28,7 +28,6 @@ import PlayerRankingController from "./controller/player-ranking.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
-import StatisticsController from "./controller/statistics.controller";
 import { EventsManager } from "./event/events-manager";
 import { metricsPlugin } from "./plugins/metrics.plugin";
 import { QueueManager } from "./queue/queue-manager";
@@ -42,7 +41,6 @@ import { PlayerHistoryService } from "./service/player/player-history.service";
 import { PlayerMedalsService } from "./service/player/player-medals.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { MedalScoresService } from "./service/score/medal-scores.service";
-import StatisticsService from "./service/statistics.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
 
@@ -279,7 +277,6 @@ export const app = new Elysia()
   .use(PlayerController)
   .use(ScoresController)
   .use(LeaderboardController)
-  .use(StatisticsController)
   .use(PlaylistController)
   .use(BeatSaverController)
   .use(BeatLeaderController)
@@ -306,7 +303,6 @@ app.onStart(async () => {
   new MinioService();
 
   new CacheService();
-  new StatisticsService();
   new PlaylistService();
 
   EventsManager.registerListener(new QueueManager());
