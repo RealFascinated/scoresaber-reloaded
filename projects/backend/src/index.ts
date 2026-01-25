@@ -260,10 +260,16 @@ export const app = new Elysia()
       return stringify(response);
     }
 
+    if (response instanceof (globalThis as any).Response) {
+      return response;
+    }
+
     if (response instanceof Object && response !== null) {
       set.headers["content-type"] = "application/json";
       return JSON.stringify(response);
     }
+
+    return response;
   })
   .use(cors())
   .use(

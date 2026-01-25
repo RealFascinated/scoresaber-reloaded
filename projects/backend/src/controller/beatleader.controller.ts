@@ -1,3 +1,5 @@
+import { NotFoundError } from "@ssr/common/error/not-found-error";
+import Logger from "@ssr/common/logger";
 import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { Elysia, redirect } from "elysia";
 import { z } from "zod";
@@ -25,7 +27,12 @@ export default function beatleaderController(app: Elysia) {
       .get(
         "/replay/:scoreId",
         async ({ params: { scoreId } }) => {
-          return redirect(await PlayerReplayService.getPlayerReplayUrl(scoreId));
+          const replayUrl = await PlayerReplayService.getPlayerReplayUrl(scoreId);
+          if (!replayUrl) {
+            throw new NotFoundError(`Replay not found for score "${scoreId}"`);
+          }
+          Logger.info(`Redirecting to replay URL "${replayUrl}" for score "${scoreId}"`);
+          return redirect(replayUrl);
         },
         {
           tags: ["BeatLeader"],
