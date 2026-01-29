@@ -15,9 +15,7 @@ export const env = createEnv({
     MINIO_SECRET_KEY: z.string(),
     MINIO_REGION: z.string(),
 
-    INFLUXDB_URL: z.string(),
-    INFLUXDB_DATABASE: z.string(),
-    INFLUXDB_TOKEN: z.string(),
+    PROMETHEUS_AUTH_TOKEN: z.string(),
 
     DISCORD_BOT_TOKEN: z.string().optional(),
 
@@ -81,10 +79,8 @@ export const env = createEnv({
     MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
     MINIO_REGION: process.env.MINIO_REGION,
 
-    // InfluxDB
-    INFLUXDB_URL: process.env.INFLUXDB_URL,
-    INFLUXDB_DATABASE: process.env.INFLUXDB_DATABASE,
-    INFLUXDB_TOKEN: process.env.INFLUXDB_TOKEN,
+    // Prometheus
+    PROMETHEUS_AUTH_TOKEN: process.env.PROMETHEUS_AUTH_TOKEN,
 
     // Misc
     NEXT_PUBLIC_WEBSITE_NAME: process.env.NEXT_PUBLIC_WEBSITE_NAME ?? "ScoreSaber Reloaded",

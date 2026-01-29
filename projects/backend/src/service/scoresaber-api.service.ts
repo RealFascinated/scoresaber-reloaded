@@ -245,7 +245,7 @@ export class ScoreSaberApiService {
       return undefined;
     }
     ScoreSaberApiService.log(`Found active player count in ${formatDuration(performance.now() - before)}`);
-    return response;
+    return Number(response);
   }
 
   /**

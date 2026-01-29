@@ -1,21 +1,32 @@
-import { Point } from "@influxdata/influxdb3-client";
+import { Gauge } from "prom-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
+import { prometheusRegistry } from "../../../service/metrics.service";
 import Metric from "../../metric";
 
 export default class EventLoopLagMetric extends Metric<number> {
   private lastCheck: number;
   private lag: number;
   private measureInterval: NodeJS.Timeout | null = null;
+  private gauge: Gauge;
 
   constructor() {
     super(MetricType.EVENT_LOOP_LAG, 0, {
-      fetchAndStore: false,
       interval: TimeUnit.toMillis(TimeUnit.Second, 1),
     });
 
     this.lastCheck = Date.now();
     this.lag = 0;
+
+    this.gauge = new Gauge({
+      name: "event_loop_lag_ms",
+      help: "Event loop lag in milliseconds",
+      registers: [prometheusRegistry],
+      collect: () => {
+        this.gauge.set(this.lag);
+      },
+    });
+
     this.startMeasuring();
   }
 
@@ -25,15 +36,8 @@ export default class EventLoopLagMetric extends Metric<number> {
       const expected = this.lastCheck + 1000; // We expect 1 second between measurements
       this.lag = Math.max(0, now - expected);
       this.lastCheck = now;
+      this.value = this.lag;
     }, 1000);
-  }
-
-  async collect(): Promise<Point | undefined> {
-    // Update the metric value
-    this.value = this.lag;
-
-    // Create a point for InfluxDB using the base point
-    return this.getPointBase().setFloatField("lag_ms", this.lag);
   }
 
   public cleanup() {

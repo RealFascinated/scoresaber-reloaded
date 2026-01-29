@@ -1,6 +1,6 @@
-import { Point } from "@influxdata/influxdb3-client";
 import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
-import { MetricType } from "../../../service/metrics.service";
+import { Gauge } from "prom-client";
+import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
 import Metric from "../../metric";
 
 type UniqueDailyPlayersData = {
@@ -9,6 +9,8 @@ type UniqueDailyPlayersData = {
 };
 
 export default class UniqueDailyPlayersMetric extends Metric<UniqueDailyPlayersData> {
+  private gauge: Gauge;
+
   constructor() {
     super(
       MetricType.UNIQUE_DAILY_PLAYERS,
@@ -17,13 +19,17 @@ export default class UniqueDailyPlayersMetric extends Metric<UniqueDailyPlayersD
         playerIds: [],
       },
       {
-        fetchAndStore: true,
         interval: TimeUnit.toMillis(TimeUnit.Minute, 1),
       }
     );
-  }
 
-  public collect(): Promise<Point | undefined> {
-    return Promise.resolve(this.getPointBase().setIntegerField("value", this.value.playerIds.length));
+    this.gauge = new Gauge({
+      name: "unique_daily_players",
+      help: "Number of unique daily players",
+      registers: [prometheusRegistry],
+      collect: () => {
+        this.gauge.set(this.value.playerIds.length);
+      },
+    });
   }
 }

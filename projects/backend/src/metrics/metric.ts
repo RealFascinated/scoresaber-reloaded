@@ -1,12 +1,6 @@
-import { Point } from "@influxdata/influxdb3-client";
 import { MetricType } from "../service/metrics.service";
 
 export interface MetricOptions {
-  /**
-   * Whether to fetch the metric from the database and store it.
-   */
-  fetchAndStore?: boolean;
-
   /**
    * The interval in milliseconds at which to collect this metric.
    */
@@ -33,22 +27,9 @@ export default abstract class Metric<T> {
     this.id = id;
     this.value = defaultValue;
     this.options = {
-      fetchAndStore: false,
       interval: 5 * 60 * 1000, // 5 minutes default
       ...options,
     };
   }
 
-  /**
-   * Collects the metric(s).
-   */
-  public abstract collect(): Promise<Point | undefined>;
-
-  /**
-   * Gets the base point.
-   * @private
-   */
-  protected getPointBase(): Point {
-    return Point.measurement(this.id).setTimestamp(new Date());
-  }
 }

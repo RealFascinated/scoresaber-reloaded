@@ -16,7 +16,6 @@
     "@elysiajs/openapi": "^1.4.12",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
-    "@influxdata/influxdb3-client": "^2.0.0",
     "@ssr/common": "workspace:common",
     "@tqman/nice-logger": "^1.1.1",
     "@typegoose/auto-increment": "^4.13.1",
@@ -32,6 +31,7 @@
     "globals": "^16.5.0",
     "minio": "^8.0.6",
     "mongoose": "^9.0.2",
+    "prom-client": "^15.1.0",
     "systeminformation": "^5.27.14"
   },
   "devDependencies": {

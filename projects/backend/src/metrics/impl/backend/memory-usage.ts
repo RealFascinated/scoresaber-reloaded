@@ -1,22 +1,36 @@
-import { Point } from "@influxdata/influxdb3-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { heapStats } from "bun:jsc";
-import { MetricType } from "../../../service/metrics.service";
+import { Gauge } from "prom-client";
+import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
 export default class MemoryUsageMetric extends NumberMetric {
+  private heapSizeGauge: Gauge;
+  private heapCapacityGauge: Gauge;
+
   constructor() {
     super(MetricType.MEMORY_USAGE, 0, {
-      fetchAndStore: false,
       interval: TimeUnit.toMillis(TimeUnit.Second, 1),
     });
-  }
 
-  public async collect(): Promise<Point | undefined> {
-    const stats = heapStats();
+    this.heapSizeGauge = new Gauge({
+      name: "memory_usage_heap_size_bytes",
+      help: "Heap size in bytes",
+      registers: [prometheusRegistry],
+      collect: () => {
+        const stats = heapStats();
+        this.heapSizeGauge.set(stats.heapSize);
+      },
+    });
 
-    return this.getPointBase()
-      .setFloatField("value", stats.heapSize / (1024 * 1024))
-      .setFloatField("total", stats.heapCapacity / (1024 * 1024));
+    this.heapCapacityGauge = new Gauge({
+      name: "memory_usage_heap_capacity_bytes",
+      help: "Heap capacity in bytes",
+      registers: [prometheusRegistry],
+      collect: () => {
+        const stats = heapStats();
+        this.heapCapacityGauge.set(stats.heapCapacity);
+      },
+    });
   }
 }

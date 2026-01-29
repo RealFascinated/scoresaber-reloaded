@@ -1,12 +1,10 @@
-import { InfluxDBClient, Point } from '@influxdata/influxdb3-client';
-import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
-import { MetricValueModel } from "../common/model/metric";
+import { formatDuration } from "@ssr/common/utils/time-utils";
+import { isProduction } from "@ssr/common/utils/utils";
+import { Registry } from "prom-client";
 import { EventListener } from "../event/event-listener";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
-import EventLoopTimersMetric from "../metrics/impl/backend/event-loop-timers";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
@@ -21,11 +19,10 @@ import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-player
 import QueueSizesMetric from "../metrics/impl/queue/queue-sizes";
 import Metric from "../metrics/metric";
 
-
-export const influxClient = new InfluxDBClient({
-  host: env.INFLUXDB_URL,
-  token: env.INFLUXDB_TOKEN,
-  database: env.INFLUXDB_DATABASE,
+// Create Prometheus registry with default labels
+export const prometheusRegistry = new Registry();
+prometheusRegistry.setDefaultLabels({
+  environment: isProduction() ? "production" : "development",
 });
 
 export enum MetricType {
@@ -42,7 +39,6 @@ export enum MetricType {
   MEMORY_USAGE = "memory_usage",
   EVENT_LOOP_LAG = "event_loop_lag",
   TOTAL_REQUESTS = "total_requests",
-  EVENT_LOOP_TIMERS = "event_loop_timers",
   API_SERVICES = "api_services",
   PROCESS_UPTIME = "process_uptime",
 
@@ -65,14 +61,6 @@ export default class MetricsService implements EventListener {
 
     this.registerAllMetrics();
     this.initMetrics();
-
-    // Save metrics in the background
-    setInterval(
-      () => {
-        this.saveMetrics();
-      },
-      TimeUnit.toMillis(TimeUnit.Second, 60)
-    );
   }
 
   /**
@@ -92,7 +80,6 @@ export default class MetricsService implements EventListener {
     this.registerMetric(new MemoryUsageMetric());
     this.registerMetric(new EventLoopLagMetric());
     this.registerMetric(new RequestsPerSecondMetric());
-    this.registerMetric(new EventLoopTimersMetric());
     this.registerMetric(new ApiServicesMetric());
     this.registerMetric(new ProcessUptimeMetric());
 
@@ -104,25 +91,10 @@ export default class MetricsService implements EventListener {
   }
 
   /**
-   * Initializes all registered metrics and sets up their timers
+   * Initializes all registered metrics
    */
   private async initMetrics(): Promise<void> {
-    for (const metric of MetricsService.metrics) {
-      if (metric.options.fetchAndStore) {
-        const metricValue = await MetricValueModel.findOne({ _id: metric.id });
-        if (metricValue) {
-          metric.value = metricValue.value;
-        }
-      }
-
-      await metric.collect(); // Collect all metrics once on boot
-      setInterval(async () => {
-        const point = await metric.collect();
-        if (point) {
-          await this.writePoint(point);
-        }
-      }, metric.options.interval);
-    }
+    // Metrics are now collected on-demand via Prometheus collect callbacks
   }
 
   /**
@@ -147,47 +119,10 @@ export default class MetricsService implements EventListener {
     return MetricsService.metrics.find(metric => metric.id === type);
   }
 
-  /**
-   * Writes a point to the cache and increments the points per second counter
-   *
-   * @param point the point to write
-   */
-  private async writePoint(point: Point): Promise<void> {
-    try {
-      await influxClient.write(point);
-    } catch (error) {
-      Logger.error("[METRICS] Failed to write point for InfluxDB:", error);
-    }
-  }
+
 
   /**
-   * Saves the metrics to the db
-   */
-  private async saveMetrics(): Promise<void> {
-    for (const metric of MetricsService.metrics) {
-      // Check if the metric needs to be saved to the db
-      if (metric.options.fetchAndStore) {
-        const before = performance.now();
-        // Check if value has changed before updating
-        const existingMetric = await MetricValueModel.findOne({ _id: metric.id }).lean();
-        if (existingMetric && JSON.stringify(existingMetric.value) === JSON.stringify(metric.value)) {
-          // Value hasn't changed, skip write
-          continue;
-        }
-        await MetricValueModel.findOneAndUpdate(
-          { _id: metric.id },
-          { value: metric.value },
-          { upsert: true, setDefaultsOnInsert: true }
-        );
-        Logger.debug(
-          `[METRICS] Saved metric ${metric.id} to primary storage in ${formatDuration(performance.now() - before)}`
-        );
-      }
-    }
-  }
-
-  /**
-   * Cleans up all timers and flushes remaining points
+   * Cleans up all timers
    */
   public async cleanup(): Promise<void> {
     for (const metric of MetricsService.metrics) {
@@ -195,14 +130,9 @@ export default class MetricsService implements EventListener {
         (metric as { cleanup: () => void }).cleanup();
       }
     }
-
-    await this.saveMetrics();
   }
 
   onStop(): Promise<void> {
-    this.saveMetrics();
-    influxClient.close(); // Flush remaining points
-
     return Promise.resolve();
   }
 }

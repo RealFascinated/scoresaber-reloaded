@@ -1,17 +1,24 @@
-import { Point } from "@influxdata/influxdb3-client";
+import { Gauge } from "prom-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { MetricType } from "../../../service/metrics.service";
+import { prometheusRegistry } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
 export default class ProcessUptimeMetric extends NumberMetric {
+  private gauge: Gauge;
+
   constructor() {
     super(MetricType.PROCESS_UPTIME, 0, {
-      fetchAndStore: false,
       interval: TimeUnit.toMillis(TimeUnit.Minute, 1),
     });
-  }
 
-  public async collect(): Promise<Point | undefined> {
-    return this.getPointBase().setFloatField("value", process.uptime());
+    this.gauge = new Gauge({
+      name: "process_uptime_seconds",
+      help: "Process uptime in seconds",
+      registers: [prometheusRegistry],
+      collect: () => {
+        this.gauge.set(process.uptime());
+      },
+    });
   }
 }

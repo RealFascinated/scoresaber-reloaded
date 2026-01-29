@@ -1,23 +1,28 @@
-import { Point } from "@influxdata/influxdb3-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { MetricType } from "../../../service/metrics.service";
+import { Gauge } from "prom-client";
+import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
 import { PlayerHmdService } from "../../../service/player/player-hmd.service";
 import NumberMetric from "../../number-metric";
 
 export default class ActivePlayerHmdStatisticMetric extends NumberMetric {
+  private gauge: Gauge<string>;
+
   constructor() {
     super(MetricType.ACTIVE_PLAYERS_HMD_STATISTIC, 0, {
-      fetchAndStore: false,
       interval: TimeUnit.toMillis(TimeUnit.Minute, 1),
     });
-  }
 
-  public async collect(): Promise<Point | undefined> {
-    const hmdUsage = await PlayerHmdService.getActiveHmdUsage();
-    const point = this.getPointBase();
-    for (const [hmd, count] of Object.entries(hmdUsage)) {
-      point.setIntegerField(hmd, count);
-    }
-    return point;
+    this.gauge = new Gauge({
+      name: "active_players_hmd",
+      help: "Number of active players by HMD type",
+      labelNames: ["hmd"],
+      registers: [prometheusRegistry],
+      collect: async () => {
+        const hmdUsage = await PlayerHmdService.getActiveHmdUsage();
+        for (const [hmd, count] of Object.entries(hmdUsage)) {
+          this.gauge.set({ hmd }, count);
+        }
+      },
+    });
   }
 }

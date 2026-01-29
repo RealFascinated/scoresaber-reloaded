@@ -1,4 +1,3 @@
-import { Point } from "@influxdata/influxdb3-client";
 import { MetricType } from "../service/metrics.service";
 import Metric, { MetricOptions } from "./metric";
 
@@ -7,16 +6,6 @@ export default class NumberMetric extends Metric<number> {
     super(id, defaultValue, options);
   }
 
-  /**
-   * Collects the metric.
-   *
-   * @returns the metric
-   */
-  public collect(): Promise<Point | undefined> {
-    // Ensure we never send undefined values
-    const value = this.value ?? 0;
-    return Promise.resolve(this.getPointBase().setFloatField("value", value));
-  }
 
   /**
    * Updates the value of the metric.
