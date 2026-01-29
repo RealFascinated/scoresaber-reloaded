@@ -36,7 +36,7 @@ const links: ReactElement<any>[] = [
     key="statistics"
     name="Statistics"
     icon={<ChartBarIcon className="size-5" />}
-    href="https://grafana.fascinated.cc/public-dashboards/4c85a324f857469b8b02154abe0cfa26"
+    href="https://grafana.fascinated.cc/goto/ffbngojr6v5kwe?orgId=2"
   />,
 ];
 

@@ -1271,11 +1271,12 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "unique_daily_players{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "expr": "max_over_time(unique_daily_players{environment=\"production\",job=\"scoresaber_reloaded\"}[1d:1d])",
           "legendFormat": "Unique Daily Players",
           "refId": "A"
         }
       ],
+      "transformations": [],
       "title": "Unique Daily Players",
       "type": "timeseries"
     },
@@ -1364,11 +1365,12 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "daily_new_accounts{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "expr": "max_over_time(daily_new_accounts{environment=\"production\",job=\"scoresaber_reloaded\"}[1d:1d])",
           "legendFormat": "Daily New Accounts",
           "refId": "A"
         }
       ],
+      "transformations": [],
       "title": "Daily New Accounts",
       "type": "timeseries"
     },
