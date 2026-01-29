@@ -99,11 +99,14 @@ export default function BackgroundCover() {
   const backgroundCover = useStableLiveQuery(async () => database.getBackgroundCover());
   const blur = useStableLiveQuery(async () => database.getBackgroundCoverBlur());
   const brightness = useStableLiveQuery(async () => database.getBackgroundCoverBrightness());
+  const customBackgroundUrl = useStableLiveQuery(async () => database.getCustomBackgroundUrl());
 
   const [currentImageIndex, setCurrentImageIndex] = useState(() => getRandomIndex());
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const cover = BACKGROUND_COVERS.find(cover => cover.id === backgroundCover);
+  const cover = backgroundCover === "custom" 
+    ? { name: "Custom", id: "custom", type: "image" as const, value: customBackgroundUrl }
+    : BACKGROUND_COVERS.find(cover => cover.id === backgroundCover);
 
   // Initialize random index when cover type changes to rotating or random
   useEffect(() => {
