@@ -4,7 +4,7 @@ import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/s
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
-import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { EventListener } from "../event/event-listener";
@@ -25,20 +25,11 @@ interface PendingScore {
 }
 
 export class ScoreWebsockets implements EventListener {
-  private static CURRENT_DAY = getMidnightAlignedDate(new Date()).getTime();
-  
   private static readonly SCORE_MATCH_TIMEOUT = TimeUnit.toMillis(TimeUnit.Minute, 5);
   private static readonly PENDING_SCORES = new Map<string, PendingScore>();
 
   constructor() {
-    // Initialize and reset unique daily players at midnight
-    this.initializeUniqueDailyPlayers();
-    setInterval(
-      () => {
-        ScoreWebsockets.resetUniqueDailyPlayersIfNewDay();
-      },
-      TimeUnit.toMillis(TimeUnit.Minute, 1)
-    );
+    // Unique daily players are now managed by the metric itself with Redis
 
     // Start the match timeout interval timer
     setInterval(
@@ -189,12 +180,10 @@ export class ScoreWebsockets implements EventListener {
         });
       }
 
-      // Track unique daily players
-      await ScoreWebsockets.resetUniqueDailyPlayersIfNewDay();
+      // Track unique daily players in Redis
       const metric = await ScoreWebsockets.getUniqueDailyPlayersMetric();
-      if (metric && !metric.value.playerIds.includes(player.id)) {
-        metric.value.playerIds.push(player.id);
-        metric.value.lastScore = new Date();
+      if (metric) {
+        await metric.addPlayer(player.id);
       }
 
       EventsManager.getListeners().forEach(listener => {
@@ -212,39 +201,6 @@ export class ScoreWebsockets implements EventListener {
       | undefined;
   }
 
-  /**
-   * Resets unique daily players if it's a new day
-   */
-  private static async resetUniqueDailyPlayersIfNewDay() {
-    const now = getMidnightAlignedDate(new Date()).getTime();
-    if (now !== ScoreWebsockets.CURRENT_DAY) {
-      ScoreWebsockets.CURRENT_DAY = now;
-      const metric = await ScoreWebsockets.getUniqueDailyPlayersMetric();
-      if (metric) {
-        metric.value = {
-          lastScore: getMidnightAlignedDate(new Date()),
-          playerIds: [],
-        };
-      }
-    }
-  }
-
-  /**
-   * Initialize unique daily players from stored metric
-   */
-  private async initializeUniqueDailyPlayers() {
-    const metric = await ScoreWebsockets.getUniqueDailyPlayersMetric();
-    if (metric) {
-      const storedDay = getMidnightAlignedDate(metric.value.lastScore).getTime();
-      const today = getMidnightAlignedDate(new Date()).getTime();
-      if (storedDay !== today) {
-        metric.value = {
-          lastScore: getMidnightAlignedDate(new Date()),
-          playerIds: [],
-        };
-      }
-    }
-  }
 
   onStop: () => Promise<void> = async () => {
     // Process all pending scores

@@ -339,9 +339,9 @@ app.onStart(async () => {
 
   new CacheService();
   new PlaylistService();
+  new MetricsService();
 
   EventsManager.registerListener(new QueueManager());
-  EventsManager.registerListener(new MetricsService());
 });
 
 app.listen({

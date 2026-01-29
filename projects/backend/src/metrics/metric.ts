@@ -1,12 +1,5 @@
 import { MetricType } from "../service/metrics.service";
 
-export interface MetricOptions {
-  /**
-   * The interval in milliseconds at which to collect this metric.
-   */
-  interval: number;
-}
-
 export default abstract class Metric<T> {
   /**
    * The id of the metric.
@@ -18,18 +11,9 @@ export default abstract class Metric<T> {
    */
   public value: T;
 
-  /**
-   * The options of the metric.
-   */
-  public options: MetricOptions;
-
-  protected constructor(id: MetricType, defaultValue: T, options?: Partial<MetricOptions>) {
+  protected constructor(id: MetricType, defaultValue: T) {
     this.id = id;
     this.value = defaultValue;
-    this.options = {
-      interval: 5 * 60 * 1000, // 5 minutes default
-      ...options,
-    };
   }
 
 }

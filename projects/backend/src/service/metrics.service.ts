@@ -1,8 +1,6 @@
 import Logger from "@ssr/common/logger";
-import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { Registry } from "prom-client";
-import { EventListener } from "../event/event-listener";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
@@ -49,24 +47,10 @@ export enum MetricType {
   MONGO_DB_SIZE = "mongo_db_size",
 }
 
-export default class MetricsService implements EventListener {
-  private static instance: MetricsService;
+export default class MetricsService {
   private static metrics: Metric<unknown>[] = [];
 
   constructor() {
-    if (MetricsService.instance) {
-      return MetricsService.instance;
-    }
-    MetricsService.instance = this;
-
-    this.registerAllMetrics();
-    this.initMetrics();
-  }
-
-  /**
-   * Registers all available metrics with the service
-   */
-  private registerAllMetrics(): void {
     // Player metrics
     this.registerMetric(new TrackedScoresMetric());
     this.registerMetric(new TrackedPlayersMetric());
@@ -91,22 +75,13 @@ export default class MetricsService implements EventListener {
   }
 
   /**
-   * Initializes all registered metrics
-   */
-  private async initMetrics(): Promise<void> {
-    // Metrics are now collected on-demand via Prometheus collect callbacks
-  }
-
-  /**
    * Registers a metric with the service
    *
    * @param metric the metric to register
    */
   private registerMetric(metric: Metric<unknown>): void {
     MetricsService.metrics.push(metric);
-    Logger.debug(
-      `[METRICS] Registered metric ${metric.id} with interval ${formatDuration(metric.options.interval)}`
-    );
+    Logger.debug(`[METRICS] Registered metric ${metric.id}`);
   }
 
   /**
@@ -117,22 +92,5 @@ export default class MetricsService implements EventListener {
    */
   public static async getMetric(type: MetricType): Promise<Metric<unknown> | undefined> {
     return MetricsService.metrics.find(metric => metric.id === type);
-  }
-
-
-
-  /**
-   * Cleans up all timers
-   */
-  public async cleanup(): Promise<void> {
-    for (const metric of MetricsService.metrics) {
-      if ("cleanup" in metric && typeof (metric as { cleanup: () => void }).cleanup === "function") {
-        (metric as { cleanup: () => void }).cleanup();
-      }
-    }
-  }
-
-  onStop(): Promise<void> {
-    return Promise.resolve();
   }
 }

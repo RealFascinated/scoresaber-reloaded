@@ -1,4 +1,3 @@
-import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { Gauge } from "prom-client";
 import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
 import Metric from "../../metric";
@@ -7,22 +6,19 @@ export default class EventLoopLagMetric extends Metric<number> {
   private lastCheck: number;
   private lag: number;
   private measureInterval: NodeJS.Timeout | null = null;
-  private gauge: Gauge;
 
   constructor() {
-    super(MetricType.EVENT_LOOP_LAG, 0, {
-      interval: TimeUnit.toMillis(TimeUnit.Second, 1),
-    });
+    super(MetricType.EVENT_LOOP_LAG, 0);
 
     this.lastCheck = performance.now();
     this.lag = 0;
 
-    this.gauge = new Gauge({
+    const gauge = new Gauge({
       name: "event_loop_lag_ms",
       help: "Event loop lag in milliseconds",
       registers: [prometheusRegistry],
       collect: () => {
-        this.gauge.set(this.lag);
+        gauge.set(this.lag);
       },
     });
 
