@@ -50,7 +50,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
+        "type": "prometheus",
         "uid": "${datasource}"
       },
       "fieldConfig": {
@@ -108,7 +108,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "value_avg"
+              "options": "tracked_players_total"
             },
             "properties": [
               {
@@ -120,7 +120,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "inactive_avg"
+              "options": "tracked_players_inactive"
             },
             "properties": [
               {
@@ -158,46 +158,22 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "dataset": "iox",
           "datasource": {
-            "type": "influxdb",
+            "type": "prometheus",
             "uid": "${datasource}"
           },
-          "editorMode": "code",
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00') AS time,\r\n  AVG(value) AS value_avg,\r\n  AVG(inactive) AS inactive_avg\r\nFROM tracked_players\r\nWHERE time >= $__timeFrom\r\n  AND time <= $__timeTo\r\nGROUP BY DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00')\r\nORDER BY time;\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "*",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [],
-            "whereJsonTree": {
-              "children1": [
-                {
-                  "id": "9b8bbaa9-cdef-4012-b456-719bf25d99f1",
-                  "properties": {
-                    "fieldSrc": "field",
-                    "value": [],
-                    "valueSrc": []
-                  },
-                  "type": "rule"
-                }
-              ],
-              "id": "9aaaa89a-0123-4456-b89a-b19bf24a30fc",
-              "type": "group"
-            }
+          "expr": "tracked_players_total{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Active Players",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
           },
-          "table": "memory_usage"
+          "expr": "tracked_players_inactive{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Inactive Players",
+          "refId": "B"
         }
       ],
       "title": "Active Players",
@@ -205,7 +181,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
+        "type": "prometheus",
         "uid": "${datasource}"
       },
       "fieldConfig": {
@@ -263,7 +239,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "totalscores_avg"
+              "options": "total_tracked_scores"
             },
             "properties": [
               {
@@ -275,7 +251,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "totalpreviousscores_avg"
+              "options": "total_tracked_previous_scores"
             },
             "properties": [
               {
@@ -313,46 +289,22 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "dataset": "iox",
           "datasource": {
-            "type": "influxdb",
+            "type": "prometheus",
             "uid": "${datasource}"
           },
-          "editorMode": "code",
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00') AS time,\r\n  AVG(\"totalScores\") AS totalScores_avg,\r\n  AVG(\"totalPreviousScores\") AS totalPreviousScores_avg\r\nFROM total_tracked_scores\r\nWHERE time >= $__timeFrom\r\n  AND time <= $__timeTo\r\nGROUP BY DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00')\r\nORDER BY time;\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "*",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [],
-            "whereJsonTree": {
-              "children1": [
-                {
-                  "id": "9b8bbaa9-cdef-4012-b456-719bf25d99f1",
-                  "properties": {
-                    "fieldSrc": "field",
-                    "value": [],
-                    "valueSrc": []
-                  },
-                  "type": "rule"
-                }
-              ],
-              "id": "9aaaa89a-0123-4456-b89a-b19bf24a30fc",
-              "type": "group"
-            }
+          "expr": "total_tracked_scores{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Total Scores",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
           },
-          "table": "memory_usage"
+          "expr": "total_tracked_previous_scores{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Score History Scores",
+          "refId": "B"
         }
       ],
       "title": "Total Scores",
@@ -368,12 +320,12 @@
       },
       "id": 5,
       "panels": [],
-      "title": "API",
+      "title": "Performance",
       "type": "row"
     },
     {
       "datasource": {
-        "type": "influxdb",
+        "type": "prometheus",
         "uid": "${datasource}"
       },
       "fieldConfig": {
@@ -453,38 +405,13 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "dataset": "iox",
           "datasource": {
-            "type": "influxdb",
+            "type": "prometheus",
             "uid": "${datasource}"
           },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  DATE_BIN('1m', time, TIMESTAMP '1970-01-01 00:00:00') AS time,\r\n  GREATEST(\r\n    MAX(total_requests) - LAG(MAX(total_requests)) OVER (ORDER BY DATE_BIN('1m', time, TIMESTAMP '1970-01-01 00:00:00')),\r\n    0\r\n  ) AS requests_per_min\r\nFROM total_requests\r\nWHERE time >= $__timeFrom\r\n  AND time <= $__timeTo\r\nGROUP BY DATE_BIN('1m', time, TIMESTAMP '1970-01-01 00:00:00')\r\nORDER BY time;\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "*",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ]
-          },
-          "table": "total_requests"
+          "expr": "rate(total_requests{environment=\"production\",job=\"scoresaber_reloaded\"}[1m]) * 60",
+          "legendFormat": "Requests",
+          "refId": "A"
         }
       ],
       "title": "Requests/m",
@@ -492,7 +419,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
+        "type": "prometheus",
         "uid": "${datasource}"
       },
       "fieldConfig": {
@@ -544,13 +471,13 @@
               }
             ]
           },
-          "unit": "decmbytes"
+          "unit": "bytes"
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "used"
+              "options": "memory_usage_heap_size_bytes"
             },
             "properties": [
               {
@@ -562,7 +489,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "total"
+              "options": "memory_usage_heap_capacity_bytes"
             },
             "properties": [
               {
@@ -596,46 +523,25 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "dataset": "iox",
           "datasource": {
-            "type": "influxdb",
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "memory_usage_heap_size_bytes{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Used",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
             "uid": "${datasource}"
           },
           "editorMode": "code",
+          "expr": "memory_usage_heap_capacity_bytes{environment=\"production\",job=\"scoresaber_reloaded\"}",
           "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00') AS time,\r\n  AVG(total) AS total,\r\n  AVG(value) AS used\r\nFROM memory_usage\r\nWHERE time >= $__timeFrom\r\n  AND time <= $__timeTo\r\nGROUP BY DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00')\r\nORDER BY time;\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "*",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [],
-            "whereJsonTree": {
-              "children1": [
-                {
-                  "id": "9b8bbaa9-cdef-4012-b456-719bf25d99f1",
-                  "properties": {
-                    "fieldSrc": "field",
-                    "value": [],
-                    "valueSrc": []
-                  },
-                  "type": "rule"
-                }
-              ],
-              "id": "9aaaa89a-0123-4456-b89a-b19bf24a30fc",
-              "type": "group"
-            }
-          },
-          "table": "memory_usage"
+          "legendFormat": "Total",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Memory Usage",
@@ -643,158 +549,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
-        "uid": "${datasource}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "locale"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "used"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Used"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "total"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Total"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 10
-      },
-      "id": 3,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "12.3.2",
-      "targets": [
-        {
-          "dataset": "iox",
-          "datasource": {
-            "type": "influxdb",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code",
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00') AS time,\r\n  AVG(total_intervals) AS total_intervals_avg,\r\n  AVG(total_timers) AS total_timers_avg,\r\n  AVG(active_intervals) AS active_intervals_avg,\r\n  AVG(active_timers) AS active_timers_avg\r\nFROM event_loop_timers\r\nWHERE time >= $__timeFrom\r\n  AND time <= $__timeTo\r\nGROUP BY DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00')\r\nORDER BY time;\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "*",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [],
-            "whereJsonTree": {
-              "children1": [
-                {
-                  "id": "9b8bbaa9-cdef-4012-b456-719bf25d99f1",
-                  "properties": {
-                    "fieldSrc": "field",
-                    "value": [],
-                    "valueSrc": []
-                  },
-                  "type": "rule"
-                }
-              ],
-              "id": "9aaaa89a-0123-4456-b89a-b19bf24a30fc",
-              "type": "group"
-            }
-          },
-          "table": "memory_usage"
-        }
-      ],
-      "title": "Event Loop Timers",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
+        "type": "prometheus",
         "uid": "${datasource}"
       },
       "fieldConfig": {
@@ -848,38 +603,13 @@
           },
           "unit": "ms"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "used"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Used"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "total"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Total"
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
         "w": 8,
-        "x": 0,
-        "y": 18
+        "x": 16,
+        "y": 10
       },
       "id": 4,
       "options": {
@@ -898,46 +628,13 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "dataset": "iox",
           "datasource": {
-            "type": "influxdb",
+            "type": "prometheus",
             "uid": "${datasource}"
           },
-          "editorMode": "code",
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00') AS time,\r\n  AVG(lag_ms) AS lag_ms_avg\r\nFROM event_loop_lag\r\nWHERE time >= $__timeFrom\r\n  AND time <= $__timeTo\r\nGROUP BY DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00')\r\nORDER BY time;\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "*",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [],
-            "whereJsonTree": {
-              "children1": [
-                {
-                  "id": "9b8bbaa9-cdef-4012-b456-719bf25d99f1",
-                  "properties": {
-                    "fieldSrc": "field",
-                    "value": [],
-                    "valueSrc": []
-                  },
-                  "type": "rule"
-                }
-              ],
-              "id": "9aaaa89a-0123-4456-b89a-b19bf24a30fc",
-              "type": "group"
-            }
-          },
-          "table": "memory_usage"
+          "expr": "event_loop_lag_ms{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Event Loop Lag",
+          "refId": "A"
         }
       ],
       "title": "Event Loop Lag",
@@ -949,16 +646,16 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 26
+        "y": 27
       },
       "id": 10,
       "panels": [],
-      "title": "Misc",
+      "title": "Infrastructure",
       "type": "row"
     },
     {
       "datasource": {
-        "type": "influxdb",
+        "type": "prometheus",
         "uid": "${datasource}"
       },
       "fieldConfig": {
@@ -1018,7 +715,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 27
+        "y": 28
       },
       "id": 11,
       "options": {
@@ -1037,38 +734,13 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "dataset": "iox",
           "datasource": {
-            "type": "influxdb",
+            "type": "prometheus",
             "uid": "${datasource}"
           },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  DATE_BIN('1m', time, TIMESTAMP '1970-01-01 00:00:00') AS time,\r\n  GREATEST(\r\n    MAX(\"scoresaber\") - LAG(MAX(\"scoresaber\")) OVER (ORDER BY DATE_BIN('1m', time, TIMESTAMP '1970-01-01 00:00:00')),\r\n    0\r\n  ) AS scoresaber,\r\n  GREATEST(\r\n    MAX(\"beatsaver\") - LAG(MAX(\"beatsaver\")) OVER (ORDER BY DATE_BIN('1m', time, TIMESTAMP '1970-01-01 00:00:00')),\r\n    0\r\n  ) AS beatsaver,\r\n  GREATEST(\r\n    MAX(\"beatleader\") - LAG(MAX(\"beatleader\")) OVER (ORDER BY DATE_BIN('1m', time, TIMESTAMP '1970-01-01 00:00:00')),\r\n    0\r\n  ) AS beatleader,\r\n  GREATEST(\r\n    MAX(\"accsaber\") - LAG(MAX(\"accsaber\")) OVER (ORDER BY DATE_BIN('1m', time, TIMESTAMP '1970-01-01 00:00:00')),\r\n    0\r\n  ) AS accsaber\r\nFROM api_services\r\nWHERE time >= $__timeFrom\r\n  AND time <= $__timeTo\r\nGROUP BY DATE_BIN('1m', time, TIMESTAMP '1970-01-01 00:00:00')\r\nORDER BY time;\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "*",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ]
-          },
-          "table": "total_requests"
+          "expr": "rate(api_service_calls_total{environment=\"production\",job=\"scoresaber_reloaded\"}[1m]) * 60",
+          "legendFormat": "{{service}}",
+          "refId": "A"
         }
       ],
       "title": "External Services (req/m)",
@@ -1076,7 +748,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
+        "type": "prometheus",
         "uid": "${datasource}"
       },
       "fieldConfig": {
@@ -1130,13 +802,50 @@
           },
           "unit": "bytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mongo_db_index_size_bytes"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Index"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mongo_db_collections_size_bytes"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Collections"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mongo_db_size_bytes"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Total"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 27
+        "y": 28
       },
       "id": 12,
       "options": {
@@ -1155,38 +864,31 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "dataset": "iox",
           "datasource": {
-            "type": "influxdb",
+            "type": "prometheus",
             "uid": "${datasource}"
           },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00') AS time,\r\n  AVG(\"index\") AS indexs,\r\n  AVG(\"collections\") AS collections,\r\n  AVG(\"total\") AS total\r\nFROM mongo_db_size\r\nWHERE time >= $__timeFrom\r\n  AND time <= $__timeTo\r\nGROUP BY DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00')\r\nORDER BY time;\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "*",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ]
+          "expr": "mongo_db_index_size_bytes{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Index",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
           },
-          "table": "total_requests"
+          "expr": "mongo_db_collections_size_bytes{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Collections",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "mongo_db_size_bytes{type=\"total\",environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Total",
+          "refId": "C"
         }
       ],
       "title": "MongoDB Storage",
@@ -1194,7 +896,7 @@
     },
     {
       "datasource": {
-        "type": "influxdb",
+        "type": "prometheus",
         "uid": "${datasource}"
       },
       "fieldConfig": {
@@ -1254,7 +956,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 27
+        "y": 28
       },
       "id": 13,
       "options": {
@@ -1273,41 +975,666 @@
       "pluginVersion": "12.3.2",
       "targets": [
         {
-          "dataset": "iox",
           "datasource": {
-            "type": "influxdb",
+            "type": "prometheus",
             "uid": "${datasource}"
           },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00') AS time,\r\n  AVG(\"player-score-refresh-queue\") AS player_score_refresh_queue,\r\n  AVG(\"leaderboard-score-seed-queue\") AS leaderboard_score_seed_queue\r\nFROM queue_sizes\r\nWHERE time >= $__timeFrom\r\n  AND time <= $__timeTo\r\nGROUP BY DATE_BIN($__interval, time, TIMESTAMP '1970-01-01 00:00:00')\r\nORDER BY time;\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [
-                  {
-                    "name": "*",
-                    "type": "functionParameter"
-                  }
-                ],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ]
-          },
-          "table": "total_requests"
+          "expr": "queue_size{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "{{queue}}",
+          "refId": "A"
         }
       ],
       "title": "Queues",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "id": 21,
+      "panels": [],
+      "title": "Users",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 37
+      },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "active_accounts{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Active Accounts",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Accounts",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "reqpm"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 55
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "rate(tracked_scores{environment=\"production\",job=\"scoresaber_reloaded\"}[1m]) * 60",
+          "legendFormat": "Scores",
+          "refId": "A"
+        }
+      ],
+      "title": "Scores/m",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 37
+      },
+      "id": 16,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "unique_daily_players{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Unique Daily Players",
+          "refId": "A"
+        }
+      ],
+      "title": "Unique Daily Players",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "bars",
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 37
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "daily_new_accounts{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Daily New Accounts",
+          "refId": "A"
+        }
+      ],
+      "title": "Daily New Accounts",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 45
+      },
+      "id": 18,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true,
+          "values": []
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "sort": "desc",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "active_players_hmd{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "{{hmd}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Players by HMD (Pie)",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 45
+      },
+      "id": 19,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "active_players_hmd{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "{{hmd}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Players by HMD",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 54
+      },
+      "id": 22,
+      "panels": [],
+      "title": "Scores",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 18
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "process_uptime_seconds{environment=\"production\",job=\"scoresaber_reloaded\"}",
+          "legendFormat": "Uptime",
+          "refId": "A"
+        }
+      ],
+      "title": "Process Uptime",
       "type": "timeseries"
     }
   ],
@@ -1319,13 +1646,13 @@
     "list": [
       {
         "current": {
-          "text": "ssr influx - prod",
-          "value": "dfb6drg4qnqioc"
+          "text": "victoria-metrics",
+          "value": "ffbmdvoh37lkwe"
         },
         "label": "Datasource",
         "name": "datasource",
         "options": [],
-        "query": "influxdb",
+        "query": "victoriametrics-metrics-datasource",
         "refresh": 1,
         "regex": "",
         "type": "datasource"
@@ -1346,5 +1673,5 @@
   "timezone": "browser",
   "title": "SSR Public",
   "uid": "5783f85b-a2b3-49d8-854d-b67bb524053d",
-  "version": 26
+  "version": 28
 }
