@@ -117,16 +117,9 @@ export default class MetricsService implements EventListener {
 
       await metric.collect(); // Collect all metrics once on boot
       setInterval(async () => {
-        const before = Date.now();
-
         const point = await metric.collect();
         if (point) {
           await this.writePoint(point);
-        }
-
-        const timeTaken = Date.now() - before;
-        if (timeTaken > 1000) {
-          Logger.warn(`[METRICS] Collected and wrote metric ${metric.id} in ${timeTaken}ms`);
         }
       }, metric.options.interval);
     }
