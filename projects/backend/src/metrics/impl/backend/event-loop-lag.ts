@@ -1,7 +1,6 @@
-import { Gauge } from "prom-client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { MetricType } from "../../../service/metrics.service";
-import { prometheusRegistry } from "../../../service/metrics.service";
+import { Gauge } from "prom-client";
+import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
 import Metric from "../../metric";
 
 export default class EventLoopLagMetric extends Metric<number> {
@@ -15,7 +14,7 @@ export default class EventLoopLagMetric extends Metric<number> {
       interval: TimeUnit.toMillis(TimeUnit.Second, 1),
     });
 
-    this.lastCheck = Date.now();
+    this.lastCheck = performance.now();
     this.lag = 0;
 
     this.gauge = new Gauge({
@@ -32,7 +31,7 @@ export default class EventLoopLagMetric extends Metric<number> {
 
   private startMeasuring() {
     this.measureInterval = setInterval(() => {
-      const now = Date.now();
+      const now = performance.now();
       const expected = this.lastCheck + 1000; // We expect 1 second between measurements
       this.lag = Math.max(0, now - expected);
       this.lastCheck = now;
