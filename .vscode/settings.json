@@ -54,5 +54,6 @@
     "**/dist": true,
     "**/.next": true,
     "**/bun.lock": true
-  }
+  },
+  "codeQL.githubDatabase.download": "never"
 }

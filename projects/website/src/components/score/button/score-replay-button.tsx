@@ -1,6 +1,6 @@
 "use client";
 
-import BeatSaberPepeLogo from "@/components/logos/beatsaber-pepe-logo";
+import BeatSaberPepeLogo from "@/components/logos/logos/beatsaber-pepe-logo";
 import ScoreButton from "@/components/score/button/score-button";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";

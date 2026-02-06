@@ -1,4 +1,4 @@
-import BeatSaverLogo from "@/components/logos/beatsaver-logo";
+import BeatSaverLogo from "@/components/logos/logos/beatsaver-logo";
 import ScoreButton from "@/components/score/button/score-button";
 import SimpleLink from "@/components/simple-link";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
