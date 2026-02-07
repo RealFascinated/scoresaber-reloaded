@@ -75,6 +75,12 @@ const links: {
       href: "/statistics",
     },
   ],
+  Other:[
+    {
+      name: "MC Utilities",
+      href: "https://mc.fascinated.cc/",
+    },
+  ]
 };
 
 const socialLinks: SocialLinkType[] = [
