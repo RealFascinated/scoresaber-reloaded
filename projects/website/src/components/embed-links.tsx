@@ -11,11 +11,13 @@ export default function EmbedLinks({ text }: EmbedLinksProps) {
   // Split the text by URLs and insert <a> tags for matching URLs
   const parts = text.split(urlRegex);
 
+  const isUrl = (s: string) => s.startsWith("http://") || s.startsWith("https://");
   return parts.map((part, index) => {
-    if (urlRegex.test(part)) {
+    const key = `embed-${index}-${part.slice(0, 50)}`;
+    if (isUrl(part)) {
       return (
         <SimpleLink
-          key={index}
+          key={key}
           href={part}
           target="_blank"
           className="text-primary hover:text-primary/80 transition-all"
@@ -23,8 +25,7 @@ export default function EmbedLinks({ text }: EmbedLinksProps) {
           {part}
         </SimpleLink>
       );
-    } else {
-      return part;
     }
+    return <span key={key}>{part}</span>;
   });
 }

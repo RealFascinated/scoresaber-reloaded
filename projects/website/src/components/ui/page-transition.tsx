@@ -1,7 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { ReactNode, useEffect, useRef } from "react";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { usePageTransition } from "../../contexts/page-transition-context";
 
 const containerVariants = {
@@ -42,32 +42,28 @@ const itemVariants = {
 
 export default function PageTransition({ children, className }: { children: ReactNode; className?: string }) {
   const { currentPage, direction, isLoading } = usePageTransition();
-  const stablePageRef = useRef(currentPage);
-  const stableChildrenRef = useRef<ReactNode>(children);
+  const shouldReduceMotion = useReducedMotion();
+  const [stablePage, setStablePage] = useState(currentPage);
+  const [stableChildren, setStableChildren] = useState<ReactNode>(children);
   const prevIsLoadingRef = useRef(isLoading);
+  const transitionDuration = shouldReduceMotion ? 0 : 0.2;
+  const filterDuration = shouldReduceMotion ? 0 : 0.15;
 
-  // Update stable refs when not loading
-  if (!isLoading) {
-    stablePageRef.current = currentPage;
-    stableChildrenRef.current = children;
-  }
-
-  // Capture children when loading starts
+  // Capture page and children in state when loading starts (no refs read during render)
   useEffect(() => {
     if (isLoading && !prevIsLoadingRef.current) {
-      // Loading just started - ensure we have the current children captured
-      stableChildrenRef.current = children;
-      stablePageRef.current = currentPage;
+      setStablePage(currentPage);
+      setStableChildren(children);
     }
     prevIsLoadingRef.current = isLoading;
   }, [isLoading, currentPage, children]);
 
-  const transitionKey = isLoading ? stablePageRef.current : currentPage;
-  const displayChildren = isLoading ? stableChildrenRef.current : children;
+  const transitionKey = isLoading ? stablePage : currentPage;
+  const displayChildren = isLoading ? stableChildren : children;
 
   return (
     <AnimatePresence mode="wait">
-      <motion.div
+      <m.div
         key={transitionKey}
         className={className}
         custom={direction}
@@ -77,43 +73,43 @@ export default function PageTransition({ children, className }: { children: Reac
         exit="exit"
         transition={{
           type: "tween",
-          duration: 0.2,
+          duration: transitionDuration,
           ease: [0.4, 0, 0.2, 1],
-          filter: { duration: 0.15 },
+          filter: { duration: filterDuration },
         }}
       >
         {Array.isArray(displayChildren) ? (
           displayChildren.map((child, index) => (
-            <motion.div
-              key={index}
+            <m.div
+              key={`${transitionKey}-${index}`}
               custom={direction}
               variants={itemVariants}
               transition={{
                 type: "tween",
-                duration: 0.2,
+                duration: transitionDuration,
                 ease: [0.4, 0, 0.2, 1],
-                delay: index * 0.025,
-                filter: { duration: 0.15 },
+                delay: shouldReduceMotion ? 0 : index * 0.025,
+                filter: { duration: filterDuration },
               }}
             >
               {child}
-            </motion.div>
+            </m.div>
           ))
         ) : (
-          <motion.div
+          <m.div
             custom={direction}
             variants={itemVariants}
             transition={{
               type: "tween",
-              duration: 0.2,
+              duration: transitionDuration,
               ease: [0.4, 0, 0.2, 1],
-              filter: { duration: 0.15 },
+              filter: { duration: filterDuration },
             }}
           >
             {displayChildren}
-          </motion.div>
+          </m.div>
         )}
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }

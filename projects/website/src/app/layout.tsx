@@ -9,6 +9,7 @@ import { ssrConfig } from "config";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
+import { domAnimation, LazyMotion } from "framer-motion";
 import { ReactNode } from "react";
 import "./styles/globals.css";
 
@@ -78,11 +79,13 @@ export default function RootLayout({
         )}
         <Toaster />
         <PreloadResources />
-        <PageTransitionProvider>
-          <ViewportProvider>
-            <QueryProvider>{children}</QueryProvider>
-          </ViewportProvider>
-        </PageTransitionProvider>
+        <LazyMotion features={domAnimation} strict>
+          <PageTransitionProvider>
+            <ViewportProvider>
+              <QueryProvider>{children}</QueryProvider>
+            </ViewportProvider>
+          </PageTransitionProvider>
+        </LazyMotion>
       </body>
     </html>
   );

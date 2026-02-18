@@ -2,7 +2,7 @@
 
 import { ChartConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
-import GenericChart from "@/components/api/chart/generic-chart";
+import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import Card from "@/components/card";
 import { useMemo } from "react";
 import { getEmptyStateClassName } from "./chart-utils";

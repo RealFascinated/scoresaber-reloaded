@@ -4,7 +4,7 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 
 type ScoreAccuracyStatProps = {
   scoreStats: ScoreStatsResponse;
@@ -38,6 +38,7 @@ function AverageCutValues({ cuts, hand }: { cuts: number[]; hand: Hand }) {
 }
 
 function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
+  const shouldReduceMotion = useReducedMotion();
   const percent = Math.min(Math.max(accuracy, 0), MAX_ACCURACY) / MAX_ACCURACY;
   const center = CIRCLE_RADIUS + STROKE_WIDTH;
   const size = (CIRCLE_RADIUS + STROKE_WIDTH) * 2;
@@ -60,7 +61,7 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
               className="text-gray-800"
             />
             <AnimatePresence mode="wait">
-              <motion.circle
+              <m.circle
                 key={`${hand}-${accuracy}`}
                 cx={center}
                 cy={center}
@@ -72,7 +73,7 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: percent }}
                 exit={{ pathLength: 0 }}
-                transition={{ duration: 1, ease: "easeInOut" }}
+                transition={{ duration: shouldReduceMotion ? 0 : 1, ease: "easeInOut" }}
                 className="drop-shadow-sm"
               />
             </AnimatePresence>

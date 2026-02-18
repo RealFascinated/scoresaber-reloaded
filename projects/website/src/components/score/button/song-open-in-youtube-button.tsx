@@ -1,6 +1,6 @@
 import { songNameToYouTubeLink } from "@/common/youtube-utils";
-import YouTubeLogo from "@/components/logos/youtube-logo";
 import ScoreButton from "@/components/score/button/score-button";
+import YouTubeLogo from "../../logos/logos/youtube-logo";
 
 type SongOpenInYoutubeButtonProps = {
   songName: string;

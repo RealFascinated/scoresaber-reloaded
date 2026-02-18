@@ -2,7 +2,7 @@
 
 import { buildChartConfig } from "@/common/chart/build-chart-config";
 import { DatasetConfig } from "@/common/chart/types";
-import GenericChart from "@/components/api/chart/generic-chart";
+import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
 import { formatDateMinimal, parseDate } from "@ssr/common/utils/time-utils";
 

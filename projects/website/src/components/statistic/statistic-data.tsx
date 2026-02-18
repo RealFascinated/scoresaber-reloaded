@@ -5,12 +5,14 @@ import { AppStatisticsResponse } from "@ssr/common/schemas/response/ssr/app-stat
 import Request from "@ssr/common/utils/request";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import Card from "../card";
 import { AppStats } from "../landing/app-statistics";
-import HmdUsageChart from "../score/charts/hmd-usage-chart";
 import ScoreSaberStatisticsChart from "../score/charts/scoresaber-statistics-chart";
 import SimpleLink from "../simple-link";
 import { Spinner } from "../spinner";
+
+const HmdUsageChart = dynamic(() => import("../score/charts/hmd-usage-chart"), { ssr: false });
 
 export default function StatisticData() {
   const { data: statistics } = useQuery({

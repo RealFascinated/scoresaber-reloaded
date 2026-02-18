@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartConfig } from "@/common/chart/types";
-import GenericChart from "@/components/api/chart/generic-chart";
+import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import Card from "@/components/card";
 import { useMemo } from "react";
 import { CHART_COLORS, getEmptyStateClassName } from "./chart-utils";

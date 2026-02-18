@@ -29,12 +29,13 @@ export function ScoreBadges<TScore, TLeaderboard>({
   return badges.map((badge, index) => {
     const toRender = badge.create(score, leaderboard, medalsMode);
     const color = badge.color?.(score, leaderboard, medalsMode);
+    const key = badge.name + String(index);
     if (toRender === undefined) {
-      return <div key={index} />;
+      return <div key={key} />;
     }
     return (
       <div
-        key={index}
+        key={key}
         className={clsx(
           "flex h-full cursor-default items-center justify-center rounded-md p-1 text-sm",
           color ? color : "bg-accent"

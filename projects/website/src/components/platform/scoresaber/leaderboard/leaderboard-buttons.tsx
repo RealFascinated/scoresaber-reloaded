@@ -89,7 +89,7 @@ export default function LeaderboardButtons({ leaderboard, beatSaverMap }: Props)
         if (buttonElement == null) {
           return null;
         }
-        return <div key={index}>{buttonElement}</div>;
+        return <div key={`leaderboard-btn-${index}`}>{buttonElement}</div>;
       })}
     </div>
   );

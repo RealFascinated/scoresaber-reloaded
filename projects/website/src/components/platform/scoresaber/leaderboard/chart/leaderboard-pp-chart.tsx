@@ -3,7 +3,7 @@
 import { ChartConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import { DEFAULT_WHAT_IF_RANGE, SettingIds } from "@/common/database/database";
-import GenericChart from "@/components/api/chart/generic-chart";
+import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import ScoreButton from "@/components/score/button/score-button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";

@@ -198,11 +198,13 @@ const WebsiteSettings = () => {
 
   async function onSubmit(values: FormValues) {
     const before = performance.now();
-    await database.setBackgroundCoverBrightness(values.backgroundCoverBrightness);
-    await database.setBackgroundCoverBlur(values.backgroundCoverBlur);
-    await database.setSetting(SettingIds.SnowParticles, values.snowParticles);
-    await database.setSetting(SettingIds.ShowKitty, values.showKitty);
-    await database.setWebsiteLanding(values.websiteLanding);
+    await Promise.all([
+      database.setBackgroundCoverBrightness(values.backgroundCoverBrightness),
+      database.setBackgroundCoverBlur(values.backgroundCoverBlur),
+      database.setSetting(SettingIds.SnowParticles, values.snowParticles),
+      database.setSetting(SettingIds.ShowKitty, values.showKitty),
+      database.setWebsiteLanding(values.websiteLanding),
+    ]);
     setTheme(values.theme);
 
     const after = performance.now();

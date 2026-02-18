@@ -50,7 +50,7 @@ export function DualRangeSlider({
       </SliderPrimitive.Track>
       {currentValue.map((val, index) => (
         <SliderPrimitive.Thumb
-          key={index}
+          key={index === 0 ? "min" : "max"}
           className="border-primary bg-background ring-offset-background hover:border-primary/80 block h-5 w-5 rounded-full border-2 shadow-md transition-all duration-200 select-none focus:ring-0 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
           onKeyDown={handleKeyDown}
         >

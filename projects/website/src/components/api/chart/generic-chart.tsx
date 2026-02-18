@@ -242,10 +242,10 @@ const GenericChart = ({ config, labels }: Props) => {
           onClick: (_: any, legendItem: any, legend: any) => {
             const index = legendItem.datasetIndex;
             const chart = legend.chart;
-            chart[chart.isDatasetVisible(index) ? "hide" : "show"](index);
-            legendItem.hidden = !legendItem.hidden;
+            const willBeVisible = !chart.isDatasetVisible(index);
+            chart[willBeVisible ? "show" : "hide"](index);
             if (id) {
-              database.setChartLegend(id, legendItem.text, !legendItem.hidden);
+              database.setChartLegend(id, legendItem.text, willBeVisible);
             }
           },
         },
@@ -307,10 +307,11 @@ const GenericChart = ({ config, labels }: Props) => {
             {
               id: "paddingBelowLegends",
               beforeInit(chart: any) {
-                const originalFit = chart.legend.fit;
-                chart.legend.fit = function fit() {
-                  originalFit.bind(chart.legend)();
-                  this.height += 8;
+                const legend = chart.legend;
+                const originalFit = legend.fit;
+                legend.fit = function fit() {
+                  originalFit.bind(legend)();
+                  legend.height = legend.height + 8;
                 };
               },
             },

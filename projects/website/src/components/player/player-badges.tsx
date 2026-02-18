@@ -12,7 +12,7 @@ export default function PlayerBadges({ player }: Props) {
       {player.badges?.map((badge, index) => {
         return (
           <SimpleTooltip
-            key={index}
+            key={badge.url + String(index)}
             display={<p className="pointer-events-none cursor-default">{badge.description}</p>}
             showOnMobile
           >

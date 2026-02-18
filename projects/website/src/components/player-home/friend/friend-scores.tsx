@@ -51,12 +51,12 @@ export function FriendScores() {
       {scoreData && (
         <div className="flex flex-col gap-(--spacing-lg)">
           <div className="flex flex-col gap-(--spacing-lg)">
-            {scoreData.items.map((playerScore, index) => {
+            {scoreData.items.map((playerScore) => {
               const score = playerScore.score;
               const leaderboard = playerScore.leaderboard;
               const beatSaverMap = playerScore.beatSaver;
               return (
-                <div key={index} className="flex flex-col">
+                <div key={score.scoreId} className="flex flex-col">
                   <PlayerScoreHeader player={playerScore.score.playerInfo} />
                   <Card className="rounded-lg rounded-tl-none p-0">
                     <ScoreSaberScoreDisplay

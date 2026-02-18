@@ -2,8 +2,8 @@
 
 import { createContext, ReactNode, useContext, useEffect, useLayoutEffect, useState } from "react";
 
-// Tailwind breakpoints matching the project's theme
-export const Breakpoint = {
+// Tailwind breakpoints matching the project's theme (internal use by useIsMobile)
+const Breakpoint = {
   xxs: 320,
   xs: 475,
   sm: 640,
@@ -13,7 +13,7 @@ export const Breakpoint = {
   "2xl": 1536,
 } as const;
 
-export type BreakpointKey = keyof typeof Breakpoint;
+type BreakpointKey = keyof typeof Breakpoint;
 
 interface ViewportContextType {
   width: number;

@@ -8,7 +8,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scores
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { useEffect } from "react";
 import LeaderboardScoresDropdown from "../leaderboard/leaderboard-scores-dropdown";
 
@@ -46,23 +46,27 @@ export default function ScoreDetailsDropdown({
     }
   }, [setIsDetailsLoading, isLoading]);
 
+  const shouldReduceMotion = useReducedMotion();
   const scoresPage = defaultScoresPage ?? getPageFromRank(score.rank, 12);
   if (isLoading) {
     return null;
   }
 
+  const motionDuration = shouldReduceMotion ? 0 : 0.2;
+  const heightDuration = shouldReduceMotion ? 0 : 0.25;
+
   return (
     <AnimatePresence mode="wait">
       {isExpanded && dropdownData && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, height: 0, scale: 0.97 }}
           animate={{ opacity: 1, height: "auto", scale: 1 }}
           exit={{ opacity: 0, height: 0, scale: 0.97 }}
           transition={{
             ease: [0.4, 0, 0.2, 1],
-            height: { duration: 0.25 },
-            opacity: { duration: 0.2 },
-            scale: { duration: 0.2 },
+            height: { duration: heightDuration },
+            opacity: { duration: motionDuration },
+            scale: { duration: motionDuration },
           }}
           className={cn(
             "flex w-full origin-top flex-col gap-(--spacing-md) px-(--spacing-xs)",
@@ -84,7 +88,7 @@ export default function ScoreDetailsDropdown({
               historyPlayerId={score.playerId}
             />
           )}
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

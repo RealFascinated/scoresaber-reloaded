@@ -8,7 +8,7 @@ import { ChartBarIcon } from "lucide-react";
 import { useState } from "react";
 import { buildChartConfig } from "../../../../../common/chart/build-chart-config";
 import { Colors } from "../../../../../common/colors";
-import GenericChart from "../../../../api/chart/generic-chart";
+import GenericChart from "../../../../api/chart/generic-chart-dynamic";
 import ScoreButton from "../../../../score/button/score-button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../../../../ui/dialog";
 

@@ -21,6 +21,63 @@ const DEFAULT_STARS = 10;
 const MIN_STARS = 0.1;
 const MIN_ACCURACY = 75;
 
+function RawPpDisplay({ desiredPpGain, targetRawPp }: { desiredPpGain: number; targetRawPp: number | null }) {
+  return (
+    <div className="bg-muted/50 border-border flex flex-col gap-2 rounded-lg border p-4 md:p-5">
+      <Label className="text-muted-foreground text-xs font-medium sm:text-sm">
+        Raw PP needed for +{formatPp(desiredPpGain)}pp
+      </Label>
+      <p className="text-xl font-bold sm:text-2xl">
+        {targetRawPp ? `${formatPp(targetRawPp)}pp` : "Calculating..."}
+      </p>
+    </div>
+  );
+}
+
+function AccuracyThresholdTable({
+  targetRawPp,
+  getStarsForAcc,
+}: {
+  targetRawPp: number;
+  getStarsForAcc: (rawPp: number, acc: number) => number;
+}) {
+  return (
+    <div className="bg-muted/30 border-border overflow-hidden rounded-lg border">
+      <div className="-mx-1 overflow-x-auto px-1">
+        <table className="w-full table-fixed border-collapse">
+          <thead>
+            <tr className="border-border bg-muted/30 border-b">
+              {ACCURACY_THRESHOLDS.map(threshold => (
+                <th
+                  key={threshold}
+                  className="px-2 py-2 text-center text-xs font-medium sm:px-4 sm:py-3 sm:text-sm"
+                >
+                  {threshold}%
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              {ACCURACY_THRESHOLDS.map(threshold => {
+                const starsForAcc = getStarsForAcc(targetRawPp, threshold);
+                return (
+                  <td
+                    key={threshold}
+                    className="px-2 py-2 text-center font-mono text-xs sm:px-4 sm:py-3 sm:text-sm"
+                  >
+                    {starsForAcc > SHARED_CONSTS.maxStars ? "—" : `${starsForAcc.toFixed(2)}★`}
+                  </td>
+                );
+              })}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer }) {
   const { data: scorePps, isLoading } = useQuery({
     queryKey: ["scorePps", player.id],
@@ -306,50 +363,10 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
             </div>
           </div>
 
-          {/* Raw PP Display */}
-          <div className="bg-muted/50 border-border flex flex-col gap-2 rounded-lg border p-4 md:p-5">
-            <Label className="text-muted-foreground text-xs font-medium sm:text-sm">
-              Raw PP needed for +{formatPp(desiredPpGain)}pp
-            </Label>
-            <p className="text-xl font-bold sm:text-2xl">
-              {targetRawPp ? `${formatPp(targetRawPp)}pp` : "Calculating..."}
-            </p>
-          </div>
+          <RawPpDisplay desiredPpGain={desiredPpGain} targetRawPp={targetRawPp} />
 
           {targetRawPp && (
-            <div className="bg-muted/30 border-border overflow-hidden rounded-lg border">
-              <div className="-mx-1 overflow-x-auto px-1">
-                <table className="w-full table-fixed border-collapse">
-                  <thead>
-                    <tr className="border-border bg-muted/30 border-b">
-                      {ACCURACY_THRESHOLDS.map(threshold => (
-                        <th
-                          key={threshold}
-                          className="px-2 py-2 text-center text-xs font-medium sm:px-4 sm:py-3 sm:text-sm"
-                        >
-                          {threshold}%
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      {ACCURACY_THRESHOLDS.map(threshold => {
-                        const starsForAcc = getStarsForAcc(targetRawPp, threshold);
-                        return (
-                          <td
-                            key={threshold}
-                            className="px-2 py-2 text-center font-mono text-xs sm:px-4 sm:py-3 sm:text-sm"
-                          >
-                            {starsForAcc > SHARED_CONSTS.maxStars ? "—" : `${starsForAcc.toFixed(2)}★`}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <AccuracyThresholdTable targetRawPp={targetRawPp} getStarsForAcc={getStarsForAcc} />
           )}
         </>
       )}

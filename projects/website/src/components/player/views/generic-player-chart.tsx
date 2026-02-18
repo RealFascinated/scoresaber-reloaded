@@ -2,7 +2,7 @@
 
 import { buildChartConfig } from "@/common/chart/build-chart-config";
 import { DatasetConfig } from "@/common/chart/types";
-import GenericChart from "@/components/api/chart/generic-chart";
+import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 import { formatDateMinimal, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
@@ -32,13 +32,7 @@ type Props = {
 
 export default function GenericPlayerChart({ id, statisticHistory, datasetConfig, daysAmount = 50 }: Props) {
   const { labels, histories } = useMemo(() => {
-    const labels: Date[] = [];
     const histories: Record<string, (number | null)[]> = {};
-
-    // Initialize histories for each dataset with pre-allocated arrays
-    datasetConfig.forEach(config => {
-      histories[config.field] = new Array(daysAmount).fill(null);
-    });
 
     // Create a map of available data for O(1) lookup
     const dataMap = new Map<string, (typeof statisticHistory)[string]>();
@@ -65,22 +59,24 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     const startDate = new Date(endDate);
     startDate.setDate(startDate.getDate() - daysAmount + 1);
 
-    // Generate all dates and populate data
+    // Generate all dates and populate data (build arrays immutably)
+    const labelsResult: Date[] = [];
     for (let i = 0; i < daysAmount; i++) {
       const currentDate = new Date(startDate);
       currentDate.setDate(startDate.getDate() + i);
-      labels.push(currentDate);
-
-      const dateString = formatDateMinimal(currentDate);
-      const history = dataMap.get(dateString);
-
-      datasetConfig.forEach(config => {
-        const value = history ? getValueFromHistory(history, config.field) : null;
-        histories[config.field][i] = value ?? null;
-      });
+      labelsResult.push(currentDate);
     }
 
-    return { labels, histories };
+    datasetConfig.forEach(config => {
+      histories[config.field] = labelsResult.map((currentDate, i) => {
+        const dateString = formatDateMinimal(currentDate);
+        const history = dataMap.get(dateString);
+        const value = history ? getValueFromHistory(history, config.field) : null;
+        return value ?? null;
+      });
+    });
+
+    return { labels: labelsResult, histories };
   }, [statisticHistory, datasetConfig, daysAmount]);
 
   // Check if player statistics are available

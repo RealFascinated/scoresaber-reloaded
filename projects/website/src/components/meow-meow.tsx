@@ -121,7 +121,7 @@ export default function MeowMeow() {
 
   const idle = useCallback(() => {
     const state = stateRef.current;
-    state.idleTime += 1;
+    state.idleTime = state.idleTime + 1;
 
     if (state.idleTime > 10 && Math.floor(Math.random() * 200) === 0 && state.idleAnimation == null) {
       const availableIdleAnimations = ["sleeping", "scratchSelf"];
@@ -166,14 +166,14 @@ export default function MeowMeow() {
         setSprite("idle", 0);
         return;
     }
-    state.idleAnimationFrame += 1;
+    state.idleAnimationFrame = state.idleAnimationFrame + 1;
   }, [setSprite, resetIdleAnimation]);
 
   const frame = useCallback(() => {
     if (!nekoElRef.current) return;
 
     const state = stateRef.current;
-    state.frameCount += 1;
+    state.frameCount = state.frameCount + 1;
     const diffX = state.nekoPosX - state.mousePosX;
     const diffY = state.nekoPosY - state.mousePosY;
     const distance = Math.sqrt(diffX ** 2 + diffY ** 2);
@@ -189,19 +189,19 @@ export default function MeowMeow() {
     if (state.idleTime > 1) {
       setSprite("alert", 0);
       state.idleTime = Math.min(state.idleTime, 7);
-      state.idleTime -= 1;
+      state.idleTime = state.idleTime - 1;
       return;
     }
 
     let direction = "";
     direction = diffY / distance > 0.5 ? "N" : "";
-    direction += diffY / distance < -0.5 ? "S" : "";
-    direction += diffX / distance > 0.5 ? "W" : "";
-    direction += diffX / distance < -0.5 ? "E" : "";
+    direction = direction + (diffY / distance < -0.5 ? "S" : "");
+    direction = direction + (diffX / distance > 0.5 ? "W" : "");
+    direction = direction + (diffX / distance < -0.5 ? "E" : "");
     setSprite(direction as SpriteName, state.frameCount);
 
-    state.nekoPosX -= (diffX / distance) * nekoSpeed;
-    state.nekoPosY -= (diffY / distance) * nekoSpeed;
+    state.nekoPosX = state.nekoPosX - (diffX / distance) * nekoSpeed;
+    state.nekoPosY = state.nekoPosY - (diffY / distance) * nekoSpeed;
 
     state.nekoPosX = Math.min(Math.max(16, state.nekoPosX), window.innerWidth - 16);
     state.nekoPosY = Math.min(Math.max(16, state.nekoPosY), window.innerHeight - 16);

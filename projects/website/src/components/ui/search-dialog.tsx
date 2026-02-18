@@ -64,7 +64,6 @@ const SearchDialog = ({
               maxLength={maxLength}
               value={query}
               onChange={e => onQueryChange(e.target.value)}
-              autoFocus
             />
           </div>
         </div>

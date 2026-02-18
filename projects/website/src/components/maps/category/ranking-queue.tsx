@@ -25,10 +25,10 @@ export default function RankingQueue() {
         <h3 className="text-lg font-semibold">{name}</h3>
 
         <div className="flex flex-col gap-(--spacing-sm)">
-          {requests.map((rankingRequest, index) => {
+          {requests.map((rankingRequest) => {
             const leaderboard = getScoreSaberLeaderboardFromToken(rankingRequest.leaderboardInfo);
             return (
-              <div key={index}>
+              <div key={leaderboard.id}>
                 <SimpleLink
                   href={`/leaderboard/${leaderboard.id}`}
                   className="bg-accent-deep hover:bg-accent-deep/50 grid items-center gap-2 rounded-md p-1.5 transition-all lg:grid-cols-[1fr_0.22fr]"

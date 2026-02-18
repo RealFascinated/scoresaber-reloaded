@@ -62,9 +62,9 @@ export default function LeaderboardScores({
         <ScoreModeSwitcher initialMode={mode} onModeChange={setMode} />
 
         <div className="flex flex-wrap justify-center gap-(--spacing-sm)">
-          {leaderboard.difficulties.map((difficultyData, index) => (
+          {leaderboard.difficulties.map((difficultyData) => (
             <DifficultyButton
-              key={index}
+              key={String(difficultyData.difficulty)}
               {...difficultyData}
               selectedId={leaderboard.id}
               inGameDifficulty={beatSaver?.difficultyLabels?.[difficultyData.difficulty] ?? undefined}

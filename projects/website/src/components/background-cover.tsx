@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/common/utils";
+import Image from "next/image";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
@@ -149,19 +150,26 @@ export default function BackgroundCover() {
   const imageUrl =
     cover.type === "rotating-images" || cover.type === "random" ? ALL_IMAGES[currentImageIndex] : cover.value;
 
+  if (!imageUrl) {
+    return null;
+  }
+
   return (
-    <img
-      src={imageUrl}
-      alt="Background image"
-      fetchPriority="high"
-      className={cn(
-        "pointer-events-none fixed -z-50 h-screen w-screen object-cover select-none",
-        cover.type === "rotating-images" && "transition-opacity duration-[1000ms] ease-in-out",
-        cover.type === "rotating-images" && (isTransitioning ? "opacity-10" : "opacity-100")
-      )}
-      style={{
-        filter: `blur(${blur}px) brightness(${brightness}%)`,
-      }}
-    />
+    <div className="pointer-events-none fixed inset-0 -z-50 h-screen w-screen select-none">
+      <Image
+        src={imageUrl}
+        alt="Background image"
+        fetchPriority="high"
+        fill
+        className={cn(
+          "object-cover",
+          cover.type === "rotating-images" && "transition-opacity duration-[1000ms] ease-in-out",
+          cover.type === "rotating-images" && (isTransitioning ? "opacity-10" : "opacity-100")
+        )}
+        style={{
+          filter: `blur(${blur}px) brightness(${brightness}%)`,
+        }}
+      />
+    </div>
   );
 }

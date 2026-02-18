@@ -5,7 +5,7 @@ import Card from "@/components/card";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import { useIsMobile } from "@/contexts/viewport-context";
-import usePageNavigation from "@/hooks/use-page-navigation";
+import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { countryFilter } from "@ssr/common/utils/country.util";

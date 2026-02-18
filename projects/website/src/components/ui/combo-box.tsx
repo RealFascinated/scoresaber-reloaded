@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronsUpDown } from "lucide-react";
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { ReactElement, ReactNode, useId, useState } from "react";
 
 /**
  * The props for this combobox.
@@ -81,14 +81,10 @@ const Combobox = <T,>({
   className,
 }: ComboboxProps<T>): ReactElement<any> => {
   const [open, setOpen] = useState<boolean>(false);
-  const [internalValue, setInternalValue] = useState<T | undefined>(controlledValue);
+  const [internalValue, setInternalValue] = useState<T | undefined>(() => controlledValue);
+  const listId = useId();
 
-  // Update internal value when controlled value changes
-  useEffect(() => {
-    setInternalValue(controlledValue);
-  }, [controlledValue]);
-
-  // Use the controlled value if provided, otherwise use internal state
+  // Derive value during render: controlled when prop provided, otherwise internal
   const value = controlledValue !== undefined ? controlledValue : internalValue;
 
   const handleValueChange = (newValue: T | undefined) => {
@@ -109,6 +105,7 @@ const Combobox = <T,>({
             size="lg"
             role="combobox"
             aria-expanded={open}
+            aria-controls={listId}
           >
             <span className="truncate">
               {value
@@ -122,7 +119,7 @@ const Combobox = <T,>({
         <PopoverContent className="w-fit p-0">
           <Command>
             <CommandInput placeholder={placeholder} />
-            <CommandList>
+            <CommandList id={listId}>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
                 {items.map((item, index) => {
@@ -134,7 +131,7 @@ const Combobox = <T,>({
                         : String(item.value);
                   return (
                     <CommandItem
-                      key={index}
+                      key={String(item.value) + (typeof item.name === "string" ? `-${item.name}` : `-${index}`)}
                       value={searchValue}
                       onSelect={() => {
                         setOpen(false);

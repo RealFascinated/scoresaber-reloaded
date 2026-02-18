@@ -84,18 +84,19 @@ export default function ScoreSaberScoreEditorButton({
   };
 
   const handleSliderReset = () => {
+    const currentAccuracy = (score.score / maxScore) * 100 * (hasModifier(score.modifiers, Modifier.NF) ? 0.5 : 1);
     updateScore({
       ...score,
-      score: (accuracy / 100) * maxScore,
+      score: (currentAccuracy / 100) * maxScore,
     });
-    setBaseValue(Math.max(1, Math.floor(accuracy)));
-    setDecimalValue(accuracy - Math.floor(accuracy));
+    setBaseValue(prev => Math.max(1, Math.floor(currentAccuracy)));
+    setDecimalValue(prev => currentAccuracy - Math.floor(currentAccuracy));
   };
 
   const setAccuracyToFC = () => {
     const fcAccuracy = score.beatLeaderScore!.fcAccuracy!;
-    setBaseValue(Math.max(1, Math.floor(fcAccuracy)));
-    setDecimalValue(fcAccuracy - Math.floor(fcAccuracy));
+    setBaseValue(prev => Math.max(1, Math.floor(fcAccuracy)));
+    setDecimalValue(prev => fcAccuracy - Math.floor(fcAccuracy));
     updateScoreAndPP(fcAccuracy);
   };
 

@@ -11,7 +11,7 @@ type ScoreTimeSetProps = {
 };
 
 export function ScoreTimeSet({ timestamp }: ScoreTimeSetProps) {
-  const [currentTime, setCurrentTime] = useState(timeAgo(new Date(timestamp)));
+  const [currentTime, setCurrentTime] = useState(() => timeAgo(new Date(timestamp)));
 
   useEffect(() => {
     const interval = setInterval(() => {

@@ -1,6 +1,7 @@
 "use client";
 
 import SimpleTooltip from "@/components/simple-tooltip";
+import Image from "next/image";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
 import { useState } from "react";
 
@@ -33,9 +34,11 @@ export default function CountryFlag({ code, size = 24, className, tooltip, toolt
           minWidth: size * 2,
         }}
       >
-        <img
+        <Image
           alt="Country Flag"
           src={flagSrc}
+          width={size * 2}
+          height={size * 2}
           className="h-auto w-full object-contain"
           style={{
             maxHeight: size * 2,

@@ -2,7 +2,6 @@ import { OverlayData } from "@/common/overlay/overlay-data";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
-import { useMemo } from "react";
 
 type OverlayScoreDataProps = {
   /**
@@ -14,12 +13,10 @@ type OverlayScoreDataProps = {
 export default function OverlayScoreDataView({ overlayData }: OverlayScoreDataProps) {
   const scoreData = overlayData.score;
   const leaderboard = overlayData.map?.leaderboard;
-  const pp = useMemo(() => {
-    if (!leaderboard || leaderboard.stars == 0 || !scoreData) {
-      return undefined;
-    }
-    return ScoreSaberCurve.getPp(leaderboard.stars, scoreData.accuracy);
-  }, [leaderboard, scoreData?.accuracy]);
+  const pp =
+    !leaderboard || leaderboard.stars === 0 || !scoreData
+      ? undefined
+      : ScoreSaberCurve.getPp(leaderboard.stars, scoreData.accuracy);
 
   // No score data, nothing to display
   if (!scoreData) {

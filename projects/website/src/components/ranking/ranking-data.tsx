@@ -8,7 +8,7 @@ import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
-import usePageNavigation from "@/hooks/use-page-navigation";
+import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { countryFilter } from "@ssr/common/utils/country.util";

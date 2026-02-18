@@ -76,7 +76,6 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
                   onChange={handleInputChange}
                   placeholder={`1-${formatNumberWithCommas(totalPages)}`}
                   className={cn("w-full", error && "border-destructive")}
-                  autoFocus
                   aria-invalid={Boolean(error)}
                   aria-describedby={error ? "page-error" : undefined}
                 />

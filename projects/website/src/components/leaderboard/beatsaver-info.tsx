@@ -25,7 +25,7 @@ export function LeaderboardBeatSaverInfo({ beatSaverMap }: LeaderboardBeatSaverI
           .split("\n")
           .map((line, index) => {
             return (
-              <p key={index} className="text-sm">
+              <p key={`line-${index}-${line.slice(0, 30)}`} className="text-sm">
                 <EmbedLinks text={line} />
               </p>
             );

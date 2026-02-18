@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import { useStableLiveQuery } from "./use-stable-live-query";
 
@@ -28,12 +28,20 @@ export function useSettingsForm<T extends FieldValues>(
     return Object.fromEntries(results) as Partial<T>;
   }, []);
 
+  // Only sync external state (DB/theme) into the form once on initial load.
+  // Otherwise we overwrite user changes with stale values (e.g. theme dropdown
+  // reverting because the query hasn't re-run with the new theme yet).
+  const hasSyncedRef = useRef(false);
+
   useEffect(() => {
     if (!settings) return;
 
     // Check if all values are loaded (not undefined)
     const allLoaded = Object.values(settings).every(value => value !== undefined);
     if (!allLoaded) return;
+
+    if (hasSyncedRef.current) return;
+    hasSyncedRef.current = true;
 
     const currentValues = form.getValues();
     const updates: Partial<T> = {};

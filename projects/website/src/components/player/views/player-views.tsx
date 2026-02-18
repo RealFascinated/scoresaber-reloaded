@@ -23,7 +23,9 @@ import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
 import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
 import PlusPpCalculator from "./impl/plus-pp-calculator";
-import ScoresGraphChart from "./impl/scores-graph-chart";
+import dynamic from "next/dynamic";
+
+const ScoresGraphChart = dynamic(() => import("./impl/scores-graph-chart"), { ssr: false });
 
 // Constants
 const DATE_PRESETS = [

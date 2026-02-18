@@ -10,5 +10,3 @@ export function usePageNavigation() {
 
   return { changePageUrl };
 }
-
-export default usePageNavigation;

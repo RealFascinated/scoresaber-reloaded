@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import usePageNavigation from "./use-page-navigation";
+import { usePageNavigation } from "./use-page-navigation";
 
 export interface UrlSegment {
   value: string | number;
