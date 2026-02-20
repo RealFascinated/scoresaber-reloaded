@@ -41,7 +41,6 @@ export default function ScoreSaberScoreDisplay({
     isPreviousScore?: boolean;
   };
 }) {
-  console.log(leaderboard);
   const isMobile = useIsMobile("2xl");
   const [baseScore, setBaseScore] = useState(score.score);
 
