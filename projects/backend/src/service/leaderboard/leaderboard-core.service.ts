@@ -369,11 +369,10 @@ export class LeaderboardCoreService {
    * @returns the processed leaderboard
    */
   public static processLeaderboard(leaderboard: ScoreSaberLeaderboard): LeaderboardResponse {
-    const processedLeaderboard = {
-      ...leaderboardToObject(leaderboard),
-      fullName: `${leaderboard.songName} ${leaderboard.songSubName}`.trim(),
-      songArt: `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.LeaderboardSongArt)}/${leaderboard.songHash}.png`,
-    } as ScoreSaberLeaderboard;
+    const processedLeaderboard = leaderboardToObject(leaderboard);
+    processedLeaderboard.fullName = `${leaderboard.songName} ${leaderboard.songSubName}`.trim();
+    processedLeaderboard.songArt = `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.LeaderboardSongArt)}/${leaderboard.songHash}.png`;
+
     return { leaderboard: processedLeaderboard };
   }
 
