@@ -57,6 +57,12 @@ export default class ScoreSaberLeaderboardInternal extends Leaderboard {
    */
   @Prop({ required: false, index: true })
   readonly seededScores?: boolean;
+
+  /**
+   * Whether the song art has been cached.
+   */
+  @Prop({ required: false, index: true })
+  readonly cachedSongArt?: boolean;
 }
 
 export type ScoreSaberLeaderboard = InstanceType<typeof ScoreSaberLeaderboardInternal>;

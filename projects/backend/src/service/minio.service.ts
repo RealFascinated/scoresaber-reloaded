@@ -126,4 +126,20 @@ export default class MinioService {
       };
     }
   }
+
+  /**
+   * Checks if a file exists in Minio.
+   *
+   * @param bucket the bucket to check in
+   * @param filename the filename to check
+   * @returns true if the file exists, false otherwise
+   */
+  public static async fileExists(bucket: MinioBucket, filename: string): Promise<boolean> {
+    try {
+      await minioClient.statObject(getMinioBucketName(bucket), filename);
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }

@@ -33,6 +33,7 @@ import { metricsPlugin } from "./plugins/metrics.plugin";
 import { QueueManager } from "./queue/queue-manager";
 import BeatSaverService from "./service/beatsaver.service";
 import CacheService from "./service/cache.service";
+import { LeaderboardCoreService } from "./service/leaderboard/leaderboard-core.service";
 import { LeaderboardNotificationsService } from "./service/leaderboard/leaderboard-notifications.service";
 import { LeaderboardRankingService } from "./service/leaderboard/leaderboard-ranking.service";
 import MetricsService, { prometheusRegistry } from "./service/metrics.service";
@@ -342,6 +343,8 @@ app.onStart(async () => {
   new MetricsService();
 
   EventsManager.registerListener(new QueueManager());
+
+  LeaderboardCoreService.cacheAllLeaderboardSongArt();
 });
 
 app.listen({

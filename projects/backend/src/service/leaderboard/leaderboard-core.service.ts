@@ -1,7 +1,9 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { DetailType } from "@ssr/common/detail-type";
+import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
+import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardModel,
@@ -14,6 +16,7 @@ import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { leaderboardToObject } from "@ssr/common/utils/model-converters";
+import Request from "@ssr/common/utils/request";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { parse } from "devalue";
 import { AnyBulkWriteOperation } from "mongoose";
@@ -22,6 +25,7 @@ import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-se
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
+import MinioService from "../minio.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardRankingService } from "./leaderboard-ranking.service";
 
@@ -368,6 +372,7 @@ export class LeaderboardCoreService {
     const processedLeaderboard = {
       ...leaderboardToObject(leaderboard),
       fullName: `${leaderboard.songName} ${leaderboard.songSubName}`.trim(),
+      songArt: `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.LeaderboardSongArt)}/${leaderboard.songHash}.png`,
     } as ScoreSaberLeaderboard;
     return { leaderboard: processedLeaderboard };
   }
@@ -395,6 +400,8 @@ export class LeaderboardCoreService {
         setDefaultsOnInsert: true,
       }
     ).lean();
+
+    await LeaderboardCoreService.cacheLeaderboardSongArt(savedLeaderboard);
 
     if (!savedLeaderboard) {
       throw new Error(`Failed to save leaderboard for "${id}"`);
@@ -510,5 +517,45 @@ export class LeaderboardCoreService {
     const leaderboardResponses = await LeaderboardCoreService.getLeaderboards(leaderboardIds, options);
 
     return new Map(leaderboardResponses.map(response => [response.leaderboard.id, response]));
+  }
+
+  /**
+   * Caches the song art for a leaderboard.
+   *
+   * @param leaderboard the leaderboard to cache the song art for
+   */
+  public static async cacheLeaderboardSongArt(leaderboard: ScoreSaberLeaderboard): Promise<void> {
+    const exists = await MinioService.fileExists(MinioBucket.LeaderboardSongArt, `${leaderboard.songHash}.png`);
+    if (!exists) {
+      const request = await Request.get<ArrayBuffer>(`https://cdn.scoresaber.com/covers/${leaderboard.songHash}.png`, {
+        returns: "arraybuffer",
+      });
+      if (request) {
+        await MinioService.saveFile(MinioBucket.LeaderboardSongArt, `${leaderboard.songHash}.png`, Buffer.from(request));
+        await ScoreSaberLeaderboardModel.updateOne({ _id: leaderboard._id }, { $set: { cachedSongArt: true } });
+      }
+    }
+  }
+
+  /**
+   * Caches all missing leaderboard song art.
+   */
+  public static async cacheAllLeaderboardSongArt(): Promise<void> {
+    // in batches of 100 fetch leaderboards from the
+    // database and cache the song art if it's missing
+
+    const notCachedFilter = { cachedSongArt: { $ne: true } };
+    const leaderboardCount = await ScoreSaberLeaderboardModel.countDocuments(notCachedFilter);
+
+    Logger.info(`Caching ${leaderboardCount} leaderboard song art`);
+    for (let i = 0; i < leaderboardCount; i += 10) {
+      const leaderboards = await ScoreSaberLeaderboardModel.find(notCachedFilter).skip(i).limit(10).lean();
+
+      for (const leaderboard of leaderboards) {
+        await LeaderboardCoreService.cacheLeaderboardSongArt(leaderboard);
+      }
+
+      Logger.info(`Cached ${i + leaderboards.length} of ${leaderboardCount} leaderboard song art`);
+    }
   }
 }
