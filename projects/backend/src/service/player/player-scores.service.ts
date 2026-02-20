@@ -432,7 +432,7 @@ export class PlayerScoresService {
             score: await ScoreCoreService.insertScoreData(score, leaderboard, {
               comparisonPlayer: comparisonPlayer,
             }),
-            leaderboard: leaderboard,
+            leaderboard: LeaderboardCoreService.processLeaderboard(leaderboard).leaderboard,
             beatSaver: await BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,

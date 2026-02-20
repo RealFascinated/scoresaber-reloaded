@@ -3,6 +3,8 @@
 import ScoreSongInfo from "@/components/score/score-song-info";
 import { SparklesIcon } from "@heroicons/react/24/solid";
 import { AccSaberScore } from "@ssr/common/api-service/impl/accsaber";
+import { env } from "@ssr/common/env";
+import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { AccSaberBadges } from "./accsaber-badges";
 import { AccSaberRankTime } from "./accsaber-rank-time";
@@ -22,7 +24,7 @@ export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
           song={{
             name: score.leaderboard.song.name,
             authorName: score.leaderboard.song.author,
-            art: `https://cdn.scoresaber.com/covers/${score.leaderboard.song.hash.toUpperCase()}.png`,
+            art: `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.LeaderboardSongArt)}/${score.leaderboard.song.hash.toUpperCase()}.png`,
           }}
           level={{
             authorName: score.leaderboard.song.mapper,
