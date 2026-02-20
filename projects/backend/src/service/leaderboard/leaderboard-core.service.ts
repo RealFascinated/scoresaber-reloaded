@@ -169,7 +169,7 @@ export class LeaderboardCoreService {
       throw new NotFoundError(`Leaderboard not found for "${id}"`);
     }
 
-    const data = LeaderboardCoreService.processLeaderboard(
+    const data = await LeaderboardCoreService.processLeaderboard(
       await LeaderboardCoreService.saveLeaderboard(id, getScoreSaberLeaderboardFromToken(leaderboardToken))
     );
 
@@ -368,10 +368,14 @@ export class LeaderboardCoreService {
    * @param cached whether the leaderboard was cached
    * @returns the processed leaderboard
    */
-  public static processLeaderboard(leaderboard: ScoreSaberLeaderboard): LeaderboardResponse {
+  public static async processLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<LeaderboardResponse> {
     const processedLeaderboard = leaderboardToObject(leaderboard);
     processedLeaderboard.fullName = `${leaderboard.songName} ${leaderboard.songSubName}`.trim();
     processedLeaderboard.songArt = `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.LeaderboardSongArt)}/${leaderboard.songHash}.png`;
+
+    if (!leaderboard.cachedSongArt) {
+      await LeaderboardCoreService.cacheLeaderboardSongArt(leaderboard);
+    }
 
     return { leaderboard: processedLeaderboard };
   }
@@ -399,8 +403,6 @@ export class LeaderboardCoreService {
         setDefaultsOnInsert: true,
       }
     ).lean();
-
-    await LeaderboardCoreService.cacheLeaderboardSongArt(savedLeaderboard);
 
     if (!savedLeaderboard) {
       throw new Error(`Failed to save leaderboard for "${id}"`);
@@ -533,30 +535,6 @@ export class LeaderboardCoreService {
         await MinioService.saveFile(MinioBucket.LeaderboardSongArt, `${leaderboard.songHash}.png`, Buffer.from(request));
         await ScoreSaberLeaderboardModel.updateOne({ _id: leaderboard.id }, { $set: { cachedSongArt: true } });
       }
-    }
-  }
-
-  /**
-   * Caches all missing leaderboard song art.
-   */
-  public static async cacheAllLeaderboardSongArt(): Promise<void> {
-    // in batches of 100 fetch leaderboards from the
-    // database and cache the song art if it's missing
-
-    const notCachedFilter = { cachedSongArt: { $ne: true } };
-    const leaderboardCount = await ScoreSaberLeaderboardModel.countDocuments(notCachedFilter);
-
-    Logger.info(`Caching ${leaderboardCount} leaderboard song art`);
-    let cachedSoFar = 0;
-    while (true) {
-      const leaderboards = await ScoreSaberLeaderboardModel.find(notCachedFilter).limit(100).lean();
-      if (leaderboards.length === 0) break;
-
-      for (const leaderboard of leaderboards) {
-        await LeaderboardCoreService.cacheLeaderboardSongArt(leaderboard);
-      }
-      cachedSoFar += leaderboards.length;
-      Logger.info(`Cached ${cachedSoFar} of ${leaderboardCount} leaderboard song art`);
     }
   }
 }
