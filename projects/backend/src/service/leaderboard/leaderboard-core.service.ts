@@ -548,14 +548,16 @@ export class LeaderboardCoreService {
     const leaderboardCount = await ScoreSaberLeaderboardModel.countDocuments(notCachedFilter);
 
     Logger.info(`Caching ${leaderboardCount} leaderboard song art`);
-    for (let i = 0; i < leaderboardCount; i += 10) {
-      const leaderboards = await ScoreSaberLeaderboardModel.find(notCachedFilter).skip(i).limit(10).lean();
+    let cachedSoFar = 0;
+    while (true) {
+      const leaderboards = await ScoreSaberLeaderboardModel.find(notCachedFilter).limit(100).lean();
+      if (leaderboards.length === 0) break;
 
       for (const leaderboard of leaderboards) {
         await LeaderboardCoreService.cacheLeaderboardSongArt(leaderboard);
       }
-
-      Logger.info(`Cached ${i + leaderboards.length} of ${leaderboardCount} leaderboard song art`);
+      cachedSoFar += leaderboards.length;
+      Logger.info(`Cached ${cachedSoFar} of ${leaderboardCount} leaderboard song art`);
     }
   }
 }
