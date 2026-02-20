@@ -531,7 +531,7 @@ export class LeaderboardCoreService {
       });
       if (request) {
         await MinioService.saveFile(MinioBucket.LeaderboardSongArt, `${leaderboard.songHash}.png`, Buffer.from(request));
-        await ScoreSaberLeaderboardModel.updateOne({ _id: leaderboard._id }, { $set: { cachedSongArt: true } });
+        await ScoreSaberLeaderboardModel.updateOne({ _id: leaderboard.id }, { $set: { cachedSongArt: true } });
       }
     }
   }
