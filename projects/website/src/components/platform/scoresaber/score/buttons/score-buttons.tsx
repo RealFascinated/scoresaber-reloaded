@@ -65,21 +65,21 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
-    id: "install-map",
-    display: ({ beatSaverMap, isPreviousScore }: Props) => {
-      return beatSaverMap != undefined && !isPreviousScore;
-    },
-    render: ({ beatSaverMap }: Props) => {
-      return <ScoreInstallMapButton beatSaverMap={beatSaverMap!} />;
-    },
-  },
-  {
     id: "replay",
     display: ({ score }: Props) => {
       return score?.beatLeaderScore != undefined;
     },
     render: ({ score }: Props) => {
       return <ScoreReplayButton score={score!} />;
+    },
+  },
+  {
+    id: "install-map",
+    display: ({ beatSaverMap, isPreviousScore }: Props) => {
+      return beatSaverMap != undefined && !isPreviousScore;
+    },
+    render: ({ beatSaverMap }: Props) => {
+      return <ScoreInstallMapButton beatSaverMap={beatSaverMap!} />;
     },
   },
 ];
