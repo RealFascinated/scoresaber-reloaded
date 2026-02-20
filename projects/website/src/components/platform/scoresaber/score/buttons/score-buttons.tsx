@@ -3,12 +3,12 @@
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
-import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { useMemo } from "react";
+import { ScoreInstallMapButton } from "../../../../score/button/score-install-map-button";
 import ScoreEditorButton from "./score-editor-button";
 import ScoreHistoryGraphButton from "./score-history-graph-buton";
 
@@ -65,27 +65,21 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
+    id: "install-map",
+    display: ({ beatSaverMap, isPreviousScore }: Props) => {
+      return beatSaverMap != undefined && !isPreviousScore;
+    },
+    render: ({ beatSaverMap }: Props) => {
+      return <ScoreInstallMapButton beatSaverMap={beatSaverMap!} />;
+    },
+  },
+  {
     id: "replay",
     display: ({ score }: Props) => {
       return score?.beatLeaderScore != undefined;
     },
     render: ({ score }: Props) => {
       return <ScoreReplayButton score={score!} />;
-    },
-  },
-  {
-    id: "youtube",
-    display: ({ leaderboard, isPreviousScore }: Props) => {
-      return leaderboard != undefined && !isPreviousScore;
-    },
-    render: ({ leaderboard }: Props) => {
-      return (
-        <SongOpenInYoutubeButton
-          songName={leaderboard.songName}
-          songSubName={leaderboard.songSubName}
-          songAuthorName={leaderboard.songAuthorName}
-        />
-      );
     },
   },
 ];

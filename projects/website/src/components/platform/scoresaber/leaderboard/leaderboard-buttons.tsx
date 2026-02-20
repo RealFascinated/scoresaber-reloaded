@@ -3,7 +3,6 @@ import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-bu
 import { OneClickInstallButton } from "@/components/leaderboard/button/one-click-install-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
-import { SongOpenInYoutubeButton } from "@/components/score/button/song-open-in-youtube-button";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import LeaderboardPpChartButton from "./chart/leaderboard-pp-chart";
@@ -52,17 +51,6 @@ const buttons = [
         return null;
       }
       return <OneClickInstallButton beatSaverMap={beatSaverMap} />;
-    },
-  },
-  {
-    render: ({ leaderboard }: Props) => {
-      return (
-        <SongOpenInYoutubeButton
-          songName={leaderboard.songName}
-          songSubName={leaderboard.songSubName}
-          songAuthorName={leaderboard.songAuthorName}
-        />
-      );
     },
   },
   {
