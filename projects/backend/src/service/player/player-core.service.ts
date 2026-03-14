@@ -11,7 +11,7 @@ import { QueueId, QueueManager } from "../../queue/queue-manager";
 import CacheService, { CacheId } from "../cache.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 
-export const accountCreationLock: Record<string, Promise<Player>> = {};
+export const accountCreationLock: Record<string, Promise<Player | undefined>> = {};
 
 export class PlayerCoreService {
   /**
@@ -25,7 +25,11 @@ export class PlayerCoreService {
   public static async getPlayer(id: string, playerToken?: ScoreSaberPlayerToken): Promise<Player> {
     // Wait for the existing lock if it's in progress
     if (accountCreationLock[id] !== undefined) {
-      return await accountCreationLock[id];
+      const result = await accountCreationLock[id];
+      if (result === undefined) {
+        throw new NotFoundError(`Player "${id}" not found after creation`);
+      }
+      return result;
     }
 
     let player: Player | null | undefined = await CacheService.fetchWithCache(
@@ -82,9 +86,22 @@ export class PlayerCoreService {
     id: string,
     playerToken?: ScoreSaberPlayerToken
   ): Promise<Player | undefined> {
+    // Set lock synchronously before any await so concurrent callers share the same promise
+    let lockPromise = accountCreationLock[id];
+    if (lockPromise === undefined) {
+      lockPromise = PlayerCoreService.runCreatePlayer(id, playerToken);
+      accountCreationLock[id] = lockPromise;
+    }
+    return lockPromise;
+  }
+
+  private static async runCreatePlayer(
+    id: string,
+    playerToken?: ScoreSaberPlayerToken
+  ): Promise<Player | undefined> {
     try {
       if (await PlayerCoreService.playerExists(id)) {
-        return undefined;
+        return (await PlayerModel.findOne({ _id: id }).lean()) ?? undefined;
       }
 
       playerToken = playerToken || (await ScoreSaberApiService.lookupPlayer(id));
@@ -92,45 +109,43 @@ export class PlayerCoreService {
         return undefined;
       }
 
-      // Create a new lock promise and assign it
-      accountCreationLock[id] = (async () => {
-        try {
-          Logger.info(`Creating player "${id}"...`);
-          const newPlayer = await PlayerModel.create({
-            _id: id,
-            joinedDate: new Date(playerToken.firstSeen),
-            inactive: playerToken.inactive,
-            name: playerToken.name,
-            trackedSince: new Date(),
+      try {
+        Logger.info(`Creating player "${id}"...`);
+        const newPlayer = await PlayerModel.create({
+          _id: id,
+          joinedDate: new Date(playerToken.firstSeen),
+          inactive: playerToken.inactive,
+          name: playerToken.name,
+          trackedSince: new Date(),
+        });
+
+        const seedQueue = QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue;
+        if (!(await seedQueue.hasItem({ id: id, data: id })) && !playerToken.banned) {
+          (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
+            id,
+            data: id,
           });
-
-          const seedQueue = QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue;
-          if (!(await seedQueue.hasItem({ id: id, data: id })) && !playerToken.banned) {
-            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
-              id,
-              data: id,
-            });
-          }
-
-          // Notify in production
-          if (isProduction()) {
-            await logNewTrackedPlayer(playerToken);
-          }
-          return newPlayer.toObject();
-        } catch (err) {
-          Logger.error(`Failed to create player document for "${id}"`, err);
-          throw new InternalServerError(`Failed to create player document for "${id}"`);
-        } finally {
-          // Ensure the lock is always removed
-          delete accountCreationLock[id];
         }
-      })();
 
-      // Return the player document
-      return await accountCreationLock[id];
+        // Notify in production
+        if (isProduction()) {
+          await logNewTrackedPlayer(playerToken);
+        }
+        return newPlayer.toObject();
+      } catch (err) {
+        Logger.error(`Failed to create player document for "${id}"`, err);
+        throw new InternalServerError(`Failed to create player document for "${id}"`);
+      } finally {
+        delete accountCreationLock[id];
+      }
     } catch (err) {
+      if (err instanceof InternalServerError) {
+        throw err;
+      }
       Logger.error(`Failed to create player document for "${id}"`, err);
       return undefined;
+    } finally {
+      delete accountCreationLock[id];
     }
   }
 
