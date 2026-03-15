@@ -74,7 +74,7 @@ export default class BeatSaverMapToken {
   /**
    * The date the map was created.
    */
-  @prop()
+  @prop({ index: true })
   public createdAt!: string;
 
   /**
@@ -92,7 +92,7 @@ export default class BeatSaverMapToken {
   /**
    * The tags of the map.
    */
-  @prop()
+  @prop({ index: true })
   public tags!: string[];
 
   /**
