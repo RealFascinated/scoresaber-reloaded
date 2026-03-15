@@ -88,7 +88,7 @@ export class ScoreSaberApiService {
 
         await ScoreSaberApiService.cooldown.waitAndUse(options?.priority || CooldownPriority.NORMAL);
 
-        const response = await fetch(`https://p.fascinated.cc/${url}${getQueryParamsFromObject(options?.searchParams || {})}`);
+        const response = await fetch(`https://p.fascinated.cc/${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`);
 
         if (!response.ok || response.status !== 200) {
           return undefined;
