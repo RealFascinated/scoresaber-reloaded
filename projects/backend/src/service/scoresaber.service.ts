@@ -3,8 +3,8 @@ import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
-import { PlayerModel } from "@ssr/common/model/player/player";
 import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
+import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
@@ -61,7 +61,7 @@ export default class ScoreSaberService {
       if (isOculusAccount) {
         avatar = "https://cdn.fascinated.cc/assets/oculus-avatar.jpg";
       } else if (account) {
-        avatar = `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.PlayerAvatar)}/${id}.jpg`;
+        avatar = `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.PlayerAvatars)}/${id}.jpg`;
       } else {
         avatar = player.profilePicture;
       }
@@ -114,15 +114,15 @@ export default class ScoreSaberService {
         // todo: cleanup this mess
         account && player !== undefined
           ? (async () => {
-              const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
-              const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
-              return Object.fromEntries(
-                Object.entries(hmdUsage).map(([hmd, count]) => [
-                  hmd,
-                  totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
-                ])
-              ) as Record<HMD, number>;
-            })()
+            const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
+            const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
+            return Object.fromEntries(
+              Object.entries(hmdUsage).map(([hmd, count]) => [
+                hmd,
+                totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
+              ])
+            ) as Record<HMD, number>;
+          })()
           : undefined,
         account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},

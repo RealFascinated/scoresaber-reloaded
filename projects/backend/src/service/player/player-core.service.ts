@@ -235,13 +235,13 @@ export class PlayerCoreService {
    * @param force when true, re-downloads even if already cached
    */
   public static async cachePlayerProfilePicture(playerId: string, force = false): Promise<void> {
-    const exists = await MinioService.fileExists(MinioBucket.PlayerAvatar, `${playerId}.jpg`);
+    const exists = await MinioService.fileExists(MinioBucket.PlayerAvatars, `${playerId}.jpg`);
     if (!exists || force) {
       const request = await Request.get<ArrayBuffer>(`https://cdn.scoresaber.com/avatars/${playerId}.jpg`, {
         returns: "arraybuffer",
       });
       if (request) {
-        await MinioService.saveFile(MinioBucket.PlayerAvatar, `${playerId}.jpg`, Buffer.from(request));
+        await MinioService.saveFile(MinioBucket.PlayerAvatars, `${playerId}.jpg`, Buffer.from(request));
         await PlayerModel.updateOne({ _id: playerId }, { $set: { cachedProfilePicture: true } });
         await CacheService.invalidate(`player:${playerId}`);
         Logger.info(`Cached profile picture for player ${playerId}${force ? " (force)" : ""}`);
