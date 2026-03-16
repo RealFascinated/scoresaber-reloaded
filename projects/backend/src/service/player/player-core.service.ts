@@ -1,14 +1,17 @@
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
+import { MinioBucket } from "@ssr/common/minio-buckets";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import CacheService, { CacheId } from "../cache.service";
+import MinioService from "../minio.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 
 export const accountCreationLock: Record<string, Promise<Player | undefined>> = {};
@@ -172,7 +175,9 @@ export class PlayerCoreService {
   public static async refreshPlayer(id: string): Promise<PlayerRefreshResponse> {
     const response = await ScoreSaberApiService.refreshPlayer(id);
     if (response !== undefined) {
-      CacheService.invalidate(`scoresaber:player:${id}`); // Remove the player from the cache
+      CacheService.invalidate(`scoresaber:player:${id}`);
+      CacheService.invalidate(`player:${id}`);
+      await PlayerCoreService.cachePlayerProfilePicture(id, true);
       return response;
     }
     return { result: false };
@@ -221,5 +226,29 @@ export class PlayerCoreService {
     }
 
     return player;
+  }
+
+  /**
+   * Caches the profile picture for a player.
+   *
+   * @param playerId the player's id
+   * @param force when true, re-downloads even if already cached
+   */
+  public static async cachePlayerProfilePicture(playerId: string, force = false): Promise<void> {
+    const exists = await MinioService.fileExists(MinioBucket.PlayerAvatar, `${playerId}.jpg`);
+    if (!exists || force) {
+      const request = await Request.get<ArrayBuffer>(`https://cdn.scoresaber.com/avatars/${playerId}.jpg`, {
+        returns: "arraybuffer",
+      });
+      if (request) {
+        await MinioService.saveFile(MinioBucket.PlayerAvatar, `${playerId}.jpg`, Buffer.from(request));
+        await PlayerModel.updateOne({ _id: playerId }, { $set: { cachedProfilePicture: true } });
+        await CacheService.invalidate(`player:${playerId}`);
+        Logger.info(`Cached profile picture for player ${playerId}${force ? " (force)" : ""}`);
+        return;
+      }
+
+      Logger.warn(`Failed to cache profile picture for player ${playerId}`);
+    }
   }
 }

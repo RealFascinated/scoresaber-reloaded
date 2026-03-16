@@ -88,6 +88,12 @@ export class Player {
   public joinedDate?: Date;
 
   /**
+   * Whether the profile picture has been cached.
+   */
+  @prop({ index: true })
+  public cachedProfilePicture?: boolean;
+
+  /**
    * Gets the number of days tracked for this player.
    */
   public async getDaysTracked(): Promise<number> {

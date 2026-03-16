@@ -1,8 +1,10 @@
 import { DetailType } from "@ssr/common/detail-type";
+import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
 import { PlayerModel } from "@ssr/common/model/player/player";
+import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
@@ -51,12 +53,23 @@ export default class ScoreSaberService {
         await ScoreSaberScoreModel.deleteMany({ playerId: id });
       }
 
+      if (account && !isOculusAccount && !account.cachedProfilePicture) {
+        await PlayerCoreService.cachePlayerProfilePicture(id);
+      }
+
+      let avatar: string;
+      if (isOculusAccount) {
+        avatar = "https://cdn.fascinated.cc/assets/oculus-avatar.jpg";
+      } else if (account) {
+        avatar = `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.PlayerAvatar)}/${id}.jpg`;
+      } else {
+        avatar = player.profilePicture;
+      }
+
       const basePlayer = {
         id: player.id,
         name: player.name,
-        avatar: isOculusAccount
-          ? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg"
-          : player.profilePicture,
+        avatar,
         country: player.country,
         rank: player.rank,
         countryRank: player.countryRank,
