@@ -155,8 +155,7 @@ export class ScoreWebsockets implements EventListener {
     beatLeaderScore?: BeatLeaderScoreToken
   ) {
     if (scoreSaberToken && leaderboardToken && player) {
-      const { leaderboard } = await LeaderboardCoreService.getLeaderboard(leaderboardToken.id);
-      // const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+      const { leaderboard } = await LeaderboardCoreService.processLeaderboard(getScoreSaberLeaderboardFromToken(leaderboardToken));
       const score = getScoreSaberScoreFromToken(scoreSaberToken, leaderboard, player.id);
       const isTop50GlobalScore = await TopScoresService.isTop50GlobalScore(score);
 
