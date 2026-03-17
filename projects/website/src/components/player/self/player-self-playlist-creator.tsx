@@ -14,12 +14,12 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { env } from "@ssr/common/env";
-import { SHARED_CONSTS } from "@ssr/common/shared-consts";
-import { encodeSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
 import {
   SelfPlaylistSettings,
   selfPlaylistSettingsSchema,
 } from "@ssr/common/playlist/self/self-playlist-settings-schema";
+import { encodeSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
+import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { Download, Filter, MusicIcon, Trophy, User } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -70,7 +70,10 @@ export default function SelfPlaylistCreator() {
   const sort = form.watch("sort");
   const sortDirection = form.watch("sortDirection");
 
-  const availableSorts = useMemo(() => Object.entries(SORT_OPTIONS) as Array<[SortOption, (typeof SORT_OPTIONS)[SortOption]]>, []);
+  const availableSorts = useMemo(
+    () => Object.entries(SORT_OPTIONS) as Array<[SortOption, (typeof SORT_OPTIONS)[SortOption]]>,
+    []
+  );
 
   const handleSort = useCallback(
     (newSort: SortOption) => {
@@ -121,11 +124,15 @@ export default function SelfPlaylistCreator() {
 
       <DialogContent className="max-h-[85vh] overflow-hidden p-0 sm:max-w-4xl">
         <DialogTitle className="sr-only">Create Self Playlist</DialogTitle>
-        <DialogDescription className="sr-only">Generate a new playlist from your own scores.</DialogDescription>
+        <DialogDescription className="sr-only">
+          Generate a new playlist from your own scores.
+        </DialogDescription>
         <Card className="relative m-0 flex h-full max-h-[85vh] flex-col rounded-lg">
           <div className="border-border border-b px-(--spacing-lg) py-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
             <h1 className="text-xl font-semibold md:text-2xl">Create Self Playlist</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Generate a new playlist from your own scores.</p>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Generate a new playlist from your own scores.
+            </p>
           </div>
 
           <div className="flex-1 overflow-x-hidden overflow-y-auto">
@@ -194,7 +201,7 @@ export default function SelfPlaylistCreator() {
                                   <DualRangeSlider
                                     min={0}
                                     max={SHARED_CONSTS.maxStars}
-                                    step={1}
+                                    step={0.1}
                                     label={v => <span className="text-xs">{v}</span>}
                                     value={[val.min, val.max]}
                                     showLabelOnHover={false}
@@ -224,7 +231,6 @@ export default function SelfPlaylistCreator() {
                                   min={0}
                                   max={100}
                                   step={0.1}
-                                  label={v => <span className="text-xs">{v !== undefined ? v.toFixed(0) : "0"}%</span>}
                                   value={[val.min, val.max]}
                                   showLabelOnHover={false}
                                   onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
@@ -254,4 +260,3 @@ export default function SelfPlaylistCreator() {
     </Dialog>
   );
 }
-

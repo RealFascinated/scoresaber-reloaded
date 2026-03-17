@@ -237,8 +237,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                                   <DualRangeSlider
                                     min={0}
                                     max={SHARED_CONSTS.maxStars}
-                                    step={1}
-                                    label={v => <span className="text-xs">{v}</span>}
+                                    step={0.1}
                                     value={[val.min, val.max]}
                                     showLabelOnHover={false}
                                     onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
@@ -267,9 +266,6 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                                   min={0}
                                   max={100}
                                   step={0.1}
-                                  label={v => (
-                                    <span className="text-xs">{v !== undefined ? v.toFixed(0) : "0.0"}%</span>
-                                  )}
                                   value={[val.min, val.max]}
                                   showLabelOnHover={false}
                                   onValueChange={vals => field.onChange({ min: vals[0], max: vals[1] })}
