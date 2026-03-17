@@ -36,7 +36,7 @@ export default class BeatLeaderService {
     songCharacteristic: string,
     songScore: number
   ): Promise<BeatLeaderScore | undefined> {
-    return CacheService.fetchWithCache(
+    return CacheService.fetch(
       CacheId.BeatLeaderScore,
       `beatleader-score:${playerId}-${songHash}-${songDifficulty}-${songScore}`,
       async () => {
@@ -62,7 +62,7 @@ export default class BeatLeaderService {
    * @returns the BeatLeader score, or undefined if none
    */
   public static async getBeatLeaderScore(scoreId: number): Promise<BeatLeaderScore | undefined> {
-    return CacheService.fetchWithCache(CacheId.BeatLeaderScore, `beatleader-score:${scoreId}`, async () => {
+    return CacheService.fetch(CacheId.BeatLeaderScore, `beatleader-score:${scoreId}`, async () => {
       const beatLeaderScore = await BeatLeaderScoreModel.findOne({
         scoreId: scoreId,
       }).lean();
@@ -83,7 +83,7 @@ export default class BeatLeaderService {
     isTop50GlobalScore?: boolean
   ): Promise<BeatLeaderScore | undefined> {
     const { playerId, leaderboard } = score;
-    const player: Player | null = await CacheService.fetchWithCache(
+    const player: Player | null = await CacheService.fetch(
       CacheId.Players,
       `player:${playerId}`,
       async () => {
@@ -200,7 +200,7 @@ export default class BeatLeaderService {
    * @param scoreId the id of the score
    */
   public static async getScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
-    return CacheService.fetchWithCache(CacheId.ScoreStats, `score-stats:${scoreId}`, async () => {
+    return CacheService.fetch(CacheId.ScoreStats, `score-stats:${scoreId}`, async () => {
       return (await ApiServiceRegistry.getInstance()
         .getBeatLeaderService()
         .lookupScoreStats(scoreId)) as ScoreStatsToken;

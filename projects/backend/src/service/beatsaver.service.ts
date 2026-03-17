@@ -28,7 +28,7 @@ export default class BeatSaverService {
   ): Promise<BeatSaverMapResponse | undefined> {
     const map =
       token ??
-      (await CacheService.fetchWithCache(CacheId.BeatSaver, `beatsaver:${hash}`, async () => {
+      (await CacheService.fetch(CacheId.BeatSaver, `beatsaver:${hash}`, async () => {
         return await this.getMapToken(hash);
       }));
 

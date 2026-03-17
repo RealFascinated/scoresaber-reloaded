@@ -35,7 +35,7 @@ export class PlayerCoreService {
       return result;
     }
 
-    let player: Player | null | undefined = await CacheService.fetchWithCache(
+    let player: Player | null | undefined = await CacheService.fetch(
       CacheId.Players,
       `player:${id}`,
       async () => PlayerModel.findOne({ _id: id }).lean()

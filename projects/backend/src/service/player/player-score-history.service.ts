@@ -165,15 +165,15 @@ export class PlayerScoreHistoryService {
         // Build cursor match stage if needed
         const cursorMatchStage = cursorInfo.cursor
           ? [
-              {
-                $match: {
-                  $or: [
-                    { timestamp: { $lt: cursorInfo.cursor.sortValue } },
-                    { timestamp: cursorInfo.cursor.sortValue, _id: { $lt: cursorInfo.cursor.id } },
-                  ],
-                },
+            {
+              $match: {
+                $or: [
+                  { timestamp: { $lt: cursorInfo.cursor.sortValue } },
+                  { timestamp: cursorInfo.cursor.sortValue, _id: { $lt: cursorInfo.cursor.id } },
+                ],
               },
-            ]
+            },
+          ]
           : [];
 
         // Build final stages
@@ -224,7 +224,7 @@ export class PlayerScoreHistoryService {
     leaderboard: ScoreSaberLeaderboard,
     timestamp: Date
   ): Promise<ScoreSaberPreviousScoreOverview | undefined> {
-    return CacheService.fetchWithCache(
+    return CacheService.fetch(
       CacheId.PreviousScore,
       `previous-score:${playerId}-${score.scoreId}`,
       async () => {
@@ -280,7 +280,7 @@ export class PlayerScoreHistoryService {
     playerId: string,
     leaderboardId: number
   ): Promise<ScoreHistoryGraph> {
-    return CacheService.fetchWithCache(
+    return CacheService.fetch(
       CacheId.ScoreHistoryGraph,
       `score-history-graph:${playerId}-${leaderboardId}`,
       async () => {

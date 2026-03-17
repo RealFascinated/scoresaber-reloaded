@@ -112,7 +112,7 @@ export class LeaderboardCoreService {
       throw new NotFoundError(`Leaderboard not found for "${id}"`);
     }
 
-    const leaderboardData = await CacheService.fetchWithCache(
+    const leaderboardData = await CacheService.fetch(
       CacheId.Leaderboards,
       `leaderboard:id:${id}`,
       async () => {
@@ -253,7 +253,7 @@ export class LeaderboardCoreService {
     };
 
     // Get or fetch leaderboard data
-    const leaderboardData = await CacheService.fetchWithCache(
+    const leaderboardData = await CacheService.fetch(
       CacheId.Leaderboards,
       `leaderboard:hash:${hash}:${difficulty}:${characteristic}`,
       async () => {
@@ -463,7 +463,7 @@ export class LeaderboardCoreService {
    * Gets all the ranked leaderboards
    */
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetchWithCache(CacheId.Leaderboards, "leaderboard:ranked-leaderboards", async () => {
+    return CacheService.fetch(CacheId.Leaderboards, "leaderboard:ranked-leaderboards", async () => {
       const leaderboards = await ScoreSaberLeaderboardModel.find({ ranked: true }).lean();
       return leaderboards.map(leaderboard => leaderboardToObject(leaderboard));
     });
@@ -473,7 +473,7 @@ export class LeaderboardCoreService {
    * Gets all the qualified leaderboards
    */
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetchWithCache(
+    return CacheService.fetch(
       CacheId.Leaderboards,
       "leaderboard:qualified-leaderboards",
       async () => {
@@ -487,7 +487,7 @@ export class LeaderboardCoreService {
    * Gets the ranking queue leaderboards
    */
   public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetchWithCache(CacheId.Leaderboards, "leaderboard:ranking-queue-maps", async () => {
+    return CacheService.fetch(CacheId.Leaderboards, "leaderboard:ranking-queue-maps", async () => {
       const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
       if (!rankingQueueTokens) {
         return [];

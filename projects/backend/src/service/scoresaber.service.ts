@@ -44,7 +44,7 @@ export default class ScoreSaberService {
       throw new NotFoundError(`Player "${id}" not found`);
     }
 
-    return CacheService.fetchWithCache(CacheId.ScoreSaber, `scoresaber:player:${id}:${type}`, async () => {
+    return CacheService.fetch(CacheId.ScoreSaber, `scoresaber:player:${id}:${type}`, async () => {
       const account = await PlayerCoreService.getPlayer(id, player).catch(() => undefined);
       const isOculusAccount = player.id.length === 16;
 
