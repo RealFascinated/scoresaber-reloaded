@@ -13,6 +13,7 @@ import { ssrConfig } from "config";
 import { ReactNode } from "react";
 import { FaTwitch } from "react-icons/fa";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
+import SelfPlaylistCreator from "../self/player-self-playlist-creator";
 import SnipePlaylistCreator from "../snipe/player-snipe-playlist-creator";
 
 type PlayerLinkProps = {
@@ -102,6 +103,16 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
           </div>
 
           <SnipePlaylistCreator toSnipe={player} />
+        </>
+      )}
+
+      {mainPlayerId && player.id === mainPlayerId && (
+        <>
+          <div className="flex items-center">
+            <div className="bg-border h-7 w-px" />
+          </div>
+
+          <SelfPlaylistCreator />
         </>
       )}
     </div>

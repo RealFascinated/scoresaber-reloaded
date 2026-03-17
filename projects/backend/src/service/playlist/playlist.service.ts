@@ -10,6 +10,8 @@ import {
 import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Playlist, PlaylistModel } from "@ssr/common/playlist/playlist";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
+import { SelfPlaylist } from "@ssr/common/playlist/self/self-playlist";
+import { parseSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
 import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
@@ -173,6 +175,139 @@ export default class PlaylistService {
       leaderboards,
       "custom-ranked"
     );
+  }
+
+  /**
+   * Creates a self playlist for a user
+   *
+   * @param user the user to create the playlist for
+   * @param settingsBase64 optional base64 encoded settings
+   * @returns the created self playlist
+   */
+  public static async getSelfPlaylist(user: string, settingsBase64?: string): Promise<Playlist> {
+    const settings = parseSelfPlaylistSettings(settingsBase64);
+
+    try {
+      if (!(await PlayerCoreService.playerExists(user))) {
+        throw new NotFoundError(`Unable to create a self playlist as the user isn't tracked.`);
+      }
+
+      const sortField = settings.sort;
+      const sortDirection = settings.sortDirection;
+
+      const getSortValue = (score: ScoreSaberScore, field: string): number => {
+        switch (field) {
+          case "pp":
+            return score.pp;
+          case "score":
+            return score.score;
+          case "acc":
+            return score.accuracy;
+          case "date":
+            return score.timestamp.getTime();
+          default:
+            return score.pp;
+        }
+      };
+
+      const pipeline = [
+        {
+          $match: {
+            playerId: user,
+          },
+        },
+        {
+          $project: {
+            pp: 1,
+            accuracy: 1,
+            timestamp: 1,
+            leaderboardId: 1,
+            playerId: 1,
+            score: 1,
+          },
+        },
+        {
+          $lookup: {
+            from: "scoresaber-leaderboards",
+            localField: "leaderboardId",
+            foreignField: "_id",
+            as: "leaderboard",
+          },
+        },
+        {
+          $unwind: {
+            path: "$leaderboard",
+            preserveNullAndEmptyArrays: false,
+          },
+        },
+        {
+          $match: {
+            ...(settings.rankedStatus === "ranked" ? { pp: { $gt: 0 } } : {}),
+            ...(settings.rankedStatus === "unranked" ? { pp: { $lte: 0 } } : {}),
+            ...(settings.rankedStatus === "ranked" &&
+            settings.starRange.min !== undefined &&
+            settings.starRange.max !== undefined
+              ? {
+                  $and: [
+                    { "leaderboard.stars": { $gte: settings.starRange.min } },
+                    { "leaderboard.stars": { $lte: settings.starRange.max } },
+                  ],
+                }
+              : {}),
+          },
+        },
+      ];
+
+      const results = (await ScoreSaberScoreModel.aggregate(
+        pipeline as Parameters<typeof ScoreSaberScoreModel.aggregate>[0]
+      )) as Array<ScoreSaberScore & { leaderboard: ScoreSaberLeaderboard }>;
+
+      if (results.length === 0) {
+        throw new NotFoundError(`Unable to create a self playlist as the user has no scores.`);
+      }
+
+      const scoredLeaderboards = results.map(result => ({
+        score: {
+          pp: result.pp,
+          accuracy: result.accuracy,
+          timestamp: result.timestamp,
+          leaderboardId: result.leaderboardId,
+          playerId: result.playerId,
+          score: result.score,
+        } as ScoreSaberScore,
+        leaderboard: leaderboardToObject(result.leaderboard),
+      }));
+
+      const filtered = scoredLeaderboards.filter(({ score }) => {
+        if (!settings.accuracyRange) {
+          return true;
+        }
+        return score.accuracy >= settings.accuracyRange.min && score.accuracy <= settings.accuracyRange.max;
+      });
+
+      if (filtered.length === 0) {
+        throw new NotFoundError(`Unable to create a self playlist as no scores match the filters.`);
+      }
+
+      const title = `Self Playlist (${formatDateMinimal(new Date())})`;
+
+      return new SelfPlaylist(
+        user,
+        settings,
+        title,
+        filtered
+          .sort((a, b) => {
+            const valueA = getSortValue(a.score, sortField);
+            const valueB = getSortValue(b.score, sortField);
+            return sortDirection === "desc" ? valueB - valueA : valueA - valueB;
+          })
+          .map(({ leaderboard }) => leaderboard),
+        this.PLAYLIST_IMAGE_BASE64
+      );
+    } catch (error) {
+      Logger.error("Error creating self playlist", error);
+      throw new InternalServerError((error as Error).message);
+    }
   }
 
   /**

@@ -57,5 +57,21 @@ export default function playlistController(app: Elysia) {
           },
         }
       )
+      .get(
+        "/self",
+        async ({ query: { user, settings } }) => {
+          return playlistToBeatSaberPlaylist(await PlaylistService.getSelfPlaylist(user, settings));
+        },
+        {
+          tags: ["Playlist"],
+          query: z.object({
+            user: z.string(),
+            settings: z.string().optional(),
+          }),
+          detail: {
+            description: "Create a self playlist",
+          },
+        }
+      )
   );
 }

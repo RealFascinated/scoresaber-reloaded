@@ -1,7 +1,9 @@
 import { env } from "../env";
+import { encodeSelfPlaylistSettings } from "./self/self-playlist-utils";
 import { encodeSnipePlaylistSettings } from "../snipe/snipe-playlist-utils";
 import { BeatSaberPlaylist } from "./beatsaber/beatsaber-playlist";
 import { Playlist } from "./playlist";
+import { SelfPlaylist } from "./self/self-playlist";
 import { SnipePlaylist } from "./snipe/snipe-playlist";
 
 /**
@@ -11,11 +13,20 @@ import { SnipePlaylist } from "./snipe/snipe-playlist";
  * @returns the URL of the playlist
  */
 export function getPlaylistURL(playlist: Playlist): string {
-  return `${env.NEXT_PUBLIC_API_URL}/playlist/${
-    playlist instanceof SnipePlaylist
-      ? `snipe?user=${playlist.userId}&toSnipe=${playlist.toSnipeId}&settings=${encodeSnipePlaylistSettings(playlist.settings)}`
-      : playlist.id + ".bplist"
-  }`;
+  const base = `${env.NEXT_PUBLIC_API_URL}/playlist/`;
+
+  if (playlist instanceof SnipePlaylist) {
+    return (
+      base +
+      `snipe?user=${playlist.userId}&toSnipe=${playlist.toSnipeId}&settings=${encodeSnipePlaylistSettings(playlist.settings)}`
+    );
+  }
+
+  if (playlist instanceof SelfPlaylist) {
+    return base + `self?user=${playlist.userId}&settings=${encodeSelfPlaylistSettings(playlist.settings)}`;
+  }
+
+  return base + playlist.id + ".bplist";
 }
 
 /**
