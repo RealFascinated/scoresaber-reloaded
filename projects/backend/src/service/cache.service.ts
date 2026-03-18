@@ -37,6 +37,10 @@ export default class CacheService {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
       mode: "MEMORY",
     },
+    [CacheId.Players]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 30),
+      mode: "MEMORY",
+    },
 
     // Redis caches
     [CacheId.BeatSaver]: {
@@ -45,10 +49,6 @@ export default class CacheService {
     },
     [CacheId.BeatLeaderScore]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "REDIS",
-    },
-    [CacheId.Players]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 30),
       mode: "REDIS",
     },
     [CacheId.ScoreStats]: {
