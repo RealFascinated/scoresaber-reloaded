@@ -5,6 +5,7 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { Metadata } from "next";
+import { cache } from "react";
 
 const UNKNOWN_PLAYER = {
   title: "Unknown Player",
@@ -17,9 +18,13 @@ type Props = {
   }>;
 };
 
+const getPlayer = cache(async (id: string) => {
+  return await ssrApi.getScoreSaberPlayer(id, "full");
+});
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { id } = await props.params;
-  const player = await ssrApi.getScoreSaberPlayer(id, "basic");
+  const player = await getPlayer(id);
 
   if (player === undefined) {
     return {
@@ -57,7 +62,7 @@ Joined: ${formatDate(player.joinedDate, "Do MMMM, YYYY")}`,
 
 export default async function PlayerPage(props: Props) {
   const { id } = await props.params;
-  const player = await ssrApi.getScoreSaberPlayer(id, "full");
+  const player = await getPlayer(id);
   if (player == undefined) {
     return (
       <NotFound title="Player Not Found" description="The player you were looking for could not be found" />
