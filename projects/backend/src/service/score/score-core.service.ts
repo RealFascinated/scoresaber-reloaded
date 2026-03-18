@@ -145,35 +145,55 @@ export class ScoreCoreService {
       return score;
     }
 
+    async function getBeatLeaderScore() {
+      if (options?.insertBeatLeaderScore && leaderboard) {
+        return BeatLeaderService.getBeatLeaderScoreFromSong(
+          score.playerId,
+          leaderboard.songHash,
+          leaderboard.difficulty.difficulty,
+          leaderboard.difficulty.characteristic,
+          score.score
+        )
+      }
+      return undefined;
+    }
+
+    async function getPreviousScore() {
+      if (options?.insertPreviousScore && leaderboard) {
+        return PlayerScoreHistoryService.getPlayerPreviousScore(
+          score.playerId,
+          score,
+          leaderboard,
+          score.timestamp
+        );
+      }
+      return undefined;
+    }
+
+    async function getPlayerInfo() {
+      if (options?.insertPlayerInfo) {
+        const playerToken = await ScoreSaberService.getCachedPlayer(score.playerId).catch(() => undefined);
+        return await ScoreSaberService.getPlayer(score.playerId, "basic", playerToken);
+      }
+      return undefined;
+    }
+
+    async function getComparisonScore() {
+      if (!options?.isComparisonPlayerScore && options?.comparisonPlayer && leaderboard) {
+        return ScoreSaberScoreModel.findOne({
+          playerId: options.comparisonPlayer!.id,
+          leaderboardId: leaderboard.id,
+        }).lean();
+      }
+      return undefined;
+    }
+
     const [isScoreTracked, beatLeaderScore, previousScore, playerInfo, comparisonScore] = await Promise.all([
       ScoreCoreService.scoreExists(score.scoreId),
-      options?.insertBeatLeaderScore
-        ? BeatLeaderService.getBeatLeaderScoreFromSong(
-            score.playerId,
-            leaderboard.songHash,
-            leaderboard.difficulty.difficulty,
-            leaderboard.difficulty.characteristic,
-            score.score
-          )
-        : undefined,
-      options?.insertPreviousScore
-        ? PlayerScoreHistoryService.getPlayerPreviousScore(
-            score.playerId,
-            score,
-            leaderboard,
-            score.timestamp
-          )
-        : undefined,
-      options?.insertPlayerInfo
-        ? (score.playerInfo ??
-          (await ScoreSaberService.getCachedPlayer(score.playerId).catch(() => undefined)))
-        : undefined,
-      !options?.isComparisonPlayerScore && options?.comparisonPlayer
-        ? ScoreSaberScoreModel.findOne({
-            playerId: options.comparisonPlayer!.id,
-            leaderboardId: leaderboard.id,
-          }).lean()
-        : undefined,
+      getBeatLeaderScore(),
+      getPreviousScore(),
+      getPlayerInfo(),
+      getComparisonScore(),
     ]);
 
     score.isTracked = isScoreTracked;
@@ -190,7 +210,7 @@ export class ScoreCoreService {
       score.playerInfo = {
         id: playerInfo.id,
         name: playerInfo.name,
-        profilePicture: playerInfo.profilePicture ?? "https://cdn.fascinated.cc/assets/oculus-avatar.jpg",
+        profilePicture: playerInfo.avatar,
         country: playerInfo.country,
       };
     }
