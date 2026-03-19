@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "database-schema-design": {
+      "source": "supercent-io/skills-template",
+      "sourceType": "github",
+      "computedHash": "4c33e1db0dbbe6f7c4c99a8a4d38b695d8bc417bcad3f18a34543c8d9bceb79d"
+    },
+    "next-best-practices": {
+      "source": "vercel-labs/next-skills",
+      "sourceType": "github",
+      "computedHash": "c31ddd68ba5798a79a516c619b1e1fc4408cc4876ad600fefa4f5add4425719d"
+    },
+    "shadcn": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "computedHash": "77faba608ea949351d1757e29e6cb726f6ec5937f7595be0593038a7d2d76bb9"
+    },
+    "tailwind-design-system": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "0fc7b79d08ee5168d46c6887014cbe5bd02f2c5e458858470e20fc8ecedefb46"
+    },
+    "vercel-composition-patterns": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "10eb4ec94577b79ae98c63ce3e7f35f8a6a06436a4011bff083b397de6960eeb"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "computedHash": "e218e50fe7057a4db91390e579c7db5aafac2394c31a3d8e5fa9444c8fa00726"
+    }
+  }
+}
