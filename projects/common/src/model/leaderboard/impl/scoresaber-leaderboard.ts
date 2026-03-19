@@ -1,4 +1,4 @@
-import { getModelForClass, modelOptions, Prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { getModelForClass, index, modelOptions, Prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import Leaderboard from "../leaderboard";
 import { type LeaderboardStatus } from "../leaderboard-status";
@@ -8,6 +8,12 @@ import { type LeaderboardStatus } from "../leaderboard-status";
   schemaOptions: {
     collection: "scoresaber-leaderboards",
   },
+})
+@index({
+  songName: "text",
+  songSubName: "text",
+  songAuthorName: "text",
+  levelAuthorName: "text",
 })
 export default class ScoreSaberLeaderboardInternal extends Leaderboard {
   /**

@@ -4,6 +4,7 @@ import { Registry } from "prom-client";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
+import ResponseTimeHistogramMetric from "../metrics/impl/backend/response-time";
 import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
 import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
@@ -36,6 +37,7 @@ export enum MetricType {
   // Backend metrics
   MEMORY_USAGE = "memory_usage",
   EVENT_LOOP_LAG = "event_loop_lag",
+  RESPONSE_TIME_MS = "response_time_ms",
   TOTAL_REQUESTS = "total_requests",
   API_SERVICES = "api_services",
   PROCESS_UPTIME = "process_uptime",
@@ -63,6 +65,7 @@ export default class MetricsService {
     // Backend metrics
     this.registerMetric(new MemoryUsageMetric());
     this.registerMetric(new EventLoopLagMetric());
+    this.registerMetric(new ResponseTimeHistogramMetric());
     this.registerMetric(new RequestsPerSecondMetric());
     this.registerMetric(new ApiServicesMetric());
     this.registerMetric(new ProcessUptimeMetric());

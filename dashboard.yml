@@ -18,22 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 0,
-  "links":
-    [
-      {
-        "asDropdown": false,
-        "icon": "external link",
-        "includeVars": false,
-        "keepTime": false,
-        "tags": [],
-        "targetBlank": false,
-        "title": "Old Grafana",
-        "tooltip": "",
-        "type": "link",
-        "url": "https://ssr-grafana.fascinated.cc/public-dashboards/19a90072026f442fafa6c371192dddff",
-      },
-    ],
+  "links": [],
   "panels":
     [
       {
@@ -86,7 +71,7 @@
                   "properties": [{ "id": "displayName", "value": "Active Players" }],
                 },
                 {
-                  "matcher": { "id": "byName", "options": "tracked_players_inactive" },
+                  "matcher": { "id": "byName", "options": "Inactive Players" },
                   "properties":
                     [
                       { "id": "displayName", "value": "Inactive Players" },
@@ -102,23 +87,29 @@
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
               "expr": 'tracked_players_total{environment="production",job="scoresaber_reloaded"}',
-              "legendFormat": "Active Players",
+              "format": "time_series",
+              "legendFormat": "Total Players",
+              "range": true,
               "refId": "A",
             },
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
               "expr": 'tracked_players_inactive{environment="production",job="scoresaber_reloaded"}',
+              "format": "time_series",
               "legendFormat": "Inactive Players",
+              "range": true,
               "refId": "B",
             },
           ],
-        "title": "Active Players",
+        "title": "Players",
         "type": "timeseries",
       },
       {
@@ -163,7 +154,7 @@
                   "properties": [{ "id": "displayName", "value": "Total Scores" }],
                 },
                 {
-                  "matcher": { "id": "byName", "options": "total_tracked_previous_scores" },
+                  "matcher": { "id": "byName", "options": "Score History Scores" },
                   "properties":
                     [
                       { "id": "displayName", "value": "Score History Scores" },
@@ -179,7 +170,7 @@
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
@@ -190,8 +181,11 @@
             },
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
               "expr": 'total_tracked_previous_scores{environment="production",job="scoresaber_reloaded"}',
+              "format": "time_series",
               "legendFormat": "Score History Scores",
+              "range": true,
               "refId": "B",
             },
           ],
@@ -251,7 +245,7 @@
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
@@ -318,7 +312,7 @@
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
@@ -384,13 +378,17 @@
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
               "expr": 'event_loop_lag_ms{environment="production",job="scoresaber_reloaded"}',
+              "format": "time_series",
+              "interval": "5m",
               "legendFormat": "Event Loop Lag",
+              "range": true,
               "refId": "A",
             },
           ],
@@ -398,8 +396,137 @@
         "type": "timeseries",
       },
       {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "fieldConfig":
+          {
+            "defaults":
+              {
+                "color": { "mode": "palette-classic" },
+                "custom":
+                  {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": { "type": "linear" },
+                    "showPoints": "auto",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": { "group": "A", "mode": "none" },
+                    "thresholdsStyle": { "mode": "off" },
+                  },
+                "mappings": [],
+                "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }] },
+                "unit": "s",
+              },
+            "overrides": [],
+          },
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 18 },
+        "id": 20,
+        "options":
+          {
+            "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+            "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
+          },
+        "pluginVersion": "12.4.1",
+        "targets":
+          [
+            {
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
+              "expr": 'process_uptime_seconds{environment="production",job="scoresaber_reloaded"}',
+              "format": "time_series",
+              "legendFormat": "Uptime",
+              "range": true,
+              "refId": "A",
+            },
+          ],
+        "title": "Process Uptime",
+        "type": "timeseries",
+      },
+      {
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "fieldConfig":
+          {
+            "defaults":
+              {
+                "color": { "mode": "palette-classic" },
+                "custom":
+                  {
+                    "axisBorderShow": false,
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "barWidthFactor": 0.6,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+                    "insertNulls": false,
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": { "type": "linear" },
+                    "showPoints": "auto",
+                    "showValues": false,
+                    "spanNulls": false,
+                    "stacking": { "group": "A", "mode": "none" },
+                    "thresholdsStyle": { "mode": "off" },
+                  },
+                "mappings": [],
+                "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }] },
+                "unit": "ms",
+              },
+            "overrides": [],
+          },
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 18 },
+        "id": 23,
+        "options":
+          {
+            "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+            "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
+          },
+        "pluginVersion": "12.4.1",
+        "targets":
+          [
+            {
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
+              "expr": 'sum(rate(response_time_ms_sum{environment="production",job="scoresaber_reloaded"}[5m])) by (route) / sum(rate(response_time_ms_count{environment="production",job="scoresaber_reloaded"}[5m])) by (route)',
+              "format": "time_series",
+              "legendFormat": "avg {{route}}",
+              "range": true,
+              "refId": "A",
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
+              "expr": 'histogram_quantile(0.95, sum(rate(response_time_ms_bucket{environment="production",job="scoresaber_reloaded"}[5m])) by (le, route))',
+              "format": "time_series",
+              "legendFormat": "p95 {{route}}",
+              "range": true,
+              "refId": "B",
+            },
+          ],
+        "title": "Response Time (avg + p95)",
+        "type": "timeseries",
+      },
+      {
         "collapsed": false,
-        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 },
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 26 },
         "id": 10,
         "panels": [],
         "title": "Infrastructure",
@@ -442,14 +569,14 @@
               },
             "overrides": [],
           },
-        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 28 },
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 27 },
         "id": 11,
         "options":
           {
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
@@ -513,14 +640,14 @@
                 },
               ],
           },
-        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 28 },
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 27 },
         "id": 12,
         "options":
           {
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
@@ -582,14 +709,14 @@
               },
             "overrides": [],
           },
-        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 28 },
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 27 },
         "id": 13,
         "options":
           {
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
@@ -604,7 +731,7 @@
       },
       {
         "collapsed": false,
-        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 36 },
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 },
         "id": 21,
         "panels": [],
         "title": "Users",
@@ -647,14 +774,14 @@
               },
             "overrides": [],
           },
-        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 37 },
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 36 },
         "id": 14,
         "options":
           {
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
@@ -687,69 +814,12 @@
                     "fillOpacity": 0,
                     "gradientMode": "none",
                     "hideFrom": { "legend": false, "tooltip": false, "viz": false },
-                    "insertNulls": false,
-                    "lineInterpolation": "linear",
-                    "lineWidth": 1,
-                    "pointSize": 5,
-                    "scaleDistribution": { "type": "linear" },
-                    "showPoints": "auto",
-                    "showValues": false,
-                    "spanNulls": false,
-                    "stacking": { "group": "A", "mode": "none" },
-                    "thresholdsStyle": { "mode": "off" },
-                  },
-                "mappings": [],
-                "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }] },
-                "unit": "reqpm",
-              },
-            "overrides": [],
-          },
-        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 55 },
-        "id": 15,
-        "options":
-          {
-            "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
-            "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
-          },
-        "pluginVersion": "12.3.2",
-        "targets":
-          [
-            {
-              "datasource": { "type": "prometheus", "uid": "${datasource}" },
-              "expr": 'rate(tracked_scores{environment="production",job="scoresaber_reloaded"}[1m]) * 60',
-              "legendFormat": "Scores",
-              "refId": "A",
-            },
-          ],
-        "title": "Scores/m",
-        "type": "timeseries",
-      },
-      {
-        "datasource": { "type": "prometheus", "uid": "${datasource}" },
-        "fieldConfig":
-          {
-            "defaults":
-              {
-                "color": { "mode": "palette-classic" },
-                "custom":
-                  {
-                    "axisBorderShow": false,
-                    "axisCenteredZero": false,
-                    "axisColorMode": "text",
-                    "axisLabel": "",
-                    "axisPlacement": "auto",
-                    "barAlignment": 0,
-                    "barWidthFactor": 0.6,
-                    "drawStyle": "points",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "hideFrom": { "legend": false, "tooltip": false, "viz": false },
                     "insertNulls": true,
                     "lineInterpolation": "linear",
                     "lineWidth": 1,
-                    "pointSize": 10,
+                    "pointSize": 1,
                     "scaleDistribution": { "type": "linear" },
-                    "showPoints": "always",
+                    "showPoints": "never",
                     "showValues": false,
                     "spanNulls": false,
                     "stacking": { "group": "A", "mode": "none" },
@@ -761,24 +831,27 @@
               },
             "overrides": [],
           },
-        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 37 },
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 36 },
         "id": 16,
         "options":
           {
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
               "expr": 'max_over_time(unique_daily_players{environment="production",job="scoresaber_reloaded"}[1d:1d])',
+              "format": "time_series",
+              "interval": "1d",
               "legendFormat": "Unique Daily Players",
+              "range": true,
               "refId": "A",
             },
           ],
-        "transformations": [],
         "title": "Unique Daily Players",
         "type": "timeseries",
       },
@@ -798,7 +871,7 @@
                     "axisPlacement": "auto",
                     "barAlignment": 0,
                     "barWidthFactor": 0.6,
-                    "drawStyle": "points",
+                    "drawStyle": "line",
                     "fillOpacity": 0,
                     "gradientMode": "none",
                     "hideFrom": { "legend": false, "tooltip": false, "viz": false },
@@ -807,7 +880,7 @@
                     "lineWidth": 1,
                     "pointSize": 10,
                     "scaleDistribution": { "type": "linear" },
-                    "showPoints": "always",
+                    "showPoints": "never",
                     "showValues": false,
                     "spanNulls": false,
                     "stacking": { "group": "A", "mode": "none" },
@@ -819,24 +892,27 @@
               },
             "overrides": [],
           },
-        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 37 },
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 36 },
         "id": 17,
         "options":
           {
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
               "expr": 'max_over_time(daily_new_accounts{environment="production",job="scoresaber_reloaded"}[1d:1d])',
+              "format": "time_series",
+              "interval": "1d",
               "legendFormat": "Daily New Accounts",
+              "range": true,
               "refId": "A",
             },
           ],
-        "transformations": [],
         "title": "Daily New Accounts",
         "type": "timeseries",
       },
@@ -853,23 +929,28 @@
               },
             "overrides": [],
           },
-        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 45 },
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 44 },
         "id": 18,
         "options":
           {
-            "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "values": [] },
+            "displayLabels": ["percent"],
+            "legend":
+              { "displayMode": "table", "placement": "right", "showLegend": true, "values": ["value"] },
             "pieType": "pie",
             "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
             "sort": "desc",
-            "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
+            "tooltip": { "hideZeros": false, "maxWidth": 2, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
               "expr": 'active_players_hmd{environment="production",job="scoresaber_reloaded"}',
+              "format": "time_series",
               "legendFormat": "{{hmd}}",
+              "range": true,
               "refId": "A",
             },
           ],
@@ -913,20 +994,31 @@
               },
             "overrides": [],
           },
-        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 45 },
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 44 },
         "id": 19,
         "options":
           {
-            "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+            "legend":
+              {
+                "calcs": ["lastNotNull"],
+                "displayMode": "table",
+                "placement": "bottom",
+                "showLegend": true,
+                "sortBy": "Last *",
+                "sortDesc": true,
+              },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
+              "editorMode": "code",
               "expr": 'active_players_hmd{environment="production",job="scoresaber_reloaded"}',
+              "format": "time_series",
               "legendFormat": "{{hmd}}",
+              "range": true,
               "refId": "A",
             },
           ],
@@ -935,7 +1027,7 @@
       },
       {
         "collapsed": false,
-        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 54 },
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 52 },
         "id": 22,
         "panels": [],
         "title": "Scores",
@@ -974,28 +1066,28 @@
                   },
                 "mappings": [],
                 "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }] },
-                "unit": "s",
+                "unit": "reqpm",
               },
             "overrides": [],
           },
-        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 18 },
-        "id": 20,
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 53 },
+        "id": 15,
         "options":
           {
             "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
             "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
           },
-        "pluginVersion": "12.3.2",
+        "pluginVersion": "12.4.1",
         "targets":
           [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
-              "expr": 'process_uptime_seconds{environment="production",job="scoresaber_reloaded"}',
-              "legendFormat": "Uptime",
+              "expr": 'rate(tracked_scores{environment="production",job="scoresaber_reloaded"}[1m]) * 60',
+              "legendFormat": "Scores",
               "refId": "A",
             },
           ],
-        "title": "Process Uptime",
+        "title": "Scores/m",
         "type": "timeseries",
       },
     ],
@@ -1008,7 +1100,7 @@
       "list":
         [
           {
-            "current": { "text": "victoria-metrics", "value": "ffbmdvoh37lkwe" },
+            "current": { "text": "victoria-metrics", "value": "ffbm9for4d62oe" },
             "label": "Datasource",
             "name": "datasource",
             "options": [],
@@ -1019,10 +1111,11 @@
           },
         ],
     },
-  "time": { "from": "now-24h", "to": "now" },
+  "time": { "from": "now-30d", "to": "now" },
   "timepicker": { "refresh_intervals": ["30s", "1m", "5m"] },
   "timezone": "browser",
   "title": "SSR Public",
   "uid": "5783f85b-a2b3-49d8-854d-b67bb524053d",
-  "version": 28,
+  "version": 9,
+  "weekStart": "",
 }

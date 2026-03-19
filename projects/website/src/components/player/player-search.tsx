@@ -39,14 +39,15 @@ const PlayerSearch = ({
 }: PlayerSearchProps) => {
   const [query, setQuery] = useState<string>("");
   const debouncedQuery = useDebounce(query, 500);
+  const trimmedQuery = debouncedQuery.trim();
 
   const { data: results, isLoading } = useQuery({
-    queryKey: ["player-search", debouncedQuery],
+    queryKey: ["player-search", trimmedQuery],
     queryFn: async () => {
-      if (debouncedQuery.length <= 3 && debouncedQuery.length !== 0) {
+      if (trimmedQuery.length > 0 && trimmedQuery.length <= 3) {
         return { players: [] };
       }
-      const playerResults = await ssrApi.searchPlayers(debouncedQuery);
+      const playerResults = await ssrApi.searchPlayers(trimmedQuery);
       return playerResults || { players: [] };
     },
     refetchInterval: false,
@@ -78,7 +79,9 @@ const PlayerSearch = ({
           <SearchX className="text-muted-foreground/50 mb-3 size-10" />
           <p className="text-muted-foreground mb-1 text-sm font-medium">No players found</p>
           <p className="text-muted-foreground/70 text-center text-xs">
-            {query.length > 0 ? "Try adjusting your search query" : "Start typing to search for players"}
+            {query.trim().length > 0
+              ? "Try adjusting your search query"
+              : "Start typing to search for players"}
           </p>
         </div>
       ) : (

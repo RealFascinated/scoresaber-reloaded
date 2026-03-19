@@ -97,14 +97,16 @@ export default function playerController(app: Elysia) {
       .get(
         "/search",
         async ({ query: { query } }) => {
+          const normalizedQuery = query?.trim();
           return {
-            players: await PlayerSearchService.searchPlayers(query),
+            players: await PlayerSearchService.searchPlayers(normalizedQuery),
           };
         },
         {
           tags: ["Player"],
           query: z.object({
-            query: z.string().optional(),
+            // Allow empty string searches (`?query=`) but cap length to avoid unbounded query costs.
+            query: z.string().optional().max(64),
           }),
           detail: {
             description: "Search players",

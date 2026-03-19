@@ -3,6 +3,7 @@ import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import type { FilterQuery } from "mongoose";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import ScoreSaberService from "../scoresaber.service";
 
@@ -14,13 +15,23 @@ export class PlayerSearchService {
    * @returns the players that match the query
    */
   public static async searchPlayers(query?: string): Promise<ScoreSaberPlayer[]> {
+    const normalizedQuery = (query ?? "").trim();
+
+    // Preserve existing behavior for empty query (`""`): call ScoreSaber and return its results.
+    // Treat short non-empty queries as invalid: trim length 1..3 returns no results without calling external APIs.
+    if (normalizedQuery.length > 0 && normalizedQuery.length <= 3) {
+      return [];
+    }
+
     const [scoreSaberResponse, foundPlayers] = await Promise.all([
-      ScoreSaberApiService.searchPlayers(query ?? ""),
-      query && query.length > 0
-        ? PlayerModel.find({
-            name: { $regex: query, $options: "i" },
+      ScoreSaberApiService.searchPlayers(normalizedQuery.length === 0 ? "" : normalizedQuery),
+      normalizedQuery.length > 0
+        ? PlayerModel.find({ $text: { $search: normalizedQuery } } as FilterQuery<unknown>, {
+            _id: 1,
+            name: 1,
+            score: { $meta: "textScore" },
           })
-            .select(["_id", "name"])
+            .sort({ score: { $meta: "textScore" } })
             .limit(20)
             .lean()
         : [],

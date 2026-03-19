@@ -115,9 +115,13 @@ export default function OverlayBuilder() {
       settingsToSave.views[OverlayViews.ScoreInfo] !== getStoredView(OverlayViews.ScoreInfo) ||
       settingsToSave.views[OverlayViews.SongInfo] !== getStoredView(OverlayViews.SongInfo);
 
-    if (hasChanged) {
-      database.setSetting(SettingIds.OverlaySettings, settingsToSave);
-    }
+    const timeoutId = setTimeout(() => {
+      if (hasChanged) {
+        void database.setSetting(SettingIds.OverlaySettings, settingsToSave);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
   }, [formValues, overlaySettings, database]);
 
   const handleRealTimeDataChange = (value: boolean) => {

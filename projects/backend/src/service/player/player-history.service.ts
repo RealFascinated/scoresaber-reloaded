@@ -14,6 +14,7 @@ import {
   isToday,
 } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
+import { AnyBulkWriteOperation } from "mongoose";
 import { redisClient } from "../..";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
@@ -320,6 +321,7 @@ export class PlayerHistoryService {
     // ScoreSaber's `histories` string ends at yesterday, so we start at "yesterday"
     // (length - 2) and derive `daysAgo` from the array index to avoid off-by-one drift.
     const historyLength = playerRankHistory.length;
+    const missingHistoryUpserts: Array<AnyBulkWriteOperation<PlayerHistoryEntry>> = [];
     for (
       let i = historyLength - 2; // yesterday
       i >= Math.max(0, historyLength - daysDiff);
@@ -340,17 +342,21 @@ export class PlayerHistoryService {
       if (!history[dateKey] || history[dateKey].rank === undefined) {
         history[dateKey] = { rank };
 
-        // Create a history entry for the date
-        await PlayerHistoryEntryModel.findOneAndUpdate(
-          {
-            playerId: player.id,
-            date,
+        missingHistoryUpserts.push({
+          updateOne: {
+            filter: { playerId: player.id, date },
+            update: { $set: { rank } },
+            upsert: true,
           },
-          { rank },
-          { upsert: true }
-        );
-        Logger.info(`Created missing history entry for %s on %s`, player.name ?? player.id, dateKey);
+        });
       }
+    }
+
+    if (missingHistoryUpserts.length > 0) {
+      await PlayerHistoryEntryModel.bulkWrite(missingHistoryUpserts, { ordered: false });
+      Logger.info(
+        `[PLAYER HISTORY] Bulk-upserted ${missingHistoryUpserts.length} missing history entries for ${player.name ?? player.id}`
+      );
     }
 
     // Handle today's data if the range includes today

@@ -11,6 +11,7 @@ import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
+import { timingSafeEqual } from "crypto";
 import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
@@ -247,10 +248,17 @@ export const app = new Elysia()
       console.log(error);
     }
 
+    const shouldExposeMessage = !isProduction();
+    const errorMessage =
+      typeof error === "object" && error !== null && "message" in error
+        ? (error as { message?: unknown }).message
+        : undefined;
+
     return {
       ...((status && { statusCode: status }) || { status: code }),
-      // @ts-expect-error - message is not in the error type
-      ...(error.message != code && { message: error.message }),
+      ...(shouldExposeMessage &&
+        errorMessage != code &&
+        typeof errorMessage === "string" && { message: errorMessage }),
       timestamp: new Date().toISOString(),
     };
   })
@@ -260,7 +268,8 @@ export const app = new Elysia()
       return stringify(response);
     }
 
-    if (response instanceof (globalThis as any).Response) {
+    const ResponseCtor = (globalThis as unknown as { Response?: typeof Response }).Response;
+    if (ResponseCtor && response instanceof ResponseCtor) {
       return response;
     }
 
@@ -291,7 +300,16 @@ export const app = new Elysia()
         }
 
         const token = authHeader.substring(7); // Remove "Bearer " prefix
-        if (token !== env.PROMETHEUS_AUTH_TOKEN) {
+
+        const expectedToken = env.PROMETHEUS_AUTH_TOKEN;
+        if (typeof expectedToken !== "string") {
+          set.status = 500;
+          return { error: "Server misconfigured" };
+        }
+
+        const tokenBuf = Buffer.from(token);
+        const expectedBuf = Buffer.from(expectedToken);
+        if (tokenBuf.length !== expectedBuf.length || !timingSafeEqual(tokenBuf, expectedBuf)) {
           set.status = 401;
           return { error: "Unauthorized" };
         }

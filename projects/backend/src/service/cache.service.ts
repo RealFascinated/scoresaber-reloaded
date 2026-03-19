@@ -21,6 +21,11 @@ export type CacheMode = "REDIS" | "MEMORY";
 
 export default class CacheService {
   private static readonly memoryCaches = new Map<CacheId, SSRCache>();
+  /**
+   * In-flight request coalescing per cache key.
+   * Prevents cache stampedes under concurrent load for the same missing key.
+   */
+  private static readonly inFlightRequests = new Map<string, Promise<unknown>>();
 
   public static readonly CACHE_INFO: Record<CacheId, { ttl: number; mode: CacheMode }> = {
     // Memory caches
@@ -81,41 +86,61 @@ export default class CacheService {
     }
 
     const mode = this.CACHE_INFO[cache].mode;
-    if (mode === "REDIS") {
-      const cachedData = await redisClient.get(cacheKey);
-      if (cachedData) {
-        try {
-          return parse(cachedData) as T;
-        } catch {
-          Logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
-          await redisClient.del(cacheKey);
-        }
-      }
-    } else {
-      const cached = this.getMemoryCache(cache).get<T>(cacheKey);
-      if (cached !== undefined) {
-        return cached;
-      }
+
+    const inFlightKey = `${cache}:${cacheKey}`;
+    const existingInFlight = this.inFlightRequests.get(inFlightKey);
+    if (existingInFlight) {
+      return (await existingInFlight) as T;
     }
 
-    const data = await fetchFn();
-    if (data) {
+    const cacheAndReturn = async () => {
       if (mode === "REDIS") {
-        const result = await redisClient.set(
-          cacheKey,
-          stringify(data),
-          "EX", // EX is used to set the TTL for the item
-          this.CACHE_INFO[cache].ttl // The TTL of the item
-        );
-        if (result !== "OK") {
-          throw new InternalServerError(`Failed to set cache for ${cacheKey}`);
+        const cachedData = await redisClient.get(cacheKey);
+        if (cachedData !== null) {
+          try {
+            return parse(cachedData) as T;
+          } catch {
+            Logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
+            await redisClient.del(cacheKey);
+          }
         }
       } else {
-        this.getMemoryCache(cache).set(cacheKey, data);
+        const cached = this.getMemoryCache(cache).get<T>(cacheKey);
+        if (cached !== undefined) {
+          return cached;
+        }
       }
-    }
 
-    return data;
+      const data = await fetchFn();
+
+      // Cache only when the fetch produced a concrete value (not `undefined` which is a "no result" signal).
+      if (data !== undefined) {
+        if (mode === "REDIS") {
+          const result = await redisClient.set(
+            cacheKey,
+            stringify(data),
+            "EX", // EX is used to set the TTL for the item
+            this.CACHE_INFO[cache].ttl // The TTL of the item
+          );
+          if (result !== "OK") {
+            throw new InternalServerError(`Failed to set cache for ${cacheKey}`);
+          }
+        } else {
+          this.getMemoryCache(cache).set(cacheKey, data);
+        }
+      }
+
+      return data;
+    };
+
+    const inFlightPromise = cacheAndReturn();
+    this.inFlightRequests.set(inFlightKey, inFlightPromise);
+
+    try {
+      return (await inFlightPromise) as T;
+    } finally {
+      this.inFlightRequests.delete(inFlightKey);
+    }
   }
 
   /**

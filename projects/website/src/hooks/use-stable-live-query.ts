@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 // Module-level cache that persists across component remounts
 // Uses a Map keyed by cache key string
 const queryCache = new Map<string, unknown>();
+const MAX_QUERY_CACHE_ENTRIES = 200;
 
 let queryCounter = 0;
 
@@ -66,6 +67,14 @@ export function useStableLiveQuery<T>(
     if (result !== undefined) {
       lastValueRef.current = result;
       queryCache.set(cacheKey, result);
+
+      // Prevent unbounded growth if cache keys vary over time.
+      if (queryCache.size > MAX_QUERY_CACHE_ENTRIES) {
+        const oldestKey = queryCache.keys().next().value;
+        if (oldestKey !== undefined) {
+          queryCache.delete(oldestKey);
+        }
+      }
     }
   }, [result, cacheKey]);
 

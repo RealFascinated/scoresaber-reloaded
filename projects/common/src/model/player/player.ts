@@ -8,6 +8,9 @@ import { type PeakRank } from "../../player/peak-rank";
 @modelOptions({ options: { allowMixed: Severity.ALLOW }, schemaOptions: { collection: "players" } })
 @index({ inactive: 1, pp: -1 })
 @index({ joinedDate: 1 })
+@index({ name: "text" })
+@index({ medals: -1, _id: 1 })
+@index({ country: 1, medals: -1, _id: 1 })
 export class Player {
   /**
    * The id of the player.

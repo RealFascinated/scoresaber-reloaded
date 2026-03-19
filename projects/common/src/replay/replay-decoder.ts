@@ -665,19 +665,27 @@ export class ReplayDecoder {
   }
 
   private static DecodeString(dataView: DataView): string {
-    const length = dataView.getInt32((dataView as any).pointer, true);
+    const pointer = (dataView as any).pointer as number;
+
+    if (!Number.isFinite(pointer) || pointer < 0 || pointer + 4 > dataView.byteLength) {
+      throw new InternalServerError("Failed to decode replay: Invalid string pointer");
+    }
+
+    const length = dataView.getInt32(pointer, true);
     if (length < 0 || length > 300) {
-      (dataView as any).pointer += 1;
-      return this.DecodeString(dataView);
+      throw new InternalServerError("Failed to decode replay: Invalid string length");
+    }
+
+    const start = pointer + 4;
+    const end = start + length;
+
+    if (end > dataView.byteLength) {
+      throw new InternalServerError("Failed to decode replay: String exceeds buffer bounds");
     }
 
     const enc = new TextDecoder("utf-8");
-    const string = enc.decode(
-      new Int8Array(
-        dataView.buffer.slice((dataView as any).pointer + 4, length + (dataView as any).pointer + 4)
-      )
-    );
-    (dataView as any).pointer += length + 4;
+    const string = enc.decode(new Int8Array(dataView.buffer.slice(start, end)));
+    (dataView as any).pointer = end;
     return string;
   }
 

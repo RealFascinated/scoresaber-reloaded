@@ -1,4 +1,4 @@
-import { getModelForClass, modelOptions, Prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { getModelForClass, index, modelOptions, Prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 
 @modelOptions({
@@ -7,6 +7,7 @@ import { Document } from "mongoose";
     collection: "scoresaber-leaderboard-star-change",
   },
 })
+@index({ leaderboardId: 1, timestamp: -1 })
 export class ScoreSaberLeaderboardStarChangeInternal {
   @Prop({ required: true, index: true })
   readonly leaderboardId!: number;

@@ -444,15 +444,15 @@ export class LeaderboardCoreService {
     if (!search || search.length < 3) {
       return [];
     }
-    const matchingLeaderboards = await ScoreSaberLeaderboardModel.find({
-      $or: [
-        { songName: { $regex: search, $options: "i" } },
-        { songSubName: { $regex: search, $options: "i" } },
-        { songAuthorName: { $regex: search, $options: "i" } },
-        { levelAuthorName: { $regex: search, $options: "i" } },
-      ],
+    const textFilter = { $text: { $search: search } } as unknown as Parameters<
+      typeof ScoreSaberLeaderboardModel.find
+    >[0];
+    const matchingLeaderboards = await ScoreSaberLeaderboardModel.find(textFilter, {
+      _id: 1,
+      score: { $meta: "textScore" },
     })
-      .select("_id")
+      .sort({ score: { $meta: "textScore" } })
+      .limit(50)
       .lean();
 
     if (!matchingLeaderboards.length) {

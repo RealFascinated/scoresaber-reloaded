@@ -32,18 +32,30 @@ const miniVariants: Variants = {
 };
 
 export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlayer }) {
-  const { data: miniRankingResponse } = useQuery({
+  const {
+    data: miniRankingResponse,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["mini-ranking", player.id],
     queryFn: () => ssrApi.getPlayerMiniRanking(player.id),
   });
 
   return (
     <>
-      <PlayerMiniRanking type="Global" player={player} players={miniRankingResponse?.globalRankings ?? []} />
+      <PlayerMiniRanking
+        type="Global"
+        player={player}
+        players={miniRankingResponse?.globalRankings ?? []}
+        isLoading={isLoading}
+        isError={isError}
+      />
       <PlayerMiniRanking
         type="Country"
         player={player}
         players={miniRankingResponse?.countryRankings ?? []}
+        isLoading={isLoading}
+        isError={isError}
       />
     </>
   );
@@ -53,10 +65,14 @@ function PlayerMiniRanking({
   type,
   player,
   players,
+  isLoading,
+  isError,
 }: {
   type: keyof Variants;
   player: ScoreSaberPlayer;
   players: ScoreSaberPlayer[];
+  isLoading: boolean;
+  isError: boolean;
 }) {
   const isMobile = useIsMobile();
   const variant = miniVariants[type];
@@ -148,9 +164,21 @@ function PlayerMiniRanking({
             );
           })
         ) : (
-          <div className="flex items-center justify-center py-(--spacing-xl)">
-            <Spinner />
-          </div>
+          <>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-(--spacing-xl)">
+                <Spinner />
+              </div>
+            ) : isError ? (
+              <div className="flex items-center justify-center py-(--spacing-xl)">
+                <p className="text-muted-foreground text-sm">Failed to load rankings</p>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center py-(--spacing-xl)">
+                <p className="text-muted-foreground text-sm">No rankings found</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </Card>

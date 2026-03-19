@@ -77,6 +77,7 @@ export class ScoreSaberApiService {
   private static proxyResetTimerStarted: boolean = false;
 
   public static totalRequests: number = 0;
+  private static readonly fetchTimeoutMs: number = 10_000;
 
   /**
    * Fetches data from the ScoreSaber API.
@@ -103,11 +104,29 @@ export class ScoreSaberApiService {
 
         await ScoreSaberApiService.cooldown.waitAndUse(options?.priority || CooldownPriority.NORMAL);
 
-        const response = await fetch(
-          ScoreSaberApiService.buildRequestUrl(
-            `${url}${getQueryParamsFromObject(options?.searchParams || {})}`
-          )
-        );
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), ScoreSaberApiService.fetchTimeoutMs);
+
+        let response: Response | undefined = undefined;
+        try {
+          response = await fetch(
+            ScoreSaberApiService.buildRequestUrl(
+              `${url}${getQueryParamsFromObject(options?.searchParams || {})}`
+            ),
+            {
+              signal: controller.signal,
+            }
+          );
+        } catch {
+          // Network failures / aborts should be treated as "no result" for callers.
+          return undefined;
+        } finally {
+          clearTimeout(timeoutId);
+        }
+
+        if (!response) {
+          return undefined;
+        }
 
         // Handle rate limit errors
         const remainingHeader = response?.headers.get("x-ratelimit-remaining");
@@ -127,8 +146,15 @@ export class ScoreSaberApiService {
           !url.includes("/players/count") && // Umbra once again can't code and returns JSON content-type but it's actually text !!
           response.headers.get("content-type")?.includes("application/json");
 
+        let responseData: T | string;
+        try {
+          responseData = isJson ? ((await response.json()) as T) : await response.text();
+        } catch {
+          return undefined;
+        }
+
         return {
-          data: isJson ? ((await response.json()) as T) : await response.text(),
+          data: responseData,
           type: isJson ? "json" : "text",
         };
       }
