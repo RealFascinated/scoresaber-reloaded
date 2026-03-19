@@ -10,7 +10,7 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
 
@@ -35,7 +35,19 @@ export default function LeaderboardScoresDropdown({
   const filter = useLeaderboardFilter();
 
   const [mode, setMode] = useState<ScoreModeEnum>(ScoreModeEnum.Global);
-  const [page, setPage] = useState(initialPage);
+  const [pagesByMode, setPagesByMode] = useState<Record<ScoreModeEnum, number>>({
+    [ScoreModeEnum.Global]: initialPage,
+    [ScoreModeEnum.Friends]: 1,
+    [ScoreModeEnum.History]: 1,
+  });
+  const page = useMemo(() => pagesByMode[mode] ?? 1, [mode, pagesByMode]);
+
+  const setPage = (nextPage: number) => {
+    setPagesByMode(previous => ({
+      ...previous,
+      [mode]: nextPage,
+    }));
+  };
 
   const {
     data: scores,
