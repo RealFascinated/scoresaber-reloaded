@@ -1,7 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import { MinioBucket } from "@ssr/common/minio-buckets";
+import { StorageBucket } from "@ssr/common/minio-buckets";
 import { BeatLeaderScore, BeatLeaderScoreModel } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
@@ -16,7 +16,7 @@ import mongoose from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import CacheService, { CacheId } from "./cache.service";
-import MinioService from "./minio.service";
+import StorageService from "./storage.service";
 
 export default class BeatLeaderService {
   /**
@@ -76,13 +76,15 @@ export default class BeatLeaderService {
   /**
    * Tracks BeatLeader score.
    *
-   * @param score the score to track
+   * @param scoreToken the score to track
+   * @param isTop50GlobalScore whether the score is a top 50 global score
+   * @returns the BeatLeader score, or undefined if none
    */
   public static async trackBeatLeaderScore(
-    score: BeatLeaderScoreToken,
-    isTop50GlobalScore?: boolean
+    scoreToken: BeatLeaderScoreToken,
+    isTop50GlobalScore: boolean = false
   ): Promise<BeatLeaderScore | undefined> {
-    const { playerId, leaderboard } = score;
+    const { playerId, leaderboard } = scoreToken;
     const player: Player | null = await CacheService.fetch(
       CacheId.Players,
       `player:${playerId}`,
@@ -101,30 +103,30 @@ export default class BeatLeaderService {
     };
 
     const difficulty = leaderboard.difficulty;
-    const rawScoreImprovement = score.scoreImprovement;
+    const rawScoreImprovement = scoreToken.scoreImprovement;
     const data = {
       playerId: playerId,
       songHash: leaderboard.song.hash.toUpperCase(),
       songDifficulty: difficulty.difficultyName,
       songCharacteristic: difficulty.modeName,
-      songScore: score.baseScore,
-      scoreId: score.id,
+      songScore: scoreToken.baseScore,
+      scoreId: scoreToken.id,
       leaderboardId: leaderboard.id,
       misses: {
-        misses: getMisses(score),
-        missedNotes: score.missedNotes,
-        bombCuts: score.bombCuts,
-        badCuts: score.badCuts,
-        wallsHit: score.wallsHit,
+        misses: getMisses(scoreToken),
+        missedNotes: scoreToken.missedNotes,
+        bombCuts: scoreToken.bombCuts,
+        badCuts: scoreToken.badCuts,
+        wallsHit: scoreToken.wallsHit,
       },
-      pauses: score.pauses,
-      fcAccuracy: score.fcAccuracy * 100,
-      fullCombo: score.fullCombo,
+      pauses: scoreToken.pauses,
+      fcAccuracy: scoreToken.fcAccuracy * 100,
+      fullCombo: scoreToken.fullCombo,
       handAccuracy: {
-        left: score.accLeft,
-        right: score.accRight,
+        left: scoreToken.accLeft,
+        right: scoreToken.accRight,
       },
-      timestamp: new Date(Number(score.timeset) * 1000),
+      timestamp: new Date(Number(scoreToken.timeset) * 1000),
     } as BeatLeaderScore;
 
     if (rawScoreImprovement && rawScoreImprovement.score > 0) {
@@ -146,40 +148,11 @@ export default class BeatLeaderService {
       };
     }
 
-    // Parallelize independent operations
-    const [savedReplay] = await Promise.all([
-      // Save replay data if needed
-      (async () => {
-        if (isProduction() && player && (player.trackReplays || isTop50GlobalScore)) {
-          try {
-            const replayId = getBeatLeaderReplayId(data);
-            const replay = await Request.get<ArrayBuffer>(`https://cdn.replays.beatleader.xyz/${replayId}`, {
-              returns: "arraybuffer",
-            });
-
-            if (replay !== undefined) {
-              await MinioService.saveFile(MinioBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replay));
-              return true;
-            }
-          } catch (error) {
-            sendEmbedToChannel(
-              DiscordChannels.BACKEND_LOGS,
-              createGenericEmbed("BeatLeader Replays", `Failed to save replay for ${score.id}: ${error}`)
-            );
-            Logger.error(`Failed to save replay for ${score.id}: ${error}`);
-          }
-        }
-        return false;
-      })(),
-    ]);
-
-    if (savedReplay) {
-      data.savedReplay = savedReplay;
-    }
+    data.savedReplay = await this.saveReplay(scoreToken, data, player, isTop50GlobalScore);
 
     // Check if score already exists
     const existingScore = await BeatLeaderScoreModel.findOne({
-      scoreId: score.id,
+      scoreId: scoreToken.id,
     }).lean();
 
     if (existingScore) {
@@ -190,7 +163,7 @@ export default class BeatLeaderService {
       ...data,
       _id: new mongoose.Types.ObjectId(), // Generate a new _id
     });
-    Logger.info(`Tracked BeatLeader score "${score.id}" for "${player.name}"(${playerId})`);
+    Logger.info(`Tracked BeatLeader score "${scoreToken.id}" for "${player.name}"(${playerId})`);
     return data;
   }
 
@@ -201,9 +174,18 @@ export default class BeatLeaderService {
    */
   public static async getScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
     return CacheService.fetch(CacheId.ScoreStats, `score-stats:${scoreId}`, async () => {
-      return (await ApiServiceRegistry.getInstance()
+      const scoreStatsFile = await StorageService.getFile(StorageBucket.BeatLeaderScoreStats, `${scoreId}.json`);
+      if (scoreStatsFile != undefined) {
+        return JSON.parse(scoreStatsFile.toString()) as ScoreStatsToken;
+      }
+
+      const scoreStats = await ApiServiceRegistry.getInstance()
         .getBeatLeaderService()
-        .lookupScoreStats(scoreId)) as ScoreStatsToken;
+        .lookupScoreStats(scoreId);
+      if (scoreStats != undefined) {
+        await StorageService.saveFile(StorageBucket.BeatLeaderScoreStats, `${scoreId}.json`, Buffer.from(JSON.stringify(scoreStats)));
+      }
+      return scoreStats;
     });
   }
 
@@ -273,5 +255,37 @@ export default class BeatLeaderService {
       return undefined;
     }
     return beatLeaderScoreToObject(beatLeaderScore);
+  }
+
+  /**
+   * Saves a replay to the storage.
+   *
+   * @param scoreToken the score token to save the replay for
+   * @param data the data to save the replay for
+   * @param player the player to save the replay for
+   * @param isTop50GlobalScore whether the score is a top 50 global score
+   * @returns whether the replay was saved
+   */
+  public static async saveReplay(scoreToken: BeatLeaderScoreToken, data: BeatLeaderScore, player: Player, isTop50GlobalScore: boolean) {
+    if (isProduction() && player && (player.trackReplays || isTop50GlobalScore)) {
+      try {
+        const replayId = getBeatLeaderReplayId(data);
+        const replay = await Request.get<ArrayBuffer>(`https://cdn.replays.beatleader.xyz/${replayId}`, {
+          returns: "arraybuffer",
+        });
+
+        if (replay !== undefined) {
+          await StorageService.saveFile(StorageBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replay));
+          return true;
+        }
+      } catch (error) {
+        sendEmbedToChannel(
+          DiscordChannels.BACKEND_LOGS,
+          createGenericEmbed("BeatLeader Replays", `Failed to save replay for ${scoreToken.id}: ${error}`)
+        );
+        Logger.error(`Failed to save replay for ${scoreToken.id}: ${error}`);
+      }
+    }
+    return false;
   }
 }

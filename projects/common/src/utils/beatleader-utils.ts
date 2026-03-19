@@ -1,7 +1,7 @@
 import { ScoreSaberScore } from "src/model/score/impl/scoresaber-score";
 import { env } from "../env";
 import { NotFoundError } from "../error/not-found-error";
-import { getMinioBucketName, MinioBucket } from "../minio-buckets";
+import { getS3BucketName, StorageBucket } from "../minio-buckets";
 import { BeatLeaderScore } from "../model/beatleader-score/beatleader-score";
 
 /**
@@ -35,7 +35,7 @@ export function getBeatLeaderReplayId(score: BeatLeaderScore): string {
  */
 export function getBeatLeaderReplayCdnUrl(additionalData: BeatLeaderScore): string {
   if (additionalData.savedReplay) {
-    return `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.BeatLeaderReplays)}/${getBeatLeaderReplayId(additionalData)}`;
+    return `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.BeatLeaderReplays)}/${getBeatLeaderReplayId(additionalData)}`;
   }
   throw new NotFoundError(`No saved replay found for ${additionalData.scoreId}`);
 }

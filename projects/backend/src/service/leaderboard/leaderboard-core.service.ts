@@ -3,7 +3,7 @@ import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
+import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardModel,
@@ -25,8 +25,8 @@ import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-se
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import BeatSaverService from "../beatsaver.service";
 import CacheService, { CacheId } from "../cache.service";
-import MinioService from "../minio.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
+import StorageService from "../storage.service";
 import { LeaderboardRankingService } from "./leaderboard-ranking.service";
 
 export type LeaderboardOptions = {
@@ -371,7 +371,7 @@ export class LeaderboardCoreService {
   public static async processLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<LeaderboardResponse> {
     const processedLeaderboard = leaderboardToObject(leaderboard);
     processedLeaderboard.fullName = `${leaderboard.songName} ${leaderboard.songSubName}`.trim();
-    processedLeaderboard.songArt = `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.LeaderboardSongArt)}/${leaderboard.songHash}.png`;
+    processedLeaderboard.songArt = `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${leaderboard.songHash}.png`;
 
     if (!leaderboard.cachedSongArt) {
       await LeaderboardCoreService.cacheLeaderboardSongArt(leaderboard);
@@ -526,13 +526,13 @@ export class LeaderboardCoreService {
    * @param leaderboard the leaderboard to cache the song art for
    */
   public static async cacheLeaderboardSongArt(leaderboard: ScoreSaberLeaderboard): Promise<void> {
-    const exists = await MinioService.fileExists(MinioBucket.LeaderboardSongArt, `${leaderboard.songHash}.png`);
+    const exists = await StorageService.fileExists(StorageBucket.LeaderboardSongArt, `${leaderboard.songHash}.png`);
     if (!exists) {
       const request = await Request.get<ArrayBuffer>(`https://cdn.scoresaber.com/covers/${leaderboard.songHash}.png`, {
         returns: "arraybuffer",
       });
       if (request) {
-        await MinioService.saveFile(MinioBucket.LeaderboardSongArt, `${leaderboard.songHash}.png`, Buffer.from(request));
+        await StorageService.saveFile(StorageBucket.LeaderboardSongArt, `${leaderboard.songHash}.png`, Buffer.from(request));
         await ScoreSaberLeaderboardModel.updateOne({ _id: leaderboard.id }, { $set: { cachedSongArt: true } });
         Logger.info(`Cached song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
         return;

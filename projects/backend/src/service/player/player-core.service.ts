@@ -1,7 +1,7 @@
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import { MinioBucket } from "@ssr/common/minio-buckets";
+import { StorageBucket } from "@ssr/common/minio-buckets";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
@@ -11,8 +11,8 @@ import { logNewTrackedPlayer } from "../../common/embds";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import CacheService, { CacheId } from "../cache.service";
-import MinioService from "../minio.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
+import StorageService from "../storage.service";
 
 export const accountCreationLock: Record<string, Promise<Player | undefined>> = {};
 
@@ -235,13 +235,13 @@ export class PlayerCoreService {
    * @param force when true, re-downloads even if already cached
    */
   public static async cachePlayerProfilePicture(playerId: string, force = false): Promise<void> {
-    const exists = await MinioService.fileExists(MinioBucket.PlayerAvatars, `${playerId}.jpg`);
+    const exists = await StorageService.fileExists(StorageBucket.PlayerAvatars, `${playerId}.jpg`);
     if (!exists || force) {
       const request = await Request.get<ArrayBuffer>(`https://cdn.scoresaber.com/avatars/${playerId}.jpg`, {
         returns: "arraybuffer",
       });
       if (request) {
-        await MinioService.saveFile(MinioBucket.PlayerAvatars, `${playerId}.jpg`, Buffer.from(request));
+        await StorageService.saveFile(StorageBucket.PlayerAvatars, `${playerId}.jpg`, Buffer.from(request));
         await PlayerModel.updateOne({ _id: playerId }, { $set: { cachedProfilePicture: true } });
         await CacheService.invalidate(`player:${playerId}`);
         Logger.info(`Cached profile picture for player ${playerId}${force ? " (force)" : ""}`);

@@ -3,7 +3,7 @@ import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
-import { getMinioBucketName, MinioBucket } from "@ssr/common/minio-buckets";
+import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -61,7 +61,7 @@ export default class ScoreSaberService {
       if (isOculusAccount) {
         avatar = "https://cdn.fascinated.cc/assets/oculus-avatar.jpg";
       } else if (account) {
-        avatar = `${env.NEXT_PUBLIC_CDN_URL}/${getMinioBucketName(MinioBucket.PlayerAvatars)}/${id}.jpg`;
+        avatar = `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.PlayerAvatars)}/${id}.jpg`;
       } else {
         avatar = player.profilePicture;
       }

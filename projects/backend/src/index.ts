@@ -36,11 +36,11 @@ import CacheService from "./service/cache.service";
 import { LeaderboardNotificationsService } from "./service/leaderboard/leaderboard-notifications.service";
 import { LeaderboardRankingService } from "./service/leaderboard/leaderboard-ranking.service";
 import MetricsService, { prometheusRegistry } from "./service/metrics.service";
-import MinioService from "./service/minio.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
 import { PlayerMedalsService } from "./service/player/player-medals.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { MedalScoresService } from "./service/score/medal-scores.service";
+import StorageService from "./service/storage.service";
 import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/score-websockets";
 
@@ -335,7 +335,7 @@ app.onStart(async () => {
   // Must be registered first
   new ScoreWebsockets();
   new BeatSaverWebsocket();
-  new MinioService();
+  new StorageService();
 
   new CacheService();
   new PlaylistService();
