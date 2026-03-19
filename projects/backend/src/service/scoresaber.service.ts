@@ -53,13 +53,15 @@ export default class ScoreSaberService {
         await ScoreSaberScoreModel.deleteMany({ playerId: id });
       }
 
-      if (account && !isOculusAccount && !account.cachedProfilePicture) {
+      if (account && !isOculusAccount && !account.cachedProfilePicture && player.profilePicture !== "https://cdn.scoresaber.com/avatars/steam.png") {
         await PlayerCoreService.cachePlayerProfilePicture(id);
       }
 
       let avatar: string;
       if (isOculusAccount) {
         avatar = "https://cdn.fascinated.cc/assets/oculus-avatar.jpg";
+      } else if (player.profilePicture === "https://cdn.scoresaber.com/avatars/steam.png") {
+        avatar = "https://cdn.fascinated.cc/assets/unknown.png";
       } else if (account) {
         avatar = `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.PlayerAvatars)}/${id}.jpg`;
       } else {
