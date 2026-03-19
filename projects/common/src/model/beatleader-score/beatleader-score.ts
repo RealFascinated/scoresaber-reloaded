@@ -1,7 +1,7 @@
 import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
-import type { MapDifficulty } from "../../score/map-difficulty";
 import type { ScoreStatsToken } from "../../schemas/beatleader/tokens/score-stats/score-stats";
+import type { MapDifficulty } from "../../score/map-difficulty";
 import type { MapCharacteristic } from "../../types/map-characteristic";
 import { HandAccuracy } from "./hand-accuracy";
 import { Misses } from "./misses";

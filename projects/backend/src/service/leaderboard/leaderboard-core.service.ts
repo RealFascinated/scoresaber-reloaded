@@ -401,7 +401,7 @@ export class LeaderboardCoreService {
       },
       {
         upsert: true,
-        returnDocument: 'after',
+        returnDocument: "after",
         setDefaultsOnInsert: true,
       }
     ).lean();
@@ -444,12 +444,15 @@ export class LeaderboardCoreService {
     if (!search || search.length < 3) {
       return [];
     }
-    const matchingLeaderboards = await ScoreSaberLeaderboardModel.find({
-      $text: { $search: search },
-    } as object, {
-      _id: 1,
-      score: { $meta: "textScore" },
-    })
+    const matchingLeaderboards = await ScoreSaberLeaderboardModel.find(
+      {
+        $text: { $search: search },
+      } as object,
+      {
+        _id: 1,
+        score: { $meta: "textScore" },
+      }
+    )
       .sort({ score: { $meta: "textScore" } })
       .limit(50)
       .lean();

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { BeatLeaderPlayerScoreStatsSchema } from "./score-stats";
-import { BeatLeaderProfileSettingsSchema } from "./profile-settings";
 import { BeatLeaderClanSchema } from "./clan";
+import { BeatLeaderProfileSettingsSchema } from "./profile-settings";
+import { BeatLeaderPlayerScoreStatsSchema } from "./score-stats";
 
 export const BeatLeaderPlayerResponseSchema = z
   .object({

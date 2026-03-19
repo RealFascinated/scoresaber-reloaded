@@ -1,6 +1,6 @@
 import Logger from "@ssr/common/logger";
-import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";

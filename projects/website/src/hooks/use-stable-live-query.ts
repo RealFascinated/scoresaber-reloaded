@@ -57,7 +57,9 @@ export function useStableLiveQuery<T>(
   // Multiple components using the same query will share the same database call
   const result = useLiveQuery(safeQuerier, deps);
 
-  const [cachedResult, setCachedResult] = useState<T | undefined>(() => queryCache.get(cacheKey) as T | undefined);
+  const [cachedResult, setCachedResult] = useState<T | undefined>(
+    () => queryCache.get(cacheKey) as T | undefined
+  );
   const prevCacheKeyRef = useRef(cacheKey);
 
   useEffect(() => {

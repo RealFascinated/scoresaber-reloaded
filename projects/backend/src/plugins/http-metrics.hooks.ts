@@ -74,12 +74,7 @@ export const createHttpMetricsHooks = () => {
       const requestsMetric = await getTotalRequestsMetric();
       requestsMetric?.increment();
     },
-    onAfterHandle: async ({
-      request,
-      route,
-      response,
-      set,
-    }: AfterHandleHookContext): Promise<void> => {
+    onAfterHandle: async ({ request, route, response, set }: AfterHandleHookContext): Promise<void> => {
       if (!route) {
         requestStartTimes.delete(request);
         return;

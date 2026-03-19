@@ -46,14 +46,20 @@ export default class ScoreSaberService {
 
     return CacheService.fetch(CacheId.ScoreSaber, `scoresaber:player:${id}:${type}`, async () => {
       const account = await PlayerCoreService.getPlayer(id, player).catch(() => undefined);
-      const isOculusAccount = player.id.length === 16 || player.profilePicture === "https://cdn.scoresaber.com/avatars/oculus.png";
+      const isOculusAccount =
+        player.id.length === 16 || player.profilePicture === "https://cdn.scoresaber.com/avatars/oculus.png";
 
       // delete players scores if banned so they don't fuck up top scores
       if (player.banned) {
         await ScoreSaberScoreModel.deleteMany({ playerId: id });
       }
 
-      if (account && !isOculusAccount && !account.cachedProfilePicture && player.profilePicture !== "https://cdn.scoresaber.com/avatars/steam.png") {
+      if (
+        account &&
+        !isOculusAccount &&
+        !account.cachedProfilePicture &&
+        player.profilePicture !== "https://cdn.scoresaber.com/avatars/steam.png"
+      ) {
         await PlayerCoreService.cachePlayerProfilePicture(id);
       }
 
@@ -116,15 +122,15 @@ export default class ScoreSaberService {
         // todo: cleanup this mess
         account && player !== undefined
           ? (async () => {
-            const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
-            const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
-            return Object.fromEntries(
-              Object.entries(hmdUsage).map(([hmd, count]) => [
-                hmd,
-                totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
-              ])
-            ) as Record<HMD, number>;
-          })()
+              const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
+              const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
+              return Object.fromEntries(
+                Object.entries(hmdUsage).map(([hmd, count]) => [
+                  hmd,
+                  totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
+                ])
+              ) as Record<HMD, number>;
+            })()
           : undefined,
         account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},

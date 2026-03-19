@@ -278,7 +278,7 @@ export const app = new Elysia()
 
     if (response instanceof Object && response !== null) {
       set.headers["content-type"] = "application/json";
-      return JSON.stringify(response);
+      return response;
     }
 
     return response;

@@ -109,7 +109,7 @@ export default class BeatSaverService {
     const newMap = await BeatSaverMapModel.findOneAndUpdate(
       { _id: map.id },
       { $set: map },
-      { upsert: true, returnDocument: 'after' }
+      { upsert: true, returnDocument: "after" }
     ).lean();
 
     // Add the id to the map

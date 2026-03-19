@@ -215,7 +215,14 @@ export default class BeatLeaderService {
   public static async getScoresFullScoreStats(scoreId: number): Promise<ScoreStatsResponse> {
     const current = await this.getBeatLeaderScore(scoreId);
     if (current == undefined) {
-      throw new NotFoundError(`Score ${scoreId} not found`);
+      const currentStats = await this.getScoreStats(scoreId);
+      if (!currentStats) {
+        throw new NotFoundError(`Score stats not found for score ${scoreId}`);
+      }
+      return {
+        current: currentStats,
+        previous: undefined,
+      };
     }
 
     const previous = await this.getPreviousBeatLeaderScore(

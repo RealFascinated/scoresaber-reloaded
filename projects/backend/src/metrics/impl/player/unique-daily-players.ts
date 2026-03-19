@@ -1,5 +1,5 @@
-import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import Logger from "@ssr/common/logger";
+import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { Gauge } from "prom-client";
 import { redisClient } from "../../../common/redis";
 import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
