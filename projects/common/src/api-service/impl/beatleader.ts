@@ -1,9 +1,12 @@
 import { Cooldown } from "../../cooldown";
-import { ScoreStatsToken } from "../../types/token/beatleader/score-stats/score-stats";
+import { BeatLeaderPlayersTotalSchema } from "../../schemas/beatleader/tokens/players/page";
+import { ScoreStatsToken } from "../../schemas/beatleader/tokens/score-stats/score-stats";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
 
 const LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT = `https://cdn.scorestats.beatleader.xyz/:scoreId.json`;
+const LOOKUP_PLAYERS_ENDPOINT =
+  "https://api.beatleader.com/players?leaderboardContext=general&page=1&count=50&sortBy=pp&mapsType=ranked&ppType=general&order=desc";
 
 export class BeatLeaderService extends ApiService {
   constructor() {
@@ -35,5 +38,28 @@ export class BeatLeaderService extends ApiService {
 
     this.log(`Found scorestats for score "${scoreId}" in ${(performance.now() - before).toFixed(0)}ms`);
     return response;
+  }
+
+  /**
+   * Looks up the total players count from BeatLeader.
+   *
+   * @returns total players count from players metadata, or undefined
+   */
+  async lookupPlayersTotal(): Promise<number | undefined> {
+    const before = performance.now();
+    this.log("Looking up BeatLeader players total...");
+
+    const response = await this.fetch<unknown>(LOOKUP_PLAYERS_ENDPOINT);
+    if (response == undefined) {
+      return undefined;
+    }
+
+    const parsed = BeatLeaderPlayersTotalSchema.safeParse(response);
+    if (!parsed.success) {
+      return undefined;
+    }
+
+    this.log(`Found BeatLeader players total in ${(performance.now() - before).toFixed(0)}ms`);
+    return parsed.data.metadata.total;
   }
 }

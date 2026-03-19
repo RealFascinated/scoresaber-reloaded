@@ -1,9 +1,9 @@
 import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
-import { type ScoreStatsAccuracyTrackerToken } from "../../types/token/beatleader/score-stats/accuracy-tracker";
-import { type ScoreStatsHitTrackerToken } from "../../types/token/beatleader/score-stats/hit-tracker";
-import { type ScoreStatsGraphTrackerToken } from "../../types/token/beatleader/score-stats/score-graph-tracker";
-import { type ScoreStatsWinTrackerToken } from "../../types/token/beatleader/score-stats/win-tracker";
+import { type ScoreStatsAccuracyTrackerToken } from "../../schemas/beatleader/tokens/score-stats/accuracy-tracker";
+import { type ScoreStatsHitTrackerToken } from "../../schemas/beatleader/tokens/score-stats/hit-tracker";
+import { type ScoreStatsGraphTrackerToken } from "../../schemas/beatleader/tokens/score-stats/score-graph-tracker";
+import { type ScoreStatsWinTrackerToken } from "../../schemas/beatleader/tokens/score-stats/win-tracker";
 
 /**
  * The model for score stats.

@@ -1,6 +1,6 @@
 import Logger from "@ssr/common/logger";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
+import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
@@ -9,6 +9,8 @@ import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-web
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
 import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
+import BeatLeaderSeenScoresMetric from "../metrics/impl/player/beatleader-seen-scores";
+import BeatLeaderUniqueDailyPlayersMetric from "../metrics/impl/player/beatleader-unique-daily-players";
 import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
 import BeatLeaderService from "../service/beatleader.service";
 import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
@@ -98,6 +100,19 @@ export class ScoreWebsockets implements EventListener {
     connectBeatLeaderWebsocket({
       onScore: async beatLeaderScore => {
         try {
+          const beatLeaderSeenScoresMetric = (await MetricsService.getMetric(
+            MetricType.BEATLEADER_SEEN_SCORES
+          )) as BeatLeaderSeenScoresMetric | undefined;
+          beatLeaderSeenScoresMetric?.increment();
+
+          const beatLeaderUniquePlayersMetric = (await MetricsService.getMetric(
+            MetricType.BEATLEADER_UNIQUE_DAILY_PLAYERS
+          )) as BeatLeaderUniqueDailyPlayersMetric | undefined;
+          if (beatLeaderUniquePlayersMetric) {
+            // no need to await this
+            beatLeaderUniquePlayersMetric.addPlayer(beatLeaderScore.player.id);
+          }
+
           const player = beatLeaderScore.player;
           const leaderboard = beatLeaderScore.leaderboard;
 

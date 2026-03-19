@@ -1,6 +1,6 @@
 import { Colors } from "@/common/colors";
 import Card from "@/components/card";
-import { ScoreStatsHitTrackerToken } from "@ssr/common/types/token/beatleader/score-stats/hit-tracker";
+import { ScoreStatsHitTrackerToken } from "@ssr/common/schemas/beatleader/tokens/score-stats/hit-tracker";
 
 type Props = {
   hitTracker: ScoreStatsHitTrackerToken;

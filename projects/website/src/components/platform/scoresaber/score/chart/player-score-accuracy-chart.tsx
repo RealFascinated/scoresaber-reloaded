@@ -6,7 +6,7 @@ import { Colors } from "@/common/colors";
 import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
+import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { formatTime } from "@ssr/common/utils/time-utils";
 
 type Props = {

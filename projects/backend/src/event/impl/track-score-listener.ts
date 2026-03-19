@@ -1,7 +1,7 @@
 import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatLeaderScoreToken } from "@ssr/common/types/token/beatleader/score/score";
+import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { DiscordChannels } from "../../bot/bot";
 import { sendScoreNotification } from "../../common/score/score.util";

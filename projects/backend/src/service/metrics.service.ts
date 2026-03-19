@@ -12,6 +12,9 @@ import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
+import BeatLeaderPlayersMetric from "../metrics/impl/player/beatleader-players";
+import BeatLeaderSeenScoresMetric from "../metrics/impl/player/beatleader-seen-scores";
+import BeatLeaderUniqueDailyPlayersMetric from "../metrics/impl/player/beatleader-unique-daily-players";
 import DailyNewAccountsMetric from "../metrics/impl/player/daily-new-accounts";
 import TotalTrackedScoresMetric from "../metrics/impl/player/total-tracked-scores";
 import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
@@ -36,6 +39,9 @@ export enum MetricType {
   ACTIVE_PLAYERS_HMD_STATISTIC = "active_players_hmd_statistic",
   TOTAL_TRACKED_SCORES = "total_tracked_scores",
   DAILY_NEW_ACCOUNTS = "daily_new_accounts",
+  BEATLEADER_SEEN_SCORES = "beatleader_seen_scores",
+  BEATLEADER_UNIQUE_DAILY_PLAYERS = "beatleader_unique_daily_players",
+  BEATLEADER_PLAYERS = "beatleader_players",
 
   // Backend metrics
   MEMORY_USAGE = "memory_usage",
@@ -73,6 +79,9 @@ export default class MetricsService {
     this.registerMetric(new ActivePlayerHmdStatisticMetric());
     this.registerMetric(new TotalTrackedScoresMetric());
     this.registerMetric(new DailyNewAccountsMetric());
+    this.registerMetric(new BeatLeaderSeenScoresMetric());
+    this.registerMetric(new BeatLeaderUniqueDailyPlayersMetric());
+    this.registerMetric(new BeatLeaderPlayersMetric());
 
     // Backend metrics
     this.registerMetric(new MemoryUsageMetric());

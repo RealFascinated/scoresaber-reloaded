@@ -1,4 +1,4 @@
-import { BeatLeaderScoreToken } from "../types/token/beatleader/score/score";
+import { BeatLeaderScoreToken } from "../schemas/beatleader/tokens/score/score";
 import { connectWebSocket, WebsocketCallbacks } from "./websocket";
 
 type BeatLeaderWebsocket = {

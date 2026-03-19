@@ -1,9 +1,9 @@
 import { Colors } from "@/common/colors";
 import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";
-import { ScoreStatsResponse } from "@ssr/common/schemas/beatleader/score-stats";
+import { ScoreStatsToken } from "@ssr/common/schemas/beatleader/tokens/score-stats/score-stats";
+import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
-import { ScoreStatsToken } from "@ssr/common/types/token/beatleader/score-stats/score-stats";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 
 type ScoreAccuracyStatProps = {

@@ -7,7 +7,7 @@ import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import type { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "../player/player-statistic-history";
-import { ScoreStatsResponse } from "../schemas/beatleader/score-stats";
+import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
 import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
 import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard";
 import LeaderboardScoresResponse from "../schemas/response/leaderboard/leaderboard-scores";
@@ -418,9 +418,9 @@ class SSRApi {
       ...(options?.category ? { category: options.category.toString() } : {}),
       ...(options?.stars
         ? {
-            minStar: (options.stars.min ?? 0).toString(),
-            maxStar: (options.stars.max ?? 0).toString(),
-          }
+          minStar: (options.stars.min ?? 0).toString(),
+          maxStar: (options.stars.max ?? 0).toString(),
+        }
         : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.search ? { search: options.search } : {}),
