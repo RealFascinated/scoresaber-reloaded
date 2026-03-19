@@ -181,16 +181,27 @@ export default class BeatLeaderService {
       return JSON.parse(scoreStatsFile.toString()) as ScoreStatsToken;
     }
 
+    return this.saveScoreStats(scoreId);
+  }
+
+  /**
+   * Saves the score stats for a score id.
+   *
+   * @param scoreId the id of the score
+   * @returns the score stats, or undefined if nothing was found
+   */
+  public static async saveScoreStats(scoreId: number) {
     const scoreStats = await ApiServiceRegistry.getInstance()
       .getBeatLeaderService()
       .lookupScoreStats(scoreId);
-    if (scoreStats != undefined) {
-      await StorageService.saveFile(
-        StorageBucket.BeatLeaderScoreStats,
-        `${scoreId}.json`,
-        Buffer.from(JSON.stringify(scoreStats))
-      );
+    if (scoreStats == undefined) {
+      return undefined;
     }
+    await StorageService.saveFile(
+      StorageBucket.BeatLeaderScoreStats,
+      `${scoreId}.json`,
+      Buffer.from(JSON.stringify(scoreStats))
+    );
     return scoreStats;
   }
 

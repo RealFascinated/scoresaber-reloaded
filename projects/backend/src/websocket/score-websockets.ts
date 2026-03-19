@@ -10,6 +10,7 @@ import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-web
 import { EventListener } from "../event/event-listener";
 import { EventsManager } from "../event/events-manager";
 import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
+import BeatLeaderService from "../service/beatleader.service";
 import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
 import MetricsService, { MetricType } from "../service/metrics.service";
 import { PlayerCoreService } from "../service/player/player-core.service";
@@ -183,7 +184,14 @@ export class ScoreWebsockets implements EventListener {
       // Track unique daily players in Redis
       const metric = await ScoreWebsockets.getUniqueDailyPlayersMetric();
       if (metric) {
-        await metric.addPlayer(player.id);
+        // no need to await this
+        metric.addPlayer(player.id);
+      }
+
+      // Save the score stats
+      if (beatLeaderScore) {
+        // no need to await this
+        BeatLeaderService.saveScoreStats(beatLeaderScore.id);
       }
 
       EventsManager.getListeners().forEach(listener => {
