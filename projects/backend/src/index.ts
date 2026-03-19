@@ -264,8 +264,8 @@ export const app = new Elysia()
       timestamp: new Date().toISOString(),
     };
   })
-  .onAfterHandle(async ({ request, response, set }) => {
-    await httpMetricsHooks.onAfterHandle({ request, response, set });
+  .onAfterHandle(async ({ request, route, response, set }) => {
+    await httpMetricsHooks.onAfterHandle({ request, route, response, set });
     if (request.headers.get("accept") === "application/devalue") {
       set.headers["content-type"] = "application/devalue";
       return stringify(response);

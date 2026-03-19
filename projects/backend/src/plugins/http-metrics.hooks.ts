@@ -5,17 +5,18 @@ import MetricsService, { MetricType } from "../service/metrics.service";
 
 type RequestHookContext = {
   request: Request;
+  route?: string;
 };
 
 type AfterHandleHookContext = {
   request: Request;
+  route?: string;
   response: unknown;
   set: { status?: number | string };
 };
 
 export const createHttpMetricsHooks = () => {
   const requestStartTimes = new Map<Request, bigint>();
-  const requestRoutes = new Map<Request, string>();
 
   let totalRequestsMetric: TotalRequestsMetric | undefined;
   let totalRequestsMetricLoaded = false;
@@ -24,22 +25,7 @@ export const createHttpMetricsHooks = () => {
   let responseTimeMetric: ResponseTimeHistogramMetric | undefined;
   let responseTimeMetricLoaded = false;
 
-  const getSanitizedPathLabel = (request: Request): string => {
-    try {
-      const pathname = new URL(request.url).pathname || "/";
-      return pathname
-        .replace(/\/\d+(?=\/|$)/g, "/:id")
-        .replace(/\/[0-9a-f]{16,}(?=\/|$)/gi, "/:id")
-        .replace(/\/[A-Za-z0-9_-]{24,}(?=\/|$)/g, "/:id");
-    } catch {
-      return "unknown";
-    }
-  };
-
-  const getRouteLabel = (request: Request): string => {
-    const routePath = (request as unknown as { route?: { path?: string } }).route?.path;
-    return routePath || requestRoutes.get(request) || getSanitizedPathLabel(request);
-  };
+  const getRouteLabel = (route?: string): string | undefined => route;
 
   const getStatusCode = (response: unknown, setStatus: unknown): number => {
     if (typeof setStatus === "number") return setStatus;
@@ -85,26 +71,34 @@ export const createHttpMetricsHooks = () => {
   };
 
   return {
-    onRequest: async ({ request }: RequestHookContext): Promise<void> => {
+    onRequest: async ({ request, route }: RequestHookContext): Promise<void> => {
       requestStartTimes.set(request, process.hrtime.bigint());
-      requestRoutes.set(request, getRouteLabel(request));
       const requestsMetric = await getTotalRequestsMetric();
       requestsMetric?.increment();
     },
-    onAfterHandle: async ({ request, response, set }: AfterHandleHookContext): Promise<void> => {
-      const route = getRouteLabel(request);
+    onAfterHandle: async ({
+      request,
+      route,
+      response,
+      set,
+    }: AfterHandleHookContext): Promise<void> => {
+      const routeLabel = getRouteLabel(route);
+      if (!routeLabel) {
+        requestStartTimes.delete(request);
+        return;
+      }
+
       const statusCode = getStatusCode(response, set.status);
       const responseMetric = await getResponseStatusMetric();
-      responseMetric?.increment(route, statusCode);
+      responseMetric?.increment(routeLabel, statusCode);
 
       const startedAt = requestStartTimes.get(request);
       requestStartTimes.delete(request);
-      requestRoutes.delete(request);
       if (!startedAt) return;
 
       const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
       const responseTimeHistogramMetric = await getResponseTimeMetric();
-      responseTimeHistogramMetric?.observe(route, durationMs);
+      responseTimeHistogramMetric?.observe(routeLabel, durationMs);
     },
   };
 };
