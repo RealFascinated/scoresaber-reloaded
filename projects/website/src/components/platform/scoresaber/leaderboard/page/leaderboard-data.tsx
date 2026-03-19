@@ -22,7 +22,7 @@ export function ScoreSaberLeaderboardData({ leaderboardData }: LeaderboardDataPr
 
   return (
     <LeaderboardFilterProvider>
-      <div className="w-full space-y-2">
+      <div className="flex w-full flex-col gap-2">
         <div className="flex w-full flex-col-reverse gap-2 xl:flex-row xl:gap-2">
           {/* Mobile Sidebar */}
           {isMobile && <ScoreSaberLeaderboardFilters />}

@@ -27,7 +27,7 @@ interface AccuracyCircleProps {
 
 function AverageCutValues({ cuts, hand }: { cuts: number[]; hand: Hand }) {
   return (
-    <div className="space-y-0.5">
+    <div className="flex flex-col gap-0.5">
       {cuts.map((cut, i) => (
         <div key={i} className={cn("flex gap-1", hand === "right" ? "justify-end" : "justify-start")}>
           <p className="text-xs font-medium text-gray-400">{cut.toFixed(2)}</p>

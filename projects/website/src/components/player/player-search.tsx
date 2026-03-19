@@ -90,7 +90,7 @@ const PlayerSearch = ({
               ({results.players.filter(player => !excludePlayerIds.includes(player.id)).length})
             </span>
           </div>
-          <div className="space-y-0.5">
+          <div className="flex flex-col gap-0.5">
             {results.players
               .filter(player => !excludePlayerIds.includes(player.id))
               .sort((a, b) => a.rank - b.rank)

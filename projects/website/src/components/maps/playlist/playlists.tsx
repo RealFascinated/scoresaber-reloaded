@@ -43,7 +43,7 @@ const playlists: Playlist[] = [
 export default function Playlists() {
   return (
     <Card className="h-fit gap-4">
-      <div className="space-y-1">
+      <div className="flex flex-col gap-1">
         <h3 className="text-foreground text-lg font-semibold">Playlists</h3>
         <p className="text-muted-foreground text-sm">Easily download maps from ScoreSaber.</p>
       </div>

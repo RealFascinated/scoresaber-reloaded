@@ -29,7 +29,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   const difficulty = getDifficulty(leaderboardData.difficulty.difficulty);
 
   return (
-    <Card className="h-fit w-full space-y-4">
+    <Card className="flex h-fit w-full flex-col gap-4">
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
         {/* Song Info */}
@@ -41,7 +41,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           >
             {leaderboard.leaderboard.ranked ? (
               <>
-                <StarFilledIcon className="h-[15px] w-[15px] text-white" />
+                <StarFilledIcon className="size-[15px] text-white" />
                 <p className="text-xs font-semibold text-white">{leaderboardData.stars.toFixed(2)}</p>
               </>
             ) : (

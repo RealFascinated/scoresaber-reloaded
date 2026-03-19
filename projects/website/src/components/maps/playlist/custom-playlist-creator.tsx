@@ -86,20 +86,20 @@ export default function CustomPlaylistCreator() {
           <div className="p-(--spacing-lg) md:p-(--spacing-xl)">
             <Form {...form}>
               <form id="custom-playlist-form" onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
                     <div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
                       <Star className="size-3.5" />
                       <span>Settings</span>
                     </div>
 
-                    <div className="space-y-1">
+                    <div className="flex flex-col gap-1">
                       <Controller
                         name="stars"
                         control={form.control}
                         render={({ field }) => (
-                          <FormItem className="flex flex-col items-start space-y-2 py-1 md:flex-row md:items-center md:justify-between md:space-y-0">
-                            <div className="flex-1 space-y-0 md:pr-4">
+                          <FormItem className="flex flex-col items-start gap-2 py-1 md:flex-row md:items-center md:justify-between">
+                            <div className="flex-1 md:pr-4">
                               <FormLabel className="text-sm leading-tight font-normal">Star Range</FormLabel>
                             </div>
                             <FormControl>
@@ -123,21 +123,21 @@ export default function CustomPlaylistCreator() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
                       <TrendingUp className="size-3.5" />
                       <span>Sort</span>
                     </div>
                     <ButtonGroup className="justify-start">
                       <ControlButton isActive={sort === "stars"} onClick={() => handleSort("stars")}>
-                        <Star className="h-4 w-4" />
+                        <Star className="size-4" />
                         Stars
                       </ControlButton>
                       <ControlButton
                         isActive={sort === "dateRanked"}
                         onClick={() => handleSort("dateRanked")}
                       >
-                        <TrendingUp className="h-4 w-4" />
+                        <TrendingUp className="size-4" />
                         Date Ranked
                       </ControlButton>
                     </ButtonGroup>
@@ -150,7 +150,7 @@ export default function CustomPlaylistCreator() {
           {/* Footer */}
           <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
             <Button type="submit" form="custom-playlist-form" className="gap-2" disabled={downloading}>
-              {downloading ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+              {downloading ? <Spinner className="size-4" /> : <Download className="size-4" />}
               <span>Download Playlist</span>
             </Button>
           </div>

@@ -162,7 +162,7 @@ export default function ScoreSaberScoreEditorButton({
 
               <div className="flex w-full flex-col gap-(--spacing-md)">
                 {/* Base Slider */}
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <label className="text-muted-foreground text-sm">Base</label>
                     <span className="text-muted-foreground text-sm">{baseValue}</span>
@@ -178,7 +178,7 @@ export default function ScoreSaberScoreEditorButton({
                 </div>
 
                 {/* Decimal Slider */}
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <label className="text-muted-foreground text-sm">Decimal</label>
                     <span className="text-muted-foreground text-sm">{decimalValue.toFixed(2)}</span>

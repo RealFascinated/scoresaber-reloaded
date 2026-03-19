@@ -6,9 +6,7 @@ metadata:
   platforms: Claude, ChatGPT, Gemini
 ---
 
-
 # Database Schema Design
-
 
 ## When to use this skill
 
@@ -25,11 +23,13 @@ Lists specific situations where this skill should be triggered:
 The required and optional input information to collect from the user:
 
 ### Required Information
+
 - **Database Type**: PostgreSQL, MySQL, MongoDB, SQLite, etc.
 - **Domain Description**: What data will be stored (e.g., e-commerce, blog, social media)
 - **Key Entities**: Core data objects (e.g., User, Product, Order)
 
 ### Optional Information
+
 - **Expected Data Volume**: Small (<10K rows), Medium (10K-1M), Large (>1M) (default: Medium)
 - **Read/Write Ratio**: Read-heavy, Write-heavy, Balanced (default: Balanced)
 - **Transaction Requirements**: Whether ACID is required (default: true)
@@ -58,12 +58,14 @@ Specifies the step-by-step task sequence to follow precisely.
 Identify core data objects and their attributes.
 
 **Tasks**:
+
 - Extract nouns from business requirements → entities
 - List each entity's attributes (columns)
 - Determine data types (VARCHAR, INTEGER, TIMESTAMP, JSON, etc.)
 - Designate Primary Keys (UUID vs Auto-increment ID)
 
 **Example** (E-commerce):
+
 ```
 Users
 - id: UUID PRIMARY KEY
@@ -102,18 +104,21 @@ OrderItems (Junction table)
 Define relationships between tables and apply normalization.
 
 **Tasks**:
+
 - 1:1 relationship: Foreign Key + UNIQUE constraint
 - 1:N relationship: Foreign Key
 - N:M relationship: Create junction table
 - Determine normalization level (1NF ~ 3NF)
 
 **Decision Criteria**:
+
 - OLTP systems → normalize to 3NF (data integrity)
 - OLAP/analytics systems → denormalization allowed (query performance)
 - Read-heavy → minimize JOINs with partial denormalization
 - Write-heavy → full normalization to eliminate redundancy
 
 **Example** (ERD Mermaid):
+
 ```mermaid
 erDiagram
     Users ||--o{ Orders : places
@@ -161,6 +166,7 @@ erDiagram
 Design indexes for query performance.
 
 **Tasks**:
+
 - Primary Keys automatically create indexes
 - Columns frequently used in WHERE clauses → add indexes
 - Foreign Keys used in JOINs → indexes
@@ -168,12 +174,14 @@ Design indexes for query performance.
 - UNIQUE indexes (email, username, etc.)
 
 **Checklist**:
+
 - [x] Indexes on frequently queried columns
 - [x] Indexes on Foreign Key columns
 - [x] Composite index order optimized (high selectivity columns first)
 - [x] Avoid excessive indexes (degrades INSERT/UPDATE performance)
 
 **Example** (PostgreSQL):
+
 ```sql
 -- Primary Keys (auto-indexed)
 CREATE TABLE users (
@@ -226,6 +234,7 @@ CREATE INDEX idx_products_description_fts ON products USING GIN(to_tsvector('eng
 Add constraints to ensure data integrity.
 
 **Tasks**:
+
 - NOT NULL: required columns
 - UNIQUE: columns that must be unique
 - CHECK: value range constraints (e.g., price >= 0)
@@ -233,6 +242,7 @@ Add constraints to ensure data integrity.
 - Set default values
 
 **Example**:
+
 ```sql
 CREATE TABLE products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -265,12 +275,14 @@ EXECUTE FUNCTION update_updated_at_column();
 Write migrations that safely apply schema changes.
 
 **Tasks**:
+
 - UP migration: apply changes
 - DOWN migration: rollback
 - Wrap in transactions
 - Prevent data loss (use ALTER TABLE carefully)
 
 **Example** (SQL migration):
+
 ```sql
 -- migrations/001_create_initial_schema.up.sql
 BEGIN;
@@ -350,9 +362,9 @@ project/
 
 \`\`\`mermaid
 erDiagram
-    Users ||--o{ Orders : places
-    Orders ||--|{ OrderItems : contains
-    Products ||--o{ OrderItems : "ordered in"
+Users ||--o{ Orders : places
+Orders ||--|{ OrderItems : contains
+Products ||--o{ OrderItems : "ordered in"
 
     Users {
         uuid id PK
@@ -365,16 +377,19 @@ erDiagram
         string name
         decimal price
     }
+
 \`\`\`
 
 ## Table Descriptions
 
 ### users
+
 - **Purpose**: Store user account information
 - **Indexes**: email, username
 - **Estimated rows**: 100,000
 
 ### products
+
 - **Purpose**: Product catalog
 - **Indexes**: category_id, price, name
 - **Estimated rows**: 10,000
@@ -427,6 +442,7 @@ Demonstrates how to apply the skill through real-world use cases.
 **Situation**: Database design for a Medium-style blog platform
 
 **User Request**:
+
 ```
 Design a PostgreSQL schema for a blog platform:
 - Users can write multiple posts
@@ -436,6 +452,7 @@ Design a PostgreSQL schema for a blog platform:
 ```
 
 **Final Result**:
+
 ```sql
 -- Users
 CREATE TABLE users (
@@ -517,12 +534,14 @@ CREATE INDEX idx_comments_parent ON comments(parent_comment_id);
 **Situation**: MongoDB schema for a real-time chat app
 
 **User Request**:
+
 ```
 Design a MongoDB schema for a real-time chat app.
 Reads are very frequent, and message history needs to be retrieved quickly.
 ```
 
 **Final Result**:
+
 ```javascript
 // users collection
 {
@@ -588,6 +607,7 @@ db.messages.createIndex({ sender_id: 1 });
 ```
 
 **Design Highlights**:
+
 - Denormalization for read optimization (embedding last_message)
 - Indexes on frequently accessed fields
 - Using array fields (participants, read_by)
@@ -627,6 +647,7 @@ db.messages.createIndex({ sender_id: 1 });
 **Cause**: Individual lookups in a loop without JOINs
 
 **Solution**:
+
 ```sql
 -- ❌ Bad example: N+1 queries
 SELECT * FROM posts;  -- 1 time
@@ -646,6 +667,7 @@ JOIN users ON posts.author_id = users.id;
 **Cause**: Missing index on Foreign Key column
 
 **Solution**:
+
 ```sql
 CREATE INDEX idx_orders_user_id ON orders(user_id);
 CREATE INDEX idx_order_items_order_id ON order_items(order_id);
@@ -659,6 +681,7 @@ CREATE INDEX idx_order_items_product_id ON order_items(product_id);
 **Cause**: UUIDs are random, causing index fragmentation
 
 **Solution**:
+
 - PostgreSQL: Use `uuid_generate_v7()` (time-ordered UUID)
 - MySQL: Use `UUID_TO_BIN(UUID(), 1)`
 - Or consider using Auto-increment BIGINT
@@ -666,29 +689,35 @@ CREATE INDEX idx_order_items_product_id ON order_items(product_id);
 ## References
 
 ### Official Documentation
+
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [MySQL Documentation](https://dev.mysql.com/doc/)
 - [MongoDB Schema Design Best Practices](https://www.mongodb.com/docs/manual/core/data-modeling-introduction/)
 
 ### Tools
+
 - [dbdiagram.io](https://dbdiagram.io/) - ERD diagram creation
 - [PgModeler](https://pgmodeler.io/) - PostgreSQL modeling tool
 - [Prisma](https://www.prisma.io/) - ORM + migrations
 
 ### Learning Resources
+
 - [Database Design Course (freecodecamp)](https://www.youtube.com/watch?v=ztHopE5Wnpc)
 - [Use The Index, Luke](https://use-the-index-luke.com/) - SQL indexing guide
 
 ## Metadata
 
 ### Version
+
 - **Current Version**: 1.0.0
 - **Last Updated**: 2025-01-01
 - **Compatible Platforms**: Claude, ChatGPT, Gemini
 
 ### Related Skills
+
 - [api-design](../api-design/SKILL.md): Schema design alongside API design
 - [performance-optimization](../../code-quality/performance-optimization/SKILL.md): Query performance optimization
 
 ### Tags
+
 `#database` `#schema` `#PostgreSQL` `#MySQL` `#MongoDB` `#SQL` `#NoSQL` `#migration` `#ERD`

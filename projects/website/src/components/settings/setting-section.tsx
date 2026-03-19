@@ -220,8 +220,8 @@ function FormFieldComponent<TFormValues extends Record<string, any>, TName exten
         hasCustomControl
           ? ""
           : field.type === "checkbox"
-            ? "flex flex-row items-center justify-between gap-4 space-y-0 py-1"
-            : "flex flex-col items-start space-y-2 py-1 md:flex-row md:items-start md:justify-between md:space-y-0"
+            ? "flex flex-row items-center justify-between gap-4 py-1"
+            : "flex flex-col items-start gap-2 py-1 md:flex-row md:items-start md:justify-between"
       }
     >
       {hasCustomControl ? (
@@ -239,7 +239,7 @@ function FormFieldComponent<TFormValues extends Record<string, any>, TName exten
         </FormControl>
       ) : (
         <>
-          <div className="flex-1 space-y-0 md:pr-4">
+          <div className="flex-1 md:pr-4">
             <FormLabel className="text-sm leading-tight font-normal">{field.label}</FormLabel>
             {field.description && (
               <FormDescription className="text-xs leading-tight">{field.description}</FormDescription>
@@ -259,12 +259,12 @@ export function SettingSection<TFormValues extends Record<string, any>>({
   form,
 }: SettingSectionProps<TFormValues>) {
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
       <div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
         <Icon className="size-3.5" />
         <span>{title}</span>
       </div>
-      <div className="space-y-1">
+      <div className="flex flex-col gap-1">
         {fields.map(field => (
           <FormField
             key={String(field.name)}

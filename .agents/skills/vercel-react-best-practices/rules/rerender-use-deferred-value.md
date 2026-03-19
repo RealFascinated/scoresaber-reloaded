@@ -13,15 +13,15 @@ When user input triggers expensive computations or renders, use `useDeferredValu
 
 ```tsx
 function Search({ items }: { items: Item[] }) {
-  const [query, setQuery] = useState('')
-  const filtered = items.filter(item => fuzzyMatch(item, query))
+  const [query, setQuery] = useState("");
+  const filtered = items.filter(item => fuzzyMatch(item, query));
 
   return (
     <>
       <input value={query} onChange={e => setQuery(e.target.value)} />
       <ResultsList results={filtered} />
     </>
-  )
+  );
 }
 ```
 
@@ -29,13 +29,13 @@ function Search({ items }: { items: Item[] }) {
 
 ```tsx
 function Search({ items }: { items: Item[] }) {
-  const [query, setQuery] = useState('')
-  const deferredQuery = useDeferredValue(query)
+  const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const filtered = useMemo(
     () => items.filter(item => fuzzyMatch(item, deferredQuery)),
     [items, deferredQuery]
-  )
-  const isStale = query !== deferredQuery
+  );
+  const isStale = query !== deferredQuery;
 
   return (
     <>
@@ -44,7 +44,7 @@ function Search({ items }: { items: Item[] }) {
         <ResultsList results={filtered} />
       </div>
     </>
-  )
+  );
 }
 ```
 

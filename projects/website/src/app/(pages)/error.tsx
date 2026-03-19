@@ -31,7 +31,7 @@ export default function Error({ error, reset }: ErrorProps) {
         {/* Error Details */}
         <div className="w-full">
           <div className="border-border bg-muted/50 mt-2 rounded-lg border p-4 text-left">
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               {error.message && (
                 <div>
                   <span className="text-muted-foreground text-sm font-semibold">Message:</span>
@@ -54,7 +54,7 @@ export default function Error({ error, reset }: ErrorProps) {
         <div className="flex flex-col gap-3 sm:flex-row">
           <SimpleLink href="/">
             <Button variant="outline" className="gap-2">
-              <HomeIcon className="h-4 w-4" />
+              <HomeIcon className="size-4" />
               Go back to homepage
             </Button>
           </SimpleLink>

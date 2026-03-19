@@ -32,19 +32,19 @@ const viewToggles = [
     name: "Player Info",
     value: OverlayViews.PlayerInfo,
     requiresRealTimeData: false,
-    icon: <User className="h-4 w-4" />,
+    icon: <User className="size-4" />,
   },
   {
     name: "Score Info",
     value: OverlayViews.ScoreInfo,
     requiresRealTimeData: true,
-    icon: <Eye className="h-4 w-4" />,
+    icon: <Eye className="size-4" />,
   },
   {
     name: "Song Info",
     value: OverlayViews.SongInfo,
     requiresRealTimeData: true,
-    icon: <Monitor className="h-4 w-4" />,
+    icon: <Monitor className="size-4" />,
   },
 ];
 
@@ -106,11 +106,14 @@ export default function OverlayBuilder() {
     };
 
     // Only save if values have actually changed
+    const getStoredView = (view: OverlayViews) => overlaySettings.views?.[view] ?? true;
     const hasChanged =
       settingsToSave.playerId !== overlaySettings.playerId ||
       settingsToSave.useRealTimeData !== overlaySettings.useRealTimeData ||
       settingsToSave.dataClient !== overlaySettings.dataClient ||
-      JSON.stringify(settingsToSave.views) !== JSON.stringify(overlaySettings.views);
+      settingsToSave.views[OverlayViews.PlayerInfo] !== getStoredView(OverlayViews.PlayerInfo) ||
+      settingsToSave.views[OverlayViews.ScoreInfo] !== getStoredView(OverlayViews.ScoreInfo) ||
+      settingsToSave.views[OverlayViews.SongInfo] !== getStoredView(OverlayViews.SongInfo);
 
     if (hasChanged) {
       database.setSetting(SettingIds.OverlaySettings, settingsToSave);
@@ -187,7 +190,7 @@ export default function OverlayBuilder() {
 
       {/* Overlay Settings */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <FormField
             control={form.control}
             name="playerId"
@@ -206,7 +209,7 @@ export default function OverlayBuilder() {
             control={form.control}
             name="useRealTimeData"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center space-y-0 space-x-3">
+              <FormItem className="flex flex-row items-center gap-3">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -216,7 +219,7 @@ export default function OverlayBuilder() {
                     }}
                   />
                 </FormControl>
-                <div className="space-y-1">
+                <div className="flex flex-col gap-1">
                   <FormLabel className="text-sm">Use Real-Time Data</FormLabel>
                   <FormDescription>Whether to fetch real-time data from the data client.</FormDescription>
                 </div>
@@ -260,7 +263,7 @@ export default function OverlayBuilder() {
           )}
 
           {/* Views Section */}
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <div>
               <FormLabel className="text-sm">Enabled Views</FormLabel>
               <FormDescription>Toggle which views to show in the overlay.</FormDescription>
@@ -275,7 +278,7 @@ export default function OverlayBuilder() {
                   control={form.control}
                   name={`views.${viewToggle.value}`}
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-y-0 space-x-3">
+                    <FormItem className="flex flex-row items-center gap-3">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
@@ -283,7 +286,7 @@ export default function OverlayBuilder() {
                           disabled={isDisabled}
                         />
                       </FormControl>
-                      <div className={cn("flex items-center space-x-2", isDisabled && "opacity-50")}>
+                      <div className={cn("flex items-center gap-2", isDisabled && "opacity-50")}>
                         {viewToggle.icon}
                         <FormLabel className="font-normal">
                           {viewToggle.name}

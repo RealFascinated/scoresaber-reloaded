@@ -66,9 +66,9 @@ const PlayerSettings = () => {
   (form as any).onSubmit = onSubmit;
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <Form {...form}>
-        <form className="space-y-6">
+        <form className="flex flex-col gap-6">
           {settings.map(section => (
             <SettingSection
               key={section.id}

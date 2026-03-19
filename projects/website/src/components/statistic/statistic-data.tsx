@@ -39,7 +39,7 @@ export default function StatisticData() {
       <article className="flex w-full flex-1 flex-col gap-(--spacing-lg)">
         {statistics && appStatistics ? (
           <Card className="gap-(--spacing-md)">
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="text-foreground text-lg font-semibold">Game Statistics</h3>
                 <SimpleLink

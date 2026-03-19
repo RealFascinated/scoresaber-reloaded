@@ -34,16 +34,18 @@ export default function PlayerAndLeaderboardSearch() {
       if (debouncedQuery.length <= 3 && debouncedQuery.length !== 0) {
         return { players: [], leaderboards: [] };
       }
-      const playerResults = await ssrApi.searchPlayers(debouncedQuery);
-      const leaderboardResults = await ssrApi.searchLeaderboards(1, {
+      const playerPromise = ssrApi.searchPlayers(debouncedQuery);
+      const leaderboardPromise = ssrApi.searchLeaderboards(1, {
         search: debouncedQuery,
       });
+
+      const [playerResults, leaderboardResults] = await Promise.all([playerPromise, leaderboardPromise]);
 
       return {
         players: playerResults?.players || [],
         leaderboards:
           leaderboardResults?.leaderboards
-            .sort((a, b) => {
+            ?.toSorted((a, b) => {
               const getStatusPriority = (leaderboard: ScoreSaberLeaderboardToken) => {
                 if (leaderboard.ranked) return 2;
                 if (leaderboard.qualified) return 1;
@@ -57,7 +59,7 @@ export default function PlayerAndLeaderboardSearch() {
 
               return b.stars - a.stars;
             })
-            .map(leaderboard => getScoreSaberLeaderboardFromToken(leaderboard)) || [],
+            ?.map(leaderboard => getScoreSaberLeaderboardFromToken(leaderboard)) ?? [],
       };
     },
     refetchInterval: false,
@@ -130,7 +132,7 @@ export default function PlayerAndLeaderboardSearch() {
                   <span>Players</span>
                   <span className="text-muted-foreground/50">({results.players.length})</span>
                 </div>
-                <div className="space-y-0.5">
+                <div className="flex flex-col gap-0.5">
                   {results.players.map(player => (
                     <PlayerSearchResultItem
                       key={player.id}
@@ -153,7 +155,7 @@ export default function PlayerAndLeaderboardSearch() {
                   <span>Leaderboards</span>
                   <span className="text-muted-foreground/50">({results.leaderboards.length})</span>
                 </div>
-                <div className="space-y-0.5">
+                <div className="flex flex-col gap-0.5">
                   {results.leaderboards.map(leaderboard => (
                     <div
                       key={leaderboard.id}
@@ -165,7 +167,7 @@ export default function PlayerAndLeaderboardSearch() {
                     >
                       <Avatar
                         src={leaderboard.songArt}
-                        className="ring-border group-hover:ring-primary/20 h-9 w-9 shrink-0 ring-2 transition-all duration-200"
+                        className="ring-border group-hover:ring-primary/20 size-9 shrink-0 ring-2 transition-all duration-200"
                         alt={leaderboard.songName}
                       />
                       <div className="min-w-0 flex-1 flex-col">

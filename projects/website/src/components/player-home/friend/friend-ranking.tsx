@@ -27,7 +27,7 @@ export function FriendRanking() {
 
     const pagination = new Pagination<ScoreSaberPlayer>();
     pagination.setItems(
-      friends.sort((a, b) => {
+      friends.toSorted((a, b) => {
         if (a.inactive && !b.inactive) return 1;
         if (!a.inactive && b.inactive) return -1;
         return b.pp - a.pp;

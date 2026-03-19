@@ -72,7 +72,7 @@ export default function RootLayout({
       <body className={`${siteFont.className} h-full w-full antialiased`}>
         {env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID && env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL && (
           <Script
-            defer
+            strategy="afterInteractive"
             src={env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL}
             data-website-id={env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID}
           />

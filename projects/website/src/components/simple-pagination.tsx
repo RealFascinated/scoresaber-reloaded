@@ -56,17 +56,17 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
           disabled={isLoading}
           className="transition-opacity duration-200"
         >
-          <MoreHorizontal className="h-4 w-4" />
+          <MoreHorizontal className="size-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64" align="center">
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4">
-            <div className="space-y-1.5 text-center">
+            <div className="flex flex-col gap-1.5 text-center">
               <h4 className="leading-none font-medium">Go to Page</h4>
               <p className="text-muted-foreground text-sm">Max: {formatNumberWithCommas(totalPages)}</p>
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Input
                   type="text"
@@ -80,7 +80,7 @@ const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSe
                   aria-describedby={error ? "page-error" : undefined}
                 />
                 <Button type="submit" size="icon" className="shrink-0">
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="size-4" />
                 </Button>
               </div>
               {error && (

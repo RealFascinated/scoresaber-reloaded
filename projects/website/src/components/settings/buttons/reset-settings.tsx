@@ -1,3 +1,5 @@
+"use client";
+
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import useDatabase from "@/hooks/use-database";
 import { Button } from "../../ui/button";

@@ -90,7 +90,9 @@ Same for triggers whose `render` is not a `Button`:
 
 ```tsx
 <Select>
-  <SelectTrigger><SelectValue placeholder="Select a fruit" /></SelectTrigger>
+  <SelectTrigger>
+    <SelectValue placeholder="Select a fruit" />
+  </SelectTrigger>
 </Select>
 ```
 
@@ -157,7 +159,7 @@ Base supports `multiple`, render-function children on `SelectValue`, and object 
 <Select items={items} multiple defaultValue={[]}>
   <SelectTrigger>
     <SelectValue>
-      {(value: string[]) => value.length === 0 ? "Select fruits" : `${value.length} selected`}
+      {(value: string[]) => (value.length === 0 ? "Select fruits" : `${value.length} selected`)}
     </SelectValue>
   </SelectTrigger>
   ...
@@ -167,9 +169,9 @@ Base supports `multiple`, render-function children on `SelectValue`, and object 
 **Correct (base — object values):**
 
 ```tsx
-<Select defaultValue={plans[0]} itemToStringValue={(plan) => plan.name}>
+<Select defaultValue={plans[0]} itemToStringValue={plan => plan.name}>
   <SelectTrigger>
-    <SelectValue>{(value) => value.name}</SelectValue>
+    <SelectValue>{value => value.name}</SelectValue>
   </SelectTrigger>
   ...
 </Select>

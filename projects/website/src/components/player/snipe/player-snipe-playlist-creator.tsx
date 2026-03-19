@@ -183,7 +183,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                           onClick={() => handleSort(opt.value)}
                           type="button"
                         >
-                          {isActive ? <DirectionIcon className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                          {isActive ? <DirectionIcon className="size-4" /> : <Icon className="size-4" />}
                           {opt.name}
                         </ControlButton>
                       );
@@ -191,12 +191,12 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                   </ButtonGroup>
 
                   {/* Filters */}
-                  <div className="space-y-6">
+                  <div className="flex flex-col gap-6">
                     <Controller
                       name="rankedStatus"
                       control={form.control}
                       render={({ field, fieldState }) => (
-                        <FormItem className="space-y-2">
+                        <FormItem className="flex flex-col gap-2">
                           <FormLabel className="text-sm font-normal">Score Type</FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
@@ -209,7 +209,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                                   return (
                                     <SelectItem key={opt.value} value={opt.value}>
                                       <span className="flex items-center gap-2">
-                                        <Icon className="h-3.5 w-3.5" />
+                                        <Icon className="size-3.5" />
                                         {opt.label}
                                       </span>
                                     </SelectItem>
@@ -230,7 +230,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                         render={({ field, fieldState }) => {
                           const val = field.value ?? { min: 0, max: SHARED_CONSTS.maxStars };
                           return (
-                            <FormItem className="space-y-2">
+                            <FormItem className="flex flex-col gap-2">
                               <FormLabel className="text-sm font-normal">Star Range</FormLabel>
                               <FormControl>
                                 <div className="w-full">
@@ -258,7 +258,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                       render={({ field, fieldState }) => {
                         const val = field.value ?? { min: 0, max: 100 };
                         return (
-                          <FormItem className="space-y-2">
+                          <FormItem className="flex flex-col gap-2">
                             <FormLabel className="text-sm font-normal">Accuracy Range</FormLabel>
                             <FormControl>
                               <div className="w-full">
@@ -302,7 +302,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
           {/* Footer */}
           <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
             <Button type="submit" form="snipe-playlist-form" className="gap-2" disabled={downloading}>
-              {downloading ? <Spinner className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+              {downloading ? <Spinner className="size-4" /> : <Download className="size-4" />}
               <span>Download Playlist</span>
             </Button>
           </div>

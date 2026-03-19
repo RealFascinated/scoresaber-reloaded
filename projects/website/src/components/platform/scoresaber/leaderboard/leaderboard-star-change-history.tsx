@@ -14,9 +14,9 @@ function LeaderboardStarChangeHistoryButton({ onClick, isOpen }: { onClick: () =
       className="border-border bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-(--spacing-sm) rounded-(--radius-lg) border px-(--spacing-sm) py-(--spacing-sm) text-xs font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none sm:px-(--spacing-lg) sm:text-sm"
       onClick={onClick}
     >
-      <StarIcon className="h-4 w-4 text-yellow-500" />
+      <StarIcon className="size-4 text-yellow-500" />
       <span>Show Star Changes</span>
-      {isOpen ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
+      {isOpen ? <ChevronUpIcon className="size-4" /> : <ChevronDownIcon className="size-4" />}
     </button>
   );
 }
@@ -36,7 +36,7 @@ export function LeaderboardStarChangeHistory({
       {open && (
         <div className="animate-in slide-in-from-top-2 w-full max-w-[500px] duration-200">
           <div className="border-border bg-background/80 rounded-lg border p-2 sm:p-(--spacing-sm)">
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               {starChangeHistory.map((starChange, index) => {
                 const isCurrent = index === 0;
                 const from = starChange.previousStars == 0 ? "Unranked" : starChange.previousStars.toFixed(2);
@@ -78,12 +78,12 @@ export function LeaderboardStarChangeHistory({
                               : "bg-red-500/10 text-red-600 dark:text-red-400" // Lower to higher
                         )}
                       >
-                        {starChange.previousStars > 0 && <StarIcon className="h-3 w-3" />}
+                        {starChange.previousStars > 0 && <StarIcon className="size-3" />}
                         <span className="font-mono">{from}</span>
                       </div>
 
                       {/* Arrow */}
-                      <ArrowRightIcon className="text-muted-foreground h-3 w-3 shrink-0" />
+                      <ArrowRightIcon className="text-muted-foreground size-3 shrink-0" />
 
                       {/* To */}
                       <div
@@ -96,7 +96,7 @@ export function LeaderboardStarChangeHistory({
                               : "bg-red-500/10 text-red-600 dark:text-red-400"
                         )}
                       >
-                        <StarIcon className="h-3 w-3" />
+                        <StarIcon className="size-3" />
                         <span className="font-mono">{to}</span>
                       </div>
                     </div>

@@ -25,7 +25,7 @@ export function FilterSection({
 }: FilterSectionProps) {
   return (
     <Card className={`h-fit w-full gap-4 ${className ?? ""}`}>
-      <div className="space-y-1">
+      <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
           <h3 className="text-foreground text-lg font-semibold">{title}</h3>
           {hasActiveFilters && onClear && (
@@ -33,10 +33,10 @@ export function FilterSection({
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-muted-foreground hover:text-destructive h-7 w-7"
+                className="text-muted-foreground hover:text-destructive size-7"
                 onClick={onClear}
               >
-                <XIcon className="h-4 w-4" />
+                <XIcon className="size-4" />
               </Button>
             </SimpleTooltip>
           )}

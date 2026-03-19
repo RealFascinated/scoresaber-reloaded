@@ -24,7 +24,7 @@ export const HmdSchema = z.enum([
   "Pico 4S",
   "Pico Neo 2",
   "Pico Neo 3",
-  "PSVR2"
+  "PSVR2",
 ]);
 export type HMD = z.infer<typeof HmdSchema>;
 
@@ -161,7 +161,7 @@ const HMD_DEFINITIONS = [
   {
     hmd: "PSVR2",
     info: {
-      logo: "psvr2.svg"
+      logo: "psvr2.svg",
     },
   },
 ] satisfies ReadonlyArray<{

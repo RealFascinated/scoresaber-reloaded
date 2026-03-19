@@ -37,7 +37,7 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
   if (isError) {
     return (
       <Card className="flex flex-col items-center justify-center text-center">
-        <AlertCircle className="mb-(--spacing-xl) h-16 w-16 text-red-500" />
+        <AlertCircle className="mb-(--spacing-xl) size-16 text-red-500" />
         <h2 className="mb-(--spacing-sm) text-xl font-semibold">Score Not Found</h2>
         <p className="text-muted-foreground">This score has not been tracked or may have been removed.</p>
       </Card>
@@ -55,12 +55,12 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
   const isAnyDataLoading = isScoreStatsLoading || isReplayLoading;
 
   return (
-    <div className="w-full space-y-4">
+    <div className="flex w-full flex-col gap-4">
       <ScoreDetails score={score} />
 
       {isAnyDataLoading && (
         <Card className="flex flex-col items-center justify-center gap-4 py-8">
-          <Loader2 className="text-primary h-8 w-8 animate-spin" />
+          <Loader2 className="text-primary size-8 animate-spin" />
           <p className="text-muted-foreground">Loading additional score data...</p>
         </Card>
       )}
@@ -68,20 +68,20 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
       {!hasAnyAdditionalData && !isAnyDataLoading ? (
         <Card className="flex flex-col items-center justify-center py-8 text-center">
           <div className="mb-6 flex flex-col items-center gap-4">
-            <AlertCircle className="h-16 w-16 text-amber-500" />
+            <AlertCircle className="size-16 text-amber-500" />
             <h2 className="text-xl font-semibold">Limited Score Data</h2>
           </div>
 
           <div className="mb-6 flex flex-col gap-3 text-left">
             {!hasScoreStats && (
               <div className="flex items-center gap-3">
-                <BarChart3 className="text-muted-foreground h-5 w-5" />
+                <BarChart3 className="text-muted-foreground size-5" />
                 <span className="text-muted-foreground">Score statistics unavailable</span>
               </div>
             )}
             {!hasReplay && (
               <div className="flex items-center gap-3">
-                <FileX className="text-muted-foreground h-5 w-5" />
+                <FileX className="text-muted-foreground size-5" />
                 <span className="text-muted-foreground">Replay analysis data unavailable</span>
               </div>
             )}
@@ -90,7 +90,7 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
           <p className="text-muted-foreground text-sm">Some data may not be available for this score.</p>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           {scoreStats && (
             <>
               <ScoreOverview score={score.score} scoreStats={scoreStats} leaderboard={score.leaderboard} />
