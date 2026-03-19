@@ -18,9 +18,11 @@ export function useBackgroundCover(onChange: (value: string | number | boolean) 
   // Initialize state from database
   useEffect(() => {
     if (backgroundCoverOption !== undefined && customBackgroundCover !== undefined) {
-      setSelectedOption(backgroundCoverOption);
-      setCustomValue(customBackgroundCover);
-      setIsInitialized(true);
+      queueMicrotask(() => {
+        setSelectedOption(backgroundCoverOption);
+        setCustomValue(customBackgroundCover);
+        setIsInitialized(true);
+      });
     }
   }, [backgroundCoverOption, customBackgroundCover]);
 

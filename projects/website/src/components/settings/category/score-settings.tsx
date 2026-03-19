@@ -77,9 +77,6 @@ const ScoreSettings = () => {
     });
   }
 
-  // Add onSubmit to the form instance
-  (form as any).onSubmit = onSubmit;
-
   return (
     <div className="flex flex-col gap-6">
       <Form {...form}>
@@ -91,6 +88,7 @@ const ScoreSettings = () => {
               icon={section.icon}
               fields={section.fields}
               form={form}
+              onFormSubmit={onSubmit}
             />
           ))}
         </form>

@@ -31,7 +31,7 @@ export default function LeaderboardPpChartButton({ leaderboard }: Props) {
 
   useEffect(() => {
     if (whatIfRange) {
-      setValues(whatIfRange);
+      queueMicrotask(() => setValues(whatIfRange));
     }
   }, [whatIfRange]);
 
@@ -97,7 +97,7 @@ export default function LeaderboardPpChartButton({ leaderboard }: Props) {
             grid: { color: "#252525" },
             ticks: {
               stepSize: 1,
-              callback: function (this, tickValue, _index, _ticks) {
+              callback: (tickValue: string | number) => {
                 const value = typeof tickValue === "number" ? tickValue : Number(tickValue);
                 return Number.isFinite(value) ? `${value.toFixed(2)}%` : String(tickValue);
               },

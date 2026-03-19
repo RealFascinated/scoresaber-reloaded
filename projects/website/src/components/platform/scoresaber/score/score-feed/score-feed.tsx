@@ -25,10 +25,12 @@ export default function ScoreFeed() {
       return;
     }
 
-    setScores(prev => {
-      return [...prev, commandData]
-        .sort((a, b) => parseDate(b.score.timeSet).getTime() - parseDate(a.score.timeSet).getTime())
-        .slice(0, 8);
+    queueMicrotask(() => {
+      setScores(prev => {
+        return [...prev, commandData]
+          .sort((a, b) => parseDate(b.score.timeSet).getTime() - parseDate(a.score.timeSet).getTime())
+          .slice(0, 8);
+      });
     });
   }, [lastJsonMessage]);
 

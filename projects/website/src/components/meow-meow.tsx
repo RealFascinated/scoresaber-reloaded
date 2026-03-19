@@ -210,23 +210,20 @@ export default function MeowMeow() {
     nekoElRef.current.style.top = `${state.nekoPosY - 16}px`;
   }, [idle, setSprite]);
 
-  const onAnimationFrame = useCallback(
-    (timestamp: number) => {
-      if (!nekoElRef.current) {
-        return;
-      }
-      const state = stateRef.current;
-      if (!state.lastFrameTimestamp) {
-        state.lastFrameTimestamp = timestamp;
-      }
-      if (timestamp - state.lastFrameTimestamp > 100) {
-        state.lastFrameTimestamp = timestamp;
-        frame();
-      }
-      animationFrameRef.current = window.requestAnimationFrame(onAnimationFrame);
-    },
-    [frame]
-  );
+  const onAnimationFrame = useCallback(function onAnimationFrameTick(timestamp: number) {
+    if (!nekoElRef.current) {
+      return;
+    }
+    const state = stateRef.current;
+    if (!state.lastFrameTimestamp) {
+      state.lastFrameTimestamp = timestamp;
+    }
+    if (timestamp - state.lastFrameTimestamp > 100) {
+      state.lastFrameTimestamp = timestamp;
+      frame();
+    }
+    animationFrameRef.current = window.requestAnimationFrame(onAnimationFrameTick);
+  }, [frame]);
 
   const init = useCallback(() => {
     const nekoEl = document.createElement("div");

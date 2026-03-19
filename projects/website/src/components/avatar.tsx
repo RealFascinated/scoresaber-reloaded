@@ -2,7 +2,7 @@
 
 import { cn } from "@/common/utils";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type AvatarProps = {
   src: string;
@@ -12,13 +12,8 @@ type AvatarProps = {
 };
 
 export default function Avatar({ src, size = 32, className, alt }: AvatarProps) {
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    setHasError(false);
-  }, [src]);
-
-  const showFallback = hasError || !src;
+  const [failedForSrc, setFailedForSrc] = useState<string | null>(null);
+  const showFallback = !src || failedForSrc === src;
   const fallbackText = alt?.trim().slice(0, 1).toUpperCase();
 
   if (showFallback) {
@@ -49,7 +44,7 @@ export default function Avatar({ src, size = 32, className, alt }: AvatarProps) 
       height={size}
       className={cn("rounded-full", className)}
       alt={alt}
-      onError={() => setHasError(true)}
+      onError={() => setFailedForSrc(src)}
       style={{
         minWidth: size,
         minHeight: size,

@@ -66,7 +66,8 @@ export default function OverlayBuilder() {
     defaultValues: defaultOverlaySettings,
   });
 
-  // Watch form values
+  // Watch form values (React Compiler: watch() is intentionally not memo-safe)
+  // eslint-disable-next-line react-hooks/incompatible-library -- react-hook-form watch()
   const formValues = form.watch();
 
   useEffect(() => {

@@ -25,8 +25,6 @@ export const createHttpMetricsHooks = () => {
   let responseTimeMetric: ResponseTimeHistogramMetric | undefined;
   let responseTimeMetricLoaded = false;
 
-  const getRouteLabel = (route?: string): string | undefined => route;
-
   const getStatusCode = (response: unknown, setStatus: unknown): number => {
     if (typeof setStatus === "number") return setStatus;
     if (typeof setStatus === "string") {
@@ -71,7 +69,7 @@ export const createHttpMetricsHooks = () => {
   };
 
   return {
-    onRequest: async ({ request, route }: RequestHookContext): Promise<void> => {
+    onRequest: async ({ request }: RequestHookContext): Promise<void> => {
       requestStartTimes.set(request, process.hrtime.bigint());
       const requestsMetric = await getTotalRequestsMetric();
       requestsMetric?.increment();
@@ -82,15 +80,14 @@ export const createHttpMetricsHooks = () => {
       response,
       set,
     }: AfterHandleHookContext): Promise<void> => {
-      const routeLabel = getRouteLabel(route);
-      if (!routeLabel) {
+      if (!route) {
         requestStartTimes.delete(request);
         return;
       }
 
       const statusCode = getStatusCode(response, set.status);
       const responseMetric = await getResponseStatusMetric();
-      responseMetric?.increment(routeLabel, statusCode);
+      responseMetric?.increment(route, statusCode);
 
       const startedAt = requestStartTimes.get(request);
       requestStartTimes.delete(request);
@@ -98,7 +95,7 @@ export const createHttpMetricsHooks = () => {
 
       const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
       const responseTimeHistogramMetric = await getResponseTimeMetric();
-      responseTimeHistogramMetric?.observe(routeLabel, durationMs);
+      responseTimeHistogramMetric?.observe(route, durationMs);
     },
   };
 };

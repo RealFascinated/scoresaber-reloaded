@@ -1,5 +1,5 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 // Module-level cache that persists across component remounts
 // Uses a Map keyed by cache key string
@@ -57,15 +57,20 @@ export function useStableLiveQuery<T>(
   // Multiple components using the same query will share the same database call
   const result = useLiveQuery(safeQuerier, deps);
 
-  // Use a ref to track the last value for comparison and caching
-  const lastValueRef = useRef<T | undefined>(queryCache.get(cacheKey) as T | undefined);
-  const resultRef = useRef(result);
+  const [cachedResult, setCachedResult] = useState<T | undefined>(() => queryCache.get(cacheKey) as T | undefined);
+  const prevCacheKeyRef = useRef(cacheKey);
+
+  useEffect(() => {
+    if (prevCacheKeyRef.current !== cacheKey) {
+      prevCacheKeyRef.current = cacheKey;
+      const fromCache = queryCache.get(cacheKey) as T | undefined;
+      queueMicrotask(() => setCachedResult(fromCache));
+    }
+  }, [cacheKey]);
 
   // Update cache when result changes
   useEffect(() => {
-    resultRef.current = result;
     if (result !== undefined) {
-      lastValueRef.current = result;
       queryCache.set(cacheKey, result);
 
       // Prevent unbounded growth if cache keys vary over time.
@@ -75,6 +80,8 @@ export function useStableLiveQuery<T>(
           queryCache.delete(oldestKey);
         }
       }
+
+      queueMicrotask(() => setCachedResult(result));
     }
   }, [result, cacheKey]);
 
@@ -85,5 +92,5 @@ export function useStableLiveQuery<T>(
   }
 
   // Fallback to cached value during remounts
-  return lastValueRef.current;
+  return cachedResult;
 }

@@ -137,17 +137,19 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
 
     let newStars = getStarsForAcc(targetRawPp, accuracyRef.current);
 
-    if (newStars < 0.5) {
-      newStars = 0.5;
-      updateAccuracy(getAccForStars(targetRawPp, newStars));
-      setStars(newStars);
-    } else if (newStars > SHARED_CONSTS.maxStars) {
-      newStars = SHARED_CONSTS.maxStars;
-      updateAccuracy(getAccForStars(targetRawPp, newStars));
-      setStars(newStars);
-    } else {
-      setStars(roundStars(newStars));
-    }
+    queueMicrotask(() => {
+      if (newStars < 0.5) {
+        const clamped = 0.5;
+        updateAccuracy(getAccForStars(targetRawPp, clamped));
+        setStars(clamped);
+      } else if (newStars > SHARED_CONSTS.maxStars) {
+        const clamped = SHARED_CONSTS.maxStars;
+        updateAccuracy(getAccForStars(targetRawPp, clamped));
+        setStars(clamped);
+      } else {
+        setStars(roundStars(newStars));
+      }
+    });
   }, [targetRawPp]);
 
   const adjustForBounds = (

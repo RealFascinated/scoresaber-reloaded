@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useDebounce } from "@uidotdev/usehooks";
-import { ReactElement, ReactNode, useEffect, useRef } from "react";
+import { ReactElement, ReactNode, Ref, useEffect, useState } from "react";
 import { Path, UseFormReturn } from "react-hook-form";
 import { IconType } from "react-icons";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from "../ui/form";
@@ -65,6 +65,7 @@ interface SettingSectionProps<TFormValues extends Record<string, any>> {
   icon: IconType;
   fields: readonly Field<TFormValues, Path<TFormValues>>[];
   form: UseFormReturn<TFormValues>;
+  onFormSubmit?: (values: TFormValues) => void | Promise<void>;
 }
 
 interface FormFieldComponentProps<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> {
@@ -72,8 +73,12 @@ interface FormFieldComponentProps<TFormValues extends Record<string, any>, TName
   formField: {
     value: TFormValues[TName];
     onChange: (value: TFormValues[TName]) => void;
+    onBlur: () => void;
+    name: TName;
+    ref: Ref<HTMLElement>;
   };
   form: UseFormReturn<TFormValues>;
+  onFormSubmit?: (values: TFormValues) => void | Promise<void>;
 }
 
 type RenderFieldProps<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> = {
@@ -159,60 +164,63 @@ function FormFieldComponent<TFormValues extends Record<string, any>, TName exten
   field,
   formField,
   form,
+  onFormSubmit,
 }: FormFieldComponentProps<TFormValues, TName>) {
   const debouncedValue = useDebounce(formField.value, 500);
-  const hasChanged = useRef(false);
+  const [hasChanged, setHasChanged] = useState(false);
 
   const wrappedOnChange = (value: any) => {
-    hasChanged.current = true;
+    setHasChanged(true);
     formField.onChange(value);
     if (field.type === "text" || field.type === "slider") {
       // For text and slider inputs, we'll let the debounced effect handle the save
       return;
     }
     // For other inputs, save immediately
-    const onSubmit = (form as any).onSubmit;
-    if (onSubmit) {
-      form.handleSubmit(onSubmit)();
+    if (onFormSubmit) {
+      form.handleSubmit(onFormSubmit)();
     }
   };
 
   // Effect to handle debounced saves for text and slider inputs
   useEffect(() => {
-    if (!hasChanged.current) {
+    if (!hasChanged) {
       return;
     }
 
     if ((field.type === "text" || field.type === "slider") && debouncedValue !== undefined) {
-      const onSubmit = (form as any).onSubmit;
-      if (onSubmit) {
-        form.handleSubmit(onSubmit)();
+      if (onFormSubmit) {
+        form.handleSubmit(onFormSubmit)();
       }
+      queueMicrotask(() => setHasChanged(false));
     }
-  }, [debouncedValue, field.type, form]);
+  }, [debouncedValue, field.type, form, hasChanged, onFormSubmit]);
 
   const hasCustomControl = field.type === "select" && field.customControl;
 
-  const renderControl = () => {
-    const renderProps: RenderFieldProps<TFormValues, TName> = {
-      field,
-      value: formField.value,
-      onChange: wrappedOnChange,
-    };
-
-    switch (field.type) {
-      case "checkbox":
-        return renderCheckboxField(renderProps);
-      case "select":
-        return renderSelectField(renderProps);
-      case "slider":
-        return renderSliderField(renderProps);
-      case "text":
-        return renderTextField(renderProps);
-      default:
-        return null;
-    }
+  const renderProps: RenderFieldProps<TFormValues, TName> = {
+    field,
+    value: formField.value,
+    onChange: wrappedOnChange,
   };
+
+  let control: ReactElement | null = null;
+  switch (field.type) {
+    case "checkbox":
+      control = renderCheckboxField(renderProps);
+      break;
+    case "select":
+      control = renderSelectField(renderProps);
+      break;
+    case "slider":
+      control = renderSliderField(renderProps);
+      break;
+    case "text":
+      control = renderTextField(renderProps);
+      break;
+    default:
+      control = null;
+  }
 
   return (
     <FormItem
@@ -229,12 +237,15 @@ function FormFieldComponent<TFormValues extends Record<string, any>, TName exten
           <div className="py-1">
             {field.type === "select" &&
               field.customControl &&
-              field.customControl({
-                field: {
-                  ...formField,
-                  onChange: wrappedOnChange,
-                },
-              })}
+              (() => {
+                const { ref: _unusedFieldRef, ...fieldForCustom } = formField;
+                return field.customControl({
+                  field: {
+                    ...fieldForCustom,
+                    onChange: wrappedOnChange,
+                  },
+                });
+              })()}
           </div>
         </FormControl>
       ) : (
@@ -245,7 +256,7 @@ function FormFieldComponent<TFormValues extends Record<string, any>, TName exten
               <FormDescription className="text-xs leading-tight">{field.description}</FormDescription>
             )}
           </div>
-          <FormControl>{renderControl()}</FormControl>
+          <FormControl>{control}</FormControl>
         </>
       )}
     </FormItem>
@@ -257,6 +268,7 @@ export function SettingSection<TFormValues extends Record<string, any>>({
   icon: Icon,
   fields,
   form,
+  onFormSubmit,
 }: SettingSectionProps<TFormValues>) {
   return (
     <div className="flex flex-col gap-2">
@@ -271,7 +283,12 @@ export function SettingSection<TFormValues extends Record<string, any>>({
             control={form.control}
             name={field.name}
             render={({ field: formField }) => (
-              <FormFieldComponent field={field} formField={formField} form={form} />
+              <FormFieldComponent
+                field={field}
+                formField={formField}
+                form={form}
+                onFormSubmit={onFormSubmit}
+              />
             )}
           />
         ))}

@@ -12,10 +12,14 @@
   },
   "scripts": {
     "prettier": "prettier --write .",
+    "lint:all": "eslint -c projects/backend/eslint.config.mjs \"projects/backend/**/*.ts\" && eslint -c projects/website/eslint.config.mjs \"projects/website/src/**/*.ts\" \"projects/website/src/**/*.tsx\"",
     "count-lines": "find projects -type f -not -path '*/dist/*' -not -path '*/.next/*' -not -path '*/node_modules/*' -name '*.ts' -o -name '*.tsx' | xargs wc -l"
   },
   "author": "fascinated7",
   "license": "MIT",
+  "devDependencies": {
+    "eslint": "^9.39.1"
+  },
   "dependencies": {
     "cross-env": "^10.1.0",
     "prettier": "^3.8.1",

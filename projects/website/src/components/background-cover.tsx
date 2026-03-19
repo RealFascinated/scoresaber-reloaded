@@ -113,7 +113,9 @@ export default function BackgroundCover() {
   // Initialize random index when cover type changes to rotating or random
   useEffect(() => {
     if (cover?.type === "rotating-images" || cover?.type === "random") {
-      setCurrentImageIndex(getRandomIndex());
+      queueMicrotask(() => {
+        setCurrentImageIndex(getRandomIndex());
+      });
     }
   }, [cover?.type]);
 

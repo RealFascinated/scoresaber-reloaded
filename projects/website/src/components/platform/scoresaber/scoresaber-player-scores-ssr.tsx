@@ -214,7 +214,7 @@ export default function ScoreSaberPlayerScoresSSR({
         animateLeft();
       }
     },
-    [animateLeft, setIsLoading, setPage]
+    [animateLeft, setIsLoading, setPage, setSearch]
   );
 
   const buildUrl = useCallback(

@@ -52,8 +52,10 @@ export default function PageTransition({ children, className }: { children: Reac
   // Capture page and children in state when loading starts (no refs read during render)
   useEffect(() => {
     if (isLoading && !prevIsLoadingRef.current) {
-      setStablePage(currentPage);
-      setStableChildren(children);
+      queueMicrotask(() => {
+        setStablePage(currentPage);
+        setStableChildren(children);
+      });
     }
     prevIsLoadingRef.current = isLoading;
   }, [isLoading, currentPage, children]);

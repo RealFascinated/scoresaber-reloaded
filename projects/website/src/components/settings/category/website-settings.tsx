@@ -18,6 +18,10 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Field, SettingSection } from "../setting-section";
 
+function getMonotonicTimeMs(): number {
+  return globalThis.performance.now();
+}
+
 const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
   backgroundCoverBrightness: z.number().min(0).max(100),
@@ -197,7 +201,7 @@ const WebsiteSettings = () => {
   );
 
   async function onSubmit(values: FormValues) {
-    const before = performance.now();
+    const before = getMonotonicTimeMs();
     await Promise.all([
       database.setBackgroundCoverBrightness(values.backgroundCoverBrightness),
       database.setBackgroundCoverBlur(values.backgroundCoverBlur),
@@ -207,14 +211,11 @@ const WebsiteSettings = () => {
     ]);
     setTheme(values.theme);
 
-    const after = performance.now();
+    const after = getMonotonicTimeMs();
     toast.success("Settings saved", {
       description: `Your settings have been saved in ${(after - before).toFixed(0)}ms`,
     });
   }
-
-  // Add onSubmit to the form instance
-  (form as any).onSubmit = onSubmit;
 
   return (
     <div className="flex flex-col gap-6">
@@ -227,6 +228,7 @@ const WebsiteSettings = () => {
               icon={section.icon}
               fields={section.fields}
               form={form}
+              onFormSubmit={onSubmit}
             />
           ))}
         </form>

@@ -9,7 +9,7 @@
     "build:analyze": "cross-env ANALYZE=true next build",
     "start": "next start",
     "start:debug": "NODE_OPTIONS='--inspect' next start",
-    "lint": "next lint"
+    "lint": "eslint \"src/**/*.ts\" \"src/**/*.tsx\""
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.5",
@@ -72,7 +72,7 @@
     "@types/node": "^25.5.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "eslint": "^10.0.3",
+    "eslint": "^9.39.1",
     "eslint-config-next": "16.2.0",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.2",

@@ -138,7 +138,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
         animateLeft();
       }
     },
-    [animateLeft, setIsLoading, setPage]
+    [animateLeft, setIsLoading, setPage, setSearch]
   );
 
   const buildUrl = useCallback(
