@@ -173,27 +173,25 @@ export default class BeatLeaderService {
    * @param scoreId the id of the score
    */
   public static async getScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
-    return CacheService.fetch(CacheId.ScoreStats, `score-stats:${scoreId}`, async () => {
-      const scoreStatsFile = await StorageService.getFile(
-        StorageBucket.BeatLeaderScoreStats,
-        `${scoreId}.json`
-      );
-      if (scoreStatsFile != undefined) {
-        return JSON.parse(scoreStatsFile.toString()) as ScoreStatsToken;
-      }
+    const scoreStatsFile = await StorageService.getFile(
+      StorageBucket.BeatLeaderScoreStats,
+      `${scoreId}.json`
+    );
+    if (scoreStatsFile != undefined) {
+      return JSON.parse(scoreStatsFile.toString()) as ScoreStatsToken;
+    }
 
-      const scoreStats = await ApiServiceRegistry.getInstance()
-        .getBeatLeaderService()
-        .lookupScoreStats(scoreId);
-      if (scoreStats != undefined) {
-        await StorageService.saveFile(
-          StorageBucket.BeatLeaderScoreStats,
-          `${scoreId}.json`,
-          Buffer.from(JSON.stringify(scoreStats))
-        );
-      }
-      return scoreStats;
-    });
+    const scoreStats = await ApiServiceRegistry.getInstance()
+      .getBeatLeaderService()
+      .lookupScoreStats(scoreId);
+    if (scoreStats != undefined) {
+      await StorageService.saveFile(
+        StorageBucket.BeatLeaderScoreStats,
+        `${scoreId}.json`,
+        Buffer.from(JSON.stringify(scoreStats))
+      );
+    }
+    return scoreStats;
   }
 
   /**

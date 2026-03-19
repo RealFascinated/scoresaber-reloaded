@@ -13,7 +13,6 @@ export enum CacheId {
   Leaderboards = "leaderboards",
   BeatLeaderScore = "beatLeaderScore",
   Players = "players",
-  ScoreStats = "scoreStats",
   PreviousScore = "previousScore",
   ScoreHistoryGraph = "scoreHistoryGraph",
 }
@@ -49,10 +48,6 @@ export default class CacheService {
     },
     [CacheId.BeatLeaderScore]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "REDIS",
-    },
-    [CacheId.ScoreStats]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 12),
       mode: "REDIS",
     },
     [CacheId.PreviousScore]: {

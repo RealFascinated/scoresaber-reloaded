@@ -18,7 +18,7 @@ export default class StorageService {
 
   constructor() {
     StorageService.CACHE = new SSRCache({
-      maxObjects: 1000,
+      maxObjects: 5_000,
     });
     this.initBuckets();
   }
