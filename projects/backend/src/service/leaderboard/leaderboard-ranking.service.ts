@@ -83,7 +83,6 @@ export class LeaderboardRankingService {
       Logger.info(`[RANKED UPDATES] Updating scores for leaderboard "${leaderboard.id}"...`);
       let hasMorePages = true;
       let page = 1;
-      let updatedScoresCount = 0;
       const scoreOps: Array<{ score: ScoreSaberScore; op: AnyBulkWriteOperation<ScoreSaberScore> }> = [];
 
       // Collect all scores first

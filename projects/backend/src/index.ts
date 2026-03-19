@@ -30,7 +30,7 @@ import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
 import { EventsManager } from "./event/events-manager";
-import { metricsPlugin } from "./plugins/metrics.plugin";
+import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { QueueManager } from "./queue/queue-manager";
 import BeatSaverService from "./service/beatsaver.service";
 import CacheService from "./service/cache.service";
@@ -70,7 +70,7 @@ Logger.info("Testing Redis connection...");
 export const redisClient = new Redis(env.REDIS_URL);
 Logger.info("Connected to Redis :)");
 
-let typeReferences: AdditionalReferences | undefined;
+const typeReferences: AdditionalReferences | undefined = {};
 if (isProduction()) {
   Logger.info("Generating type references...");
   fromTypes("src/index.ts", {
@@ -80,6 +80,8 @@ if (isProduction()) {
     debug: true,
   })();
 }
+
+const httpMetricsHooks = createHttpMetricsHooks();
 
 export const app = new Elysia()
   .use(
@@ -210,7 +212,7 @@ export const app = new Elysia()
       },
     })
   )
-  .use(metricsPlugin())
+  .onRequest(httpMetricsHooks.onRequest)
   .onError({ as: "global" }, ({ code, error }) => {
     // Return default error for type validation
     if (code === "VALIDATION") {
@@ -262,7 +264,8 @@ export const app = new Elysia()
       timestamp: new Date().toISOString(),
     };
   })
-  .onAfterHandle(({ request, response, set }) => {
+  .onAfterHandle(async ({ request, response, set }) => {
+    await httpMetricsHooks.onAfterHandle({ request, response, set });
     if (request.headers.get("accept") === "application/devalue") {
       set.headers["content-type"] = "application/devalue";
       return stringify(response);

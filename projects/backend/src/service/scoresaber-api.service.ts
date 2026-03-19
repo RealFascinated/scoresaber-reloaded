@@ -110,7 +110,7 @@ export class ScoreSaberApiService {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), ScoreSaberApiService.fetchTimeoutMs);
 
-        let response: Response | undefined = undefined;
+        let response: Response | undefined;
         try {
           response = await fetch(
             ScoreSaberApiService.buildRequestUrl(

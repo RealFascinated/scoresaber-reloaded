@@ -401,7 +401,7 @@ export class LeaderboardCoreService {
       },
       {
         upsert: true,
-        new: true,
+        returnDocument: 'after',
         setDefaultsOnInsert: true,
       }
     ).lean();
