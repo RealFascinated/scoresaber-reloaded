@@ -182,7 +182,9 @@ export class ScoreWebsockets implements EventListener {
       }
 
       // Track unique daily players in Redis
-      const metric = await ScoreWebsockets.getUniqueDailyPlayersMetric();
+      const metric = (await MetricsService.getMetric(MetricType.UNIQUE_DAILY_PLAYERS)) as
+        | UniqueDailyPlayersMetric
+        | undefined
       if (metric) {
         // no need to await this
         metric.addPlayer(player.id);
@@ -198,15 +200,6 @@ export class ScoreWebsockets implements EventListener {
         listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);
       });
     }
-  }
-
-  /**
-   * Gets the unique daily players metric
-   */
-  private static async getUniqueDailyPlayersMetric(): Promise<UniqueDailyPlayersMetric | undefined> {
-    return (await MetricsService.getMetric(MetricType.UNIQUE_DAILY_PLAYERS)) as
-      | UniqueDailyPlayersMetric
-      | undefined;
   }
 
   onStop: () => Promise<void> = async () => {
