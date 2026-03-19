@@ -42,6 +42,7 @@ export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberSc
         title: "Accuracy",
         color: Colors.generic.green,
         axisId: "y",
+        pointRadius: 3,
         labelFormatter: value => `Accuracy: ${value.toFixed(2)}%`,
         axisConfig: {
           display: true,

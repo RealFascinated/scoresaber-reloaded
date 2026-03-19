@@ -87,7 +87,7 @@ const GenericChart = ({ config, labels }: Props) => {
         stack: dataset.stack,
         order: dataset.stackOrder,
         maxBarThickness: 12,
-        pointRadius: dataset.type === "point" ? dataset.pointRadius || 3 : 0,
+        pointRadius: dataset.pointRadius ?? (dataset.type === "point" ? 3 : 0),
         showLine: dataset.type !== "point",
         segment: {
           borderDash: (ctx: any) => {
