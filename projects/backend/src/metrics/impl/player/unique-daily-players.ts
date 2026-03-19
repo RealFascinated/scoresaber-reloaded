@@ -1,20 +1,24 @@
 import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
+import Logger from "@ssr/common/logger";
 import { Gauge } from "prom-client";
 import { redisClient } from "../../../common/redis";
 import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
 import Metric from "../../metric";
 
 export default class UniqueDailyPlayersMetric extends Metric<null> {
+  private readonly gauge: Gauge;
+  private lastCollectedAt = 0;
+  private lastKnownCount = 0;
+
   constructor() {
     super(MetricType.UNIQUE_DAILY_PLAYERS, null);
 
-    const gauge = new Gauge({
+    this.gauge = new Gauge({
       name: "unique_daily_players",
       help: "Number of unique daily players",
       registers: [prometheusRegistry],
       collect: async () => {
-        const count = await this.getUniqueCount();
-        gauge.set(count);
+        await this.collectCount();
       },
     });
   }
@@ -41,5 +45,23 @@ export default class UniqueDailyPlayersMetric extends Metric<null> {
    */
   public async getUniqueCount(): Promise<number> {
     return await redisClient.scard(this.getDateKey());
+  }
+
+  private async collectCount(): Promise<void> {
+    const now = Date.now();
+    if (now - this.lastCollectedAt < 30_000) {
+      this.gauge.set(this.lastKnownCount);
+      return;
+    }
+
+    this.lastCollectedAt = now;
+    try {
+      const count = await this.getUniqueCount();
+      this.lastKnownCount = count;
+      this.gauge.set(count);
+    } catch (error) {
+      Logger.error("Failed to collect unique daily players metric:", error);
+      this.gauge.set(this.lastKnownCount);
+    }
   }
 }

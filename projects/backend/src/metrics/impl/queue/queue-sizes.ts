@@ -13,9 +13,14 @@ export default class QueueSizesMetric extends NumberMetric {
       labelNames: ["queue"],
       registers: [prometheusRegistry],
       collect: async () => {
-        for (const queue of QueueManager.getQueues()) {
-          const size = await queue.getSize();
-          gauge.set({ queue: queue.id }, size);
+        const queueSizes = await Promise.all(
+          QueueManager.getQueues().map(async queue => ({ queueId: queue.id, size: await queue.getSize() }))
+        );
+        let totalSize = 0;
+        for (const { queueId, size } of queueSizes) {
+          totalSize += size;
+          this.value = totalSize;
+          gauge.set({ queue: queueId }, size);
         }
       },
     });

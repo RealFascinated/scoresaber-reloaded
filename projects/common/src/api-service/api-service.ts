@@ -32,6 +32,8 @@ export default class ApiService {
    * Only tracked on the server.
    */
   private callCount: number = 0;
+  private failedCallCount: number = 0;
+  private totalLatencyMs: number = 0;
 
   /**
    * The current proxy to use.
@@ -79,6 +81,17 @@ export default class ApiService {
     return this.callCount;
   }
 
+  public getFailedCallCount(): number {
+    return this.failedCallCount;
+  }
+
+  public getAverageLatencyMs(): number {
+    if (this.callCount <= 0) {
+      return 0;
+    }
+    return this.totalLatencyMs / this.callCount;
+  }
+
   /**
    * Logs a message to the console.
    *
@@ -109,6 +122,7 @@ export default class ApiService {
     url: string,
     options?: RequestOptions & { priority?: CooldownPriority }
   ): Promise<T | undefined> {
+    const startedAt = performance.now();
     await this.cooldown.waitAndUse(options?.priority || CooldownPriority.NORMAL);
 
     // Increment the call count if we're on the server
@@ -119,6 +133,7 @@ export default class ApiService {
     const response = await Request.executeRequest(this.buildRequestUrl(url), "GET", {
       ...options,
     });
+    this.totalLatencyMs += Math.max(0, performance.now() - startedAt);
 
     // Handle rate limit errors
     const remaining = response?.headers.get("x-ratelimit-remaining");
@@ -138,7 +153,12 @@ export default class ApiService {
       this.lastRateLimitSeen = Number(remaining);
     }
 
-    return response?.json() as Promise<T>;
+    if (!response) {
+      this.failedCallCount++;
+      return undefined;
+    }
+
+    return response.json() as Promise<T>;
   }
 
   /**
@@ -154,16 +174,12 @@ export default class ApiService {
     variables: Record<string, any>,
     options?: RequestOptions
   ): Promise<T | undefined> {
+    const startedAt = performance.now();
     if (isServer()) {
       this.callCount++;
     }
 
     await this.cooldown.waitAndUse();
-
-    // Increment the call count if we're on the server
-    if (isServer()) {
-      this.callCount++;
-    }
 
     const response = await fetch(url, {
       method: "POST",
@@ -176,6 +192,12 @@ export default class ApiService {
         variables: variables || {},
       }),
     });
+
+    this.totalLatencyMs += Math.max(0, performance.now() - startedAt);
+    if (!response.ok) {
+      this.failedCallCount++;
+      return undefined;
+    }
 
     return response.json() as Promise<T>;
   }

@@ -1,7 +1,8 @@
 import Logger from "@ssr/common/logger";
 import { Elysia } from "elysia";
+import HttpResponseStatusMetric from "../metrics/impl/backend/http-response-status";
 import ResponseTimeHistogramMetric from "../metrics/impl/backend/response-time";
-import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
+import TotalRequestsMetric from "../metrics/impl/backend/total-requests";
 import MetricsService, { MetricType } from "../service/metrics.service";
 
 interface RequestStore {
@@ -22,6 +23,10 @@ const resolveRouteLabel = (request: RouteLabelRequest): string => {
 export const metricsPlugin = () => {
   let responseTimeMetric: ResponseTimeHistogramMetric | undefined;
   let responseTimeMetricLoaded = false;
+  let responseStatusMetric: HttpResponseStatusMetric | undefined;
+  let responseStatusMetricLoaded = false;
+  let totalRequestsMetric: TotalRequestsMetric | undefined;
+  let totalRequestsMetricLoaded = false;
 
   const getResponseTimeMetric = async (): Promise<ResponseTimeHistogramMetric | undefined> => {
     if (responseTimeMetricLoaded) return responseTimeMetric;
@@ -32,12 +37,44 @@ export const metricsPlugin = () => {
     return responseTimeMetric;
   };
 
+  const getResponseStatusMetric = async (): Promise<HttpResponseStatusMetric | undefined> => {
+    if (responseStatusMetricLoaded) return responseStatusMetric;
+    responseStatusMetricLoaded = true;
+    responseStatusMetric = (await MetricsService.getMetric(MetricType.HTTP_RESPONSES)) as
+      | HttpResponseStatusMetric
+      | undefined;
+    return responseStatusMetric;
+  };
+
+  const getTotalRequestsMetric = async (): Promise<TotalRequestsMetric | undefined> => {
+    if (totalRequestsMetricLoaded) return totalRequestsMetric;
+    totalRequestsMetricLoaded = true;
+    totalRequestsMetric = (await MetricsService.getMetric(MetricType.TOTAL_REQUESTS)) as
+      | TotalRequestsMetric
+      | undefined;
+    return totalRequestsMetric;
+  };
+
+  const resolveStatusCode = (response: unknown, setStatus: unknown): number => {
+    if (typeof setStatus === "number") {
+      return setStatus;
+    }
+    if (typeof setStatus === "string") {
+      const parsed = Number.parseInt(setStatus, 10);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+    if (response instanceof Response) {
+      return response.status;
+    }
+    return 200;
+  };
+
   return new Elysia()
     .onRequest(async ({ store, request }) => {
       try {
-        const rpsMetric = (await MetricsService.getMetric(MetricType.TOTAL_REQUESTS)) as
-          | RequestsPerSecondMetric
-          | undefined;
+        const rpsMetric = await getTotalRequestsMetric();
 
         if (rpsMetric) {
           rpsMetric.increment();
@@ -50,9 +87,17 @@ export const metricsPlugin = () => {
         Logger.error("Failed to increment request counter:", error);
       }
     })
-    .onAfterHandle(async ({ store }) => {
+    .onAfterHandle(async ({ store, response, set, request }) => {
       try {
         const requestStore = store as RequestStore;
+        // Route metadata may be unavailable during onRequest in some Elysia phases.
+        // Resolve again at response time and fallback to the earlier captured value.
+        const route = resolveRouteLabel(request as RouteLabelRequest) || requestStore.route;
+        if (route) {
+          const responseStatusMetricInstance = await getResponseStatusMetric();
+          responseStatusMetricInstance?.increment(route, resolveStatusCode(response, set.status));
+        }
+
         if (!requestStore.startTime) return;
 
         const durationNs = process.hrtime.bigint() - requestStore.startTime;
@@ -61,7 +106,6 @@ export const metricsPlugin = () => {
         const responseTimeMetricInstance = await getResponseTimeMetric();
         if (!responseTimeMetricInstance) return;
 
-        const route = requestStore.route;
         if (!route) return;
 
         responseTimeMetricInstance.observe(route, durationMs);

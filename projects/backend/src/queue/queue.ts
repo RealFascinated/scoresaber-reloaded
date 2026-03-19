@@ -8,8 +8,14 @@ export type QueueItem<T> = {
   data: T;
 };
 type QueueMode = "fifo" | "lifo";
+export type QueueProcessEvent = {
+  queueId: string;
+  durationMs: number;
+  success: boolean;
+};
 
 export abstract class Queue<T> {
+  private static processObserver: ((event: QueueProcessEvent) => void) | undefined;
   /**
    * The name of the queue
    */
@@ -33,6 +39,10 @@ export abstract class Queue<T> {
   constructor(id: QueueId, queueMode: QueueMode = "lifo") {
     this.id = id;
     this.queueMode = queueMode;
+  }
+
+  public static setProcessObserver(observer: ((event: QueueProcessEvent) => void) | undefined): void {
+    Queue.processObserver = observer;
   }
 
   /**
@@ -94,7 +104,18 @@ export abstract class Queue<T> {
         return;
       }
 
-      await this.processItem(item);
+      const startedAt = performance.now();
+      let success = false;
+      try {
+        await this.processItem(item);
+        success = true;
+      } finally {
+        Queue.processObserver?.({
+          queueId: this.id,
+          durationMs: Math.max(0, performance.now() - startedAt),
+          success,
+        });
+      }
     } catch (error) {
       Logger.error(`Error processing queue ${this.id}:`, error);
     } finally {

@@ -391,6 +391,7 @@ const gracefulShutdown = async (signal: string) => {
     );
 
     Logger.info("Stopping all services...");
+    MetricsService.cleanup();
     for (const listener of EventsManager.getListeners()) {
       try {
         await listener.onStop?.();

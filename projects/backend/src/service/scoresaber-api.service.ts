@@ -77,6 +77,8 @@ export class ScoreSaberApiService {
   private static proxyResetTimerStarted: boolean = false;
 
   public static totalRequests: number = 0;
+  public static failedRequests: number = 0;
+  private static totalRequestLatencyMs: number = 0;
   private static readonly fetchTimeoutMs: number = 10_000;
 
   /**
@@ -93,6 +95,7 @@ export class ScoreSaberApiService {
       searchParams?: Record<string, string>;
     }
   ): Promise<T | undefined> {
+    const startedAt = performance.now();
     ScoreSaberApiService.ensureProxyResetTimer();
     const cacheHash = Bun.hash(JSON.stringify({ url, options })).toString();
 
@@ -119,6 +122,7 @@ export class ScoreSaberApiService {
           );
         } catch {
           // Network failures / aborts should be treated as "no result" for callers.
+          ScoreSaberApiService.failedRequests++;
           return undefined;
         } finally {
           clearTimeout(timeoutId);
@@ -139,6 +143,7 @@ export class ScoreSaberApiService {
         }
 
         if (!response.ok || response.status !== 200) {
+          ScoreSaberApiService.failedRequests++;
           return undefined;
         }
 
@@ -150,6 +155,7 @@ export class ScoreSaberApiService {
         try {
           responseData = isJson ? ((await response.json()) as T) : await response.text();
         } catch {
+          ScoreSaberApiService.failedRequests++;
           return undefined;
         }
 
@@ -160,7 +166,15 @@ export class ScoreSaberApiService {
       }
     );
 
+    ScoreSaberApiService.totalRequestLatencyMs += Math.max(0, performance.now() - startedAt);
     return data?.data as T;
+  }
+
+  public static getAverageLatencyMs(): number {
+    if (ScoreSaberApiService.totalRequests <= 0) {
+      return 0;
+    }
+    return ScoreSaberApiService.totalRequestLatencyMs / ScoreSaberApiService.totalRequests;
   }
 
   /**

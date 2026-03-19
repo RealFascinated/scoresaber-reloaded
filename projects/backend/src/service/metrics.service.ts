@@ -3,9 +3,11 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { Registry } from "prom-client";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
+import HttpResponseStatusMetric from "../metrics/impl/backend/http-response-status";
 import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
+import RedisHealthMetric from "../metrics/impl/backend/redis-health";
 import ResponseTimeHistogramMetric from "../metrics/impl/backend/response-time";
-import RequestsPerSecondMetric from "../metrics/impl/backend/total-requests";
+import TotalRequestsMetric from "../metrics/impl/backend/total-requests";
 import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
 import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
@@ -15,6 +17,7 @@ import TotalTrackedScoresMetric from "../metrics/impl/player/total-tracked-score
 import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
 import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
 import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
+import QueueProcessingDurationMetric from "../metrics/impl/queue/queue-processing-duration";
 import QueueSizesMetric from "../metrics/impl/queue/queue-sizes";
 import Metric from "../metrics/metric";
 
@@ -39,20 +42,29 @@ export enum MetricType {
   EVENT_LOOP_LAG = "event_loop_lag",
   RESPONSE_TIME_MS = "response_time_ms",
   TOTAL_REQUESTS = "total_requests",
+  HTTP_RESPONSES = "http_responses",
   API_SERVICES = "api_services",
   PROCESS_UPTIME = "process_uptime",
+  REDIS_HEALTH = "redis_health",
 
   // Queue metrics
   QUEUE_SIZES = "queue_sizes",
+  QUEUE_PROCESSING_DURATION = "queue_processing_duration",
 
   // Database metrics
   MONGO_DB_SIZE = "mongo_db_size",
 }
 
 export default class MetricsService {
-  private static metrics: Metric<unknown>[] = [];
+  private static readonly metrics = new Map<MetricType, Metric<unknown>>();
+  private static initialized = false;
 
   constructor() {
+    if (MetricsService.initialized) {
+      return;
+    }
+    MetricsService.initialized = true;
+
     // Player metrics
     this.registerMetric(new TrackedScoresMetric());
     this.registerMetric(new TrackedPlayersMetric());
@@ -66,12 +78,15 @@ export default class MetricsService {
     this.registerMetric(new MemoryUsageMetric());
     this.registerMetric(new EventLoopLagMetric());
     this.registerMetric(new ResponseTimeHistogramMetric());
-    this.registerMetric(new RequestsPerSecondMetric());
+    this.registerMetric(new TotalRequestsMetric());
+    this.registerMetric(new HttpResponseStatusMetric());
     this.registerMetric(new ApiServicesMetric());
     this.registerMetric(new ProcessUptimeMetric());
+    this.registerMetric(new RedisHealthMetric());
 
     // Queue metrics
     this.registerMetric(new QueueSizesMetric());
+    this.registerMetric(new QueueProcessingDurationMetric());
 
     // Database metrics
     this.registerMetric(new MongoDbSizeMetric());
@@ -83,7 +98,12 @@ export default class MetricsService {
    * @param metric the metric to register
    */
   private registerMetric(metric: Metric<unknown>): void {
-    MetricsService.metrics.push(metric);
+    if (MetricsService.metrics.has(metric.id)) {
+      Logger.warn(`[METRICS] Metric ${metric.id} already registered, skipping duplicate registration`);
+      return;
+    }
+
+    MetricsService.metrics.set(metric.id, metric);
     Logger.debug(`[METRICS] Registered metric ${metric.id}`);
   }
 
@@ -94,6 +114,12 @@ export default class MetricsService {
    * @returns the metric instance, or undefined if not found
    */
   public static async getMetric(type: MetricType): Promise<Metric<unknown> | undefined> {
-    return MetricsService.metrics.find(metric => metric.id === type);
+    return MetricsService.metrics.get(type);
+  }
+
+  public static cleanup(): void {
+    for (const metric of MetricsService.metrics.values()) {
+      metric.cleanup?.();
+    }
   }
 }

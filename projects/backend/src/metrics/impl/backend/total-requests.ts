@@ -2,7 +2,7 @@ import { Counter } from "prom-client";
 import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
-export default class RequestsPerSecondMetric extends NumberMetric {
+export default class TotalRequestsMetric extends NumberMetric {
   private counter: Counter;
 
   constructor() {
