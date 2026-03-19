@@ -444,10 +444,9 @@ export class LeaderboardCoreService {
     if (!search || search.length < 3) {
       return [];
     }
-    const textFilter = { $text: { $search: search } } as unknown as Parameters<
-      typeof ScoreSaberLeaderboardModel.find
-    >[0];
-    const matchingLeaderboards = await ScoreSaberLeaderboardModel.find(textFilter, {
+    const matchingLeaderboards = await ScoreSaberLeaderboardModel.find({
+      $text: { $search: search },
+    } as object, {
       _id: 1,
       score: { $meta: "textScore" },
     })

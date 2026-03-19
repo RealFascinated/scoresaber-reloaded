@@ -106,7 +106,7 @@ export default function playerController(app: Elysia) {
           tags: ["Player"],
           query: z.object({
             // Allow empty string searches (`?query=`) but cap length to avoid unbounded query costs.
-            query: z.string().optional().max(64),
+            query: z.string().max(64).optional(),
           }),
           detail: {
             description: "Search players",
