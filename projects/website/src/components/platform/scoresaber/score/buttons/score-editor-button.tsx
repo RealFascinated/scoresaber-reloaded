@@ -84,7 +84,8 @@ export default function ScoreSaberScoreEditorButton({
   };
 
   const handleSliderReset = () => {
-    const currentAccuracy = (score.score / maxScore) * 100 * (hasModifier(score.modifiers, Modifier.NF) ? 0.5 : 1);
+    const currentAccuracy =
+      (score.score / maxScore) * 100 * (hasModifier(score.modifiers, Modifier.NF) ? 0.5 : 1);
     updateScore({
       ...score,
       score: (currentAccuracy / 100) * maxScore,

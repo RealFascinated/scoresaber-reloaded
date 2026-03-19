@@ -1,10 +1,10 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import Image from "next/image";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -105,9 +105,10 @@ export default function BackgroundCover() {
   const [currentImageIndex, setCurrentImageIndex] = useState(() => getRandomIndex());
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const cover = backgroundCover === "custom" 
-    ? { name: "Custom", id: "custom", type: "image" as const, value: customBackgroundUrl }
-    : BACKGROUND_COVERS.find(cover => cover.id === backgroundCover);
+  const cover =
+    backgroundCover === "custom"
+      ? { name: "Custom", id: "custom", type: "image" as const, value: customBackgroundUrl }
+      : BACKGROUND_COVERS.find(cover => cover.id === backgroundCover);
 
   // Initialize random index when cover type changes to rotating or random
   useEffect(() => {

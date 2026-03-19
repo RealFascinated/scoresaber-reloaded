@@ -15,6 +15,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysAgo, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
+import dynamic from "next/dynamic";
 import { ReactElement, useState } from "react";
 import { cn } from "../../../common/utils";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
@@ -23,7 +24,6 @@ import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
 import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
 import PlusPpCalculator from "./impl/plus-pp-calculator";
-import dynamic from "next/dynamic";
 
 const ScoresGraphChart = dynamic(() => import("./impl/scores-graph-chart"), { ssr: false });
 

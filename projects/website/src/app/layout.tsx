@@ -6,10 +6,10 @@ import { PageTransitionProvider } from "@/contexts/page-transition-context";
 import { ViewportProvider } from "@/contexts/viewport-context";
 import { env } from "@ssr/common/env";
 import { ssrConfig } from "config";
+import { domAnimation, LazyMotion } from "framer-motion";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Script from "next/script";
-import { domAnimation, LazyMotion } from "framer-motion";
 import { ReactNode } from "react";
 import "./styles/globals.css";
 

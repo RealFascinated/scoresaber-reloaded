@@ -63,7 +63,9 @@ export class LeaderboardCoreService {
         if (updateOps.length > 0) {
           LeaderboardCoreService.pendingLeaderboardUpdates.clear();
           await ScoreSaberLeaderboardModel.bulkWrite(updateOps);
-          Logger.info(`Pushed ${updateOps.length} leaderboard updates to the database in ${formatDuration(performance.now() - before)}`);
+          Logger.info(
+            `Pushed ${updateOps.length} leaderboard updates to the database in ${formatDuration(performance.now() - before)}`
+          );
         }
       },
       TimeUnit.toMillis(TimeUnit.Minute, 10)
@@ -473,14 +475,10 @@ export class LeaderboardCoreService {
    * Gets all the qualified leaderboards
    */
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(
-      CacheId.Leaderboards,
-      "leaderboard:qualified-leaderboards",
-      async () => {
-        const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
-        return leaderboards.map(leaderboard => leaderboardToObject(leaderboard));
-      }
-    );
+    return CacheService.fetch(CacheId.Leaderboards, "leaderboard:qualified-leaderboards", async () => {
+      const leaderboards = await ScoreSaberLeaderboardModel.find({ qualified: true }).lean();
+      return leaderboards.map(leaderboard => leaderboardToObject(leaderboard));
+    });
   }
 
   /**
@@ -526,14 +524,27 @@ export class LeaderboardCoreService {
    * @param leaderboard the leaderboard to cache the song art for
    */
   public static async cacheLeaderboardSongArt(leaderboard: ScoreSaberLeaderboard): Promise<void> {
-    const exists = await StorageService.fileExists(StorageBucket.LeaderboardSongArt, `${leaderboard.songHash}.png`);
+    const exists = await StorageService.fileExists(
+      StorageBucket.LeaderboardSongArt,
+      `${leaderboard.songHash}.png`
+    );
     if (!exists) {
-      const request = await Request.get<ArrayBuffer>(`https://cdn.scoresaber.com/covers/${leaderboard.songHash}.png`, {
-        returns: "arraybuffer",
-      });
+      const request = await Request.get<ArrayBuffer>(
+        `https://cdn.scoresaber.com/covers/${leaderboard.songHash}.png`,
+        {
+          returns: "arraybuffer",
+        }
+      );
       if (request) {
-        await StorageService.saveFile(StorageBucket.LeaderboardSongArt, `${leaderboard.songHash}.png`, Buffer.from(request));
-        await ScoreSaberLeaderboardModel.updateOne({ _id: leaderboard.id }, { $set: { cachedSongArt: true } });
+        await StorageService.saveFile(
+          StorageBucket.LeaderboardSongArt,
+          `${leaderboard.songHash}.png`,
+          Buffer.from(request)
+        );
+        await ScoreSaberLeaderboardModel.updateOne(
+          { _id: leaderboard.id },
+          { $set: { cachedSongArt: true } }
+        );
         Logger.info(`Cached song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
         return;
       }

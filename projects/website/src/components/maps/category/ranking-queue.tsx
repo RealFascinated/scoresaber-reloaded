@@ -25,7 +25,7 @@ export default function RankingQueue() {
         <h3 className="text-lg font-semibold">{name}</h3>
 
         <div className="flex flex-col gap-(--spacing-sm)">
-          {requests.map((rankingRequest) => {
+          {requests.map(rankingRequest => {
             const leaderboard = getScoreSaberLeaderboardFromToken(rankingRequest.leaderboardInfo);
             return (
               <div key={leaderboard.id}>

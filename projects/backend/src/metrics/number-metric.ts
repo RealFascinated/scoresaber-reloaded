@@ -6,7 +6,6 @@ export default class NumberMetric extends Metric<number> {
     super(id, defaultValue);
   }
 
-
   /**
    * Updates the value of the metric.
    *

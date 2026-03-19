@@ -51,7 +51,7 @@ export function FriendScores() {
       {scoreData && (
         <div className="flex flex-col gap-(--spacing-lg)">
           <div className="flex flex-col gap-(--spacing-lg)">
-            {scoreData.items.map((playerScore) => {
+            {scoreData.items.map(playerScore => {
               const score = playerScore.score;
               const leaderboard = playerScore.leaderboard;
               const beatSaverMap = playerScore.beatSaver;

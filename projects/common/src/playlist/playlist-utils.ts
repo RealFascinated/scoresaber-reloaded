@@ -1,9 +1,9 @@
 import { env } from "../env";
-import { encodeSelfPlaylistSettings } from "./self/self-playlist-utils";
 import { encodeSnipePlaylistSettings } from "../snipe/snipe-playlist-utils";
 import { BeatSaberPlaylist } from "./beatsaber/beatsaber-playlist";
 import { Playlist } from "./playlist";
 import { SelfPlaylist } from "./self/self-playlist";
+import { encodeSelfPlaylistSettings } from "./self/self-playlist-utils";
 import { SnipePlaylist } from "./snipe/snipe-playlist";
 
 /**

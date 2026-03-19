@@ -1,4 +1,3 @@
-
 type CacheOptions = {
   /**
    * The time (in ms) the cached object will be valid for
@@ -9,6 +8,11 @@ type CacheOptions = {
    * How often to check for expired objects
    */
   checkInterval?: number;
+
+  /**
+   * The maximum number of objects to cache
+   */
+  maxObjects?: number;
 };
 
 type CachedObject = {
@@ -37,15 +41,22 @@ export class SSRCache {
   private readonly checkInterval: number | undefined;
 
   /**
+   * The maximum number of objects to cache
+   * @private
+   */
+  private readonly maxObjects: number | undefined;
+
+  /**
    * The objects that have been cached
    * @private
    */
   private cache = new Map<string, CachedObject>();
   private cleanupInterval: NodeJS.Timeout | null = null;
 
-  constructor({ ttl, checkInterval }: CacheOptions) {
+  constructor({ ttl, checkInterval, maxObjects }: CacheOptions) {
     this.ttl = ttl;
     this.checkInterval = checkInterval ?? (this.ttl !== undefined ? 1000 * 60 : undefined); // 1 minute
+    this.maxObjects = maxObjects;
 
     if (this.ttl !== undefined && this.checkInterval !== undefined) {
       this.cleanupInterval = setInterval(() => {
@@ -56,20 +67,6 @@ export class SSRCache {
         }
       }, this.checkInterval);
     }
-  }
-
-  public cleanup() {
-    if (this.cleanupInterval) {
-      clearInterval(this.cleanupInterval);
-      this.cleanupInterval = null;
-    }
-  }
-
-  private isExpired(cachedObject: CachedObject): boolean {
-    if (this.ttl === undefined) {
-      return false;
-    }
-    return cachedObject.timestamp + this.ttl < Date.now();
   }
 
   /**
@@ -100,6 +97,10 @@ export class SSRCache {
       value,
       timestamp: Date.now(),
     });
+
+    if (this.maxObjects !== undefined && this.cache.size >= this.maxObjects) {
+      this.remove(Array.from(this.cache.keys())[0]); // Remove the oldest object
+    }
   }
 
   /**
@@ -126,5 +127,28 @@ export class SSRCache {
    */
   public remove(key: string): void {
     this.cache.delete(key);
+  }
+
+  /**
+   * Cleans up the cache
+   */
+  public cleanup() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+  }
+
+  /**
+   * Checks if an object is expired
+   *
+   * @param cachedObject the cached object
+   * @returns true if the object is expired, false otherwise
+   */
+  private isExpired(cachedObject: CachedObject): boolean {
+    if (this.ttl === undefined) {
+      return false;
+    }
+    return cachedObject.timestamp + this.ttl < Date.now();
   }
 }

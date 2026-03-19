@@ -1,8 +1,8 @@
 "use client";
 
 import SimpleTooltip from "@/components/simple-tooltip";
-import Image from "next/image";
 import { normalizedRegionName } from "@ssr/common/utils/region-utils";
+import Image from "next/image";
 import { useState } from "react";
 
 type Props = {

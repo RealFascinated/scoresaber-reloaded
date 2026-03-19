@@ -104,9 +104,7 @@ export class ScoreWebsockets implements EventListener {
             `${player.id}-${leaderboard.song.hash}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`.toUpperCase();
           const pendingScore = ScoreWebsockets.PENDING_SCORES.get(key);
 
-          Logger.info(
-            `[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`
-          );
+          Logger.info(`[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`);
 
           if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
             // Found a matching ScoreSaber score, process both
@@ -155,7 +153,9 @@ export class ScoreWebsockets implements EventListener {
     beatLeaderScore?: BeatLeaderScoreToken
   ) {
     if (scoreSaberToken && leaderboardToken && player) {
-      const { leaderboard } = await LeaderboardCoreService.processLeaderboard(getScoreSaberLeaderboardFromToken(leaderboardToken));
+      const { leaderboard } = await LeaderboardCoreService.processLeaderboard(
+        getScoreSaberLeaderboardFromToken(leaderboardToken)
+      );
       const score = getScoreSaberScoreFromToken(scoreSaberToken, leaderboard, player.id);
       const isTop50GlobalScore = await TopScoresService.isTop50GlobalScore(score);
 
@@ -200,7 +200,6 @@ export class ScoreWebsockets implements EventListener {
       | UniqueDailyPlayersMetric
       | undefined;
   }
-
 
   onStop: () => Promise<void> = async () => {
     // Process all pending scores

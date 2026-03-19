@@ -131,7 +131,9 @@ const Combobox = <T,>({
                         : String(item.value);
                   return (
                     <CommandItem
-                      key={String(item.value) + (typeof item.name === "string" ? `-${item.name}` : `-${index}`)}
+                      key={
+                        String(item.value) + (typeof item.name === "string" ? `-${item.name}` : `-${index}`)
+                      }
                       value={searchValue}
                       onSelect={() => {
                         setOpen(false);

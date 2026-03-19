@@ -72,11 +72,7 @@ export default class CacheService {
    * @param cacheKey the key used for caching.
    * @param fetchFn the function to fetch data if it's not in cache.
    */
-  public static async fetch<T>(
-    cache: CacheId,
-    cacheKey: string,
-    fetchFn: () => Promise<T>
-  ): Promise<T> {
+  public static async fetch<T>(cache: CacheId, cacheKey: string, fetchFn: () => Promise<T>): Promise<T> {
     // Skip cache in development
     if (!isProduction()) {
       return fetchFn();
@@ -147,7 +143,7 @@ export default class CacheService {
 
     const ttlMs = Math.max(0, this.CACHE_INFO[cacheId].ttl) * 1000;
     const created = new SSRCache({
-      ttl: ttlMs
+      ttl: ttlMs,
     });
     this.memoryCaches.set(cacheId, created);
     return created;

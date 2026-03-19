@@ -22,7 +22,10 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
   const difficulty: LeaderboardDifficulty = {
     leaderboardId: token.difficulty.leaderboardId,
     difficulty: getDifficultyFromScoreSaberDifficulty(token.difficulty.difficulty),
-    characteristic: characteristic == "" || characteristic == undefined ? "Standard" : characteristic as MapCharacteristic,
+    characteristic:
+      characteristic == "" || characteristic == undefined
+        ? "Standard"
+        : (characteristic as MapCharacteristic),
     difficultyRaw: token.difficulty.difficultyRaw,
   };
   validateMap(difficulty.difficulty, difficulty.characteristic);
@@ -50,7 +53,10 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
             const diff: LeaderboardDifficulty = {
               leaderboardId: difficulty.leaderboardId,
               difficulty: getDifficultyFromScoreSaberDifficulty(difficulty.difficulty),
-              characteristic: characteristic == "" || characteristic == undefined ? "Standard" : characteristic as MapCharacteristic,
+              characteristic:
+                characteristic == "" || characteristic == undefined
+                  ? "Standard"
+                  : (characteristic as MapCharacteristic),
               difficultyRaw: difficulty.difficultyRaw,
             };
 

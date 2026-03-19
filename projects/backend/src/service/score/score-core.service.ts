@@ -153,7 +153,7 @@ export class ScoreCoreService {
           leaderboard.difficulty.difficulty,
           leaderboard.difficulty.characteristic,
           score.score
-        )
+        );
       }
       return undefined;
     }

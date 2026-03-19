@@ -1,3 +1,4 @@
+import { SSRCache } from "@ssr/common/cache";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
@@ -13,7 +14,12 @@ const minioClient = new Client({
 });
 
 export default class StorageService {
+  private static CACHE: SSRCache;
+
   constructor() {
+    StorageService.CACHE = new SSRCache({
+      maxObjects: 1000,
+    });
     this.initBuckets();
   }
 
@@ -25,13 +31,21 @@ export default class StorageService {
    * @returns the file
    */
   public static async getFile(bucket: StorageBucket, filename: string): Promise<Buffer | undefined> {
+    const cacheKey = `${bucket}:${filename}`;
+    const cached = StorageService.CACHE.get<Buffer>(cacheKey);
+    if (cached !== undefined) {
+      return cached;
+    }
+
     try {
       const data = await minioClient.getObject(getS3BucketName(bucket), filename);
       const chunks: Buffer[] = [];
       for await (const chunk of data) {
         chunks.push(chunk);
       }
-      return Buffer.concat(chunks);
+      const file = Buffer.concat(chunks);
+      StorageService.CACHE.set(cacheKey, file);
+      return file;
     } catch {
       return undefined;
     }
@@ -48,6 +62,7 @@ export default class StorageService {
   public static async saveFile(bucket: StorageBucket, filename: string, data: Buffer) {
     try {
       await minioClient.putObject(getS3BucketName(bucket), filename, data);
+      StorageService.CACHE.set(`${bucket}:${filename}`, data);
     } catch (error) {
       Logger.error(`Failed to save file to Minio: ${error}`);
     }
@@ -62,6 +77,7 @@ export default class StorageService {
   public static async deleteFile(bucket: StorageBucket, filename: string) {
     try {
       await minioClient.removeObject(getS3BucketName(bucket), filename);
+      StorageService.CACHE.remove(`${bucket}:${filename}`);
     } catch (error) {
       Logger.error(`Failed to delete file from Minio: ${error}`);
     }

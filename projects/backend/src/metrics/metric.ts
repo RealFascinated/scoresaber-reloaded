@@ -15,5 +15,4 @@ export default abstract class Metric<T> {
     this.id = id;
     this.value = defaultValue;
   }
-
 }

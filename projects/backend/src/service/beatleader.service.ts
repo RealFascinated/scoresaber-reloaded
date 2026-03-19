@@ -174,7 +174,10 @@ export default class BeatLeaderService {
    */
   public static async getScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
     return CacheService.fetch(CacheId.ScoreStats, `score-stats:${scoreId}`, async () => {
-      const scoreStatsFile = await StorageService.getFile(StorageBucket.BeatLeaderScoreStats, `${scoreId}.json`);
+      const scoreStatsFile = await StorageService.getFile(
+        StorageBucket.BeatLeaderScoreStats,
+        `${scoreId}.json`
+      );
       if (scoreStatsFile != undefined) {
         return JSON.parse(scoreStatsFile.toString()) as ScoreStatsToken;
       }
@@ -183,7 +186,11 @@ export default class BeatLeaderService {
         .getBeatLeaderService()
         .lookupScoreStats(scoreId);
       if (scoreStats != undefined) {
-        await StorageService.saveFile(StorageBucket.BeatLeaderScoreStats, `${scoreId}.json`, Buffer.from(JSON.stringify(scoreStats)));
+        await StorageService.saveFile(
+          StorageBucket.BeatLeaderScoreStats,
+          `${scoreId}.json`,
+          Buffer.from(JSON.stringify(scoreStats))
+        );
       }
       return scoreStats;
     });
@@ -266,7 +273,12 @@ export default class BeatLeaderService {
    * @param isTop50GlobalScore whether the score is a top 50 global score
    * @returns whether the replay was saved
    */
-  public static async saveReplay(scoreToken: BeatLeaderScoreToken, data: BeatLeaderScore, player: Player, isTop50GlobalScore: boolean) {
+  public static async saveReplay(
+    scoreToken: BeatLeaderScoreToken,
+    data: BeatLeaderScore,
+    player: Player,
+    isTop50GlobalScore: boolean
+  ) {
     if (isProduction() && player && (player.trackReplays || isTop50GlobalScore)) {
       try {
         const replayId = getBeatLeaderReplayId(data);
