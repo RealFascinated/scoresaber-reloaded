@@ -177,7 +177,11 @@ export class PlayerCoreService {
     if (response !== undefined) {
       CacheService.invalidate(`scoresaber:player:${id}`);
       CacheService.invalidate(`player:${id}`);
-      await PlayerCoreService.cachePlayerProfilePicture(id, true);
+
+      const isOculusAccount = id.length === 16;
+      if (!isOculusAccount) {
+        await PlayerCoreService.cachePlayerProfilePicture(id, true);
+      }
       return response;
     }
     return { result: false };
