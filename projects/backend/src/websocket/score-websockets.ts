@@ -184,7 +184,7 @@ export class ScoreWebsockets implements EventListener {
       // Track unique daily players in Redis
       const metric = (await MetricsService.getMetric(MetricType.UNIQUE_DAILY_PLAYERS)) as
         | UniqueDailyPlayersMetric
-        | undefined
+        | undefined;
       if (metric) {
         // no need to await this
         metric.addPlayer(player.id);

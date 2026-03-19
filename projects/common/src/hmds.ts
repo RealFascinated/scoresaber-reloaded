@@ -8,15 +8,23 @@ export const HmdSchema = z.enum([
   "Vive Pro 2",
   "HTC Vive Elite",
   "Windows Mixed Reality",
+  "Windows MR",
   "Rift S",
   "Quest",
+  "Quest 1",
   "Quest 2",
+  "Quest 2 (Virtual Desktop)",
   "Quest Pro",
   "Quest 3",
   "Quest 3S",
   "Valve Index",
   "Vive Cosmos",
   "Bigscreen Beyond",
+  "Pico 4",
+  "Pico 4S",
+  "Pico Neo 2",
+  "Pico Neo 3",
+  "PSVR2"
 ]);
 export type HMD = z.infer<typeof HmdSchema>;
 
@@ -25,78 +33,149 @@ export type HMDInfo = {
   filters?: string;
 };
 
-export const HMDs: Record<HMD, HMDInfo> = {
-  Unknown: {
-    logo: "unknown.svg",
-    filters: "invert(100%)",
+/**
+ * HMD display metadata definitions.
+ *
+ * Each entry defines a "root" HMD plus optional aliases which share the same
+ * icon/filters without duplicating the values in this file.
+ */
+const HMD_DEFINITIONS = [
+  {
+    hmd: "Unknown",
+    info: { logo: "unknown.svg", filters: "invert(100%)" },
   },
 
   // SteamVR
-  Vive: {
-    logo: "vive.svg",
-    filters: "invert(54%) sepia(78%) saturate(2598%) hue-rotate(157deg) brightness(97%) contrast(101%)",
+  {
+    hmd: "Vive",
+    info: {
+      logo: "vive.svg",
+      filters: "invert(54%) sepia(78%) saturate(2598%) hue-rotate(157deg) brightness(97%) contrast(101%)",
+    },
   },
-  "Vive Cosmos": {
-    logo: "vive.svg",
-    filters: "invert(11%) sepia(100%) saturate(7426%) hue-rotate(297deg) brightness(85%) contrast(109%)",
+  {
+    hmd: "Vive Cosmos",
+    info: {
+      logo: "vive.svg",
+      filters: "invert(11%) sepia(100%) saturate(7426%) hue-rotate(297deg) brightness(85%) contrast(109%)",
+    },
   },
-  "Vive Pro": {
-    logo: "vive.svg",
-    filters: "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)",
+  {
+    hmd: "Vive Pro",
+    info: {
+      logo: "vive.svg",
+      filters: "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)",
+    },
   },
-  "Vive Pro 2": {
-    logo: "vive.svg",
-    filters: "invert(79%) sepia(68%) saturate(5755%) hue-rotate(232deg) brightness(90%) contrast(109%)",
+  {
+    hmd: "Vive Pro 2",
+    aliases: ["HTC Vive Elite"],
+    info: {
+      logo: "vive.svg",
+      filters: "invert(79%) sepia(68%) saturate(5755%) hue-rotate(232deg) brightness(90%) contrast(109%)",
+    },
   },
-  "HTC Vive Elite": {
-    logo: "vive.svg",
-    filters: "invert(79%) sepia(68%) saturate(5755%) hue-rotate(232deg) brightness(90%) contrast(109%)",
+  {
+    hmd: "Valve Index",
+    info: {
+      logo: "index.svg",
+      filters: "invert(81%) sepia(27%) saturate(6288%) hue-rotate(344deg) brightness(103%) contrast(103%)",
+    },
   },
-  "Valve Index": {
-    logo: "index.svg",
-    filters: "invert(81%) sepia(27%) saturate(6288%) hue-rotate(344deg) brightness(103%) contrast(103%)",
-  },
-  "Bigscreen Beyond": {
-    logo: "bigscreen.svg",
-    filters: "",
+  {
+    hmd: "Bigscreen Beyond",
+    info: { logo: "bigscreen.svg" },
   },
 
   // Windows Mixed Reality
-  "Windows Mixed Reality": {
-    logo: "wmr.svg",
-    filters: "invert(34%) sepia(67%) saturate(7482%) hue-rotate(193deg) brightness(103%) contrast(101%)",
+  {
+    hmd: "Windows Mixed Reality",
+    aliases: ["Windows MR"],
+    info: {
+      logo: "wmr.svg",
+      filters: "invert(34%) sepia(67%) saturate(7482%) hue-rotate(193deg) brightness(103%) contrast(101%)",
+    },
   },
 
   // Quest / Meta
-  "Rift CV1": {
-    logo: "oculus.svg",
-    filters: "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)",
+  {
+    hmd: "Rift CV1",
+    info: {
+      logo: "oculus.svg",
+      filters: "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)",
+    },
   },
-  "Rift S": {
-    logo: "oculus.svg",
-    filters: "invert(96%) sepia(9%) saturate(5456%) hue-rotate(170deg) brightness(100%) contrast(107%)",
+  {
+    hmd: "Rift S",
+    info: {
+      logo: "oculus.svg",
+      filters: "invert(96%) sepia(9%) saturate(5456%) hue-rotate(170deg) brightness(100%) contrast(107%)",
+    },
   },
-  Quest: {
-    logo: "oculus.svg",
-    filters: "invert(73%) sepia(55%) saturate(5479%) hue-rotate(271deg) brightness(106%) contrast(107%)",
+  {
+    hmd: "Quest",
+    aliases: ["Quest 1"],
+    info: {
+      logo: "oculus.svg",
+      filters: "invert(73%) sepia(55%) saturate(5479%) hue-rotate(271deg) brightness(106%) contrast(107%)",
+    },
   },
-  "Quest 2": {
-    logo: "oculus.svg",
-    filters: "invert(49%) sepia(26%) saturate(5619%) hue-rotate(146deg) brightness(93%) contrast(86%)",
+  {
+    hmd: "Quest 2",
+    aliases: ["Quest 2 (Virtual Desktop)"],
+    info: {
+      logo: "oculus.svg",
+      filters: "invert(49%) sepia(26%) saturate(5619%) hue-rotate(146deg) brightness(93%) contrast(86%)",
+    },
   },
-  "Quest Pro": {
-    logo: "oculus.svg",
-    filters: "",
+  {
+    hmd: "Quest Pro",
+    info: { logo: "oculus.svg" },
   },
-  "Quest 3": {
-    logo: "meta.svg",
-    filters: "invert(49%) sepia(26%) saturate(5619%) hue-rotate(260deg) brightness(93%) contrast(86%)",
+  {
+    hmd: "Quest 3",
+    info: {
+      logo: "meta.svg",
+      filters: "invert(49%) sepia(26%) saturate(5619%) hue-rotate(260deg) brightness(93%) contrast(86%)",
+    },
   },
-  "Quest 3S": {
-    logo: "meta.svg",
-    filters: "invert(49%) sepia(26%) saturate(5619%) hue-rotate(125deg) brightness(93%) contrast(86%)",
+  {
+    hmd: "Quest 3S",
+    info: {
+      logo: "meta.svg",
+      filters: "invert(49%) sepia(26%) saturate(5619%) hue-rotate(125deg) brightness(93%) contrast(86%)",
+    },
   },
-};
+
+  // Pico
+  {
+    hmd: "Pico 4",
+    aliases: ["Pico Neo 3", "Pico Neo 2", "Pico 4S"],
+    info: {
+      logo: "piconeo.webp",
+      filters: "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)",
+    },
+  },
+
+  // PSVR
+  {
+    hmd: "PSVR2",
+    info: {
+      logo: "psvr2.svg"
+    },
+  },
+] satisfies ReadonlyArray<{
+  hmd: HMD;
+  aliases?: ReadonlyArray<HMD>;
+  info: HMDInfo;
+}>;
+
+export const HMDs: Record<HMD, HMDInfo> = Object.fromEntries(
+  HMD_DEFINITIONS.flatMap(({ hmd, aliases, info }) => [
+    [hmd, info],
+    ...(aliases?.map(alias => [alias, info]) ?? []),
+  ])
+) as Record<HMD, HMDInfo>;
 
 /**
  * Gets the HMD info for a HMD.
@@ -104,6 +183,6 @@ export const HMDs: Record<HMD, HMDInfo> = {
  * @param hmd the HMD to get the info for
  * @returns the HMD info
  */
-export const getHMDInfo = (hmd: HMD) => {
-  return HMDs[hmd] ?? HMDs["Unknown"];
+export const getHMDInfo = (hmd: HMD): HMDInfo => {
+  return HMDs[hmd] ?? HMDs.Unknown;
 };
