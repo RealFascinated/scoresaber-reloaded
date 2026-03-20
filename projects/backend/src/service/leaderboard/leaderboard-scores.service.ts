@@ -34,35 +34,38 @@ export class LeaderboardScoresService {
       throw new NotFoundError(`Leaderboard scores for leaderboard "${leaderboardId}" not found`);
     }
 
-    // Process scores in parallel
-    const scorePromises = leaderboardScores.scores.map(async token => {
-      const score = getScoreSaberScoreFromToken(
-        token,
-        leaderboardResponse.leaderboard,
-        token.leaderboardPlayerInfo.id
-      );
-      if (score == undefined) {
-        return undefined;
-      }
+    const parsedScores = leaderboardScores.scores.map(token =>
+      getScoreSaberScoreFromToken(token, leaderboardResponse.leaderboard, token.leaderboardPlayerInfo.id)
+    );
 
-      const beatLeaderScore = await BeatLeaderService.getBeatLeaderScoreFromSong(
-        score.playerId,
-        leaderboard.songHash,
-        leaderboard.difficulty.difficulty,
-        leaderboard.difficulty.characteristic,
-        score.score
-      );
-      if (beatLeaderScore !== undefined) {
-        score.beatLeaderScore = beatLeaderScore;
-      }
+    const batchRequests = parsedScores
+      .filter((score): score is ScoreSaberScore => score !== undefined)
+      .map(score => ({ playerId: score.playerId, songScore: score.score }));
 
-      return score;
-    });
+    const beatLeaderByKey = await BeatLeaderService.batchGetBeatLeaderScoresFromSong(
+      leaderboard.songHash,
+      leaderboard.difficulty.difficulty,
+      leaderboard.difficulty.characteristic,
+      batchRequests
+    );
+
+    const scores = parsedScores
+      .map(score => {
+        if (score === undefined) {
+          return undefined;
+        }
+        const bl = beatLeaderByKey.get(BeatLeaderService.beatLeaderSongLookupKey(score.playerId, score.score));
+        if (bl !== undefined) {
+          score.beatLeaderScore = bl;
+        }
+        return score;
+      })
+      .filter((score): score is ScoreSaberScore => score !== undefined);
 
     const totalPages = Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage);
 
     return {
-      scores: (await Promise.all(scorePromises)).filter(score => score !== undefined) as ScoreSaberScore[],
+      scores,
       leaderboard: leaderboard,
       beatSaver: beatSaverMap,
       metadata: {

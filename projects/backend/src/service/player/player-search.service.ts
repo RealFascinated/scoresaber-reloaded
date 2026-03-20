@@ -1,9 +1,9 @@
-import { PlayerModel } from "@ssr/common/model/player/player";
+import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import type { FilterQuery } from "mongoose";
+import type { QueryFilter } from "mongoose";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import ScoreSaberService from "../scoresaber.service";
 
@@ -26,7 +26,7 @@ export class PlayerSearchService {
     const [scoreSaberResponse, foundPlayers] = await Promise.all([
       ScoreSaberApiService.searchPlayers(normalizedQuery.length === 0 ? "" : normalizedQuery),
       normalizedQuery.length > 0
-        ? PlayerModel.find({ $text: { $search: normalizedQuery } } as FilterQuery<unknown>, {
+        ? PlayerModel.find({ $text: { $search: normalizedQuery } } as QueryFilter<Player>, {
             _id: 1,
             name: 1,
             score: { $meta: "textScore" },

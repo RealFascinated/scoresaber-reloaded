@@ -1,4 +1,4 @@
-import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
+import { getModelForClass, index, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import type { ScoreStatsToken } from "../../schemas/beatleader/tokens/score-stats/score-stats";
 import type { MapDifficulty } from "../../score/map-difficulty";
@@ -9,6 +9,7 @@ import { Misses } from "./misses";
 /**
  * The model for BeatLeader score.
  */
+@index({ playerId: 1, songHash: 1, leaderboardId: 1, timestamp: -1 })
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },
   schemaOptions: {

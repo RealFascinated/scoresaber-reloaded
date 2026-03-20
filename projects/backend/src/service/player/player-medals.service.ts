@@ -1,11 +1,11 @@
 import Logger from "@ssr/common/logger";
-import { PlayerModel } from "@ssr/common/model/player/player";
+import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerMedalRankingsResponse } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { FilterQuery } from "mongoose";
+import type { QueryFilter } from "mongoose";
 import ScoreSaberService from "../scoresaber.service";
 
 export class PlayerMedalsService {
@@ -146,10 +146,10 @@ export class PlayerMedalsService {
     page: number,
     country?: string
   ): Promise<PlayerMedalRankingsResponse> {
-    const filter: FilterQuery<typeof PlayerModel> = {
+    const filter: QueryFilter<Player> = {
       medals: { $gt: 0 },
-      country: { $nin: [null, "", undefined] },
-      ...(country && { country: { $nin: [null, "", undefined], $in: [country] } }),
+      country: { $nin: [null, ""] },
+      ...(country && { country: { $nin: [null, ""], $in: [country] } }),
     };
 
     const totalPlayers = await PlayerModel.countDocuments(filter);

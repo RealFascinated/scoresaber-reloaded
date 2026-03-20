@@ -261,19 +261,15 @@ export default class BeatLeaderService {
     leaderboardId: string,
     timestamp: Date
   ): Promise<BeatLeaderScore | undefined> {
-    const scores: BeatLeaderScore[] = await BeatLeaderScoreModel.find({
+    const beatLeaderScore = await BeatLeaderScoreModel.findOne({
       playerId: playerId,
       songHash: songHash.toUpperCase(),
       leaderboardId: leaderboardId,
+      timestamp: { $lt: timestamp },
     })
       .sort({ timestamp: -1 })
       .lean();
 
-    if (scores == null || scores.length == 0) {
-      return undefined;
-    }
-
-    const beatLeaderScore = scores.find(score => score.timestamp.getTime() < timestamp.getTime());
     if (beatLeaderScore == undefined) {
       return undefined;
     }
@@ -315,5 +311,48 @@ export default class BeatLeaderService {
       }
     }
     return false;
+  }
+
+  /**
+   * Stable key for batch BeatLeader lookups by player + base score (same map difficulty on a leaderboard page).
+   */
+  public static beatLeaderSongLookupKey(playerId: string, songScore: number): string {
+    return `${playerId}:${songScore}`;
+  }
+
+  /**
+   * Loads BeatLeader rows for many (playerId, songScore) pairs on the same map difficulty in one query.
+   */
+  public static async batchGetBeatLeaderScoresFromSong(
+    songHash: string,
+    songDifficulty: string,
+    songCharacteristic: string,
+    requests: ReadonlyArray<{ playerId: string; songScore: number }>
+  ): Promise<Map<string, BeatLeaderScore>> {
+    const result = new Map<string, BeatLeaderScore>();
+    if (requests.length === 0) {
+      return result;
+    }
+
+    const seen = new Map<string, { playerId: string; songScore: number }>();
+    for (const r of requests) {
+      const key = BeatLeaderService.beatLeaderSongLookupKey(r.playerId, r.songScore);
+      seen.set(key, r);
+    }
+
+    const orClause = [...seen.values()].map(r => ({
+      playerId: r.playerId,
+      songHash: songHash.toUpperCase(),
+      songDifficulty,
+      songCharacteristic,
+      songScore: r.songScore,
+    }));
+
+    const docs = await BeatLeaderScoreModel.find({ $or: orClause }).lean();
+    for (const doc of docs) {
+      const key = BeatLeaderService.beatLeaderSongLookupKey(doc.playerId, doc.songScore);
+      result.set(key, beatLeaderScoreToObject(doc));
+    }
+    return result;
   }
 }

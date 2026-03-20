@@ -217,19 +217,32 @@ export class LeaderboardCoreService {
       })
     );
 
-    // Fetch BeatSaver data for all leaderboards
+    // Fetch BeatSaver data for all leaderboards (one fetch per distinct map difficulty)
     const allLeaderboards = Array.from(leaderboards.values()).filter(
       (data): data is LeaderboardResponse => data !== null
     );
+    const beatSaverKey = (lb: ScoreSaberLeaderboard) =>
+      `${lb.songHash}:${lb.difficulty.difficulty}:${lb.difficulty.characteristic}`;
+    const representativeByMapKey = new Map<string, LeaderboardResponse>();
+    for (const data of allLeaderboards) {
+      const key = beatSaverKey(data.leaderboard);
+      if (!representativeByMapKey.has(key)) {
+        representativeByMapKey.set(key, data);
+      }
+    }
+    const beatSaverByMapKey = new Map<string, BeatSaverMapResponse | undefined>();
     await Promise.all(
-      allLeaderboards.map(async data => {
+      [...representativeByMapKey.entries()].map(async ([key, data]) => {
         const beatsaver = await LeaderboardCoreService.fetchBeatSaverData(
           data.leaderboard,
           options.beatSaverType
         );
-        data.beatsaver = beatsaver;
+        beatSaverByMapKey.set(key, beatsaver);
       })
     );
+    for (const data of allLeaderboards) {
+      data.beatsaver = beatSaverByMapKey.get(beatSaverKey(data.leaderboard));
+    }
 
     return allLeaderboards;
   }

@@ -24,7 +24,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
-import { FilterQuery } from "mongoose";
+import type { QueryFilter } from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import BeatSaverService from "../beatsaver.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
@@ -428,17 +428,22 @@ export class PlayerScoresService {
             return undefined;
           }
 
-          return {
-            score: await ScoreCoreService.insertScoreData(score, leaderboard, {
-              comparisonPlayer: comparisonPlayer,
-            }),
-            leaderboard: (await LeaderboardCoreService.processLeaderboard(leaderboard)).leaderboard,
-            beatSaver: await BeatSaverService.getMap(
+          const [processed, beatSaver] = await Promise.all([
+            LeaderboardCoreService.processLeaderboard(leaderboard),
+            BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic,
               "full"
             ),
+          ]);
+
+          return {
+            score: await ScoreCoreService.insertScoreData(score, leaderboard, {
+              comparisonPlayer: comparisonPlayer,
+            }),
+            leaderboard: processed.leaderboard,
+            beatSaver,
           } as PlayerScore;
         })
       );
@@ -480,14 +485,14 @@ export class PlayerScoresService {
      * @param matchingLeaderboardIds the leaderboard ids to include in the query
      * @returns the score query
      */
-    function buildScoreQuery(): FilterQuery<ScoreSaberScore> {
+    function buildScoreQuery(): QueryFilter<ScoreSaberScore> {
       const uniquePlayerIds = Array.from(new Set([playerId, ...(filters.includePlayers || [])]));
-      const queryConditions: FilterQuery<ScoreSaberScore>[] = [{ playerId: { $in: uniquePlayerIds } }];
+      const queryConditions: QueryFilter<ScoreSaberScore>[] = [{ playerId: { $in: uniquePlayerIds } }];
 
       // Filter out invalid accuracies (null, undefined, Infinity, etc.)
       if (sort === "acc") {
         queryConditions.push({
-          accuracy: { $exists: true, $nin: [null, undefined, Infinity], $gte: 0 },
+          accuracy: { $exists: true, $nin: [null, Infinity], $gte: 0 },
         });
       }
 
@@ -510,7 +515,8 @@ export class PlayerScoresService {
     }
 
     const query = buildScoreQuery();
-    const totalScores = await model.countDocuments(query);
+    // Mongoose 9 + union model: countDocuments resolves the `Query` overload; filter shape is valid at runtime.
+    const totalScores = await model.countDocuments(query as never);
 
     const pagination = new Pagination<PlayerScore>().setItemsPerPage(8).setTotalItems(totalScores);
 
@@ -551,7 +557,7 @@ export class PlayerScoresService {
         const previousPageStart = (page - 1) * 8 - 1;
         if (previousPageStart < 0) return null;
         const queryBuilder = (model as typeof ScoreSaberScoreModel)
-          .find(query)
+          .find(query as never)
           .sort({ [sortField]: sortOrder, _id: sortOrder })
           .skip(previousPageStart)
           .limit(1)
@@ -566,11 +572,11 @@ export class PlayerScoresService {
         }
 
         const items = await queryBuilder;
-        return (items[0] as Record<string, unknown>) || null;
+        return (items[0] as unknown as Record<string, unknown>) || null;
       },
       fetchItems: async cursorInfo => {
         const rawScores = (await (model as typeof ScoreSaberScoreModel)
-          .find(cursorInfo.query)
+          .find(cursorInfo.query as never)
           .sort({ [sortField]: sortOrder, _id: sortOrder })
           .limit(cursorInfo.limit)
           .lean()) as unknown as ScoreSaberScore[];
