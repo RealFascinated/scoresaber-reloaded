@@ -14,6 +14,7 @@ import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
 import { redisClient } from "../common/redis";
+import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import CacheService, { CacheId } from "./cache.service";
 import MetricsService, { MetricType } from "./metrics.service";
 import { PlayerAccuraciesService } from "./player/player-accuracies.service";
@@ -122,15 +123,15 @@ export default class ScoreSaberService {
         // todo: cleanup this mess
         account && player !== undefined
           ? (async () => {
-              const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
-              const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
-              return Object.fromEntries(
-                Object.entries(hmdUsage).map(([hmd, count]) => [
-                  hmd,
-                  totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
-                ])
-              ) as Record<HMD, number>;
-            })()
+            const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
+            const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
+            return Object.fromEntries(
+              Object.entries(hmdUsage).map(([hmd, count]) => [
+                hmd,
+                totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
+              ])
+            ) as Record<HMD, number>;
+          })()
           : undefined,
         account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},
@@ -166,7 +167,7 @@ export default class ScoreSaberService {
           medals: medalsRank ? getPageFromRank(medalsRank, 50) : undefined,
         },
         rankPercentile:
-          (player.rank / ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) ||
+          (player.rank / (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1) ||
             1) * 100,
         rankWithInactives,
       } as ScoreSaberPlayer;

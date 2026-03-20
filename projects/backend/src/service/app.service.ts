@@ -4,6 +4,7 @@ import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AppStatisticsResponse } from "@ssr/common/schemas/response/ssr/app-statistics";
+import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import MetricsService, { MetricType } from "./metrics.service";
 
 export class AppService {
@@ -27,7 +28,7 @@ export class AppService {
       PlayerModel.countDocuments({
         inactive: true,
       }),
-      ((await MetricsService.getMetric(MetricType.ACTIVE_ACCOUNTS))?.value as number) || 0,
+      MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 0,
       ScoreSaberLeaderboardModel.estimatedDocumentCount(),
     ]);
 

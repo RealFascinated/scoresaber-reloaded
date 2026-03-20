@@ -87,11 +87,7 @@ export class TrackScoreListener implements EventListener {
     }
 
     // Update metric
-    const trackedScoresMetric = (await MetricsService.getMetric(MetricType.TRACKED_SCORES)) as
-      | TrackedScoresMetric
-      | undefined;
-    if (trackedScoresMetric) {
-      trackedScoresMetric.increment();
-    }
+    const trackedScoresMetric = MetricsService.getMetric<TrackedScoresMetric>(MetricType.TRACKED_SCORES);
+    trackedScoresMetric?.increment();
   }
 }
