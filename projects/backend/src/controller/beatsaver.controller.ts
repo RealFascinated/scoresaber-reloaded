@@ -1,9 +1,9 @@
 import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { MapDifficultySchema } from "@ssr/common/score/map-difficulty";
+import { MapCharacteristicSchema } from "@ssr/common/types/map-characteristic";
 import { Elysia } from "elysia";
 import { z } from "zod";
-import { MapCharacteristicSchema } from "../../../common/src/types/map-characteristic";
 import BeatSaverService from "../service/beatsaver.service";
 
 export default function beatsaverController(app: Elysia) {

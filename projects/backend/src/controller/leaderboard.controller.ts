@@ -1,7 +1,7 @@
+import { MapDifficultySchema } from "@ssr/common/score/map-difficulty";
+import { MapCharacteristicSchema } from "@ssr/common/types/map-characteristic";
 import { Elysia } from "elysia";
 import { z } from "zod";
-import { MapDifficultySchema } from "../../../common/src/score/map-difficulty";
-import { MapCharacteristicSchema } from "../../../common/src/types/map-characteristic";
 import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
 import { LeaderboardHmdService } from "../service/leaderboard/leaderboard-hmd.service";
 import { ScoreSaberApiService } from "../service/scoresaber-api.service";

@@ -246,8 +246,8 @@ export const app = new Elysia()
       }
     }
 
-    if (code === 500) {
-      console.log(error);
+    if (status === 500) {
+      Logger.error("Internal server error:", error);
     }
 
     const shouldExposeMessage = !isProduction();

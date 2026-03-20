@@ -54,7 +54,9 @@ export class LeaderboardScoresService {
         if (score === undefined) {
           return undefined;
         }
-        const bl = beatLeaderByKey.get(BeatLeaderService.beatLeaderSongLookupKey(score.playerId, score.score));
+        const bl = beatLeaderByKey.get(
+          BeatLeaderService.beatLeaderSongLookupKey(score.playerId, score.score)
+        );
         if (bl !== undefined) {
           score.beatLeaderScore = bl;
         }

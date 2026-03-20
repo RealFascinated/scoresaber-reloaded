@@ -57,7 +57,7 @@ export class PlayerHistoryService {
         Logger.info(`Fetching page ${page} of ${pages}...`);
       }
       const response = await ScoreSaberApiService.lookupPlayers(page);
-      if (page == undefined) {
+      if (response == undefined) {
         Logger.error(`Failed to fetch players on page ${page}, skipping page...`);
         errorCount++;
         continue;
