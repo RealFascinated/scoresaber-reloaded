@@ -20,8 +20,8 @@ export const HmdSchema = z.enum([
   "Valve Index",
   "Vive Cosmos",
   "Bigscreen Beyond",
-  "Pico 4",
-  "Pico 4S",
+  "PICO",
+  "PICO",
   "Pico Neo 2",
   "Pico Neo 3",
   "PSVR2",
@@ -149,8 +149,8 @@ const HMD_DEFINITIONS = [
 
   // Pico
   {
-    hmd: "Pico 4",
-    aliases: ["Pico Neo 3", "Pico Neo 2", "Pico 4S"],
+    hmd: "PICO 4",
+    aliases: ["Pico Neo 3", "Pico Neo 2", "PICO 4S"],
     info: {
       logo: "piconeo.webp",
       filters: "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)",
