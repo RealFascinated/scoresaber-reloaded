@@ -266,14 +266,16 @@ export const app = new Elysia()
   })
   .onAfterHandle(async ({ request, route, response, set }) => {
     await httpMetricsHooks.onAfterHandle({ request, route, response, set });
-    if (request.headers.get("accept") === "application/devalue") {
-      set.headers["content-type"] = "application/devalue";
-      return stringify(response);
-    }
 
     const ResponseCtor = (globalThis as unknown as { Response?: typeof Response }).Response;
     if (ResponseCtor && response instanceof ResponseCtor) {
       return response;
+    }
+
+    if (request.headers.get("accept") === "application/devalue") {
+      return new Response(stringify(response), {
+        headers: { "content-type": "application/devalue" },
+      });
     }
 
     if (response instanceof Object && response !== null) {
