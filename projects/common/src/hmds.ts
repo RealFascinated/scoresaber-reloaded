@@ -184,5 +184,10 @@ export const HMDs: Record<HMD, HMDInfo> = Object.fromEntries(
  * @returns the HMD info
  */
 export const getHMDInfo = (hmd: HMD): HMDInfo => {
-  return HMDs[hmd] ?? HMDs.Unknown;
+  for (const definition of HMD_DEFINITIONS) {
+    if (definition.hmd.toLowerCase() === hmd.toLowerCase()) {
+      return definition.info;
+    }
+  }
+  return HMDs.Unknown;
 };
