@@ -171,15 +171,15 @@ export default class ApiService {
   public async fetchGQL<T>(
     url: string,
     query: string,
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<T | undefined> {
     const startedAt = performance.now();
+    await this.cooldown.waitAndUse();
+
     if (isServer()) {
       this.callCount++;
     }
-
-    await this.cooldown.waitAndUse();
 
     const response = await fetch(url, {
       method: "POST",
@@ -189,7 +189,7 @@ export default class ApiService {
       },
       body: JSON.stringify({
         query: query.trim(),
-        variables: variables || {},
+        variables: variables ?? {},
       }),
     });
 

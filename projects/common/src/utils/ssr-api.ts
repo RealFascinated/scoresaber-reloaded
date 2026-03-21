@@ -1,5 +1,4 @@
 import { parse } from "devalue";
-import { PpGainResponse } from "src/schemas/response/player/pp-boundary";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
 import { StarFilter } from "../maps/types";
@@ -16,6 +15,7 @@ import { MiniRankingResponse } from "../schemas/response/player/around-player";
 import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
 import { PlayerRankingsResponse } from "../schemas/response/player/player-rankings";
 import { PlayerSearchResponse } from "../schemas/response/player/player-search";
+import { PpGainResponse } from "../schemas/response/player/pp-boundary";
 import { PlayerScoresChartResponse } from "../schemas/response/player/scores-chart";
 import { PlayerMedalRankingsResponse } from "../schemas/response/ranking/medal-rankings";
 import { PlayerScoresPageResponse } from "../schemas/response/score/player-scores";
@@ -40,7 +40,7 @@ class SSRApi {
    * @returns the parsed response
    * @throws an error if the request fails
    */
-  async request<T>(url: string, queryParams?: Record<string, string>, body?: any) {
+  async request<T>(url: string, queryParams?: Record<string, string>, body?: Record<string, unknown>) {
     const queryString = getQueryParamsFromObject(queryParams || {});
     const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${url}${queryString}`, {
       method: body ? "POST" : "GET",
