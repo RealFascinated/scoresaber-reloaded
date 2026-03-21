@@ -57,6 +57,7 @@ if (fs.existsSync(".env")) {
 }
 
 new EventsManager();
+new MetricsService();
 
 try {
   Logger.info("Connecting to MongoDB...");
@@ -213,6 +214,61 @@ export const app = new Elysia()
       },
     })
   )
+  .onRequest(httpMetricsHooks.onRequest)
+  .onError({ as: "global" }, ({ code, error }) => {
+    // Return default error for type validation
+    if (code === "VALIDATION") {
+      return (error as ValidationError).all;
+    }
+
+    // Assume unknown error is an internal server error
+    if (code === "UNKNOWN") {
+      code = "INTERNAL_SERVER_ERROR";
+    }
+
+    let status: number | undefined = undefined;
+    if (typeof error === "object" && error !== null && "status" in error) {
+      status = (error as { status?: number }).status;
+    }
+
+    if (status === undefined) {
+      switch (code) {
+        case "INTERNAL_SERVER_ERROR":
+          status = 500;
+          break;
+        case "NOT_FOUND":
+          status = 404;
+          break;
+        case "PARSE":
+          status = 400;
+          break;
+        case "INVALID_COOKIE_SIGNATURE":
+          status = 401;
+          break;
+      }
+    }
+
+    if (status === 500) {
+      Logger.error("Internal server error:", error);
+    }
+
+    const shouldExposeMessage = !isProduction();
+    const errorMessage =
+      typeof error === "object" && error !== null && "message" in error
+        ? (error as { message?: unknown }).message
+        : undefined;
+
+    return {
+      ...((status && { statusCode: status }) || { status: code }),
+      ...(shouldExposeMessage &&
+        errorMessage != code &&
+        typeof errorMessage === "string" && { message: errorMessage }),
+      timestamp: new Date().toISOString(),
+    };
+  })
+  .onAfterHandle(async ({ request, route, response, set }) => {
+    await httpMetricsHooks.onAfterHandle({ request, route, response, set });
+  })
   .mapResponse(({ request, responseValue }) => {
     const ResponseCtor = (globalThis as unknown as { Response?: typeof Response }).Response;
     if (ResponseCtor && responseValue instanceof ResponseCtor) {
@@ -278,64 +334,7 @@ export const app = new Elysia()
   .use(PlaylistController)
   .use(BeatSaverController)
   .use(BeatLeaderController)
-  .use(PlayerRankingController)
-  .onRequest(httpMetricsHooks.onRequest)
-  .onError({ as: "global" }, ({ code, error, request }) => {
-    httpMetricsHooks.cleanupRequest(request);
-
-    // Return default error for type validation
-    if (code === "VALIDATION") {
-      return (error as ValidationError).all;
-    }
-
-    // Assume unknown error is an internal server error
-    if (code === "UNKNOWN") {
-      code = "INTERNAL_SERVER_ERROR";
-    }
-
-    let status: number | undefined = undefined;
-    if (typeof error === "object" && error !== null && "status" in error) {
-      status = (error as { status?: number }).status;
-    }
-
-    if (status === undefined) {
-      switch (code) {
-        case "INTERNAL_SERVER_ERROR":
-          status = 500;
-          break;
-        case "NOT_FOUND":
-          status = 404;
-          break;
-        case "PARSE":
-          status = 400;
-          break;
-        case "INVALID_COOKIE_SIGNATURE":
-          status = 401;
-          break;
-      }
-    }
-
-    if (status === 500) {
-      Logger.error("Internal server error:", error);
-    }
-
-    const shouldExposeMessage = !isProduction();
-    const errorMessage =
-      typeof error === "object" && error !== null && "message" in error
-        ? (error as { message?: unknown }).message
-        : undefined;
-
-    return {
-      ...((status && { statusCode: status }) || { status: code }),
-      ...(shouldExposeMessage &&
-        errorMessage != code &&
-        typeof errorMessage === "string" && { message: errorMessage }),
-      timestamp: new Date().toISOString(),
-    };
-  })
-  .onAfterHandle(async ({ request, route, path, response, set }) => {
-    await httpMetricsHooks.onAfterHandle({ request, route, path, response, set });
-  });
+  .use(PlayerRankingController);
 
 app.onStart(async () => {
   EventsManager.getListeners().forEach(listener => {
@@ -361,7 +360,6 @@ app.onStart(async () => {
 
   new CacheService();
   new PlaylistService();
-  new MetricsService();
 
   EventsManager.registerListener(new QueueManager());
 });

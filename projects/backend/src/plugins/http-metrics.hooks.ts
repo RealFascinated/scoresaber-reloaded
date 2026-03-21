@@ -10,10 +10,7 @@ type RequestHookContext = {
 
 type AfterHandleHookContext = {
   request: Request;
-  /** Registered path pattern, e.g. `/player/:id` — may be empty if the hook runs before routes are composed. */
   route?: string;
-  /** Actual path (no query); used as a fallback label when `route` is missing. */
-  path?: string;
   response: unknown;
   set: { status?: number | string };
 };
@@ -44,7 +41,7 @@ export const createHttpMetricsHooks = () => {
     if (!metric) return undefined;
     totalRequestsMetric = metric;
     totalRequestsMetricLoaded = true;
-    return metric;
+    return totalRequestsMetric;
   };
 
   const getResponseStatusMetric = async (): Promise<HttpResponseStatusMetric | undefined> => {
@@ -52,7 +49,7 @@ export const createHttpMetricsHooks = () => {
     const metric = MetricsService.getMetric<HttpResponseStatusMetric>(MetricType.HTTP_RESPONSES);
     responseStatusMetric = metric;
     responseStatusMetricLoaded = true;
-    return metric;
+    return responseStatusMetric;
   };
 
   const getResponseTimeMetric = async (): Promise<ResponseTimeHistogramMetric | undefined> => {
@@ -60,32 +57,24 @@ export const createHttpMetricsHooks = () => {
     const metric = MetricsService.getMetric<ResponseTimeHistogramMetric>(MetricType.RESPONSE_TIME_MS);
     responseTimeMetric = metric;
     responseTimeMetricLoaded = true;
-    return metric;
+    return responseTimeMetric;
   };
 
   return {
-    /**
-     * Drop timing state when a request errors before `onAfterHandle` runs; otherwise
-     * `Request` objects stay in the Map and the heap grows without bound.
-     */
-    cleanupRequest: (request: Request): void => {
-      requestStartTimes.delete(request);
-    },
     onRequest: async ({ request }: RequestHookContext): Promise<void> => {
       requestStartTimes.set(request, process.hrtime.bigint());
       const requestsMetric = await getTotalRequestsMetric();
       requestsMetric?.increment();
     },
-    onAfterHandle: async ({ request, route, path, response, set }: AfterHandleHookContext): Promise<void> => {
-      const routeLabel = route && route.length > 0 ? route : path;
-      if (!routeLabel) {
+    onAfterHandle: async ({ request, route, response, set }: AfterHandleHookContext): Promise<void> => {
+      if (!route) {
         requestStartTimes.delete(request);
         return;
       }
 
       const statusCode = getStatusCode(response, set.status);
       const responseMetric = await getResponseStatusMetric();
-      responseMetric?.increment(routeLabel, statusCode);
+      responseMetric?.increment(route, statusCode);
 
       const startedAt = requestStartTimes.get(request);
       requestStartTimes.delete(request);
@@ -93,7 +82,7 @@ export const createHttpMetricsHooks = () => {
 
       const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
       const responseTimeHistogramMetric = await getResponseTimeMetric();
-      responseTimeHistogramMetric?.observe(routeLabel, durationMs);
+      responseTimeHistogramMetric?.observe(route, durationMs);
     },
   };
 };
