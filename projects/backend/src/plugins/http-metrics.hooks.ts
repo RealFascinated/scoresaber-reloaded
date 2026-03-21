@@ -10,7 +10,10 @@ type RequestHookContext = {
 
 type AfterHandleHookContext = {
   request: Request;
+  /** Registered path pattern, e.g. `/player/:id` — may be empty if the hook runs before routes are composed. */
   route?: string;
+  /** Actual path (no query); used as a fallback label when `route` is missing. */
+  path?: string;
   response: unknown;
   set: { status?: number | string };
 };
@@ -73,15 +76,16 @@ export const createHttpMetricsHooks = () => {
       const requestsMetric = await getTotalRequestsMetric();
       requestsMetric?.increment();
     },
-    onAfterHandle: async ({ request, route, response, set }: AfterHandleHookContext): Promise<void> => {
-      if (!route) {
+    onAfterHandle: async ({ request, route, path, response, set }: AfterHandleHookContext): Promise<void> => {
+      const routeLabel = route && route.length > 0 ? route : path;
+      if (!routeLabel) {
         requestStartTimes.delete(request);
         return;
       }
 
       const statusCode = getStatusCode(response, set.status);
       const responseMetric = await getResponseStatusMetric();
-      responseMetric?.increment(route, statusCode);
+      responseMetric?.increment(routeLabel, statusCode);
 
       const startedAt = requestStartTimes.get(request);
       requestStartTimes.delete(request);
@@ -89,7 +93,7 @@ export const createHttpMetricsHooks = () => {
 
       const durationMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
       const responseTimeHistogramMetric = await getResponseTimeMetric();
-      responseTimeHistogramMetric?.observe(route, durationMs);
+      responseTimeHistogramMetric?.observe(routeLabel, durationMs);
     },
   };
 };
