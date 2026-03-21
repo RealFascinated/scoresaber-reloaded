@@ -22,7 +22,8 @@ type MedalScoresQueueItem = {
 
 export class MedalScoresService {
   private static IGNORE_SCORES = false;
-  private static SCORES_INGEST_QUEUE = new Set<MedalScoresQueueItem>();
+  /** Deduped by `scoreId` — a Set of `{ score }` objects would keep every duplicate reference during rescan. */
+  private static SCORES_INGEST_QUEUE = new Map<string, MedalScoresQueueItem>();
 
   /**
    * Refreshes the medal scores for all ranked leaderboards.
@@ -55,7 +56,7 @@ export class MedalScoresService {
     MedalScoresService.IGNORE_SCORES = false;
 
     // Process the scores queue
-    for (const item of MedalScoresService.SCORES_INGEST_QUEUE) {
+    for (const item of MedalScoresService.SCORES_INGEST_QUEUE.values()) {
       await MedalScoresService.handleIncomingMedalsScoreUpdate(item.score, item.beatLeaderScore);
     }
     MedalScoresService.SCORES_INGEST_QUEUE.clear();
@@ -198,7 +199,7 @@ export class MedalScoresService {
 
     // Add to update queue
     if (MedalScoresService.IGNORE_SCORES) {
-      MedalScoresService.SCORES_INGEST_QUEUE.add({ score, beatLeaderScore });
+      MedalScoresService.SCORES_INGEST_QUEUE.set(score.scoreId, { score, beatLeaderScore });
       return;
     }
 

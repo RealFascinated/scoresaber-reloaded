@@ -43,8 +43,10 @@ const DEFAULT_OPTIONS: LeaderboardOptions = {
 export class LeaderboardCoreService {
   public static pendingLeaderboardUpdates: Map<number, Partial<ScoreSaberLeaderboard>> = new Map();
 
-  constructor() {
-    // Start the leaderboard update interval timer
+  /**
+   * Registers a periodic flush of `pendingLeaderboardUpdates` to MongoDB. Call once at process startup.
+   */
+  public static startPendingLeaderboardUpdateFlush(): void {
     setInterval(
       async () => {
         const before = performance.now();
