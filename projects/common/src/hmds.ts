@@ -20,8 +20,8 @@ export const HmdSchema = z.enum([
   "Valve Index",
   "Vive Cosmos",
   "Bigscreen Beyond",
-  "PICO",
-  "PICO",
+  "PICO 4",
+  "PICO 4S",
   "Pico Neo 2",
   "Pico Neo 3",
   "PSVR2",
@@ -184,5 +184,10 @@ export const HMDs: Record<HMD, HMDInfo> = Object.fromEntries(
  * @returns the HMD info
  */
 export const getHMDInfo = (hmd: HMD): HMDInfo => {
-  return HMDs[hmd] ?? HMDs.Unknown;
+  for (const definition of HMD_DEFINITIONS) {
+    if (definition.hmd.toLowerCase() === hmd.toLowerCase()) {
+      return definition.info;
+    }
+  }
+  return HMDs.Unknown;
 };

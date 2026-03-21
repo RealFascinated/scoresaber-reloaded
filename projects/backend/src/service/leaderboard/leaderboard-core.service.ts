@@ -43,16 +43,23 @@ const DEFAULT_OPTIONS: LeaderboardOptions = {
 export class LeaderboardCoreService {
   public static pendingLeaderboardUpdates: Map<number, Partial<ScoreSaberLeaderboard>> = new Map();
 
-  constructor() {
-    // Start the leaderboard update interval timer
+  /**
+   * Registers a periodic flush of `pendingLeaderboardUpdates` to MongoDB. Call once at process startup.
+   */
+  public static startPendingLeaderboardUpdateFlush(): void {
     setInterval(
       async () => {
+        const snapshot = LeaderboardCoreService.pendingLeaderboardUpdates;
+        if (snapshot.size === 0) {
+          return;
+        }
+
+        // New updates during the flush accumulate here; do not clear `snapshot` until the write succeeds.
+        LeaderboardCoreService.pendingLeaderboardUpdates = new Map();
+
         const before = performance.now();
         const updateOps: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];
-        for (const [
-          leaderboardId,
-          leaderboard,
-        ] of LeaderboardCoreService.pendingLeaderboardUpdates.entries()) {
+        for (const [leaderboardId, leaderboard] of snapshot.entries()) {
           updateOps.push({
             updateOne: {
               filter: { _id: leaderboardId },
@@ -60,12 +67,21 @@ export class LeaderboardCoreService {
             },
           });
         }
-        if (updateOps.length > 0) {
-          LeaderboardCoreService.pendingLeaderboardUpdates.clear();
+
+        try {
           await ScoreSaberLeaderboardModel.bulkWrite(updateOps);
           Logger.info(
             `Pushed ${updateOps.length} leaderboard updates to the database in ${formatDuration(performance.now() - before)}`
           );
+        } catch (error) {
+          Logger.error("Failed to flush pending leaderboard updates; will merge back for retry", error);
+          for (const [id, partial] of snapshot.entries()) {
+            const existing = LeaderboardCoreService.pendingLeaderboardUpdates.get(id);
+            LeaderboardCoreService.pendingLeaderboardUpdates.set(
+              id,
+              existing ? { ...partial, ...existing } : partial
+            );
+          }
         }
       },
       TimeUnit.toMillis(TimeUnit.Minute, 10)

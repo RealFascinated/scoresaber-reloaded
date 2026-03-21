@@ -50,7 +50,7 @@ export class ScoreWebsockets implements EventListener {
             } else if (pendingScore.beatLeaderScore) {
               this.processScore(undefined, undefined, undefined, pendingScore.beatLeaderScore);
             }
-            return;
+            continue;
           }
         }
       },
@@ -100,18 +100,15 @@ export class ScoreWebsockets implements EventListener {
     connectBeatLeaderWebsocket({
       onScore: async beatLeaderScore => {
         try {
-          const beatLeaderSeenScoresMetric = (await MetricsService.getMetric(
+          const beatLeaderSeenScoresMetric = MetricsService.getMetric<BeatLeaderSeenScoresMetric>(
             MetricType.BEATLEADER_SEEN_SCORES
-          )) as BeatLeaderSeenScoresMetric | undefined;
+          );
           beatLeaderSeenScoresMetric?.increment();
 
-          const beatLeaderUniquePlayersMetric = (await MetricsService.getMetric(
+          const beatLeaderUniquePlayersMetric = MetricsService.getMetric<BeatLeaderUniqueDailyPlayersMetric>(
             MetricType.BEATLEADER_UNIQUE_DAILY_PLAYERS
-          )) as BeatLeaderUniqueDailyPlayersMetric | undefined;
-          if (beatLeaderUniquePlayersMetric) {
-            // no need to await this
-            beatLeaderUniquePlayersMetric.addPlayer(beatLeaderScore.player.id);
-          }
+          );
+          beatLeaderUniquePlayersMetric?.addPlayer(beatLeaderScore.player.id);
 
           const player = beatLeaderScore.player;
           const leaderboard = beatLeaderScore.leaderboard;
@@ -197,13 +194,8 @@ export class ScoreWebsockets implements EventListener {
       }
 
       // Track unique daily players in Redis
-      const metric = (await MetricsService.getMetric(MetricType.UNIQUE_DAILY_PLAYERS)) as
-        | UniqueDailyPlayersMetric
-        | undefined;
-      if (metric) {
-        // no need to await this
-        metric.addPlayer(player.id);
-      }
+      const metric = MetricsService.getMetric<UniqueDailyPlayersMetric>(MetricType.UNIQUE_DAILY_PLAYERS);
+      metric?.addPlayer(player.id);
 
       // Save the score stats
       if (beatLeaderScore) {

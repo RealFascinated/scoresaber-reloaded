@@ -22,7 +22,8 @@ type MedalScoresQueueItem = {
 
 export class MedalScoresService {
   private static IGNORE_SCORES = false;
-  private static SCORES_INGEST_QUEUE = new Set<MedalScoresQueueItem>();
+  /** Deduped by `scoreId` — a Set of `{ score }` objects would keep every duplicate reference during rescan. */
+  private static SCORES_INGEST_QUEUE = new Map<string, MedalScoresQueueItem>();
 
   /**
    * Refreshes the medal scores for all ranked leaderboards.
@@ -30,35 +31,41 @@ export class MedalScoresService {
   public static async rescanMedalScores() {
     MedalScoresService.IGNORE_SCORES = true;
 
-    const rankedLeaderboards = await LeaderboardCoreService.getRankedLeaderboards();
-    let updatedCount = 0;
-    let skippedCount = 0;
+    try {
+      const rankedLeaderboards = await LeaderboardCoreService.getRankedLeaderboards();
+      let updatedCount = 0;
+      let skippedCount = 0;
 
-    for (const [index, leaderboard] of rankedLeaderboards.entries()) {
-      const needsUpdate = await this.rescanLeaderboardIfChanged(leaderboard.id);
-      if (needsUpdate) {
-        updatedCount++;
-      } else {
-        skippedCount++;
+      for (const [index, leaderboard] of rankedLeaderboards.entries()) {
+        const needsUpdate = await this.rescanLeaderboardIfChanged(leaderboard.id);
+        if (needsUpdate) {
+          updatedCount++;
+        } else {
+          skippedCount++;
+        }
+
+        if (index % 100 === 0) {
+          Logger.info(
+            `[MEDAL SCORES] Processed ${index} of ${rankedLeaderboards.length} ranked leaderboards (${updatedCount} updated, ${skippedCount} skipped)`
+          );
+        }
       }
 
-      if (index % 100 === 0) {
-        Logger.info(
-          `[MEDAL SCORES] Processed ${index} of ${rankedLeaderboards.length} ranked leaderboards (${updatedCount} updated, ${skippedCount} skipped)`
-        );
+      Logger.info(
+        `[MEDAL SCORES] Refreshed all ranked leaderboards: ${updatedCount} updated, ${skippedCount} skipped`
+      );
+    } finally {
+      MedalScoresService.IGNORE_SCORES = false;
+
+      for (const item of MedalScoresService.SCORES_INGEST_QUEUE.values()) {
+        try {
+          await MedalScoresService.handleIncomingMedalsScoreUpdate(item.score, item.beatLeaderScore);
+        } catch (error) {
+          Logger.error("[MEDAL SCORES] Failed to process queued score after rescan:", error);
+        }
       }
+      MedalScoresService.SCORES_INGEST_QUEUE.clear();
     }
-
-    Logger.info(
-      `[MEDAL SCORES] Refreshed all ranked leaderboards: ${updatedCount} updated, ${skippedCount} skipped`
-    );
-    MedalScoresService.IGNORE_SCORES = false;
-
-    // Process the scores queue
-    for (const item of MedalScoresService.SCORES_INGEST_QUEUE) {
-      await MedalScoresService.handleIncomingMedalsScoreUpdate(item.score, item.beatLeaderScore);
-    }
-    MedalScoresService.SCORES_INGEST_QUEUE.clear();
   }
 
   /**
@@ -198,7 +205,7 @@ export class MedalScoresService {
 
     // Add to update queue
     if (MedalScoresService.IGNORE_SCORES) {
-      MedalScoresService.SCORES_INGEST_QUEUE.add({ score, beatLeaderScore });
+      MedalScoresService.SCORES_INGEST_QUEUE.set(score.scoreId, { score, beatLeaderScore });
       return;
     }
 

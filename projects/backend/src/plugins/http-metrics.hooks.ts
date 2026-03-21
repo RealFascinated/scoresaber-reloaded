@@ -37,35 +37,27 @@ export const createHttpMetricsHooks = () => {
 
   const getTotalRequestsMetric = async (): Promise<TotalRequestsMetric | undefined> => {
     if (totalRequestsMetricLoaded) return totalRequestsMetric;
-    const metric = (await MetricsService.getMetric(MetricType.TOTAL_REQUESTS)) as
-      | TotalRequestsMetric
-      | undefined;
+    const metric = MetricsService.getMetric<TotalRequestsMetric>(MetricType.TOTAL_REQUESTS);
     if (!metric) return undefined;
     totalRequestsMetric = metric;
     totalRequestsMetricLoaded = true;
-    return metric;
+    return totalRequestsMetric;
   };
 
   const getResponseStatusMetric = async (): Promise<HttpResponseStatusMetric | undefined> => {
     if (responseStatusMetricLoaded) return responseStatusMetric;
-    const metric = (await MetricsService.getMetric(MetricType.HTTP_RESPONSES)) as
-      | HttpResponseStatusMetric
-      | undefined;
-    if (!metric) return undefined;
+    const metric = MetricsService.getMetric<HttpResponseStatusMetric>(MetricType.HTTP_RESPONSES);
     responseStatusMetric = metric;
     responseStatusMetricLoaded = true;
-    return metric;
+    return responseStatusMetric;
   };
 
   const getResponseTimeMetric = async (): Promise<ResponseTimeHistogramMetric | undefined> => {
     if (responseTimeMetricLoaded) return responseTimeMetric;
-    const metric = (await MetricsService.getMetric(MetricType.RESPONSE_TIME_MS)) as
-      | ResponseTimeHistogramMetric
-      | undefined;
-    if (!metric) return undefined;
+    const metric = MetricsService.getMetric<ResponseTimeHistogramMetric>(MetricType.RESPONSE_TIME_MS);
     responseTimeMetric = metric;
     responseTimeMetricLoaded = true;
-    return metric;
+    return responseTimeMetric;
   };
 
   return {

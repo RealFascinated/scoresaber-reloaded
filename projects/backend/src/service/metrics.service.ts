@@ -122,8 +122,8 @@ export default class MetricsService {
    * @param type the type of metric to retrieve
    * @returns the metric instance, or undefined if not found
    */
-  public static async getMetric(type: MetricType): Promise<Metric<unknown> | undefined> {
-    return MetricsService.metrics.get(type);
+  public static getMetric<T extends Metric<unknown>>(type: MetricType): T | undefined {
+    return MetricsService.metrics.get(type) as T | undefined;
   }
 
   public static cleanup(): void {
