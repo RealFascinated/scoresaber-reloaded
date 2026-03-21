@@ -61,6 +61,13 @@ export const createHttpMetricsHooks = () => {
   };
 
   return {
+    /**
+     * Drop timing state when a request errors before `onAfterHandle` runs; otherwise
+     * `Request` objects stay in the Map and the heap grows without bound.
+     */
+    cleanupRequest: (request: Request): void => {
+      requestStartTimes.delete(request);
+    },
     onRequest: async ({ request }: RequestHookContext): Promise<void> => {
       requestStartTimes.set(request, process.hrtime.bigint());
       const requestsMetric = await getTotalRequestsMetric();

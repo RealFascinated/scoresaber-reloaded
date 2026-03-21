@@ -50,7 +50,7 @@ export class ScoreWebsockets implements EventListener {
             } else if (pendingScore.beatLeaderScore) {
               this.processScore(undefined, undefined, undefined, pendingScore.beatLeaderScore);
             }
-            return;
+            continue;
           }
         }
       },

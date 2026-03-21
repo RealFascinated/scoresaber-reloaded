@@ -213,7 +213,9 @@ export const app = new Elysia()
     })
   )
   .onRequest(httpMetricsHooks.onRequest)
-  .onError({ as: "global" }, ({ code, error }) => {
+  .onError({ as: "global" }, ({ code, error, request }) => {
+    httpMetricsHooks.cleanupRequest(request);
+
     // Return default error for type validation
     if (code === "VALIDATION") {
       return (error as ValidationError).all;
