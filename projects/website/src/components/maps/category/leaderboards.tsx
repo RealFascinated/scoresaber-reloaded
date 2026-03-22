@@ -98,7 +98,7 @@ export default function Leaderboards() {
                             difficulty: leaderboard.difficulty.difficulty,
                           }}
                           imageSize={58}
-                          worth={{
+                          metric={{
                             value: leaderboard.stars,
                             icon: StarIcon,
                           }}

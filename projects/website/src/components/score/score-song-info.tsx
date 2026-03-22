@@ -16,7 +16,7 @@ interface ScoreSongInfoProps {
     authorName: string;
     difficulty: MapDifficulty;
   };
-  worth?: {
+  metric?: {
     value: number;
     icon: React.ComponentType<{ className?: string }>;
   };
@@ -29,7 +29,7 @@ interface ScoreSongInfoProps {
 export default function ScoreSongInfo({
   song,
   level,
-  worth,
+  metric,
   beatSaverMap,
   clickableSongName = true,
   leaderboardId,
@@ -39,7 +39,7 @@ export default function ScoreSongInfo({
     beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap.author.id}` : undefined;
 
   const diff = getDifficulty(level.difficulty);
-  const WorthIcon = worth?.icon;
+  const MetricIcon = metric?.icon;
 
   return (
     <div className="flex w-full items-center gap-3">
@@ -65,10 +65,10 @@ export default function ScoreSongInfo({
             backgroundColor: `color-mix(in srgb, ${diff.color} 95%, transparent)`,
           }}
         >
-          {worth != undefined && worth.value > 0 ? (
+          {metric != undefined && metric.value > 0 ? (
             <div className="flex items-center justify-center gap-1">
-              <p>{worth.value.toFixed(2)}</p>
-              {WorthIcon && <WorthIcon className="h-[14px] w-[14px]" />}
+              <p>{metric.value.toFixed(2)}</p>
+              {MetricIcon && <MetricIcon className="h-[14px] w-[14px]" />}
             </div>
           ) : (
             <p>{getDifficultyName(diff)}</p>
