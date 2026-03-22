@@ -85,7 +85,7 @@ export default function PlayerAndLeaderboardSearch() {
   return (
     <>
       <div
-        className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-center rounded-xl border px-2 backdrop-blur-sm transition-all duration-200 select-none sm:min-w-16 xl:w-64 xl:justify-start xl:px-(--spacing-sm)"
+        className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-center rounded-xl border px-2 backdrop-blur-xs transition-all duration-200 select-none sm:min-w-16 xl:w-64 xl:justify-start xl:px-(--spacing-sm)"
         onClick={openSearch}
       >
         <UserSearch className="text-muted-foreground size-5" />
@@ -95,7 +95,7 @@ export default function PlayerAndLeaderboardSearch() {
         </p>
 
         <div className="hidden shrink-0 xl:flex">
-          <kbd className="bg-muted/80 text-muted-foreground pointer-events-none inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs font-medium shadow-sm select-none">
+          <kbd className="bg-muted/80 text-muted-foreground pointer-events-none inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs font-medium shadow-xs select-none">
             <span className="text-xs">⌘</span>K
           </kbd>
         </div>
@@ -160,7 +160,7 @@ export default function PlayerAndLeaderboardSearch() {
                   {results.leaderboards.map(leaderboard => (
                     <div
                       key={leaderboard.id}
-                      className="group hover:bg-accent flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 hover:shadow-sm active:scale-[0.98]"
+                      className="group hover:bg-accent flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 hover:shadow-xs active:scale-[0.98]"
                       onClick={() => {
                         closeSearch();
                         router.push(`/leaderboard/${leaderboard.id}`);

@@ -35,9 +35,9 @@ export function Tab({
     <button
       className={cn(
         "relative flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200",
-        "focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+        "focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
         isActive
-          ? "bg-primary text-primary-foreground shadow-sm"
+          ? "bg-primary text-primary-foreground shadow-xs"
           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
       )}
       onClick={onClick}

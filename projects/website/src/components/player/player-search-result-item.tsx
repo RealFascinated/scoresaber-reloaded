@@ -18,7 +18,7 @@ export default function PlayerSearchResultItem({
 }: PlayerSearchResultItemProps) {
   return (
     <div
-      className={`group hover:bg-accent flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 hover:shadow-sm active:scale-[0.98] ${className ?? ""}`}
+      className={`group hover:bg-accent flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 hover:shadow-xs active:scale-[0.98] ${className ?? ""}`}
       onClick={onClick}
     >
       <Avatar

@@ -11,7 +11,7 @@ import { useState } from "react";
 function LeaderboardStarChangeHistoryButton({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) {
   return (
     <button
-      className="border-border bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-(--spacing-sm) rounded-(--radius-lg) border px-(--spacing-sm) py-(--spacing-sm) text-xs font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none sm:px-(--spacing-lg) sm:text-sm"
+      className="border-border bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-(--spacing-sm) rounded-(--radius-lg) border px-(--spacing-sm) py-(--spacing-sm) text-xs font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-hidden sm:px-(--spacing-lg) sm:text-sm"
       onClick={onClick}
     >
       <StarIcon className="size-4 text-yellow-500" />
@@ -70,7 +70,7 @@ export function LeaderboardStarChangeHistory({
                       {/* From */}
                       <div
                         className={cn(
-                          "flex items-center gap-(--spacing-xs) rounded px-2 py-1 text-xs font-medium sm:px-(--spacing-md) sm:py-(--spacing-xs)",
+                          "flex items-center gap-(--spacing-xs) rounded-sm px-2 py-1 text-xs font-medium sm:px-(--spacing-md) sm:py-(--spacing-xs)",
                           starChange.previousStars === 0
                             ? "bg-muted/50 text-muted-foreground"
                             : isDecrease || isRankedToUnranked
@@ -88,7 +88,7 @@ export function LeaderboardStarChangeHistory({
                       {/* To */}
                       <div
                         className={cn(
-                          "flex items-center gap-(--spacing-xs) rounded px-2 py-1 text-xs font-medium sm:px-(--spacing-md) sm:py-(--spacing-xs)",
+                          "flex items-center gap-(--spacing-xs) rounded-sm px-2 py-1 text-xs font-medium sm:px-(--spacing-md) sm:py-(--spacing-xs)",
                           starChange.newStars === 0
                             ? "bg-muted/50 text-muted-foreground"
                             : isUnrankedToRanked || isIncrease

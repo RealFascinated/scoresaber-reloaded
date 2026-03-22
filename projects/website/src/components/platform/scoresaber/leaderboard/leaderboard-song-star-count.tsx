@@ -16,7 +16,7 @@ export function LeaderboardSongStarCount({ leaderboard }: LeaderboardSongStarCou
 
   return (
     <div
-      className="flex h-[20px] w-fit cursor-default items-center justify-center rounded-sm text-xs"
+      className="flex h-[20px] w-fit cursor-default items-center justify-center rounded-xs text-xs"
       style={{
         backgroundColor: getDifficulty(leaderboard.difficulty.difficulty).color + "f0", // Transparency value (in hex 0-255)
       }}
