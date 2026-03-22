@@ -13,6 +13,13 @@ export interface ServiceConfig {
 
 export default class ApiService {
   /**
+   * In-flight GraphQL request coalescing (same URL/query/variables).
+   */
+  private static readonly pendingGqlRequests = new Map<string, Promise<unknown>>();
+
+  private static readonly gqlFetchTimeoutMs = 10_000;
+
+  /**
    * The cooldown for the service.
    */
   private readonly cooldown: Cooldown;
@@ -171,35 +178,65 @@ export default class ApiService {
   public async fetchGQL<T>(
     url: string,
     query: string,
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
     options?: RequestOptions
   ): Promise<T | undefined> {
-    const startedAt = performance.now();
-    if (isServer()) {
-      this.callCount++;
+    const cacheKey = JSON.stringify({
+      url,
+      query: query.trim(),
+      variables: variables ?? {},
+    });
+    const existing = ApiService.pendingGqlRequests.get(cacheKey);
+    if (existing) {
+      return existing as Promise<T | undefined>;
     }
 
-    await this.cooldown.waitAndUse();
+    const promise = (async (): Promise<T | undefined> => {
+      const startedAt = performance.now();
+      await this.cooldown.waitAndUse();
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...((options?.headers as Record<string, string>) || {}),
-      },
-      body: JSON.stringify({
-        query: query.trim(),
-        variables: variables || {},
-      }),
+      if (isServer()) {
+        this.callCount++;
+      }
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), ApiService.gqlFetchTimeoutMs);
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            ...((options?.headers as Record<string, string>) || {}),
+          },
+          body: JSON.stringify({
+            query: query.trim(),
+            variables: variables ?? {},
+          }),
+        });
+
+        this.totalLatencyMs += Math.max(0, performance.now() - startedAt);
+        if (!response.ok) {
+          this.failedCallCount++;
+          return undefined;
+        }
+
+        return response.json() as Promise<T>;
+      } catch {
+        this.totalLatencyMs += Math.max(0, performance.now() - startedAt);
+        this.failedCallCount++;
+        return undefined;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    })();
+
+    ApiService.pendingGqlRequests.set(cacheKey, promise);
+    promise.finally(() => {
+      ApiService.pendingGqlRequests.delete(cacheKey);
     });
 
-    this.totalLatencyMs += Math.max(0, performance.now() - startedAt);
-    if (!response.ok) {
-      this.failedCallCount++;
-      return undefined;
-    }
-
-    return response.json() as Promise<T>;
+    return promise;
   }
 
   /**

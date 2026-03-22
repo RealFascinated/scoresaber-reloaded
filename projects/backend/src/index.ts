@@ -2,8 +2,6 @@ import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
 import { openapi } from "@elysiajs/openapi";
-import { fromTypes } from "@elysiajs/openapi/gen";
-import { AdditionalReferences } from "@elysiajs/openapi/types";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
@@ -72,17 +70,6 @@ Logger.info("Testing Redis connection...");
 export const redisClient = new Redis(env.REDIS_URL);
 Logger.info("Connected to Redis :)");
 
-const typeReferences: AdditionalReferences | undefined = {};
-if (isProduction()) {
-  Logger.info("Generating type references...");
-  fromTypes("src/index.ts", {
-    projectRoot: process.cwd(),
-    overrideOutputPath: (tempDir: string) => `${tempDir}/dist/backend/src/index.d.ts`,
-    silent: false,
-    debug: true,
-  })();
-}
-
 const httpMetricsHooks = createHttpMetricsHooks();
 
 export const app = new Elysia()
@@ -95,7 +82,6 @@ export const app = new Elysia()
   .use(
     openapi({
       path: "/swagger",
-      references: typeReferences,
       documentation: {
         info: {
           title: "SSR Backend",

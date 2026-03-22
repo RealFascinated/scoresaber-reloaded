@@ -18,7 +18,7 @@
   "author": "fascinated7",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^9.39.1"
+    "eslint": "^9.39.4"
   },
   "dependencies": {
     "cross-env": "^10.1.0",

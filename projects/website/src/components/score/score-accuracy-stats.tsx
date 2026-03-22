@@ -50,7 +50,7 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
       >
         <AverageCutValues cuts={averageCut} hand={hand} />
         <div className="relative shrink-0">
-          <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }} className="drop-shadow-sm">
+          <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }} className="drop-shadow-xs">
             <circle
               cx={center}
               cy={center}
@@ -74,7 +74,7 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
                 animate={{ pathLength: percent }}
                 exit={{ pathLength: 0 }}
                 transition={{ duration: shouldReduceMotion ? 0 : 1, ease: "easeInOut" }}
-                className="drop-shadow-sm"
+                className="drop-shadow-xs"
               />
             </AnimatePresence>
           </svg>
@@ -95,7 +95,7 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
 function HandStat({ hand, name, value }: { hand: Hand; name: string; value: string }) {
   return (
     <div
-      className="hover:bg-opacity-30 inline-flex w-full min-w-0 items-center justify-between rounded-lg px-2 py-1.5 transition-colors md:px-3"
+      className="inline-flex w-full min-w-0 items-center justify-between rounded-lg px-2 py-1.5 transition-[filter] hover:brightness-110 md:px-3"
       style={{ backgroundColor: `${handColors[hand]}20` }}
     >
       <p className="shrink-0 text-xs font-semibold tracking-wide text-gray-300 uppercase">{name}</p>

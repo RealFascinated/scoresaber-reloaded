@@ -84,7 +84,7 @@ export default function ScoreSaberScoreDisplay({
                 authorName: leaderboard.levelAuthorName,
                 difficulty: leaderboard.difficulty.difficulty,
               }}
-              worth={{
+              metric={{
                 value: leaderboard.stars,
                 icon: StarIcon,
               }}

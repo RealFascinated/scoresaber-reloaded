@@ -30,7 +30,7 @@ export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
             authorName: score.leaderboard.song.mapper,
             difficulty: score.leaderboard.diffInfo.diff as MapDifficulty,
           }}
-          worth={{
+          metric={{
             value: score.leaderboard.complexity,
             icon: SparklesIcon,
           }}

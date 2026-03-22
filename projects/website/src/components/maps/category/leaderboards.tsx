@@ -9,6 +9,7 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/contexts/viewport-context";
+import { StarIcon } from "@heroicons/react/24/solid";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -97,6 +98,10 @@ export default function Leaderboards() {
                             difficulty: leaderboard.difficulty.difficulty,
                           }}
                           imageSize={58}
+                          metric={{
+                            value: leaderboard.stars,
+                            icon: StarIcon,
+                          }}
                           clickableSongName={false}
                         />
                       </div>

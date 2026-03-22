@@ -511,12 +511,12 @@ export class ScoreSaberApiService {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up ranking requests...`);
 
-    const nextInQueueResponse = await ScoreSaberApiService.fetch<RankingRequestToken[]>(
-      RANKING_REQUESTS_ENDPOINT.replace(":query", "top")
-    );
-    const openRankUnrankResponse = await ScoreSaberApiService.fetch<RankingRequestToken[]>(
-      RANKING_REQUESTS_ENDPOINT.replace(":query", "belowTop")
-    );
+    const [nextInQueueResponse, openRankUnrankResponse] = await Promise.all([
+      ScoreSaberApiService.fetch<RankingRequestToken[]>(RANKING_REQUESTS_ENDPOINT.replace(":query", "top")),
+      ScoreSaberApiService.fetch<RankingRequestToken[]>(
+        RANKING_REQUESTS_ENDPOINT.replace(":query", "belowTop")
+      ),
+    ]);
 
     const response = nextInQueueResponse?.concat(openRankUnrankResponse || []);
     if (response === undefined) {

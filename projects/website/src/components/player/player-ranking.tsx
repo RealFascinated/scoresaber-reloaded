@@ -74,7 +74,7 @@ export function PlayerRanking({
       <div className="block lg:hidden">
         <div
           className={cn(
-            "bg-muted/50 mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg px-2 py-1 transition-colors hover:shadow-sm",
+            "bg-muted/50 mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg px-2 py-1 transition-colors hover:shadow-xs",
             mainPlayer?.id == player.id ? "bg-primary/10" : ""
           )}
         >
@@ -114,7 +114,7 @@ function RankDisplay({ rank }: { rank: number }) {
   return (
     <div
       className={cn(
-        "flex h-[24px] w-fit items-center justify-center gap-1 rounded px-1 py-1 text-xs font-semibold",
+        "flex h-[24px] w-fit items-center justify-center gap-1 rounded-sm px-1 py-1 text-xs font-semibold",
         getRankBgColor(rank)
       )}
     >
@@ -128,7 +128,7 @@ function CountryRankDisplay({ country, countryRank }: { country: string; country
     <div className="flex items-center">
       <div
         className={cn(
-          "flex h-[24px] items-center gap-1 rounded px-1 py-1 text-xs font-semibold",
+          "flex h-[24px] items-center gap-1 rounded-sm px-1 py-1 text-xs font-semibold",
           getRankBgColor(countryRank)
         )}
       >

@@ -34,7 +34,7 @@ function Slider({ className, label, labelPosition = "top", showLabelOnHover = tr
         <SliderPrimitive.Range className="bg-primary absolute h-full transition-colors duration-200" />
       </SliderPrimitive.Track>
       <SliderPrimitive.Thumb
-        className="border-primary bg-background ring-offset-background hover:border-primary/80 block h-5 w-5 rounded-full border-2 shadow-md transition-all duration-200 select-none focus:ring-0 focus:outline-none disabled:pointer-events-none disabled:opacity-50"
+        className="border-primary bg-background ring-offset-background hover:border-primary/80 block h-5 w-5 rounded-full border-2 shadow-md transition-all duration-200 select-none focus:ring-0 focus:outline-hidden disabled:pointer-events-none disabled:opacity-50"
         onKeyDown={handleKeyDown}
       >
         {label && showLabel && (

@@ -59,7 +59,7 @@ const SearchDialog = ({
               <Search className="text-muted-foreground size-4 shrink-0" />
             )}
             <input
-              className="placeholder:text-muted-foreground focus:text-foreground flex h-full w-full rounded-md bg-transparent py-3 text-sm transition-colors outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="placeholder:text-muted-foreground focus:text-foreground flex h-full w-full rounded-md bg-transparent py-3 text-sm outline-hidden transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               placeholder={placeholder}
               maxLength={maxLength}
               value={query}

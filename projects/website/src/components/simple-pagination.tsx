@@ -132,7 +132,7 @@ const PageButton = React.memo(
           "whitespace-nowrap",
           isButtonLoading && "cursor-not-allowed opacity-50",
           isCurrentPage && "cursor-not-allowed",
-          !isActive && !isButtonLoading && "hover:shadow-sm"
+          !isActive && !isButtonLoading && "hover:shadow-xs"
         )}
         aria-current={isCurrentPage ? "page" : undefined}
       >
@@ -175,7 +175,7 @@ const NavigationButton = React.memo(
       className={cn(
         "transition-all duration-200",
         disabled && "cursor-not-allowed opacity-50",
-        !disabled && !isLoading && "hover:shadow-sm"
+        !disabled && !isLoading && "hover:shadow-xs"
       )}
       aria-label={
         buttonPage === 1

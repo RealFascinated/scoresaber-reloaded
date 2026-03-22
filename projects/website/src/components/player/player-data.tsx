@@ -49,13 +49,20 @@ export default function PlayerData({ player }: PlayerDataProps) {
     queryFn: async () => {
       const platforms = platformRepository.getPlatforms();
       const available = await Promise.all(
-        platforms.map(async p => ({
-          platform: p,
-          available: await p.getOptions().displayPredicate(player.id),
-        }))
+        platforms.map(async p => {
+          try {
+            return {
+              platform: p,
+              available: await p.getOptions().displayPredicate(player.id),
+            };
+          } catch {
+            return { platform: p, available: false };
+          }
+        })
       );
       return available.filter(p => p.available).map(p => p.platform);
     },
+    placeholderData: data => data,
   });
 
   const platform = useMemo(() => {

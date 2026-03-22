@@ -130,7 +130,7 @@ export function HoverDropdown({
 
       {open && (
         <div
-          className={`bg-card border-border text-card-foreground absolute top-full z-50 overflow-hidden rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-200 ${
+          className={`bg-card border-border text-card-foreground absolute top-full z-50 overflow-hidden rounded-xl border shadow-lg backdrop-blur-xs transition-all duration-200 ${
             isMobile
               ? "right-0 left-auto max-w-[calc(100vw-1rem)]" // Better positioning on mobile
               : "left-0"
@@ -191,7 +191,7 @@ export function DropdownItem({
 
   return (
     <div
-      className={`${styleClass} relative flex cursor-pointer items-center gap-(--spacing-sm) rounded-md px-(--spacing-sm) py-(--spacing-xs) text-sm font-medium transition-colors duration-200 outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50 ${
+      className={`${styleClass} relative flex cursor-pointer items-center gap-(--spacing-sm) rounded-md px-(--spacing-sm) py-(--spacing-xs) text-sm font-medium outline-hidden transition-colors duration-200 select-none data-disabled:pointer-events-none data-disabled:opacity-50 ${
         disabled ? "pointer-events-none opacity-50" : ""
       } ${className}`}
       onClick={handleClick}
@@ -267,7 +267,7 @@ export function DropdownButton({
   };
   const buttonClassName = cn(
     styleClass,
-    "relative w-full flex cursor-pointer items-center gap-(--spacing-sm) rounded-(--radius-md) px-(--spacing-sm) py-(--spacing-xs) text-sm font-medium transition-colors duration-200 outline-none select-none data-disabled:pointer-events-none data-disabled:opacity-50",
+    "relative w-full flex cursor-pointer items-center gap-(--spacing-sm) rounded-(--radius-md) px-(--spacing-sm) py-(--spacing-xs) text-sm font-medium transition-colors duration-200 outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50",
     disabled ? "pointer-events-none opacity-50" : "",
     className
   );

@@ -62,7 +62,7 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
           <p className="mb-4 text-red-500">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            className="rounded-sm bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
             Retry
           </button>

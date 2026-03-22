@@ -34,19 +34,15 @@ export async function sendScoreNotification(
   beatLeaderScore: BeatLeaderScore | undefined,
   title: string
 ) {
-  const beatSaver = await BeatSaverService.getMap(
-    leaderboard.songHash,
-    leaderboard.difficulty.difficulty,
-    leaderboard.difficulty.characteristic,
-    "basic"
-  );
-
-  const previousScore = await PlayerScoreHistoryService.getPlayerPreviousScore(
-    player.id,
-    score,
-    leaderboard,
-    score.timestamp
-  );
+  const [beatSaver, previousScore] = await Promise.all([
+    BeatSaverService.getMap(
+      leaderboard.songHash,
+      leaderboard.difficulty.difficulty,
+      leaderboard.difficulty.characteristic,
+      "basic"
+    ),
+    PlayerScoreHistoryService.getPlayerPreviousScore(player.id, score, leaderboard, score.timestamp),
+  ]);
   const change = previousScore &&
     previousScore.change && {
       accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
@@ -151,8 +147,29 @@ export async function sendMedalScoreNotification(
     return changeA - changeB;
   });
 
+  // Find the player with the highest positive change for the title
+  const topChangePlayerId = Array.from(changes.entries()).find(
+    ([, change]) => change.after - change.before > 0
+  )?.[0];
+  if (!topChangePlayerId) {
+    return;
+  }
+
+  const uniquePlayerIds = new Set([...sortedChanges.map(([playerId]) => playerId), topChangePlayerId]);
+  const playerById = new Map(
+    await Promise.all(
+      [...uniquePlayerIds].map(async playerId => {
+        const player = await PlayerCoreService.getPlayer(playerId);
+        return [playerId, player] as const;
+      })
+    )
+  );
+
   for (const [playerId, change] of sortedChanges) {
-    const changePlayer = await PlayerCoreService.getPlayer(playerId);
+    const changePlayer = playerById.get(playerId);
+    if (!changePlayer) {
+      continue;
+    }
     description.push(
       format(
         `**[%s](%s)** %s %s %s (%s -> %s)`,
@@ -167,14 +184,10 @@ export async function sendMedalScoreNotification(
     );
   }
 
-  // Find the player with the highest positive change for the title
-  const topChangePlayerId = Array.from(changes.entries()).find(
-    ([, change]) => change.after - change.before > 0
-  )?.[0];
-  if (!topChangePlayerId) {
+  const topChangePlayer = playerById.get(topChangePlayerId);
+  if (!topChangePlayer) {
     return;
   }
-  const topChangePlayer = await PlayerCoreService.getPlayer(topChangePlayerId);
 
   await sendEmbedToChannel(
     DiscordChannels.MEDAL_SCORES_FEED,

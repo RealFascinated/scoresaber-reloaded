@@ -14,7 +14,7 @@ import CountryFlag from "../../ui/country-flag";
 
 function PlayerOverviewItem({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-background/80 border-border flex h-9 items-center gap-2 rounded-lg border px-3 py-1.5 text-gray-300 shadow-sm backdrop-blur-sm">
+    <div className="bg-background/80 border-border flex h-9 items-center gap-2 rounded-lg border px-3 py-1.5 text-gray-300 shadow-xs backdrop-blur-xs">
       {children}
     </div>
   );
@@ -52,7 +52,7 @@ const playerData = [
               }
             >
               <SimpleLink href={`/ranking/${player.rankPages.global}`}>
-                <span className="hover:text-primary/80 focus-visible:outline-primary/50 m-0 text-sm transition-all focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2">
+                <span className="hover:text-primary/80 focus-visible:outline-primary/50 m-0 text-sm transition-all focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
               </SimpleLink>
@@ -75,13 +75,13 @@ const playerData = [
             <CountryFlag
               code={player.country}
               size={10}
-              className="rounded-sm"
+              className="rounded-xs"
               tooltipSide="bottom"
               tooltip={name => `Country Rank in ${name}`}
             />
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
               <SimpleLink href={`/ranking/${player.country}/${player.rankPages.country}`}>
-                <span className="hover:text-primary/80 focus-visible:outline-primary/50 m-0 text-sm transition-all focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2">
+                <span className="hover:text-primary/80 focus-visible:outline-primary/50 m-0 text-sm transition-all focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
               </SimpleLink>
