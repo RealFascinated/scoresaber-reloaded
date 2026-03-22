@@ -14,7 +14,7 @@ import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-hist
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { getDaysAgo, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon } from "lucide-react";
+import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon, TriangleIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ReactElement, useState } from "react";
 import { cn } from "../../../common/utils";
@@ -24,6 +24,7 @@ import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
 import PlayerScoresChart from "./impl/player-scores-chart";
 import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
 import PlusPpCalculator from "./impl/plus-pp-calculator";
+import SkillTriangleChart from "./impl/skill-triangle-chart";
 
 const ScoresGraphChart = dynamic(() => import("./impl/scores-graph-chart"), { ssr: false });
 
@@ -173,6 +174,15 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
     },
     {
       index: 4,
+      label: "Skill Triangle",
+      icon: TriangleIcon,
+      showDateRangeSelector: false,
+      // has chart in name -> look inside -> isnt a chart
+      isChart: false,
+      chart: player => <SkillTriangleChart player={player} />,
+    },
+    {
+      index: 5,
       label: "PP Calculator",
       icon: CalculatorIcon,
       showDateRangeSelector: false,
