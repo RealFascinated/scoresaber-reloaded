@@ -14,9 +14,7 @@ export class PlatformRepository {
   private platforms: Platform[] = [];
 
   private constructor() {
-    this.platforms.push(new ScoreSaberPlatform());
-    this.platforms.push(new AccSaberPlatform());
-    this.platforms.push(new MedalScoresPlatform());
+    this.platforms.push(new ScoreSaberPlatform(), new AccSaberPlatform(), new MedalScoresPlatform());
   }
 
   /**
