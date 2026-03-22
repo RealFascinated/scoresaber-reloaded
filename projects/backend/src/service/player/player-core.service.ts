@@ -22,10 +22,19 @@ export class PlayerCoreService {
    *
    * @param id the player's id
    * @param playerToken an optional player token
+   * @param options optional behavior (e.g. skip in-memory cache for bulk operations)
    * @returns the player document if found
    * @throws NotFoundError if the player doesn't exist on ScoreSaber
    */
-  public static async getPlayer(id: string, playerToken?: ScoreSaberPlayerToken): Promise<Player> {
+  public static async getPlayer(
+    id: string,
+    playerToken?: ScoreSaberPlayerToken,
+    options?: {
+      useCache?: boolean;
+    }
+  ): Promise<Player> {
+    const useCache = options?.useCache !== false;
+
     // Wait for the existing lock if it's in progress
     if (accountCreationLock[id] !== undefined) {
       const result = await accountCreationLock[id];
@@ -35,11 +44,11 @@ export class PlayerCoreService {
       return result;
     }
 
-    let player: Player | null | undefined = await CacheService.fetch(
-      CacheId.Players,
-      `player:${id}`,
-      async () => PlayerModel.findOne({ _id: id }).lean()
-    );
+    let player: Player | null | undefined = await (useCache
+      ? CacheService.fetch(CacheId.Players, `player:${id}`, async () =>
+          PlayerModel.findOne({ _id: id }).lean()
+        )
+      : PlayerModel.findOne({ _id: id }).lean());
 
     if (player === null) {
       player = await PlayerCoreService.createPlayer(id, playerToken);
@@ -73,6 +82,9 @@ export class PlayerCoreService {
     if (shouldSave) {
       await PlayerModel.updateOne({ _id: id }, { $set: updates });
       Object.assign(player, updates);
+      if (!useCache) {
+        await CacheService.invalidate(`player:${id}`);
+      }
     }
 
     return player;
@@ -89,67 +101,62 @@ export class PlayerCoreService {
     id: string,
     playerToken?: ScoreSaberPlayerToken
   ): Promise<Player | undefined> {
-    // Set lock synchronously before any await so concurrent callers share the same promise
     let lockPromise = accountCreationLock[id];
     if (lockPromise === undefined) {
-      lockPromise = PlayerCoreService.runCreatePlayer(id, playerToken);
+      lockPromise = (async (): Promise<Player | undefined> => {
+        try {
+          if (await PlayerCoreService.playerExists(id)) {
+            return (await PlayerModel.findOne({ _id: id }).lean()) ?? undefined;
+          }
+
+          const token = playerToken || (await ScoreSaberApiService.lookupPlayer(id));
+          if (!token) {
+            return undefined;
+          }
+
+          try {
+            Logger.info(`Creating player "${id}"...`);
+            const newPlayer = await PlayerModel.create({
+              _id: id,
+              joinedDate: new Date(token.firstSeen),
+              inactive: token.inactive,
+              name: token.name,
+              trackedSince: new Date(),
+            });
+
+            const seedQueue = QueueManager.getQueue(
+              QueueId.PlayerScoreRefreshQueue
+            ) as FetchMissingScoresQueue;
+            if (!(await seedQueue.hasItem({ id: id, data: id })) && !token.banned) {
+              (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
+                id,
+                data: id,
+              });
+            }
+
+            if (isProduction()) {
+              await logNewTrackedPlayer(token);
+            }
+            return newPlayer.toObject();
+          } catch (err) {
+            Logger.error(`Failed to create player document for "${id}"`, err);
+            throw new InternalServerError(`Failed to create player document for "${id}"`);
+          } finally {
+            delete accountCreationLock[id];
+          }
+        } catch (err) {
+          if (err instanceof InternalServerError) {
+            throw err;
+          }
+          Logger.error(`Failed to create player document for "${id}"`, err);
+          return undefined;
+        } finally {
+          delete accountCreationLock[id];
+        }
+      })();
       accountCreationLock[id] = lockPromise;
     }
     return lockPromise;
-  }
-
-  private static async runCreatePlayer(
-    id: string,
-    playerToken?: ScoreSaberPlayerToken
-  ): Promise<Player | undefined> {
-    try {
-      if (await PlayerCoreService.playerExists(id)) {
-        return (await PlayerModel.findOne({ _id: id }).lean()) ?? undefined;
-      }
-
-      playerToken = playerToken || (await ScoreSaberApiService.lookupPlayer(id));
-      if (!playerToken) {
-        return undefined;
-      }
-
-      try {
-        Logger.info(`Creating player "${id}"...`);
-        const newPlayer = await PlayerModel.create({
-          _id: id,
-          joinedDate: new Date(playerToken.firstSeen),
-          inactive: playerToken.inactive,
-          name: playerToken.name,
-          trackedSince: new Date(),
-        });
-
-        const seedQueue = QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue;
-        if (!(await seedQueue.hasItem({ id: id, data: id })) && !playerToken.banned) {
-          (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
-            id,
-            data: id,
-          });
-        }
-
-        // Notify in production
-        if (isProduction()) {
-          await logNewTrackedPlayer(playerToken);
-        }
-        return newPlayer.toObject();
-      } catch (err) {
-        Logger.error(`Failed to create player document for "${id}"`, err);
-        throw new InternalServerError(`Failed to create player document for "${id}"`);
-      } finally {
-        delete accountCreationLock[id];
-      }
-    } catch (err) {
-      if (err instanceof InternalServerError) {
-        throw err;
-      }
-      Logger.error(`Failed to create player document for "${id}"`, err);
-      return undefined;
-    } finally {
-      delete accountCreationLock[id];
-    }
   }
 
   /**

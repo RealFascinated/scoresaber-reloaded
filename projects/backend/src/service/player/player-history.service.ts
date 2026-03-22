@@ -45,15 +45,15 @@ export class PlayerHistoryService {
 
     const pages = Math.ceil(firstPage.metadata.total / (firstPage.metadata.itemsPerPage ?? 100));
     Logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
+    Logger.info(`Fetching page 1 of ${pages}...`);
 
     let successCount = 0;
     let errorCount = 0;
 
-    const players: ScoreSaberPlayerToken[] = [];
+    const players: ScoreSaberPlayerToken[] = [...(firstPage.players ?? [])];
 
-    // Fetch all the active players from ScoreSaber
-    for (let page = 1; page <= pages; page++) {
-      if (page % 10 === 0 || page === 1 || page === pages) {
+    for (let page = 2; page <= pages; page++) {
+      if (page % 10 === 0 || page === pages) {
         Logger.info(`Fetching page ${page} of ${pages}...`);
       }
       const response = await ScoreSaberApiService.lookupPlayers(page);
@@ -62,12 +62,12 @@ export class PlayerHistoryService {
         errorCount++;
         continue;
       }
-      players.push(...(response?.players ?? []));
+      players.push(...(response.players ?? []));
     }
     Logger.info(`Found ${players.length} active players from ScoreSaber API`);
 
     await processInBatches(players, 25, async player => {
-      const foundPlayer = await PlayerCoreService.getPlayer(player.id, player);
+      const foundPlayer = await PlayerCoreService.getPlayer(player.id, player, { useCache: false });
 
       const [, trackedScores] = await Promise.all([
         // Track the player's history
@@ -80,10 +80,10 @@ export class PlayerHistoryService {
 
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
-          (async () => {
-            await PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } });
-            redisClient.del(`scoresaber:cached-player:${foundPlayer._id}`);
-          })(),
+        (async () => {
+          await PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } });
+          redisClient.del(`scoresaber:cached-player:${foundPlayer._id}`);
+        })(),
       ]);
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
@@ -130,9 +130,9 @@ export class PlayerHistoryService {
     );
     Logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-        `Successfully processed: ${successCount} players\n` +
-        `Failed to process: ${errorCount} players\n` +
-        `Total inactive players: ${inactivePlayers}`
+      `Successfully processed: ${successCount} players\n` +
+      `Failed to process: ${errorCount} players\n` +
+      `Total inactive players: ${inactivePlayers}`
     );
   }
 
