@@ -29,6 +29,7 @@
     "elysia-helmet": "^3.0.0",
     "eslint": "^9.39.1",
     "globals": "^17.4.0",
+    "ioredis": "^5.10.1",
     "minio": "^8.0.7",
     "mongoose": "^9.3.1",
     "prom-client": "^15.1.3",
