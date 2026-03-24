@@ -1,3 +1,8 @@
+import {
+  accSaberScoreOrderSchema,
+  accSaberScoreSortSchema,
+  accSaberScoreTypeSchema,
+} from "@ssr/common/schemas/accsaber/tokens/query/query";
 import { ScoreSaberScoreSortSchema } from "@ssr/common/score/score-sort";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import {
@@ -58,6 +63,27 @@ export default function scoresController(app: Elysia) {
           }),
           detail: {
             description: "Fetch player scores from ScoreSaber",
+          },
+        }
+      )
+      .get(
+        "/player/accsaber/:playerId/:page",
+        async ({ params: { playerId, page }, query: { sort, order, type } }) => {
+          return await PlayerScoresService.getAccSaberEnrichedPlayerScores(playerId, page, sort, order, type);
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            playerId: z.string(),
+            page: z.coerce.number().default(1),
+          }),
+          query: z.object({
+            sort: accSaberScoreSortSchema.default("date"),
+            order: accSaberScoreOrderSchema.default("desc"),
+            type: accSaberScoreTypeSchema.default("overall"),
+          }),
+          detail: {
+            description: "Fetch AccSaber player scores with optional BeatLeader replay URLs",
           },
         }
       )

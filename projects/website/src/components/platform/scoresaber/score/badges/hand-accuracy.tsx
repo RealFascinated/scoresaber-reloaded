@@ -1,21 +1,19 @@
 import { Change } from "@/components/change";
-import { ScoreBadgeProps } from "@/components/platform/scoresaber/score/badges/badge-props";
 import SimpleTooltip from "@/components/simple-tooltip";
+import type { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 
-type HandAccuracyProps = ScoreBadgeProps & {
+type HandAccuracyProps = {
+  beatLeaderScore: BeatLeaderScore;
   /**
    * The hand to get the hand accuracy from
    */
   hand: "left" | "right";
 };
 
-export function HandAccuracyBadge({ score, hand }: HandAccuracyProps) {
-  if (!score.beatLeaderScore) {
-    return undefined;
-  }
-  const { handAccuracy } = score.beatLeaderScore;
-  const scoreImprovement = score.beatLeaderScore.scoreImprovement;
+export function HandAccuracyBadge({ beatLeaderScore, hand }: HandAccuracyProps) {
+  const { handAccuracy } = beatLeaderScore;
+  const scoreImprovement = beatLeaderScore.scoreImprovement;
   const currentHandAccuracy = handAccuracy[hand];
   const previousHandAccuracy = scoreImprovement
     ? handAccuracy[hand] - scoreImprovement.handAccuracy[hand]

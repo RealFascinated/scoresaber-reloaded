@@ -1,3 +1,10 @@
+import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import {
+  type AccSaberScoreOrder,
+  type AccSaberScoreSort,
+  type AccSaberScoreType,
+  type EnrichedAccSaberScore,
+} from "@ssr/common/api-service/impl/accsaber";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
@@ -5,6 +12,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scores
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import {
@@ -15,10 +23,12 @@ import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/pla
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { ScoreQuery, SortDirection, SortField } from "@ssr/common/types/score-query";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
+import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-difficulty";
 import { scoreToObject } from "@ssr/common/utils/model-converters";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
@@ -26,6 +36,7 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import type { QueryFilter } from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import BeatLeaderService from "../beatleader.service";
 import BeatSaverService from "../beatsaver.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
@@ -449,6 +460,45 @@ export class PlayerScoresService {
       );
       return scores.filter((result): result is PlayerScore => result !== undefined);
     });
+  }
+
+  /**
+   * AccSaber player scores from GraphQL, enriched with BeatLeader score data when available (replay, hand acc, etc.).
+   */
+  public static async getAccSaberEnrichedPlayerScores(
+    playerId: string,
+    pageNumber: number,
+    sort: AccSaberScoreSort,
+    order: AccSaberScoreOrder,
+    type: AccSaberScoreType
+  ): Promise<Page<EnrichedAccSaberScore>> {
+    const requested = await ApiServiceRegistry.getInstance()
+      .getAccSaberService()
+      .getPlayerScores(playerId, pageNumber, { sort, order, type });
+
+    const items: EnrichedAccSaberScore[] = await Promise.all(
+      requested.items.map(async row => {
+        const songHash = row.leaderboard.song.hash;
+        const difficulty = accSaberDifficultyToMapDifficulty(row.leaderboard.diffInfo.diff);
+        const characteristic = (row.leaderboard.diffInfo.type ?? "Standard") as MapCharacteristic;
+        const songScore = row.score.unmodifiedScore;
+
+        const beatLeaderScore = await BeatLeaderService.getBeatLeaderScoreFromSong(
+          playerId,
+          songHash,
+          difficulty,
+          characteristic,
+          songScore
+        );
+
+        return beatLeaderScore ? { ...row, beatLeaderScore } : { ...row };
+      })
+    );
+
+    return {
+      items,
+      metadata: requested.metadata,
+    };
   }
 
   /**

@@ -2,54 +2,39 @@ import { Cooldown } from "../../cooldown";
 import Logger from "../../logger";
 import type { Page } from "../../pagination";
 import { Pagination } from "../../pagination";
+import {
+  type AccSaberScoreOrder,
+  type AccSaberScoreSort,
+  type AccSaberScoreType,
+  accSaberScoreOrderSchema,
+  accSaberScoreSortSchema,
+  accSaberScoreTypeSchema,
+} from "../../schemas/accsaber/tokens/query/query";
+import {
+  type AccSaberScore,
+  type EnrichedAccSaberScore,
+  accSaberScoreSchema,
+  enrichedAccSaberScoreSchema,
+} from "../../schemas/accsaber/tokens/score/score";
+import { accSaberDifficultyToMapDifficulty } from "../../utils/accsaber-difficulty";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
 
-const GQL_BASE = "https://gql.accsaber.com/graphql";
-const SCORES_PER_PAGE = 8;
-
-export type AccSaberScore = {
-  id: string;
-  playerId: string;
-  leaderboardId: number;
-  timeSet: Date;
-  ap: number;
-  acc: number;
-  leaderboard: {
-    leaderboardId: number;
-    song: {
-      hash: string;
-      name: string;
-      subName: string;
-      author: string;
-      mapper: string;
-      beatsaverKey: string;
-    };
-    diffInfo: {
-      type: string;
-      diff: string;
-    };
-    complexity: number;
-    category: string;
-  };
-  score: {
-    ap: number;
-    rank: number;
-    unmodifiedScore: number;
-    score: number;
-    mods: null;
-    timeSet: Date;
-    acc: number;
-    percentage: number;
-    weightedAp: number;
-  };
-  fetchedAt: Date;
-  lastUpdated: Date;
+export {
+  accSaberScoreOrderSchema,
+  accSaberScoreSchema,
+  accSaberScoreSortSchema,
+  accSaberScoreTypeSchema,
+  enrichedAccSaberScoreSchema,
+  type AccSaberScore,
+  type AccSaberScoreOrder,
+  type AccSaberScoreSort,
+  type AccSaberScoreType,
+  type EnrichedAccSaberScore,
 };
 
-export type AccSaberScoreSort = "date" | "ap" | "acc" | "complexity" | "ranking";
-export type AccSaberScoreOrder = "asc" | "desc";
-export type AccSaberScoreType = "overall" | "true" | "tech" | "speed";
+const GQL_BASE = "https://gql.accsaber.com/graphql";
+const SCORES_PER_PAGE = 8;
 
 export class AccSaberService extends ApiService {
   constructor() {
@@ -207,7 +192,7 @@ export class AccSaberService extends ApiService {
             },
             diffInfo: {
               type: "Standard",
-              diff: score.difficulty?.toLowerCase()?.replace("plus", "Plus"),
+              diff: accSaberDifficultyToMapDifficulty(score.difficulty),
             },
             complexity: score.complexity,
             category: score.categoryName,

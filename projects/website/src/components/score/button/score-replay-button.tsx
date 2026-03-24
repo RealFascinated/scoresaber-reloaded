@@ -4,10 +4,12 @@ import BeatSaberPepeLogo from "@/components/logos/logos/beatsaber-pepe-logo";
 import ScoreButton from "@/components/score/button/score-button";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
+import {
+  getBeatLeaderReplayRedirectUrl,
+  type BeatLeaderReplaySource,
+} from "@ssr/common/utils/beatleader-utils";
 
-export function ScoreReplayButton({ score }: { score: ScoreSaberScore }) {
+export function ScoreReplayButton({ score }: { score: BeatLeaderReplaySource }) {
   const database = useDatabase();
   const viewer = useStableLiveQuery(async () => database.getReplayViewer());
 

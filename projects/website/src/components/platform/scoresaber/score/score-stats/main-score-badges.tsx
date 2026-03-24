@@ -46,20 +46,22 @@ const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
     name: "Left Hand Accuracy",
     color: () => "bg-hands-left",
     create: (score: ScoreSaberScore) => {
-      if (!score.beatLeaderScore) {
+      const beatLeaderScore = score.beatLeaderScore;
+      if (!beatLeaderScore) {
         return undefined;
       }
-      return <HandAccuracyBadge score={score} hand="left" />;
+      return <HandAccuracyBadge beatLeaderScore={beatLeaderScore} hand="left" />;
     },
   },
   {
     name: "Right Hand Accuracy",
     color: () => "bg-hands-right",
     create: (score: ScoreSaberScore) => {
-      if (!score.beatLeaderScore) {
+      const beatLeaderScore = score.beatLeaderScore;
+      if (!beatLeaderScore) {
         return undefined;
       }
-      return <HandAccuracyBadge score={score} hand="right" />;
+      return <HandAccuracyBadge beatLeaderScore={beatLeaderScore} hand="right" />;
     },
   },
   {

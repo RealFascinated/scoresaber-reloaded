@@ -2,16 +2,16 @@
 
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import {
-  AccSaberScore,
   AccSaberScoreOrder,
   AccSaberScoreSort,
   AccSaberScoreType,
+  type EnrichedAccSaberScore,
 } from "@ssr/common/api-service/impl/accsaber";
-import type { Page } from "@ssr/common/pagination";
+import { Pagination, type Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
@@ -91,14 +91,11 @@ export default function AccSaberPlayerScores({ player }: Props) {
     isError,
     isLoading,
     isRefetching,
-  } = useQuery<Page<AccSaberScore>>({
+  } = useQuery<Page<EnrichedAccSaberScore>>({
     queryKey: ["playerScores:accsaber", player.id, page, type, sort, order],
-    queryFn: () =>
-      ApiServiceRegistry.getInstance().getAccSaberService().getPlayerScores(player.id, page, {
-        order: order,
-        sort: sort,
-        type: type,
-      }),
+    queryFn: async () =>
+      (await ssrApi.fetchAccSaberPlayerScores(player.id, page, sort, order, type)) ??
+      Pagination.empty<EnrichedAccSaberScore>(),
     placeholderData: prev => prev,
   });
 

@@ -1,4 +1,10 @@
 import { parse } from "devalue";
+import type {
+  AccSaberScoreOrder,
+  AccSaberScoreSort,
+  AccSaberScoreType,
+  EnrichedAccSaberScore,
+} from "../api-service/impl/accsaber";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
 import { StarFilter } from "../maps/types";
@@ -252,6 +258,30 @@ class SSRApi {
     return await this.request<PlayerScoresPageResponse>(`/scores/player/scoresaber/${id}/${sort}/${page}`, {
       ...(search ? { search: search } : {}),
       ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
+    });
+  }
+
+  /**
+   * Fetches AccSaber player scores from the backend (GraphQL + BeatLeader replay URLs).
+   *
+   * @param id the player id
+   * @param page the page
+   * @param sort the sort
+   * @param order the order
+   * @param type the type
+   * @returns the scores
+   */
+  async fetchAccSaberPlayerScores(
+    id: string,
+    page: number,
+    sort: AccSaberScoreSort,
+    order: AccSaberScoreOrder,
+    type: AccSaberScoreType
+  ) {
+    return await this.request<Page<EnrichedAccSaberScore>>(`/scores/player/accsaber/${id}/${page}`, {
+      sort,
+      order,
+      type,
     });
   }
 

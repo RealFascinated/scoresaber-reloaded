@@ -17,8 +17,6 @@ export default class ApiService {
    */
   private static readonly pendingGqlRequests = new Map<string, Promise<unknown>>();
 
-  private static readonly gqlFetchTimeoutMs = 10_000;
-
   /**
    * The cooldown for the service.
    */
@@ -199,12 +197,9 @@ export default class ApiService {
         this.callCount++;
       }
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), ApiService.gqlFetchTimeoutMs);
       try {
         const response = await fetch(url, {
           method: "POST",
-          signal: controller.signal,
           headers: {
             "Content-Type": "application/json",
             ...((options?.headers as Record<string, string>) || {}),
@@ -226,8 +221,6 @@ export default class ApiService {
         this.totalLatencyMs += Math.max(0, performance.now() - startedAt);
         this.failedCallCount++;
         return undefined;
-      } finally {
-        clearTimeout(timeoutId);
       }
     })();
 
