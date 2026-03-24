@@ -241,7 +241,7 @@ function TimelineSlider({
   if (timeline.length <= 1) return null;
 
   return (
-    <div className="flex w-full max-w-[200px] flex-col gap-2 md:max-w-[250px]">
+    <div className="flex w-full max-w-full min-w-0 flex-col gap-3 md:max-w-[250px] md:gap-2">
       <Slider
         value={[selectedIndex]}
         onValueChange={v => onSelect(v[0])}
@@ -251,19 +251,20 @@ function TimelineSlider({
         labelPosition="none"
         className="w-full"
       />
-      <div className="scrollbar-none max-h-[280px] overflow-y-auto">
-        <div className="flex flex-col gap-0.5">
+      <div className="scrollbar-none max-h-[min(42vh,220px)] overflow-y-auto overscroll-contain md:max-h-[280px]">
+        <div className="flex flex-col gap-0.5 md:gap-0.5">
           {[...timeline].reverse().map((entry, reverseIdx) => {
             const idx = timeline.length - 1 - reverseIdx;
             const isSelected = idx === selectedIndex;
             return (
               <button
+                type="button"
                 key={entry.timestamp}
                 onClick={() => onSelect(idx)}
-                className={`cursor-pointer rounded px-2 py-0.5 text-left text-xs transition-colors ${
+                className={`cursor-pointer touch-manipulation rounded-md px-3 py-2.5 text-left text-sm transition-colors md:px-2 md:py-0.5 md:text-xs ${
                   isSelected
                     ? "bg-primary/20 text-primary font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    : "text-muted-foreground active:bg-muted/70 hover:text-foreground hover:bg-muted/50"
                 }`}
               >
                 {idx === timeline.length - 1 ? "Today" : entry.label}
@@ -312,7 +313,7 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
 
   if (isLoading) {
     return (
-      <div className="flex h-[400px] items-center justify-center">
+      <div className="flex min-h-[min(70vh,400px)] items-center justify-center px-4 py-8">
         <div className="flex flex-col items-center gap-3">
           <Spinner />
           <p className="text-muted-foreground text-sm">Computing skill triangle...</p>
@@ -323,72 +324,86 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
 
   if (!metrics) {
     return (
-      <div className="flex h-[400px] items-center justify-center">
-        <p className="text-muted-foreground text-sm">Not enough ranked score data for skill triangle</p>
+      <div className="flex min-h-[min(50vh,400px)] items-center justify-center px-4 py-8">
+        <p className="text-muted-foreground text-center text-sm">
+          Not enough ranked score data for skill triangle
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6 p-4 md:p-8">
-      <div className="flex flex-col items-center gap-6 md:flex-row md:gap-10">
+    <div className="flex flex-col items-center justify-center gap-4 overflow-visible px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:gap-6 md:p-6 md:pb-6">
+      <div className="flex w-full max-w-lg flex-col-reverse items-stretch gap-6 overflow-visible md:max-w-none md:flex-row md:items-center md:justify-center md:gap-10">
         {timeline.length > 1 && (
           <TimelineSlider timeline={timeline} selectedIndex={activeIndex} onSelect={setSelectedIndex} />
         )}
 
-        <div className="relative flex items-center justify-center">
-          <div className="absolute -top-2 left-0 flex -translate-y-full flex-col items-center gap-0.5 md:-left-4">
-            <SimpleTooltip
-              display={
-                <p>
-                  Tech skill ratio (higher means the player extracts more PP relative to map difficulty and
-                  accuracy)
-                </p>
-              }
-              side="top"
-            >
-              <div className="flex flex-col items-center gap-0.5">
-                <span className="text-sm font-semibold text-red-400">Tech: {metrics.tech.toFixed(4)}</span>
-                <span className="text-xs text-yellow-400">({techPart.toFixed(1)}%)</span>
-              </div>
-            </SimpleTooltip>
-          </div>
+        <div className="relative mx-auto w-full max-w-[min(100%,320px)] overflow-visible px-1 pt-8 pb-8 md:pt-9 md:pb-9">
+          <div className="relative flex w-full items-center justify-center">
+            <div className="absolute -top-1 left-0 z-10 flex max-w-[42%] -translate-y-full flex-col items-start gap-0.5 sm:max-w-none md:-left-4 md:items-center">
+              <SimpleTooltip
+                display={
+                  <p>
+                    Tech skill ratio (higher means the player extracts more PP relative to map difficulty and
+                    accuracy)
+                  </p>
+                }
+                side="top"
+                showOnMobile
+              >
+                <div className="flex flex-col items-start gap-0.5 md:items-center">
+                  <span className="text-xs font-semibold text-red-400 sm:text-sm">
+                    Tech: {metrics.tech.toFixed(4)}
+                  </span>
+                  <span className="text-[10px] text-yellow-400 sm:text-xs">({techPart.toFixed(1)}%)</span>
+                </div>
+              </SimpleTooltip>
+            </div>
 
-          <div className="absolute -top-2 right-0 flex -translate-y-full flex-col items-center gap-0.5 md:-right-4">
-            <SimpleTooltip display={<p>Weighted average accuracy across top ranked scores</p>} side="top">
-              <div className="flex flex-col items-center gap-0.5">
-                <span className="text-sm font-semibold text-blue-400">Acc: {metrics.acc.toFixed(2)}%</span>
-                <span className="text-xs text-yellow-400">({accPart.toFixed(1)}%)</span>
-              </div>
-            </SimpleTooltip>
-          </div>
+            <div className="absolute -top-1 right-0 z-10 flex max-w-[42%] -translate-y-full flex-col items-end gap-0.5 sm:max-w-none md:-right-4 md:items-center">
+              <SimpleTooltip
+                display={<p>Weighted average accuracy across top ranked scores</p>}
+                side="top"
+                showOnMobile
+              >
+                <div className="flex flex-col items-end gap-0.5 md:items-center">
+                  <span className="text-xs font-semibold text-blue-400 sm:text-sm">
+                    Acc: {metrics.acc.toFixed(2)}%
+                  </span>
+                  <span className="text-[10px] text-yellow-400 sm:text-xs">({accPart.toFixed(1)}%)</span>
+                </div>
+              </SimpleTooltip>
+            </div>
 
-          <div className="absolute -bottom-2 left-1/2 flex -translate-x-1/2 translate-y-full flex-col items-center gap-0.5">
-            <SimpleTooltip
-              display={<p>Weighted average star rating (higher means the player passes harder maps)</p>}
-              side="bottom"
-            >
-              <div className="flex flex-col items-center gap-0.5">
-                <span className="text-sm font-semibold text-green-400">
-                  Pass: {metrics.pass.toFixed(1)}
-                  {"\u2009"}★
-                </span>
-                <span className="text-xs text-yellow-400">({passPart.toFixed(1)}%)</span>
-              </div>
-            </SimpleTooltip>
-          </div>
+            <div className="absolute -bottom-1 left-1/2 z-10 flex max-w-[90%] -translate-x-1/2 translate-y-full flex-col items-center gap-0.5 px-1 text-center">
+              <SimpleTooltip
+                display={<p>Weighted average star rating (higher means the player passes harder maps)</p>}
+                side="bottom"
+                showOnMobile
+              >
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-xs font-semibold text-green-400 sm:text-sm">
+                    Pass: {metrics.pass.toFixed(1)}
+                    {"\u2009"}★
+                  </span>
+                  <span className="text-[10px] text-yellow-400 sm:text-xs">({passPart.toFixed(1)}%)</span>
+                </div>
+              </SimpleTooltip>
+            </div>
 
-          <div className="h-[200px] w-[200px] transition-all duration-500 md:h-[280px] md:w-[280px]">
-            <TriangleSVG
-              normalizedPass={normalizedPass}
-              normalizedAcc={normalizedAcc}
-              normalizedTech={normalizedTech}
-            />
+            <div className="mx-auto aspect-square w-full max-w-[220px] transition-all duration-500 sm:max-w-[240px] md:h-[280px] md:w-[280px] md:max-w-[280px]">
+              <TriangleSVG
+                normalizedPass={normalizedPass}
+                normalizedAcc={normalizedAcc}
+                normalizedTech={normalizedTech}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="text-muted-foreground mt-10 w-full text-center text-xs">
+      <div className="text-muted-foreground mt-5 w-full text-center text-xs md:mt-8">
         Based on top {Math.min(100, activeEntry?.scoreCount ?? 0)} ranked scores
         {activeIndex !== timeline.length - 1 && activeEntry ? ` as of ${activeEntry.label}` : ""}
       </div>
