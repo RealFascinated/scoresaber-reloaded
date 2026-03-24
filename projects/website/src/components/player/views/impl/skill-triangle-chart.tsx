@@ -115,8 +115,7 @@ function normalizeMetrics(metrics: SkillMetrics) {
   const nAcc = Math.min(metrics.acc / maxAcc, 1);
   const nTech = Math.min(metrics.tech / maxTech, 1);
 
-  const totalNormalized =
-    metrics.pass * (maxAcc / maxPass) + metrics.acc + metrics.tech * (maxAcc / maxTech);
+  const totalNormalized = metrics.pass * (maxAcc / maxPass) + metrics.acc + metrics.tech * (maxAcc / maxTech);
 
   return {
     normalizedPass: nPass,
@@ -349,23 +348,16 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
               side="top"
             >
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-sm font-semibold text-red-400">
-                  Tech: {metrics.tech.toFixed(4)}
-                </span>
+                <span className="text-sm font-semibold text-red-400">Tech: {metrics.tech.toFixed(4)}</span>
                 <span className="text-xs text-yellow-400">({techPart.toFixed(1)}%)</span>
               </div>
             </SimpleTooltip>
           </div>
 
           <div className="absolute -top-2 right-0 flex -translate-y-full flex-col items-center gap-0.5 md:-right-4">
-            <SimpleTooltip
-              display={<p>Weighted average accuracy across top ranked scores</p>}
-              side="top"
-            >
+            <SimpleTooltip display={<p>Weighted average accuracy across top ranked scores</p>} side="top">
               <div className="flex flex-col items-center gap-0.5">
-                <span className="text-sm font-semibold text-blue-400">
-                  Acc: {metrics.acc.toFixed(2)}%
-                </span>
+                <span className="text-sm font-semibold text-blue-400">Acc: {metrics.acc.toFixed(2)}%</span>
                 <span className="text-xs text-yellow-400">({accPart.toFixed(1)}%)</span>
               </div>
             </SimpleTooltip>
@@ -378,7 +370,8 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
             >
               <div className="flex flex-col items-center gap-0.5">
                 <span className="text-sm font-semibold text-green-400">
-                  Pass: {metrics.pass.toFixed(1)}{"\u2009"}★
+                  Pass: {metrics.pass.toFixed(1)}
+                  {"\u2009"}★
                 </span>
                 <span className="text-xs text-yellow-400">({passPart.toFixed(1)}%)</span>
               </div>

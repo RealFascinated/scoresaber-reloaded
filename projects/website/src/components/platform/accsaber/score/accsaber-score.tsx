@@ -18,28 +18,32 @@ export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
   return (
     <div className={`relative`}>
       <div
-        className={`grid w-full grid-cols-[20px_1fr_1fr_auto] gap-2 py-2 lg:grid-cols-[0.5fr_4fr_350px_minmax(0,auto)] lg:gap-0`}
+        className={
+          "grid w-full grid-cols-[20px_1fr_1fr] gap-2 py-2 lg:grid-cols-[0.5fr_4fr_1fr_350px] lg:gap-0"
+        }
       >
         <AccSaberRankTime score={score} />
-        <ScoreSongInfo
-          song={{
-            name: score.leaderboard.song.name,
-            authorName: score.leaderboard.song.author,
-            art: `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${score.leaderboard.song.hash.toUpperCase()}.png`,
-          }}
-          level={{
-            authorName: score.leaderboard.song.mapper,
-            difficulty: score.leaderboard.diffInfo.diff as MapDifficulty,
-          }}
-          metric={{
-            value: score.leaderboard.complexity,
-            icon: SparklesIcon,
-          }}
-        />
-        <AccSaberBadges score={score} />
-        <div className="flex items-center justify-end lg:justify-center">
+        <div className="flex min-w-0 items-center overflow-hidden">
+          <ScoreSongInfo
+            song={{
+              name: score.leaderboard.song.name,
+              authorName: score.leaderboard.song.author,
+              art: `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${score.leaderboard.song.hash.toUpperCase()}.png`,
+            }}
+            level={{
+              authorName: score.leaderboard.song.mapper,
+              difficulty: score.leaderboard.diffInfo.diff as MapDifficulty,
+            }}
+            metric={{
+              value: score.leaderboard.complexity,
+              icon: SparklesIcon,
+            }}
+          />
+        </div>
+        <div className="flex items-center justify-end gap-(--spacing-md) px-(--spacing-md)">
           <ScoreReplayButton score={score} />
         </div>
+        <AccSaberBadges score={score} />
       </div>
     </div>
   );

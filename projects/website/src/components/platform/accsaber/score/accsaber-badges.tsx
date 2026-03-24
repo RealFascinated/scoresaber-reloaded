@@ -12,8 +12,8 @@ export const badges: ScoreBadge<EnrichedAccSaberScore, EnrichedAccSaberScore["le
     color: () => "bg-statistic",
     create: (score: EnrichedAccSaberScore) => {
       return (
-        <div className="flex items-center gap-1">
-          <p className="text-sm font-medium text-white">{score.ap.toFixed(2)} AP</p>
+        <div className="flex cursor-default flex-col items-center justify-center">
+          <p>{score.ap.toFixed(2)} AP</p>
         </div>
       );
     },
@@ -25,8 +25,8 @@ export const badges: ScoreBadge<EnrichedAccSaberScore, EnrichedAccSaberScore["le
     },
     create: (score: EnrichedAccSaberScore) => {
       return (
-        <div className="flex items-center gap-1">
-          <p className="text-sm font-medium text-white">{score.acc.toFixed(2)}%</p>
+        <div className="flex cursor-default flex-col items-center justify-center">
+          <p>{score.acc.toFixed(2)}%</p>
         </div>
       );
     },
@@ -34,7 +34,11 @@ export const badges: ScoreBadge<EnrichedAccSaberScore, EnrichedAccSaberScore["le
   {
     name: "Score",
     create: (scoreResponse: EnrichedAccSaberScore) => {
-      return <p>{formatNumberWithCommas(scoreResponse.score.score)}</p>;
+      return (
+        <div className="flex flex-col items-center justify-center">
+          <p>{formatNumberWithCommas(scoreResponse.score.score)}</p>
+        </div>
+      );
     },
   },
   {
@@ -67,8 +71,8 @@ type AccSaberBadgesProps = {
 
 export function AccSaberBadges({ score }: AccSaberBadgesProps) {
   return (
-    <div className="flex h-full flex-col justify-center">
-      <div className="grid grid-cols-3 justify-center gap-1 sm:grid-cols-5">
+    <div className="flex h-full w-full flex-col justify-center">
+      <div className="grid w-full grid-cols-3 justify-center gap-1">
         <ScoreBadges badges={badges} score={score} leaderboard={score.leaderboard} />
       </div>
     </div>
