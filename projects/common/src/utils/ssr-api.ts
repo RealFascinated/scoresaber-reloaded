@@ -1,10 +1,6 @@
 import { parse } from "devalue";
-import type {
-  AccSaberScoreOrder,
-  AccSaberScoreSort,
-  AccSaberScoreType,
-  EnrichedAccSaberScore,
-} from "../api-service/impl/accsaber";
+import type { AccSaberScoreOrder, AccSaberScoreSort, AccSaberScoreType } from "../schemas/accsaber/tokens/query/query";
+import type { EnrichedAccSaberScore } from "../schemas/accsaber/tokens/score/score";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
 import { StarFilter } from "../maps/types";

@@ -62,12 +62,17 @@ export class ScoreCoreService {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-expect-error
       delete previousScore._id; // Remove _id to let a new one be generated
+
       await ScoreSaberPreviousScoreModel.create(previousScore);
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     delete score.playerInfo;
+
+    if (beatLeaderScore) {
+      score.beatLeaderScoreId = beatLeaderScore.scoreId;
+    }
 
     await ScoreSaberScoreModel.create(score);
     await PlayerHmdService.updatePlayerHmd(player.id, score);
@@ -146,14 +151,8 @@ export class ScoreCoreService {
     }
 
     async function getBeatLeaderScore() {
-      if (options?.insertBeatLeaderScore && leaderboard) {
-        return BeatLeaderService.getBeatLeaderScoreFromSong(
-          score.playerId,
-          leaderboard.songHash,
-          leaderboard.difficulty.difficulty,
-          leaderboard.difficulty.characteristic,
-          score.score
-        );
+      if (options?.insertBeatLeaderScore && leaderboard && score.beatLeaderScoreId) {
+        return BeatLeaderService.getBeatLeaderScore(score.beatLeaderScoreId);
       }
       return undefined;
     }

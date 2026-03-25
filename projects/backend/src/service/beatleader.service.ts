@@ -74,6 +74,32 @@ export default class BeatLeaderService {
   }
 
   /**
+   * Checks whether a BeatLeader score has already been tracked.
+   *
+   * Used by the BeatLeader missing-scores seeding flow to avoid wasting pages.
+   */
+  public static async scoreExists(scoreId: number): Promise<boolean> {
+    return (await BeatLeaderScoreModel.exists({ scoreId })) != null;
+  }
+
+  /**
+   * Batch existence check for BeatLeader score ids.
+   *
+   * @returns a set containing all scoreIds that already exist
+   */
+  public static async scoresExist(scoreIds: ReadonlyArray<number>): Promise<Set<number>> {
+    const unique = Array.from(new Set(scoreIds));
+    if (unique.length === 0) {
+      return new Set();
+    }
+
+    const docs = await BeatLeaderScoreModel.find({ scoreId: { $in: unique } })
+      .select({ scoreId: 1 })
+      .lean();
+    return new Set(docs.map(d => d.scoreId));
+  }
+
+  /**
    * Tracks BeatLeader score.
    *
    * @param scoreToken the score to track

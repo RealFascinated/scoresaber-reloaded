@@ -52,6 +52,12 @@ export class ScoreSaberScoreBase extends Score {
   public readonly controllers?: Controllers;
 
   /**
+   * The BeatLeader score id for this ScoreSaber score.
+   */
+  @Prop({ required: false })
+  public beatLeaderScoreId?: number;
+
+  /**
    * The previous score, if any.
    */
   public previousScore?: ScoreSaberPreviousScoreOverview;

@@ -4,7 +4,7 @@ import { getRankColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { AccSaberScore } from "@ssr/common/api-service/impl/accsaber";
+import type { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type AccSaberRankTimeProps = {

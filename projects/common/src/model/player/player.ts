@@ -37,6 +37,12 @@ export class Player {
   public seededScores?: boolean;
 
   /**
+   * Whether the player has their BeatLeader scores seeded.
+   */
+  @prop()
+  public seededBeatLeaderScores?: boolean;
+
+  /**
    * Whether we should track replays for this player.
    */
   @prop()

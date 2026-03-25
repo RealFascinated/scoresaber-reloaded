@@ -3,7 +3,8 @@ import { z } from "zod";
 export const BeatLeaderScoreImprovementSchema = z
   .object({
     id: z.number(),
-    timeset: z.number(),
+    // BeatLeader REST sometimes returns this as a unix timestamp number, but it can also be an empty string.
+    timeset: z.union([z.number(), z.string()]),
     score: z.number(),
     accuracy: z.number(),
     pp: z.number(),

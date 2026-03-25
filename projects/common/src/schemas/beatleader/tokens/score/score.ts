@@ -9,7 +9,7 @@ export const BeatLeaderScoreSchema = z
     myScore: z.null(),
     validContexts: z.number(),
     leaderboard: BeatLeaderLeaderboardSchema,
-    contextExtensions: z.null(),
+    contextExtensions: z.null().optional(),
     accLeft: z.number(),
     accRight: z.number(),
     id: z.number(),
@@ -50,7 +50,7 @@ export const BeatLeaderScoreSchema = z
     scoreImprovement: BeatLeaderScoreImprovementSchema,
     rankVoting: z.null(),
     metadata: z.null(),
-    offsets: BeatLeaderScoreOffsetsSchema,
+    offsets: BeatLeaderScoreOffsetsSchema.nullable().optional(),
   })
   .passthrough();
 

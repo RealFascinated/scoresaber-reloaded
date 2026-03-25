@@ -1,6 +1,6 @@
 "use client";
 
-import { AccSaberScore } from "@ssr/common/api-service/impl/accsaber";
+import type { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import Image from "next/image";
 
 type AccSaberSongInfoProps = {

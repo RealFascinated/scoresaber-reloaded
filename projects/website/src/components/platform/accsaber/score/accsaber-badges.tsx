@@ -2,7 +2,7 @@
 
 import { HandAccuracyBadge } from "@/components/platform/scoresaber/score/badges/hand-accuracy";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badges";
-import type { EnrichedAccSaberScore } from "@ssr/common/api-service/impl/accsaber";
+import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 

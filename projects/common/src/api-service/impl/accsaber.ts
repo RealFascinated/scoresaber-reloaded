@@ -20,19 +20,6 @@ import { accSaberDifficultyToMapDifficulty } from "../../utils/accsaber-difficul
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
 
-export {
-  accSaberScoreOrderSchema,
-  accSaberScoreSchema,
-  accSaberScoreSortSchema,
-  accSaberScoreTypeSchema,
-  enrichedAccSaberScoreSchema,
-  type AccSaberScore,
-  type AccSaberScoreOrder,
-  type AccSaberScoreSort,
-  type AccSaberScoreType,
-  type EnrichedAccSaberScore
-};
-
 const GQL_BASE = "https://gql.h2.accsaber.com/graphql";
 const SCORES_PER_PAGE = 8;
 

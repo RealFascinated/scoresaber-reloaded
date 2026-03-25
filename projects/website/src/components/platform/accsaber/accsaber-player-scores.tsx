@@ -2,12 +2,8 @@
 
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
-import {
-  AccSaberScoreOrder,
-  AccSaberScoreSort,
-  AccSaberScoreType,
-  type EnrichedAccSaberScore,
-} from "@ssr/common/api-service/impl/accsaber";
+import type { AccSaberScoreOrder, AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
+import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { Pagination, type Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";

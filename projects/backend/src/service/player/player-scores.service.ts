@@ -1,10 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import {
-  type AccSaberScoreOrder,
-  type AccSaberScoreSort,
-  type AccSaberScoreType,
-  type EnrichedAccSaberScore,
-} from "@ssr/common/api-service/impl/accsaber";
+import type { AccSaberScoreOrder, AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
+import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
