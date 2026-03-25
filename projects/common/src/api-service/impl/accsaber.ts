@@ -6,16 +6,8 @@ import {
   type AccSaberScoreOrder,
   type AccSaberScoreSort,
   type AccSaberScoreType,
-  accSaberScoreOrderSchema,
-  accSaberScoreSortSchema,
-  accSaberScoreTypeSchema,
 } from "../../schemas/accsaber/tokens/query/query";
-import {
-  type AccSaberScore,
-  type EnrichedAccSaberScore,
-  accSaberScoreSchema,
-  enrichedAccSaberScoreSchema,
-} from "../../schemas/accsaber/tokens/score/score";
+import { type AccSaberScore } from "../../schemas/accsaber/tokens/score/score";
 import { accSaberDifficultyToMapDifficulty } from "../../utils/accsaber-difficulty";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";

@@ -10,7 +10,6 @@ import {
 } from "@typegoose/typegoose";
 import { Document } from "mongoose";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "../../../types/token/scoresaber/leaderboard-player-info";
-import { ScoreSaberScore } from "./scoresaber-score";
 import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 
 @modelOptions({
@@ -21,11 +20,6 @@ export class ScoreSaberMedalsScoreBase extends ScoreSaberScoreBase {
    * The player who set the score.
    */
   public playerInfo!: ScoreSaberLeaderboardPlayerInfoToken;
-
-  /**
-   * The score of the player who set the score.
-   */
-  public comparisonScore?: ScoreSaberScore;
 }
 
 @modelOptions({

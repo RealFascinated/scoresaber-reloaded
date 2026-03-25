@@ -44,11 +44,6 @@ export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
   public playerInfo!: ScoreSaberLeaderboardPlayerInfoToken;
 
   /**
-   * The score of the player who set the score.
-   */
-  public comparisonScore?: ScoreSaberScore;
-
-  /**
    * Whether the score is tracked.
    */
   public isTracked?: boolean;

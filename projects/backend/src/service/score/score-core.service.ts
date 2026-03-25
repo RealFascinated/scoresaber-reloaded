@@ -3,10 +3,8 @@ import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-s
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { scoreToObject } from "@ssr/common/utils/model-converters";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
@@ -127,11 +125,9 @@ export class ScoreCoreService {
     score: ScoreSaberScore,
     leaderboard?: ScoreSaberLeaderboard,
     options?: {
-      comparisonPlayer?: ScoreSaberPlayer;
       insertBeatLeaderScore?: boolean;
       insertPreviousScore?: boolean;
       insertPlayerInfo?: boolean;
-      isComparisonPlayerScore?: boolean;
       removeScoreWeightAndRank?: boolean;
     }
   ) {
@@ -139,7 +135,6 @@ export class ScoreCoreService {
       insertBeatLeaderScore: true,
       insertPreviousScore: true,
       insertPlayerInfo: true,
-      isComparisonPlayerScore: false,
       removeScoreWeightAndRank: false,
       ...options,
     };
@@ -154,6 +149,7 @@ export class ScoreCoreService {
     }
 
     async function getBeatLeaderScore() {
+      console.log("beatLeaderScoreId", score.beatLeaderScoreId);
       if (options?.insertBeatLeaderScore && score.beatLeaderScoreId !== undefined) {
         return BeatLeaderService.getBeatLeaderScore(score.beatLeaderScoreId);
       }
@@ -180,22 +176,11 @@ export class ScoreCoreService {
       return undefined;
     }
 
-    async function getComparisonScore() {
-      if (!options?.isComparisonPlayerScore && options?.comparisonPlayer && leaderboard) {
-        return ScoreSaberScoreModel.findOne({
-          playerId: options.comparisonPlayer!.id,
-          leaderboardId: leaderboard.id,
-        }).lean();
-      }
-      return undefined;
-    }
-
-    const [isScoreTracked, beatLeaderScore, previousScore, playerInfo, comparisonScore] = await Promise.all([
+    const [isScoreTracked, beatLeaderScore, previousScore, playerInfo] = await Promise.all([
       ScoreCoreService.scoreExists(score.scoreId),
       getBeatLeaderScore(),
       getPreviousScore(),
       getPlayerInfo(),
-      getComparisonScore(),
     ]);
 
     score.isTracked = isScoreTracked;
@@ -215,20 +200,6 @@ export class ScoreCoreService {
         profilePicture: playerInfo.avatar,
         country: playerInfo.country,
       };
-    }
-
-    if (comparisonScore) {
-      score.comparisonScore = await ScoreCoreService.insertScoreData(
-        scoreToObject(comparisonScore as unknown as ScoreSaberScore),
-        leaderboard,
-        {
-          comparisonPlayer: options.comparisonPlayer,
-          insertBeatLeaderScore: options.insertBeatLeaderScore,
-          insertPreviousScore: options.insertPreviousScore,
-          insertPlayerInfo: options.insertPlayerInfo,
-          isComparisonPlayerScore: true,
-        }
-      );
     }
 
     if (options?.removeScoreWeightAndRank) {

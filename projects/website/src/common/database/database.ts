@@ -50,7 +50,6 @@ export enum SettingIds {
   OverlaySettings = "overlaySettings",
   ReplayViewer = "replayViewer",
   Friends = "friends",
-  ShowScoreComparison = "showScoreComparison",
   DefaultLeaderboardCountry = "defaultLeaderboardCountry",
   WebsiteLanding = "websiteLanding",
   PlusPpDefaultAccuracy = "plusPpDefaultAccuracy",
@@ -66,7 +65,6 @@ const DEFAULT_BACKGROUND_COVER_BLUR: number = 6;
 const DEFAULT_SHOW_KITTY: boolean = false;
 const DEFAULT_SNOW_PARTICLES: boolean = false;
 const DEFAULT_REPLAY_VIEWER: ReplayViewerTypes = "beatleader";
-const DEFAULT_SHOW_SCORE_COMPARISON: boolean = true;
 const DEFAULT_PLUS_PP_DEFAULT_ACCURACY: number = 95;
 
 export enum WebsiteLanding {
@@ -509,24 +507,6 @@ export default class Database extends Dexie {
    */
   async setOverlaySettings(overlaySettings: OverlaySettings) {
     await this.setSetting(SettingIds.OverlaySettings, overlaySettings);
-  }
-
-  /**
-   * Gets the show score comparison setting from the database
-   *
-   * @returns the show score comparison setting
-   */
-  async getShowScoreComparison(): Promise<boolean> {
-    return (await this.getSetting<boolean>(SettingIds.ShowScoreComparison, DEFAULT_SHOW_SCORE_COMPARISON))!;
-  }
-
-  /**
-   * Sets the show score comparison setting in the database
-   *
-   * @param showScoreComparison the show score comparison setting
-   */
-  async setShowScoreComparison(showScoreComparison: boolean) {
-    await this.setSetting(SettingIds.ShowScoreComparison, showScoreComparison);
   }
 
   /**

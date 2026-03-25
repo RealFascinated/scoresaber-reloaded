@@ -68,7 +68,10 @@ export class PlayerBeatLeaderScoresService {
         if (existing.has(scoreToken.id)) {
           continue;
         }
-        const tracked = await BeatLeaderService.trackBeatLeaderScore(scoreToken as BeatLeaderScoreToken, false);
+        const tracked = await BeatLeaderService.trackBeatLeaderScore(
+          scoreToken as BeatLeaderScoreToken,
+          false
+        );
         if (tracked) {
           newTrackedThisPage++;
         }
@@ -119,4 +122,3 @@ export class PlayerBeatLeaderScoresService {
     return result;
   }
 }
-

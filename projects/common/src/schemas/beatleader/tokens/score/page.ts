@@ -8,4 +8,3 @@ export const BeatLeaderPlayerScoresPageSchema = z.object({
 });
 
 export type BeatLeaderPlayerScoresPageToken = z.infer<typeof BeatLeaderPlayerScoresPageSchema>;
-

@@ -338,7 +338,9 @@ async function ensureIndexIfMissing(
     throw new Error("MongoDB connection not established");
   }
 
-  Logger.warn(`[Preflight] Missing index on ${collectionName}: (${keyPrefix.join(", ")}). Creating it now...`);
+  Logger.warn(
+    `[Preflight] Missing index on ${collectionName}: (${keyPrefix.join(", ")}). Creating it now...`
+  );
   const createdName = await db.collection(collectionName).createIndex(key, {
     name: indexName,
     background: true,
@@ -377,7 +379,9 @@ async function preflightIndexChecks(): Promise<string[]> {
   const createdIndexes: string[] = [];
 
   if (!hasScoresRangeIndex) {
-    Logger.warn("[Preflight] Missing _id index on scoresaber-scores. This is unexpected for MongoDB collections.");
+    Logger.warn(
+      "[Preflight] Missing _id index on scoresaber-scores. This is unexpected for MongoDB collections."
+    );
   }
 
   const createdScoresMissingIndex = await ensureIndexIfMissing(
@@ -392,7 +396,9 @@ async function preflightIndexChecks(): Promise<string[]> {
   }
 
   if (!hasLeaderboardIdIndex) {
-    Logger.warn("[Preflight] Missing _id index on scoresaber-leaderboards. This is unexpected for MongoDB collections.");
+    Logger.warn(
+      "[Preflight] Missing _id index on scoresaber-leaderboards. This is unexpected for MongoDB collections."
+    );
   }
 
   const createdBeatLeaderJoinIndex = await ensureIndexIfMissing(
@@ -437,8 +443,16 @@ async function getCollectionIdBounds(): Promise<{ minId: unknown; maxId: unknown
   }
 
   const [minDoc, maxDoc] = await Promise.all([
-    collection.find({}, { projection: { _id: 1 } }).sort({ _id: 1 }).limit(1).next(),
-    collection.find({}, { projection: { _id: 1 } }).sort({ _id: -1 }).limit(1).next(),
+    collection
+      .find({}, { projection: { _id: 1 } })
+      .sort({ _id: 1 })
+      .limit(1)
+      .next(),
+    collection
+      .find({}, { projection: { _id: 1 } })
+      .sort({ _id: -1 })
+      .limit(1)
+      .next(),
   ]);
 
   if (!minDoc?._id || !maxDoc?._id) {
@@ -533,7 +547,9 @@ async function run(opts: CliOptions) {
 
     const candidateCountPromise = countCandidates(baseMatch);
     const matchedCountPromise =
-      !opts.apply || opts.countMatchesInApply ? countMatched(baseMatch) : Promise.resolve<number | undefined>(undefined);
+      !opts.apply || opts.countMatchesInApply
+        ? countMatched(baseMatch)
+        : Promise.resolve<number | undefined>(undefined);
     const [candidateCount, matchedCount] = await Promise.all([candidateCountPromise, matchedCountPromise]);
 
     if (opts.apply) {
@@ -541,7 +557,8 @@ async function run(opts: CliOptions) {
     }
 
     const chunkElapsedMs = performance.now() - chunkTimerStart;
-    const rowsPerSec = chunkElapsedMs > 0 ? Math.round((candidateCount / chunkElapsedMs) * 1000) : candidateCount;
+    const rowsPerSec =
+      chunkElapsedMs > 0 ? Math.round((candidateCount / chunkElapsedMs) * 1000) : candidateCount;
 
     totals.chunksProcessed++;
     totals.totalCandidates += candidateCount;
@@ -563,14 +580,16 @@ async function run(opts: CliOptions) {
 
   const totalElapsedMs = performance.now() - totals.startTimeMs;
   const totalRowsPerSec =
-    totalElapsedMs > 0 ? Math.round((totals.totalCandidates / totalElapsedMs) * 1000) : totals.totalCandidates;
+    totalElapsedMs > 0
+      ? Math.round((totals.totalCandidates / totalElapsedMs) * 1000)
+      : totals.totalCandidates;
 
   Logger.info(
     `[Summary] chunks=${totals.chunksProcessed}, candidates=${totals.totalCandidates}, matched=${totals.totalMatched}, ${
       opts.apply ? "updated" : "wouldUpdate"
-    }=${opts.apply && !opts.countMatchesInApply ? "unknown" : totals.totalMatched}, elapsed=${formatElapsed(totalElapsedMs)}, rate≈${totalRowsPerSec}/s, lastProcessedId=${
-      idToLogString(totals.lastProcessedId)
-    }`
+    }=${opts.apply && !opts.countMatchesInApply ? "unknown" : totals.totalMatched}, elapsed=${formatElapsed(totalElapsedMs)}, rate≈${totalRowsPerSec}/s, lastProcessedId=${idToLogString(
+      totals.lastProcessedId
+    )}`
   );
 
   if (opts.keepCreatedIndexes) {

@@ -1,6 +1,4 @@
 import { parse } from "devalue";
-import type { AccSaberScoreOrder, AccSaberScoreSort, AccSaberScoreType } from "../schemas/accsaber/tokens/query/query";
-import type { EnrichedAccSaberScore } from "../schemas/accsaber/tokens/score/score";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
 import { StarFilter } from "../maps/types";
@@ -8,6 +6,12 @@ import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import type { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "../player/player-statistic-history";
+import type {
+  AccSaberScoreOrder,
+  AccSaberScoreSort,
+  AccSaberScoreType,
+} from "../schemas/accsaber/tokens/query/query";
+import type { EnrichedAccSaberScore } from "../schemas/accsaber/tokens/score/score";
 import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
 import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
 import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard";
@@ -240,20 +244,11 @@ class SSRApi {
    * @param page the page
    * @param sort the sort
    * @param search the search
-   * @param comparisonPlayerId the player to compare scores with
-   * @param includePlayers the players to include in the scores
    * @returns the scores
    */
-  async fetchScoreSaberPlayerScores(
-    id: string,
-    page: number,
-    sort: ScoreSaberScoreSort,
-    search?: string,
-    comparisonPlayerId?: string
-  ) {
+  async fetchScoreSaberPlayerScores(id: string, page: number, sort: ScoreSaberScoreSort, search?: string) {
     return await this.request<PlayerScoresPageResponse>(`/scores/player/scoresaber/${id}/${sort}/${page}`, {
       ...(search ? { search: search } : {}),
-      ...(comparisonPlayerId ? { comparisonPlayerId: comparisonPlayerId } : {}),
     });
   }
 

@@ -3,9 +3,9 @@
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import { SparklesIcon } from "@heroicons/react/24/solid";
-import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { env } from "@ssr/common/env";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
+import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { AccSaberBadges } from "./accsaber-badges";
 import { AccSaberRankTime } from "./accsaber-rank-time";

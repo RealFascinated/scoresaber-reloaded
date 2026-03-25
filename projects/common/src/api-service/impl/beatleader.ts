@@ -1,10 +1,10 @@
 import { Cooldown } from "../../cooldown";
 import { BeatLeaderPlayersTotalSchema } from "../../schemas/beatleader/tokens/players/page";
+import { ScoreStatsToken } from "../../schemas/beatleader/tokens/score-stats/score-stats";
 import {
   BeatLeaderPlayerScoresPageSchema,
   type BeatLeaderPlayerScoresPageToken,
 } from "../../schemas/beatleader/tokens/score/page";
-import { ScoreStatsToken } from "../../schemas/beatleader/tokens/score-stats/score-stats";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
 

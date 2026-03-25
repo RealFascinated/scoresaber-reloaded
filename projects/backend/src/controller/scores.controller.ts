@@ -41,14 +41,8 @@ export default function scoresController(app: Elysia) {
       )
       .get(
         "/player/scoresaber/:playerId/:sort/:page",
-        async ({ params: { playerId, page, sort }, query: { search, comparisonPlayerId } }) => {
-          return await PlayerScoresService.getScoreSaberLivePlayerScores(
-            playerId,
-            page,
-            sort,
-            search,
-            comparisonPlayerId
-          );
+        async ({ params: { playerId, page, sort }, query: { search } }) => {
+          return await PlayerScoresService.getScoreSaberLivePlayerScores(playerId, page, sort, search);
         },
         {
           tags: ["Scores"],
@@ -59,7 +53,6 @@ export default function scoresController(app: Elysia) {
           }),
           query: z.object({
             search: z.string().optional(),
-            comparisonPlayerId: z.string().optional(),
           }),
           detail: {
             description: "Fetch player scores from ScoreSaber",

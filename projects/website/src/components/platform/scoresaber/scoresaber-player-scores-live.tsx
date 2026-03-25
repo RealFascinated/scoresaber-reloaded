@@ -45,7 +45,6 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
   const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
-  const showScoreComparison = useStableLiveQuery(() => database.getShowScoreComparison());
 
   // Sorting
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
@@ -80,22 +79,13 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
     isLoading,
     isRefetching,
   } = useQuery<PlayerScoresPageResponse>({
-    queryKey: [
-      "playerScores:live",
-      player.id,
-      page,
-      sort,
-      debouncedSearchTerm,
-      mainPlayerId,
-      showScoreComparison,
-    ],
+    queryKey: ["playerScores:live", player.id, page, sort, debouncedSearchTerm, mainPlayerId],
     queryFn: async () => {
       const response = await ssrApi.fetchScoreSaberPlayerScores(
         player.id,
         page,
         sort,
-        invalidSearch ? undefined : debouncedSearchTerm,
-        showScoreComparison && mainPlayerId ? mainPlayerId : undefined
+        invalidSearch ? undefined : debouncedSearchTerm
       );
       return response || Pagination.empty();
     },

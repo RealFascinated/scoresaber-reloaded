@@ -7,7 +7,6 @@ import { PlatformType } from "../platform-repository";
 export type ScoreSaberScoreLookupOptions = {
   sort: ScoreSaberScoreSort;
   search?: string;
-  comparisonPlayerId?: string;
 };
 
 export class MedalScoresPlatform extends Platform {

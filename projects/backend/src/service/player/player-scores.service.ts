@@ -1,6 +1,4 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import type { AccSaberScoreOrder, AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
-import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
@@ -10,7 +8,12 @@ import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresa
 import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import type {
+  AccSaberScoreOrder,
+  AccSaberScoreSort,
+  AccSaberScoreType,
+} from "@ssr/common/schemas/accsaber/tokens/query/query";
+import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import {
   PlayerScoreChartDataPoint,
   PlayerScoresChartResponse,
@@ -37,7 +40,6 @@ import BeatSaverService from "../beatsaver.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
-import ScoreSaberService from "../scoresaber.service";
 
 const FIELDS_MAP: Record<SortField, string> = {
   pp: "pp",
@@ -399,8 +401,7 @@ export class PlayerScoresService {
     playerId: string,
     pageNumber: number,
     sort: string,
-    search?: string,
-    comparisonPlayerId?: string
+    search?: string
   ): Promise<PlayerScoresPageResponse> {
     // Get the requested page directly
     const requestedPage = await ScoreSaberApiService.lookupPlayerScores({
@@ -418,14 +419,6 @@ export class PlayerScoresService {
       .setItemsPerPage(requestedPage.metadata.itemsPerPage)
       .setTotalItems(requestedPage.metadata.total);
 
-    let comparisonPlayer: ScoreSaberPlayer | undefined;
-    if (comparisonPlayerId !== playerId && comparisonPlayerId !== undefined) {
-      comparisonPlayer = await ScoreSaberService.getPlayer(
-        comparisonPlayerId,
-        "basic",
-        await ScoreSaberService.getCachedPlayer(comparisonPlayerId)
-      );
-    }
     return await pagination.getPage(pageNumber, async () => {
       const scores = await Promise.all(
         requestedPage.playerScores.map(async playerScore => {
@@ -446,9 +439,7 @@ export class PlayerScoresService {
           ]);
 
           return {
-            score: await ScoreCoreService.insertScoreData(score, leaderboard, {
-              comparisonPlayer: comparisonPlayer,
-            }),
+            score: await ScoreCoreService.insertScoreData(score, leaderboard),
             leaderboard: processed.leaderboard,
             beatSaver,
           } as PlayerScore;
