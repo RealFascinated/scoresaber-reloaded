@@ -1,8 +1,12 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
+import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
+import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { BeatLeaderPlayerScoresPageToken } from "@ssr/common/schemas/beatleader/tokens/score/page";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
+import type { MapDifficulty } from "@ssr/common/score/map-difficulty";
+import type { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import BeatLeaderService from "../beatleader.service";
@@ -13,6 +17,38 @@ const BEATLEADER_PAGE_SIZE = 100;
 const MAX_LOOKUP_ATTEMPTS = 3;
 
 export class PlayerBeatLeaderScoresService {
+  /**
+   * Links a BeatLeader score to a ScoreSaber score.
+   *
+   * @param scoreToken the score token
+   */
+  private static async linkScoreSaberScoreBeatLeaderId(scoreToken: BeatLeaderScoreToken): Promise<void> {
+    const hash = scoreToken.leaderboard.song.hash.toUpperCase();
+    const difficulty = scoreToken.leaderboard.difficulty.difficultyName as MapDifficulty;
+    const characteristic = scoreToken.leaderboard.difficulty.modeName as MapCharacteristic;
+
+    const leaderboard = await ScoreSaberLeaderboardModel.findOne({
+      songHash: hash,
+      "difficulty.difficulty": difficulty,
+      "difficulty.characteristic": characteristic,
+    })
+      .select("_id")
+      .lean();
+
+    if (leaderboard == null) {
+      return;
+    }
+
+    await ScoreSaberScoreModel.updateOne(
+      {
+        playerId: scoreToken.playerId,
+        leaderboardId: leaderboard._id,
+        score: scoreToken.baseScore,
+      },
+      { $set: { beatLeaderScoreId: scoreToken.id } }
+    );
+  }
+
   /**
    * Fetches missing BeatLeader scores for a player.
    *
@@ -131,6 +167,9 @@ export class PlayerBeatLeaderScoresService {
         );
         if (tracked) {
           newTracked++;
+          await PlayerBeatLeaderScoresService.linkScoreSaberScoreBeatLeaderId(
+            scoreToken as BeatLeaderScoreToken
+          );
         }
       }
 
