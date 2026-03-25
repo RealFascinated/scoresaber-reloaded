@@ -164,9 +164,18 @@ export class PlayerBeatLeaderScoresService {
         );
         if (tracked) {
           newTracked++;
-          await PlayerBeatLeaderScoresService.linkScoreSaberScoreBeatLeaderId(
-            scoreToken as BeatLeaderScoreToken
-          );
+          try {
+            await PlayerBeatLeaderScoresService.linkScoreSaberScoreBeatLeaderId(
+              scoreToken as BeatLeaderScoreToken
+            );
+          } catch (error) {
+            Logger.warn(
+              `[BeatLeader Seed] Failed to link ScoreSaber score for BeatLeader score %s (player %s): %s`,
+              formatNumberWithCommas(scoreToken.id),
+              scoreToken.playerId,
+              error instanceof Error ? error.message : String(error)
+            );
+          }
         }
       }
 
