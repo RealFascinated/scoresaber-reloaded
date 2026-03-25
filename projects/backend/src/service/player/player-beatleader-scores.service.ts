@@ -14,7 +14,10 @@ import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service"
 type SeedMode = "backfill" | "requested";
 
 const BEATLEADER_PAGE_SIZE = 100;
-const MAX_LOOKUP_ATTEMPTS = 3;
+/** Retries per page (BeatLeader / proxy often flake; backoff avoids hammering). */
+const MAX_LOOKUP_ATTEMPTS = 5;
+/** Milliseconds to wait after a failed attempt before the next (exponential). */
+const LOOKUP_RETRY_BACKOFF_MS = [400, 800, 1600, 3200] as const;
 
 export class PlayerBeatLeaderScoresService {
   /**
@@ -113,6 +116,11 @@ export class PlayerBeatLeaderScoresService {
         });
         if (scoresPage) {
           return scoresPage;
+        }
+        if (attempt < MAX_LOOKUP_ATTEMPTS - 1) {
+          const backoff =
+            LOOKUP_RETRY_BACKOFF_MS[attempt] ?? LOOKUP_RETRY_BACKOFF_MS[LOOKUP_RETRY_BACKOFF_MS.length - 1];
+          await Bun.sleep(backoff);
         }
       }
       return undefined;
