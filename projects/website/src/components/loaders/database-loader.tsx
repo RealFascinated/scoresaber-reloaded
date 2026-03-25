@@ -1,5 +1,6 @@
 "use client";
 
+import { isServer } from "@ssr/common/utils/utils";
 import { createContext, ReactNode, useEffect, useState } from "react";
 import Database, { getDatabase } from "../../common/database/database";
 import FullscreenLoader from "./fullscreen-loader";
@@ -25,26 +26,32 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (isServer()) {
+      setIsLoading(false);
+      return;
+    }
+
     const initializeDatabase = async () => {
       try {
+        // Use singleton pattern
         if (!databaseInstance) {
           databaseInstance = getDatabase();
         }
 
+        // Set database immediately for non-blocking access
         setDatabase(databaseInstance);
-        setIsLoading(false);
 
-        void databaseInstance.initializeChartLegends().catch(err => {
-          console.error("Failed to initialize chart legends:", err);
-        });
+        // Initialize chart legends in background
+        await databaseInstance.initializeChartLegends();
       } catch (err) {
         console.error("Failed to initialize database:", err);
         setError("Failed to load database");
+      } finally {
         setIsLoading(false);
       }
     };
 
-    void initializeDatabase();
+    initializeDatabase();
   }, []);
 
   // Show error state
