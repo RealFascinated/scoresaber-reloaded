@@ -33,13 +33,13 @@ export class Player {
   /**
    * Whether the player has their scores seeded.
    */
-  @prop()
+  @prop({ index: true })
   public seededScores?: boolean;
 
   /**
    * Whether the player has their BeatLeader scores seeded.
    */
-  @prop()
+  @prop({ index: true })
   public seededBeatLeaderScores?: boolean;
 
   /**
