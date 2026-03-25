@@ -154,7 +154,7 @@ export class ScoreCoreService {
     }
 
     async function getBeatLeaderScore() {
-      if (options?.insertBeatLeaderScore && leaderboard && score.beatLeaderScoreId) {
+      if (options?.insertBeatLeaderScore && score.beatLeaderScoreId !== undefined) {
         return BeatLeaderService.getBeatLeaderScore(score.beatLeaderScoreId);
       }
       return undefined;

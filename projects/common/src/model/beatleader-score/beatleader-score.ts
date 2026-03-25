@@ -1,6 +1,5 @@
 import { getModelForClass, index, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
 import { Document } from "mongoose";
-import type { ScoreStatsToken } from "../../schemas/beatleader/tokens/score-stats/score-stats";
 import type { MapDifficulty } from "../../score/map-difficulty";
 import type { MapCharacteristic } from "../../types/map-characteristic";
 import { HandAccuracy } from "./hand-accuracy";
@@ -135,12 +134,6 @@ export class BeatLeaderScore {
    */
   @prop({ required: true })
   public timestamp!: Date;
-
-  /**
-   * The score stats for this score.
-   */
-  @prop({ required: false })
-  public scoreStats?: ScoreStatsToken;
 }
 
 export type BeatLeaderScoreDocument = BeatLeaderScore & Document;
