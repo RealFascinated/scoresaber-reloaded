@@ -70,11 +70,14 @@ export class ScoreCoreService {
     // @ts-expect-error
     delete score.playerInfo;
 
-    if (beatLeaderScore) {
-      score.beatLeaderScoreId = beatLeaderScore.scoreId;
-    }
+    const scoreToCreate: ScoreSaberScore = {
+      ...score,
+      ...(beatLeaderScore?.scoreId ? { beatLeaderScoreId: beatLeaderScore?.scoreId } : {}),
+    };
 
-    await ScoreSaberScoreModel.create(score);
+    console.log(scoreToCreate);
+
+    await ScoreSaberScoreModel.create(scoreToCreate);
     await PlayerHmdService.updatePlayerHmd(player.id, score);
 
     // Handle score for medal updates
