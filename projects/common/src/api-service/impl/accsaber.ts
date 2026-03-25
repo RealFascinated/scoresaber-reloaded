@@ -30,10 +30,10 @@ export {
   type AccSaberScoreOrder,
   type AccSaberScoreSort,
   type AccSaberScoreType,
-  type EnrichedAccSaberScore,
+  type EnrichedAccSaberScore
 };
 
-const GQL_BASE = "https://gql.accsaber.com/graphql";
+const GQL_BASE = "https://gql.h2.accsaber.com/graphql";
 const SCORES_PER_PAGE = 8;
 
 export class AccSaberService extends ApiService {
