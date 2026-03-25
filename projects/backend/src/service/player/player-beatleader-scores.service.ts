@@ -1,6 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
-import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { BeatLeaderPlayerScoresPageToken } from "@ssr/common/schemas/beatleader/tokens/score/page";
@@ -10,6 +9,7 @@ import type { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import BeatLeaderService from "../beatleader.service";
+import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 
 type SeedMode = "backfill" | "requested";
 
@@ -27,18 +27,15 @@ export class PlayerBeatLeaderScoresService {
     const difficulty = scoreToken.leaderboard.difficulty.difficultyName as MapDifficulty;
     const characteristic = scoreToken.leaderboard.difficulty.modeName as MapCharacteristic;
 
-    const leaderboard = await ScoreSaberLeaderboardModel.findOne({
-      songHash: hash,
-      "difficulty.difficulty": difficulty,
-      "difficulty.characteristic": characteristic,
-    })
-      .select("_id")
-      .lean();
-
-    if (leaderboard == null) {
+    const leaderboardResponse = await LeaderboardCoreService.getLeaderboardByHash(hash, difficulty, characteristic, {
+      includeBeatSaver: false,
+      includeStarChangeHistory: false,
+    });
+    if (leaderboardResponse == undefined) {
       return;
     }
 
+    const leaderboard = leaderboardResponse.leaderboard;
     await ScoreSaberScoreModel.updateOne(
       {
         playerId: scoreToken.playerId,
