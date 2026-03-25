@@ -14,6 +14,7 @@ import type {
   AccSaberScoreType,
 } from "@ssr/common/schemas/accsaber/tokens/query/query";
 import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
+import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import {
   PlayerScoreChartDataPoint,
   PlayerScoresChartResponse,
@@ -423,22 +424,31 @@ export class PlayerScoresService {
       const scores = await Promise.all(
         requestedPage.playerScores.map(async playerScore => {
           const leaderboard = getScoreSaberLeaderboardFromToken(playerScore.leaderboard);
-          const score: ScoreSaberScorePublic = {
-            beatLeaderScoreId: (await ScoreSaberScoreModel.findOne({ scoreId: playerScore.score.id }).select("beatLeaderScoreId").lean())?.beatLeaderScoreId,
-            ...getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId)
-          }
-          if (!score) {
-            return undefined;
+
+          async function getScore(): Promise<ScoreSaberScorePublic> {
+            return {
+              beatLeaderScoreId: (await ScoreSaberScoreModel.findOne({ scoreId: playerScore.score.id }).select("beatLeaderScoreId").lean())?.beatLeaderScoreId,
+              ...getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId)
+            } as ScoreSaberScorePublic;
           }
 
-          const [processedLeaderboard, beatSaver] = await Promise.all([
-            (await LeaderboardCoreService.processLeaderboard(leaderboard)).leaderboard,
-            BeatSaverService.getMap(
+          async function getLeaderboard(): Promise<ScoreSaberLeaderboard> {
+            return (await LeaderboardCoreService.processLeaderboard(leaderboard)).leaderboard;
+          }
+
+          async function getBeatSaver(): Promise<BeatSaverMapResponse | undefined> {
+            return BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic,
               "full"
-            ),
+            );
+          }
+
+          const [score, processedLeaderboard, beatSaver] = await Promise.all([
+            getScore(),
+            getLeaderboard(),
+            getBeatSaver(),
           ]);
 
           return {
