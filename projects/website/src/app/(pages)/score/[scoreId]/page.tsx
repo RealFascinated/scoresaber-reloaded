@@ -71,7 +71,7 @@ export async function generateMetadata(props: ScorePageProps): Promise<Metadata>
         : {}),
     },
     twitter: {
-      card: "summary_large_image",
+      card: "summary",
     },
   };
 }
