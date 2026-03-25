@@ -108,9 +108,9 @@ export class ScoreWebsockets implements EventListener {
           const beatLeaderUniquePlayersMetric = MetricsService.getMetric<BeatLeaderUniqueDailyPlayersMetric>(
             MetricType.BEATLEADER_UNIQUE_DAILY_PLAYERS
           );
-          beatLeaderUniquePlayersMetric?.addPlayer(beatLeaderScore.player.id);
+          beatLeaderUniquePlayersMetric?.addPlayer(beatLeaderScore.player!.id);
 
-          const player = beatLeaderScore.player;
+          const player = beatLeaderScore.player!;
           const leaderboard = beatLeaderScore.leaderboard;
 
           const key =

@@ -17,6 +17,6 @@ export const BeatLeaderSongSchema = z
     uploadTime: z.number().optional(),
     difficulties: z.null().optional(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderSongToken = z.infer<typeof BeatLeaderSongSchema>;

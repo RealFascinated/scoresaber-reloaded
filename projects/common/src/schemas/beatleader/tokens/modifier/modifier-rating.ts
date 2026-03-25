@@ -19,6 +19,6 @@ export const BeatLeaderModifierRatingSchema = z
     sfTechRating: z.number(),
     sfStars: z.number(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderModifierRatingToken = z.infer<typeof BeatLeaderModifierRatingSchema>;

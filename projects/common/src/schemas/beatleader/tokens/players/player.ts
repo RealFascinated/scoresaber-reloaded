@@ -26,7 +26,7 @@ export const BeatLeaderPlayerResponseSchema = z
     externalProfileUrl: z.string().nullable(),
     scoreStats: BeatLeaderPlayerScoreStatsSchema,
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderPlayerResponseToken = z.infer<typeof BeatLeaderPlayerResponseSchema>;
 

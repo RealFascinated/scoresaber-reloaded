@@ -21,6 +21,6 @@ export const BeatLeaderScoreImprovementSchema = z
     wallsHit: z.number(),
     pauses: z.number(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderScoreImprovementToken = z.infer<typeof BeatLeaderScoreImprovementSchema>;

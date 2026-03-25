@@ -14,7 +14,7 @@ export const BeatLeaderProfileSettingsSchema = z
     showBots: z.boolean(),
     showAllRatings: z.boolean(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderProfileSettingsToken = z.infer<typeof BeatLeaderProfileSettingsSchema>;
 

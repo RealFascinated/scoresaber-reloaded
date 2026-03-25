@@ -33,6 +33,6 @@ export const BeatLeaderDifficultySchema = z
     duration: z.number(),
     requirements: z.number(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderDifficultyToken = z.infer<typeof BeatLeaderDifficultySchema>;

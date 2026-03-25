@@ -9,6 +9,6 @@ export const BeatLeaderLeaderboardSchema = z
     song: BeatLeaderSongSchema,
     difficulty: BeatLeaderDifficultySchema,
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderLeaderboardToken = z.infer<typeof BeatLeaderLeaderboardSchema>;

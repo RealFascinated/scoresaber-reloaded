@@ -9,6 +9,6 @@ export const BeatLeaderScoreOffsetsSchema = z
     heights: z.number(),
     pauses: z.number(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderScoreOffsetsToken = z.infer<typeof BeatLeaderScoreOffsetsSchema>;

@@ -7,7 +7,7 @@ export const BeatLeaderClanSchema = z
     color: z.string().nullable().optional(),
     name: z.string().nullable(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderClanToken = z.infer<typeof BeatLeaderClanSchema>;
 

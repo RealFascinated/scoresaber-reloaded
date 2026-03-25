@@ -7,7 +7,7 @@ import { BeatLeaderScoreOffsetsSchema } from "./score-offsets";
 export const BeatLeaderScoreSchema = z
   .object({
     /** API returns null or a nested score summary object. */
-    myScore: z.union([z.null(), z.object({}).passthrough()]),
+    myScore: z.union([z.null(), z.object({}).loose()]),
     validContexts: z.number(),
     leaderboard: BeatLeaderLeaderboardSchema,
     contextExtensions: z.null().optional(),
@@ -53,6 +53,6 @@ export const BeatLeaderScoreSchema = z
     metadata: z.null(),
     offsets: BeatLeaderScoreOffsetsSchema.nullable().optional(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderScoreToken = z.infer<typeof BeatLeaderScoreSchema>;

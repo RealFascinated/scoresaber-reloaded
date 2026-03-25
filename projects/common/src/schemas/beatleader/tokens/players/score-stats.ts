@@ -11,7 +11,7 @@ export const BeatLeaderPlayerScoreStatsSchema = z
     rankedPlayCount: z.number(),
     replaysWatched: z.number(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderPlayerScoreStatsToken = z.infer<typeof BeatLeaderPlayerScoreStatsSchema>;
 

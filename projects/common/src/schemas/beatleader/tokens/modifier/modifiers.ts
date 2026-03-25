@@ -17,6 +17,6 @@ export const BeatLeaderModifierSchema = z
     sa: z.number(),
     op: z.number(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderModifierToken = z.infer<typeof BeatLeaderModifierSchema>;

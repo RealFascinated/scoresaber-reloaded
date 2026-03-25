@@ -11,6 +11,6 @@ export const BeatLeaderPlayerSchema = z
     countryRank: z.number(),
     name: z.string(),
   })
-  .passthrough();
+  .loose();
 
 export type BeatLeaderPlayerToken = z.infer<typeof BeatLeaderPlayerSchema>;
