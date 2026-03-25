@@ -5,7 +5,11 @@ import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
-import { ScoreSaberScore, ScoreSaberScoreModel, ScoreSaberScorePublic } from "@ssr/common/model/score/impl/scoresaber-score";
+import {
+  ScoreSaberScore,
+  ScoreSaberScoreModel,
+  ScoreSaberScorePublic,
+} from "@ssr/common/model/score/impl/scoresaber-score";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
 import type {
@@ -427,8 +431,12 @@ export class PlayerScoresService {
 
           async function getScore(): Promise<ScoreSaberScorePublic> {
             return {
-              beatLeaderScoreId: (await ScoreSaberScoreModel.findOne({ scoreId: playerScore.score.id }).select("beatLeaderScoreId").lean())?.beatLeaderScoreId,
-              ...getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId)
+              beatLeaderScoreId: (
+                await ScoreSaberScoreModel.findOne({ scoreId: playerScore.score.id })
+                  .select("beatLeaderScoreId")
+                  .lean()
+              )?.beatLeaderScoreId,
+              ...getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId),
             } as ScoreSaberScorePublic;
           }
 

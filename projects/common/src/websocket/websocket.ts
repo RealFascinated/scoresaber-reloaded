@@ -1,6 +1,13 @@
 import WebSocket from "ws";
 import Logger from "../logger";
 
+const RECONNECT_DELAY_MS = 5000;
+
+/** Optional details when a socket `error` event fired before `close` on the same connection. */
+export type WebsocketDisconnectContext = {
+  precedingSocketError?: Error;
+};
+
 export type WebsocketCallbacks = {
   /**
    * Invoked when a general message is received.
@@ -10,11 +17,13 @@ export type WebsocketCallbacks = {
   onMessage?: (message: unknown) => void;
 
   /**
-   * Invoked when the connection is closed.
+   * Invoked once when the connection closes (after `error`, if any, on the same socket).
+   * This is only called from the `close` handler so it never runs twice for one disconnect.
    *
-   * @param error the error that caused the connection to close
+   * @param close the WebSocket close event.
+   * @param context when present, `precedingSocketError` was set by a prior `error` on this socket.
    */
-  onDisconnect?: (error?: WebSocket.ErrorEvent | WebSocket.CloseEvent) => void;
+  onDisconnect?: (close: WebSocket.CloseEvent, context?: WebsocketDisconnectContext) => void;
 };
 
 type Websocket = {
@@ -29,39 +38,58 @@ type Websocket = {
   url: string;
 } & WebsocketCallbacks;
 
+function formatCloseReason(reason: unknown): string {
+  if (typeof reason === "string") return reason;
+  if (Buffer.isBuffer(reason)) return reason.toString("utf8");
+  return "";
+}
+
 /**
- * Connects to the ScoreSaber websocket and handles incoming messages.
+ * Connects to a WebSocket URL, parses JSON messages, and reconnects after disconnect.
  */
 export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websocket) {
-  let websocket: WebSocket | null = null;
   let reconnectTimer: NodeJS.Timeout | undefined;
 
   function connectWs() {
-    websocket = new WebSocket(url);
+    let precedingSocketError: Error | undefined;
+
+    const websocket = new WebSocket(url);
 
     websocket.onopen = () => {
+      precedingSocketError = undefined;
       Logger.info(`Connected to the ${name} WebSocket!`);
     };
 
     websocket.onerror = event => {
-      Logger.error("WebSocket Error:", event);
-      if (websocket) {
-        websocket.close(); // Close the connection on error
-      }
-
-      onDisconnect && onDisconnect(event);
+      const raw = event.error;
+      precedingSocketError =
+        raw instanceof Error
+          ? raw
+          : typeof raw === "string"
+            ? new Error(raw)
+            : new Error(event.message || "WebSocket error");
+      Logger.error(`WebSocket error (${name}):`, precedingSocketError);
+      // Do not call onDisconnect here — `close` always follows and is the single notification path.
     };
 
     websocket.onclose = event => {
-      Logger.info(`Lost connection to the ${name} WebSocket. Attempting to reconnect...`);
+      const reasonText = formatCloseReason(event.reason);
+      const reasonLog = reasonText ? reasonText : "(none)";
+      const errHint = precedingSocketError ? ` Preceding error: ${precedingSocketError.message}` : "";
 
-      onDisconnect && onDisconnect(event);
+      Logger.info(
+        `Lost connection to the ${name} WebSocket (code=${event.code}, reason=${reasonLog}, wasClean=${event.wasClean}).${errHint} Reconnecting in ${RECONNECT_DELAY_MS / 1000}s...`
+      );
 
-      // Clear any existing reconnection timer
+      const context: WebsocketDisconnectContext | undefined = precedingSocketError
+        ? { precedingSocketError }
+        : undefined;
+      onDisconnect?.(event, context);
+
       if (reconnectTimer) {
         clearTimeout(reconnectTimer);
       }
-      reconnectTimer = setTimeout(connectWs, 5000); // Reconnect after 5 seconds
+      reconnectTimer = setTimeout(connectWs, RECONNECT_DELAY_MS);
     };
 
     websocket.onmessage = messageEvent => {
