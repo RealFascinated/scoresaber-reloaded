@@ -70,7 +70,7 @@ export default function CutDistributionChart({ cutDistribution }: Props) {
 
   if (chartData.datasets.length === 0) {
     return (
-      <div className={getEmptyStateClassName(500)}>
+      <div className={getEmptyStateClassName(350)}>
         <p className="text-muted-foreground">No cut data available</p>
       </div>
     );

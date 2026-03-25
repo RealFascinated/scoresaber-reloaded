@@ -32,10 +32,15 @@ export class PlayerBeatLeaderScoresService {
     const difficulty = scoreToken.leaderboard.difficulty.difficultyName as MapDifficulty;
     const characteristic = scoreToken.leaderboard.difficulty.modeName as MapCharacteristic;
 
-    const leaderboardResponse = await LeaderboardCoreService.getLeaderboardByHash(hash, difficulty, characteristic, {
-      includeBeatSaver: false,
-      includeStarChangeHistory: false,
-    });
+    const leaderboardResponse = await LeaderboardCoreService.getLeaderboardByHash(
+      hash,
+      difficulty,
+      characteristic,
+      {
+        includeBeatSaver: false,
+        includeStarChangeHistory: false,
+      }
+    );
     if (leaderboardResponse == undefined) {
       return;
     }

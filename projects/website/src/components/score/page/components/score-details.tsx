@@ -3,18 +3,21 @@ import { PlayerAvatar } from "@/components/ranking/player-avatar";
 import { getHMDInfo } from "@ssr/common/hmds";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
+import { formatDate } from "@ssr/common/utils/time-utils";
+import { CalendarDays } from "lucide-react";
 import Card from "../../../card";
 import ScoreSongInfo from "../../score-song-info";
 import LeaderboardButton from "./buttons/leaderboard-button";
 import PlayerButton from "./buttons/player-button";
 import ReplayButton from "./buttons/replay-button";
 
-export default function ScoreDetails({ score }: { score: PlayerScore }) {
-  const { leaderboard } = score;
+export default function ScoreDetails({ score: playerScore }: { score: PlayerScore }) {
+  const { leaderboard } = playerScore;
+  const score = playerScore.score;
 
   return (
-    <Card className="p-0">
-      <div className="flex flex-col p-4">
+    <Card className="overflow-hidden rounded-xl p-0">
+      <div className="p-4">
         <ScoreSongInfo
           song={{
             name: leaderboard.fullName,
@@ -25,32 +28,40 @@ export default function ScoreDetails({ score }: { score: PlayerScore }) {
             authorName: leaderboard.levelAuthorName,
             difficulty: leaderboard.difficulty.difficulty,
           }}
+          beatSaverMap={playerScore.beatSaver}
+          leaderboardId={leaderboard.id}
         />
       </div>
 
-      {/* Score Buttons */}
-      <div className="flex flex-wrap items-center gap-2 px-4 pb-4">
-        <ReplayButton score={score.score} />
-        <PlayerButton playerId={score.score.playerInfo.id} />
+      <div className="border-border flex flex-wrap items-center gap-2 border-t px-4 py-3 sm:gap-2.5">
+        <ReplayButton score={score} />
+        <PlayerButton playerId={score.playerInfo.id} />
         <LeaderboardButton leaderboardId={leaderboard.id} />
       </div>
 
-      <div className="bg-accent-deep/90 flex flex-wrap items-center justify-between gap-4 rounded-b-md">
-        <div className="flex items-center gap-2 p-4">
+      <div className="bg-accent-deep/90 border-border flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
           <PlayerAvatar
-            profilePicture={getScoreSaberAvatar(score.score.playerInfo)}
-            name={score.score.playerInfo.name ?? ""}
-            className="size-14"
+            profilePicture={getScoreSaberAvatar(score.playerInfo)}
+            name={score.playerInfo.name ?? ""}
+            className="size-14 shrink-0"
           />
-          <div>
-            <p>{score.score.playerInfo.name}</p>
-            {score.score.hmd && (
-              <div className="flex items-center gap-2 text-sm">
-                <HMDIcon hmd={getHMDInfo(score.score.hmd!)} />
-                <p>{score.score.hmd}</p>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-semibold">{score.playerInfo.name}</p>
+            {score.hmd && (
+              <div className="text-muted-foreground mt-1 flex items-center gap-2 text-sm">
+                <HMDIcon hmd={getHMDInfo(score.hmd)} />
+                <span>{score.hmd}</span>
               </div>
             )}
           </div>
+        </div>
+
+        <div className="text-muted-foreground flex shrink-0 items-center gap-2 sm:justify-end">
+          <CalendarDays className="size-4 shrink-0" aria-hidden />
+          <span className="text-sm whitespace-nowrap">
+            {formatDate(score.timestamp, "Do MMMM, YYYY HH:mm a")}
+          </span>
         </div>
       </div>
     </Card>

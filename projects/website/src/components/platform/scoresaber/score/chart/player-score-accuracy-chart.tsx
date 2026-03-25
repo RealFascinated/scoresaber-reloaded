@@ -4,6 +4,7 @@ import { buildChartConfig } from "@/common/chart/build-chart-config";
 import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/api/chart/generic-chart-dynamic";
+import Card from "@/components/card";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
@@ -103,8 +104,8 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
   });
 
   return (
-    <div className="bg-card border-border flex h-[330px] w-full flex-col items-center justify-center rounded-xl border p-4">
+    <Card className="h-[330px] w-full rounded-xl">
       <GenericChart labels={labels} config={config} />
-    </div>
+    </Card>
   );
 }

@@ -69,7 +69,6 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
                 fill="none"
                 stroke={handColors[hand]}
                 strokeWidth={STROKE_WIDTH}
-                strokeLinecap="round"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: percent }}
                 exit={{ pathLength: 0 }}

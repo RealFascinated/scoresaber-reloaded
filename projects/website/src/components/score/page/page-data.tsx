@@ -3,13 +3,13 @@
 import Card from "@/components/card";
 import { FancyLoader } from "@/components/fancy-loader";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
+import { MapStats } from "@/components/score/map-stats";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, BarChart3, FileX, Loader2 } from "lucide-react";
 import CutDistributionChart from "./components/charts/cut-distribution-chart";
 import SwingSpeedChart from "./components/charts/swing-speed-chart";
-import HitTrackerStats from "./components/hit-tracker-stats";
 import ScoreDetails from "./components/score-details";
 
 export default function ScorePageData({ scoreId }: { scoreId: string }) {
@@ -51,12 +51,19 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
   // Check if we have any additional data to show
   const hasScoreStats = !!scoreStats;
   const hasReplay = !!replay;
+  const hasBeatSaver = !!score.beatSaver;
   const hasAnyAdditionalData = hasScoreStats || hasReplay;
   const isAnyDataLoading = isScoreStatsLoading || isReplayLoading;
 
   return (
     <div className="flex w-full flex-col gap-4">
       <ScoreDetails score={score} />
+
+      {hasBeatSaver && (
+        <Card className="rounded-xl">
+          <MapStats beatSaver={score.beatSaver} />
+        </Card>
+      )}
 
       {isAnyDataLoading && (
         <Card className="flex flex-col items-center justify-center gap-4 py-8">
@@ -94,7 +101,6 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
           {scoreStats && (
             <>
               <ScoreOverview score={score.score} scoreStats={scoreStats} leaderboard={score.leaderboard} />
-              <HitTrackerStats hitTracker={scoreStats.current.hitTracker} />
             </>
           )}
 
