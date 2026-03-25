@@ -118,16 +118,22 @@ export class PlayerBeatLeaderScoresService {
       return undefined;
     }
 
+    function maxPageFromMetadata(scoresPage: BeatLeaderPlayerScoresPageToken): number {
+      const { total, itemsPerPage } = scoresPage.metadata;
+      const ipp = Math.max(1, itemsPerPage);
+      return Math.ceil(total / ipp);
+    }
+
     /**
      * Whether there is another page after this one.
+     *
+     * Uses BeatLeader’s `metadata.total` and `metadata.itemsPerPage` (same fields the API uses for paging).
      *
      * @param currentPage the page that was just processed
      * @param scoresPage the page token
      */
     function hasMorePages(currentPage: number, scoresPage: BeatLeaderPlayerScoresPageToken): boolean {
-      const { total, itemsPerPage } = scoresPage.metadata;
-      const ipp = Math.max(1, itemsPerPage);
-      return currentPage < Math.ceil(total / ipp);
+      return currentPage < maxPageFromMetadata(scoresPage);
     }
 
     /**
@@ -171,7 +177,7 @@ export class PlayerBeatLeaderScoresService {
           } catch (error) {
             Logger.warn(
               `[BeatLeader Seed] Failed to link ScoreSaber score for BeatLeader score %s (player %s): %s`,
-              formatNumberWithCommas(scoreToken.id),
+              scoreToken.id,
               scoreToken.playerId,
               error instanceof Error ? error.message : String(error)
             );
@@ -184,19 +190,33 @@ export class PlayerBeatLeaderScoresService {
 
     let currentPage = 1;
     let exitedDueToApiFailure = false;
+    let lastSuccessfulScoresPage: BeatLeaderPlayerScoresPageToken | undefined;
 
     while (true) {
       const scoresPage = await getScoresPage(currentPage);
       if (!scoresPage) {
         exitedDueToApiFailure = true;
-        Logger.warn(
-          `[BeatLeader Seed] Stopped fetching for player %s: BeatLeader API returned no page after %s attempt(s) (page %s)`,
-          playerId,
-          formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
-          formatNumberWithCommas(currentPage)
-        );
+        if (lastSuccessfulScoresPage !== undefined) {
+          const maxPage = maxPageFromMetadata(lastSuccessfulScoresPage);
+          Logger.warn(
+            `[BeatLeader Seed] Stopped fetching for player %s: BeatLeader API returned no page after %s attempt(s) (page %s of %s)`,
+            playerId,
+            formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
+            formatNumberWithCommas(currentPage),
+            formatNumberWithCommas(maxPage)
+          );
+        } else {
+          Logger.warn(
+            `[BeatLeader Seed] Stopped fetching for player %s: BeatLeader API returned no page after %s attempt(s) (page %s)`,
+            playerId,
+            formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
+            formatNumberWithCommas(currentPage)
+          );
+        }
         break;
       }
+
+      lastSuccessfulScoresPage = scoresPage;
 
       const scores = scoresPage.data ?? [];
       if (scores.length === 0) {
