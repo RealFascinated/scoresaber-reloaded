@@ -183,6 +183,12 @@ export class PlayerBeatLeaderScoresService {
       const scoresPage = await getScoresPage(currentPage);
       if (!scoresPage) {
         exitedDueToApiFailure = true;
+        Logger.warn(
+          `[BeatLeader Seed] Stopped fetching for player %s: BeatLeader API returned no page after %s attempt(s) (page %s)`,
+          playerId,
+          formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
+          formatNumberWithCommas(currentPage)
+        );
         break;
       }
 
