@@ -9,9 +9,16 @@ export function proxy(request: NextRequest) {
     // If they have a player and prefer the landing page, stay on landing
     if (websiteLanding?.value === "landing") {
       return NextResponse.next();
+    } else if (websiteLanding?.value === "playerHome") {
+      // Otherwise redirect to player home
+      return NextResponse.redirect(new URL("/home", request.url));
+    } else if (websiteLanding?.value === "playerPage") {
+      // Otherwise redirect to player page
+      return NextResponse.redirect(new URL(`/player/${playerId?.value}`, request.url));
+    } else {
+      // Otherwise redirect to landing
+      return NextResponse.redirect(new URL("/", request.url));
     }
-    // Otherwise redirect to player home
-    return NextResponse.redirect(new URL("/home", request.url));
   }
 
   // Handle player home redirect if they don't have a player claimed
