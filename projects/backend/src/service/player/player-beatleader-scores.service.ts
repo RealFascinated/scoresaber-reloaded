@@ -1,13 +1,25 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
+import type { BeatLeaderPlayerScoresPageToken } from "@ssr/common/schemas/beatleader/tokens/score/page";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 import BeatLeaderService from "../beatleader.service";
 
 type SeedMode = "backfill" | "requested";
 
+const BEATLEADER_PAGE_SIZE = 100;
+const MAX_LOOKUP_ATTEMPTS = 3;
+
 export class PlayerBeatLeaderScoresService {
+  /**
+   * Fetches missing BeatLeader scores for a player.
+   *
+   * @param player the player to fetch scores for
+   * @param options the options
+   * @returns the result
+   */
   public static async fetchMissingBeatLeaderScores(
     player: Player,
     options: { mode: SeedMode }
@@ -15,55 +27,100 @@ export class PlayerBeatLeaderScoresService {
     totalPagesFetched: number;
     newScoresTracked: number;
     stoppedBecauseAllTrackedPage: boolean;
+    timeTaken: number;
   }> {
+    const empty = (): {
+      totalPagesFetched: number;
+      newScoresTracked: number;
+      stoppedBecauseAllTrackedPage: boolean;
+      timeTaken: number;
+    } => ({
+      totalPagesFetched: 0,
+      newScoresTracked: 0,
+      stoppedBecauseAllTrackedPage: false,
+      timeTaken: 0,
+    });
+
     const playerId = player._id;
     if (!playerId) {
-      return { totalPagesFetched: 0, newScoresTracked: 0, stoppedBecauseAllTrackedPage: false };
+      return empty();
     }
 
+    if (player.banned) {
+      if (!player.seededBeatLeaderScores) {
+        await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
+      }
+      return empty();
+    }
+
+    const startTime = performance.now();
     const beatLeaderApi = ApiServiceRegistry.getInstance().getBeatLeaderService();
 
     const result = {
       totalPagesFetched: 0,
       newScoresTracked: 0,
       stoppedBecauseAllTrackedPage: false,
+      timeTaken: 0,
     };
 
-    const maxNoNewPages = 2;
-    let consecutiveNoNewPages = 0;
-
-    let page = 1;
-    while (true) {
-      const pageToken = await beatLeaderApi.lookupPlayerScores(playerId, page, {
-        count: 100,
-        sortBy: "date",
-        order: "desc",
-        leaderboardContext: "general",
-        includeIO: true,
-      });
-
-      if (!pageToken) {
-        break;
+    /**
+     * Gets a page of BeatLeader scores for the player.
+     *
+     * @param page the page to get
+     * @returns the scores page
+     */
+    async function getScoresPage(page: number): Promise<BeatLeaderPlayerScoresPageToken | undefined> {
+      for (let attempt = 0; attempt < MAX_LOOKUP_ATTEMPTS; attempt++) {
+        const scoresPage = await beatLeaderApi.lookupPlayerScores(playerId, page, {
+          count: BEATLEADER_PAGE_SIZE,
+          sortBy: "date",
+          order: "desc",
+          leaderboardContext: "general",
+          includeIO: true,
+        });
+        if (scoresPage) {
+          return scoresPage;
+        }
       }
+      return undefined;
+    }
 
-      // Avoid wasting requests on empty pages.
-      const scores = pageToken.data ?? [];
+    /**
+     * Whether there is another page after this one.
+     *
+     * @param currentPage the page that was just processed
+     * @param scoresPage the page token
+     */
+    function hasMorePages(currentPage: number, scoresPage: BeatLeaderPlayerScoresPageToken): boolean {
+      const { total, itemsPerPage } = scoresPage.metadata;
+      const ipp = Math.max(1, itemsPerPage);
+      return currentPage < Math.ceil(total / ipp);
+    }
+
+    /**
+     * Tracks scores on this page that are not already stored.
+     *
+     * @param scoresPage the page to process
+     * @returns counts and whether the page was already fully tracked
+     */
+    async function processPageScores(
+      scoresPage: BeatLeaderPlayerScoresPageToken
+    ): Promise<{ newTracked: number; fullPageAlreadyTracked: boolean }> {
+      const scores = scoresPage.data ?? [];
       if (scores.length === 0) {
-        break;
+        return { newTracked: 0, fullPageAlreadyTracked: true };
       }
 
-      // Prefetch what already exists for this page.
       const scoreIds = scores.map(score => score.id);
       const existing = await BeatLeaderService.scoresExist(scoreIds);
       const uniqueIdsCount = new Set(scoreIds).size;
-      const allTrackedOnPage = existing.size >= uniqueIdsCount;
+      const fullPageAlreadyTracked = existing.size >= uniqueIdsCount;
 
-      if (allTrackedOnPage) {
-        result.stoppedBecauseAllTrackedPage = true;
-        break;
+      if (fullPageAlreadyTracked) {
+        return { newTracked: 0, fullPageAlreadyTracked: true };
       }
 
-      let newTrackedThisPage = 0;
+      let newTracked = 0;
       for (const scoreToken of scores) {
         if (existing.has(scoreToken.id)) {
           continue;
@@ -73,49 +130,64 @@ export class PlayerBeatLeaderScoresService {
           false
         );
         if (tracked) {
-          newTrackedThisPage++;
+          newTracked++;
         }
       }
 
-      result.totalPagesFetched++;
-      result.newScoresTracked += newTrackedThisPage;
-
-      if (newTrackedThisPage === 0) {
-        consecutiveNoNewPages++;
-        if (consecutiveNoNewPages >= maxNoNewPages) {
-          break;
-        }
-      } else {
-        consecutiveNoNewPages = 0;
-      }
-
-      page++;
+      return { newTracked, fullPageAlreadyTracked: false };
     }
 
-    // Mark seeded following plan semantics.
-    if (options.mode === "backfill") {
-      if (result.stoppedBecauseAllTrackedPage) {
-        if (!player.seededBeatLeaderScores) {
-          await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
-        }
-      } else if (result.totalPagesFetched > 0) {
-        // Backfill mode: consider a clean run that fetched pages as "seeded enough" to avoid re-running forever.
-        if (!player.seededBeatLeaderScores) {
-          await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
-        }
+    let currentPage = 1;
+    let exitedDueToApiFailure = false;
+
+    while (true) {
+      const scoresPage = await getScoresPage(currentPage);
+      if (!scoresPage) {
+        exitedDueToApiFailure = true;
+        break;
       }
-    } else {
-      if (result.stoppedBecauseAllTrackedPage && !player.seededBeatLeaderScores) {
+
+      const scores = scoresPage.data ?? [];
+      if (scores.length === 0) {
+        break;
+      }
+
+      const { newTracked, fullPageAlreadyTracked } = await processPageScores(scoresPage);
+      result.newScoresTracked += newTracked;
+
+      if (options.mode === "requested" && fullPageAlreadyTracked) {
+        result.stoppedBecauseAllTrackedPage = true;
+        break;
+      }
+
+      const hasMore = hasMorePages(currentPage, scoresPage);
+      if (!hasMore) {
+        break;
+      }
+
+      currentPage++;
+    }
+
+    result.timeTaken = performance.now() - startTime;
+    result.totalPagesFetched = currentPage - 1;
+
+    if (!player.seededBeatLeaderScores) {
+      if (options.mode === "backfill") {
+        if (!exitedDueToApiFailure) {
+          await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
+        }
+      } else if (result.stoppedBecauseAllTrackedPage) {
         await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
       }
     }
 
-    if (result.totalPagesFetched > 0 || result.newScoresTracked > 0) {
+    if (currentPage !== 1) {
       Logger.info(
-        `[BeatLeader Seed] Player %s fetched %s page(s), tracked %s new score(s)`,
+        `[BeatLeader Seed] Player %s fetched %s page(s), tracked %s new score(s), in %s`,
         playerId,
         formatNumberWithCommas(result.totalPagesFetched),
-        formatNumberWithCommas(result.newScoresTracked)
+        formatNumberWithCommas(result.newScoresTracked),
+        formatDuration(result.timeTaken)
       );
     }
 
