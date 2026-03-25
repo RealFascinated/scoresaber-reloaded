@@ -205,60 +205,59 @@ function FormFieldComponent<TFormValues extends Record<string, any>, TName exten
   };
 
   let control: ReactElement | null = null;
-  switch (field.type) {
-    case "checkbox":
-      control = renderCheckboxField(renderProps);
-      break;
-    case "select":
-      control = renderSelectField(renderProps);
-      break;
-    case "slider":
-      control = renderSliderField(renderProps);
-      break;
-    case "text":
-      control = renderTextField(renderProps);
-      break;
-    default:
-      control = null;
+  if (!hasCustomControl) {
+    switch (field.type) {
+      case "checkbox":
+        control = renderCheckboxField(renderProps);
+        break;
+      case "select":
+        control = renderSelectField(renderProps);
+        break;
+      case "slider":
+        control = renderSliderField(renderProps);
+        break;
+      case "text":
+        control = renderTextField(renderProps);
+        break;
+      default:
+        control = null;
+    }
+  }
+
+  if (hasCustomControl && field.type === "select" && field.customControl) {
+    const CustomControl = field.customControl;
+    const { ref: _unusedFieldRef, ...fieldForCustom } = formField;
+    return (
+      <FormItem className="">
+        <FormControl>
+          <div className="py-1">
+            <CustomControl
+              field={{
+                ...fieldForCustom,
+                onChange: wrappedOnChange,
+              }}
+            />
+          </div>
+        </FormControl>
+      </FormItem>
+    );
   }
 
   return (
     <FormItem
       className={
-        hasCustomControl
-          ? ""
-          : field.type === "checkbox"
-            ? "flex flex-row items-center justify-between gap-4 py-1"
-            : "flex flex-col items-start gap-2 py-1 md:flex-row md:items-start md:justify-between"
+        field.type === "checkbox"
+          ? "flex flex-row items-center justify-between gap-4 py-1"
+          : "flex flex-col items-start gap-2 py-1 md:flex-row md:items-start md:justify-between"
       }
     >
-      {hasCustomControl ? (
-        <FormControl>
-          <div className="py-1">
-            {field.type === "select" &&
-              field.customControl &&
-              (() => {
-                const { ref: _unusedFieldRef, ...fieldForCustom } = formField;
-                return field.customControl({
-                  field: {
-                    ...fieldForCustom,
-                    onChange: wrappedOnChange,
-                  },
-                });
-              })()}
-          </div>
-        </FormControl>
-      ) : (
-        <>
-          <div className="flex-1 md:pr-4">
-            <FormLabel className="text-sm leading-tight font-normal">{field.label}</FormLabel>
-            {field.description && (
-              <FormDescription className="text-xs leading-tight">{field.description}</FormDescription>
-            )}
-          </div>
-          <FormControl>{control}</FormControl>
-        </>
-      )}
+      <div className="flex-1 md:pr-4">
+        <FormLabel className="text-sm leading-tight font-normal">{field.label}</FormLabel>
+        {field.description && (
+          <FormDescription className="text-xs leading-tight">{field.description}</FormDescription>
+        )}
+      </div>
+      <FormControl>{control}</FormControl>
     </FormItem>
   );
 }
