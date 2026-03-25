@@ -148,6 +148,7 @@ const settings: {
         options: [
           { value: WebsiteLanding.PLAYER_HOME, label: "Player Home" },
           { value: WebsiteLanding.LANDING, label: "Website Landing" },
+          { value: WebsiteLanding.PLAYER_PAGE, label: "Player Page" },
         ],
       },
     ],

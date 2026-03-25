@@ -70,6 +70,7 @@ const DEFAULT_PLUS_PP_DEFAULT_ACCURACY: number = 95;
 export enum WebsiteLanding {
   PLAYER_HOME = "playerHome",
   LANDING = "landing",
+  PLAYER_PAGE = "playerPage",
 }
 
 export default class Database extends Dexie {
