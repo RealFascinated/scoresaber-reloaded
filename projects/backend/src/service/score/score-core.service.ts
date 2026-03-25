@@ -73,8 +73,6 @@ export class ScoreCoreService {
       ...(beatLeaderScore?.scoreId ? { beatLeaderScoreId: beatLeaderScore?.scoreId } : {}),
     };
 
-    console.log(scoreToCreate);
-
     await ScoreSaberScoreModel.create(scoreToCreate);
     await PlayerHmdService.updatePlayerHmd(player.id, score);
 
@@ -149,7 +147,6 @@ export class ScoreCoreService {
     }
 
     async function getBeatLeaderScore() {
-      console.log("beatLeaderScoreId", score.beatLeaderScoreId);
       if (options?.insertBeatLeaderScore && score.beatLeaderScoreId !== undefined) {
         return BeatLeaderService.getBeatLeaderScore(score.beatLeaderScoreId);
       }

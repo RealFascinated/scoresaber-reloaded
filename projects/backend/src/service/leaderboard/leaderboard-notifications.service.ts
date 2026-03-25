@@ -111,7 +111,5 @@ export class LeaderboardNotificationsService {
       `${playlistId}.bplist`,
       JSON.stringify(await playlistToBeatSaberPlaylist(playlist), null, 2)
     );
-
-    console.log(changelog);
   }
 }
