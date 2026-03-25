@@ -119,11 +119,13 @@ const GenericChart = ({ config, labels }: Props) => {
             ticks: {
               maxRotation: 45,
               minRotation: 45,
-              callback: (_: any, index: number) => {
-                if (typeof labels[index] === "string") return labels[index];
-                if (typeof labels[index] === "number") return labels[index].toString();
+              // First arg is tick.value (category index); second is position in ticks array — use value for labels[].
+              callback: (labelIndex: number) => {
+                if (typeof labels[labelIndex] === "string") return labels[labelIndex];
+                if (typeof labels[labelIndex] === "number") return labels[labelIndex].toString();
 
-                const date = labels[index] instanceof Date ? labels[index] : parseDate(labels[index]);
+                const date =
+                  labels[labelIndex] instanceof Date ? labels[labelIndex] : parseDate(labels[labelIndex]);
                 const daysAgo = getDaysAgo(date);
                 const currentYear = new Date().getUTCFullYear();
                 const dateYear = date.getUTCFullYear();
@@ -143,19 +145,26 @@ const GenericChart = ({ config, labels }: Props) => {
     };
 
     Object.entries(axes).forEach(([axisId, axis]) => {
+      const previousAxis = generatedAxes[axisId];
+      // Do not replace x-axis tick formatting from the block above: category labels (and linear x
+      // with valueFormatter) must keep their callbacks; otherwise ticks show raw indices / numbers.
+      const preserveXTicks = axisId === "x" && previousAxis?.ticks !== undefined;
+
       generatedAxes[axisId] = {
         position: axis.position,
         reverse: axis.reverse,
         display: axis.hideOnMobile && isMobile ? false : axis.display,
         grid: { drawOnChartArea: axisId === "y", color: axisId === "y" ? "#252525" : "" },
         title: { display: true, text: axis.displayName, color: "#ffffff" },
-        ticks: {
-          callback: (value: number) => {
-            // Format the value to avoid excessive decimal places
-            const formattedValue = Number(Number(value).toFixed(4));
-            return axis.valueFormatter?.(formattedValue) ?? formattedValue.toString();
-          },
-        },
+        ticks: preserveXTicks
+          ? previousAxis.ticks
+          : {
+              callback: (value: number) => {
+                // Format the value to avoid excessive decimal places
+                const formattedValue = Number(Number(value).toFixed(4));
+                return axis.valueFormatter?.(formattedValue) ?? formattedValue.toString();
+              },
+            },
         min: axis.min,
         max: axis.max,
       };

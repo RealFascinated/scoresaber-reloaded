@@ -170,12 +170,13 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
 
         <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
           {scores.items.map(score => (
-            <ScoreSaberScoreDisplay
-              key={score.score.scoreId}
-              score={score.score}
-              leaderboard={score.leaderboard}
-              beatSaverMap={score.beatSaver}
-            />
+            <div key={score.score.scoreId} className="cv-score-card">
+              <ScoreSaberScoreDisplay
+                score={score.score}
+                leaderboard={score.leaderboard}
+                beatSaverMap={score.beatSaver}
+              />
+            </div>
           ))}
         </PageTransition>
 

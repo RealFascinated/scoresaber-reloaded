@@ -40,6 +40,7 @@ export default function ScoreSaberLeaderboardScore({
     <tbody>
       <tr
         className={cn(
+          "cv-list-row",
           highlightedPlayerId === score.playerId && "bg-primary/10",
           detailsExpanded ? "border-b border-transparent" : "border-border/50 border-b"
         )}

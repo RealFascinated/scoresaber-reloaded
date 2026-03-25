@@ -108,13 +108,13 @@ export function HoverDropdown({
       closeDropdown();
     };
 
-    // Listen to scroll events on window and all scrollable containers
-    window.addEventListener("scroll", handleScroll, true);
-    document.addEventListener("scroll", handleScroll, true);
+    const scrollOpts = { capture: true, passive: true } as const;
+    window.addEventListener("scroll", handleScroll, scrollOpts);
+    document.addEventListener("scroll", handleScroll, scrollOpts);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll, true);
-      document.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("scroll", handleScroll, scrollOpts);
+      document.removeEventListener("scroll", handleScroll, scrollOpts);
     };
   }, [open]);
 

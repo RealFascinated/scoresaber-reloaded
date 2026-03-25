@@ -65,3 +65,16 @@ body {
     display: none;
   }
 }
+
+/* Long lists: skip layout/paint for off-screen rows (see Vercel rendering perf guidance) */
+@layer utilities {
+  .cv-list-row {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 5rem;
+  }
+
+  .cv-score-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 8rem;
+  }
+}

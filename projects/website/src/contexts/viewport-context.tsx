@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
-// Tailwind breakpoints matching the project's theme (internal use by useIsMobile)
+// Tailwind breakpoints matching the project's theme (used by useIsMobile max-width queries)
 const Breakpoint = {
   xxs: 320,
   xs: 475,
@@ -13,79 +13,33 @@ const Breakpoint = {
   "2xl": 1536,
 } as const;
 
-type BreakpointKey = keyof typeof Breakpoint;
+export type BreakpointKey = keyof typeof Breakpoint;
 
-interface ViewportContextType {
-  width: number;
-  height: number;
+function maxWidthQuery(px: number): string {
+  return `(max-width: ${px}px)`;
 }
 
-const ViewportContext = createContext<ViewportContextType | null>(null);
-
-export function ViewportProvider({ children }: { children: ReactNode }) {
-  const [viewport, setViewport] = useState<ViewportContextType>(getInitialViewport);
-
-  useIsomorphicLayoutEffect(() => {
-    const handleResize = () => {
-      const dimensions = getWindowDimensions();
-      const next: ViewportContextType = {
-        width: dimensions.width,
-        height: dimensions.height,
-      };
-
-      setViewport(next);
-    };
-
-    // Initialize on mount
-    handleResize();
-
-    // Add resize listener
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  return <ViewportContext.Provider value={viewport}>{children}</ViewportContext.Provider>;
+function subscribeMaxWidth(px: number, onStoreChange: () => void): () => void {
+  const mq = window.matchMedia(maxWidthQuery(px));
+  mq.addEventListener("change", onStoreChange);
+  return () => mq.removeEventListener("change", onStoreChange);
 }
 
-const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
-
-function getInitialViewport(): ViewportContextType {
-  if (typeof window === "undefined") {
-    return { width: 0, height: 0 };
-  }
-  const { innerWidth, innerHeight } = window;
-  return {
-    width: innerWidth,
-    height: innerHeight,
-  };
+function getMaxWidthMatches(px: number): boolean {
+  return window.matchMedia(maxWidthQuery(px)).matches;
 }
 
-function getWindowDimensions() {
-  if (typeof window === "undefined") {
-    return { width: 0, height: 0 };
-  }
-  const { innerWidth: width, innerHeight: height } = window;
-  return { width, height };
-}
+/**
+ * True when the viewport width is at or below the given Tailwind breakpoint (same as the former width <= Breakpoint[k] check).
+ * Uses matchMedia so we only re-render when crossing the boundary, not on every resize pixel.
+ */
+export function useIsMobile(breakpoint: BreakpointKey = "md"): boolean {
+  const maxPx = Breakpoint[breakpoint];
 
-export function useViewport() {
-  const context = useContext(ViewportContext);
-  if (!context) {
-    throw new Error("useViewport must be used within a ViewportProvider");
-  }
-  return context;
-}
-
-export function useIsMobile(breakpoint?: BreakpointKey): boolean {
-  const { width } = useViewport();
-  breakpoint = breakpoint ?? "md";
-  return width <= Breakpoint[breakpoint];
-}
-
-export function useWindowDimensions() {
-  const { width, height } = useViewport();
-  return { width, height };
+  return useSyncExternalStore(
+    onStoreChange => subscribeMaxWidth(maxPx, onStoreChange),
+    () => getMaxWidthMatches(maxPx),
+    // SSR: previous ViewportProvider used width 0 → isMobile was always true for any positive breakpoint
+    () => true
+  );
 }

@@ -4,6 +4,7 @@ import { ChartConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import Card from "@/components/card";
+import { formatTime } from "@ssr/common/utils/time-utils";
 import { useMemo } from "react";
 import { getEmptyStateClassName } from "./chart-utils";
 
@@ -22,9 +23,7 @@ export default function SwingSpeedChart({ swingSpeed, replayLengthSeconds }: Pro
     }
 
     const dataLength = Math.max(swingSpeed.leftSwingSpeed.length, swingSpeed.rightSwingSpeed.length);
-    const timeLabels = Array.from({ length: dataLength }, (_, i) => {
-      return (i * 2).toString();
-    });
+    const timeLabels = Array.from({ length: dataLength }, (_, i) => formatTime(i * 2));
 
     return {
       chartData: {
@@ -57,7 +56,7 @@ export default function SwingSpeedChart({ swingSpeed, replayLengthSeconds }: Pro
     axes: {
       x: {
         display: true,
-        displayName: "Time (seconds)",
+        displayName: "Time",
         hideOnMobile: false,
       },
       y: {

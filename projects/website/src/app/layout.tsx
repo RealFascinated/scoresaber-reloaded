@@ -3,7 +3,6 @@ import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { PageTransitionProvider } from "@/contexts/page-transition-context";
-import { ViewportProvider } from "@/contexts/viewport-context";
 import { env } from "@ssr/common/env";
 import { ssrConfig } from "config";
 import { domAnimation, LazyMotion } from "framer-motion";
@@ -81,9 +80,7 @@ export default function RootLayout({
         <PreloadResources />
         <LazyMotion features={domAnimation} strict>
           <PageTransitionProvider>
-            <ViewportProvider>
-              <QueryProvider>{children}</QueryProvider>
-            </ViewportProvider>
+            <QueryProvider>{children}</QueryProvider>
           </PageTransitionProvider>
         </LazyMotion>
       </body>

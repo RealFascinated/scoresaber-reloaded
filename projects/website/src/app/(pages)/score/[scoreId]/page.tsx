@@ -78,10 +78,11 @@ export async function generateMetadata(props: ScorePageProps): Promise<Metadata>
 
 export default async function ScorePage({ params }: ScorePageProps) {
   const { scoreId } = await params;
+  const initialScore = await getPlayerScore(scoreId);
 
   return (
     <main className="flex w-full flex-col items-center text-sm">
-      <ScorePageData scoreId={scoreId} />
+      <ScorePageData scoreId={scoreId} initialScore={initialScore} />
     </main>
   );
 }

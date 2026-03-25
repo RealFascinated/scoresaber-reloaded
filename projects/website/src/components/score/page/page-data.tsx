@@ -5,6 +5,7 @@ import { FancyLoader } from "@/components/fancy-loader";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
 import { MapStats } from "@/components/score/map-stats";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
+import { PlayerScore } from "@ssr/common/score/player-score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, BarChart3, FileX, Loader2 } from "lucide-react";
@@ -12,7 +13,13 @@ import CutDistributionChart from "./components/charts/cut-distribution-chart";
 import SwingSpeedChart from "./components/charts/swing-speed-chart";
 import ScoreDetails from "./components/score-details";
 
-export default function ScorePageData({ scoreId }: { scoreId: string }) {
+type ScorePageDataProps = {
+  scoreId: string;
+  /** From RSC; avoids a duplicate client fetch on first paint when present */
+  initialScore?: PlayerScore;
+};
+
+export default function ScorePageData({ scoreId, initialScore }: ScorePageDataProps) {
   const {
     data: score,
     isLoading,
@@ -20,6 +27,7 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
   } = useQuery({
     queryKey: ["score", scoreId],
     queryFn: () => ssrApi.getScore(scoreId),
+    ...(initialScore !== undefined ? { initialData: initialScore } : {}),
   });
 
   const { data: scoreStats, isLoading: isScoreStatsLoading } = useQuery({
@@ -28,10 +36,12 @@ export default function ScorePageData({ scoreId }: { scoreId: string }) {
     enabled: !!score?.score.beatLeaderScore?.scoreId,
   });
 
+  const beatLeaderScoreId = score?.score.beatLeaderScore?.scoreId;
+
   const { data: replay, isLoading: isReplayLoading } = useQuery({
-    queryKey: ["replayAnalysis", score],
-    queryFn: () => getDecodedReplay(score?.score.beatLeaderScore?.scoreId.toString()!),
-    enabled: !!score?.score.beatLeaderScore?.scoreId,
+    queryKey: ["replayAnalysis", beatLeaderScoreId],
+    queryFn: () => getDecodedReplay(beatLeaderScoreId!.toString()),
+    enabled: beatLeaderScoreId != null,
   });
 
   if (isError) {
