@@ -4,19 +4,43 @@ import { PlatformRepository, PlatformType } from "@/common/platform/platform-rep
 import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
 import PlayerViews from "@/components/player/views/player-views";
+import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { useQueryParamSelector } from "@/hooks/use-query-param-selector";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { parseAsStringEnum } from "nuqs";
 import { useMemo } from "react";
-import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
-import ScoreSaberPlayerScoresSSR from "../platform/scoresaber/scoresaber-player-scores-ssr";
 import { Button } from "../ui/button";
 import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
+
+const AccSaberPlayerScores = dynamic(
+  () => import("../platform/accsaber/accsaber-player-scores").then(m => m.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex min-h-[240px] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    ),
+  }
+);
+
+const ScoreSaberPlayerScoresSSR = dynamic(
+  () => import("../platform/scoresaber/scoresaber-player-scores-ssr").then(m => m.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex min-h-[240px] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    ),
+  }
+);
 
 const platformRepository = PlatformRepository.getInstance();
 const PLATFORM_QUERY = parseAsStringEnum<PlatformType>(Object.values(PlatformType)).withDefault(
@@ -41,6 +65,8 @@ export default function PlayerData({ player }: PlayerDataProps) {
     queryKey: ["player", player.id],
     queryFn: () => ssrApi.getScoreSaberPlayer(player.id, "full"),
     initialData: player,
+    staleTime: 60_000,
+    refetchOnMount: false,
   });
   player = playerData ?? player;
 

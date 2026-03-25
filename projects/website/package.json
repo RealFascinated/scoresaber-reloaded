@@ -6,7 +6,7 @@
     "dev": "next dev",
     "dev:debug": "NODE_OPTIONS='--inspect' next dev --turbopack",
     "build": "next build",
-    "build:analyze": "cross-env ANALYZE=true next build",
+    "build:analyze": "cross-env ANALYZE=true next experimental-analyze",
     "start": "next start",
     "start:debug": "NODE_OPTIONS='--inspect' next start",
     "lint": "eslint \"src/**/*.ts\" \"src/**/*.tsx\""

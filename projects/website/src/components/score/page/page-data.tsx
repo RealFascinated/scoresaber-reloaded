@@ -9,9 +9,29 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, BarChart3, FileX, Loader2 } from "lucide-react";
-import CutDistributionChart from "./components/charts/cut-distribution-chart";
-import SwingSpeedChart from "./components/charts/swing-speed-chart";
+import dynamic from "next/dynamic";
 import ScoreDetails from "./components/score-details";
+
+const CutDistributionChart = dynamic(
+  () => import("./components/charts/cut-distribution-chart").then(m => m.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-chart-card flex min-h-[280px] items-center justify-center rounded-lg border">
+        <Loader2 className="text-primary size-8 animate-spin" />
+      </div>
+    ),
+  }
+);
+
+const SwingSpeedChart = dynamic(() => import("./components/charts/swing-speed-chart").then(m => m.default), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-chart-card flex min-h-[280px] items-center justify-center rounded-lg border">
+      <Loader2 className="text-primary size-8 animate-spin" />
+    </div>
+  ),
+});
 
 type ScorePageDataProps = {
   scoreId: string;
@@ -20,6 +40,8 @@ type ScorePageDataProps = {
 };
 
 export default function ScorePageData({ scoreId, initialScore }: ScorePageDataProps) {
+  const hasServerScore = initialScore !== undefined;
+
   const {
     data: score,
     isLoading,
@@ -27,7 +49,7 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
   } = useQuery({
     queryKey: ["score", scoreId],
     queryFn: () => ssrApi.getScore(scoreId),
-    ...(initialScore !== undefined ? { initialData: initialScore } : {}),
+    ...(hasServerScore ? { initialData: initialScore, staleTime: 60_000, refetchOnMount: false } : {}),
   });
 
   const { data: scoreStats, isLoading: isScoreStatsLoading } = useQuery({

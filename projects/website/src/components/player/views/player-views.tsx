@@ -19,16 +19,44 @@ import dynamic from "next/dynamic";
 import { ReactElement, useState } from "react";
 import { cn } from "../../../common/utils";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
-import PlayerAccuracyChart from "./impl/player-accuracy-chart";
-import PlayerAdvancedRankingChart from "./impl/player-advanced-ranking-chart";
-import PlayerScoresChart from "./impl/player-scores-chart";
-import PlayerSimpleRankingChart from "./impl/player-simple-ranking-chart";
-import PlusPpCalculator from "./impl/plus-pp-calculator";
-import SkillTriangleChart from "./impl/skill-triangle-chart";
 
-const ScoresGraphChart = dynamic(() => import("./impl/scores-graph-chart"), { ssr: false });
+function ChartPanelSkeleton() {
+  return (
+    <div className="flex h-[400px] items-center justify-center">
+      <Spinner />
+    </div>
+  );
+}
 
-// Constants
+const PlayerSimpleRankingChart = dynamic(() => import("./impl/player-simple-ranking-chart"), {
+  ssr: false,
+  loading: ChartPanelSkeleton,
+});
+const PlayerAdvancedRankingChart = dynamic(() => import("./impl/player-advanced-ranking-chart"), {
+  ssr: false,
+  loading: ChartPanelSkeleton,
+});
+const PlayerAccuracyChart = dynamic(() => import("./impl/player-accuracy-chart"), {
+  ssr: false,
+  loading: ChartPanelSkeleton,
+});
+const PlayerScoresChart = dynamic(() => import("./impl/player-scores-chart"), {
+  ssr: false,
+  loading: ChartPanelSkeleton,
+});
+const ScoresGraphChart = dynamic(() => import("./impl/scores-graph-chart"), {
+  ssr: false,
+  loading: ChartPanelSkeleton,
+});
+const SkillTriangleChart = dynamic(() => import("./impl/skill-triangle-chart"), {
+  ssr: false,
+  loading: ChartPanelSkeleton,
+});
+const PlusPpCalculator = dynamic(() => import("./impl/plus-pp-calculator"), {
+  ssr: false,
+  loading: ChartPanelSkeleton,
+});
+
 const DATE_PRESETS = [
   { label: "Last 50 Days", value: 50 },
   { label: "Last 90 Days", value: 90 },
@@ -39,23 +67,101 @@ const DATE_PRESETS = [
 
 const DEFAULT_DAYS_AGO = 50;
 
-type SelectedView = {
+type ViewMeta = {
   index: number;
   label: string;
   showDateRangeSelector: boolean;
   isChart: boolean;
   icon: React.ElementType;
-  chart: (player: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => ReactElement;
 };
+
+const VIEW_METAS: ViewMeta[] = [
+  {
+    index: 0,
+    label: "Ranking",
+    icon: GlobeAmericasIcon,
+    showDateRangeSelector: true,
+    isChart: true,
+  },
+  {
+    index: 1,
+    label: "Accuracy",
+    icon: TrendingUpIcon,
+    showDateRangeSelector: true,
+    isChart: true,
+  },
+  {
+    index: 2,
+    label: "Scores",
+    icon: SwordIcon,
+    showDateRangeSelector: true,
+    isChart: true,
+  },
+  {
+    index: 3,
+    label: "Scores Graph",
+    icon: ChartBarIcon,
+    showDateRangeSelector: false,
+    isChart: true,
+  },
+  {
+    index: 4,
+    label: "Skill Triangle",
+    icon: TriangleIcon,
+    showDateRangeSelector: false,
+    isChart: false,
+  },
+  {
+    index: 5,
+    label: "PP Calculator",
+    icon: CalculatorIcon,
+    showDateRangeSelector: false,
+    isChart: false,
+  },
+];
+
+function PlayerViewPanel({
+  viewIndex,
+  player,
+  statisticHistory,
+  actualDaysAgo,
+  historyMode,
+}: {
+  viewIndex: number;
+  player: ScoreSaberPlayer;
+  statisticHistory: PlayerStatisticHistory;
+  actualDaysAgo: number;
+  historyMode: HistoryMode;
+}): ReactElement {
+  switch (viewIndex) {
+    case 0:
+      if (historyMode === HistoryMode.ADVANCED) {
+        return <PlayerAdvancedRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+      }
+      return <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+    case 1:
+      return <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+    case 2:
+      return <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+    case 3:
+      return <ScoresGraphChart player={player} />;
+    case 4:
+      return <SkillTriangleChart player={player} />;
+    case 5:
+      return <PlusPpCalculator player={player} />;
+    default:
+      return <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
+  }
+}
 
 function ViewSelector({
   views,
   selectedView,
   onViewSelect,
 }: {
-  views: SelectedView[];
-  selectedView: SelectedView;
-  onViewSelect: (view: SelectedView) => void;
+  views: ViewMeta[];
+  selectedView: ViewMeta;
+  onViewSelect: (view: ViewMeta) => void;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-center gap-1">
@@ -120,89 +226,24 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
     placeholderData: data => data,
   });
 
-  const views: SelectedView[] = [
-    {
-      index: 0,
-      label: "Ranking",
-      icon: GlobeAmericasIcon,
-      showDateRangeSelector: true,
-      isChart: true,
-      chart: (_: ScoreSaberPlayer, statisticHistory: PlayerStatisticHistory) => {
-        switch (historyMode) {
-          case HistoryMode.SIMPLE:
-            return (
-              <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
-            );
-          case HistoryMode.ADVANCED:
-            return (
-              <PlayerAdvancedRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
-            );
-          default:
-            return (
-              <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
-            );
-        }
-      },
-    },
-    {
-      index: 1,
-      label: "Accuracy",
-      icon: TrendingUpIcon,
-      showDateRangeSelector: true,
-      isChart: true,
-      chart: (_, statisticHistory) => (
-        <PlayerAccuracyChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
-      ),
-    },
-    {
-      index: 2,
-      label: "Scores",
-      icon: SwordIcon,
-      showDateRangeSelector: true,
-      isChart: true,
-      chart: (_, statisticHistory) => (
-        <PlayerScoresChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />
-      ),
-    },
-    {
-      index: 3,
-      label: "Scores Graph",
-      icon: ChartBarIcon,
-      showDateRangeSelector: false,
-      isChart: true,
-      chart: player => <ScoresGraphChart player={player} />,
-    },
-    {
-      index: 4,
-      label: "Skill Triangle",
-      icon: TriangleIcon,
-      showDateRangeSelector: false,
-      // has chart in name -> look inside -> isnt a chart
-      isChart: false,
-      chart: player => <SkillTriangleChart player={player} />,
-    },
-    {
-      index: 5,
-      label: "PP Calculator",
-      icon: CalculatorIcon,
-      showDateRangeSelector: false,
-      isChart: false,
-      chart: player => <PlusPpCalculator player={player} />,
-    },
-  ];
-
-  const selectedView = views[selectedViewIndex];
+  const selectedView = VIEW_METAS[selectedViewIndex] ?? VIEW_METAS[0];
   return (
     <div className="flex flex-col gap-(--spacing-md)">
       <ViewSelector
-        views={views}
+        views={VIEW_METAS}
         selectedView={selectedView}
         onViewSelect={view => setSelectedViewIndex(view.index)}
       />
 
       {statisticHistory && historyMode !== undefined ? (
         <Card className={cn("bg-chart-card", selectedView.isChart ? "p-2.5" : "")}>
-          {selectedView.chart(player, statisticHistory)}
+          <PlayerViewPanel
+            viewIndex={selectedView.index}
+            player={player}
+            statisticHistory={statisticHistory}
+            actualDaysAgo={actualDaysAgo}
+            historyMode={historyMode}
+          />
         </Card>
       ) : (
         <Card className="bg-chart-card p-2.5">

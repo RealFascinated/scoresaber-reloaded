@@ -55,7 +55,7 @@ export default function ScoreFeed() {
         const score = getScoreSaberScoreFromToken(scoreToken.score, leaderboard);
 
         return (
-          <div key={score.scoreId} className="flex flex-col py-2">
+          <div key={score.scoreId} className="cv-score-card flex flex-col py-2">
             <div className="flex flex-row items-center gap-2">
               <Avatar
                 src={player.profilePicture!}

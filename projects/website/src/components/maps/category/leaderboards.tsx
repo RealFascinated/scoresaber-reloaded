@@ -81,7 +81,7 @@ export default function Leaderboards() {
                 }
 
                 return (
-                  <div key={leaderboard.id}>
+                  <div key={leaderboard.id} className="cv-score-card">
                     <SimpleLink
                       href={`/leaderboard/${leaderboard.id}`}
                       className="bg-accent-deep hover:bg-accent-deep/50 grid items-center gap-2 rounded-md p-1.5 transition-all lg:grid-cols-[1fr_0.19fr]"
