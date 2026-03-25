@@ -18,6 +18,8 @@ const BEATLEADER_PAGE_SIZE = 100;
 const MAX_LOOKUP_ATTEMPTS = 5;
 /** Milliseconds to wait after a failed attempt before the next (exponential). */
 const LOOKUP_RETRY_BACKOFF_MS = [400, 800, 1600, 3200] as const;
+/** Pause between page fetches (after page 1) to stay under BeatLeader / proxy rate limits during long seeds. */
+const INTER_PAGE_THROTTLE_MS = 250;
 
 export class PlayerBeatLeaderScoresService {
   /**
@@ -199,32 +201,51 @@ export class PlayerBeatLeaderScoresService {
     let currentPage = 1;
     let exitedDueToApiFailure = false;
     let lastSuccessfulScoresPage: BeatLeaderPlayerScoresPageToken | undefined;
+    let pagesFetchedOk = 0;
 
     while (true) {
+      if (currentPage > 1) {
+        await Bun.sleep(INTER_PAGE_THROTTLE_MS);
+      }
       const scoresPage = await getScoresPage(currentPage);
       if (!scoresPage) {
-        exitedDueToApiFailure = true;
-        if (lastSuccessfulScoresPage !== undefined) {
-          const maxPage = maxPageFromMetadata(lastSuccessfulScoresPage);
-          Logger.warn(
-            `[BeatLeader Seed] Stopped fetching for player %s: BeatLeader API returned no page after %s attempt(s) (page %s of %s)`,
-            playerId,
-            formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
-            formatNumberWithCommas(currentPage),
-            formatNumberWithCommas(maxPage)
-          );
-        } else {
+        if (lastSuccessfulScoresPage === undefined) {
+          exitedDueToApiFailure = true;
           Logger.warn(
             `[BeatLeader Seed] Stopped fetching for player %s: BeatLeader API returned no page after %s attempt(s) (page %s)`,
             playerId,
             formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
             formatNumberWithCommas(currentPage)
           );
+          break;
         }
+
+        const maxPage = maxPageFromMetadata(lastSuccessfulScoresPage);
+        if (currentPage < maxPage) {
+          Logger.warn(
+            `[BeatLeader Seed] Skipping player %s page %s after %s failed attempt(s); continuing (max page %s) — scores on this page will be missing until a later sync`,
+            playerId,
+            formatNumberWithCommas(currentPage),
+            formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
+            formatNumberWithCommas(maxPage)
+          );
+          currentPage++;
+          continue;
+        }
+
+        exitedDueToApiFailure = true;
+        Logger.warn(
+          `[BeatLeader Seed] Stopped fetching for player %s: BeatLeader API returned no page after %s attempt(s) (page %s of %s)`,
+          playerId,
+          formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
+          formatNumberWithCommas(currentPage),
+          formatNumberWithCommas(maxPage)
+        );
         break;
       }
 
       lastSuccessfulScoresPage = scoresPage;
+      pagesFetchedOk++;
 
       const scores = scoresPage.data ?? [];
       if (scores.length === 0) {
@@ -248,7 +269,7 @@ export class PlayerBeatLeaderScoresService {
     }
 
     result.timeTaken = performance.now() - startTime;
-    result.totalPagesFetched = currentPage - 1;
+    result.totalPagesFetched = pagesFetchedOk;
 
     /** True when the only failure was loading the last page (page N of N); earlier pages succeeded. */
     const failedOnLastPageOnly =
