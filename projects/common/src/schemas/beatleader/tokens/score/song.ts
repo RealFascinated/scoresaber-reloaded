@@ -7,15 +7,15 @@ export const BeatLeaderSongSchema = z
     name: z.string(),
     subName: z.string(),
     author: z.string(),
-    mapperId: z.string(),
+    mapperId: z.union([z.string(), z.number()]),
     coverImage: z.string(),
-    fullCoverImage: z.string(),
-    downloadUrl: z.string(),
+    fullCoverImage: z.union([z.string(), z.null()]).optional(),
     bpm: z.number(),
     duration: z.number(),
-    tags: z.string(),
-    uploadTime: z.number(),
-    difficulties: z.null(),
+    downloadUrl: z.string().optional(),
+    tags: z.string().optional(),
+    uploadTime: z.number().optional(),
+    difficulties: z.null().optional(),
   })
   .passthrough();
 

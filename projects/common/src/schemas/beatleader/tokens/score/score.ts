@@ -6,7 +6,8 @@ import { BeatLeaderScoreOffsetsSchema } from "./score-offsets";
 
 export const BeatLeaderScoreSchema = z
   .object({
-    myScore: z.null(),
+    /** API returns null or a nested score summary object. */
+    myScore: z.union([z.null(), z.object({}).passthrough()]),
     validContexts: z.number(),
     leaderboard: BeatLeaderLeaderboardSchema,
     contextExtensions: z.null().optional(),
@@ -23,7 +24,7 @@ export const BeatLeaderScoreSchema = z
     accPP: z.number(),
     techPP: z.number(),
     rank: z.number(),
-    country: z.string(),
+    country: z.union([z.string(), z.null()]),
     fcAccuracy: z.number(),
     fcPp: z.number(),
     weight: z.number(),
@@ -37,7 +38,7 @@ export const BeatLeaderScoreSchema = z
     fullCombo: z.boolean(),
     platform: z.string(),
     maxCombo: z.number(),
-    maxStreak: z.number(),
+    maxStreak: z.union([z.number(), z.null()]),
     hmd: z.number(),
     controller: z.number(),
     leaderboardId: z.string(),
@@ -46,7 +47,7 @@ export const BeatLeaderScoreSchema = z
     replaysWatched: z.number(),
     playCount: z.number(),
     priority: z.number(),
-    player: BeatLeaderPlayerSchema,
+    player: BeatLeaderPlayerSchema.nullable(),
     scoreImprovement: BeatLeaderScoreImprovementSchema,
     rankVoting: z.null(),
     metadata: z.null(),

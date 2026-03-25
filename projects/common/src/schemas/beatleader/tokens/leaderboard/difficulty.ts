@@ -2,6 +2,8 @@ import { z } from "zod";
 import { BeatLeaderModifierRatingSchema } from "../modifier/modifier-rating";
 import { BeatLeaderModifierSchema } from "../modifier/modifiers";
 
+const nullableNumber = z.union([z.number(), z.null()]);
+
 export const BeatLeaderDifficultySchema = z
   .object({
     id: z.number(),
@@ -11,15 +13,16 @@ export const BeatLeaderDifficultySchema = z
     modeName: z.string(),
     status: z.number(),
     modifierValues: BeatLeaderModifierSchema,
-    modifiersRating: BeatLeaderModifierRatingSchema,
+    modifiersRating: z.union([BeatLeaderModifierRatingSchema, z.null()]),
     nominatedTime: z.number(),
     qualifiedTime: z.number(),
     rankedTime: z.number(),
-    stars: z.number(),
-    predictedAcc: z.number(),
-    passRating: z.number(),
-    accRating: z.number(),
-    techRating: z.number(),
+    stars: nullableNumber,
+    predictedAcc: nullableNumber,
+    passRating: nullableNumber,
+    accRating: nullableNumber,
+    techRating: nullableNumber,
+    multiRating: nullableNumber,
     type: z.number(),
     njs: z.number(),
     nps: z.number(),

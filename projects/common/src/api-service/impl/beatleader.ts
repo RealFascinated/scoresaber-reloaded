@@ -105,6 +105,7 @@ export class BeatLeaderService extends ApiService {
 
     const parsed = BeatLeaderPlayerScoresPageSchema.safeParse(response);
     if (!parsed.success) {
+      this.log(`Failed to parse BeatLeader scores page ${page} for "${playerId}": ${parsed.error.message}`);
       return undefined;
     }
 
