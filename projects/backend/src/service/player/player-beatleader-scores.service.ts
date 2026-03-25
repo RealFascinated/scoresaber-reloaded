@@ -242,9 +242,15 @@ export class PlayerBeatLeaderScoresService {
     result.timeTaken = performance.now() - startTime;
     result.totalPagesFetched = currentPage - 1;
 
+    /** True when the only failure was loading the last page (page N of N); earlier pages succeeded. */
+    const failedOnLastPageOnly =
+      exitedDueToApiFailure &&
+      lastSuccessfulScoresPage !== undefined &&
+      currentPage === maxPageFromMetadata(lastSuccessfulScoresPage);
+
     if (!player.seededBeatLeaderScores) {
       if (options.mode === "backfill") {
-        if (!exitedDueToApiFailure) {
+        if (!exitedDueToApiFailure || failedOnLastPageOnly) {
           await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
         }
       } else if (result.stoppedBecauseAllTrackedPage) {
