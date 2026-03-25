@@ -5,7 +5,7 @@ import Logger from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel, ScoreSaberScorePublic } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
 import type {
@@ -423,13 +423,16 @@ export class PlayerScoresService {
       const scores = await Promise.all(
         requestedPage.playerScores.map(async playerScore => {
           const leaderboard = getScoreSaberLeaderboardFromToken(playerScore.leaderboard);
-          const score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
+          const score: ScoreSaberScorePublic = {
+            beatLeaderScoreId: (await ScoreSaberScoreModel.findOne({ scoreId: playerScore.score.id }).select("beatLeaderScoreId").lean())?.beatLeaderScoreId,
+            ...getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId)
+          }
           if (!score) {
             return undefined;
           }
 
-          const [processed, beatSaver] = await Promise.all([
-            LeaderboardCoreService.processLeaderboard(leaderboard),
+          const [processedLeaderboard, beatSaver] = await Promise.all([
+            (await LeaderboardCoreService.processLeaderboard(leaderboard)).leaderboard,
             BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
@@ -440,7 +443,7 @@ export class PlayerScoresService {
 
           return {
             score: await ScoreCoreService.insertScoreData(score, leaderboard),
-            leaderboard: processed.leaderboard,
+            leaderboard: processedLeaderboard,
             beatSaver,
           } as PlayerScore;
         })
