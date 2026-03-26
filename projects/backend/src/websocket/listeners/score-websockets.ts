@@ -16,11 +16,8 @@ import BeatLeaderService from "../../service/beatleader.service";
 import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
 import MetricsService, { MetricType } from "../../service/metrics.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
-import { ScoreCoreService } from "../../service/score/score-core.service";
 import { TopScoresService } from "../../service/score/top-scores.service";
 import ScoreSaberService from "../../service/scoresaber.service";
-import { ScoreWebsocketEvent } from "../impl/score-websocket";
-import { WebsocketManager } from "../websocket-manager";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
@@ -212,13 +209,6 @@ export class ScoreWebsockets implements EventListener {
           listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);
         })
       );
-
-      WebsocketManager.get<ScoreWebsocketEvent>("score")?.publish({
-        score: await ScoreCoreService.insertScoreData(score, leaderboard, {
-          insertBeatLeaderScore: true
-        }),
-        leaderboard: leaderboard
-      });
     }
   }
 

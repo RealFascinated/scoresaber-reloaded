@@ -2,6 +2,7 @@ import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-s
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
+import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { DiscordChannels } from "../../bot/bot";
 import { sendScoreNotification } from "../../common/score/score.util";
@@ -11,6 +12,7 @@ import CacheService from "../../service/cache.service";
 import MetricsService, { MetricType } from "../../service/metrics.service";
 import { PlayerHistoryService } from "../../service/player/player-history.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
+import { WebsocketManager } from "../../websocket/websocket-manager";
 import { EventListener } from "../event-listener";
 
 export class TrackScoreListener implements EventListener {
@@ -89,5 +91,13 @@ export class TrackScoreListener implements EventListener {
     // Update metric
     const trackedScoresMetric = MetricsService.getMetric<TrackedScoresMetric>(MetricType.TRACKED_SCORES);
     trackedScoresMetric?.increment();
+
+    // Publish the score to the websocket
+    WebsocketManager.get<PlayerScore>("score")?.publish({
+      score: await ScoreCoreService.insertScoreData(score, leaderboard, {
+        insertBeatLeaderScore: true
+      }),
+      leaderboard: leaderboard
+    });
   }
 }
