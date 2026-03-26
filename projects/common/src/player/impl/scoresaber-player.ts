@@ -1,5 +1,5 @@
 import { HMD } from "../../hmds";
-import { AccBadges } from "../acc-badges";
+import { PlayerScoreStats } from "../../model/player/player-score-stats";
 import { PeakRank } from "../peak-rank";
 import Player, { StatisticChange } from "../player";
 
@@ -23,6 +23,11 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   peakRank?: PeakRank;
 
   /**
+   * The player's score stats.
+   */
+  scoreStats: PlayerScoreStats;
+
+  /**
    * The pages for the players positions.
    */
   rankPages: ScoreSaberRankPages;
@@ -31,11 +36,6 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    * The amount of raw pp needed to gain 1 weighted pp.
    */
   plusOnePp: number;
-
-  /**
-   * The acc badges based on the player's scores.
-   */
-  accBadges: AccBadges;
 
   /**
    * The date the player was first tracked.

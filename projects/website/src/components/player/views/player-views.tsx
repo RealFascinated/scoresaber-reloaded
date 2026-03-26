@@ -13,7 +13,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon, TriangleIcon } from "lucide-react";
+import { Award, CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon, TriangleIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ReactElement, useState } from "react";
 import { cn } from "../../../common/utils";
@@ -52,6 +52,10 @@ const SkillTriangleChart = dynamic(() => import("./impl/skill-triangle-chart"), 
   loading: ChartPanelSkeleton,
 });
 const PlusPpCalculator = dynamic(() => import("./impl/plus-pp-calculator"), {
+  ssr: false,
+  loading: ChartPanelSkeleton,
+});
+const PlayerAccuracyBadgesChart = dynamic(() => import("./impl/player-accuracy-badges-chart"), {
   ssr: false,
   loading: ChartPanelSkeleton,
 });
@@ -117,6 +121,13 @@ const VIEW_METAS: ViewMeta[] = [
     showDateRangeSelector: false,
     isChart: false,
   },
+  {
+    index: 6,
+    label: "Badges",
+    icon: Award,
+    showDateRangeSelector: true,
+    isChart: true,
+  },
 ];
 
 function PlayerViewPanel({
@@ -148,6 +159,8 @@ function PlayerViewPanel({
       return <SkillTriangleChart player={player} />;
     case 5:
       return <PlusPpCalculator player={player} />;
+    case 6:
+      return <PlayerAccuracyBadgesChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
     default:
       return <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
   }

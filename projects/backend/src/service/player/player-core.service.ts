@@ -3,6 +3,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { StorageBucket } from "@ssr/common/minio-buckets";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
+import { PlayerScoreStats } from "@ssr/common/model/player/player-score-stats";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
@@ -47,8 +48,8 @@ export class PlayerCoreService {
 
     let player: Player | null | undefined = await (useCache
       ? CacheService.fetch(CacheId.Players, `player:${id}`, async () =>
-          PlayerModel.findOne({ _id: id }).lean()
-        )
+        PlayerModel.findOne({ _id: id }).lean()
+      )
       : PlayerModel.findOne({ _id: id }).lean());
 
     if (player === null) {
@@ -269,5 +270,31 @@ export class PlayerCoreService {
 
       Logger.warn(`Failed to cache profile picture for player ${playerId}`);
     }
+  }
+
+  /**
+   * Gets the player's score stats.
+   *
+   * @param playerId the player's id
+   * @returns the player's score stats
+   */
+  public static async getPlayerScoreStats(playerId: string): Promise<PlayerScoreStats> {
+    const scores = await ScoreSaberScoreModel.find({
+      playerId: playerId,
+      pp: { $gt: 0 },
+    })
+      .select({
+        accuracy: 1,
+      })
+      .lean();
+
+    return {
+      godPlays: scores.filter(score => score.accuracy >= 98).length,
+      sspPlays: scores.filter(score => score.accuracy >= 95).length,
+      ssPlays: scores.filter(score => score.accuracy >= 90).length,
+      spPlays: scores.filter(score => score.accuracy >= 85).length,
+      sPlays: scores.filter(score => score.accuracy >= 80).length,
+      aPlays: scores.filter(score => score.accuracy >= 70).length,
+    } as PlayerScoreStats;
   }
 }

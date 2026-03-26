@@ -1,6 +1,7 @@
 import Logger from "@ssr/common/logger";
 import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
@@ -8,6 +9,7 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
+import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerHmdService } from "../player/player-hmd.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import ScoreSaberService from "../scoresaber.service";
@@ -80,6 +82,10 @@ export class ScoreCoreService {
     if (leaderboard.ranked && score.rank <= 10) {
       await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
     }
+
+    // Update player score stats
+    const scoreStats = await PlayerCoreService.getPlayerScoreStats(player.id);
+    await PlayerModel.updateOne({ _id: player.id }, { $set: { scoreStats: scoreStats } });
 
     if (newScore) {
       Logger.info(

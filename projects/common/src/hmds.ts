@@ -94,7 +94,7 @@ const HMD_DEFINITIONS = [
     hmd: "HP Reverb G2",
     info: {
       logo: "hp.webp",
-      filters: "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)"
+      filters: "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)",
     },
   },
 

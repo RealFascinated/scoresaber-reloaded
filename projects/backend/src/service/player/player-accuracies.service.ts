@@ -1,5 +1,4 @@
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import { AccBadges } from "@ssr/common/player/acc-badges";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
 
 export class PlayerAccuraciesService {
@@ -64,42 +63,5 @@ export class PlayerAccuraciesService {
     }
 
     return accuracies;
-  }
-
-  /**
-   * Gets the acc badges for a player.
-   *
-   * @param playerId the player's id
-   * @returns the acc badges
-   */
-  public static async getAccBadges(playerId: string): Promise<AccBadges> {
-    const badges: AccBadges = {
-      GOD: 0,
-      SSPlus: 0,
-      SS: 0,
-      SPlus: 0,
-      S: 0,
-      A: 0,
-    };
-
-    const playerScores = await ScoreSaberScoreModel.find({
-      playerId: playerId,
-      pp: { $gt: 0 },
-    })
-      .select({
-        accuracy: 1,
-      })
-      .lean();
-
-    for (const playerScore of playerScores) {
-      const accuracy = playerScore.accuracy;
-      if (accuracy >= 98) badges.GOD++;
-      else if (accuracy >= 95) badges.SSPlus++;
-      else if (accuracy >= 90) badges.SS++;
-      else if (accuracy >= 85) badges.SPlus++;
-      else if (accuracy >= 80) badges.S++;
-      else if (accuracy >= 70) badges.A++;
-    }
-    return badges;
   }
 }

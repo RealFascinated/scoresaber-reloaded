@@ -141,72 +141,53 @@ export class PlayerHistoryService {
    * This method handles both new and existing players, updating their statistics
    * and handling inactive status.
    *
-   * @param foundPlayer the player to track the history for
+   * @param player the player to track the history for
    * @param trackTime the time to track the history for
-   * @param player the player token to track the history for
+   * @param playerToken the player token to track the history for
    */
   public static async trackPlayerHistory(
-    foundPlayer: Player,
+    player: Player,
     trackTime: Date,
-    player: ScoreSaberPlayerToken
+    playerToken: ScoreSaberPlayerToken
   ): Promise<void> {
     const before = performance.now();
 
     // Don't track inactive players
-    if (!player || player.inactive) {
+    if (!playerToken || playerToken.inactive) {
       return;
     }
 
-    // Update the player's peak rank
-    await PlayerCoreService.updatePeakRank(player);
+    await PlayerCoreService.updatePeakRank(playerToken);
 
-    const daysTracked = await PlayerHistoryService.getDaysTracked(foundPlayer._id);
+    // insert score stats if missing
+    if (!player.scoreStats) {
+      player.scoreStats = await PlayerCoreService.getPlayerScoreStats(player._id);
+      await PlayerModel.updateOne({ _id: player._id }, { $set: { scoreStats: player.scoreStats } });
+    }
+
+    const daysTracked = await PlayerHistoryService.getDaysTracked(player._id);
     if (daysTracked === 0) {
-      await PlayerHistoryService.seedPlayerRankHistory(foundPlayer, player);
+      await PlayerHistoryService.seedPlayerRankHistory(player, playerToken);
     }
 
-    if (foundPlayer.seededScores) {
-      const existingEntry = await PlayerHistoryEntryModel.findOne({
-        playerId: foundPlayer._id,
-        date: getMidnightAlignedDate(trackTime),
-      }).lean();
+    const existingEntry = await PlayerHistoryEntryModel.findOne({
+      playerId: player._id,
+      date: getMidnightAlignedDate(trackTime),
+    }).lean();
 
-      const updatedHistory = await PlayerHistoryService.createHistoryEntry(
-        player,
-        existingEntry ?? undefined
-      );
+    const updatedHistory = await PlayerHistoryService.createHistoryEntry(
+      playerToken,
+      player,
+      existingEntry ?? undefined
+    );
 
-      // Only update if data has actually changed
-      if (existingEntry) {
-        const hasChanged =
-          existingEntry.pp !== updatedHistory.pp ||
-          existingEntry.rank !== updatedHistory.rank ||
-          existingEntry.countryRank !== updatedHistory.countryRank ||
-          existingEntry.averageRankedAccuracy !== updatedHistory.averageRankedAccuracy ||
-          existingEntry.averageUnrankedAccuracy !== updatedHistory.averageUnrankedAccuracy ||
-          existingEntry.averageAccuracy !== updatedHistory.averageAccuracy ||
-          existingEntry.totalScores !== updatedHistory.totalScores ||
-          existingEntry.totalRankedScores !== updatedHistory.totalRankedScores ||
-          existingEntry.totalUnrankedScores !== updatedHistory.totalUnrankedScores ||
-          existingEntry.totalScore !== updatedHistory.totalScore ||
-          existingEntry.totalRankedScore !== updatedHistory.totalRankedScore ||
-          existingEntry.plusOnePp !== updatedHistory.plusOnePp ||
-          existingEntry.medals !== updatedHistory.medals;
+    await PlayerHistoryEntryModel.findOneAndUpdate(
+      { playerId: player._id, date: getMidnightAlignedDate(trackTime) },
+      updatedHistory,
+      { upsert: true }
+    );
 
-        if (!hasChanged) {
-          // No changes, skip write
-          return;
-        }
-      }
-
-      await PlayerHistoryEntryModel.findOneAndUpdate(
-        { playerId: foundPlayer._id, date: getMidnightAlignedDate(trackTime) },
-        updatedHistory,
-        { upsert: true }
-      );
-    }
-
-    Logger.info(`Tracked player "${foundPlayer._id}" in ${(performance.now() - before).toFixed(0)}ms`);
+    Logger.info(`Tracked player "${player._id}" in ${(performance.now() - before).toFixed(0)}ms`);
   }
 
   /**
@@ -374,15 +355,16 @@ export class PlayerHistoryService {
    * Gets today's player statistics, either from database or generates fresh data.
    */
   public static async getTodayPlayerStatistic(
-    player: ScoreSaberPlayerToken
+    playerToken: ScoreSaberPlayerToken
   ): Promise<Partial<PlayerHistoryEntry> | undefined> {
     const today = getMidnightAlignedDate(new Date());
     const existingEntry = await PlayerHistoryEntryModel.findOne({
-      playerId: player.id,
+      playerId: playerToken.id,
       date: today,
     }).lean();
 
-    return await PlayerHistoryService.createHistoryEntry(player, existingEntry ?? undefined);
+    const player = await PlayerCoreService.getPlayer(playerToken.id, playerToken);
+    return await PlayerHistoryService.createHistoryEntry(playerToken, player, existingEntry ?? undefined);
   }
 
   /**
@@ -420,6 +402,7 @@ export class PlayerHistoryService {
    */
   public static async createHistoryEntry(
     playerToken: ScoreSaberPlayerToken,
+    player: Player,
     existingEntry?: Partial<PlayerHistoryEntry>
   ): Promise<Partial<PlayerHistoryEntry>> {
     const [accuracies, plusOnePp, medals] = await Promise.all([
@@ -445,6 +428,12 @@ export class PlayerHistoryService {
       totalScore: playerToken.scoreStats.totalScore,
       totalRankedScore: playerToken.scoreStats.totalRankedScore,
       plusOnePp: plusOnePp,
+      aPlays: player.scoreStats?.aPlays ?? 0,
+      sPlays: player.scoreStats?.sPlays ?? 0,
+      spPlays: player.scoreStats?.spPlays ?? 0,
+      ssPlays: player.scoreStats?.ssPlays ?? 0,
+      sspPlays: player.scoreStats?.sspPlays ?? 0,
+      godPlays: player.scoreStats?.godPlays ?? 0,
       medals: medals,
     };
   }

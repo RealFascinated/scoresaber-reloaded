@@ -119,10 +119,7 @@ export default function playerController(app: Elysia) {
           if (!player) {
             throw new NotFoundError(`Player "${playerId}" not found`);
           }
-          return await PlayerHistoryService.getPlayerStatisticHistories(
-            player,
-            count
-          );
+          return await PlayerHistoryService.getPlayerStatisticHistories(player, count);
         },
         {
           tags: ["Player"],

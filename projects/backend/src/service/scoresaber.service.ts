@@ -17,7 +17,6 @@ import { redisClient } from "../common/redis";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import CacheService, { CacheId } from "./cache.service";
 import MetricsService, { MetricType } from "./metrics.service";
-import { PlayerAccuraciesService } from "./player/player-accuracies.service";
 import { PlayerCoreService } from "./player/player-core.service";
 import { PlayerHistoryService } from "./player/player-history.service";
 import { PlayerHmdService } from "./player/player-hmd.service";
@@ -110,7 +109,6 @@ export default class ScoreSaberService {
 
       const [
         plusOnePp,
-        accBadges,
         hmdBreakdown,
         medalsRank,
         dailyChanges,
@@ -119,19 +117,18 @@ export default class ScoreSaberService {
         rankWithInactives,
       ] = await Promise.all([
         account ? PlayerRankedService.getPlayerWeightedPpGainForRawPp(id) : 0,
-        account ? PlayerAccuraciesService.getAccBadges(id) : {},
         // todo: cleanup this mess
         account && player !== undefined
           ? (async () => {
-              const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
-              const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
-              return Object.fromEntries(
-                Object.entries(hmdUsage).map(([hmd, count]) => [
-                  hmd,
-                  totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
-                ])
-              ) as Record<HMD, number>;
-            })()
+            const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
+            const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
+            return Object.fromEntries(
+              Object.entries(hmdUsage).map(([hmd, count]) => [
+                hmd,
+                totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
+              ])
+            ) as Record<HMD, number>;
+          })()
           : undefined,
         account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},
@@ -157,7 +154,6 @@ export default class ScoreSaberService {
           monthly: monthlyChanges,
         },
         plusOnePp: plusOnePp,
-        accBadges,
         peakRank: account?.peakRank,
         statistics: player.scoreStats,
         hmdBreakdown: hmdBreakdown,
@@ -171,6 +167,7 @@ export default class ScoreSaberService {
             (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1) || 1) *
           100,
         rankWithInactives,
+        scoreStats: account?.scoreStats ?? undefined,
       } as ScoreSaberPlayer;
     });
   }

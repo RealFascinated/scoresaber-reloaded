@@ -1,6 +1,7 @@
 import { getModelForClass, index, modelOptions, prop, Severity } from "@typegoose/typegoose";
 import type { Document } from "mongoose";
 import { type PeakRank } from "../../player/peak-rank";
+import { PlayerScoreStats } from "./player-score-stats";
 
 /**
  * The model for a player.
@@ -83,6 +84,12 @@ export class Player {
    */
   @prop({ index: true })
   public medals?: number;
+
+  /**
+   * The player's score stats.
+   */
+  @prop()
+  public scoreStats?: PlayerScoreStats;
 
   /**
    * The date the player was first tracked.
