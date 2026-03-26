@@ -98,6 +98,12 @@ const playerStats: Stat[] = [
   {
     name: "Headset",
     create: (player: ScoreSaberPlayer) => {
+      if (player.hmd === undefined) {
+        return {
+          value: undefined,
+        };
+      }
+
       const hmd = getHMDInfo(player.hmd as HMD);
 
       return {
