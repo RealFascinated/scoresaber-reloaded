@@ -1,7 +1,7 @@
 import { isProduction } from "./utils/utils";
 
 export const SHARED_CONSTS = {
-  maxStars: 20,
+  maxStars: 15,
   maxFriends: 15,
 };
 
