@@ -3,6 +3,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { StorageBucket } from "@ssr/common/minio-buckets";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
+import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import Request from "@ssr/common/utils/request";
@@ -46,8 +47,8 @@ export class PlayerCoreService {
 
     let player: Player | null | undefined = await (useCache
       ? CacheService.fetch(CacheId.Players, `player:${id}`, async () =>
-          PlayerModel.findOne({ _id: id }).lean()
-        )
+        PlayerModel.findOne({ _id: id }).lean()
+      )
       : PlayerModel.findOne({ _id: id }).lean());
 
     if (player === null) {
@@ -124,14 +125,21 @@ export class PlayerCoreService {
               trackedSince: new Date(),
             });
 
-            const seedQueue = QueueManager.getQueue(
-              QueueId.PlayerScoreRefreshQueue
-            ) as FetchMissingScoresQueue;
-            if (!(await seedQueue.hasItem({ id: id, data: id })) && !token.banned) {
-              (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
-                id,
-                data: id,
-              });
+            // If the player has less scores tracked than the total play count, add them to the refresh queue
+            const trackedScores = await ScoreSaberScoreModel.countDocuments({ playerId: id });
+            if (trackedScores < token.scoreStats.totalPlayCount) {
+              const seedQueue = QueueManager.getQueue(
+                QueueId.PlayerScoreRefreshQueue
+              ) as FetchMissingScoresQueue;
+              if (!(await seedQueue.hasItem({ id: id, data: id })) && !token.banned) {
+                (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
+                  id,
+                  data: id,
+                });
+              }
+            } else {
+              // Mark player as seeded
+              await PlayerModel.updateOne({ _id: newPlayer._id }, { $set: { seededScores: true } });
             }
 
             if (isProduction()) {
