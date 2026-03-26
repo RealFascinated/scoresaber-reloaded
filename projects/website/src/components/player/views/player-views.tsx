@@ -123,7 +123,7 @@ const VIEW_METAS: ViewMeta[] = [
   },
   {
     index: 6,
-    label: "Badges",
+    label: "Acc Badges",
     icon: Award,
     showDateRangeSelector: true,
     isChart: true,
