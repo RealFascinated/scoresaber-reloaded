@@ -80,10 +80,10 @@ export class PlayerHistoryService {
 
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
-          (async () => {
-            await PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } });
-            redisClient.del(`scoresaber:cached-player:${foundPlayer._id}`);
-          })(),
+        (async () => {
+          await PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } });
+          redisClient.del(`scoresaber:cached-player:${foundPlayer._id}`);
+        })(),
       ]);
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
@@ -130,9 +130,9 @@ export class PlayerHistoryService {
     );
     Logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-        `Successfully processed: ${successCount} players\n` +
-        `Failed to process: ${errorCount} players\n` +
-        `Total inactive players: ${inactivePlayers}`
+      `Successfully processed: ${successCount} players\n` +
+      `Failed to process: ${errorCount} players\n` +
+      `Total inactive players: ${inactivePlayers}`
     );
   }
 
@@ -283,25 +283,21 @@ export class PlayerHistoryService {
    */
   public static async getPlayerStatisticHistories(
     player: ScoreSaberPlayerToken,
-    startDate: Date,
-    endDate: Date
+    count: number
   ): Promise<PlayerStatisticHistory> {
+    const today = getMidnightAlignedDate(new Date());
+    const startDate = getDaysAgoDate(count);
+
     const startTimestamp = getMidnightAlignedDate(startDate).getTime();
-    const endTimestamp = getMidnightAlignedDate(endDate).getTime();
-
-    const isRangeIncludesToday = isToday(startDate) || isToday(endDate);
-
-    // Ensure start date is before end date
-    const [queryStart, queryEnd] =
-      startTimestamp > endTimestamp ? [endTimestamp, startTimestamp] : [startTimestamp, endTimestamp];
+    const endTimestamp = getMidnightAlignedDate(today).getTime();
 
     // Run queries in parallel
     const [entries, playerRankHistory] = await Promise.all([
       PlayerHistoryEntryModel.find({
         playerId: player.id,
         date: {
-          $gte: new Date(queryStart),
-          $lte: new Date(queryEnd),
+          $gte: new Date(startDate),
+          $lte: new Date(today),
         },
       })
         .sort({ date: -1 })
@@ -359,15 +355,9 @@ export class PlayerHistoryService {
       );
     }
 
-    // Handle today's data if the range includes today
-    if (isRangeIncludesToday) {
-      const today = getMidnightAlignedDate(new Date());
-      const todayKey = formatDateMinimal(today);
-
-      const todayData = await PlayerHistoryService.getTodayPlayerStatistic(player);
-      if (todayData) {
-        history[todayKey] = todayData;
-      }
+    const todayData = await PlayerHistoryService.getTodayPlayerStatistic(player);
+    if (todayData) {
+      history[formatDateMinimal(today)] = todayData;
     }
 
     // Sort history by date

@@ -12,7 +12,6 @@ import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { getDaysAgo, getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon, TriangleIcon } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -218,11 +217,11 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
   const [selectedViewIndex, setSelectedViewIndex] = useState(0);
   const [daysAgo, setDaysAgo] = useState(DEFAULT_DAYS_AGO);
-  const actualDaysAgo = daysAgo === Infinity ? getDaysAgo(player.trackedSince) : daysAgo;
+  const actualDaysAgo = daysAgo === Infinity ? -1 : daysAgo;
 
   const { data: statisticHistory } = useQuery({
     queryKey: ["player-statistic-history", player.id, daysAgo],
-    queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, getDaysAgoDate(actualDaysAgo), new Date()),
+    queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, actualDaysAgo),
     placeholderData: data => data,
   });
 

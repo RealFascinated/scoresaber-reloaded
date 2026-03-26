@@ -321,20 +321,15 @@ class SSRApi {
    * Fetches the player's statistic history.
    *
    * @param playerId the id of the player
-   * @param startDate the start date
-   * @param endDate the end date
-   * @param includedFields the fields to include in the response
+   * @param count the number of days to get the statistic history for
+   * @returns the statistic history
    */
   async getPlayerStatisticHistory(
     playerId: string,
-    startDate: Date,
-    endDate: Date,
-    includedFields?: (keyof PlayerStatisticHistory)[]
+    count: number,
   ) {
     return await this.request<PlayerStatisticHistory>(`/player/history/${playerId}`, {
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      ...(includedFields ? { includedFields: includedFields.join(",") } : {}),
+      count: count.toString(),
     });
   }
 
@@ -439,9 +434,9 @@ class SSRApi {
       ...(options?.category ? { category: options.category.toString() } : {}),
       ...(options?.stars
         ? {
-            minStar: (options.stars.min ?? 0).toString(),
-            maxStar: (options.stars.max ?? 0).toString(),
-          }
+          minStar: (options.stars.min ?? 0).toString(),
+          maxStar: (options.stars.max ?? 0).toString(),
+        }
         : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.search ? { search: options.search } : {}),

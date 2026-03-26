@@ -1,6 +1,5 @@
 import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { getDaysAgoDate } from "@ssr/common/utils/time-utils";
 import { Elysia } from "elysia";
 import { z } from "zod";
 import MiniRankingService from "../service/mini-ranking.service";
@@ -115,15 +114,14 @@ export default function playerController(app: Elysia) {
       )
       .get(
         "/history/:playerId",
-        async ({ params: { playerId }, query: { startDate, endDate } }) => {
+        async ({ params: { playerId }, query: { count } }) => {
           const player = await ScoreSaberApiService.lookupPlayer(playerId);
           if (!player) {
             throw new NotFoundError(`Player "${playerId}" not found`);
           }
           return await PlayerHistoryService.getPlayerStatisticHistories(
             player,
-            new Date(startDate),
-            new Date(endDate)
+            count
           );
         },
         {
@@ -132,8 +130,7 @@ export default function playerController(app: Elysia) {
             playerId: z.string(),
           }),
           query: z.object({
-            startDate: z.string().default(new Date().toISOString()),
-            endDate: z.string().default(getDaysAgoDate(50).toISOString()),
+            count: z.coerce.number().default(50),
           }),
           detail: {
             description: "Fetch player statistics history",
