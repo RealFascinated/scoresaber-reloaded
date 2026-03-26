@@ -203,9 +203,9 @@ export const app = new Elysia()
   )
   .onRequest(httpMetricsHooks.onRequest)
   .onError({ as: "global" }, ({ code, error }) => {
-    // Return default error for type validation
+    // Return default error for type validation. JSON round-trip drops Elysia class instances (e.g. RequestParams in `value`) so mapResponse's devalue can serialize.
     if (code === "VALIDATION") {
-      return (error as ValidationError).all;
+      return JSON.parse(JSON.stringify((error as ValidationError).all));
     }
 
     // Assume unknown error is an internal server error
