@@ -94,7 +94,8 @@ export class ScoreCoreService {
         formatDuration(performance.now() - before)
       );
     }
-    return { score: score, hasPreviousScore: isImprovement, tracked: true };
+
+    return { score: scoreToCreate, hasPreviousScore: isImprovement, tracked: true };
   }
 
   /**
