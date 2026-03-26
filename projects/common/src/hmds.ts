@@ -7,6 +7,7 @@ export const HmdSchema = z.enum([
   "Vive Pro",
   "Vive Pro 2",
   "HTC Vive Elite",
+  "HP Reverb G2",
   "Windows Mixed Reality",
   "Windows MR",
   "Rift S",
@@ -86,6 +87,15 @@ const HMD_DEFINITIONS = [
   {
     hmd: "Bigscreen Beyond",
     info: { logo: "bigscreen.svg" },
+  },
+
+  // HP
+  {
+    hmd: "HP Reverb G2",
+    info: {
+      logo: "hp.webp",
+      filters: "invert(99%) sepia(3%) saturate(82%) hue-rotate(58deg) brightness(118%) contrast(100%)"
+    },
   },
 
   // Windows Mixed Reality
