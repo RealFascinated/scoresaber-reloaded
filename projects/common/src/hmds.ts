@@ -172,8 +172,8 @@ const HMD_DEFINITIONS = [
 
 export const HMDs: Record<HMD, HMDInfo> = Object.fromEntries(
   HMD_DEFINITIONS.flatMap(({ hmd, aliases, info }) => [
-    [hmd, info],
-    ...(aliases?.map(alias => [alias, info]) ?? []),
+    [hmd.toLowerCase(), info],
+    ...(aliases?.map(alias => [alias.toLowerCase(), info]) ?? []),
   ])
 ) as Record<HMD, HMDInfo>;
 
@@ -184,10 +184,5 @@ export const HMDs: Record<HMD, HMDInfo> = Object.fromEntries(
  * @returns the HMD info
  */
 export const getHMDInfo = (hmd: HMD): HMDInfo => {
-  for (const definition of HMD_DEFINITIONS) {
-    if (definition.hmd.toLowerCase() === hmd.toLowerCase()) {
-      return definition.info;
-    }
-  }
-  return HMDs.Unknown;
+  return HMDs[hmd.toLowerCase() as HMD] ?? HMDs.Unknown;
 };
