@@ -52,6 +52,19 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
 
   function connectWs() {
     let precedingSocketError: Error | undefined;
+    let reconnectScheduled = false;
+
+    const scheduleReconnect = () => {
+      if (reconnectScheduled) {
+        return;
+      }
+
+      reconnectScheduled = true;
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+      }
+      reconnectTimer = setTimeout(connectWs, RECONNECT_DELAY_MS);
+    };
 
     const websocket = new WebSocket(url);
 
@@ -69,7 +82,8 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
             ? new Error(raw)
             : new Error(event.message || "WebSocket error");
       Logger.error(`WebSocket error (${name}):`, precedingSocketError);
-      // Do not call onDisconnect here — `close` always follows and is the single notification path.
+      // `close` usually follows `error`, but schedule reconnect here as a fallback.
+      scheduleReconnect();
     };
 
     websocket.onclose = event => {
@@ -84,12 +98,12 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
       const context: WebsocketDisconnectContext | undefined = precedingSocketError
         ? { precedingSocketError }
         : undefined;
-      onDisconnect?.(event, context);
-
-      if (reconnectTimer) {
-        clearTimeout(reconnectTimer);
+      try {
+        onDisconnect?.(event, context);
+      } catch (disconnectError) {
+        Logger.error(`onDisconnect callback failed (${name}):`, disconnectError);
       }
-      reconnectTimer = setTimeout(connectWs, RECONNECT_DELAY_MS);
+      scheduleReconnect();
     };
 
     websocket.onmessage = messageEvent => {
@@ -97,7 +111,7 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
 
       try {
         const command = JSON.parse(messageEvent.data);
-        onMessage && onMessage(command);
+        onMessage?.(command);
       } catch (err) {
         Logger.warn(`Received invalid json message on ${name}:`, messageEvent.data);
       }
