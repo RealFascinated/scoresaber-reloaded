@@ -11,6 +11,7 @@ export const HmdSchema = z.enum([
   "Windows MR",
   "Rift S",
   "Quest",
+  "Quest (Virtual Desktop)",
   "Quest 1",
   "Quest 2",
   "Quest 2 (Virtual Desktop)",
@@ -114,7 +115,7 @@ const HMD_DEFINITIONS = [
   },
   {
     hmd: "Quest",
-    aliases: ["Quest 1"],
+    aliases: ["Quest 1", "Quest (Virtual Desktop)"],
     info: {
       logo: "oculus.svg",
       filters: "invert(73%) sepia(55%) saturate(5479%) hue-rotate(271deg) brightness(106%) contrast(107%)",
