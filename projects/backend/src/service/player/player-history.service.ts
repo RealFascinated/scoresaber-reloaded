@@ -266,19 +266,17 @@ export class PlayerHistoryService {
     const startTimestamp = getMidnightAlignedDate(startDate).getTime();
     const endTimestamp = getMidnightAlignedDate(today).getTime();
 
-    // Run queries in parallel
-    const [entries, playerRankHistory] = await Promise.all([
-      PlayerHistoryEntryModel.find({
-        playerId: player.id,
+    const entries = await PlayerHistoryEntryModel.find({
+      playerId: player.id,
+      ...(count > 0 ? {
         date: {
           $gte: new Date(startDate),
           $lte: new Date(today),
         },
-      })
-        .sort({ date: -1 })
-        .lean(),
-      parseRankHistory(player),
-    ]);
+      } : {}),
+    })
+      .sort({ date: -1 })
+      .lean();
 
     const history: PlayerStatisticHistory = {};
     for (const entry of entries) {
@@ -291,6 +289,7 @@ export class PlayerHistoryService {
     // `parseRankHistory()` includes today's rank (playerToken.rank) as the last element.
     // ScoreSaber's `histories` string ends at yesterday, so we start at "yesterday"
     // (length - 2) and derive `daysAgo` from the array index to avoid off-by-one drift.
+    const playerRankHistory = parseRankHistory(player);
     const historyLength = playerRankHistory.length;
     const missingHistoryUpserts: Array<AnyBulkWriteOperation<PlayerHistoryEntry>> = [];
     for (
