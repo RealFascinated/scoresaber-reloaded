@@ -99,7 +99,7 @@ export class Player {
   /**
    * Whether the profile picture has been cached.
    */
-  @prop({ index: true })
+  @prop()
   public cachedProfilePicture?: boolean;
 
   /**
