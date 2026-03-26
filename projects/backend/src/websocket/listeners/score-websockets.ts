@@ -7,17 +7,20 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
-import { EventListener } from "../event/event-listener";
-import { EventsManager } from "../event/events-manager";
-import BeatLeaderSeenScoresMetric from "../metrics/impl/player/beatleader-seen-scores";
-import BeatLeaderUniqueDailyPlayersMetric from "../metrics/impl/player/beatleader-unique-daily-players";
-import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
-import BeatLeaderService from "../service/beatleader.service";
-import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
-import MetricsService, { MetricType } from "../service/metrics.service";
-import { PlayerCoreService } from "../service/player/player-core.service";
-import { TopScoresService } from "../service/score/top-scores.service";
-import ScoreSaberService from "../service/scoresaber.service";
+import { EventListener } from "../../event/event-listener";
+import { EventsManager } from "../../event/events-manager";
+import BeatLeaderSeenScoresMetric from "../../metrics/impl/player/beatleader-seen-scores";
+import BeatLeaderUniqueDailyPlayersMetric from "../../metrics/impl/player/beatleader-unique-daily-players";
+import UniqueDailyPlayersMetric from "../../metrics/impl/player/unique-daily-players";
+import BeatLeaderService from "../../service/beatleader.service";
+import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
+import MetricsService, { MetricType } from "../../service/metrics.service";
+import { PlayerCoreService } from "../../service/player/player-core.service";
+import { ScoreCoreService } from "../../service/score/score-core.service";
+import { TopScoresService } from "../../service/score/top-scores.service";
+import ScoreSaberService from "../../service/scoresaber.service";
+import { ScoreWebsocketEvent } from "../impl/score-websocket";
+import { WebsocketManager } from "../websocket-manager";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
@@ -205,6 +208,13 @@ export class ScoreWebsockets implements EventListener {
 
       EventsManager.getListeners().forEach(listener => {
         listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);
+      });
+
+      WebsocketManager.get<ScoreWebsocketEvent>("score")?.publish({
+        score: await ScoreCoreService.insertScoreData(score, leaderboard, {
+          insertBeatLeaderScore: true
+        }),
+        leaderboard: leaderboard
       });
     }
   }

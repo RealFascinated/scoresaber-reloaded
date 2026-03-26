@@ -41,8 +41,9 @@ import { PlayerMedalsService } from "./service/player/player-medals.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { MedalScoresService } from "./service/score/medal-scores.service";
 import StorageService from "./service/storage.service";
-import { BeatSaverWebsocket } from "./websocket/beatsaver-websocket";
-import { ScoreWebsockets } from "./websocket/score-websockets";
+import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
+import { ScoreWebsockets } from "./websocket/listeners/score-websockets";
+import { WebsocketManager } from "./websocket/websocket-manager";
 
 Logger.info("Starting SSR Backend...");
 
@@ -321,6 +322,15 @@ export const app = new Elysia()
   .use(BeatSaverController)
   .use(BeatLeaderController)
   .use(PlayerRankingController);
+
+new WebsocketManager();
+
+for (const websocket of WebsocketManager.getAll()) {
+  app.ws(websocket.route, {
+    open: ws => websocket.onOpen(ws.raw),
+    close: ws => websocket.onClose(ws.raw),
+  });
+}
 
 app.onStart(async () => {
   EventsManager.getListeners().forEach(listener => {
