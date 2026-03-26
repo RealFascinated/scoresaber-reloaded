@@ -88,7 +88,7 @@ export class Player {
   /**
    * The player's score stats.
    */
-  @prop()
+  @prop({ _id: false, type: () => PlayerScoreStats })
   public scoreStats?: PlayerScoreStats;
 
   /**
