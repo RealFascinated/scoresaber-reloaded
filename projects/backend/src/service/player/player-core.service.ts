@@ -47,8 +47,8 @@ export class PlayerCoreService {
 
     let player: Player | null | undefined = await (useCache
       ? CacheService.fetch(CacheId.Players, `player:${id}`, async () =>
-        PlayerModel.findOne({ _id: id }).lean()
-      )
+          PlayerModel.findOne({ _id: id }).lean()
+        )
       : PlayerModel.findOne({ _id: id }).lean());
 
     if (player === null) {

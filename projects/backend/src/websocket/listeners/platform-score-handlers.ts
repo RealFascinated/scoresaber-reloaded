@@ -28,7 +28,7 @@ interface PendingScore {
 }
 
 export class ScoreWebsockets implements EventListener {
-  private static readonly SCORE_MATCH_TIMEOUT = TimeUnit.toMillis(TimeUnit.Minute, 5);
+  private static readonly SCORE_MATCH_TIMEOUT = TimeUnit.toMillis(TimeUnit.Second, 10);
   private static readonly PENDING_SCORES = new Map<string, PendingScore>();
 
   constructor() {

@@ -1,52 +1,102 @@
 "use client";
 
-import Avatar from "@/components/avatar";
+import { cn } from "@/common/utils";
+import Card from "@/components/card";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
-import SimpleLink from "@/components/simple-link";
+import PlayerScoreHeader from "@/components/score/player-score-header";
+import { Spinner } from "@/components/spinner";
 import { env } from "@ssr/common/env";
+import { getHMDInfo } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { parseDate } from "@ssr/common/utils/time-utils";
 import { useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import HMDIcon from "../../../../hmd-icon";
 
-export default function ScoreFeed() {
-  const { readyState, lastJsonMessage } = useWebSocket<PlayerScore>(
-    `${env.NEXT_PUBLIC_WEBSOCKET_URL}/ws/score`
+const LIVE_FEED_MAX_ITEMS = 12;
+
+const EMPTY_COPY = {
+  connecting: "Connecting to the live feed…",
+  disconnected: "Disconnected from the live feed. Check your connection or refresh the page.",
+  waiting: "Connected — waiting for new scores…",
+} as const;
+
+type EmptyVariant = keyof typeof EMPTY_COPY;
+
+type FeedPhase = { kind: "list"; scores: PlayerScore[] } | { kind: "empty"; variant: EmptyVariant };
+
+function sortByNewestFirst(a: PlayerScore, b: PlayerScore): number {
+  return (
+    parseDate(b.score.timestamp.toString()).getTime() - parseDate(a.score.timestamp.toString()).getTime()
   );
-  const [scores, setScores] = useState<PlayerScore[]>([]);
+}
 
-  useEffect(() => {
-    if (!lastJsonMessage) {
-      return;
-    }
-
-    queueMicrotask(() => {
-      setScores(prev => {
-        return [...prev, lastJsonMessage]
-          .sort(
-            (a, b) =>
-              parseDate(b.score.timestamp.toString()).getTime() -
-              parseDate(a.score.timestamp.toString()).getTime()
-          )
-          .slice(0, 8);
-      });
-    });
-  }, [lastJsonMessage]);
-
-  if (readyState == ReadyState.CONNECTING) {
-    return <p>Not Connected to the ScoreSaber Websocket :(</p>;
+function getFeedPhase(readyState: ReadyState, scores: PlayerScore[]): FeedPhase {
+  if (scores.length > 0) {
+    return { kind: "list", scores };
   }
+  if (readyState === ReadyState.CONNECTING) {
+    return { kind: "empty", variant: "connecting" };
+  }
+  if (readyState === ReadyState.CLOSED || readyState === ReadyState.CLOSING) {
+    return { kind: "empty", variant: "disconnected" };
+  }
+  if (readyState === ReadyState.OPEN) {
+    return { kind: "empty", variant: "waiting" };
+  }
+  return { kind: "empty", variant: "connecting" };
+}
 
-  if (scores.length == 0) {
-    return <p>Waiting for scores...</p>;
+function FeedConnectionStatus({ readyState }: { readyState: ReadyState }) {
+  const state =
+    readyState === ReadyState.OPEN ? "open" : readyState === ReadyState.CONNECTING ? "connecting" : "closed";
+  const label = { open: "Connected", connecting: "Connecting", closed: "Disconnected" }[state];
+
+  return (
+    <span
+      className={cn(
+        "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium",
+        state === "open" && "border-emerald-500/35 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+        state === "connecting" && "border-amber-500/35 bg-amber-500/10 text-amber-800 dark:text-amber-400",
+        state === "closed" && "border-destructive/35 bg-destructive/10 text-destructive"
+      )}
+      title="WebSocket status for the live score feed"
+    >
+      <span
+        className={cn(
+          "size-2 rounded-full",
+          state === "open" && "bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.7)]",
+          state === "connecting" && "animate-pulse bg-amber-500",
+          state === "closed" && "bg-destructive"
+        )}
+        aria-hidden
+      />
+      {label}
+    </span>
+  );
+}
+
+function FeedEmptyState({ variant }: { variant: EmptyVariant }) {
+  if (variant === "connecting") {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-(--spacing-2xl)">
+        <Spinner />
+        <p className="text-muted-foreground text-sm">{EMPTY_COPY[variant]}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="divide-border flex w-full flex-col divide-y">
+    <p className="text-muted-foreground py-(--spacing-2xl) text-center text-sm">{EMPTY_COPY[variant]}</p>
+  );
+}
+
+function FeedScoreList({ scores }: { scores: PlayerScore[] }) {
+  return (
+    <div className="flex flex-col gap-(--spacing-sm)">
       {scores.map(scoreToken => {
         if (!scoreToken.leaderboard || !scoreToken.score) {
-          Logger.error("Invalid leaderboard or score data:", scoreToken);
           return null;
         }
 
@@ -55,30 +105,82 @@ export default function ScoreFeed() {
         const leaderboard = scoreToken.leaderboard;
 
         return (
-          <div key={score.scoreId} className="cv-score-card flex w-full flex-col py-2 first:py-0 last:pb-0">
-            <div className="flex flex-row items-center gap-2">
-              <Avatar
-                src={player.profilePicture!}
-                className="h-6 w-6"
-                alt={`${player.name}'s Profile Picture`}
-              />
-              <SimpleLink href={`/player/${player.id}`}>
-                <span className="text-primary hover:text-primary/80 transition-all">{player.name}</span>
-              </SimpleLink>
-              <p className="text-xs text-gray-400">on {scoreToken.score.hmd || "Unknown Device"}</p>
+          <div key={score.scoreId} className="flex flex-col">
+            <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
+              <PlayerScoreHeader player={player} />
+              <div className="flex items-center gap-2">
+                <HMDIcon hmd={getHMDInfo(score.hmd)} />
+                <span className="text-muted-foreground text-xs">
+                  {score.hmd ? `on ${score.hmd}` : "Unknown device"}
+                </span>
+              </div>
             </div>
-            <ScoreSaberScoreDisplay
-              key={score.scoreId}
-              score={score}
-              leaderboard={leaderboard}
-              settings={{
-                noScoreButtons: true,
-                hideDetailsDropdown: true,
-              }}
-            />
+            <Card className="rounded-lg rounded-tl-none p-0">
+              <ScoreSaberScoreDisplay
+                score={score}
+                leaderboard={leaderboard}
+                settings={{
+                  noScoreButtons: true,
+                  hideDetailsDropdown: true,
+                }}
+              />
+            </Card>
           </div>
         );
       })}
     </div>
+  );
+}
+
+function FeedBody({ phase }: { phase: FeedPhase }) {
+  if (phase.kind === "list") {
+    return <FeedScoreList scores={phase.scores} />;
+  }
+  return <FeedEmptyState variant={phase.variant} />;
+}
+
+export default function ScoreFeed() {
+  const { readyState, lastJsonMessage } = useWebSocket<PlayerScore>(
+    `${env.NEXT_PUBLIC_WEBSOCKET_URL}/ws/score`,
+    {
+      reconnectAttempts: 10,
+      reconnectInterval: 3000,
+      shouldReconnect: () => true,
+    }
+  );
+  const [scores, setScores] = useState<PlayerScore[]>([]);
+
+  useEffect(() => {
+    if (!lastJsonMessage) {
+      return;
+    }
+    if (!lastJsonMessage.leaderboard || !lastJsonMessage.score) {
+      Logger.error("Invalid leaderboard or score data:", lastJsonMessage);
+      return;
+    }
+
+    setScores(prev => {
+      const id = lastJsonMessage.score.scoreId;
+      const withoutDup = prev.filter(s => s.score.scoreId !== id);
+      return [...withoutDup, lastJsonMessage].sort(sortByNewestFirst).slice(0, LIVE_FEED_MAX_ITEMS);
+    });
+  }, [lastJsonMessage]);
+
+  const phase = getFeedPhase(readyState, scores);
+
+  return (
+    <Card className="flex h-fit w-full flex-col 2xl:w-[75%]">
+      <div className="mb-(--spacing-lg) flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold">Live Score Feed</h1>
+          <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+            New scores from ScoreSaber appear here as they are submitted. The list keeps the{" "}
+            {LIVE_FEED_MAX_ITEMS} most recent plays.
+          </p>
+        </div>
+        <FeedConnectionStatus readyState={readyState} />
+      </div>
+      <FeedBody phase={phase} />
+    </Card>
   );
 }

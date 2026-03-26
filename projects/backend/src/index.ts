@@ -42,7 +42,7 @@ import PlaylistService from "./service/playlist/playlist.service";
 import { MedalScoresService } from "./service/score/medal-scores.service";
 import StorageService from "./service/storage.service";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
-import { ScoreWebsockets } from "./websocket/listeners/score-websockets";
+import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
 
 Logger.info("Starting SSR Backend...");

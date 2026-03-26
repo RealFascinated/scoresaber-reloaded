@@ -35,7 +35,7 @@ import { ScoreSaberScoreBase } from "./scoresaber-score-base";
 // @index({ playerId: 1, score: -1, _id: -1 })
 // @index({ playerId: 1, misses: -1, _id: -1 })
 // @index({ playerId: 1, maxCombo: -1, _id: -1 })
-export class ScoreSaberScoreInternal extends ScoreSaberScoreBase { }
+export class ScoreSaberScoreInternal extends ScoreSaberScoreBase {}
 
 export class ScoreSaberScorePublic extends ScoreSaberScoreInternal {
   /**

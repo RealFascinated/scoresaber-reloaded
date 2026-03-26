@@ -8,7 +8,7 @@ export function ScoreSaberScoreHMD({
   children,
 }: {
   score: ScoreSaberScore;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
     <SimpleTooltip

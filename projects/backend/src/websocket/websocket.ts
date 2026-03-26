@@ -10,7 +10,7 @@ interface WebsocketClient {
 export abstract class Websocket<TPayload> {
   private readonly clients = new Set<WebsocketClient>();
 
-  protected constructor(public readonly route: string) { }
+  protected constructor(public readonly route: string) {}
 
   /**
    * Called when a client opens a connection to the websocket.

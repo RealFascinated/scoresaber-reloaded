@@ -95,9 +95,9 @@ export class TrackScoreListener implements EventListener {
     // Publish the score to the websocket
     WebsocketManager.get<PlayerScore>("score")?.publish({
       score: await ScoreCoreService.insertScoreData(trackedScore, leaderboard, {
-        insertBeatLeaderScore: true
+        insertBeatLeaderScore: true,
       }),
-      leaderboard: leaderboard
+      leaderboard: leaderboard,
     });
   }
 }
