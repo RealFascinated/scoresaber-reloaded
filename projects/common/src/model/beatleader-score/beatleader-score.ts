@@ -19,13 +19,13 @@ export class BeatLeaderScore {
   /**
    * The id of the player who set the score.
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public playerId!: string;
 
   /**
    * The hash of the song.
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public songHash!: string;
 
   /**
@@ -43,7 +43,7 @@ export class BeatLeaderScore {
   /**
    * The score of the play.
    */
-  @prop({ required: true, index: true })
+  @prop({ required: true })
   public songScore!: number;
 
   // Above data is only so we can fetch it
