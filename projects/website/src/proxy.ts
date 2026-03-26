@@ -16,8 +16,8 @@ export function proxy(request: NextRequest) {
       // Otherwise redirect to player page
       return NextResponse.redirect(new URL(`/player/${playerId?.value}`, request.url));
     } else {
-      // Otherwise redirect to landing
-      return NextResponse.redirect(new URL("/", request.url));
+      // No preference set (or unknown value): stay on `/` — do not redirect to `/` (that loops)
+      return NextResponse.next();
     }
   }
 
@@ -30,6 +30,8 @@ export function proxy(request: NextRequest) {
   if (process.env.NEXT_PUBLIC_APP_ENV === "production") {
     console.log(`${request.method} ${request.nextUrl.pathname}${request.nextUrl.search}`);
   }
+
+  return NextResponse.next();
 }
 
 export const config = {
