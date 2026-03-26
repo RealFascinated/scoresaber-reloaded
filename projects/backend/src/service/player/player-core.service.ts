@@ -81,6 +81,12 @@ export class PlayerCoreService {
       }
     }
 
+    // insert score stats if missing
+    if (!player.scoreStats) {
+      updates.scoreStats = await PlayerCoreService.getPlayerScoreStats(id);
+      shouldSave = true;
+    }
+
     if (shouldSave) {
       await PlayerModel.updateOne({ _id: id }, { $set: updates });
       Object.assign(player, updates);

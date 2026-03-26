@@ -159,12 +159,6 @@ export class PlayerHistoryService {
 
     await PlayerCoreService.updatePeakRank(playerToken);
 
-    // insert score stats if missing
-    if (!player.scoreStats) {
-      player.scoreStats = await PlayerCoreService.getPlayerScoreStats(player._id);
-      await PlayerModel.updateOne({ _id: player._id }, { $set: { scoreStats: player.scoreStats } });
-    }
-
     const daysTracked = await PlayerHistoryService.getDaysTracked(player._id);
     if (daysTracked === 0) {
       await PlayerHistoryService.seedPlayerRankHistory(player, playerToken);
