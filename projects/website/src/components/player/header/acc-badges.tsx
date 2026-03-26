@@ -4,20 +4,20 @@ import { PlayerScoreStats } from "@ssr/common/model/player/player-score-stats";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getAccDetails, getScoreBadgeFromName } from "@ssr/common/utils/song-utils";
 
-const badges: Record<keyof PlayerScoreStats, { name: string; color: string }> = {
-  aPlays: { name: "A", color: "bg-statistic" },
-  sPlays: { name: "S", color: "bg-statistic" },
-  spPlays: { name: "S+", color: "bg-statistic" },
-  ssPlays: { name: "SS", color: "bg-statistic" },
-  sspPlays: { name: "SS+", color: "bg-statistic" },
-  godPlays: { name: "GOD", color: "bg-statistic" },
+const badges: Record<keyof PlayerScoreStats, string> = {
+  aPlays: "A",
+  sPlays: "S",
+  spPlays: "S+",
+  ssPlays: "SS",
+  sspPlays: "SS+",
+  godPlays: "GOD",
 };
 
 export default function PlayerAccBadges({ scoreStats }: { scoreStats: PlayerScoreStats }) {
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
-      {Object.entries(badges).map(([name, count]) => {
-        const badge = getScoreBadgeFromName(name.replace("Plus", "+"));
+      {Object.entries(badges).map(([name, displayName]) => {
+        const badge = getScoreBadgeFromName(displayName.replace("Plus", "+"));
 
         return (
           <SimpleTooltip

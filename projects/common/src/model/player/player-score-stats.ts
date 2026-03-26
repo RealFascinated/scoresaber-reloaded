@@ -5,35 +5,35 @@ export class PlayerScoreStats {
    * The amount of A plays the player has.
    */
   @prop()
-  public aPlays?: number;
+  public aPlays!: number;
 
   /**
    * The amount of S plays the player has.
    */
   @prop()
-  public sPlays?: number;
+  public sPlays!: number;
 
   /**
    * The amount of S+ plays the player has.
    */
   @prop()
-  public spPlays?: number;
+  public spPlays!: number;
 
   /**
    * The amount of SS plays the player has.
    */
   @prop()
-  public ssPlays?: number;
+  public ssPlays!: number;
 
   /**
    * The amount of SS+ plays the player has.
    */
   @prop()
-  public sspPlays?: number;
+  public sspPlays!: number;
 
   /**
    * The amount of GOD plays the player has.
    */
   @prop()
-  public godPlays?: number;
+  public godPlays!: number;
 }

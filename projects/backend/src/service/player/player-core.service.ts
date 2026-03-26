@@ -294,13 +294,24 @@ export class PlayerCoreService {
       })
       .lean();
 
-    return {
-      godPlays: scores.filter(score => score.accuracy >= 98).length,
-      sspPlays: scores.filter(score => score.accuracy >= 95).length,
-      ssPlays: scores.filter(score => score.accuracy >= 90).length,
-      spPlays: scores.filter(score => score.accuracy >= 85).length,
-      sPlays: scores.filter(score => score.accuracy >= 80).length,
-      aPlays: scores.filter(score => score.accuracy >= 70).length,
-    } as PlayerScoreStats;
+    const scoreStats: PlayerScoreStats = {
+      godPlays: 0,
+      sspPlays: 0,
+      ssPlays: 0,
+      spPlays: 0,
+      sPlays: 0,
+      aPlays: 0,
+    };
+
+    for (const playerScore of scores) {
+      const accuracy = playerScore.accuracy;
+      if (accuracy >= 98) scoreStats.godPlays++;
+      else if (accuracy >= 95) scoreStats.sspPlays++;
+      else if (accuracy >= 90) scoreStats.ssPlays++;
+      else if (accuracy >= 85) scoreStats.spPlays++;
+      else if (accuracy >= 80) scoreStats.sPlays++;
+      else if (accuracy >= 70) scoreStats.aPlays++;
+    }
+    return scoreStats;
   }
 }
