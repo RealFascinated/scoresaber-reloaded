@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function ScoresPage() {
   return (
-    <main className="flex w-full flex-col items-center justify-center gap-(--spacing-xl)">
+    <main className="flex w-full flex-col items-center justify-center gap-(--spacing-md)">
       <Card className="flex h-fit w-full flex-col xl:w-[75%]">
         <h1 className="text-lg font-semibold">Live Score Feed</h1>
         <p className="text-muted-foreground mt-(--spacing-xs) text-sm">

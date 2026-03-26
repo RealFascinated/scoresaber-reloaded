@@ -177,12 +177,17 @@ export const HMDs: Record<HMD, HMDInfo> = Object.fromEntries(
   ])
 ) as Record<HMD, HMDInfo>;
 
+/** Runtime keys are lowercase; use this when lookup misses (unknown device string, missing field). */
+const DEFAULT_HMD_INFO = HMD_DEFINITIONS[0].info;
+
 /**
  * Gets the HMD info for a HMD.
  *
  * @param hmd the HMD to get the info for
  * @returns the HMD info
  */
-export const getHMDInfo = (hmd: HMD): HMDInfo => {
-  return HMDs[hmd.toLowerCase() as HMD] ?? HMDs.Unknown;
+export const getHMDInfo = (hmd: HMD | string | undefined | null): HMDInfo => {
+  const key = String(hmd ?? "Unknown").toLowerCase();
+  const info = (HMDs as Record<string, HMDInfo | undefined>)[key];
+  return info ?? DEFAULT_HMD_INFO;
 };

@@ -206,9 +206,12 @@ export class ScoreWebsockets implements EventListener {
         BeatLeaderService.saveScoreStats(beatLeaderScore.id);
       }
 
-      EventsManager.getListeners().forEach(listener => {
-        listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);
-      });
+      // Wait for all event listeners to process the score
+      await Promise.all(
+        EventsManager.getListeners().map(listener => {
+          listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);
+        })
+      );
 
       WebsocketManager.get<ScoreWebsocketEvent>("score")?.publish({
         score: await ScoreCoreService.insertScoreData(score, leaderboard, {

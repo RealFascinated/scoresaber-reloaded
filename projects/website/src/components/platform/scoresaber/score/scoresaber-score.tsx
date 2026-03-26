@@ -63,14 +63,8 @@ export default function ScoreSaberScoreDisplay({
   return (
     <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative px-2 lg:pl-0")}>
       <div className="flex items-center">
-        <div
-          className={cn(
-            "grid w-full gap-2 lg:gap-0",
-            settings?.noScoreButtons
-              ? "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_350px]"
-              : "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]"
-          )}
-        >
+        {/* Four columns on lg: info, song, actions (buttons and/or chevron), score stats. */}
+        <div className="grid w-full grid-cols-[20px_1fr_1fr] gap-2 lg:grid-cols-[0.5fr_4fr_1fr_350px] lg:gap-0">
           <ScoreSaberScoreInfo score={score} leaderboard={leaderboard} />
 
           <div className="flex min-w-0 items-center overflow-hidden">
