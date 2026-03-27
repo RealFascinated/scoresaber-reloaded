@@ -7,8 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Box, Globe, type LucideIcon, User } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactNode, useCallback, useMemo } from "react";
-import ExportSettings from "./buttons/export-settings";
-import ImportSettings from "./buttons/import-settings";
 import ResetSettings from "./buttons/reset-settings";
 import PlayerSettings from "./category/player-settings";
 
@@ -71,7 +69,7 @@ export default function Settings() {
   );
 
   return (
-    <div className="bg-card/80 border-border flex h-full min-h-0 flex-col overflow-hidden rounded-xl border shadow-sm">
+    <div className="bg-card/80 border-border flex w-full flex-col overflow-hidden rounded-xl border shadow-sm">
       <div className="border-border bg-muted/15 border-b p-(--spacing-md) md:hidden">
         <Select
           value={selectedCategory.slug}
@@ -104,7 +102,7 @@ export default function Settings() {
         </Select>
       </div>
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex">
         <nav
           className="border-border bg-muted/25 hidden w-[220px] shrink-0 flex-col border-r md:flex lg:w-[240px]"
           aria-label="Settings categories"
@@ -148,13 +146,13 @@ export default function Settings() {
           </div>
         </nav>
 
-        <div className="bg-background/50 flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="bg-background/50 flex min-w-0 flex-1 flex-col">
           <header className="border-border hidden shrink-0 border-b px-6 py-5 md:block md:px-8 lg:px-10">
             <h1 className="text-foreground text-2xl font-bold tracking-tight">{selectedCategory.name}</h1>
             <p className="text-muted-foreground mt-1 max-w-xl text-sm">{selectedCategory.description}</p>
           </header>
 
-          <div className="flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="overflow-x-hidden">
             <div className="mx-auto w-full max-w-2xl px-4 py-5 md:px-8 md:py-6 lg:px-10">
               <div className="md:hidden">
                 <h1 className="text-foreground mb-4 text-xl font-bold tracking-tight">
@@ -167,17 +165,8 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="border-border bg-muted/10 flex flex-col gap-(--spacing-md) border-t px-(--spacing-lg) py-(--spacing-md) md:flex-row md:items-center md:justify-between md:px-8 md:py-(--spacing-lg)">
-        <div className="flex flex-wrap items-center gap-(--spacing-sm)">
-          <ResetSettings />
-        </div>
-        <div className="flex flex-wrap items-center gap-(--spacing-sm) md:gap-(--spacing-md)">
-          <span className="text-muted-foreground hidden text-xs md:inline">Backup</span>
-          <div className="flex flex-wrap items-center gap-(--spacing-sm) md:gap-(--spacing-md)">
-            <ExportSettings />
-            <ImportSettings />
-          </div>
-        </div>
+      <div className="border-border bg-muted/10 flex flex-wrap items-center gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-md) md:px-8 md:py-(--spacing-lg)">
+        <ResetSettings />
       </div>
     </div>
   );
