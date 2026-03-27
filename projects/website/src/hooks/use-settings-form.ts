@@ -18,6 +18,8 @@ export function useSettingsForm<T extends FieldValues>(
   config: SettingConfig<T>,
   excludeFromSync: Path<T>[] = []
 ) {
+  const configKeys = Object.keys(config) as Path<T>[];
+
   // Create a single object to hold all setting values
   const settings = useStableLiveQuery(async () => {
     const entries = Object.entries(config) as [
@@ -28,17 +30,18 @@ export function useSettingsForm<T extends FieldValues>(
     return Object.fromEntries(results) as Partial<T>;
   }, []);
 
+  // True when we have a result object and every field declared in `config` is defined.
+  // Note: `Object.values({}).every(...)` is true, so we must key off `configKeys`, not values only.
+  const settingsReady =
+    settings !== undefined && configKeys.every(key => settings[key] !== undefined);
+
   // Only sync external state (DB/theme) into the form once on initial load.
   // Otherwise we overwrite user changes with stale values (e.g. theme dropdown
   // reverting because the query hasn't re-run with the new theme yet).
   const hasSyncedRef = useRef(false);
 
   useEffect(() => {
-    if (!settings) return;
-
-    // Check if all values are loaded (not undefined)
-    const allLoaded = Object.values(settings).every(value => value !== undefined);
-    if (!allLoaded) return;
+    if (!settingsReady || !settings) return;
 
     if (hasSyncedRef.current) return;
     hasSyncedRef.current = true;
@@ -60,7 +63,7 @@ export function useSettingsForm<T extends FieldValues>(
     for (const [key, value] of Object.entries(updates) as [Path<T>, T[Path<T>]][]) {
       form.setValue(key, value);
     }
-  }, [settings, form, excludeFromSync]);
+  }, [settings, settingsReady, form, excludeFromSync]);
 
-  return { settings, isLoading: settings === undefined };
+  return { settings, isLoading: !settingsReady };
 }
