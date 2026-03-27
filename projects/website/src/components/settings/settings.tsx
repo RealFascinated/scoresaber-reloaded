@@ -4,9 +4,8 @@ import { cn } from "@/common/utils";
 import ScoreSettings from "@/components/settings/category/score-settings";
 import WebsiteSettings from "@/components/settings/category/website-settings";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CubeIcon, GlobeAmericasIcon, UserIcon } from "@heroicons/react/24/solid";
+import { Box, Globe, type LucideIcon, User } from "lucide-react";
 import { ReactNode, useState } from "react";
-import { IconType } from "react-icons";
 import Card from "../card";
 import ExportSettings from "./buttons/export-settings";
 import ImportSettings from "./buttons/import-settings";
@@ -16,7 +15,7 @@ import PlayerSettings from "./category/player-settings";
 type Category = {
   name: string;
   description: string;
-  icon: IconType;
+  icon: LucideIcon;
   component: ReactNode;
 };
 
@@ -24,19 +23,19 @@ const categories: Category[] = [
   {
     name: "Website",
     description: "Customize your experience",
-    icon: GlobeAmericasIcon,
+    icon: Globe,
     component: <WebsiteSettings />,
   },
   {
     name: "Scores",
     description: "Manage your scores",
-    icon: CubeIcon,
+    icon: Box,
     component: <ScoreSettings />,
   },
   {
     name: "Player",
     description: "Manage your player",
-    icon: UserIcon,
+    icon: User,
     component: <PlayerSettings />,
   },
 ];

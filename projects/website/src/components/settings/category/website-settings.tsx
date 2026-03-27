@@ -10,10 +10,10 @@ import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ssrConfig } from "config";
+import type { LucideIcon } from "lucide-react";
+import { Globe, Image as ImageIcon, Palette, Snowflake } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Path, useForm } from "react-hook-form";
-import { IconType } from "react-icons";
-import { FaGlobe, FaImage, FaPalette, FaSnowflake } from "react-icons/fa";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Field, SettingSection } from "../setting-section";
@@ -81,13 +81,13 @@ const BackgroundCoverControl = (props: {
 const settings: {
   id: string;
   title: string;
-  icon: IconType;
+  icon: LucideIcon;
   fields: Field<FormValues, keyof FormValues>[];
 }[] = [
   {
     id: "background",
     title: "Background",
-    icon: FaImage,
+    icon: ImageIcon,
     fields: [
       {
         name: "backgroundCover" as Path<FormValues>,
@@ -119,7 +119,7 @@ const settings: {
   {
     id: "effects",
     title: "Visual Effects",
-    icon: FaSnowflake,
+    icon: Snowflake,
     fields: [
       {
         name: "snowParticles" as Path<FormValues>,
@@ -138,7 +138,7 @@ const settings: {
   {
     id: "navigation",
     title: "Navigation",
-    icon: FaGlobe,
+    icon: Globe,
     fields: [
       {
         name: "websiteLanding" as Path<FormValues>,
@@ -156,7 +156,7 @@ const settings: {
   {
     id: "theme",
     title: "Theme",
-    icon: FaPalette,
+    icon: Palette,
     fields: [
       {
         name: "theme" as Path<FormValues>,

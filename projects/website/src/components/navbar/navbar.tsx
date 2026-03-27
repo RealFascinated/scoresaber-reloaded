@@ -8,16 +8,15 @@ import SimpleLink from "@/components/simple-link";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { CubeIcon } from "@heroicons/react/24/solid";
-import { ChartBarIcon, MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
+import { ChartBarIcon, Medal, MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
-import { FaMedal } from "react-icons/fa";
 
 const links: ReactElement<any>[] = [
   <FriendsButton key="friends" />,
   <SimpleNavLink key="ranking" name="Ranking" icon={<TrendingUpIcon className="size-5" />} href="/ranking" />,
-  <SimpleNavLink key="medals" name="Medals" icon={<FaMedal className="size-4.5" />} href="/medals" />,
+  <SimpleNavLink key="medals" name="Medals" icon={<Medal className="size-4.5" />} href="/medals" />,
   <SimpleNavLink key="maps" name="Maps" icon={<MusicIcon className="size-5" />} href="/maps/leaderboards" />,
   <SimpleNavLink
     key="overlay"

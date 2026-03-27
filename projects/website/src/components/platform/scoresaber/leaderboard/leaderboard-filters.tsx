@@ -11,7 +11,7 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { FilterItem } from "@ssr/common/filter-item";
 import { countryFilter } from "@ssr/common/utils/country.util";
-import { FaCheck } from "react-icons/fa";
+import { Check } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ScoreSaberLeaderboardFilters() {
@@ -68,7 +68,7 @@ export default function ScoreSaberLeaderboardFilters() {
                 );
               }}
             >
-              <FaCheck className="h-4 w-4" />
+              <Check className="h-4 w-4" />
             </Button>
           </SimpleTooltip>
         </FilterRow>

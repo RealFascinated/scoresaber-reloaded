@@ -7,7 +7,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { pluralize } from "@ssr/common/utils/string.util";
-import { FaMedal } from "react-icons/fa";
+import { Medal } from "lucide-react";
 import { ChangeOverTime } from "../../statistic/change-over-time";
 import { DailyChange } from "../../statistic/daily-change";
 import CountryFlag from "../../ui/country-flag";
@@ -97,7 +97,7 @@ const playerData = [
     render: (player: ScoreSaberPlayer) => {
       return (
         <PlayerOverviewItem>
-          <FaMedal className="text-muted-foreground size-4" />
+          <Medal className="text-muted-foreground size-4" />
           <FallbackLink href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}>
             <span
               className={cn(

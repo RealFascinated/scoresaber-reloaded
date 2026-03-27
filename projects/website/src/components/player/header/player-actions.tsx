@@ -1,5 +1,6 @@
 "use client";
 
+import { TwitchIcon } from "@/components/icons/twitch-icon";
 import AccSaberLogo from "@/components/logos/logos/accsaber-logo";
 import BeatLeaderLogo from "@/components/logos/logos/beatleader-logo";
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
@@ -11,7 +12,6 @@ import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrConfig } from "config";
 import { ReactNode } from "react";
-import { FaTwitch } from "react-icons/fa";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 import SelfPlaylistCreator from "../self/player-self-playlist-creator";
 import SnipePlaylistCreator from "../snipe/player-snipe-playlist-creator";
@@ -91,7 +91,7 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
           playerName={player.name}
           name="Twitch"
           url={`https://twitch.tv/${twitchName}`}
-          icon={<FaTwitch className="size-[20px] select-none" />}
+          icon={<TwitchIcon className="size-[20px] select-none" />}
         />
       )}
 

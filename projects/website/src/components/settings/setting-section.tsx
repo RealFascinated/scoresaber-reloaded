@@ -3,9 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useDebounce } from "@uidotdev/usehooks";
+import type { LucideIcon } from "lucide-react";
 import { ReactElement, ReactNode, Ref, useEffect, useState } from "react";
 import { Path, UseFormReturn } from "react-hook-form";
-import { IconType } from "react-icons";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from "../ui/form";
 
 interface BaseField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> {
@@ -62,7 +62,7 @@ export type Field<TFormValues extends Record<string, any>, TName extends Path<TF
 
 interface SettingSectionProps<TFormValues extends Record<string, any>> {
   title: string;
-  icon: IconType;
+  icon: LucideIcon;
   fields: readonly Field<TFormValues, Path<TFormValues>>[];
   form: UseFormReturn<TFormValues>;
   onFormSubmit?: (values: TFormValues) => void | Promise<void>;

@@ -11,8 +11,8 @@ import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { Cog, Flag, Undo2 } from "lucide-react";
 import { useState } from "react";
-import { FaCog, FaFlagCheckered, FaUndo } from "react-icons/fa";
 
 type ScoreEditorButtonProps = {
   score: ScoreSaberScore;
@@ -123,7 +123,7 @@ export default function ScoreSaberScoreEditorButton({
       >
         <PopoverTrigger asChild>
           <Button variant="ghost" className="h-[28px] w-[28px] p-0">
-            <FaCog className="size-4" />
+            <Cog className="size-4" />
           </Button>
         </PopoverTrigger>
 
@@ -146,7 +146,7 @@ export default function ScoreSaberScoreEditorButton({
                       }
                     >
                       <Button onClick={setAccuracyToFC} className="h-fit p-1.5" variant="ghost">
-                        <FaFlagCheckered className="size-3.5" />
+                        <Flag className="size-3.5" />
                       </Button>
                     </SimpleTooltip>
                   )}
@@ -154,7 +154,7 @@ export default function ScoreSaberScoreEditorButton({
                   {/* Reset Button */}
                   <SimpleTooltip display={<p>Set accuracy to score accuracy</p>}>
                     <Button onClick={handleSliderReset} className="h-fit p-1.5" variant="ghost">
-                      <FaUndo className="size-3.5" />
+                      <Undo2 className="size-3.5" />
                     </Button>
                   </SimpleTooltip>
                 </div>

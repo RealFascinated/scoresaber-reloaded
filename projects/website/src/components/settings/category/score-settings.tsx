@@ -4,8 +4,8 @@ import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
+import { Play } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { FaPlay } from "react-icons/fa";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Form } from "../../ui/form";
@@ -19,7 +19,7 @@ const settings = [
   {
     id: "replay",
     title: "Replay Settings",
-    icon: FaPlay,
+    icon: Play,
     fields: [
       {
         name: "replayViewer",

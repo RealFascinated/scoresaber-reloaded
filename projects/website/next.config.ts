@@ -34,7 +34,6 @@ const nextConfig: NextConfig = {
       "zustand",
       "@hookform/resolvers",
       "framer-motion",
-      "react-icons",
     ],
   },
   modularizeImports: {

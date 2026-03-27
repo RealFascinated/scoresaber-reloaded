@@ -1,5 +1,5 @@
 import { MEDAL_COUNTS } from "@ssr/common/medal";
-import { FaMedal } from "react-icons/fa";
+import { Medal } from "lucide-react";
 
 export default function MedalsInfo() {
   return (
@@ -12,7 +12,7 @@ export default function MedalsInfo() {
         {Object.entries(MEDAL_COUNTS).map(([rank, count]) => (
           <div key={rank} className="bg-background/50 flex items-center justify-between gap-2 rounded-md p-2">
             <div className="flex items-center gap-1">
-              <FaMedal className="size-3 text-yellow-400" />
+              <Medal className="size-3 text-yellow-400" />
               <span className="text-xs font-medium text-white">#{rank}</span>
             </div>
             <span className="text-muted-foreground text-xs">

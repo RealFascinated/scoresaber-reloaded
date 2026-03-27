@@ -13,9 +13,8 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { pluralize } from "@ssr/common/utils/string.util";
 import { useQuery } from "@tanstack/react-query";
-import { LinkIcon } from "lucide-react";
+import { LinkIcon, Medal } from "lucide-react";
 import { useEffect, useState } from "react";
-import { FaMedal } from "react-icons/fa";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
 import { PlayerRanking } from "../player/player-ranking";
@@ -111,7 +110,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                         showAccountInactive={false}
                         renderWorth={() => (
                           <div className="ml-auto flex min-w-[70px] flex-row items-center justify-end gap-2">
-                            <FaMedal className="size-4" />
+                            <Medal className="size-4" />
                             <p className="text-pp font-semibold">{formatNumberWithCommas(player.medals)}</p>
                           </div>
                         )}
