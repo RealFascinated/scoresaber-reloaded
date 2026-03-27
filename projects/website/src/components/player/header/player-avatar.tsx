@@ -42,6 +42,7 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
         size={128}
         className="border-border pointer-events-none border-2"
         alt={`${player.name}'s Profile Picture`}
+        priority
       />
       <div className="absolute top-[3px] right-[3px] z-10">
         <SimpleTooltip display={isRefreshing ? "Refreshing..." : "Refresh player"}>

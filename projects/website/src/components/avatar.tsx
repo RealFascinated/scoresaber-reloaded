@@ -9,9 +9,11 @@ type AvatarProps = {
   size?: number;
   className?: string;
   alt: string;
+  /** When true, loads eagerly (use for above-the-fold / LCP images). */
+  priority?: boolean;
 };
 
-export default function Avatar({ src, size = 32, className, alt }: AvatarProps) {
+export default function Avatar({ src, size = 32, className, alt, priority = false }: AvatarProps) {
   const [failedForSrc, setFailedForSrc] = useState<string | null>(null);
   const showFallback = !src || failedForSrc === src;
   const fallbackText = alt?.trim().slice(0, 1).toUpperCase();
@@ -44,6 +46,7 @@ export default function Avatar({ src, size = 32, className, alt }: AvatarProps) 
       height={size}
       className={cn("rounded-full", className)}
       alt={alt}
+      priority={priority}
       onError={() => setFailedForSrc(src)}
       style={{
         minWidth: size,
