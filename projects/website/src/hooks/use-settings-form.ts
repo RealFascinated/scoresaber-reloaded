@@ -65,5 +65,6 @@ export function useSettingsForm<T extends FieldValues>(
     }
   }, [settings, settingsReady, form, excludeFromSync]);
 
-  return { settings, isLoading: !settingsReady };
+  // Skeleton only when the query has no result yet; `settingsReady` stays for sync gating only.
+  return { settings, isLoading: settings === undefined };
 }
