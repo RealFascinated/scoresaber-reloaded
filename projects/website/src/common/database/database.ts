@@ -56,7 +56,7 @@ export enum SettingIds {
   HistoryMode = "historyMode",
 }
 
-export const DEFAULT_WHAT_IF_RANGE: [number, number] = [70, 98.5];
+export const DEFAULT_WHAT_IF_RANGE: [number, number] = [90, 98.5];
 const DEFAULT_CACHE_TTL: number = 60 * 60;
 const DEFAULT_PLAYER_CACHE_TTL: number = 60 * 60 * 6;
 const DEFAULT_CHART_LEGEND_STATE: boolean = false;

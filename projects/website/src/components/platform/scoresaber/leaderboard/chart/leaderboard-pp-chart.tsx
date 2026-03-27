@@ -27,7 +27,7 @@ export default function LeaderboardPpChartButton({ leaderboard }: Props) {
   const whatIfRange = useStableLiveQuery(() => database.getWhatIfRange());
 
   const [values, setValues] = useState(DEFAULT_WHAT_IF_RANGE);
-  const debouncedValues = useDebounce(values, 100);
+  const debouncedValues = useDebounce(values, 250);
 
   useEffect(() => {
     if (whatIfRange) {
@@ -41,7 +41,7 @@ export default function LeaderboardPpChartButton({ leaderboard }: Props) {
   };
 
   const { labels, dataPoints } = useMemo(() => {
-    const precision = 0.05;
+    const precision = 0.01;
     const labels: number[] = [];
     const dataPoints: (number | null)[] = [];
 
@@ -139,7 +139,7 @@ export default function LeaderboardPpChartButton({ leaderboard }: Props) {
               onValueChange={updateRange}
               min={DEFAULT_WHAT_IF_RANGE[0]}
               max={100}
-              step={0.5}
+              step={0.1}
               showLabelOnHover={false}
             />
           </div>

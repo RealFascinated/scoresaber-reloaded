@@ -24,7 +24,7 @@ export default function ProfileButton() {
         size={20}
         src={mainPlayer.avatar}
         className="border-border box-border size-5 shrink-0 rounded-full border"
-        alt={`${mainPlayer.name}'s Profile Picture`}
+        alt={`Your Profile Picture`}
       />
       <span className="hidden 2xl:flex">Me</span>
     </NavbarButton>
