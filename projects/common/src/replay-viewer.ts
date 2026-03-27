@@ -1,5 +1,10 @@
 export type ReplayViewer = {
   /**
+   * The id of the replay viewer.
+   */
+  id: string;
+
+  /**
    * The name of the replay viewer.
    */
   name: string;
@@ -18,11 +23,13 @@ export type ReplayViewer = {
  */
 export const ReplayViewers: Record<string, ReplayViewer> = {
   beatleader: {
+    id: "beatleader",
     name: "BeatLeader",
     generateUrl: (id, replayUrl) =>
       `https://replay.beatleader.xyz/${replayUrl ? `?link=${replayUrl}` : `?scoreId=${id}`}`,
   },
   arcviewer: {
+    id: "arcviewer",
     name: "ArcViewer",
     generateUrl: (id, replayUrl) =>
       `https://allpoland.github.io/ArcViewer/${replayUrl ? `?replayURL=${replayUrl}` : `?scoreID=${id}`}`,

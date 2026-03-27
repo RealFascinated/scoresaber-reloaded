@@ -34,7 +34,7 @@ export const ssrConfig: Config = {
   themes: [
     {
       id: "default",
-      name: "Default",
+      name: "Blue",
       color: "#5555FF",
     },
     {

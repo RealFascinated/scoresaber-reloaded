@@ -4,7 +4,8 @@ import { SettingIds, WebsiteLanding } from "@/common/database/database";
 import { BACKGROUND_COVERS } from "@/components/background-cover";
 import { Form, FormDescription, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useBackgroundCover } from "@/hooks/use-background-cover";
 import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
@@ -14,13 +15,10 @@ import type { LucideIcon } from "lucide-react";
 import { Globe, Image as ImageIcon, Palette, Snowflake } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Path, useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Field, SettingSection } from "../setting-section";
-
-function getMonotonicTimeMs(): number {
-  return globalThis.performance.now();
-}
+import { SettingsCategorySkeleton } from "../settings-category-skeleton";
+import { getMonotonicTimeMs, showSettingsSavedToast } from "../settings-feedback";
 
 const formSchema = z.object({
   backgroundCover: z.string().min(0).max(128),
@@ -46,10 +44,12 @@ const BackgroundCoverControl = (props: {
   );
 
   return (
-    <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-      <div className="flex-1 md:pr-4">
-        <FormLabel className="text-sm leading-tight font-normal">Background Cover</FormLabel>
-        <FormDescription className="text-xs leading-tight">
+    <div className="flex flex-col gap-3">
+      <div className="w-full min-w-0">
+        <FormLabel className="text-foreground text-[15px] leading-snug font-medium">
+          Background Cover
+        </FormLabel>
+        <FormDescription className="text-muted-foreground mt-1 text-[13px] leading-snug">
           Change the background cover of the website
         </FormDescription>
         {selectedOption === "custom" && (
@@ -57,23 +57,38 @@ const BackgroundCoverControl = (props: {
             placeholder="Hex color or image URL"
             value={customValue}
             onChange={e => handleCustomInputChange(e.target.value)}
-            className="mt-2 h-8 w-full text-xs md:w-2xl"
+            className="mt-2 h-8 w-full max-w-xl text-xs"
           />
         )}
       </div>
-      <Select onValueChange={handleSelectChange} value={selectedOption}>
-        <SelectTrigger className="w-full md:w-52">
-          <SelectValue placeholder="Select a background cover" />
-        </SelectTrigger>
-        <SelectContent>
-          {Object.values(BACKGROUND_COVERS).map(cover => (
-            <SelectItem key={cover.id} value={cover.id}>
-              {cover.name}
-            </SelectItem>
-          ))}
-          <SelectItem value="custom">Custom</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="w-full min-w-0">
+        <RadioGroup
+          value={selectedOption}
+          onValueChange={handleSelectChange}
+          className="flex max-h-[min(320px,50vh)] flex-col gap-2 overflow-y-auto pr-1"
+        >
+          {Object.values(BACKGROUND_COVERS).map(cover => {
+            const id = `background-cover-${cover.id}`;
+            return (
+              <div key={cover.id} className="flex items-center gap-2.5">
+                <RadioGroupItem value={cover.id} id={id} />
+                <Label htmlFor={id} className="cursor-pointer text-[15px] leading-snug font-normal">
+                  {cover.name}
+                </Label>
+              </div>
+            );
+          })}
+          <div className="flex items-center gap-2.5">
+            <RadioGroupItem value="custom" id="background-cover-custom" />
+            <Label
+              htmlFor="background-cover-custom"
+              className="cursor-pointer text-[15px] leading-snug font-normal"
+            >
+              Custom
+            </Label>
+          </div>
+        </RadioGroup>
+      </div>
     </div>
   );
 };
@@ -187,7 +202,7 @@ const WebsiteSettings = () => {
   });
 
   // Sync form with database settings
-  useSettingsForm(
+  const { isLoading } = useSettingsForm(
     form,
     {
       backgroundCover: () => database.getBackgroundCover(),
@@ -212,16 +227,17 @@ const WebsiteSettings = () => {
     ]);
     setTheme(values.theme);
 
-    const after = getMonotonicTimeMs();
-    toast.success("Settings saved", {
-      description: `Your settings have been saved in ${(after - before).toFixed(0)}ms`,
-    });
+    showSettingsSavedToast(before);
+  }
+
+  if (isLoading) {
+    return <SettingsCategorySkeleton />;
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <Form {...form}>
-        <form className="flex flex-col gap-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <form className="flex flex-col gap-8" onSubmit={form.handleSubmit(onSubmit)}>
           {settings.map(section => (
             <SettingSection<FormValues>
               key={section.id}

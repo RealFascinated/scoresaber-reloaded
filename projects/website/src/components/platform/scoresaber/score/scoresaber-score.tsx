@@ -35,7 +35,6 @@ export default function ScoreSaberScoreDisplay({
     noScoreButtons?: boolean;
     hideDetailsDropdown?: boolean;
     hideAccuracyChanger?: boolean;
-    disablePadding?: boolean;
     defaultLeaderboardScoresPage?: number;
     medalsMode?: boolean;
     isPreviousScore?: boolean;
@@ -61,9 +60,8 @@ export default function ScoreSaberScoreDisplay({
   const isTracked = score.isTracked && score.beatLeaderScore;
 
   return (
-    <div className={cn(settings?.disablePadding ? "" : "pt-2 pb-2", "relative px-2 lg:pl-0")}>
+    <div data-ss-score-row className="relative px-2 pt-2 pb-2 lg:pl-0">
       <div className="flex items-center">
-        {/* Four columns on lg: info, song, actions (buttons and/or chevron), score stats. */}
         <div
           className={cn(
             "grid w-full gap-2 lg:gap-0",

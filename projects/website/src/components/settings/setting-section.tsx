@@ -1,28 +1,29 @@
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { useDebounce } from "@uidotdev/usehooks";
 import type { LucideIcon } from "lucide-react";
 import { ReactElement, ReactNode, Ref, useEffect, useState } from "react";
-import { Path, UseFormReturn } from "react-hook-form";
+import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from "../ui/form";
 
-interface BaseField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> {
+interface BaseField<TFormValues extends FieldValues, TName extends Path<TFormValues>> {
   name: TName;
   label: string;
   description?: string;
 }
 
 export interface CheckboxField<
-  TFormValues extends Record<string, any>,
+  TFormValues extends FieldValues,
   TName extends Path<TFormValues>,
 > extends BaseField<TFormValues, TName> {
   type: "checkbox";
 }
 
 export interface SelectField<
-  TFormValues extends Record<string, any>,
+  TFormValues extends FieldValues,
   TName extends Path<TFormValues>,
 > extends BaseField<TFormValues, TName> {
   type: "select";
@@ -36,7 +37,7 @@ export interface SelectField<
 }
 
 export interface SliderField<
-  TFormValues extends Record<string, any>,
+  TFormValues extends FieldValues,
   TName extends Path<TFormValues>,
 > extends BaseField<TFormValues, TName> {
   type: "slider";
@@ -48,19 +49,19 @@ export interface SliderField<
 }
 
 export interface TextField<
-  TFormValues extends Record<string, any>,
+  TFormValues extends FieldValues,
   TName extends Path<TFormValues>,
 > extends BaseField<TFormValues, TName> {
   type: "text";
 }
 
-export type Field<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> =
+export type Field<TFormValues extends FieldValues, TName extends Path<TFormValues>> =
   | CheckboxField<TFormValues, TName>
   | SelectField<TFormValues, TName>
   | SliderField<TFormValues, TName>
   | TextField<TFormValues, TName>;
 
-interface SettingSectionProps<TFormValues extends Record<string, any>> {
+interface SettingSectionProps<TFormValues extends FieldValues> {
   title: string;
   icon: LucideIcon;
   fields: readonly Field<TFormValues, Path<TFormValues>>[];
@@ -68,7 +69,7 @@ interface SettingSectionProps<TFormValues extends Record<string, any>> {
   onFormSubmit?: (values: TFormValues) => void | Promise<void>;
 }
 
-interface FormFieldComponentProps<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> {
+interface FormFieldComponentProps<TFormValues extends FieldValues, TName extends Path<TFormValues>> {
   field: Field<TFormValues, TName>;
   formField: {
     value: TFormValues[TName];
@@ -81,43 +82,57 @@ interface FormFieldComponentProps<TFormValues extends Record<string, any>, TName
   onFormSubmit?: (values: TFormValues) => void | Promise<void>;
 }
 
-type RenderFieldProps<TFormValues extends Record<string, any>, TName extends Path<TFormValues>> = {
+type RenderFieldProps<TFormValues extends FieldValues, TName extends Path<TFormValues>> = {
   field: Field<TFormValues, TName>;
   value: TFormValues[TName];
   onChange: (value: TFormValues[TName]) => void;
 };
 
-function renderCheckboxField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>>({
+function renderCheckboxField<TFormValues extends FieldValues, TName extends Path<TFormValues>>({
   value,
   onChange,
 }: RenderFieldProps<TFormValues, TName>) {
-  return <Checkbox checked={value as boolean} onCheckedChange={onChange} />;
+  return (
+    <Switch
+      checked={value as boolean}
+      onCheckedChange={checked => {
+        onChange(checked as TFormValues[TName]);
+      }}
+    />
+  );
 }
 
-function renderSelectField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>>({
+function optionId(fieldName: string, value: string): string {
+  return `${fieldName}-${value.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+}
+
+function renderSelectField<TFormValues extends FieldValues, TName extends Path<TFormValues>>({
   field,
   value,
   onChange,
 }: RenderFieldProps<TFormValues, TName>) {
   if (field.type !== "select") return null;
 
+  const name = String(field.name);
+
   return (
-    <Select value={value as string} onValueChange={onChange}>
-      <SelectTrigger className="w-full md:w-52">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {field.options?.map(option => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <RadioGroup value={value as string} onValueChange={onChange} className="flex w-full flex-col gap-2.5">
+      {field.options?.map(option => {
+        const id = optionId(name, option.value);
+        return (
+          <div key={option.value} className="flex items-center gap-2.5">
+            <RadioGroupItem value={option.value} id={id} />
+            <Label htmlFor={id} className="cursor-pointer text-[15px] leading-snug font-normal">
+              {option.label}
+            </Label>
+          </div>
+        );
+      })}
+    </RadioGroup>
   );
 }
 
-function renderSliderField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>>({
+function renderSliderField<TFormValues extends FieldValues, TName extends Path<TFormValues>>({
   field,
   value,
   onChange,
@@ -127,7 +142,7 @@ function renderSliderField<TFormValues extends Record<string, any>, TName extend
   const labelFormatter = field.labelFormatter ?? ((val: number | undefined) => `${val}%`);
 
   return (
-    <div className="flex w-full items-center gap-3 md:w-52">
+    <div className="flex w-full max-w-xl items-center gap-4">
       <Slider
         value={[value as number]}
         onValueChange={values => onChange(values[0] as TFormValues[TName])}
@@ -147,7 +162,7 @@ function renderSliderField<TFormValues extends Record<string, any>, TName extend
   );
 }
 
-function renderTextField<TFormValues extends Record<string, any>, TName extends Path<TFormValues>>({
+function renderTextField<TFormValues extends FieldValues, TName extends Path<TFormValues>>({
   value,
   onChange,
 }: RenderFieldProps<TFormValues, TName>) {
@@ -155,12 +170,12 @@ function renderTextField<TFormValues extends Record<string, any>, TName extends 
     <Input
       value={value as string}
       onChange={e => onChange(e.target.value as TFormValues[TName])}
-      className="w-full md:w-52"
+      className="w-full max-w-xl"
     />
   );
 }
 
-function FormFieldComponent<TFormValues extends Record<string, any>, TName extends Path<TFormValues>>({
+function FormFieldComponent<TFormValues extends FieldValues, TName extends Path<TFormValues>>({
   field,
   formField,
   form,
@@ -169,7 +184,7 @@ function FormFieldComponent<TFormValues extends Record<string, any>, TName exten
   const debouncedValue = useDebounce(formField.value, 500);
   const [hasChanged, setHasChanged] = useState(false);
 
-  const wrappedOnChange = (value: any) => {
+  const wrappedOnChange = (value: TFormValues[TName]) => {
     setHasChanged(true);
     formField.onChange(value);
     if (field.type === "text" || field.type === "slider") {
@@ -228,41 +243,43 @@ function FormFieldComponent<TFormValues extends Record<string, any>, TName exten
     const CustomControl = field.customControl;
     const { ref: _unusedFieldRef, ...fieldForCustom } = formField;
     return (
-      <FormItem className="">
+      <FormItem className="space-y-0 py-4">
         <FormControl>
-          <div className="py-1">
-            <CustomControl
-              field={{
-                ...fieldForCustom,
-                onChange: wrappedOnChange,
-              }}
-            />
-          </div>
+          <CustomControl
+            field={{
+              ...fieldForCustom,
+              onChange: wrappedOnChange,
+            }}
+          />
         </FormControl>
       </FormItem>
     );
   }
 
+  const isToggleRow = field.type === "checkbox";
+
   return (
     <FormItem
       className={
-        field.type === "checkbox"
-          ? "flex flex-row items-center justify-between gap-4 py-1"
-          : "flex flex-col items-start gap-2 py-1 md:flex-row md:items-start md:justify-between"
+        isToggleRow ? "flex flex-row items-start gap-6 py-4 sm:items-center" : "flex flex-col gap-3 py-4"
       }
     >
-      <div className="flex-1 md:pr-4">
-        <FormLabel className="text-sm leading-tight font-normal">{field.label}</FormLabel>
+      <div className={isToggleRow ? "min-w-0 flex-1" : "w-full min-w-0"}>
+        <FormLabel className="text-foreground text-[15px] leading-snug font-medium">{field.label}</FormLabel>
         {field.description && (
-          <FormDescription className="text-xs leading-tight">{field.description}</FormDescription>
+          <FormDescription className="text-muted-foreground mt-1 text-[13px] leading-snug">
+            {field.description}
+          </FormDescription>
         )}
       </div>
-      <FormControl>{control}</FormControl>
+      <FormControl className={isToggleRow ? "ml-auto shrink-0 pt-0.5 sm:pt-0" : "w-full min-w-0"}>
+        {control}
+      </FormControl>
     </FormItem>
   );
 }
 
-export function SettingSection<TFormValues extends Record<string, any>>({
+export function SettingSection<TFormValues extends FieldValues>({
   title,
   icon: Icon,
   fields,
@@ -270,12 +287,12 @@ export function SettingSection<TFormValues extends Record<string, any>>({
   onFormSubmit,
 }: SettingSectionProps<TFormValues>) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
-        <Icon className="size-3.5" />
-        <span>{title}</span>
-      </div>
-      <div className="flex flex-col gap-1">
+    <section className="flex flex-col">
+      <h3 className="text-foreground flex items-center gap-2 pb-2 text-lg font-semibold tracking-tight">
+        <Icon className="text-muted-foreground size-5 shrink-0" aria-hidden />
+        {title}
+      </h3>
+      <div className="divide-border/80 border-border/80 divide-y border-t">
         {fields.map(field => (
           <FormField
             key={String(field.name)}
@@ -292,6 +309,6 @@ export function SettingSection<TFormValues extends Record<string, any>>({
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 }

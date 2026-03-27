@@ -3,50 +3,87 @@
 import { cn } from "@/common/utils";
 import FriendsButton from "@/components/friend/friends-button";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
-import ProfileButton from "@/components/navbar/profile-button";
 import SimpleLink from "@/components/simple-link";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { CubeIcon } from "@heroicons/react/24/solid";
-import { ChartBarIcon, Medal, MusicIcon, TrendingUpIcon, TrophyIcon } from "lucide-react";
+import { CubeIcon } from "@radix-ui/react-icons";
+import { Medal, MusicIcon, Settings, TrendingUpIcon, TrophyIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
+import NavbarButton from "./navbar-button";
+import ProfileButton from "./profile-button";
 
-const links: ReactElement<any>[] = [
-  <FriendsButton key="friends" />,
-  <SimpleNavLink key="ranking" name="Ranking" icon={<TrendingUpIcon className="size-5" />} href="/ranking" />,
-  <SimpleNavLink key="medals" name="Medals" icon={<Medal className="size-4.5" />} href="/medals" />,
-  <SimpleNavLink key="maps" name="Maps" icon={<MusicIcon className="size-5" />} href="/maps/leaderboards" />,
-  <SimpleNavLink
-    key="overlay"
-    name="Overlay"
-    icon={<CubeIcon className="size-5" />}
-    href="/overlay/builder"
-    className="hidden md:flex"
-  />,
-  <SimpleNavLink
-    key="top-scores"
-    name="Top Scores"
-    icon={<TrophyIcon className="size-5" />}
-    href="/scores/top"
-  />,
-  <SimpleNavLink
-    key="statistics"
-    name="Statistics"
-    icon={<ChartBarIcon className="size-5" />}
-    href="https://grafana.fascinated.cc/d/5783f85b-a2b3-49d8-854d-b67bb524053d/ssr-public?orgId=2"
-  />,
+type Link = {
+  name: string;
+  icon: ReactElement<any>;
+  href?: string;
+  className?: string;
+  side: "left" | "right";
+};
+
+const links: Link[] = [
+  {
+    name: "",
+    icon: <ProfileButton />,
+    side: "left",
+  },
+  {
+    name: "Friends",
+    icon: <FriendsButton key="friends" />,
+    side: "left",
+  },
+  {
+    name: "Ranking",
+    icon: <TrendingUpIcon className="size-5" />,
+    href: "/ranking",
+    side: "left",
+  },
+  {
+    name: "Medals",
+    icon: <Medal className="size-5" />,
+    href: "/medals",
+    side: "left",
+  },
+
+  // Right
+  {
+    name: "Maps",
+    icon: <MusicIcon className="size-5" />,
+    href: "/maps/leaderboards",
+    side: "right",
+  },
+  {
+    name: "Overlay",
+    icon: <CubeIcon className="size-5" />,
+    href: "/overlay/builder",
+    side: "right",
+  },
+  {
+    name: "Top Scores",
+    icon: <TrophyIcon className="size-5" />,
+    href: "/scores/top",
+    side: "right",
+  },
+  {
+    name: "Settings",
+    icon: <Settings className="size-5" />,
+    href: "/settings",
+    side: "right",
+  },
+  {
+    name: "",
+    icon: <PlayerAndLeaderboardSearch />,
+    side: "right",
+  },
 ];
 
 export default function Navbar() {
-  const database = useDatabase();
-  const hasMainPlayer = useStableLiveQuery(() => database.hasMainPlayer());
+  const leftLinks = links.filter(link => link.side === "left");
+  const rightLinks = links.filter(link => link.side === "right");
 
   return (
     <nav
       className={cn(
-        "border-border bg-background/55 sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around lg:px-8"
+        "border-border bg-background/55 sticky inset-x-0 top-0 z-50 flex h-12 w-full items-center justify-between border-b px-2 py-1 backdrop-blur-md select-none lg:justify-around"
       )}
     >
       {/* Left */}
@@ -68,55 +105,38 @@ export default function Navbar() {
         </SimpleLink>
 
         {/* Links */}
-        <div className="flex items-center gap-0.5 md:gap-1">{links.map(link => link)}</div>
+        <div className="flex items-center gap-0.5 md:gap-1">
+          {leftLinks.map(link => (
+            <NavButton key={link.name} {...link} />
+          ))}
+        </div>
       </div>
 
       {/* Right */}
       <div className="flex items-center gap-(--spacing-sm)">
-        {/* Search */}
-        <PlayerAndLeaderboardSearch />
-
-        {/* Profile Section */}
-        {hasMainPlayer && <ProfileButton />}
+        <div className="flex items-center gap-0.5 md:gap-1">
+          {rightLinks.map(link => (
+            <NavButton key={link.name} {...link} />
+          ))}
+        </div>
       </div>
     </nav>
   );
 }
 
-function SimpleNavLink({
-  name,
-  icon,
-  href,
-  className,
-}: {
-  name: string;
-  icon: ReactElement<any>;
-  href: string;
-  className?: string;
-}) {
+function NavButton({ name, icon, href, className }: Link) {
   const pathname = usePathname();
-  const isActive = pathname && (pathname === href || (href !== "/" && pathname.startsWith(href)));
+
+  if (href == null) {
+    return <div className={cn(className)}>{icon}</div>;
+  }
+
+  const isActive = pathname != null && (pathname === href || (href !== "/" && pathname.startsWith(href)));
 
   return (
-    <SimpleLink
-      className={cn(
-        "group relative flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors duration-150",
-        isActive
-          ? "bg-primary/10 text-primary border-primary/20 border"
-          : "text-muted-foreground hover:text-primary hover:bg-primary/5",
-        className
-      )}
-      href={href}
-      target={href.startsWith("/") ? "_self" : "_blank"}
-      draggable={false}
-    >
+    <NavbarButton href={href} isActive={isActive} className={className}>
       {icon}
       <span className="hidden 2xl:flex">{name}</span>
-
-      {/* Active indicator */}
-      {isActive && (
-        <div className="bg-primary absolute -bottom-0.5 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full transition-opacity duration-200" />
-      )}
-    </SimpleLink>
+    </NavbarButton>
   );
 }

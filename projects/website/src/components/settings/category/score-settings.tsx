@@ -6,10 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
 import { Play } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Form } from "../../ui/form";
 import { SettingSection } from "../setting-section";
+import { SettingsCategorySkeleton } from "../settings-category-skeleton";
+import { showSettingsSavedToast } from "../settings-feedback";
 
 const formSchema = z.object({
   replayViewer: z.string().min(1).max(32),
@@ -46,24 +47,25 @@ const ScoreSettings = () => {
   });
 
   // Sync form with database settings
-  useSettingsForm(form, {
-    replayViewer: async () => (await database.getReplayViewer()).name.toLowerCase(),
+  const { isLoading } = useSettingsForm(form, {
+    replayViewer: () => database.getReplayViewer().then(viewer => viewer.id),
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const before = performance.now();
     await database.setReplayViewer(values.replayViewer);
-    const after = performance.now();
 
-    toast.success("Settings saved", {
-      description: `Your settings have been saved in ${(after - before).toFixed(0)}ms`,
-    });
+    showSettingsSavedToast(before);
+  }
+
+  if (isLoading) {
+    return <SettingsCategorySkeleton />;
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <Form {...form}>
-        <form className="flex flex-col gap-6">
+        <form className="flex flex-col gap-8">
           {settings.map(section => (
             <SettingSection
               key={section.id}

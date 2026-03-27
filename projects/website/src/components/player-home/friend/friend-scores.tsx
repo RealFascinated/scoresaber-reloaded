@@ -38,6 +38,9 @@ export function FriendScores() {
     <Card className="flex h-fit flex-col">
       <div className="mb-(--spacing-lg)">
         <h2 className="text-lg font-semibold">Friend Scores</h2>
+        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+          See the recent scores of your friends.
+        </p>
       </div>
 
       {/* Loading */}
@@ -50,7 +53,7 @@ export function FriendScores() {
       {/* Scores */}
       {scoreData && (
         <div className="flex flex-col gap-(--spacing-lg)">
-          <div className="flex flex-col gap-(--spacing-lg)">
+          <div className="flex flex-col gap-(--spacing-md)">
             {scoreData.items.map(playerScore => {
               const score = playerScore.score;
               const leaderboard = playerScore.leaderboard;

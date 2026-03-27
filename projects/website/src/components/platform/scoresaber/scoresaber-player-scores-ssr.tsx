@@ -257,7 +257,12 @@ export default function ScoreSaberPlayerScoresSSR({
             ))}
         </div>
 
-        <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
+        <PageTransition
+          className={cn(
+            "divide-border grid min-w-full grid-cols-1 divide-y",
+            "[&>div:first-child_[data-ss-score-row]]:pt-0 [&>div:last-child_[data-ss-score-row]]:pb-0"
+          )}
+        >
           {scores.items.map(score => (
             <ScoreSaberScoreDisplay
               key={score.score.scoreId}

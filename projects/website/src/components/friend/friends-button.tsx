@@ -40,7 +40,7 @@ export default function FriendsButton() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="h-full" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-        <NavbarButton className="text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors duration-150">
+        <NavbarButton>
           <UsersIcon className="size-5" />
           <span className="hidden 2xl:flex">Friends</span>
         </NavbarButton>

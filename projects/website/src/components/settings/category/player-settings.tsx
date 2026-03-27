@@ -6,10 +6,11 @@ import { useSettingsForm } from "@/hooks/use-settings-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { History } from "lucide-react";
 import { Path, useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Form } from "../../ui/form";
 import { SettingSection } from "../setting-section";
+import { SettingsCategorySkeleton } from "../settings-category-skeleton";
+import { getMonotonicTimeMs, showSettingsSavedToast } from "../settings-feedback";
 
 const formSchema = z.object({
   historyMode: z.string().min(1).max(32),
@@ -48,24 +49,24 @@ const PlayerSettings = () => {
   });
 
   // Sync form with database settings
-  useSettingsForm(form, {
+  const { isLoading } = useSettingsForm(form, {
     historyMode: () => database.getHistoryMode(),
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const before = performance.now();
+    const before = getMonotonicTimeMs();
     await database.setHistoryMode(values.historyMode as HistoryMode);
-    const after = performance.now();
+    showSettingsSavedToast(before);
+  }
 
-    toast.success("Settings saved", {
-      description: `Your settings have been saved in ${(after - before).toFixed(0)}ms`,
-    });
+  if (isLoading) {
+    return <SettingsCategorySkeleton />;
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <Form {...form}>
-        <form className="flex flex-col gap-6">
+        <form className="flex flex-col gap-8">
           {settings.map(section => (
             <SettingSection
               key={section.id}
