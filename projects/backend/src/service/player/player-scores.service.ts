@@ -293,7 +293,6 @@ export class PlayerScoresService {
         $match: {
           playerId: playerId,
           pp: { $gt: 0 },
-          leaderboardId: { $ne: null },
         },
       },
       {
