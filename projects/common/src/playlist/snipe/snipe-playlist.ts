@@ -1,5 +1,5 @@
 import { env } from "../../env";
-import { ScoreSaberLeaderboard } from "../../model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberLeaderboard } from "../../schemas/scoresaber/leaderboard/leaderboard";
 import type { SnipeSettings } from "../../snipe/snipe-settings-schema";
 import { Playlist } from "../playlist";
 

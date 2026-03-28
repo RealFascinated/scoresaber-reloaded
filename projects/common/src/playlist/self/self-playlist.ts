@@ -1,5 +1,5 @@
 import { env } from "../../env";
-import { ScoreSaberLeaderboard } from "../../model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberLeaderboard } from "../../schemas/scoresaber/leaderboard/leaderboard";
 import { Playlist } from "../playlist";
 import type { SelfPlaylistSettings } from "./self-playlist-settings-schema";
 

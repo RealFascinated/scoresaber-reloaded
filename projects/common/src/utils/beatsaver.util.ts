@@ -1,6 +1,6 @@
+import { MapCharacteristic } from "../schemas/map/map-characteristic";
+import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
-import { MapDifficulty } from "../score/map-difficulty";
-import { MapCharacteristic } from "../types/map-characteristic";
 import BeatSaverMapToken from "../types/token/beatsaver/map";
 import BeatSaverMapDifficultyToken from "../types/token/beatsaver/map-difficulty";
 

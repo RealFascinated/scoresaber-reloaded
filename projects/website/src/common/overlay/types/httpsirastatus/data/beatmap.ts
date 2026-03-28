@@ -41,8 +41,8 @@
  * :
  * 1737943721153
  */
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 
 export type HttpSiraStatus_BeatMapData = {
   /**

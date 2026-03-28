@@ -12,6 +12,8 @@ import type {
   AccSaberScoreType,
 } from "../schemas/accsaber/tokens/query/query";
 import type { EnrichedAccSaberScore } from "../schemas/accsaber/tokens/score/score";
+import { MapCharacteristic } from "../schemas/map/map-characteristic";
+import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
 import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
 import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard";
@@ -28,10 +30,8 @@ import { PlayerScoresPageResponse } from "../schemas/response/score/player-score
 import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph";
 import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
-import { MapDifficulty } from "../score/map-difficulty";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
-import { MapCharacteristic } from "../types/map-characteristic";
 import { ScoreCalendarData } from "../types/player/player-statistic";
 import { ScoreQuery, SortDirection, SortField } from "../types/score-query";
 import ScoreSaberLeaderboardPageToken from "../types/token/scoresaber/leaderboard-page";

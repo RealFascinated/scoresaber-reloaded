@@ -32,8 +32,7 @@ export function useSettingsForm<T extends FieldValues>(
 
   // True when we have a result object and every field declared in `config` is defined.
   // Note: `Object.values({}).every(...)` is true, so we must key off `configKeys`, not values only.
-  const settingsReady =
-    settings !== undefined && configKeys.every(key => settings[key] !== undefined);
+  const settingsReady = settings !== undefined && configKeys.every(key => settings[key] !== undefined);
 
   // Only sync external state (DB/theme) into the form once on initial load.
   // Otherwise we overwrite user changes with stale values (e.g. theme dropdown

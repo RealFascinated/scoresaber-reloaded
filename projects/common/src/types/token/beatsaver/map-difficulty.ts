@@ -1,5 +1,5 @@
 import { prop } from "@typegoose/typegoose";
-import type { MapDifficulty } from "../../../score/map-difficulty";
+import type { MapDifficulty } from "../../../schemas/map/map-difficulty";
 import type MapDifficultyParitySummaryToken from "./difficulty-parity-summary";
 
 export default class BeatSaverMapDifficultyToken {

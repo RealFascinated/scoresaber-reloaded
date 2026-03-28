@@ -1,6 +1,6 @@
-import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
+import { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 
 export interface PlayerScore {
   /**

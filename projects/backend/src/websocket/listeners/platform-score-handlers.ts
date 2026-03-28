@@ -166,9 +166,7 @@ export class ScoreWebsockets implements EventListener {
     beatLeaderScore?: BeatLeaderScoreToken
   ) {
     if (scoreSaberToken && leaderboardToken && player) {
-      const { leaderboard } = await LeaderboardCoreService.processLeaderboard(
-        getScoreSaberLeaderboardFromToken(leaderboardToken)
-      );
+      const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
       const score = getScoreSaberScoreFromToken(scoreSaberToken, leaderboard, player.id);
       const isTop50GlobalScore = await TopScoresService.isTop50GlobalScore(score);
 
@@ -179,7 +177,7 @@ export class ScoreWebsockets implements EventListener {
           player.name ? PlayerCoreService.updatePlayerName(player.id, player.name) : undefined,
 
           // Update cached player in Redis
-          ScoreSaberService.updateCachedPlayer(player.id, player),
+          ScoreSaberService.updateCachedPlayer(player.id, score.playerInfo!),
         ]);
       }
 
@@ -206,7 +204,13 @@ export class ScoreWebsockets implements EventListener {
       // Wait for all event listeners to process the score
       await Promise.all(
         EventsManager.getListeners().map(listener => {
-          listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);
+          listener.onScoreReceived?.(
+            score,
+            leaderboard,
+            score.playerInfo!,
+            beatLeaderScore,
+            isTop50GlobalScore
+          );
         })
       );
     }

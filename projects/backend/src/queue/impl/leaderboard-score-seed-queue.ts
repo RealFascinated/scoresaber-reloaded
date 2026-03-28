@@ -20,12 +20,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   protected async processItem(item: QueueItem<number>): Promise<void> {
     const leaderboardId = Number(item.id);
 
-    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(leaderboardId);
-    if (!leaderboardResponse) {
-      Logger.warn(`Leaderboard "${leaderboardId}" not found`);
-      return;
-    }
-    const leaderboard = leaderboardResponse.leaderboard;
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
 
     let currentPage = 1;
     let hasMoreScores = true;
@@ -69,7 +64,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           continue;
         }
 
-        await ScoreCoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo, undefined, false);
+        await ScoreCoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo!, undefined, false);
         processedAnyScores = true;
       }
 

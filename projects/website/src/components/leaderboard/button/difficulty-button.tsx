@@ -1,5 +1,4 @@
 import { cn } from "@/common/utils";
-import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
@@ -11,7 +10,6 @@ type DifficultyButtonProps = {
   characteristic: MapCharacteristic;
   leaderboardId: number;
   selectedId: number;
-  inGameDifficulty: string | undefined;
 };
 
 export function DifficultyButton({
@@ -19,7 +17,6 @@ export function DifficultyButton({
   characteristic,
   leaderboardId,
   selectedId,
-  inGameDifficulty,
 }: DifficultyButtonProps) {
   if (characteristic !== "Standard") {
     return null;
@@ -30,16 +27,16 @@ export function DifficultyButton({
   const color = difficultyData.color;
 
   const buttonId = `difficulty-btn-${leaderboardId}`;
-  let button = (
+  return (
     <SimpleLink href={`/leaderboard/${leaderboardId}`}>
       <style>{`
-        @media (hover: hover) {
-          #${buttonId}.difficulty-button-hover:hover {
-            border-color: ${color} !important;
-            background-color: ${color}00 !important;
-          }
-        }
-      `}</style>
+    @media (hover: hover) {
+      #${buttonId}.difficulty-button-hover:hover {
+        border-color: ${color} !important;
+        background-color: ${color}00 !important;
+      }
+    }
+  `}</style>
       <Button
         id={buttonId}
         variant="ghost"
@@ -56,6 +53,4 @@ export function DifficultyButton({
       </Button>
     </SimpleLink>
   );
-
-  return inGameDifficulty ? <SimpleTooltip display={inGameDifficulty}>{button}</SimpleTooltip> : button;
 }

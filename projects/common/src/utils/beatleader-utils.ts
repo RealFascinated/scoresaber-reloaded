@@ -4,22 +4,14 @@ import { getS3BucketName, StorageBucket } from "../minio-buckets";
 import { BeatLeaderScore } from "../model/beatleader-score/beatleader-score";
 
 /**
- * Minimal score shape for BeatLeader replay redirect (ScoreSaber scores, AccSaber enriched rows, etc.).
- */
-export type BeatLeaderReplaySource = {
-  beatLeaderScore?: BeatLeaderScore;
-  isPreviousScore?: boolean;
-};
-
-/**
  * Get the redirect URL of a BeatLeader replay.
  *
  * @param score the score data
  * @returns the URL of the replay
  */
-export function getBeatLeaderReplayRedirectUrl(score: BeatLeaderReplaySource): string | undefined {
-  if (score.beatLeaderScore && score.beatLeaderScore.savedReplay && !!score.isPreviousScore) {
-    return `${env.NEXT_PUBLIC_API_URL}/beatleader/replay/${score.beatLeaderScore?.scoreId}.bsor`;
+export function getBeatLeaderReplayRedirectUrl(score: BeatLeaderScore): string | undefined {
+  if (score.savedReplay) {
+    return `${env.NEXT_PUBLIC_API_URL}/beatleader/replay/${score.scoreId}.bsor`;
   }
   return undefined;
 }

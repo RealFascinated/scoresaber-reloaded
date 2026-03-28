@@ -1,7 +1,7 @@
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 
 export interface EventListener {
   /**
@@ -26,7 +26,7 @@ export interface EventListener {
   onScoreReceived?: (
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
-    player: ScoreSaberLeaderboardPlayerInfoToken,
+    player: ScoreSaberLeaderboardPlayerInfo,
     beatLeaderScore: BeatLeaderScoreToken | undefined,
     isTop50GlobalScore: boolean
   ) => void;

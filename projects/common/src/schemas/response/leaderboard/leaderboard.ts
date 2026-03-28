@@ -1,5 +1,5 @@
-import { ScoreSaberLeaderboard } from "../../../model/leaderboard/impl/scoresaber-leaderboard";
 import { LeaderboardStarChange } from "../../leaderboard/leaderboard-star-change";
+import { ScoreSaberLeaderboard } from "../../scoresaber/leaderboard/leaderboard";
 import { BeatSaverMapResponse } from "../beatsaver/beatsaver-map";
 
 export type LeaderboardResponse = {

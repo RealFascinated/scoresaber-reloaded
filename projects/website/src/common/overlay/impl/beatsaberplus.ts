@@ -1,5 +1,5 @@
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import OverlayDataClient from "../data-client";
 import { resetOverlayData, useOverlayDataStore } from "../overlay-data-store";

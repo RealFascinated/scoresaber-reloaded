@@ -67,7 +67,6 @@ export default function LeaderboardScores({
               key={String(difficultyData.difficulty)}
               {...difficultyData}
               selectedId={leaderboard.id}
-              inGameDifficulty={beatSaver?.difficultyLabels?.[difficultyData.difficulty] ?? undefined}
             />
           ))}
         </div>

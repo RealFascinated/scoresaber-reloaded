@@ -1,19 +1,17 @@
 import Logger from "@ssr/common/logger";
 import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { PlayerModel } from "@ssr/common/model/player/player";
-import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { and, eq } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/schema";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
-import { PlayerCoreService } from "../player/player-core.service";
-import { PlayerHmdService } from "../player/player-hmd.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import ScoreSaberService from "../scoresaber.service";
-import { MedalScoresService } from "./medal-scores.service";
 
 export class ScoreCoreService {
   /**
@@ -29,7 +27,7 @@ export class ScoreCoreService {
   public static async trackScoreSaberScore(
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
-    player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken,
+    player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfo,
     beatLeaderScore?: BeatLeaderScore,
     newScore: boolean = false
   ): Promise<{
@@ -38,54 +36,51 @@ export class ScoreCoreService {
     tracked: boolean;
   }> {
     const before = performance.now();
+    const existingScore = await db
+      .select()
+      .from(scoreSaberScoresTable)
+      .where(
+        and(
+          eq(scoreSaberScoresTable.playerId, player.id),
+          eq(scoreSaberScoresTable.leaderboardId, leaderboard.id)
+        )
+      )
+      .limit(1);
 
-    // Check if score exists and get previous score in parallel
-    const [scoreExists, previousScore] = await Promise.all([
-      ScoreCoreService.scoreExists(score.scoreId, score.score),
-      ScoreSaberScoreModel.findOne({
-        playerId: player.id,
-        leaderboardId: leaderboard.id,
-      }).lean(),
-    ]);
-    const isImprovement = previousScore !== null && previousScore !== undefined;
-
-    // Skip saving the score if it already exists
-    if (scoreExists) {
-      return { score: undefined, hasPreviousScore: isImprovement, tracked: false };
-    }
-
-    // Handle previous score if it exists
+    const isImprovement = existingScore.length > 0;
     if (isImprovement) {
-      // Delete the the old score
-      await ScoreSaberScoreModel.deleteOne({ scoreId: previousScore.scoreId });
+      const previous = existingScore[0];
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      delete previousScore._id; // Remove _id to let a new one be generated
+      // Move old score to history
+      await db.insert(scoreSaberScoreHistoryTable).values(previous);
 
-      await ScoreSaberPreviousScoreModel.create(previousScore);
+      // Delete from current
+      await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.scoreId, previous.scoreId));
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    delete score.playerInfo;
+    const modifiers = score.modifiers.map(modifier => modifier.toString());
+    await db.insert(scoreSaberScoresTable).values({
+      scoreId: score.scoreId,
+      playerId: player.id,
+      leaderboardId: leaderboard.id,
+      difficulty: score.difficulty,
+      characteristic: score.characteristic,
+      score: score.score,
+      accuracy: score.accuracy,
+      pp: score.pp ?? 0,
+      missedNotes: score.missedNotes,
+      badCuts: score.badCuts,
+      maxCombo: score.maxCombo,
+      fullCombo: score.fullCombo,
+      modifiers: modifiers.length > 0 ? modifiers : null,
+      hmd: score.hmd,
+      rightController: score.rightController,
+      leftController: score.leftController,
+      beatLeaderScoreId: beatLeaderScore?.scoreId,
+      timestamp: score.timestamp,
+    });
 
-    const scoreToCreate: ScoreSaberScore = {
-      ...score,
-      ...(beatLeaderScore?.scoreId ? { beatLeaderScoreId: beatLeaderScore?.scoreId } : {}),
-    };
-
-    await ScoreSaberScoreModel.create(scoreToCreate);
-    await PlayerHmdService.updatePlayerHmd(player.id, score);
-
-    // Handle score for medal updates
-    if (leaderboard.ranked && score.rank <= 10) {
-      await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
-    }
-
-    // Update player score stats
-    const scoreStats = await PlayerCoreService.getPlayerScoreStats(player.id);
-    await PlayerModel.updateOne({ _id: player.id }, { $set: { scoreStats: scoreStats } });
+    // todo: update player hmd, handle medal updates, update player score stats
 
     if (newScore) {
       Logger.info(
@@ -100,8 +95,72 @@ export class ScoreCoreService {
         formatDuration(performance.now() - before)
       );
     }
+    return { score: score, hasPreviousScore: isImprovement, tracked: true };
 
-    return { score: scoreToCreate, hasPreviousScore: isImprovement, tracked: true };
+    // const before = performance.now();
+
+    // // Check if score exists and get previous score in parallel
+    // const [scoreExists, previousScore] = await Promise.all([
+    //   ScoreCoreService.scoreExists(score.scoreId, score.score),
+    //   ScoreSaberScoreModel.findOne({
+    //     playerId: player.id,
+    //     leaderboardId: leaderboard.id,
+    //   }).lean(),
+    // ]);
+    // const isImprovement = previousScore !== null && previousScore !== undefined;
+
+    // // Skip saving the score if it already exists
+    // if (scoreExists) {
+    //   return { score: undefined, hasPreviousScore: isImprovement, tracked: false };
+    // }
+
+    // // Handle previous score if it exists
+    // if (isImprovement) {
+    //   // Delete the the old score
+    //   await ScoreSaberScoreModel.deleteOne({ scoreId: previousScore.scoreId });
+
+    //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //   // @ts-expect-error
+    //   delete previousScore._id; // Remove _id to let a new one be generated
+
+    //   await ScoreSaberPreviousScoreModel.create(previousScore);
+    // }
+
+    // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // // @ts-expect-error
+    // delete score.playerInfo;
+
+    // const scoreToCreate: ScoreSaberScore = {
+    //   ...score,
+    //   ...(beatLeaderScore?.scoreId ? { beatLeaderScoreId: beatLeaderScore?.scoreId } : {}),
+    // };
+
+    // await ScoreSaberScoreModel.create(scoreToCreate);
+    // await PlayerHmdService.updatePlayerHmd(player.id, score);
+
+    // // Handle score for medal updates
+    // if (leaderboard.ranked && score.rank <= 10) {
+    //   await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
+    // }
+
+    // // Update player score stats
+    // const scoreStats = await PlayerCoreService.getPlayerScoreStats(player.id);
+    // await PlayerModel.updateOne({ _id: player.id }, { $set: { scoreStats: scoreStats } });
+
+    // if (newScore) {
+    //   Logger.info(
+    //     `Tracked %s ScoreSaber score "%s" for "%s" on "%s" [%s / %s]%s in %s`,
+    //     newScore ? "New" : "Missing",
+    //     score.scoreId,
+    //     player.name,
+    //     leaderboard.songName,
+    //     leaderboard.difficulty.difficulty,
+    //     leaderboard.difficulty.characteristic,
+    //     isImprovement ? ` (improvement)` : "",
+    //     formatDuration(performance.now() - before)
+    //   );
+    // }
+    // return { score: score, hasPreviousScore: isImprovement, tracked: true };
   }
 
   /**
@@ -110,12 +169,15 @@ export class ScoreCoreService {
    * @param scoreId the id of the score
    * @param score the score to check if it exists to do an exact match
    */
-  public static async scoreExists(scoreId: string | number, score?: number): Promise<boolean> {
+  public static async scoreExists(scoreId: number): Promise<boolean> {
     return (
-      (await ScoreSaberScoreModel.exists({
-        scoreId: String(scoreId),
-        ...(score ? { score } : {}),
-      })) !== null
+      (
+        await db
+          .select({ scoreId: scoreSaberScoresTable.scoreId })
+          .from(scoreSaberScoresTable)
+          .where(eq(scoreSaberScoresTable.scoreId, scoreId))
+          .limit(1)
+      ).length > 0
     );
   }
 
@@ -128,24 +190,22 @@ export class ScoreCoreService {
    */
   public static async insertScoreData(
     score: ScoreSaberScore,
-    leaderboard?: ScoreSaberLeaderboard,
+    leaderboard: ScoreSaberLeaderboard,
     options?: {
       insertBeatLeaderScore?: boolean;
       insertPreviousScore?: boolean;
       insertPlayerInfo?: boolean;
-      removeScoreWeightAndRank?: boolean;
     }
   ) {
     options = {
       insertBeatLeaderScore: true,
       insertPreviousScore: true,
       insertPlayerInfo: true,
-      removeScoreWeightAndRank: false,
       ...options,
     };
 
     leaderboard = !leaderboard
-      ? (await LeaderboardCoreService.getLeaderboard(score.leaderboardId)).leaderboard
+      ? await LeaderboardCoreService.getLeaderboard(score.leaderboardId)
       : leaderboard;
 
     // If the leaderboard is not found, return the plain score
@@ -154,20 +214,21 @@ export class ScoreCoreService {
     }
 
     async function getBeatLeaderScore() {
-      if (options?.insertBeatLeaderScore && score.beatLeaderScoreId !== undefined) {
-        return BeatLeaderService.getBeatLeaderScore(score.beatLeaderScoreId);
+      if (options?.insertBeatLeaderScore) {
+        return BeatLeaderService.getBeatLeaderScoreFromSong(
+          score.playerId,
+          leaderboard.songHash,
+          leaderboard.difficulty.difficulty,
+          leaderboard.difficulty.characteristic,
+          score.score
+        );
       }
       return undefined;
     }
 
     async function getPreviousScore() {
       if (options?.insertPreviousScore && leaderboard) {
-        return PlayerScoreHistoryService.getPlayerPreviousScore(
-          score.playerId,
-          score,
-          leaderboard,
-          score.timestamp
-        );
+        return PlayerScoreHistoryService.getPlayerPreviousScore(score, leaderboard);
       }
       return undefined;
     }
@@ -180,14 +241,11 @@ export class ScoreCoreService {
       return undefined;
     }
 
-    const [isScoreTracked, beatLeaderScore, previousScore, playerInfo] = await Promise.all([
-      ScoreCoreService.scoreExists(score.scoreId),
+    const [beatLeaderScore, previousScore, playerInfo] = await Promise.all([
       getBeatLeaderScore(),
       getPreviousScore(),
       getPlayerInfo(),
     ]);
-
-    score.isTracked = isScoreTracked;
 
     if (beatLeaderScore !== undefined) {
       score.beatLeaderScore = beatLeaderScore;
@@ -203,12 +261,9 @@ export class ScoreCoreService {
         name: playerInfo.name,
         profilePicture: playerInfo.avatar,
         country: playerInfo.country,
+        permissions: null,
+        role: null,
       };
-    }
-
-    if (options?.removeScoreWeightAndRank) {
-      score.weight = undefined;
-      score.rank = -1;
     }
 
     return score;

@@ -2,7 +2,7 @@ import { ScoreSaberScore } from "../../src/model/score/impl/scoresaber-score";
 import { HMD } from "../hmds";
 import { ScoreSaberCurve } from "../leaderboard-curve/scoresaber-curve";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
-import { MapDifficulty } from "../score/map-difficulty";
+import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { ScoreSaberLeaderboardPlayerInfoToken } from "../types/token/scoresaber/leaderboard-player-info";
 import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
 
@@ -140,6 +140,29 @@ export function getDifficultyFromScoreSaberDifficulty(ssDifficultyNumber: number
     default: {
       throw new Error(`Unknown difficulty number: ${ssDifficultyNumber}`);
     }
+  }
+}
+
+/**
+ * Gets the ScoreSaber difficulty from a difficulty.
+ *
+ * @param difficulty the difficulty
+ * @returns the ScoreSaber difficulty
+ */
+export function getScoreSaberDifficultyFromDifficulty(difficulty: MapDifficulty): number {
+  switch (difficulty) {
+    case "Easy":
+      return 1;
+    case "Normal":
+      return 3;
+    case "Hard":
+      return 5;
+    case "Expert":
+      return 7;
+    case "ExpertPlus":
+      return 9;
+    default:
+      throw new Error(`Unknown difficulty: ${difficulty}`);
   }
 }
 

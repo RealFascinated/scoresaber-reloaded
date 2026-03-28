@@ -7,7 +7,7 @@ import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
+import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
@@ -210,7 +210,7 @@ export default class ScoreSaberService {
    */
   public static async updateCachedPlayer(
     id: string,
-    player: ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayerToken
+    player: ScoreSaberLeaderboardPlayerInfo | ScoreSaberPlayerToken
   ) {
     const cachedPlayer = await redisClient.get(`scoresaber:cached-player:${player.id}`);
 

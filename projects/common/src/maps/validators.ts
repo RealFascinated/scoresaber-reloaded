@@ -1,5 +1,5 @@
-import { MapDifficulty, MapDifficultySchema } from "../score/map-difficulty";
-import { MapCharacteristic } from "../types/map-characteristic";
+import { MapCharacteristic } from "../schemas/map/map-characteristic";
+import { MapDifficulty, MapDifficultySchema } from "../schemas/map/map-difficulty";
 
 /**
  * Validates a map difficulty and characteristic

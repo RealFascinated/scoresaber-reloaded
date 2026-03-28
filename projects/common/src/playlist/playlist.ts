@@ -1,5 +1,5 @@
 import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from "@typegoose/typegoose";
-import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
 import type { PlaylistCategory } from "./playlist-category";
 import { PlaylistSong } from "./playlist-song";
 

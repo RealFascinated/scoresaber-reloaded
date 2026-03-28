@@ -1,7 +1,7 @@
 import { modelOptions, prop, Severity } from "@typegoose/typegoose";
-import { type MapDifficulty } from "../../score/map-difficulty";
+import { type MapCharacteristic } from "../../schemas/map/map-characteristic";
+import { type MapDifficulty } from "../../schemas/map/map-difficulty";
 import { Modifier } from "../../score/modifier";
-import { type MapCharacteristic } from "../../types/map-characteristic";
 
 /**
  * The model for a score.

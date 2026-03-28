@@ -1,6 +1,6 @@
-import { ScoreSaberLeaderboard } from "../../../model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "../../../model/score/impl/scoresaber-score";
 import { Metadata } from "../../../types/metadata";
+import { ScoreSaberLeaderboard } from "../../scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "../../scoresaber/score/score";
 import { BeatSaverMapResponse } from "../beatsaver/beatsaver-map";
 
 export default interface LeaderboardScoresResponse {

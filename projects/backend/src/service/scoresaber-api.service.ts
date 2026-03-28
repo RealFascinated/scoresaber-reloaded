@@ -4,7 +4,6 @@ import Logger from "@ssr/common/logger";
 import { StarFilter } from "@ssr/common/maps/types";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/schemas/response/scoresaber/ranking-requests";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { SERVER_PROXIES } from "@ssr/common/shared-consts";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
@@ -15,7 +14,6 @@ import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/
 import { ScoreSaberPlayerSearchToken } from "@ssr/common/types/token/scoresaber/player-search";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
-import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import CacheService, { CacheId } from "./cache.service";
@@ -371,7 +369,7 @@ export class ScoreSaberApiService {
    */
   public static async lookupLeaderboardByHash(
     hash: string,
-    difficulty: MapDifficulty,
+    difficulty: number,
     gameMode: string
   ): Promise<ScoreSaberLeaderboardToken | undefined> {
     const before = performance.now();
@@ -380,7 +378,7 @@ export class ScoreSaberApiService {
     );
     const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardToken>(
       LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT.replace(":query", hash)
-        .replace(":difficulty", getDifficulty(difficulty).diffId.toString())
+        .replace(":difficulty", difficulty.toString())
         .replace(":gameMode", gameMode)
     );
     if (response === undefined) {
