@@ -2,9 +2,9 @@ import Card from "@/components/card";
 import PlayerScoreAccuracyChart from "@/components/platform/scoresaber/score/chart/player-score-accuracy-chart";
 import ScoreAccuracyStats from "@/components/score/score-accuracy-stats";
 import StatValue from "@/components/statistic/stat-value";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type ScoreOverviewProps = {

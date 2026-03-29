@@ -23,6 +23,10 @@ export const MapCharacteristicSchema = z
     z.templateLiteral([z.literal("Vertical"), base]),
 
     z.templateLiteral([base, z.literal("OldDots")]),
+    z.templateLiteral([base, z.literal("DM")]),
+    z.templateLiteral([base, z.literal("HD")]),
+    z.templateLiteral([base, z.literal("HM")]),
+    z.templateLiteral([base, z.literal("DMOH")]),
 
     z.templateLiteral([z.literal("RhythmGame"), base]),
 

@@ -2,6 +2,7 @@ import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/scor
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { BeatLeaderScore } from "../../../../score/score";
 
 type DropdownData = {
   scoreStats?: ScoreStatsResponse;
@@ -9,9 +10,9 @@ type DropdownData = {
 
 export function useLeaderboardDropdownData(
   leaderboardId: number,
-  scoreId: string,
+  scoreId: number,
   isExpanded: boolean,
-  beatLeaderScore?: { scoreId: number }
+  beatLeaderScore?: BeatLeaderScore
 ) {
   const [shouldFetch, setShouldFetch] = useState(false);
 

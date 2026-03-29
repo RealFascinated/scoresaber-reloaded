@@ -44,7 +44,7 @@ export async function sendScoreNotification(
   const change = previousScore &&
     previousScore.change && {
       accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
-      pp: `${formatChange(previousScore.change.pp ?? 0, undefined, true) || ""}`,
+      pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
       misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}`,
       badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}`,
       maxCombo: previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}`,

@@ -4,6 +4,7 @@ import { db } from "../db";
 import { scoreSaberLeaderboardsTable } from "../db/schema";
 import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
 import { ScoreSaberApiService } from "../service/scoresaber-api.service";
+import StorageService from "../service/storage.service";
 
 async function createMissingLeaderboards() {
   const existingLeaderboards = await db
@@ -11,7 +12,7 @@ async function createMissingLeaderboards() {
     .from(scoreSaberLeaderboardsTable);
 
   let hasMorePages = true;
-  let page = 4900;
+  let page = 17100;
   while (hasMorePages) {
     const response = await ScoreSaberApiService.lookupLeaderboards(page);
     if (!response) {
@@ -42,4 +43,5 @@ async function createMissingLeaderboards() {
   }
 }
 
+await new StorageService().initBuckets();
 createMissingLeaderboards().catch(console.error);

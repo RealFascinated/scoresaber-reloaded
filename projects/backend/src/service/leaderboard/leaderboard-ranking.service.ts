@@ -1,29 +1,62 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger from "@ssr/common/logger";
-import {
-  ScoreSaberLeaderboard,
-  ScoreSaberLeaderboardModel,
-} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberLeaderboardStarChangeModel } from "@ssr/common/model/leaderboard/leaderboard-star-change";
-import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { formatDate, formatDuration } from "@ssr/common/utils/time-utils";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
-import { AnyBulkWriteOperation } from "mongoose";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { db } from "../../db";
+import { scoreSaberScoreTypeToInsert } from "../../db/converter/scoresaber-score";
+import {
+  scoreSaberLeaderboardsTable,
+  scoreSaberLeaderboardStarChangeTable,
+  scoreSaberScoreHistoryTable,
+  scoreSaberScoresTable,
+} from "../../db/schema";
+import CacheService from "../cache.service";
 import PlaylistService, { PLAYLIST_NAMES } from "../playlist/playlist.service";
 import { MedalScoresService } from "../score/medal-scores.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
 
+/** Row shape from Postgres for ranked maps we compare during sync. */
+export type RankedLeaderboardSnapshot = {
+  id: number;
+  ranked: boolean;
+  qualified: boolean;
+  stars: number | null;
+  plays: number;
+  dailyPlays: number;
+};
+
 export type LeaderboardUpdate = {
-  previousLeaderboard?: ScoreSaberLeaderboard;
+  previousLeaderboard?: Pick<RankedLeaderboardSnapshot, "ranked" | "qualified" | "stars">;
   newLeaderboard: ScoreSaberLeaderboard;
 };
+
+const scoreUpsertSet = {
+  playerId: sql`excluded."playerId"`,
+  leaderboardId: sql`excluded."leaderboardId"`,
+  difficulty: sql`excluded."difficulty"`,
+  characteristic: sql`excluded."characteristic"`,
+  score: sql`excluded."score"`,
+  accuracy: sql`excluded."accuracy"`,
+  pp: sql`excluded."pp"`,
+  missedNotes: sql`excluded."missedNotes"`,
+  badCuts: sql`excluded."badCuts"`,
+  maxCombo: sql`excluded."maxCombo"`,
+  fullCombo: sql`excluded."fullCombo"`,
+  modifiers: sql`excluded."modifiers"`,
+  hmd: sql`excluded."hmd"`,
+  rightController: sql`excluded."rightController"`,
+  leftController: sql`excluded."leftController"`,
+  timestamp: sql`excluded."timestamp"`,
+} as const;
 
 export class LeaderboardRankingService {
   /**
@@ -35,46 +68,43 @@ export class LeaderboardRankingService {
     const before = performance.now();
 
     Logger.info(`[RANKED UPDATES] Refreshing ranked leaderboards...`);
-    const { leaderboards, leaderboardDifficulties } = await LeaderboardCoreService.fetchLeaderboardsFromAPI(
-      "ranked",
-      true
-    );
+    const { leaderboards } = await LeaderboardCoreService.fetchLeaderboardsFromAPI("ranked", true);
     Logger.info(`[RANKED UPDATES] Found ${leaderboards.length} ranked leaderboards.`);
-
-    // todo: handle leaderboards that are no longer ranked
 
     async function reweightHistoryScores(leaderboard: ScoreSaberLeaderboard) {
       Logger.info(`[RANKED UPDATES] Reweighting history scores for leaderboard "${leaderboard.id}"...`);
 
-      const scores = await ScoreSaberPreviousScoreModel.find({ leaderboardId: leaderboard.id })
-        .select({ pp: 1, accuracy: 1 })
-        .lean();
-
-      // Only update scores where PP actually changed
-      const updates = scores
-        .map(score => {
-          const newPp = ScoreSaberCurve.getPp(leaderboard.stars, score.accuracy);
-          // Only include in bulk write if PP changed
-          if (score.pp !== newPp) {
-            return {
-              updateOne: {
-                filter: { _id: score._id },
-                update: { $set: { pp: newPp } },
-              },
-            };
-          }
-          return null;
+      const rows = await db
+        .select({
+          id: scoreSaberScoreHistoryTable.id,
+          pp: scoreSaberScoreHistoryTable.pp,
+          accuracy: scoreSaberScoreHistoryTable.accuracy,
         })
-        .filter((update): update is NonNullable<typeof update> => update !== null);
+        .from(scoreSaberScoreHistoryTable)
+        .where(eq(scoreSaberScoreHistoryTable.leaderboardId, leaderboard.id));
+
+      const updates = rows
+        .map(row => {
+          const newPp = ScoreSaberCurve.getPp(leaderboard.stars, row.accuracy);
+          return row.pp !== newPp ? { id: row.id, newPp } : null;
+        })
+        .filter((u): u is { id: number; newPp: number } => u !== null);
 
       if (updates.length > 0) {
-        await ScoreSaberPreviousScoreModel.bulkWrite(updates);
+        await Promise.all(
+          updates.map(u =>
+            db
+              .update(scoreSaberScoreHistoryTable)
+              .set({ pp: u.newPp })
+              .where(eq(scoreSaberScoreHistoryTable.id, u.id))
+          )
+        );
         Logger.info(
-          `[RANKED UPDATES] Reweighted ${updates.length} of ${scores.length} history scores for leaderboard "${leaderboard.id}".`
+          `[RANKED UPDATES] Reweighted ${updates.length} of ${rows.length} history scores for leaderboard "${leaderboard.id}".`
         );
       } else {
         Logger.info(
-          `[RANKED UPDATES] No PP changes needed for ${scores.length} history scores for leaderboard "${leaderboard.id}".`
+          `[RANKED UPDATES] No PP changes needed for ${rows.length} history scores for leaderboard "${leaderboard.id}".`
         );
       }
     }
@@ -83,9 +113,8 @@ export class LeaderboardRankingService {
       Logger.info(`[RANKED UPDATES] Updating scores for leaderboard "${leaderboard.id}"...`);
       let hasMorePages = true;
       let page = 1;
-      const scoreOps: Array<{ score: ScoreSaberScore; op: AnyBulkWriteOperation<ScoreSaberScore> }> = [];
+      const scoreOps: ScoreSaberScore[] = [];
 
-      // Collect all scores first
       while (hasMorePages) {
         const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboard.id, page);
         if (!response) {
@@ -94,25 +123,9 @@ export class LeaderboardRankingService {
         }
 
         for (const scoreToken of response.scores) {
-          const score = getScoreSaberScoreFromToken(
-            scoreToken,
-            leaderboard,
-            scoreToken.leaderboardPlayerInfo.id
+          scoreOps.push(
+            getScoreSaberScoreFromToken(scoreToken, leaderboard, scoreToken.leaderboardPlayerInfo.id)
           );
-          if (!score) {
-            continue;
-          }
-
-          scoreOps.push({
-            score,
-            op: {
-              updateOne: {
-                filter: { scoreId: score.scoreId },
-                update: { $set: score },
-                upsert: true,
-              },
-            },
-          });
         }
 
         const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
@@ -126,53 +139,71 @@ export class LeaderboardRankingService {
         hasMorePages = page < totalPages;
       }
 
-      // Batch check which scores actually need updating
-      if (scoreOps.length > 0) {
-        const scoreIds = scoreOps.map(so => so.score.scoreId);
-        const existingScores = await ScoreSaberScoreModel.find({
-          scoreId: { $in: scoreIds },
-          leaderboardId: leaderboard.id,
-        })
-          .select("scoreId score rank")
-          .lean();
+      if (scoreOps.length === 0) {
+        return;
+      }
 
-        const existingScoreMap = new Map(
-          existingScores.map(s => [s.scoreId, { score: s.score, rank: s.rank }])
+      const scoreIds = scoreOps.map(s => s.scoreId);
+      const existingRows = await db
+        .select({
+          scoreId: scoreSaberScoresTable.scoreId,
+          score: scoreSaberScoresTable.score,
+          pp: scoreSaberScoresTable.pp,
+        })
+        .from(scoreSaberScoresTable)
+        .where(
+          and(
+            inArray(scoreSaberScoresTable.scoreId, scoreIds),
+            eq(scoreSaberScoresTable.leaderboardId, leaderboard.id)
+          )
         );
 
-        // Filter out scores that haven't changed
-        const opsToWrite = scoreOps
-          .filter(({ score }) => {
-            const existing = existingScoreMap.get(score.scoreId);
-            return !existing || existing.score !== score.score || existing.rank !== score.rank;
-          })
-          .map(({ op }) => op);
+      const existingMap = new Map(existingRows.map(r => [r.scoreId, { score: r.score, pp: r.pp }]));
 
-        if (opsToWrite.length > 0) {
-          const result = await ScoreSaberScoreModel.bulkWrite(opsToWrite, { ordered: false });
-          updatedScoresCount = result.upsertedCount + result.modifiedCount;
-          Logger.info(
-            `[RANKED UPDATES] Updated ${updatedScoresCount} of ${scoreOps.length} scores for leaderboard "${leaderboard.id}" (${result.upsertedCount} inserted, ${result.modifiedCount} modified, ${scoreOps.length - opsToWrite.length} skipped).`
-          );
-        } else {
-          Logger.info(
-            `[RANKED UPDATES] No score changes needed for leaderboard "${leaderboard.id}" (${scoreOps.length} scores checked).`
-          );
-        }
+      const toWrite = scoreOps.filter(s => {
+        const ex = existingMap.get(s.scoreId);
+        return !ex || ex.score !== s.score || ex.pp !== s.pp;
+      });
+
+      if (toWrite.length === 0) {
+        Logger.info(
+          `[RANKED UPDATES] No score changes needed for leaderboard "${leaderboard.id}" (${scoreOps.length} scores checked).`
+        );
+        return;
       }
+
+      let upserted = 0;
+      for (const batch of chunkArray(toWrite, 100)) {
+        const rows = batch.map(scoreSaberScoreTypeToInsert);
+        await db.insert(scoreSaberScoresTable).values(rows).onConflictDoUpdate({
+          target: scoreSaberScoresTable.scoreId,
+          set: scoreUpsertSet,
+        });
+        upserted += batch.length;
+      }
+
+      Logger.info(
+        `[RANKED UPDATES] Upserted ${upserted} of ${scoreOps.length} scores for leaderboard "${leaderboard.id}" (${scoreOps.length - toWrite.length} skipped).`
+      );
     }
 
-    const rankedLeaderboards: Map<number, ScoreSaberLeaderboard> = await ScoreSaberLeaderboardModel.find({
-      ranked: true,
-    })
-      .select({ _id: 1, stars: 1, ranked: 1, qualified: 1 })
-      .lean()
-      .then(leaderboards => new Map(leaderboards.map(leaderboard => [leaderboard._id, leaderboard])));
+    const dbRankedRows = await db
+      .select({
+        id: scoreSaberLeaderboardsTable.id,
+        stars: scoreSaberLeaderboardsTable.stars,
+        ranked: scoreSaberLeaderboardsTable.ranked,
+        qualified: scoreSaberLeaderboardsTable.qualified,
+        plays: scoreSaberLeaderboardsTable.plays,
+        dailyPlays: scoreSaberLeaderboardsTable.dailyPlays,
+      })
+      .from(scoreSaberLeaderboardsTable)
+      .where(eq(scoreSaberLeaderboardsTable.ranked, true));
 
-    const leaderboardBulkWrite: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];
+    const rankedLeaderboards = new Map<number, RankedLeaderboardSnapshot>(dbRankedRows.map(r => [r.id, r]));
+
+    const leaderboardsToUpsert: ScoreSaberLeaderboard[] = [];
     const updatedLeaderboards: LeaderboardUpdate[] = [];
 
-    // Process the leaderboards
     let checked = 0;
     for (const apiLeaderboard of leaderboards) {
       checked++;
@@ -186,25 +217,13 @@ export class LeaderboardRankingService {
         dbLeaderboard?.qualified !== apiLeaderboard.qualified ||
         dbLeaderboard?.stars !== apiLeaderboard.stars;
 
-      // Update the leaderboard if it has changed
       if (
         !dbLeaderboard ||
         leaderboardUpdated ||
         dbLeaderboard.dailyPlays !== apiLeaderboard.dailyPlays ||
         dbLeaderboard.plays !== apiLeaderboard.plays
       ) {
-        leaderboardBulkWrite.push({
-          updateOne: {
-            filter: { _id: apiLeaderboard.id },
-            update: {
-              $set: {
-                ...apiLeaderboard,
-                difficulties: leaderboardDifficulties.get(apiLeaderboard.songHash) ?? [],
-              },
-            },
-            upsert: true,
-          },
-        });
+        leaderboardsToUpsert.push(apiLeaderboard);
       }
 
       if (!leaderboardUpdated) {
@@ -212,16 +231,22 @@ export class LeaderboardRankingService {
       }
 
       updatedLeaderboards.push({
-        previousLeaderboard: dbLeaderboard ?? undefined,
+        previousLeaderboard: dbLeaderboard
+          ? { ranked: dbLeaderboard.ranked, qualified: dbLeaderboard.qualified, stars: dbLeaderboard.stars }
+          : undefined,
         newLeaderboard: apiLeaderboard,
       });
 
-      // Reweight the history scores if the stars have changed
-      if (dbLeaderboard?.stars !== apiLeaderboard.stars) {
+      if (dbLeaderboard && dbLeaderboard.stars !== apiLeaderboard.stars) {
         await reweightHistoryScores(apiLeaderboard);
+        await db.insert(scoreSaberLeaderboardStarChangeTable).values({
+          leaderboardId: apiLeaderboard.id,
+          previousStars: dbLeaderboard.stars ?? 0,
+          newStars: apiLeaderboard.stars,
+          timestamp: new Date(),
+        });
       }
 
-      // Previously unranked, now ranked
       if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
         await MedalScoresService.rescanLeaderboard(apiLeaderboard.id, true);
         await updateLeaderboardScores(apiLeaderboard);
@@ -230,7 +255,6 @@ export class LeaderboardRankingService {
 
     const playlistSongs: Map<string, PlaylistSong> = new Map();
     for (const leaderboard of leaderboards) {
-      // Ignore unranked leaderboards
       if (!leaderboard.ranked) {
         continue;
       }
@@ -256,16 +280,18 @@ export class LeaderboardRankingService {
       });
     }
 
-    if (leaderboardBulkWrite.length > 0) {
-      Logger.info(`[RANKED UPDATES] Updating ${leaderboardBulkWrite.length} leaderboards...`);
+    if (leaderboardsToUpsert.length > 0) {
+      Logger.info(`[RANKED UPDATES] Updating ${leaderboardsToUpsert.length} leaderboards...`);
 
-      for (const batch of chunkArray(leaderboardBulkWrite, 250)) {
-        await ScoreSaberLeaderboardModel.bulkWrite(batch);
+      for (const batch of chunkArray(leaderboardsToUpsert, 250)) {
+        await LeaderboardCoreService.upsertLeaderboardsFromRankingApi(batch);
         Logger.info(`[RANKED UPDATES] Updated batch of ${batch.length} leaderboards!`);
       }
 
+      await CacheService.invalidate("leaderboard:ranked-leaderboards");
+
       Logger.info(
-        `[RANKED UPDATES] Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
+        `[RANKED UPDATES] Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
       );
 
       sendEmbedToChannel(
@@ -273,13 +299,12 @@ export class LeaderboardRankingService {
         new EmbedBuilder()
           .setTitle("Ranked Leaderboards Updated")
           .setDescription(
-            `Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
+            `Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
           )
           .setColor("#00ff00")
       );
     }
 
-    // Update the ranked playlist
     await PlaylistService.updatePlaylist("scoresaber-ranked-maps", {
       title: `${PLAYLIST_NAMES["scoresaber-ranked-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
       songs: Array.from(playlistSongs.values()),
@@ -295,47 +320,44 @@ export class LeaderboardRankingService {
     const before = performance.now();
 
     Logger.info(`[RANKED UPDATES] Refreshing qualified leaderboards...`);
-    const { leaderboards, leaderboardDifficulties } = await LeaderboardCoreService.fetchLeaderboardsFromAPI(
-      "qualified",
-      true
-    );
+    const { leaderboards } = await LeaderboardCoreService.fetchLeaderboardsFromAPI("qualified", true);
     Logger.info(`[RANKED UPDATES] Found ${leaderboards.length} qualified leaderboards.`);
 
-    const leaderboardBulkWrite: AnyBulkWriteOperation<ScoreSaberLeaderboard>[] = [];
+    const dbQualifiedRows = await db
+      .select({
+        id: scoreSaberLeaderboardsTable.id,
+        stars: scoreSaberLeaderboardsTable.stars,
+        ranked: scoreSaberLeaderboardsTable.ranked,
+        qualified: scoreSaberLeaderboardsTable.qualified,
+      })
+      .from(scoreSaberLeaderboardsTable)
+      .where(eq(scoreSaberLeaderboardsTable.qualified, true));
+
+    const dbById = new Map(dbQualifiedRows.map(r => [r.id, r]));
+
+    const leaderboardsToUpsert: ScoreSaberLeaderboard[] = [];
 
     for (const apiLeaderboard of leaderboards) {
-      const dbLeaderboard = await ScoreSaberLeaderboardModel.findOne({ _id: apiLeaderboard.id })
-        .select({ stars: 1, ranked: 1, qualified: 1 })
-        .lean();
+      const dbLeaderboard = dbById.get(apiLeaderboard.id);
       const leaderboardUpdated =
-        dbLeaderboard?.ranked !== apiLeaderboard.ranked ||
-        dbLeaderboard?.qualified !== apiLeaderboard.qualified ||
-        dbLeaderboard?.stars !== apiLeaderboard.stars;
+        !dbLeaderboard ||
+        dbLeaderboard.ranked !== apiLeaderboard.ranked ||
+        dbLeaderboard.qualified !== apiLeaderboard.qualified ||
+        dbLeaderboard.stars !== apiLeaderboard.stars;
 
       if (!leaderboardUpdated) {
         continue;
       }
 
-      // Update or create the leaderboard
-      leaderboardBulkWrite.push({
-        updateOne: {
-          filter: { _id: apiLeaderboard.id },
-          update: {
-            $set: {
-              ...apiLeaderboard,
-              difficulties: leaderboardDifficulties.get(apiLeaderboard.songHash) ?? [],
-            },
-          },
-          upsert: true,
-        },
-      });
+      leaderboardsToUpsert.push(apiLeaderboard);
     }
 
-    if (leaderboardBulkWrite.length > 0) {
-      Logger.info(`[RANKED UPDATES] Updating ${leaderboardBulkWrite.length} leaderboards...`);
-      await ScoreSaberLeaderboardModel.bulkWrite(leaderboardBulkWrite);
+    if (leaderboardsToUpsert.length > 0) {
+      Logger.info(`[RANKED UPDATES] Updating ${leaderboardsToUpsert.length} leaderboards...`);
+      await LeaderboardCoreService.upsertLeaderboardsFromRankingApi(leaderboardsToUpsert);
+      await CacheService.invalidate("leaderboard:qualified-leaderboards");
       Logger.info(
-        `[RANKED UPDATES] Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
+        `[RANKED UPDATES] Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
       );
 
       sendEmbedToChannel(
@@ -343,7 +365,7 @@ export class LeaderboardRankingService {
         new EmbedBuilder()
           .setTitle("Qualified Leaderboards Updated")
           .setDescription(
-            `Updated ${leaderboardBulkWrite.length} leaderboards in ${formatDuration(performance.now() - before)}`
+            `Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
           )
           .setColor("#00ff00")
       );
@@ -370,13 +392,13 @@ export class LeaderboardRankingService {
   public static async fetchStarChangeHistory(
     leaderboard: ScoreSaberLeaderboard
   ): Promise<LeaderboardStarChange[]> {
-    return (
-      await ScoreSaberLeaderboardStarChangeModel.find({
-        leaderboardId: leaderboard.id,
-      })
-        .lean()
-        .sort({ timestamp: -1 })
-    ).map(starChange => ({
+    const rows = await db
+      .select()
+      .from(scoreSaberLeaderboardStarChangeTable)
+      .where(eq(scoreSaberLeaderboardStarChangeTable.leaderboardId, leaderboard.id))
+      .orderBy(desc(scoreSaberLeaderboardStarChangeTable.timestamp));
+
+    return rows.map(starChange => ({
       previousStars: starChange.previousStars,
       newStars: starChange.newStars,
       timestamp: starChange.timestamp,

@@ -1,0 +1,558 @@
+{
+  "id": "bd644585-cbcf-4ee1-8002-5a96b932ca8c",
+  "prevId": "ed9a7571-f177-40e4-b1bb-8f261ae42b60",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.scoresaber-leaderboard-star-change": {
+      "name": "scoresaber-leaderboard-star-change",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "leaderboardId": {
+          "name": "leaderboardId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "previousStars": {
+          "name": "previousStars",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "newStars": {
+          "name": "newStars",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.scoresaber-leaderboards": {
+      "name": "scoresaber-leaderboards",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "songHash": {
+          "name": "songHash",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "songName": {
+          "name": "songName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "songSubName": {
+          "name": "songSubName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "songAuthorName": {
+          "name": "songAuthorName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "levelAuthorName": {
+          "name": "levelAuthorName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "difficulty": {
+          "name": "difficulty",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "characteristic": {
+          "name": "characteristic",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "maxScore": {
+          "name": "maxScore",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ranked": {
+          "name": "ranked",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "qualified": {
+          "name": "qualified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stars": {
+          "name": "stars",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rankedDate": {
+          "name": "rankedDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "qualifiedDate": {
+          "name": "qualifiedDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plays": {
+          "name": "plays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dailyPlays": {
+          "name": "dailyPlays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "seededScores": {
+          "name": "seededScores",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cachedSongArt": {
+          "name": "cachedSongArt",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "leaderboards_search_idx": {
+          "name": "leaderboards_search_idx",
+          "columns": [
+            {
+              "expression": "to_tsvector('english', \"songName\" || ' ' || \"songSubName\" || ' ' || \"songAuthorName\" || ' ' || \"levelAuthorName\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.scoresaber-medal-scores": {
+      "name": "scoresaber-medal-scores",
+      "schema": "",
+      "columns": {
+        "scoreId": {
+          "name": "scoreId",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "playerId": {
+          "name": "playerId",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "leaderboardId": {
+          "name": "leaderboardId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "difficulty": {
+          "name": "difficulty",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "characteristic": {
+          "name": "characteristic",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "score": {
+          "name": "score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accuracy": {
+          "name": "accuracy",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "medals": {
+          "name": "medals",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "missedNotes": {
+          "name": "missedNotes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "badCuts": {
+          "name": "badCuts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "maxCombo": {
+          "name": "maxCombo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fullCombo": {
+          "name": "fullCombo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "modifiers": {
+          "name": "modifiers",
+          "type": "varchar(32)[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hmd": {
+          "name": "hmd",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rightController": {
+          "name": "rightController",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "leftController": {
+          "name": "leftController",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.scoresaber-score-history": {
+      "name": "scoresaber-score-history",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "playerId": {
+          "name": "playerId",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "leaderboardId": {
+          "name": "leaderboardId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scoreId": {
+          "name": "scoreId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "difficulty": {
+          "name": "difficulty",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "characteristic": {
+          "name": "characteristic",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "score": {
+          "name": "score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accuracy": {
+          "name": "accuracy",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pp": {
+          "name": "pp",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "missedNotes": {
+          "name": "missedNotes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "badCuts": {
+          "name": "badCuts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "maxCombo": {
+          "name": "maxCombo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fullCombo": {
+          "name": "fullCombo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "modifiers": {
+          "name": "modifiers",
+          "type": "varchar(32)[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hmd": {
+          "name": "hmd",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rightController": {
+          "name": "rightController",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "leftController": {
+          "name": "leftController",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.scoresaber-scores": {
+      "name": "scoresaber-scores",
+      "schema": "",
+      "columns": {
+        "scoreId": {
+          "name": "scoreId",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "playerId": {
+          "name": "playerId",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "leaderboardId": {
+          "name": "leaderboardId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "difficulty": {
+          "name": "difficulty",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "characteristic": {
+          "name": "characteristic",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "score": {
+          "name": "score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accuracy": {
+          "name": "accuracy",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pp": {
+          "name": "pp",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "missedNotes": {
+          "name": "missedNotes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "badCuts": {
+          "name": "badCuts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "maxCombo": {
+          "name": "maxCombo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fullCombo": {
+          "name": "fullCombo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "modifiers": {
+          "name": "modifiers",
+          "type": "varchar(32)[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hmd": {
+          "name": "hmd",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rightController": {
+          "name": "rightController",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "leftController": {
+          "name": "leftController",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

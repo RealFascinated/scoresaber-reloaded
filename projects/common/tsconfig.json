@@ -16,6 +16,6 @@
     "declarationMap": true,
     "baseUrl": "./"
   },
-  "include": ["src/"],
+  "include": ["src/", "../../score"],
   "exclude": ["node_modules", "dist"]
 }

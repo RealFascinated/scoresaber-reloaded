@@ -67,7 +67,7 @@ export class ScoreCoreService {
       characteristic: score.characteristic,
       score: score.score,
       accuracy: score.accuracy,
-      pp: score.pp ?? 0,
+      pp: score.pp,
       missedNotes: score.missedNotes,
       badCuts: score.badCuts,
       maxCombo: score.maxCombo,
@@ -76,7 +76,6 @@ export class ScoreCoreService {
       hmd: score.hmd,
       rightController: score.rightController,
       leftController: score.leftController,
-      beatLeaderScoreId: beatLeaderScore?.scoreId,
       timestamp: score.timestamp,
     });
 
@@ -261,8 +260,6 @@ export class ScoreCoreService {
         name: playerInfo.name,
         profilePicture: playerInfo.avatar,
         country: playerInfo.country,
-        permissions: null,
-        role: null,
       };
     }
 

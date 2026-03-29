@@ -80,7 +80,7 @@ export class TopScoresService {
    * @returns whether the score is in the top 50 global scores
    */
   public static async isTop50GlobalScore(score: ScoreSaberScore): Promise<boolean> {
-    if (score.pp == null || score.pp <= 0 || score.rank >= 10) {
+    if (score.pp <= 0 || score.rank >= 10) {
       return false;
     }
 

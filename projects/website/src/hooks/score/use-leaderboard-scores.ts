@@ -1,8 +1,7 @@
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import type { Page } from "@ssr/common/pagination";
-import { Pagination } from "@ssr/common/pagination";
+import { Pagination, type Page } from "@ssr/common/pagination";
+import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import useDatabase from "../use-database";
@@ -56,14 +55,14 @@ export const useLeaderboardScores = (
 
               response.items = response.items.map(score => ({
                 ...score,
-                playerInfo: friends.find(f => f.id === score.playerId) || mainPlayer || undefined,
+                // playerInfo: friends.find(f => f.id === score.playerId) || mainPlayer || undefined,
               }));
 
               return response;
             }
           }
 
-          return Pagination.empty();
+          return Pagination.empty<ScoreSaberScore>();
         }
         case ScoreModeEnum.History: {
           if (mainPlayer) {
@@ -78,7 +77,7 @@ export const useLeaderboardScores = (
             }
           }
 
-          return Pagination.empty();
+          return Pagination.empty<ScoreSaberScore>();
         }
       }
     },

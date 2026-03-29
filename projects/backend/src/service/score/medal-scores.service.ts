@@ -204,7 +204,7 @@ export class MedalScoresService {
     score: ScoreSaberScore,
     beatLeaderScore: BeatLeaderScore | undefined
   ) {
-    if (score.rank > 10 || (score.pp ?? 0) <= 0) {
+    if (score.rank > 10 || score.pp <= 0) {
       return;
     }
 

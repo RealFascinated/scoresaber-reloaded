@@ -1,7 +1,7 @@
 import HMDIcon from "@/components/hmd-icon";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 
 export function ScoreSaberScoreHMD({
   score,
@@ -22,16 +22,16 @@ export function ScoreSaberScoreHMD({
           ) : (
             <div>
               <p>An unknown HMD was used (outdated mod?)</p>
-              {score.controllers?.leftController === "Touch" && <p>Likely a Quest variant was used</p>}
+              {score.leftController === "Touch" && <p>Likely a Quest variant was used</p>}
             </div>
           )}
 
-          {score.controllers && (
+          {score.leftController && score.rightController && (
             <div>
               <p className="font-semibold">Controllers</p>
               <div>
-                <p>Left: {score.controllers.leftController}</p>
-                <p>Right: {score.controllers.rightController}</p>
+                <p>Left: {score.leftController}</p>
+                <p>Right: {score.rightController}</p>
               </div>
             </div>
           )}

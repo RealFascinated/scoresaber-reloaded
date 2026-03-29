@@ -1,9 +1,12 @@
+import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { MapDifficultySchema } from "@ssr/common/score/map-difficulty";
 import { MapCharacteristicSchema } from "@ssr/common/types/map-characteristic";
 import { Elysia } from "elysia";
 import { z } from "zod";
+import BeatSaverService from "../service/beatsaver.service";
 import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
 import { LeaderboardHmdService } from "../service/leaderboard/leaderboard-hmd.service";
+import { LeaderboardRankingService } from "../service/leaderboard/leaderboard-ranking.service";
 import { ScoreSaberApiService } from "../service/scoresaber-api.service";
 
 export default function leaderboardController(app: Elysia) {
@@ -56,7 +59,17 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/by-id/:leaderboardId",
         async ({ params: { leaderboardId } }) => {
-          return await LeaderboardCoreService.getLeaderboard(leaderboardId);
+          const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
+          return {
+            leaderboard: leaderboard,
+            beatsaver: await BeatSaverService.getMap(
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic,
+              "full"
+            ),
+            starChangeHistory: await LeaderboardRankingService.fetchStarChangeHistory(leaderboard),
+          } as LeaderboardResponse;
         },
         {
           tags: ["Leaderboard"],
@@ -71,8 +84,21 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/by-hash/:hash/:difficulty/:characteristic",
         async ({ params: { hash, difficulty, characteristic } }) => {
-          const data = await LeaderboardCoreService.getLeaderboardByHash(hash, difficulty, characteristic);
-          return data;
+          const leaderboard = await LeaderboardCoreService.getLeaderboardByHash(
+            hash,
+            difficulty,
+            characteristic
+          );
+          return {
+            leaderboard: leaderboard,
+            beatsaver: await BeatSaverService.getMap(
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic,
+              "full"
+            ),
+            starChangeHistory: await LeaderboardRankingService.fetchStarChangeHistory(leaderboard),
+          } as LeaderboardResponse;
         },
         {
           tags: ["Leaderboard"],

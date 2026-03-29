@@ -52,7 +52,7 @@ export function scoreSaberMedalScoreRowToScoreSaberScore(row: ScoreSaberMedalSco
     score: row.score,
     accuracy: row.accuracy,
     pp: 0,
-    weight: null,
+    weight: 0,
     rank: 0,
     misses: row.missedNotes + row.badCuts,
     missedNotes: row.missedNotes,

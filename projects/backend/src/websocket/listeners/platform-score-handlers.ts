@@ -188,10 +188,13 @@ export class ScoreWebsockets implements EventListener {
       if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id))) {
         await LeaderboardCoreService.createLeaderboard(leaderboard.id, leaderboardToken);
       } else {
-        await db.update(scoreSaberLeaderboardsTable).set({
-          plays: leaderboard.plays,
-          dailyPlays: leaderboard.dailyPlays,
-        }).where(eq(scoreSaberLeaderboardsTable.id, leaderboard.id));
+        await db
+          .update(scoreSaberLeaderboardsTable)
+          .set({
+            plays: leaderboard.plays,
+            dailyPlays: leaderboard.dailyPlays,
+          })
+          .where(eq(scoreSaberLeaderboardsTable.id, leaderboard.id));
       }
 
       // Track unique daily players in Redis

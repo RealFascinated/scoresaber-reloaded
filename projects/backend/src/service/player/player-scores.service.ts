@@ -13,6 +13,7 @@ import type {
 } from "@ssr/common/schemas/accsaber/tokens/query/query";
 import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import {
   PlayerScoreChartDataPoint,
@@ -33,7 +34,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
-import { and, asc, desc, eq, gte, inArray, isNotNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
@@ -300,72 +301,44 @@ export class PlayerScoresService {
    * @param playerId the player's id
    */
   public static async getPlayerScoreChart(playerId: string): Promise<PlayerScoresChartResponse> {
-    const scores = await ScoreSaberScoreModel.aggregate([
-      {
-        $match: {
-          playerId: playerId,
-          pp: { $gt: 0 },
-        },
-      },
-      {
-        $project: {
-          accuracy: 1,
-          pp: 1,
-          timestamp: 1,
-          leaderboardId: 1,
-        },
-      },
-      {
-        $lookup: {
-          from: "scoresaber-leaderboards",
-          localField: "leaderboardId",
-          foreignField: "_id",
-          as: "leaderboard",
-          pipeline: [
-            {
-              $project: {
-                _id: 1,
-                stars: 1,
-                songName: 1,
-                "difficulty.difficulty": 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $unwind: {
-          path: "$leaderboard",
-          preserveNullAndEmptyArrays: false,
-        },
-      },
-    ]);
+    const rows = await db
+      .select({
+        accuracy: scoreSaberScoresTable.accuracy,
+        pp: scoreSaberScoresTable.pp,
+        timestamp: scoreSaberScoresTable.timestamp,
+        leaderboardId: scoreSaberLeaderboardsTable.id,
 
-    if (!scores.length) {
+        songName: scoreSaberLeaderboardsTable.songName,
+        stars: scoreSaberLeaderboardsTable.stars,
+        leaderboardDifficulty: scoreSaberLeaderboardsTable.difficulty,
+      })
+      .from(scoreSaberScoresTable)
+      .innerJoin(
+        scoreSaberLeaderboardsTable,
+        eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
+      )
+      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)));
+
+    if (!rows.length) {
       return {
         data: [],
       };
     }
 
-    const dataPoints: PlayerScoreChartDataPoint[] = [];
-    for (const score of scores) {
-      const leaderboard = score.leaderboard;
-      if (!leaderboard) {
-        continue;
-      }
-      dataPoints.push({
-        accuracy: score.accuracy,
-        stars: leaderboard.stars,
-        pp: score.pp,
-        timestamp: score.timestamp,
-        leaderboardId: leaderboard._id,
-        leaderboardName: leaderboard.songName,
-        leaderboardDifficulty: getDifficultyName(getDifficulty(leaderboard.difficulty.difficulty)),
-      });
-    }
+    const data: PlayerScoreChartDataPoint[] = rows.map(row => ({
+      accuracy: row.accuracy,
+      stars: row.stars ?? 0,
+      pp: row.pp,
+      timestamp: row.timestamp,
+      leaderboardId: row.leaderboardId,
+      leaderboardName: row.songName,
+      leaderboardDifficulty: getDifficultyName(
+        getDifficulty(MapDifficultySchema.parse(row.leaderboardDifficulty))
+      ),
+    }));
 
     return {
-      data: dataPoints,
+      data,
     };
   }
 

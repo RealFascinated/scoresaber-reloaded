@@ -2,7 +2,6 @@ import { parse } from "devalue";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
 import { StarFilter } from "../maps/types";
-import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import type { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { PlayerStatisticHistory } from "../player/player-statistic-history";
@@ -31,6 +30,7 @@ import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph
 import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
 import type { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
 import { ScoreCalendarData } from "../types/player/player-statistic";

@@ -1,34 +1,27 @@
 import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
+import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import SimpleLink from "../../simple-link";
 
 type DifficultyButtonProps = {
-  difficulty: MapDifficulty;
-  characteristic: MapCharacteristic;
-  leaderboardId: number;
+  leaderboardDifficulty: ScoreSaberLeaderboardDifficulty;
   selectedId: number;
 };
 
-export function DifficultyButton({
-  difficulty,
-  characteristic,
-  leaderboardId,
-  selectedId,
-}: DifficultyButtonProps) {
+export function DifficultyButton({ leaderboardDifficulty, selectedId }: DifficultyButtonProps) {
+  const { characteristic, difficulty, id } = leaderboardDifficulty;
   if (characteristic !== "Standard") {
     return null;
   }
 
-  const isSelected = leaderboardId === selectedId;
+  const isSelected = id === selectedId;
   const difficultyData = getDifficulty(difficulty);
   const color = difficultyData.color;
 
-  const buttonId = `difficulty-btn-${leaderboardId}`;
+  const buttonId = `difficulty-btn-${id}`;
   return (
-    <SimpleLink href={`/leaderboard/${leaderboardId}`}>
+    <SimpleLink href={`/leaderboard/${id}`}>
       <style>{`
     @media (hover: hover) {
       #${buttonId}.difficulty-button-hover:hover {

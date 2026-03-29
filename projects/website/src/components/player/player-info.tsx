@@ -2,8 +2,7 @@ import Avatar from "@/components/avatar";
 import SimpleLink from "@/components/simple-link";
 import CountryFlag from "@/components/ui/country-flag";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { clsx } from "clsx";
 
@@ -14,7 +13,7 @@ export function PlayerInfo({
   hideCountryFlag,
   useLink,
 }: {
-  player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayer;
+  player: ScoreSaberLeaderboardPlayerInfo | ScoreSaberPlayer;
   highlightedPlayerId?: string;
   className?: string;
   hideCountryFlag?: boolean;

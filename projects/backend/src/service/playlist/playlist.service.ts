@@ -264,7 +264,7 @@ export default class PlaylistService {
       const getSortValue = (score: ScoreSaberScore, field: string): number => {
         switch (field) {
           case "pp":
-            return score.pp ?? 0;
+            return score.pp;
           case "score":
             return score.score;
           case "acc":
@@ -272,7 +272,7 @@ export default class PlaylistService {
           case "date":
             return score.timestamp.getTime();
           default:
-            return score.pp ?? 0;
+            return score.pp;
         }
       };
 
@@ -353,7 +353,7 @@ export default class PlaylistService {
       const getSortValue = (score: ScoreSaberScore, field: string): number => {
         switch (field) {
           case "pp":
-            return score.pp ?? 0;
+            return score.pp;
           case "score":
             return score.score;
           case "acc":
@@ -361,7 +361,7 @@ export default class PlaylistService {
           case "date":
             return score.timestamp.getTime();
           default:
-            return score.pp ?? 0;
+            return score.pp;
         }
       };
 

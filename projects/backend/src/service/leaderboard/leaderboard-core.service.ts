@@ -50,6 +50,73 @@ export class LeaderboardCoreService {
   }
 
   /**
+   * Gets a ScoreSaber leaderboard by hash.
+   *
+   * @param hash the hash of the leaderboard to get
+   * @param difficulty the difficulty of the leaderboard to get
+   * @param characteristic the characteristic of the leaderboard to get
+   * @param options the options to use for the fetch
+   * @returns the fetched leaderboard
+   */
+  public static async getLeaderboardByHash(
+    hash: string,
+    difficulty: MapDifficulty,
+    characteristic: MapCharacteristic
+  ): Promise<ScoreSaberLeaderboard> {
+    return await CacheService.fetch(
+      CacheId.Leaderboards,
+      `leaderboard:hash:${hash}:${difficulty}:${characteristic}`,
+      async () => {
+        const hashNorm = hash.trim().toLowerCase();
+
+        const [match] = await db
+          .select({ id: scoreSaberLeaderboardsTable.id })
+          .from(scoreSaberLeaderboardsTable)
+          .where(
+            and(
+              eq(sql`lower(${scoreSaberLeaderboardsTable.songHash})`, hashNorm),
+              eq(scoreSaberLeaderboardsTable.difficulty, difficulty),
+              eq(scoreSaberLeaderboardsTable.characteristic, characteristic)
+            )
+          )
+          .limit(1);
+
+        if (match) {
+          const map = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds([match.id]);
+          const fromDb = map.get(match.id);
+          if (fromDb) {
+            return fromDb;
+          }
+        }
+
+        const before = performance.now();
+        const leaderboardToken = await ScoreSaberApiService.lookupLeaderboardByHash(
+          hash,
+          getScoreSaberDifficultyFromDifficulty(difficulty),
+          characteristic
+        );
+        if (leaderboardToken == undefined) {
+          throw new NotFoundError(
+            `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
+          );
+        }
+        const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+
+        await LeaderboardCoreService.saveLeaderboard(leaderboard.id, leaderboard);
+        (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
+          id: leaderboard.id.toString(),
+          data: leaderboard.id,
+        });
+
+        Logger.info(
+          `Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`
+        );
+        return leaderboard;
+      }
+    );
+  }
+
+  /**
    * Loads leaderboard rows with all difficulties for the same song (self-join on song hash).
    */
   public static async getLeaderboardsWithDifficultiesByIds(
@@ -116,73 +183,6 @@ export class LeaderboardCoreService {
 
     Logger.info(`Created leaderboard "${id}" in ${formatDuration(performance.now() - before)}`);
     return leaderboard;
-  }
-
-  /**
-   * Gets a ScoreSaber leaderboard by hash.
-   *
-   * @param hash the hash of the leaderboard to get
-   * @param difficulty the difficulty of the leaderboard to get
-   * @param characteristic the characteristic of the leaderboard to get
-   * @param options the options to use for the fetch
-   * @returns the fetched leaderboard
-   */
-  public static async getLeaderboardByHash(
-    hash: string,
-    difficulty: MapDifficulty,
-    characteristic: MapCharacteristic
-  ): Promise<ScoreSaberLeaderboard> {
-    return await CacheService.fetch(
-      CacheId.Leaderboards,
-      `leaderboard:hash:${hash}:${difficulty}:${characteristic}`,
-      async () => {
-        const hashNorm = hash.trim().toLowerCase();
-
-        const [match] = await db
-          .select({ id: scoreSaberLeaderboardsTable.id })
-          .from(scoreSaberLeaderboardsTable)
-          .where(
-            and(
-              eq(sql`lower(${scoreSaberLeaderboardsTable.songHash})`, hashNorm),
-              eq(scoreSaberLeaderboardsTable.difficulty, difficulty),
-              eq(scoreSaberLeaderboardsTable.characteristic, characteristic)
-            )
-          )
-          .limit(1);
-
-        if (match) {
-          const map = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds([match.id]);
-          const fromDb = map.get(match.id);
-          if (fromDb) {
-            return fromDb;
-          }
-        }
-
-        const before = performance.now();
-        const leaderboardToken = await ScoreSaberApiService.lookupLeaderboardByHash(
-          hash,
-          getScoreSaberDifficultyFromDifficulty(difficulty),
-          characteristic
-        );
-        if (leaderboardToken == undefined) {
-          throw new NotFoundError(
-            `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
-          );
-        }
-        const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-
-        await LeaderboardCoreService.saveLeaderboard(leaderboard.id, leaderboard);
-        (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
-          id: leaderboard.id.toString(),
-          data: leaderboard.id,
-        });
-
-        Logger.info(
-          `Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`
-        );
-        return leaderboard;
-      }
-    );
   }
 
   /**
@@ -275,6 +275,66 @@ export class LeaderboardCoreService {
   }
 
   /**
+   * Bulk upsert leaderboards from ScoreSaber API sync (ranked/qualified refresh).
+   * Does not run song-art caching. Preserves `seededScores` and `cachedSongArt` on existing rows.
+   */
+  public static async upsertLeaderboardsFromRankingApi(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
+    if (leaderboards.length === 0) {
+      return;
+    }
+
+    const t = scoreSaberLeaderboardsTable;
+    const rows = leaderboards.map(lb => ({
+      id: lb.id,
+      songHash: lb.songHash,
+      songName: lb.songName,
+      songSubName: lb.songSubName,
+      songAuthorName: lb.songAuthorName,
+      levelAuthorName: lb.levelAuthorName,
+      difficulty: lb.difficulty.difficulty,
+      characteristic: lb.difficulty.characteristic,
+      maxScore: lb.maxScore,
+      ranked: lb.ranked,
+      qualified: lb.qualified,
+      stars: lb.stars,
+      rankedDate: lb.rankedDate ?? null,
+      qualifiedDate: lb.qualifiedDate ?? null,
+      plays: lb.plays,
+      dailyPlays: lb.dailyPlays,
+      seededScores: false,
+      cachedSongArt: false,
+      timestamp: lb.timestamp,
+    }));
+
+    await db
+      .insert(t)
+      .values(rows)
+      .onConflictDoUpdate({
+        target: t.id,
+        set: {
+          songHash: sql`excluded."songHash"`,
+          songName: sql`excluded."songName"`,
+          songSubName: sql`excluded."songSubName"`,
+          songAuthorName: sql`excluded."songAuthorName"`,
+          levelAuthorName: sql`excluded."levelAuthorName"`,
+          difficulty: sql`excluded."difficulty"`,
+          characteristic: sql`excluded."characteristic"`,
+          maxScore: sql`excluded."maxScore"`,
+          ranked: sql`excluded."ranked"`,
+          qualified: sql`excluded."qualified"`,
+          stars: sql`excluded."stars"`,
+          rankedDate: sql`excluded."rankedDate"`,
+          qualifiedDate: sql`excluded."qualifiedDate"`,
+          plays: sql`excluded."plays"`,
+          dailyPlays: sql`excluded."dailyPlays"`,
+          timestamp: sql`excluded."timestamp"`,
+          seededScores: sql`"scoresaber-leaderboards"."seededScores"`,
+          cachedSongArt: sql`"scoresaber-leaderboards"."cachedSongArt"`,
+        },
+      });
+  }
+
+  /**
    * Searches leaderboards from Postgres (full-text search + filters).
    * `verified` is ignored (not stored). `priority` is ignored (no upstream call).
    * Default category/sort is latest ranked maps (`rankedDate` desc, unranked last).
@@ -343,16 +403,8 @@ export class LeaderboardCoreService {
         case MapCategory.DateRanked:
         default:
           return ascending
-            ? [
-              sql`${scoreSaberLeaderboardsTable.rankedDate} ASC NULLS LAST`,
-              asc(dateFallback),
-              idTie,
-            ]
-            : [
-              sql`${scoreSaberLeaderboardsTable.rankedDate} DESC NULLS LAST`,
-              desc(dateFallback),
-              idTie,
-            ];
+            ? [sql`${scoreSaberLeaderboardsTable.rankedDate} ASC NULLS LAST`, asc(dateFallback), idTie]
+            : [sql`${scoreSaberLeaderboardsTable.rankedDate} DESC NULLS LAST`, desc(dateFallback), idTie];
       }
     })();
 

@@ -139,7 +139,16 @@ export const scoreSaberLeaderboardsTable = pgTable(
   ]
 );
 
+export const scoreSaberLeaderboardStarChangeTable = pgTable("scoresaber-leaderboard-star-change", {
+  id: serial().primaryKey(),
+  leaderboardId: integer().notNull(),
+  previousStars: doublePrecision().notNull(),
+  newStars: doublePrecision().notNull(),
+  timestamp: timestamp().notNull(),
+});
+
 export type ScoreSaberScoreRow = typeof scoreSaberScoresTable.$inferSelect;
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
 export type ScoreSaberMedalScoreRow = typeof scoreSaberMedalScoresTable.$inferSelect;
 export type ScoreSaberLeaderboardRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
+export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;

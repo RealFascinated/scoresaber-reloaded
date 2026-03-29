@@ -50,6 +50,20 @@
       "when": 1774748769721,
       "tag": "0006_widen_characteristic_128",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1774800000000,
+      "tag": "0007_leaderboard_star_change",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1774754246296,
+      "tag": "0008_curly_kate_bishop",
+      "breakpoints": true
     }
   ]
 }

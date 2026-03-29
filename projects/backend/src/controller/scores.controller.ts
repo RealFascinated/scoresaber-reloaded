@@ -31,7 +31,7 @@ export default function scoresController(app: Elysia) {
         {
           tags: ["Scores"],
           params: z.object({
-            scoreId: z.string(),
+            scoreId: z.coerce.number(),
           }),
 
           detail: {

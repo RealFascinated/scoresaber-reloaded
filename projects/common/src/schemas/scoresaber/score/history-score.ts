@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { numberIncludingInfinitySchema } from "../../number";
+import { BeatLeaderScoreSchema } from "../../../../../../score/score";
 import { ModifiersSchema } from "../../../score/modifier";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
 import { MapDifficultySchema } from "../../map/map-difficulty";
+import { nullToZeroNumberSchema, numberIncludingInfinitySchema } from "../../number";
 import { ScoreSaberLeaderboardPlayerInfoSchema } from "../leaderboard/player-info";
 
 export const ScoreSaberHistoryScoreSchema = z.object({
@@ -18,8 +19,8 @@ export const ScoreSaberHistoryScoreSchema = z.object({
   // Score information
   score: z.number(),
   accuracy: numberIncludingInfinitySchema,
-  pp: z.number().nullable(),
-  weight: z.number().nullable(),
+  pp: nullToZeroNumberSchema,
+  weight: nullToZeroNumberSchema,
   rank: z.number(),
   misses: z.number(),
   missedNotes: z.number(),
@@ -48,7 +49,7 @@ export const ScoreSaberHistoryScoreSchema = z.object({
   }),
 
   // todo: beatleader score
-  beatLeaderScore: z.unknown().nullable(),
+  beatLeaderScore: BeatLeaderScoreSchema.optional(),
 
   timestamp: z.date(),
 });
