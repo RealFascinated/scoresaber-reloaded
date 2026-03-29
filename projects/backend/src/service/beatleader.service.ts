@@ -101,7 +101,9 @@ export default class BeatLeaderService {
       .returning();
 
     const timeTaken = performance.now() - before;
-    Logger.info(`Tracked BeatLeader score "${scoreToken.id}" for "${player.name}"(${playerId}) in ${formatDuration(timeTaken)}`);
+    Logger.info(
+      `Tracked BeatLeader score "${scoreToken.id}" for "${player.name}"(${playerId}) in ${formatDuration(timeTaken)}`
+    );
     return beatLeaderScoreRowToType(row);
   }
 
@@ -442,32 +444,32 @@ export default class BeatLeaderService {
     const scoreImprovement =
       rawScoreImprovement && rawScoreImprovement.score > 0
         ? {
-          score: rawScoreImprovement.score,
-          pauses: rawScoreImprovement.pauses,
-          misses: {
-            misses: getMisses(rawScoreImprovement),
-            missedNotes: rawScoreImprovement.missedNotes,
-            bombCuts: rawScoreImprovement.bombCuts,
-            badCuts: rawScoreImprovement.badCuts,
-            wallsHit: rawScoreImprovement.wallsHit,
-          },
-          handAccuracy: {
-            left: rawScoreImprovement.accLeft,
-            right: rawScoreImprovement.accRight,
-          },
-        }
+            score: rawScoreImprovement.score,
+            pauses: rawScoreImprovement.pauses,
+            misses: {
+              misses: getMisses(rawScoreImprovement),
+              missedNotes: rawScoreImprovement.missedNotes,
+              bombCuts: rawScoreImprovement.bombCuts,
+              badCuts: rawScoreImprovement.badCuts,
+              wallsHit: rawScoreImprovement.wallsHit,
+            },
+            handAccuracy: {
+              left: rawScoreImprovement.accLeft,
+              right: rawScoreImprovement.accRight,
+            },
+          }
         : {
-          score: 0,
-          pauses: 0,
-          misses: {
-            misses: 0,
-            missedNotes: 0,
-            bombCuts: 0,
-            wallsHit: 0,
-            badCuts: 0,
-          },
-          handAccuracy: { left: 0, right: 0 },
-        };
+            score: 0,
+            pauses: 0,
+            misses: {
+              misses: 0,
+              missedNotes: 0,
+              bombCuts: 0,
+              wallsHit: 0,
+              badCuts: 0,
+            },
+            handAccuracy: { left: 0, right: 0 },
+          };
 
     return {
       playerId: scoreToken.playerId,
@@ -493,5 +495,4 @@ export default class BeatLeaderService {
       timestamp: new Date(Number(scoreToken.timeset) * 1000),
     };
   }
-
 }

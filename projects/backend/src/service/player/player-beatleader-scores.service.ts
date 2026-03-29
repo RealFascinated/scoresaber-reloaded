@@ -1,11 +1,12 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
-import { Player, PlayerModel } from "@ssr/common/model/player/player";
+import { Player } from "@ssr/common/model/player/player";
 import type { BeatLeaderPlayerScoresPageToken } from "@ssr/common/schemas/beatleader/tokens/score/page";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import BeatLeaderService from "../beatleader.service";
+import { PlayerCoreService } from "./player-core.service";
 
 type SeedMode = "backfill" | "requested";
 
@@ -45,7 +46,7 @@ export class PlayerBeatLeaderScoresService {
 
     if (player.banned) {
       if (!player.seededBeatLeaderScores) {
-        await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
+        await PlayerCoreService.updatePlayer(playerId, { seededBeatLeaderScores: true });
       }
       return empty();
     }
@@ -165,7 +166,7 @@ export class PlayerBeatLeaderScoresService {
     result.timeTaken = performance.now() - startTime;
     result.totalPagesFetched = currentPage - 1;
 
-    await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
+    await PlayerCoreService.updatePlayer(playerId, { seededBeatLeaderScores: true });
 
     if (currentPage !== 1) {
       Logger.info(

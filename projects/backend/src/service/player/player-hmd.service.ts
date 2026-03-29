@@ -2,6 +2,8 @@ import { HMD } from "@ssr/common/hmds";
 import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 
+import { PlayerCoreService } from "./player-core.service";
+
 export class PlayerHmdService {
   /**
    * Updates the player's HMD.
@@ -19,7 +21,7 @@ export class PlayerHmdService {
       return;
     }
 
-    await PlayerModel.updateOne({ _id: playerId }, { $set: { hmd: score.hmd } });
+    await PlayerCoreService.updatePlayer(playerId, { hmd: score.hmd });
   }
 
   /**

@@ -1,15 +1,49 @@
+import { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
 import { sql } from "drizzle-orm";
 import {
   boolean,
   doublePrecision,
   index,
   integer,
+  jsonb,
   pgTable,
   serial,
   text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+
+export const scoreSaberAccountsTable = pgTable(
+  "scoresaber-accounts",
+  {
+    id: varchar({ length: 32 }).primaryKey(),
+    name: text().notNull(),
+    country: varchar({ length: 32 }),
+
+    // Peak rank
+    peakRank: integer(),
+    peakRankTimestamp: timestamp(),
+
+    seededScores: boolean().notNull(),
+    seededBeatLeaderScores: boolean().notNull(),
+    cachedProfilePicture: boolean().notNull(),
+
+    trackReplays: boolean().notNull(),
+
+    inactive: boolean().notNull(),
+    banned: boolean().notNull(),
+
+    hmd: varchar({ length: 32 }),
+    pp: doublePrecision().notNull().default(0),
+    medals: integer().notNull().default(0),
+
+    scoreStats: jsonb().$type<ScoreSaberPlayerScoreStats>().notNull(),
+
+    trackedSince: timestamp().notNull(),
+    joinedDate: timestamp().notNull(),
+  },
+  table => [index("accounts_name_idx").on(table.name), index("accounts_medals_idx").on(table.medals.desc())]
+);
 
 export const scoreSaberScoresTable = pgTable(
   "scoresaber-scores",
@@ -241,6 +275,7 @@ export const beatLeaderScoresTable = pgTable(
   ]
 );
 
+export type ScoreSaberAccountRow = typeof scoreSaberAccountsTable.$inferSelect;
 export type ScoreSaberScoreRow = typeof scoreSaberScoresTable.$inferSelect;
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
 export type ScoreSaberMedalScoreRow = typeof scoreSaberMedalScoresTable.$inferSelect;

@@ -9,7 +9,8 @@ import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
 
 const LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT = `https://cdn.scorestats.beatleader.xyz/:scoreId.json`;
-const LOOKUP_PLAYERS_ENDPOINT = "https://api.beatleader.com/players?leaderboardContext=general&page=1&count=50&sortBy=pp&mapsType=ranked&ppType=general&order=desc";
+const LOOKUP_PLAYERS_ENDPOINT =
+  "https://api.beatleader.com/players?leaderboardContext=general&page=1&count=50&sortBy=pp&mapsType=ranked&ppType=general&order=desc";
 const LOOKUP_PLAYER_SCORES_ENDPOINT = "https://api.beatleader.com/player/:playerId/scores";
 
 export class BeatLeaderService extends ApiService {

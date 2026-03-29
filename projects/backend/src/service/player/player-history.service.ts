@@ -1,8 +1,9 @@
 import Logger from "@ssr/common/logger";
-import { Player, PlayerModel } from "@ssr/common/model/player/player";
+import { PlayerModel } from "@ssr/common/model/player/player";
 import { PlayerHistoryEntry, PlayerHistoryEntryModel } from "@ssr/common/model/player/player-history-entry";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
+import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { playerHistoryToObject } from "@ssr/common/utils/model-converters";
@@ -80,10 +81,10 @@ export class PlayerHistoryService {
 
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
-          (async () => {
-            await PlayerModel.updateOne({ _id: foundPlayer._id }, { $set: { inactive: player.inactive } });
-            redisClient.del(`scoresaber:cached-player:${foundPlayer._id}`);
-          })(),
+        (async () => {
+          await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
+          redisClient.del(`scoresaber:cached-player:${foundPlayer.id}`);
+        })(),
       ]);
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
@@ -130,9 +131,9 @@ export class PlayerHistoryService {
     );
     Logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-        `Successfully processed: ${successCount} players\n` +
-        `Failed to process: ${errorCount} players\n` +
-        `Total inactive players: ${inactivePlayers}`
+      `Successfully processed: ${successCount} players\n` +
+      `Failed to process: ${errorCount} players\n` +
+      `Total inactive players: ${inactivePlayers}`
     );
   }
 
@@ -146,7 +147,7 @@ export class PlayerHistoryService {
    * @param playerToken the player token to track the history for
    */
   public static async trackPlayerHistory(
-    player: Player,
+    player: ScoreSaberAccount,
     trackTime: Date,
     playerToken: ScoreSaberPlayerToken
   ): Promise<void> {
@@ -159,13 +160,13 @@ export class PlayerHistoryService {
 
     await PlayerCoreService.updatePeakRank(playerToken);
 
-    const daysTracked = await PlayerHistoryService.getDaysTracked(player._id);
+    const daysTracked = await PlayerHistoryService.getDaysTracked(player.id);
     if (daysTracked === 0) {
       await PlayerHistoryService.seedPlayerRankHistory(player, playerToken);
     }
 
     const existingEntry = await PlayerHistoryEntryModel.findOne({
-      playerId: player._id,
+      playerId: player.id,
       date: getMidnightAlignedDate(trackTime),
     }).lean();
 
@@ -176,25 +177,25 @@ export class PlayerHistoryService {
     );
 
     await PlayerHistoryEntryModel.findOneAndUpdate(
-      { playerId: player._id, date: getMidnightAlignedDate(trackTime) },
+      { playerId: player.id, date: getMidnightAlignedDate(trackTime) },
       updatedHistory,
       { upsert: true }
     );
 
-    Logger.info(`Tracked player "${player._id}" in ${(performance.now() - before).toFixed(0)}ms`);
+    Logger.info(`Tracked player "${player.id}" in ${(performance.now() - before).toFixed(0)}ms`);
   }
 
   /**
    * Gets a player's statistic history for a specific day.
    *
-   * @param player the player to get the statistic history for
+   * @param playerToken the player to get the statistic history for
    * @param date the date to get the statistic history for
    * @param projection the projection to use
    * @param includeToday whether to include today's data even if the target date is not today
    * @returns the statistic history
    */
   public static async getPlayerStatisticHistory(
-    player: ScoreSaberPlayerToken,
+    playerToken: ScoreSaberPlayerToken,
     date: Date,
     includeToday?: boolean,
     projection?: Record<string, string | number | boolean | object>
@@ -207,7 +208,7 @@ export class PlayerHistoryService {
 
     // Get entry from database
     const entry = await PlayerHistoryEntryModel.findOne({
-      playerId: player.id,
+      playerId: playerToken.id,
       date: targetDate,
     })
       .select(projection ? { date: 1, ...projection } : {})
@@ -221,7 +222,7 @@ export class PlayerHistoryService {
     if (isTargetToday || includeToday) {
       const today = getMidnightAlignedDate(new Date());
       const todayKey = formatDateMinimal(today);
-      const todayData = await PlayerHistoryService.getTodayPlayerStatistic(player);
+      const todayData = await PlayerHistoryService.getTodayPlayerStatistic(playerToken);
       if (todayData) {
         if (isTargetToday) {
           history[dateKey] = todayData;
@@ -233,7 +234,7 @@ export class PlayerHistoryService {
 
     if (!isTargetToday && !entry && !includeToday) {
       // If no entry found and not today, try to get rank from history
-      const playerRankHistory = parseRankHistory(player);
+      const playerRankHistory = parseRankHistory(playerToken);
       const daysAgo = Math.floor((Date.now() - targetDate.getTime()) / (1000 * 60 * 60 * 24));
 
       if (daysAgo >= 0 && daysAgo < playerRankHistory.length) {
@@ -250,14 +251,14 @@ export class PlayerHistoryService {
   /**
    * Gets a player's statistic history for a specific date range.
    *
-   * @param player the player to get the statistic history for
+   * @param playerToken the player to get the statistic history for
    * @param startDate the start date to get the statistic history for
    * @param endDate the end date to get the statistic history for
    * @param projection the projection to use
    * @returns the statistic history
    */
   public static async getPlayerStatisticHistories(
-    player: ScoreSaberPlayerToken,
+    playerToken: ScoreSaberPlayerToken,
     count: number
   ): Promise<PlayerStatisticHistory> {
     const today = getMidnightAlignedDate(new Date());
@@ -267,14 +268,14 @@ export class PlayerHistoryService {
     const endTimestamp = getMidnightAlignedDate(today).getTime();
 
     const entries = await PlayerHistoryEntryModel.find({
-      playerId: player.id,
+      playerId: playerToken.id,
       ...(count > 0
         ? {
-            date: {
-              $gte: new Date(startDate),
-              $lte: new Date(today),
-            },
-          }
+          date: {
+            $gte: new Date(startDate),
+            $lte: new Date(today),
+          },
+        }
         : {}),
     })
       .sort({ date: -1 })
@@ -291,7 +292,7 @@ export class PlayerHistoryService {
     // `parseRankHistory()` includes today's rank (playerToken.rank) as the last element.
     // ScoreSaber's `histories` string ends at yesterday, so we start at "yesterday"
     // (length - 2) and derive `daysAgo` from the array index to avoid off-by-one drift.
-    const playerRankHistory = parseRankHistory(player);
+    const playerRankHistory = parseRankHistory(playerToken);
     const historyLength = playerRankHistory.length;
     const missingHistoryUpserts: Array<AnyBulkWriteOperation<PlayerHistoryEntry>> = [];
     for (
@@ -316,7 +317,7 @@ export class PlayerHistoryService {
 
         missingHistoryUpserts.push({
           updateOne: {
-            filter: { playerId: player.id, date },
+            filter: { playerId: playerToken.id, date },
             update: { $set: { rank } },
             upsert: true,
           },
@@ -327,11 +328,11 @@ export class PlayerHistoryService {
     if (missingHistoryUpserts.length > 0) {
       await PlayerHistoryEntryModel.bulkWrite(missingHistoryUpserts, { ordered: false });
       Logger.info(
-        `[PLAYER HISTORY] Bulk-upserted ${missingHistoryUpserts.length} missing history entries for ${player.name ?? player.id}`
+        `[PLAYER HISTORY] Bulk-upserted ${missingHistoryUpserts.length} missing history entries for ${playerToken.name ?? playerToken.id}`
       );
     }
 
-    const todayData = await PlayerHistoryService.getTodayPlayerStatistic(player);
+    const todayData = await PlayerHistoryService.getTodayPlayerStatistic(playerToken);
     if (todayData) {
       history[formatDateMinimal(today)] = todayData;
     }
@@ -367,7 +368,7 @@ export class PlayerHistoryService {
    * This method populates the player's rank history from their ScoreSaber profile.
    */
   public static async seedPlayerRankHistory(
-    player: Player,
+    account: ScoreSaberAccount,
     playerToken: ScoreSaberPlayerToken
   ): Promise<void> {
     const playerRankHistory = parseRankHistory(playerToken);
@@ -381,7 +382,7 @@ export class PlayerHistoryService {
       const daysAgo = historyLength - 1 - i;
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
       await PlayerHistoryEntryModel.findOneAndUpdate(
-        { playerId: player._id, date },
+        { playerId: account.id, date },
         { rank },
         { upsert: true }
       );
@@ -397,7 +398,7 @@ export class PlayerHistoryService {
    */
   public static async createHistoryEntry(
     playerToken: ScoreSaberPlayerToken,
-    player: Player,
+    account: ScoreSaberAccount,
     existingEntry?: Partial<PlayerHistoryEntry>
   ): Promise<Partial<PlayerHistoryEntry>> {
     const [accuracies, plusOnePp, medals] = await Promise.all([
@@ -423,12 +424,12 @@ export class PlayerHistoryService {
       totalScore: playerToken.scoreStats.totalScore,
       totalRankedScore: playerToken.scoreStats.totalRankedScore,
       plusOnePp: plusOnePp,
-      aPlays: player.scoreStats?.aPlays ?? 0,
-      sPlays: player.scoreStats?.sPlays ?? 0,
-      spPlays: player.scoreStats?.spPlays ?? 0,
-      ssPlays: player.scoreStats?.ssPlays ?? 0,
-      sspPlays: player.scoreStats?.sspPlays ?? 0,
-      godPlays: player.scoreStats?.godPlays ?? 0,
+      aPlays: account.scoreStats?.aPlays ?? 0,
+      sPlays: account.scoreStats?.sPlays ?? 0,
+      spPlays: account.scoreStats?.spPlays ?? 0,
+      ssPlays: account.scoreStats?.ssPlays ?? 0,
+      sspPlays: account.scoreStats?.sspPlays ?? 0,
+      godPlays: account.scoreStats?.godPlays ?? 0,
       medals: medals,
     };
   }

@@ -164,10 +164,7 @@ function mongoBeatLeaderDocToRow(doc: MongoBeatLeaderLeanDoc): typeof beatLeader
   };
 }
 
-const beatLeaderUpsertSet: Record<
-  Exclude<keyof BeatLeaderScoreRow, "id">,
-  ReturnType<typeof sql>
-> = {
+const beatLeaderUpsertSet: Record<Exclude<keyof BeatLeaderScoreRow, "id">, ReturnType<typeof sql>> = {
   playerId: sql`excluded."playerId"`,
   songHash: sql`excluded."songHash"`,
   leaderboardId: sql`excluded."leaderboardId"`,

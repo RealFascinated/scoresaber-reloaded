@@ -1,11 +1,13 @@
 import Logger from "@ssr/common/logger";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
-import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerMedalRankingsResponse } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { inArray, sum } from "drizzle-orm";
 import type { QueryFilter } from "mongoose";
+import { db } from "../../db";
+import { scoreSaberMedalScoresTable } from "../../db/schema";
 import ScoreSaberService from "../scoresaber.service";
 
 export class PlayerMedalsService {
@@ -15,25 +17,17 @@ export class PlayerMedalsService {
   public static async updatePlayerGlobalMedalCounts(): Promise<void> {
     const before = performance.now();
 
-    const medalCounts = await ScoreSaberMedalsScoreModel.aggregate([
-      {
-        $group: {
-          _id: "$playerId",
-          totalMedals: { $sum: "$medals" },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          playerId: "$_id",
-          totalMedals: 1,
-        },
-      },
-    ]);
+    const medalCountRows = await db
+      .select({
+        playerId: scoreSaberMedalScoresTable.playerId,
+        totalMedals: sum(scoreSaberMedalScoresTable.medals),
+      })
+      .from(scoreSaberMedalScoresTable)
+      .groupBy(scoreSaberMedalScoresTable.playerId);
 
     const playerMedalCounts = new Map<string, number>();
-    for (const result of medalCounts) {
-      playerMedalCounts.set(result.playerId, result.totalMedals);
+    for (const row of medalCountRows) {
+      playerMedalCounts.set(row.playerId, Number(row.totalMedals ?? 0));
     }
 
     const bulkOps = [];
@@ -82,29 +76,27 @@ export class PlayerMedalsService {
    */
   public static async updatePlayerMedalCounts(...playerIds: string[]): Promise<Record<string, number>> {
     const before = performance.now();
-    const medalCounts = await ScoreSaberMedalsScoreModel.aggregate([
-      {
-        $match: {
-          playerId: { $in: playerIds },
-        },
-      },
-      {
-        $group: {
-          _id: "$playerId",
-          totalMedals: { $sum: "$medals" },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          playerId: "$_id",
-          totalMedals: 1,
-        },
-      },
-    ]);
+
+    if (playerIds.length === 0) {
+      return {};
+    }
+
+    const medalCounts = await db
+      .select({
+        playerId: scoreSaberMedalScoresTable.playerId,
+        totalMedals: sum(scoreSaberMedalScoresTable.medals),
+      })
+      .from(scoreSaberMedalScoresTable)
+      .where(inArray(scoreSaberMedalScoresTable.playerId, playerIds))
+      .groupBy(scoreSaberMedalScoresTable.playerId);
+
+    const normalized = medalCounts.map(row => ({
+      playerId: row.playerId,
+      totalMedals: Number(row.totalMedals ?? 0),
+    }));
 
     await PlayerModel.bulkWrite(
-      medalCounts.map(result => {
+      normalized.map(result => {
         return {
           updateOne: {
             filter: { _id: result.playerId },
@@ -115,10 +107,10 @@ export class PlayerMedalsService {
     );
 
     Logger.info(
-      `[PLAYER MEDALS] Updated ${medalCounts.length} player medal counts in ${formatDuration(performance.now() - before)}`
+      `[PLAYER MEDALS] Updated ${normalized.length} player medal counts in ${formatDuration(performance.now() - before)}`
     );
 
-    return medalCounts.reduce(
+    return normalized.reduce(
       (acc, curr) => {
         acc[curr.playerId] = curr.totalMedals;
         return acc;

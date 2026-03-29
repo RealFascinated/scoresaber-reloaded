@@ -171,7 +171,7 @@ export class ScoreCoreService {
 
     // // Update player score stats
     // const scoreStats = await PlayerCoreService.getPlayerScoreStats(player.id);
-    // await PlayerModel.updateOne({ _id: player.id }, { $set: { scoreStats: scoreStats } });
+    // await PlayerCoreService.updatePlayer(player.id, { scoreStats });
 
     // if (newScore) {
     //   Logger.info(

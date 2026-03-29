@@ -2,7 +2,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import { Player, PlayerModel } from "@ssr/common/model/player/player";
+import { Player } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
@@ -44,6 +44,7 @@ import BeatSaverService from "../beatsaver.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
+import { PlayerCoreService } from "./player-core.service";
 
 function playerScoresOrderBy(
   sort: SortField,
@@ -93,7 +94,7 @@ export class PlayerScoresService {
   }> {
     if (player.banned) {
       if (!player.seededScores) {
-        await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
+        await PlayerCoreService.updatePlayer(player._id, { seededScores: true });
       }
       return {
         missingScores: 0,
@@ -113,7 +114,7 @@ export class PlayerScoresService {
     if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
       // Mark player as seeded
       if (!player.seededScores) {
-        await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
+        await PlayerCoreService.updatePlayer(player._id, { seededScores: true });
       }
 
       return {
@@ -190,7 +191,7 @@ export class PlayerScoresService {
       result.totalScores = 0;
 
       player.seededScores = false;
-      await PlayerModel.updateOne({ _id: playerId }, { $set: { seededScores: false } });
+      await PlayerCoreService.updatePlayer(playerId, { seededScores: false });
 
       // Notify
       sendEmbedToChannel(
@@ -280,7 +281,7 @@ export class PlayerScoresService {
 
     // Mark player as seeded
     if (!player.seededScores) {
-      await PlayerModel.updateOne({ _id: player._id }, { $set: { seededScores: true } });
+      await PlayerCoreService.updatePlayer(player._id, { seededScores: true });
     }
 
     result.timeTaken = performance.now() - startTime;

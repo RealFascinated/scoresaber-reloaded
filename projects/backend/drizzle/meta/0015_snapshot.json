@@ -1,6 +1,6 @@
 {
-  "id": "5fe6532b-47f5-4e86-a39c-db2aa6116f77",
-  "prevId": "407aac48-08ff-47ed-9976-8c83a70ae85e",
+  "id": "4abd08ef-df27-45af-97c3-6654c7e8a441",
+  "prevId": "c906a3a5-8c60-43e6-8c90-1f709366cac2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -177,7 +177,53 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "beatleader_scores_player_map_score_time_idx": {
+          "name": "beatleader_scores_player_map_score_time_idx",
+          "columns": [
+            {
+              "expression": "playerId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "songHash",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "songDifficulty",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "songCharacteristic",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "songScore",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "timestamp",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -562,6 +608,121 @@
               "expression": "id",
               "isExpression": false,
               "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.scoresaber-players": {
+      "name": "scoresaber-players",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(32)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "country": {
+          "name": "country",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "peakRank": {
+          "name": "peakRank",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "peakRankTimestamp": {
+          "name": "peakRankTimestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "seededScores": {
+          "name": "seededScores",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "seededBeatLeaderScores": {
+          "name": "seededBeatLeaderScores",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "trackReplays": {
+          "name": "trackReplays",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inactive": {
+          "name": "inactive",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "banned": {
+          "name": "banned",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hmd": {
+          "name": "hmd",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pp": {
+          "name": "pp",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "medals": {
+          "name": "medals",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "scoreStats": {
+          "name": "scoreStats",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "players_name_idx": {
+          "name": "players_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
               "nulls": "last"
             }
           ],
