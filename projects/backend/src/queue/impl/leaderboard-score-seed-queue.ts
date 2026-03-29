@@ -1,8 +1,10 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
-import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { asc, desc, eq } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberLeaderboardsTable } from "../../db/schema";
 import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
 import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
@@ -14,7 +16,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     super(QueueId.LeaderboardScoreSeedQueue, "lifo");
 
     setImmediate(() => this.insertLeaderboards());
-    setInterval(() => this.insertLeaderboards(), TimeUnit.toMillis(TimeUnit.Hour, 1));
+    setInterval(() => this.insertLeaderboards(), TimeUnit.toMillis(TimeUnit.Minute, 1));
   }
 
   protected async processItem(item: QueueItem<number>): Promise<void> {
@@ -64,7 +66,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           continue;
         }
 
-        await ScoreCoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo!, undefined, false);
+        await ScoreCoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo!, false);
         processedAnyScores = true;
       }
 
@@ -75,10 +77,10 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
     // Update the seeded scores status only if we processed at least one score
     if (processedAnyScores) {
-      await ScoreSaberLeaderboardModel.updateOne(
-        { _id: leaderboardId },
-        { $set: { seededScores: true } }
-      ).lean();
+      await db
+        .update(scoreSaberLeaderboardsTable)
+        .set({ seededScores: true })
+        .where(eq(scoreSaberLeaderboardsTable.id, leaderboardId));
       Logger.info(`Updated seeded scores status for leaderboard "${leaderboardId}"`);
     } else {
       Logger.warn(`Skipping seeded flag for leaderboard "${leaderboardId}" because no scores were processed`);
@@ -94,13 +96,14 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       return;
     }
     try {
-      const leaderboards = await ScoreSaberLeaderboardModel.find({
-        seededScores: { $in: [null, false] },
-      })
-        .select("_id")
-        .sort({ ranked: -1, plays: 1 }) // Ranked first, then least plays
-        .lean();
-      const leaderboardIds = leaderboards.map(p => p._id);
+      const leaderboards = await db
+        .select({ id: scoreSaberLeaderboardsTable.id })
+        .from(scoreSaberLeaderboardsTable)
+        .where(eq(scoreSaberLeaderboardsTable.seededScores, false))
+        .orderBy(desc(scoreSaberLeaderboardsTable.ranked), asc(scoreSaberLeaderboardsTable.plays))
+        .limit(100);
+
+      const leaderboardIds = leaderboards.map(l => l.id);
       if (leaderboardIds.length === 0) {
         Logger.info("No leaderboard to seed scores for");
         return;

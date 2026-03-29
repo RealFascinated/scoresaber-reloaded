@@ -1,6 +1,6 @@
 import { env } from "@ssr/common/env";
-import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
+import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";

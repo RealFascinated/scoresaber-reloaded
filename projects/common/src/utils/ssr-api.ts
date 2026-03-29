@@ -10,7 +10,7 @@ import type {
   AccSaberScoreSort,
   AccSaberScoreType,
 } from "../schemas/accsaber/tokens/query/query";
-import type { EnrichedAccSaberScore } from "../schemas/accsaber/tokens/score/score";
+import { AccSaberScore } from "../schemas/accsaber/tokens/score/score";
 import { MapCharacteristic } from "../schemas/map/map-characteristic";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
@@ -269,7 +269,7 @@ class SSRApi {
     order: AccSaberScoreOrder,
     type: AccSaberScoreType
   ) {
-    return await this.request<Page<EnrichedAccSaberScore>>(`/scores/player/accsaber/${id}/${page}`, {
+    return await this.request<Page<AccSaberScore>>(`/scores/player/accsaber/${id}/${page}`, {
       sort,
       order,
       type,

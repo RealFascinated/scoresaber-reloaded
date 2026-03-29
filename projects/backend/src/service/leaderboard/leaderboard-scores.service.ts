@@ -2,7 +2,6 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import LeaderboardScoresResponse from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { beatLeaderScoreRowToType } from "../../db/converter/beatleader-score";
 import BeatLeaderService from "../beatleader.service";
 import BeatSaverService from "../beatsaver.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
@@ -44,8 +43,7 @@ export class LeaderboardScoresService {
 
     const beatLeaderByKey = await BeatLeaderService.batchGetBeatLeaderScoresFromSong(
       leaderboard.songHash,
-      leaderboard.difficulty.difficulty,
-      leaderboard.difficulty.characteristic,
+      String(leaderboard.id),
       batchRequests
     );
 
@@ -58,7 +56,7 @@ export class LeaderboardScoresService {
           BeatLeaderService.beatLeaderSongLookupKey(score.playerId, score.score)
         );
         if (bl !== undefined) {
-          score.beatLeaderScore = beatLeaderScoreRowToType(bl);
+          score.beatLeaderScore = bl;
         }
         return score;
       })

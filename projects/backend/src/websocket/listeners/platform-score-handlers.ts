@@ -193,6 +193,7 @@ export class ScoreWebsockets implements EventListener {
           .set({
             plays: leaderboard.plays,
             dailyPlays: leaderboard.dailyPlays,
+            maxScore: leaderboard.maxScore,
           })
           .where(eq(scoreSaberLeaderboardsTable.id, leaderboard.id));
       }

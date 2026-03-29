@@ -12,7 +12,7 @@ async function createMissingLeaderboards() {
     .from(scoreSaberLeaderboardsTable);
 
   let hasMorePages = true;
-  let page = 17100;
+  let page = 1;
   while (hasMorePages) {
     const response = await ScoreSaberApiService.lookupLeaderboards(page);
     if (!response) {

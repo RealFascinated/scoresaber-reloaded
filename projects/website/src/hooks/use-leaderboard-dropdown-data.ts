@@ -2,7 +2,7 @@ import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/scor
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { BeatLeaderScore } from "../../../../score/score";
+import { BeatLeaderScore } from "../../../common/src/schemas/beatleader/score/score";
 
 type DropdownData = {
   scoreStats?: ScoreStatsResponse;

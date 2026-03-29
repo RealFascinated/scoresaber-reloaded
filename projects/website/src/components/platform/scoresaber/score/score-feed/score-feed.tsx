@@ -10,7 +10,7 @@ import { getHMDInfo } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { parseDate } from "@ssr/common/utils/time-utils";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import HMDIcon from "../../../../hmd-icon";
 
@@ -107,7 +107,7 @@ function FeedScoreList({ scores }: { scores: PlayerScore[] }) {
         return (
           <div key={score.scoreId} className="flex flex-col">
             <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
-              <PlayerScoreHeader player={player} />
+              <PlayerScoreHeader player={player!} />
               <div className="flex items-center gap-2">
                 <HMDIcon hmd={getHMDInfo(score.hmd)} />
                 <span className="text-muted-foreground text-xs">
@@ -140,31 +140,36 @@ function FeedBody({ phase }: { phase: FeedPhase }) {
 }
 
 export default function ScoreFeed() {
-  const { readyState, lastJsonMessage } = useWebSocket<PlayerScore>(
-    `${env.NEXT_PUBLIC_WEBSOCKET_URL}/ws/score`,
-    {
-      reconnectAttempts: 10,
-      reconnectInterval: 3000,
-      shouldReconnect: () => true,
-    }
-  );
   const [scores, setScores] = useState<PlayerScore[]>([]);
 
-  useEffect(() => {
-    if (!lastJsonMessage) {
+  const onMessage = useCallback((event: WebSocketEventMap["message"]) => {
+    if (typeof event.data !== "string") {
       return;
     }
-    if (!lastJsonMessage.leaderboard || !lastJsonMessage.score) {
-      Logger.error("Invalid leaderboard or score data:", lastJsonMessage);
+    let parsed: PlayerScore;
+    try {
+      parsed = JSON.parse(event.data) as PlayerScore;
+    } catch {
+      return;
+    }
+    if (!parsed.leaderboard || !parsed.score) {
+      Logger.error("Invalid leaderboard or score data:", parsed);
       return;
     }
 
     setScores(prev => {
-      const id = lastJsonMessage.score.scoreId;
+      const id = parsed.score.scoreId;
       const withoutDup = prev.filter(s => s.score.scoreId !== id);
-      return [...withoutDup, lastJsonMessage].sort(sortByNewestFirst).slice(0, LIVE_FEED_MAX_ITEMS);
+      return [...withoutDup, parsed].sort(sortByNewestFirst).slice(0, LIVE_FEED_MAX_ITEMS);
     });
-  }, [lastJsonMessage]);
+  }, []);
+
+  const { readyState } = useWebSocket<PlayerScore>(`${env.NEXT_PUBLIC_WEBSOCKET_URL}/ws/score`, {
+    reconnectAttempts: 10,
+    reconnectInterval: 3000,
+    shouldReconnect: () => true,
+    onMessage,
+  });
 
   const phase = getFeedPhase(readyState, scores);
 

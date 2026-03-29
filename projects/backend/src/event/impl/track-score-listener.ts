@@ -1,4 +1,4 @@
-import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
+import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
@@ -37,7 +37,6 @@ export class TrackScoreListener implements EventListener {
       score,
       leaderboard,
       player,
-      beatLeaderScore,
       true
     );
     if (trackedScore == undefined) {

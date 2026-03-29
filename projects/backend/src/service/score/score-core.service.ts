@@ -1,5 +1,4 @@
 import Logger from "@ssr/common/logger";
-import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -28,7 +27,6 @@ export class ScoreCoreService {
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
     player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfo,
-    beatLeaderScore?: BeatLeaderScore,
     newScore: boolean = false
   ): Promise<{
     score: ScoreSaberScore | undefined;
@@ -36,6 +34,17 @@ export class ScoreCoreService {
     tracked: boolean;
   }> {
     const before = performance.now();
+
+    // Ensure the score is not already tracked (same scoreId and score)
+    const scoreExists = await db
+      .select()
+      .from(scoreSaberScoresTable)
+      .where(and(eq(scoreSaberScoresTable.id, score.scoreId), eq(scoreSaberScoresTable.score, score.score)))
+      .limit(1);
+    if (scoreExists.length > 0) {
+      return { score: undefined, hasPreviousScore: false, tracked: false };
+    }
+
     const existingScore = await db
       .select()
       .from(scoreSaberScoresTable)
@@ -52,15 +61,33 @@ export class ScoreCoreService {
       const previous = existingScore[0];
 
       // Move old score to history
-      await db.insert(scoreSaberScoreHistoryTable).values(previous);
+      await db.insert(scoreSaberScoreHistoryTable).values({
+        playerId: player.id,
+        leaderboardId: leaderboard.id,
+        scoreId: previous.id,
+        difficulty: score.difficulty,
+        characteristic: score.characteristic,
+        score: score.score,
+        accuracy: score.accuracy,
+        pp: score.pp,
+        missedNotes: score.missedNotes,
+        badCuts: score.badCuts,
+        maxCombo: score.maxCombo,
+        fullCombo: score.fullCombo,
+        modifiers: score.modifiers.map(modifier => modifier.toString()),
+        hmd: score.hmd,
+        rightController: score.rightController,
+        leftController: score.leftController,
+        timestamp: score.timestamp,
+      });
 
       // Delete from current
-      await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.scoreId, previous.scoreId));
+      await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.id, previous.id));
     }
 
     const modifiers = score.modifiers.map(modifier => modifier.toString());
     await db.insert(scoreSaberScoresTable).values({
-      scoreId: score.scoreId,
+      id: score.scoreId,
       playerId: player.id,
       leaderboardId: leaderboard.id,
       difficulty: score.difficulty,
@@ -172,9 +199,9 @@ export class ScoreCoreService {
     return (
       (
         await db
-          .select({ scoreId: scoreSaberScoresTable.scoreId })
+          .select({ scoreId: scoreSaberScoresTable.id })
           .from(scoreSaberScoresTable)
-          .where(eq(scoreSaberScoresTable.scoreId, scoreId))
+          .where(eq(scoreSaberScoresTable.id, scoreId))
           .limit(1)
       ).length > 0
     );

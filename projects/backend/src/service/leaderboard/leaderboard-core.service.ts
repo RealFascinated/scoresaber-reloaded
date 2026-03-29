@@ -4,11 +4,11 @@ import Logger from "@ssr/common/logger";
 import { MapCategory, MapSort, StarFilter } from "@ssr/common/maps/types";
 import { StorageBucket } from "@ssr/common/minio-buckets";
 import type { Page } from "@ssr/common/pagination";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import Request from "@ssr/common/utils/request";
 import { getScoreSaberDifficultyFromDifficulty } from "@ssr/common/utils/scoresaber.util";
@@ -134,9 +134,7 @@ export class LeaderboardCoreService {
       .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
       .where(inArray(mainAlias.id, ids));
 
-    const map = leaderboardsMapFromJoinedRows(rows);
-    await LeaderboardCoreService.postprocessLeaderboards([...map.values()]);
-    return map;
+    return leaderboardsMapFromJoinedRows(rows);
   }
 
   /**
@@ -249,7 +247,7 @@ export class LeaderboardCoreService {
    * @returns the saved leaderboard
    */
   public static async saveLeaderboard(id: number, leaderboard: ScoreSaberLeaderboard) {
-    await LeaderboardCoreService.cacheLeaderboardSongArt(leaderboard);
+    const cachedSongArt = await LeaderboardCoreService.cacheLeaderboardSongArt(leaderboard);
 
     await db.insert(scoreSaberLeaderboardsTable).values({
       id: id,
@@ -269,7 +267,7 @@ export class LeaderboardCoreService {
       plays: leaderboard.plays,
       dailyPlays: leaderboard.dailyPlays,
       seededScores: false,
-      cachedSongArt: true,
+      cachedSongArt: cachedSongArt,
       timestamp: leaderboard.timestamp,
     });
   }
@@ -477,9 +475,7 @@ export class LeaderboardCoreService {
         .where(eq(mainAlias.ranked, true))
         .orderBy(desc(mainAlias.id));
 
-      const ordered = leaderboardsOrderedFromJoinedRows(result);
-      await LeaderboardCoreService.postprocessLeaderboards(ordered);
-      return ordered;
+      return leaderboardsOrderedFromJoinedRows(result);
     });
   }
 
@@ -497,9 +493,7 @@ export class LeaderboardCoreService {
         .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
         .where(eq(mainAlias.qualified, true));
 
-      const ordered = leaderboardsOrderedFromJoinedRows(result);
-      await LeaderboardCoreService.postprocessLeaderboards(ordered);
-      return ordered;
+      return leaderboardsOrderedFromJoinedRows(result);
     });
   }
 
@@ -518,36 +512,11 @@ export class LeaderboardCoreService {
   }
 
   /**
-   * After loading leaderboards from Postgres: ensure cover is in object storage and `cachedSongArt` rows are updated.
-   * Deduplicates by song hash so one MinIO check covers all difficulties of the same map.
-   */
-  public static async postprocessLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<void> {
-    await LeaderboardCoreService.cacheLeaderboardSongArt(leaderboard);
-  }
-
-  /**
-   * Runs {@link postprocessLeaderboard} for each leaderboard, at most once per distinct song hash.
-   */
-  public static async postprocessLeaderboards(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
-    if (leaderboards.length === 0) {
-      return;
-    }
-    const bySongHash = new Map<string, ScoreSaberLeaderboard>();
-    for (const lb of leaderboards) {
-      const key = lb.songHash.trim().toLowerCase();
-      if (!bySongHash.has(key)) {
-        bySongHash.set(key, lb);
-      }
-    }
-    await Promise.all([...bySongHash.values()].map(lb => LeaderboardCoreService.postprocessLeaderboard(lb)));
-  }
-
-  /**
    * Caches the song art for a leaderboard.
    *
    * @param leaderboard the leaderboard to cache the song art for
    */
-  public static async cacheLeaderboardSongArt(leaderboard: ScoreSaberLeaderboard): Promise<void> {
+  public static async cacheLeaderboardSongArt(leaderboard: ScoreSaberLeaderboard): Promise<boolean> {
     const hashNorm = leaderboard.songHash.trim().toLowerCase();
     const objectKey = `${leaderboard.songHash}.png`;
 
@@ -562,7 +531,7 @@ export class LeaderboardCoreService {
             eq(scoreSaberLeaderboardsTable.cachedSongArt, false)
           )
         );
-      return;
+      return true;
     }
 
     const request = await Request.get<ArrayBuffer>(
@@ -580,10 +549,11 @@ export class LeaderboardCoreService {
         .where(sql`lower(${scoreSaberLeaderboardsTable.songHash}) = ${hashNorm}`);
 
       Logger.info(`Cached song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
-      return;
+      return true;
     }
 
     Logger.warn(`Failed to cache song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
+    return false;
   }
 
   private static leaderboardFtsMatch(search: string): SQL {

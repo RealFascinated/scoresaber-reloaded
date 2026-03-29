@@ -11,7 +11,6 @@ import { EmbedBuilder } from "discord.js";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { db } from "../../db";
-import { scoreSaberScoreTypeToInsert } from "../../db/converter/scoresaber-score";
 import {
   scoreSaberLeaderboardsTable,
   scoreSaberLeaderboardStarChangeTable,
@@ -146,14 +145,14 @@ export class LeaderboardRankingService {
       const scoreIds = scoreOps.map(s => s.scoreId);
       const existingRows = await db
         .select({
-          scoreId: scoreSaberScoresTable.scoreId,
+          scoreId: scoreSaberScoresTable.id,
           score: scoreSaberScoresTable.score,
           pp: scoreSaberScoresTable.pp,
         })
         .from(scoreSaberScoresTable)
         .where(
           and(
-            inArray(scoreSaberScoresTable.scoreId, scoreIds),
+            inArray(scoreSaberScoresTable.id, scoreIds),
             eq(scoreSaberScoresTable.leaderboardId, leaderboard.id)
           )
         );
@@ -174,9 +173,30 @@ export class LeaderboardRankingService {
 
       let upserted = 0;
       for (const batch of chunkArray(toWrite, 100)) {
-        const rows = batch.map(scoreSaberScoreTypeToInsert);
+        const rows = batch.map(score => {
+          const modifiers = score.modifiers.map(m => m.toString());
+          return {
+            id: score.scoreId,
+            playerId: score.playerId,
+            leaderboardId: score.leaderboardId,
+            difficulty: score.difficulty,
+            characteristic: score.characteristic,
+            score: score.score,
+            accuracy: score.accuracy,
+            pp: score.pp,
+            missedNotes: score.missedNotes,
+            badCuts: score.badCuts,
+            maxCombo: score.maxCombo,
+            fullCombo: score.fullCombo,
+            modifiers: modifiers.length > 0 ? modifiers : null,
+            hmd: score.hmd,
+            rightController: score.rightController,
+            leftController: score.leftController,
+            timestamp: score.timestamp,
+          };
+        });
         await db.insert(scoreSaberScoresTable).values(rows).onConflictDoUpdate({
-          target: scoreSaberScoresTable.scoreId,
+          target: scoreSaberScoresTable.id,
           set: scoreUpsertSet,
         });
         upserted += batch.length;

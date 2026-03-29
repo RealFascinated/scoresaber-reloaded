@@ -6,94 +6,122 @@ import {
   integer,
   pgTable,
   serial,
+  text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const scoreSaberScoresTable = pgTable("scoresaber-scores", {
-  // Identifiers
-  scoreId: integer().primaryKey(),
-  playerId: varchar({ length: 32 }).notNull(),
-  leaderboardId: integer().notNull(),
+export const scoreSaberScoresTable = pgTable(
+  "scoresaber-scores",
+  {
+    // Identifiers
+    id: integer().primaryKey(),
+    playerId: varchar({ length: 32 }).notNull(),
+    leaderboardId: integer().notNull(),
 
-  // Leaderboard information
-  difficulty: varchar({ length: 64 }).notNull(),
-  characteristic: varchar({ length: 128 }).notNull(),
+    // Leaderboard information
+    difficulty: varchar({ length: 64 }).notNull(),
+    characteristic: varchar({ length: 128 }).notNull(),
 
-  // Score information
-  score: integer().notNull(),
-  accuracy: doublePrecision().notNull(),
-  pp: doublePrecision().notNull().default(0),
-  missedNotes: integer().notNull(),
-  badCuts: integer().notNull(),
-  maxCombo: integer().notNull(),
-  fullCombo: boolean().notNull(),
-  modifiers: varchar({ length: 32 }).array(),
+    // Score information
+    score: integer().notNull(),
+    accuracy: doublePrecision().notNull(),
+    pp: doublePrecision().notNull().default(0),
+    missedNotes: integer().notNull(),
+    badCuts: integer().notNull(),
+    maxCombo: integer().notNull(),
+    fullCombo: boolean().notNull(),
+    modifiers: varchar({ length: 32 }).array(),
 
-  // Headset information
-  hmd: varchar({ length: 32 }),
-  rightController: varchar({ length: 32 }),
-  leftController: varchar({ length: 32 }),
+    // Headset information
+    hmd: varchar({ length: 32 }),
+    rightController: varchar({ length: 32 }),
+    leftController: varchar({ length: 32 }),
 
-  timestamp: timestamp().notNull(),
-});
+    timestamp: timestamp().notNull(),
+  },
+  table => [
+    index("scores_player_leaderboard_idx").on(table.playerId, table.leaderboardId),
+    index("scores_leaderboard_id_idx").on(table.leaderboardId),
+    index("scores_pp_positive_idx")
+      .on(table.pp.desc())
+      .where(sql`${table.pp} > 0`),
+  ]
+);
 
-export const scoreSaberScoreHistoryTable = pgTable("scoresaber-score-history", {
-  // Identifiers
-  id: serial().primaryKey(),
-  playerId: varchar({ length: 32 }).notNull(),
-  leaderboardId: integer().notNull(),
-  scoreId: integer().notNull(),
+export const scoreSaberScoreHistoryTable = pgTable(
+  "scoresaber-score-history",
+  {
+    // Identifiers
+    id: serial().primaryKey(),
+    playerId: varchar({ length: 32 }).notNull(),
+    leaderboardId: integer().notNull(),
+    scoreId: integer().notNull(),
 
-  // Leaderboard information
-  difficulty: varchar({ length: 64 }).notNull(),
-  characteristic: varchar({ length: 128 }).notNull(),
+    // Leaderboard information
+    difficulty: varchar({ length: 64 }).notNull(),
+    characteristic: varchar({ length: 128 }).notNull(),
 
-  // Score information
-  score: integer().notNull(),
-  accuracy: doublePrecision().notNull(),
-  pp: doublePrecision().notNull().default(0),
-  missedNotes: integer().notNull(),
-  badCuts: integer().notNull(),
-  maxCombo: integer().notNull(),
-  fullCombo: boolean().notNull(),
-  modifiers: varchar({ length: 32 }).array(),
+    // Score information
+    score: integer().notNull(),
+    accuracy: doublePrecision().notNull(),
+    pp: doublePrecision().notNull().default(0),
+    missedNotes: integer().notNull(),
+    badCuts: integer().notNull(),
+    maxCombo: integer().notNull(),
+    fullCombo: boolean().notNull(),
+    modifiers: varchar({ length: 32 }).array(),
 
-  // Headset information
-  hmd: varchar({ length: 32 }),
-  rightController: varchar({ length: 32 }),
-  leftController: varchar({ length: 32 }),
+    // Headset information
+    hmd: varchar({ length: 32 }),
+    rightController: varchar({ length: 32 }),
+    leftController: varchar({ length: 32 }),
 
-  timestamp: timestamp().notNull(),
-});
+    timestamp: timestamp().notNull(),
+  },
+  table => [
+    index("scoresaber_score_history_leaderboard_idx").on(table.leaderboardId),
+    index("scoresaber_score_history_player_leaderboard_time_idx").on(
+      table.playerId,
+      table.leaderboardId,
+      table.timestamp.desc()
+    ),
+  ]
+);
 
-export const scoreSaberMedalScoresTable = pgTable("scoresaber-medal-scores", {
-  // Identifiers
-  scoreId: integer().primaryKey(),
-  playerId: varchar({ length: 32 }).notNull(),
-  leaderboardId: integer().notNull(),
+export const scoreSaberMedalScoresTable = pgTable(
+  "scoresaber-medal-scores",
+  {
+    // Identifiers
+    id: integer().primaryKey(),
+    playerId: varchar({ length: 32 }).notNull(),
+    leaderboardId: integer().notNull(),
 
-  // Leaderboard information
-  difficulty: varchar({ length: 64 }).notNull(),
-  characteristic: varchar({ length: 128 }).notNull(),
+    // Leaderboard information
+    difficulty: varchar({ length: 64 }).notNull(),
+    characteristic: varchar({ length: 128 }).notNull(),
 
-  // Score information
-  score: integer().notNull(),
-  accuracy: doublePrecision().notNull(),
-  medals: integer().notNull(),
-  missedNotes: integer().notNull(),
-  badCuts: integer().notNull(),
-  maxCombo: integer().notNull(),
-  fullCombo: boolean().notNull(),
-  modifiers: varchar({ length: 32 }).array(),
+    // Score information
+    score: integer().notNull(),
+    accuracy: doublePrecision().notNull(),
+    medals: integer().notNull(),
+    missedNotes: integer().notNull(),
+    badCuts: integer().notNull(),
+    maxCombo: integer().notNull(),
+    fullCombo: boolean().notNull(),
+    modifiers: varchar({ length: 32 }).array(),
 
-  // Headset information
-  hmd: varchar({ length: 32 }),
-  rightController: varchar({ length: 32 }),
-  leftController: varchar({ length: 32 }),
+    // Headset information
+    hmd: varchar({ length: 32 }),
+    rightController: varchar({ length: 32 }),
+    leftController: varchar({ length: 32 }),
 
-  timestamp: timestamp().notNull(),
-});
+    timestamp: timestamp().notNull(),
+  },
+  table => [
+    index("medal_scores_leaderboard_score_idx").on(table.leaderboardId, table.score.desc(), table.id.desc()),
+  ]
+);
 
 export const scoreSaberLeaderboardsTable = pgTable(
   "scoresaber-leaderboards",
@@ -102,16 +130,16 @@ export const scoreSaberLeaderboardsTable = pgTable(
 
     // Song information
     songHash: varchar({ length: 64 }).notNull(),
-    songName: varchar({ length: 255 }).notNull(),
-    songSubName: varchar({ length: 255 }).notNull(),
-    songAuthorName: varchar({ length: 255 }).notNull(),
+    songName: text().notNull(),
+    songSubName: text().notNull(),
+    songAuthorName: text().notNull(),
 
     // Level information
-    levelAuthorName: varchar({ length: 255 }).notNull(),
+    levelAuthorName: text().notNull(),
 
     // Difficulty information
     difficulty: varchar({ length: 64 }).notNull(),
-    characteristic: varchar({ length: 128 }).notNull(),
+    characteristic: text().notNull(),
     maxScore: integer().notNull(),
 
     // Ranking information
@@ -136,19 +164,86 @@ export const scoreSaberLeaderboardsTable = pgTable(
       "gin",
       sql`to_tsvector('english', ${table.songName} || ' ' || ${table.songSubName} || ' ' || ${table.songAuthorName} || ' ' || ${table.levelAuthorName})`
     ),
+    index("leaderboards_song_lookup_idx").on(
+      sql`lower(${table.songHash})`,
+      table.difficulty,
+      table.characteristic
+    ),
+    index("leaderboards_song_hash_idx").on(table.songHash),
   ]
 );
 
-export const scoreSaberLeaderboardStarChangeTable = pgTable("scoresaber-leaderboard-star-change", {
-  id: serial().primaryKey(),
-  leaderboardId: integer().notNull(),
-  previousStars: doublePrecision().notNull(),
-  newStars: doublePrecision().notNull(),
-  timestamp: timestamp().notNull(),
-});
+export const scoreSaberLeaderboardStarChangeTable = pgTable(
+  "scoresaber-leaderboard-star-change",
+  {
+    id: serial().primaryKey(),
+    leaderboardId: integer().notNull(),
+    previousStars: doublePrecision().notNull(),
+    newStars: doublePrecision().notNull(),
+    timestamp: timestamp().notNull(),
+  },
+  table => [
+    index("leaderboard_star_change_leaderboard_time_idx").on(table.leaderboardId, table.timestamp.desc()),
+  ]
+);
+
+export const beatLeaderScoresTable = pgTable(
+  "beatleader-scores",
+  {
+    // Identifiers
+    id: integer().primaryKey(),
+    playerId: varchar({ length: 32 }).notNull(),
+    songHash: varchar({ length: 64 }).notNull(),
+    leaderboardId: varchar({ length: 32 }).notNull(),
+    songDifficulty: varchar({ length: 64 }).notNull(),
+    songCharacteristic: varchar({ length: 128 }).notNull(),
+    songScore: integer().notNull(),
+
+    // Score information
+    pauses: integer().notNull(),
+    fcAccuracy: doublePrecision().notNull(),
+    fullCombo: boolean().notNull(),
+    savedReplay: boolean().notNull(),
+
+    // Hand accuracy
+    leftHandAccuracy: doublePrecision().notNull(),
+    rightHandAccuracy: doublePrecision().notNull(),
+
+    // Misses
+    misses: integer().notNull(),
+    missedNotes: integer().notNull(),
+    bombCuts: integer().notNull(),
+    wallsHit: integer().notNull(),
+    badCuts: integer().notNull(),
+
+    // Score improvement
+    improvementScore: integer().notNull(),
+    improvementPauses: integer().notNull(),
+    improvementMisses: integer().notNull(),
+    improvementMissedNotes: integer().notNull(),
+    improvementBombCuts: integer().notNull(),
+    improvementWallsHit: integer().notNull(),
+    improvementBadCuts: integer().notNull(),
+    improvementLeftHandAccuracy: doublePrecision().notNull(),
+    improvementRightHandAccuracy: doublePrecision().notNull(),
+
+    timestamp: timestamp().notNull(),
+  },
+  table => [
+    index("beatleader_scores_player_map_score_time_idx").on(
+      table.playerId,
+      table.songHash,
+      table.songDifficulty,
+      table.songCharacteristic,
+      table.songScore,
+      table.timestamp.desc()
+    ),
+  ]
+);
 
 export type ScoreSaberScoreRow = typeof scoreSaberScoresTable.$inferSelect;
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
 export type ScoreSaberMedalScoreRow = typeof scoreSaberMedalScoresTable.$inferSelect;
 export type ScoreSaberLeaderboardRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
 export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;
+export type BeatLeaderScoreRow = typeof beatLeaderScoresTable.$inferSelect;

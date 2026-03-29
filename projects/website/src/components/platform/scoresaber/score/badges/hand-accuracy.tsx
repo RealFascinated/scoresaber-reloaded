@@ -1,6 +1,6 @@
 import { Change } from "@/components/change";
 import SimpleTooltip from "@/components/simple-tooltip";
-import type { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
+import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 
 type HandAccuracyProps = {

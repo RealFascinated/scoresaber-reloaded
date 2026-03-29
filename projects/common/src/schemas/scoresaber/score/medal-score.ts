@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { BeatLeaderScoreSchema } from "../../../../../../score/score";
 import { ModifiersSchema } from "../../../score/modifier";
+import { BeatLeaderScoreSchema } from "../../beatleader/score/score";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
 import { MapDifficultySchema } from "../../map/map-difficulty";
 import { numberIncludingInfinitySchema } from "../../number";

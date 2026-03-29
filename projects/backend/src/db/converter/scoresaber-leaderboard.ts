@@ -113,7 +113,7 @@ export function leaderboardRowToType(
       songSubName: row.songSubName,
       songAuthorName: row.songAuthorName,
       levelAuthorName: row.levelAuthorName,
-      songArt: `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${row.songHash}.png`,
+      songArt: row.cachedSongArt ? `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${row.songHash}.png` : "https://cdn.fascinated.cc/assets/unknown.png",
       difficulty,
       difficulties: difficulties ?? [difficulty],
       maxScore: row.maxScore,

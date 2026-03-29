@@ -1,5 +1,5 @@
-import { BeatLeaderScore as OldBeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
-import { BeatLeaderScore } from "../../../../../score/score";
+import { BeatLeaderScore } from "../../../../common/src/schemas/beatleader/score/score";
+import { BeatLeaderScoreRow } from "../schema";
 
 /**
  * Converts a BeatLeader score row to a BeatLeader score.
@@ -7,26 +7,39 @@ import { BeatLeaderScore } from "../../../../../score/score";
  * @param row the row to convert
  * @returns the converted BeatLeader score
  */
-export function beatLeaderScoreRowToType(row: OldBeatLeaderScore): BeatLeaderScore {
+export function beatLeaderScoreRowToType(row: BeatLeaderScoreRow): BeatLeaderScore {
   return {
-    scoreId: row.scoreId,
+    playerId: row.playerId,
+    songHash: row.songHash,
+    leaderboardId: row.leaderboardId,
+    scoreId: row.id,
     pauses: row.pauses,
     fcAccuracy: row.fcAccuracy,
     fullCombo: row.fullCombo,
     handAccuracy: {
-      left: row.handAccuracy.left,
-      right: row.handAccuracy.right,
+      left: row.leftHandAccuracy,
+      right: row.rightHandAccuracy,
     },
-    misses: row.misses,
+    misses: {
+      misses: row.misses,
+      missedNotes: row.missedNotes,
+      bombCuts: row.bombCuts,
+      wallsHit: row.wallsHit,
+      badCuts: row.badCuts,
+    },
     scoreImprovement: {
-      score: row.scoreImprovement?.score ?? 0,
-      pauses: row.scoreImprovement?.pauses ?? 0,
+      score: row.improvementScore,
+      pauses: row.improvementPauses,
       misses: {
-        misses: row.scoreImprovement?.misses.misses ?? 0,
-        missedNotes: row.scoreImprovement?.misses.missedNotes ?? 0,
-        bombCuts: row.scoreImprovement?.misses.bombCuts ?? 0,
-        wallsHit: row.scoreImprovement?.misses.wallsHit ?? 0,
-        badCuts: row.scoreImprovement?.misses.badCuts ?? 0,
+        misses: row.improvementMisses,
+        missedNotes: row.improvementMissedNotes,
+        bombCuts: row.improvementBombCuts,
+        wallsHit: row.improvementWallsHit,
+        badCuts: row.improvementBadCuts,
+      },
+      handAccuracy: {
+        left: row.improvementLeftHandAccuracy,
+        right: row.improvementRightHandAccuracy,
       },
     },
     savedReplay: row.savedReplay ?? false,

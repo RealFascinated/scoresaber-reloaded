@@ -1,0 +1,1 @@
+CREATE INDEX "beatleader_scores_player_map_score_time_idx" ON "beatleader-scores" USING btree ("playerId","songHash","songDifficulty","songCharacteristic","songScore","timestamp" DESC NULLS LAST);

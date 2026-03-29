@@ -229,7 +229,6 @@ export default class PlaylistService {
       .orderBy(asc(mainAlias.stars));
 
     const rankedLeaderboards = leaderboardsOrderedFromJoinedRows(rankedJoinRows);
-    await LeaderboardCoreService.postprocessLeaderboards(rankedLeaderboards);
 
     const title = `Custom Ranked Maps (${formatDateMinimal(new Date())})`;
 

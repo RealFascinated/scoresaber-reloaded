@@ -18,7 +18,7 @@ export function scoreSaberMedalScoreRowToType(row: ScoreSaberMedalScoreRow): Sco
   return {
     playerId: row.playerId,
     leaderboardId: row.leaderboardId,
-    scoreId: row.scoreId,
+    scoreId: row.id,
     difficulty: MapDifficultySchema.parse(row.difficulty, { reportInput: true }),
     characteristic: MapCharacteristicSchema.parse(row.characteristic, { reportInput: true }),
     score: row.score,
@@ -46,7 +46,7 @@ export function scoreSaberMedalScoreRowToScoreSaberScore(row: ScoreSaberMedalSco
   return {
     playerId: row.playerId,
     leaderboardId: row.leaderboardId,
-    scoreId: row.scoreId,
+    scoreId: row.id,
     difficulty: MapDifficultySchema.parse(row.difficulty, { reportInput: true }),
     characteristic: MapCharacteristicSchema.parse(row.characteristic, { reportInput: true }),
     score: row.score,
@@ -79,7 +79,7 @@ export function scoreSaberScoreToMedalScoreInsert(
 ): ScoreSaberMedalScoreInsert {
   const modifiers = score.modifiers.map(modifier => modifier.toString());
   return {
-    scoreId: score.scoreId,
+    id: score.scoreId,
     playerId: score.playerId,
     leaderboardId: score.leaderboardId,
     difficulty: score.difficulty,

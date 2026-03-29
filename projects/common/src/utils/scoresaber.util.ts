@@ -1,8 +1,8 @@
-import { ScoreSaberScore } from "../../src/model/score/impl/scoresaber-score";
 import { HMD } from "../hmds";
 import { ScoreSaberCurve } from "../leaderboard-curve/scoresaber-curve";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
+import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
 import { ScoreSaberLeaderboardPlayerInfo } from "../schemas/scoresaber/leaderboard/player-info";
 
 export type ScoreSaberRole = {
@@ -191,7 +191,7 @@ export function getScoreSaberAvatar(player: ScoreSaberLeaderboardPlayerInfo | Sc
  *
  * @param scores the scores
  */
-export function updateScoreWeights(scores: Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]) {
+export function updateScoreWeights(scores: PlayerPpsResponse["scores"]) {
   for (let i = 0; i < scores.length; i++) {
     scores[i].weight = Math.pow(ScoreSaberCurve.WEIGHT_COEFFICIENT, i);
   }

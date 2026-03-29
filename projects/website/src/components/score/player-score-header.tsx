@@ -1,14 +1,9 @@
 import SimpleLink from "@/components/simple-link";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
+import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import Avatar from "../avatar";
 
-export default function PlayerScoreHeader({
-  player,
-}: {
-  player: ScoreSaberPlayer | ScoreSaberLeaderboardPlayerInfoToken;
-}) {
+export default function PlayerScoreHeader({ player }: { player: ScoreSaberLeaderboardPlayerInfo }) {
   return (
     <div className="bg-primary/20 flex w-fit items-center gap-2 rounded-md rounded-b-none p-2">
       <Avatar src={getScoreSaberAvatar(player)} alt={player.name ?? ""} size={20} />

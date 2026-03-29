@@ -2,7 +2,7 @@ import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteris
 import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { normalizeModifiers } from "@ssr/common/score/modifier";
-import { ScoreSaberScoreHistoryRow, ScoreSaberScoreRow, scoreSaberScoresTable } from "../schema";
+import { ScoreSaberScoreHistoryRow, ScoreSaberScoreRow } from "../schema";
 
 /**
  * Converts a ScoreSaberScoreRow to a ScoreSaberScore.
@@ -16,7 +16,7 @@ export function scoreSaberScoreRowToType(
   return {
     playerId: row.playerId,
     leaderboardId: row.leaderboardId,
-    scoreId: row.scoreId,
+    scoreId: row.id,
     difficulty: MapDifficultySchema.parse(row.difficulty, { reportInput: true }),
     characteristic: MapCharacteristicSchema.parse(row.characteristic, { reportInput: true }),
     score: row.score,
@@ -35,33 +35,5 @@ export function scoreSaberScoreRowToType(
     rightController: row.rightController ?? null,
     leftController: row.leftController ?? null,
     timestamp: row.timestamp,
-  };
-}
-
-export type ScoreSaberScoreInsert = typeof scoreSaberScoresTable.$inferInsert;
-
-/**
- * Maps a parsed API score to a Drizzle insert row for `scoresaber-scores`.
- */
-export function scoreSaberScoreTypeToInsert(score: ScoreSaberScore): ScoreSaberScoreInsert {
-  const modifiers = score.modifiers.map(m => m.toString());
-  return {
-    scoreId: score.scoreId,
-    playerId: score.playerId,
-    leaderboardId: score.leaderboardId,
-    difficulty: score.difficulty,
-    characteristic: score.characteristic,
-    score: score.score,
-    accuracy: score.accuracy,
-    pp: score.pp,
-    missedNotes: score.missedNotes,
-    badCuts: score.badCuts,
-    maxCombo: score.maxCombo,
-    fullCombo: score.fullCombo,
-    modifiers: modifiers.length > 0 ? modifiers : null,
-    hmd: score.hmd,
-    rightController: score.rightController,
-    leftController: score.leftController,
-    timestamp: score.timestamp,
   };
 }

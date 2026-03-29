@@ -9,7 +9,12 @@ export const BeatLeaderMissesSchema = z.object({
 });
 
 export const BeatLeaderScoreSchema = z.object({
+  // Identifiers
+  playerId: z.string(),
+  songHash: z.string(),
+  leaderboardId: z.string(),
   scoreId: z.number(),
+
   pauses: z.number(),
   fcAccuracy: z.number(),
   fullCombo: z.boolean(),
@@ -22,6 +27,10 @@ export const BeatLeaderScoreSchema = z.object({
     score: z.number(),
     pauses: z.number(),
     misses: BeatLeaderMissesSchema,
+    handAccuracy: z.object({
+      left: z.number(),
+      right: z.number(),
+    }),
   }),
   savedReplay: z.boolean(),
   timestamp: z.date(),

@@ -1,61 +1,15 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import { Player, PlayerModel } from "@ssr/common/model/player/player";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { BeatLeaderPlayerScoresPageToken } from "@ssr/common/schemas/beatleader/tokens/score/page";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
-import type { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
-import type { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import BeatLeaderService from "../beatleader.service";
-import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 
 type SeedMode = "backfill" | "requested";
 
-const BEATLEADER_PAGE_SIZE = 100;
-/** Retries per page (BeatLeader / proxy often flake; backoff avoids hammering). */
-const MAX_LOOKUP_ATTEMPTS = 5;
-/** Milliseconds to wait after a failed attempt before the next (exponential). */
-const LOOKUP_RETRY_BACKOFF_MS = [400, 800, 1600, 3200] as const;
-/** Pause between page fetches (after page 1) to stay under BeatLeader / proxy rate limits during long seeds. */
-const INTER_PAGE_THROTTLE_MS = 250;
-
 export class PlayerBeatLeaderScoresService {
-  /**
-   * Links a BeatLeader score to a ScoreSaber score.
-   *
-   * @param scoreToken the score token
-   */
-  private static async linkScoreSaberScoreBeatLeaderId(scoreToken: BeatLeaderScoreToken): Promise<void> {
-    const hash = scoreToken.leaderboard.song.hash.toUpperCase();
-    const difficulty = scoreToken.leaderboard.difficulty.difficultyName as MapDifficulty;
-    const characteristic = scoreToken.leaderboard.difficulty.modeName as MapCharacteristic;
-
-    const leaderboardResponse = await LeaderboardCoreService.getLeaderboardByHash(
-      hash,
-      difficulty,
-      characteristic,
-      {
-        includeBeatSaver: false,
-        includeStarChangeHistory: false,
-      }
-    );
-    if (leaderboardResponse == undefined) {
-      return;
-    }
-
-    const leaderboard = leaderboardResponse.leaderboard;
-    await ScoreSaberScoreModel.updateOne(
-      {
-        playerId: scoreToken.playerId,
-        leaderboardId: leaderboard._id,
-        score: scoreToken.baseScore,
-      },
-      { $set: { beatLeaderScoreId: scoreToken.id } }
-    );
-  }
-
   /**
    * Fetches missing BeatLeader scores for a player.
    *
@@ -113,24 +67,13 @@ export class PlayerBeatLeaderScoresService {
      * @returns the scores page
      */
     async function getScoresPage(page: number): Promise<BeatLeaderPlayerScoresPageToken | undefined> {
-      for (let attempt = 0; attempt < MAX_LOOKUP_ATTEMPTS; attempt++) {
-        const scoresPage = await beatLeaderApi.lookupPlayerScores(playerId, page, {
-          count: BEATLEADER_PAGE_SIZE,
-          sortBy: "date",
-          order: "desc",
-          leaderboardContext: "general",
-          includeIO: true,
-        });
-        if (scoresPage) {
-          return scoresPage;
-        }
-        if (attempt < MAX_LOOKUP_ATTEMPTS - 1) {
-          const backoff =
-            LOOKUP_RETRY_BACKOFF_MS[attempt] ?? LOOKUP_RETRY_BACKOFF_MS[LOOKUP_RETRY_BACKOFF_MS.length - 1];
-          await Bun.sleep(backoff);
-        }
-      }
-      return undefined;
+      const scoresPage = await beatLeaderApi.lookupPlayerScores(playerId, page, {
+        count: 100,
+        sortBy: "date",
+        order: "desc",
+        leaderboardContext: "general",
+      });
+      return scoresPage;
     }
 
     function maxPageFromMetadata(scoresPage: BeatLeaderPlayerScoresPageToken): number {
@@ -185,18 +128,6 @@ export class PlayerBeatLeaderScoresService {
         );
         if (tracked) {
           newTracked++;
-          try {
-            await PlayerBeatLeaderScoresService.linkScoreSaberScoreBeatLeaderId(
-              scoreToken as BeatLeaderScoreToken
-            );
-          } catch (error) {
-            Logger.warn(
-              `[BeatLeader Seed] Failed to link ScoreSaber score for BeatLeader score %s (player %s): %s`,
-              scoreToken.id,
-              scoreToken.playerId,
-              error instanceof Error ? error.message : String(error)
-            );
-          }
         }
       }
 
@@ -204,53 +135,11 @@ export class PlayerBeatLeaderScoresService {
     }
 
     let currentPage = 1;
-    let exitedDueToApiFailure = false;
-    let lastSuccessfulScoresPage: BeatLeaderPlayerScoresPageToken | undefined;
-    let pagesFetchedOk = 0;
-
     while (true) {
-      if (currentPage > 1) {
-        await Bun.sleep(INTER_PAGE_THROTTLE_MS);
-      }
       const scoresPage = await getScoresPage(currentPage);
       if (!scoresPage) {
-        if (lastSuccessfulScoresPage === undefined) {
-          exitedDueToApiFailure = true;
-          Logger.warn(
-            `[BeatLeader Seed] Stopped fetching for player %s: BeatLeader API returned no page after %s attempt(s) (page %s)`,
-            playerId,
-            formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
-            formatNumberWithCommas(currentPage)
-          );
-          break;
-        }
-
-        const maxPage = maxPageFromMetadata(lastSuccessfulScoresPage);
-        if (currentPage < maxPage) {
-          Logger.warn(
-            `[BeatLeader Seed] Skipping player %s page %s after %s failed attempt(s); continuing (max page %s) — scores on this page will be missing until a later sync`,
-            playerId,
-            formatNumberWithCommas(currentPage),
-            formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
-            formatNumberWithCommas(maxPage)
-          );
-          currentPage++;
-          continue;
-        }
-
-        exitedDueToApiFailure = true;
-        Logger.warn(
-          `[BeatLeader Seed] Stopped fetching for player %s: BeatLeader API returned no page after %s attempt(s) (page %s of %s)`,
-          playerId,
-          formatNumberWithCommas(MAX_LOOKUP_ATTEMPTS),
-          formatNumberWithCommas(currentPage),
-          formatNumberWithCommas(maxPage)
-        );
         break;
       }
-
-      lastSuccessfulScoresPage = scoresPage;
-      pagesFetchedOk++;
 
       const scores = scoresPage.data ?? [];
       if (scores.length === 0) {
@@ -274,23 +163,9 @@ export class PlayerBeatLeaderScoresService {
     }
 
     result.timeTaken = performance.now() - startTime;
-    result.totalPagesFetched = pagesFetchedOk;
+    result.totalPagesFetched = currentPage - 1;
 
-    /** True when the only failure was loading the last page (page N of N); earlier pages succeeded. */
-    const failedOnLastPageOnly =
-      exitedDueToApiFailure &&
-      lastSuccessfulScoresPage !== undefined &&
-      currentPage === maxPageFromMetadata(lastSuccessfulScoresPage);
-
-    if (!player.seededBeatLeaderScores) {
-      if (options.mode === "backfill") {
-        if (!exitedDueToApiFailure || failedOnLastPageOnly) {
-          await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
-        }
-      } else if (result.stoppedBecauseAllTrackedPage) {
-        await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
-      }
-    }
+    await PlayerModel.updateOne({ _id: playerId }, { $set: { seededBeatLeaderScores: true } });
 
     if (currentPage !== 1) {
       Logger.info(

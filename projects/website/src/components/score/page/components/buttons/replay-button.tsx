@@ -5,7 +5,7 @@ import SimpleLink from "@/components/simple-link";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 import { PlayCircle } from "lucide-react";
 

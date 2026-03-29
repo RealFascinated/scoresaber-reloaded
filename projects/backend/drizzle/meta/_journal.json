@@ -64,6 +64,48 @@
       "when": 1774754246296,
       "tag": "0008_curly_kate_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1774802546974,
+      "tag": "0009_yellow_maginty",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1774803685696,
+      "tag": "0010_third_tempest",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1774805854855,
+      "tag": "0011_magical_apocalypse",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1774808168424,
+      "tag": "0012_optimal_mulholland_black",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1774809591542,
+      "tag": "0013_concerned_lester",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1774813511653,
+      "tag": "0014_pale_the_renegades",
+      "breakpoints": true
     }
   ]
 }

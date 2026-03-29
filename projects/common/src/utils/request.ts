@@ -99,7 +99,7 @@ class Request {
 
         if (!response.ok) {
           if (throwOnError) {
-            throw new Error(response.statusText);
+            throw new Error(`Request ${fullUrl} failed with status ${response.status}: ${response.statusText}`);
           }
           return undefined;
         }
