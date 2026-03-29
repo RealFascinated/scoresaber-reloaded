@@ -11,9 +11,7 @@ export default function leaderboardController(app: Elysia) {
     app
       .get(
         "/search",
-        async ({
-          query: { page, ranked, qualified, category, minStar, maxStar, sort, query },
-        }) => {
+        async ({ query: { page, ranked, qualified, category, minStar, maxStar, sort, query } }) => {
           return await LeaderboardCoreService.lookupLeaderboards(page, {
             query,
             ranked,

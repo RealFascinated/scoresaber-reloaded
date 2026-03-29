@@ -28,37 +28,9 @@ import CacheService, { CacheId } from "../cache.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import StorageService from "../storage.service";
 
-/** Matches ScoreSaber leaderboard list page size closely enough for client pagination. */
 const LEADERBOARD_SEARCH_PAGE_SIZE = 20;
 
 export class LeaderboardCoreService {
-  /**
-   * Updates a leaderboard in the database.
-   *
-   * @param leaderboardId the ID of the leaderboard to update
-   * @param leaderboard the leaderboard to update
-   */
-  public static async updateLeaderboard(
-    leaderboardId: number,
-    leaderboard: Partial<ScoreSaberLeaderboard>
-  ): Promise<void> {
-    void leaderboardId;
-    void leaderboard;
-    // // Merge the existing leaderboard updates with the new leaderboard updates
-    // if (LeaderboardCoreService.pendingLeaderboardUpdates.has(leaderboardId)) {
-    //   const existingLeaderboard = LeaderboardCoreService.pendingLeaderboardUpdates.get(leaderboardId);
-    //   if (existingLeaderboard) {
-    //     LeaderboardCoreService.pendingLeaderboardUpdates.set(leaderboardId, {
-    //       ...existingLeaderboard,
-    //       ...leaderboard,
-    //     });
-    //   }
-    // } else {
-    //   // Set the new leaderboard updates
-    //   LeaderboardCoreService.pendingLeaderboardUpdates.set(leaderboardId, leaderboard);
-    // }
-  }
-
   /**
    * Gets a ScoreSaber leaderboard by ID.
    *
@@ -95,7 +67,9 @@ export class LeaderboardCoreService {
       .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
       .where(inArray(mainAlias.id, ids));
 
-    return leaderboardsMapFromJoinedRows(rows);
+    const map = leaderboardsMapFromJoinedRows(rows);
+    await LeaderboardCoreService.postprocessLeaderboards([...map.values()]);
+    return map;
   }
 
   /**
@@ -275,6 +249,8 @@ export class LeaderboardCoreService {
    * @returns the saved leaderboard
    */
   public static async saveLeaderboard(id: number, leaderboard: ScoreSaberLeaderboard) {
+    await LeaderboardCoreService.cacheLeaderboardSongArt(leaderboard);
+
     await db.insert(scoreSaberLeaderboardsTable).values({
       id: id,
       songHash: leaderboard.songHash,
@@ -293,7 +269,7 @@ export class LeaderboardCoreService {
       plays: leaderboard.plays,
       dailyPlays: leaderboard.dailyPlays,
       seededScores: false,
-      cachedSongArt: false,
+      cachedSongArt: true,
       timestamp: leaderboard.timestamp,
     });
   }
@@ -301,6 +277,7 @@ export class LeaderboardCoreService {
   /**
    * Searches leaderboards from Postgres (full-text search + filters).
    * `verified` is ignored (not stored). `priority` is ignored (no upstream call).
+   * Default category/sort is latest ranked maps (`rankedDate` desc, unranked last).
    */
   public static async lookupLeaderboards(
     page: number,
@@ -349,11 +326,10 @@ export class LeaderboardCoreService {
         return ascending ? [asc(rank), idTie] : [desc(rank), idTie];
       }
 
-      const coalescedDate = sql`coalesce(${scoreSaberLeaderboardsTable.rankedDate}, ${scoreSaberLeaderboardsTable.qualifiedDate}, ${scoreSaberLeaderboardsTable.timestamp})`;
       const starsCol = sql`coalesce(${scoreSaberLeaderboardsTable.stars}, 0)`;
+      const dateFallback = sql`coalesce(${scoreSaberLeaderboardsTable.qualifiedDate}, ${scoreSaberLeaderboardsTable.timestamp})`;
 
       switch (category) {
-        case MapCategory.Trending:
         case MapCategory.ScoresSet:
           return ascending
             ? [asc(scoreSaberLeaderboardsTable.plays), idTie]
@@ -366,7 +342,17 @@ export class LeaderboardCoreService {
             : [desc(scoreSaberLeaderboardsTable.levelAuthorName), idTie];
         case MapCategory.DateRanked:
         default:
-          return ascending ? [asc(coalescedDate), idTie] : [desc(coalescedDate), idTie];
+          return ascending
+            ? [
+              sql`${scoreSaberLeaderboardsTable.rankedDate} ASC NULLS LAST`,
+              asc(dateFallback),
+              idTie,
+            ]
+            : [
+              sql`${scoreSaberLeaderboardsTable.rankedDate} DESC NULLS LAST`,
+              desc(dateFallback),
+              idTie,
+            ];
       }
     })();
 
@@ -439,7 +425,9 @@ export class LeaderboardCoreService {
         .where(eq(mainAlias.ranked, true))
         .orderBy(desc(mainAlias.id));
 
-      return leaderboardsOrderedFromJoinedRows(result);
+      const ordered = leaderboardsOrderedFromJoinedRows(result);
+      await LeaderboardCoreService.postprocessLeaderboards(ordered);
+      return ordered;
     });
   }
 
@@ -457,7 +445,9 @@ export class LeaderboardCoreService {
         .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
         .where(eq(mainAlias.qualified, true));
 
-      return leaderboardsOrderedFromJoinedRows(result);
+      const ordered = leaderboardsOrderedFromJoinedRows(result);
+      await LeaderboardCoreService.postprocessLeaderboards(ordered);
+      return ordered;
     });
   }
 
@@ -476,40 +466,72 @@ export class LeaderboardCoreService {
   }
 
   /**
+   * After loading leaderboards from Postgres: ensure cover is in object storage and `cachedSongArt` rows are updated.
+   * Deduplicates by song hash so one MinIO check covers all difficulties of the same map.
+   */
+  public static async postprocessLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<void> {
+    await LeaderboardCoreService.cacheLeaderboardSongArt(leaderboard);
+  }
+
+  /**
+   * Runs {@link postprocessLeaderboard} for each leaderboard, at most once per distinct song hash.
+   */
+  public static async postprocessLeaderboards(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
+    if (leaderboards.length === 0) {
+      return;
+    }
+    const bySongHash = new Map<string, ScoreSaberLeaderboard>();
+    for (const lb of leaderboards) {
+      const key = lb.songHash.trim().toLowerCase();
+      if (!bySongHash.has(key)) {
+        bySongHash.set(key, lb);
+      }
+    }
+    await Promise.all([...bySongHash.values()].map(lb => LeaderboardCoreService.postprocessLeaderboard(lb)));
+  }
+
+  /**
    * Caches the song art for a leaderboard.
    *
    * @param leaderboard the leaderboard to cache the song art for
    */
   public static async cacheLeaderboardSongArt(leaderboard: ScoreSaberLeaderboard): Promise<void> {
-    const exists = await StorageService.fileExists(
-      StorageBucket.LeaderboardSongArt,
-      `${leaderboard.songHash}.png`
-    );
-    if (!exists) {
-      const request = await Request.get<ArrayBuffer>(
-        `https://cdn.scoresaber.com/covers/${leaderboard.songHash}.png`,
-        {
-          returns: "arraybuffer",
-        }
-      );
-      if (request) {
-        await StorageService.saveFile(
-          StorageBucket.LeaderboardSongArt,
-          `${leaderboard.songHash}.png`,
-          Buffer.from(request)
+    const hashNorm = leaderboard.songHash.trim().toLowerCase();
+    const objectKey = `${leaderboard.songHash}.png`;
+
+    const exists = await StorageService.fileExists(StorageBucket.LeaderboardSongArt, objectKey);
+    if (exists) {
+      await db
+        .update(scoreSaberLeaderboardsTable)
+        .set({ cachedSongArt: true })
+        .where(
+          and(
+            sql`lower(${scoreSaberLeaderboardsTable.songHash}) = ${hashNorm}`,
+            eq(scoreSaberLeaderboardsTable.cachedSongArt, false)
+          )
         );
-
-        await db
-          .update(scoreSaberLeaderboardsTable)
-          .set({ cachedSongArt: true })
-          .where(eq(scoreSaberLeaderboardsTable.id, leaderboard.id));
-
-        Logger.info(`Cached song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
-        return;
-      }
-
-      Logger.warn(`Failed to cache song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
+      return;
     }
+
+    const request = await Request.get<ArrayBuffer>(
+      `https://cdn.scoresaber.com/covers/${leaderboard.songHash}.png`,
+      {
+        returns: "arraybuffer",
+      }
+    );
+    if (request) {
+      await StorageService.saveFile(StorageBucket.LeaderboardSongArt, objectKey, Buffer.from(request));
+
+      await db
+        .update(scoreSaberLeaderboardsTable)
+        .set({ cachedSongArt: true })
+        .where(sql`lower(${scoreSaberLeaderboardsTable.songHash}) = ${hashNorm}`);
+
+      Logger.info(`Cached song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
+      return;
+    }
+
+    Logger.warn(`Failed to cache song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
   }
 
   private static leaderboardFtsMatch(search: string): SQL {

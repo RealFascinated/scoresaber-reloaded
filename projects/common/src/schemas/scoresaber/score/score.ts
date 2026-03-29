@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { numberIncludingInfinitySchema } from "../../number";
 import { ModifiersSchema } from "../../../score/modifier";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
 import { MapDifficultySchema } from "../../map/map-difficulty";
@@ -17,7 +18,7 @@ export const ScoreSaberScoreSchema = z.object({
 
   // Score information
   score: z.number(),
-  accuracy: z.number(),
+  accuracy: numberIncludingInfinitySchema,
   pp: z.number().nullable(),
   weight: z.number().nullable(),
   rank: z.number(),

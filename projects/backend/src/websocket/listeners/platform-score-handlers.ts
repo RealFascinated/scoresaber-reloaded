@@ -7,6 +7,9 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
+import { eq } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberLeaderboardsTable } from "../../db/schema";
 import { EventListener } from "../../event/event-listener";
 import { EventsManager } from "../../event/events-manager";
 import BeatLeaderSeenScoresMetric from "../../metrics/impl/player/beatleader-seen-scores";
@@ -185,10 +188,10 @@ export class ScoreWebsockets implements EventListener {
       if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id))) {
         await LeaderboardCoreService.createLeaderboard(leaderboard.id, leaderboardToken);
       } else {
-        await LeaderboardCoreService.updateLeaderboard(leaderboard.id, {
+        await db.update(scoreSaberLeaderboardsTable).set({
           plays: leaderboard.plays,
           dailyPlays: leaderboard.dailyPlays,
-        });
+        }).where(eq(scoreSaberLeaderboardsTable.id, leaderboard.id));
       }
 
       // Track unique daily players in Redis
