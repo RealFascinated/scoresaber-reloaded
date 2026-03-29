@@ -270,7 +270,7 @@ export const beatLeaderScoresTable = pgTable(
     id: integer().primaryKey(),
     playerId: varchar({ length: 32 }).notNull(),
     songHash: varchar({ length: 64 }).notNull(),
-    leaderboardId: varchar({ length: 32 }).notNull(),
+    leaderboardId: text().notNull(),
     songDifficulty: varchar({ length: 64 }).notNull(),
     songCharacteristic: varchar({ length: 128 }).notNull(),
     songScore: integer().notNull(),

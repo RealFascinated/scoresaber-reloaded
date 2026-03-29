@@ -13,7 +13,7 @@ export const ScoreSaberAccountSchema = z.object({
   trackReplays: z.boolean(),
   inactive: z.boolean(),
   banned: z.boolean(),
-  hmd: z.string().optional(),
+  hmd: z.string().nullable(),
   pp: z.number(),
   medals: z.number(),
   scoreStats: ScoreSaberPlayerScoreStatsSchema,

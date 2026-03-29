@@ -22,7 +22,7 @@ export type FetchScoresWithLeaderboardsOptions = {
   offset: number;
   /**
    * When set, the outer query omits `ORDER BY` on the expanded join (large sort on many rows).
-   * Results are ordered by sorting the ~25 scores in memory instead.
+   * Results are ordered by sorting the scores in memory instead.
    */
   sortGroupedScores?: (a: ScoreSaberScoreRow, b: ScoreSaberScoreRow) => number;
 };
@@ -46,9 +46,9 @@ export async function fetchScoresWithLeaderboards(
     .orderBy(...innerOrder)
     .limit(options.limit)
     .offset(options.offset)
-    .as("top_scores");
+    .as("scores");
 
-  const main = alias(scoreSaberLeaderboardsTable, "main");
+  const leaderboard = alias(scoreSaberLeaderboardsTable, "leaderboard");
   const difficulties = alias(scoreSaberLeaderboardsTable, "difficulties");
 
   const outerOrder = [
@@ -60,20 +60,20 @@ export async function fetchScoresWithLeaderboards(
   const baseQuery = db
     .select()
     .from(topScores)
-    .innerJoin(main, eq(topScores.leaderboardId, main.id))
-    .leftJoin(difficulties, eq(main.songHash, difficulties.songHash));
+    .innerJoin(leaderboard, eq(topScores.leaderboardId, leaderboard.id))
+    .leftJoin(difficulties, eq(leaderboard.songHash, difficulties.songHash));
 
   const flatRows = await (options.sortGroupedScores ? baseQuery : baseQuery.orderBy(...outerOrder));
 
   const rows: ScoreLeaderboardDifficultyJoinRow[] = flatRows.map(row => {
     const r = row as {
-      top_scores: ScoreSaberScoreRow;
-      main: ScoreSaberLeaderboardRow;
+      scores: ScoreSaberScoreRow;
+      leaderboard: ScoreSaberLeaderboardRow;
       difficulties: ScoreSaberLeaderboardRow | null;
     };
     return {
-      score: r.top_scores,
-      main: r.main,
+      score: r.scores,
+      leaderboard: r.leaderboard,
       difficulties: r.difficulties,
     };
   });

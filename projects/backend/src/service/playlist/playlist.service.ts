@@ -211,7 +211,7 @@ export default class PlaylistService {
     }
 
     const parsedConfig = parseCustomRankedPlaylistSettings(config);
-    const mainAlias = alias(scoreSaberLeaderboardsTable, "main");
+    const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
     const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
 
     const rankedJoinRows = await db

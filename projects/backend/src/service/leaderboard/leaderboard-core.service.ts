@@ -125,7 +125,7 @@ export class LeaderboardCoreService {
     if (ids.length === 0) {
       return new Map();
     }
-    const mainAlias = alias(scoreSaberLeaderboardsTable, "main");
+    const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
     const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
 
     const rows = await db
@@ -465,7 +465,7 @@ export class LeaderboardCoreService {
    */
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     return CacheService.fetch(CacheId.Leaderboards, "leaderboard:ranked-leaderboards", async () => {
-      const mainAlias = alias(scoreSaberLeaderboardsTable, "main");
+      const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
       const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
 
       const result = await db
@@ -484,7 +484,7 @@ export class LeaderboardCoreService {
    */
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     return CacheService.fetch(CacheId.Leaderboards, "leaderboard:qualified-leaderboards", async () => {
-      const mainAlias = alias(scoreSaberLeaderboardsTable, "main");
+      const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
       const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
 
       const result = await db

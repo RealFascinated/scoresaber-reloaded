@@ -10,7 +10,7 @@ import type { ScoreSaberLeaderboardStatus } from "@ssr/common/schemas/scoresaber
 import { ScoreSaberLeaderboardRow } from "../schema";
 
 export type LeaderboardMainDiffJoinRow = {
-  main: ScoreSaberLeaderboardRow;
+  leaderboard: ScoreSaberLeaderboardRow;
   difficulties: ScoreSaberLeaderboardRow | null;
 };
 
@@ -45,16 +45,16 @@ export function leaderboardsMapFromJoinedRows(
 ): Map<number, ScoreSaberLeaderboard> {
   const byMainId = new Map<number, LeaderboardMainDiffJoinRow[]>();
   for (const r of rows) {
-    let group = byMainId.get(r.main.id);
+    let group = byMainId.get(r.leaderboard.id);
     if (!group) {
       group = [];
-      byMainId.set(r.main.id, group);
+      byMainId.set(r.leaderboard.id, group);
     }
     group.push(r);
   }
   const out = new Map<number, ScoreSaberLeaderboard>();
   for (const [id, group] of byMainId) {
-    const main = group[0].main;
+    const main = group[0].leaderboard;
     const difficulties = difficultiesFromLeaderboardJoinRows(group);
     out.set(id, leaderboardRowToType(main, difficulties));
   }
@@ -71,9 +71,9 @@ export function leaderboardsOrderedFromJoinedRows(
   const orderedIds: number[] = [];
   const seen = new Set<number>();
   for (const r of rows) {
-    if (!seen.has(r.main.id)) {
-      seen.add(r.main.id);
-      orderedIds.push(r.main.id);
+    if (!seen.has(r.leaderboard.id)) {
+      seen.add(r.leaderboard.id);
+      orderedIds.push(r.leaderboard.id);
     }
   }
   return orderedIds.map(id => map.get(id)!);

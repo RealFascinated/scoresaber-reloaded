@@ -4,12 +4,12 @@ import { leaderboardsMapFromJoinedRows, type LeaderboardMainDiffJoinRow } from "
 
 export type ScoreLeaderboardDifficultyJoinRow = {
   score: ScoreSaberScoreRow;
-  main: ScoreSaberLeaderboardRow;
+  leaderboard: ScoreSaberLeaderboardRow;
   difficulties: ScoreSaberLeaderboardRow | null;
 };
 
 /**
- * Groups rows from (scores subquery) ⨝ main leaderboard ⨝ difficulties self-join into one
+ * Groups rows from (scores subquery) ⨝ leaderboard ⨝ difficulties self-join into one
  * {@link ScoreSaberLeaderboard} per score (with all difficulties for the song).
  *
  * When `sortGroupedScores` is omitted, score order follows the first occurrence of each score `id` in
@@ -45,7 +45,7 @@ export function groupScoreRowsWithFullLeaderboards(
     const chunkRows = byScoreId.get(id)!;
     const scoreRow = chunkRows[0].score;
     const joinChunk: LeaderboardMainDiffJoinRow[] = chunkRows.map(r => ({
-      main: r.main,
+      leaderboard: r.leaderboard,
       difficulties: r.difficulties,
     }));
     const map = leaderboardsMapFromJoinedRows(joinChunk);

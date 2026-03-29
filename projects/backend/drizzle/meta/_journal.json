@@ -127,6 +127,13 @@
       "when": 1774817719385,
       "tag": "0017_player_history",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1774820524912,
+      "tag": "0018_eager_sabretooth",
+      "breakpoints": true
     }
   ]
 }

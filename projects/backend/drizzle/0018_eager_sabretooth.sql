@@ -1,0 +1,1 @@
+ALTER TABLE "beatleader-scores" ALTER COLUMN "leaderboardId" SET DATA TYPE text;
