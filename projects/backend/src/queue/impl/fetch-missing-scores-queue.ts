@@ -1,10 +1,13 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { PlayerModel } from "@ssr/common/model/player/player";
+import { and, eq } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberAccountsTable } from "../../db/schema";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { scoreSaberAccountToPlayer } from "../../db/converter/scoresaber-account";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoresService } from "../../service/player/player-scores.service";
 import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
@@ -28,7 +31,8 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       return;
     }
 
-    const player = await PlayerCoreService.getPlayer(playerId, playerToken);
+    const account = await PlayerCoreService.getPlayer(playerId, playerToken);
+    const player = scoreSaberAccountToPlayer(account);
     const { totalScores, missingScores, totalPagesFetched, timeTaken } =
       await PlayerScoresService.fetchMissingPlayerScores(player, playerToken);
     if (missingScores == 0) {
@@ -75,13 +79,11 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       if ((await this.getSize()) !== 0) {
         return;
       }
-      const players = await PlayerModel.find({
-        seededScores: { $in: [null, false] },
-        banned: false,
-      })
-        .select("_id")
-        .lean();
-      const playerIds = players.map(p => p._id);
+      const players = await db
+        .select({ id: scoreSaberAccountsTable.id })
+        .from(scoreSaberAccountsTable)
+        .where(and(eq(scoreSaberAccountsTable.seededScores, false), eq(scoreSaberAccountsTable.banned, false)));
+      const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {
         Logger.info("No players to seed scores for");
         return;

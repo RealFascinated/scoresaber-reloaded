@@ -1,5 +1,7 @@
-import { PlayerModel } from "@ssr/common/model/player/player";
+import { count, eq } from "drizzle-orm";
 import { Gauge } from "prom-client";
+import { db } from "../../../db";
+import { scoreSaberAccountsTable } from "../../../db/schema";
 import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";
 
@@ -12,8 +14,8 @@ export default class TrackedPlayersMetric extends NumberMetric {
       help: "Total number of tracked players",
       registers: [prometheusRegistry],
       collect: async () => {
-        const count = await PlayerModel.estimatedDocumentCount();
-        totalGauge.set(count ?? 0);
+        const [row] = await db.select({ c: count() }).from(scoreSaberAccountsTable);
+        totalGauge.set(row?.c ?? 0);
       },
     });
 
@@ -22,8 +24,11 @@ export default class TrackedPlayersMetric extends NumberMetric {
       help: "Number of inactive tracked players",
       registers: [prometheusRegistry],
       collect: async () => {
-        const inactiveCount = await PlayerModel.countDocuments({ inactive: true });
-        inactiveGauge.set(inactiveCount ?? 0);
+        const [inactiveRow] = await db
+          .select({ c: count() })
+          .from(scoreSaberAccountsTable)
+          .where(eq(scoreSaberAccountsTable.inactive, true));
+        inactiveGauge.set(inactiveRow?.c ?? 0);
       },
     });
   }

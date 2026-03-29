@@ -1,6 +1,8 @@
 import { BeatLeaderScoreModel } from "@ssr/common/model/beatleader-score/beatleader-score";
 import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { PlayerModel } from "@ssr/common/model/player/player";
+import { count, eq } from "drizzle-orm";
+import { db } from "../db";
+import { scoreSaberAccountsTable } from "../db/schema";
 import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { AppStatisticsResponse } from "@ssr/common/schemas/response/ssr/app-statistics";
@@ -25,9 +27,13 @@ export class AppService {
       BeatLeaderScoreModel.countDocuments({
         savedReplay: true,
       }),
-      PlayerModel.countDocuments({
-        inactive: true,
-      }),
+      (async () => {
+        const [row] = await db
+          .select({ c: count() })
+          .from(scoreSaberAccountsTable)
+          .where(eq(scoreSaberAccountsTable.inactive, true));
+        return row?.c ?? 0;
+      })(),
       MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 0,
       ScoreSaberLeaderboardModel.estimatedDocumentCount(),
     ]);

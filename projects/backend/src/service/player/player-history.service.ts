@@ -1,5 +1,4 @@
 import Logger from "@ssr/common/logger";
-import { PlayerModel } from "@ssr/common/model/player/player";
 import { PlayerHistoryEntry, PlayerHistoryEntryModel } from "@ssr/common/model/player/player-history-entry";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
@@ -16,8 +15,11 @@ import {
 } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { AnyBulkWriteOperation } from "mongoose";
+import { count, eq, notInArray, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { redisClient } from "../../common/redis";
+import { db } from "../../db";
+import { scoreSaberAccountsTable } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
@@ -104,17 +106,25 @@ export class PlayerHistoryService {
     const activePlayerIdsArray = Array.from(playerIds);
     Logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
 
-    // Mark players as inactive
-    const result = await PlayerModel.updateMany(
-      { _id: { $nin: activePlayerIdsArray } },
-      { $set: { inactive: true } }
-    );
+    // Mark players as inactive (Mongo `$nin: []` matches all ids when the list is empty)
+    const inactiveUpdate = await db
+      .update(scoreSaberAccountsTable)
+      .set({ inactive: true })
+      .where(
+        activePlayerIdsArray.length > 0
+          ? notInArray(scoreSaberAccountsTable.id, activePlayerIdsArray)
+          : sql`true`
+      );
 
-    if (result.modifiedCount > 0) {
-      Logger.info(`Marked ${result.modifiedCount} players as inactive`);
+    if ((inactiveUpdate.rowCount ?? 0) > 0) {
+      Logger.info(`Marked ${inactiveUpdate.rowCount} players as inactive`);
     }
 
-    const inactivePlayers = await PlayerModel.countDocuments({ inactive: true });
+    const [inactiveRow] = await db
+      .select({ c: count() })
+      .from(scoreSaberAccountsTable)
+      .where(eq(scoreSaberAccountsTable.inactive, true));
+    const inactivePlayers = inactiveRow?.c ?? 0;
 
     sendEmbedToChannel(
       DiscordChannels.BACKEND_LOGS,

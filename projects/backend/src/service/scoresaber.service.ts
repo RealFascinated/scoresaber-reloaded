@@ -4,7 +4,6 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
-import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
@@ -13,7 +12,10 @@ import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
+import { count, gt } from "drizzle-orm";
 import { redisClient } from "../common/redis";
+import { db } from "../db";
+import { scoreSaberAccountsTable } from "../db/schema";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import CacheService, { CacheId } from "./cache.service";
 import MetricsService, { MetricType } from "./metrics.service";
@@ -134,7 +136,15 @@ export default class ScoreSaberService {
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(7)), 7) : {},
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(30)), 30) : {},
-        account ? (await PlayerModel.countDocuments({ pp: { $gt: player.pp } })) + 1 : 0,
+        account
+          ? (async () => {
+              const [row] = await db
+                .select({ c: count() })
+                .from(scoreSaberAccountsTable)
+                .where(gt(scoreSaberAccountsTable.pp, player.pp));
+              return (row?.c ?? 0) + 1;
+            })()
+          : 0,
       ]);
 
       return {

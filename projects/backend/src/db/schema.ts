@@ -10,6 +10,7 @@ import {
   serial,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -43,6 +44,47 @@ export const scoreSaberAccountsTable = pgTable(
     joinedDate: timestamp().notNull(),
   },
   table => [index("accounts_name_idx").on(table.name), index("accounts_medals_idx").on(table.medals.desc())]
+);
+
+/** Daily (or per-snapshot) statistics for a tracked player. Matches Mongo `player-history` collection. */
+export const playerHistoryTable = pgTable(
+  "player-history",
+  {
+    id: serial().primaryKey(),
+    playerId: varchar({ length: 32 }).notNull(),
+    date: timestamp().notNull(),
+
+    rank: integer(),
+    countryRank: integer(),
+    medals: integer(),
+    pp: doublePrecision(),
+    plusOnePp: doublePrecision(),
+    totalScore: doublePrecision(),
+    totalRankedScore: doublePrecision(),
+
+    rankedScores: integer(),
+    unrankedScores: integer(),
+    rankedScoresImproved: integer(),
+    unrankedScoresImproved: integer(),
+    totalRankedScores: integer(),
+    totalUnrankedScores: integer(),
+    totalScores: integer(),
+
+    averageRankedAccuracy: doublePrecision(),
+    averageUnrankedAccuracy: doublePrecision(),
+    averageAccuracy: doublePrecision(),
+
+    aPlays: integer(),
+    sPlays: integer(),
+    spPlays: integer(),
+    ssPlays: integer(),
+    sspPlays: integer(),
+    godPlays: integer(),
+  },
+  table => [
+    uniqueIndex("player_history_player_id_date_unique").on(table.playerId, table.date),
+    index("player_history_player_id_date_idx").on(table.playerId, table.date.desc()),
+  ]
 );
 
 export const scoreSaberScoresTable = pgTable(
@@ -276,6 +318,7 @@ export const beatLeaderScoresTable = pgTable(
 );
 
 export type ScoreSaberAccountRow = typeof scoreSaberAccountsTable.$inferSelect;
+export type PlayerHistoryRow = typeof playerHistoryTable.$inferSelect;
 export type ScoreSaberScoreRow = typeof scoreSaberScoresTable.$inferSelect;
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
 export type ScoreSaberMedalScoreRow = typeof scoreSaberMedalScoresTable.$inferSelect;

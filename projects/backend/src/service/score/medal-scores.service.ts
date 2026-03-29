@@ -1,22 +1,21 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
-import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
-import { PlayerModel } from "@ssr/common/model/player/player";
+import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { isProduction } from "@ssr/common/utils/utils";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { db } from "../../db";
 import {
   scoreSaberMedalScoreRowToScoreSaberScore,
   scoreSaberScoreToMedalScoreInsert,
 } from "../../db/converter/medal-score";
-import { ScoreSaberMedalScoreRow, scoreSaberMedalScoresTable } from "../../db/schema";
+import { ScoreSaberMedalScoreRow, scoreSaberAccountsTable, scoreSaberMedalScoresTable } from "../../db/schema";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerMedalsService } from "../player/player-medals.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
@@ -27,12 +26,11 @@ type MedalScoresQueueItem = {
 };
 
 function sortMedalRowsByLeaderboardOrder(rows: ScoreSaberMedalScoreRow[]): ScoreSaberMedalScoreRow[] {
-  return [...rows].sort((a, b) => b.score - a.score || b.scoreId - a.scoreId);
+  return [...rows].sort((a, b) => b.score - a.score || b.id - a.id);
 }
 
 export class MedalScoresService {
   private static IGNORE_SCORES = false;
-  /** Deduped by `scoreId` — a Set of `{ score }` objects would keep every duplicate reference during rescan. */
   private static SCORES_INGEST_QUEUE = new Map<number, MedalScoresQueueItem>();
 
   /**
@@ -111,7 +109,7 @@ export class MedalScoresService {
 
     const existingTop10 = sortMedalRowsByLeaderboardOrder(existingRows).slice(0, 10);
     const existingComparable = existingTop10.map((row, index) => ({
-      scoreId: row.scoreId,
+      scoreId: row.id,
       playerId: row.playerId,
       rank: index + 1,
     }));
@@ -218,7 +216,7 @@ export class MedalScoresService {
         .select()
         .from(scoreSaberMedalScoresTable)
         .where(eq(scoreSaberMedalScoresTable.leaderboardId, score.leaderboardId))
-        .orderBy(desc(scoreSaberMedalScoresTable.score), desc(scoreSaberMedalScoresTable.scoreId));
+        .orderBy(desc(scoreSaberMedalScoresTable.score), desc(scoreSaberMedalScoresTable.id));
 
       const oldScoreMedals = new Map<string, number>();
       for (const row of existingRows) {
@@ -276,13 +274,12 @@ export class MedalScoresService {
     }
 
     async function getChanges(affectedPlayerIds: string[]): Promise<Map<string, MedalChange>> {
-      const playersBefore = await PlayerModel.find({
-        _id: { $in: Array.from(affectedPlayerIds) },
-      })
-        .select("_id medals")
-        .lean();
+      const playersBefore = await db
+        .select({ id: scoreSaberAccountsTable.id, medals: scoreSaberAccountsTable.medals })
+        .from(scoreSaberAccountsTable)
+        .where(inArray(scoreSaberAccountsTable.id, Array.from(affectedPlayerIds)));
 
-      const medalsBefore = Object.fromEntries(playersBefore.map(p => [p._id.toString(), p.medals ?? 0]));
+      const medalsBefore = Object.fromEntries(playersBefore.map(p => [p.id, p.medals ?? 0]));
       const medalsAfter = await PlayerMedalsService.updatePlayerMedalCounts(...affectedPlayerIds);
 
       const changes = new Map<string, MedalChange>();

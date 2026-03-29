@@ -2,7 +2,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { StorageBucket } from "@ssr/common/minio-buckets";
-import { Player, PlayerModel } from "@ssr/common/model/player/player";
+import { Player } from "@ssr/common/model/player/player";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreStatsToken } from "@ssr/common/schemas/beatleader/tokens/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
@@ -14,6 +14,8 @@ import Request from "@ssr/common/utils/request";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { and, desc, eq, inArray, lt, or } from "drizzle-orm";
+import { scoreSaberAccountRowToPlayer } from "../db/converter/scoresaber-account";
+import { scoreSaberAccountsTable } from "../db/schema";
 import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import { db } from "../db";
@@ -37,10 +39,15 @@ export default class BeatLeaderService {
     const before = performance.now();
     const { playerId } = scoreToken;
     const player: Player | null = await CacheService.fetch(
-      CacheId.Players,
+      CacheId.ScoreSaber,
       `player:${playerId}`,
       async () => {
-        return await PlayerModel.findById(playerId).lean();
+        const [row] = await db
+          .select()
+          .from(scoreSaberAccountsTable)
+          .where(eq(scoreSaberAccountsTable.id, playerId))
+          .limit(1);
+        return row ? scoreSaberAccountRowToPlayer(row) : null;
       }
     );
 

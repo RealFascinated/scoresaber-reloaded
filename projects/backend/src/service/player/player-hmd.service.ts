@@ -1,6 +1,8 @@
 import { HMD } from "@ssr/common/hmds";
-import { PlayerModel } from "@ssr/common/model/player/player";
 import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { and, count, eq, isNotNull } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberAccountsTable } from "../../db/schema";
 
 import { PlayerCoreService } from "./player-core.service";
 
@@ -16,7 +18,11 @@ export class PlayerHmdService {
       return;
     }
 
-    const player = await PlayerModel.findById(playerId).select("hmd").lean();
+    const [player] = await db
+      .select({ hmd: scoreSaberAccountsTable.hmd })
+      .from(scoreSaberAccountsTable)
+      .where(eq(scoreSaberAccountsTable.id, playerId))
+      .limit(1);
     if (!player || player.hmd == score.hmd) {
       return;
     }
@@ -30,18 +36,16 @@ export class PlayerHmdService {
    * @returns the hmd usage
    */
   public static async getActiveHmdUsage(): Promise<Record<string, number>> {
-    const hmdUsage = await PlayerModel.aggregate([
-      {
-        $match: {
-          hmd: { $nin: [null] },
-          inactive: false,
-        },
-      },
-      { $group: { _id: "$hmd", count: { $sum: 1 } } },
-      { $project: { _id: 0, hmd: "$_id", count: 1 } },
-    ]).then(results => Object.fromEntries(results.map(r => [r.hmd, r.count])));
+    const rows = await db
+      .select({
+        hmd: scoreSaberAccountsTable.hmd,
+        c: count(),
+      })
+      .from(scoreSaberAccountsTable)
+      .where(and(isNotNull(scoreSaberAccountsTable.hmd), eq(scoreSaberAccountsTable.inactive, false)))
+      .groupBy(scoreSaberAccountsTable.hmd);
 
-    return hmdUsage;
+    return Object.fromEntries(rows.map(r => [r.hmd as string, r.c]));
   }
 
   /**

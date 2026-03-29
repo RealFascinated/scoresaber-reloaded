@@ -112,16 +112,13 @@ export class PlayerCoreService {
     if (lockPromise === undefined) {
       lockPromise = (async (): Promise<ScoreSaberAccount | undefined> => {
         try {
-          if (await PlayerCoreService.playerExists(id)) {
-            const account = await db
-              .select()
-              .from(scoreSaberAccountsTable)
-              .where(eq(scoreSaberAccountsTable.id, id))
-              .limit(1);
-            if (!account) {
-              return undefined;
-            }
-            return scoreSaberAccountRowToType(account[0]);
+          const [existingRow] = await db
+            .select()
+            .from(scoreSaberAccountsTable)
+            .where(eq(scoreSaberAccountsTable.id, id))
+            .limit(1);
+          if (existingRow) {
+            return scoreSaberAccountRowToType(existingRow);
           }
 
           const token = playerToken || (await ScoreSaberApiService.lookupPlayer(id));
@@ -138,7 +135,7 @@ export class PlayerCoreService {
                 name: token.name,
                 country: token.country ?? null,
                 peakRank: token.rank,
-                peakRankTimestamp: new Date(token.firstSeen),
+                peakRankTimestamp: new Date(),
                 seededScores: false,
                 seededBeatLeaderScores: false,
                 cachedProfilePicture: false,
@@ -184,7 +181,11 @@ export class PlayerCoreService {
             if (isProduction()) {
               await logNewTrackedPlayer(token);
             }
-            return scoreSaberAccountRowToType(newAccount[0]);
+            const [inserted] = newAccount;
+            if (!inserted) {
+              throw new InternalServerError(`Insert did not return a row for player "${id}"`);
+            }
+            return scoreSaberAccountRowToType(inserted);
           } catch (err) {
             Logger.error(`Failed to create player document for "${id}"`, err);
             throw new InternalServerError(`Failed to create player document for "${id}"`);
@@ -213,18 +214,16 @@ export class PlayerCoreService {
    * @returns whether the player exists
    */
   public static async playerExists(id: string, throwIfNotFound: boolean = false): Promise<boolean> {
-    const account = await db
+    const [row] = await db
       .select()
       .from(scoreSaberAccountsTable)
       .where(eq(scoreSaberAccountsTable.id, id))
       .limit(1);
-    if (!account) {
-      return false;
-    }
-    if (throwIfNotFound && !account) {
+    const exists = row !== undefined;
+    if (throwIfNotFound && !exists) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
-    return account !== null;
+    return exists;
   }
 
   /**
@@ -275,15 +274,15 @@ export class PlayerCoreService {
    */
   public static async updatePlayerName(playerId: string, name: string) {
     // Only update if name has changed
-    const account = await db
+    const [row] = await db
       .select()
       .from(scoreSaberAccountsTable)
       .where(eq(scoreSaberAccountsTable.id, playerId))
       .limit(1);
-    if (!account) {
+    if (!row) {
       return;
     }
-    if (account[0].name === name) {
+    if (row.name === name) {
       return;
     }
     await db.update(scoreSaberAccountsTable).set({ name }).where(eq(scoreSaberAccountsTable.id, playerId));

@@ -1,9 +1,10 @@
-import { Player, PlayerModel } from "@ssr/common/model/player/player";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import type { QueryFilter } from "mongoose";
+import { and, asc, count, desc, eq, ilike, isNotNull, ne } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberAccountsTable } from "../../db/schema";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import ScoreSaberService from "../scoresaber.service";
 
@@ -23,24 +24,27 @@ export class PlayerSearchService {
       return [];
     }
 
-    const [scoreSaberResponse, foundPlayers] = await Promise.all([
+    const pattern =
+      normalizedQuery.length > 0
+        ? `%${normalizedQuery.replace(/[%_\\]/g, "\\$&")}%`
+        : "";
+
+    const [scoreSaberResponse, localMatches] = await Promise.all([
       ScoreSaberApiService.searchPlayers(normalizedQuery.length === 0 ? "" : normalizedQuery),
       normalizedQuery.length > 0
-        ? PlayerModel.find({ $text: { $search: normalizedQuery } } as QueryFilter<Player>, {
-            _id: 1,
-            name: 1,
-            score: { $meta: "textScore" },
-          })
-            .sort({ score: { $meta: "textScore" } })
+        ? db
+            .select({ id: scoreSaberAccountsTable.id })
+            .from(scoreSaberAccountsTable)
+            .where(ilike(scoreSaberAccountsTable.name, pattern))
+            .orderBy(asc(scoreSaberAccountsTable.name))
             .limit(20)
-            .lean()
         : [],
     ]);
 
     const scoreSaberPlayerTokens = scoreSaberResponse?.players;
     const uniquePlayerIds = [
       ...new Set(
-        foundPlayers.map(player => player._id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])
+        localMatches.map(p => p.id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])
       ),
     ];
 
@@ -91,29 +95,27 @@ export class PlayerSearchService {
      * @returns the amount of players in each country
      */
     async function getPlayerCountryCounts() {
-      const counts = await PlayerModel.aggregate([
-        {
-          $match: {
-            inactive: false,
-            country: { $nin: [null, ""] },
-          },
-        },
-        {
-          $group: {
-            _id: "$country",
-            count: { $sum: 1 },
-          },
-        },
-        {
-          $sort: {
-            count: -1,
-          },
-        },
-      ]);
+      const rows = await db
+        .select({
+          country: scoreSaberAccountsTable.country,
+          c: count(),
+        })
+        .from(scoreSaberAccountsTable)
+        .where(
+          and(
+            eq(scoreSaberAccountsTable.inactive, false),
+            isNotNull(scoreSaberAccountsTable.country),
+            ne(scoreSaberAccountsTable.country, "")
+          )
+        )
+        .groupBy(scoreSaberAccountsTable.country)
+        .orderBy(desc(count()));
 
-      return counts.reduce(
+      return rows.reduce(
         (acc, curr) => {
-          acc[curr._id] = curr.count;
+          if (curr.country) {
+            acc[curr.country] = curr.c;
+          }
           return acc;
         },
         {} as Record<string, number>
