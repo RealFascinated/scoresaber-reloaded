@@ -56,7 +56,7 @@ export default function SelfPlaylistCreator() {
   const [downloading, setDownloading] = useState(false);
 
   const form = useForm<SelfPlaylistSettings>({
-    resolver: zodResolver(selfPlaylistSettingsSchema),
+    resolver: zodResolver(selfPlaylistSettingsSchema, { reportInput: true }),
     defaultValues: {
       sort: "pp",
       sortDirection: "desc",

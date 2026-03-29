@@ -3,20 +3,25 @@ import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import {
-  ScoreSaberLeaderboard,
-  ScoreSaberLeaderboardModel,
-} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Playlist, PlaylistModel } from "@ssr/common/playlist/playlist";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SelfPlaylist } from "@ssr/common/playlist/self/self-playlist";
+import type { SelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-settings-schema";
 import { parseSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
 import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
+import type { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
-import { leaderboardToObject, playlistToObject } from "@ssr/common/utils/model-converters";
+import { playlistToObject } from "@ssr/common/utils/model-converters";
 import { formatDate, formatDateMinimal, TimeUnit } from "@ssr/common/utils/time-utils";
+import { and, asc, eq, gt, gte, isNotNull, lte } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import { db } from "../../db";
+import { leaderboardsOrderedFromJoinedRows } from "../../db/converter/scoresaber-leaderboard";
+import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
+import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import ScoreSaberService from "../scoresaber.service";
@@ -37,6 +42,55 @@ export const PLAYLIST_NAMES: Record<PlaylistId, string> = {
 
 export default class PlaylistService {
   public static PLAYLIST_IMAGE_BASE64 = "";
+
+  /**
+   * Loads ScoreSaber scores for a player with leaderboard rows from Postgres (replaces legacy Mongo aggregate + $lookup).
+   */
+  private static async fetchPlayerScoresWithLeaderboards(
+    playerId: string,
+    rankedStatus: SelfPlaylistSettings["rankedStatus"] | SnipeSettings["rankedStatus"],
+    starRange: SelfPlaylistSettings["starRange"] | SnipeSettings["starRange"]
+  ): Promise<Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>> {
+    const conditions = [eq(scoreSaberScoresTable.playerId, playerId)];
+
+    if (rankedStatus === "ranked") {
+      conditions.push(gt(scoreSaberScoresTable.pp, 0));
+    } else if (rankedStatus === "unranked") {
+      conditions.push(lte(scoreSaberScoresTable.pp, 0));
+    }
+
+    if (rankedStatus === "ranked" && starRange.min !== undefined && starRange.max !== undefined) {
+      conditions.push(isNotNull(scoreSaberLeaderboardsTable.stars));
+      conditions.push(gte(scoreSaberLeaderboardsTable.stars, starRange.min));
+      conditions.push(lte(scoreSaberLeaderboardsTable.stars, starRange.max));
+    }
+
+    const rows = await db
+      .select({
+        scoreRow: scoreSaberScoresTable,
+        lbRow: scoreSaberLeaderboardsTable,
+      })
+      .from(scoreSaberScoresTable)
+      .innerJoin(
+        scoreSaberLeaderboardsTable,
+        eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
+      )
+      .where(and(...conditions));
+
+    const leaderboardIds = [...new Set(rows.map(r => r.lbRow.id))];
+    const leaderboardMap = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(leaderboardIds);
+
+    return rows.map(({ scoreRow, lbRow }) => {
+      const leaderboard = leaderboardMap.get(lbRow.id);
+      if (!leaderboard) {
+        throw new InternalServerError(`Missing leaderboard ${lbRow.id} for playlist scores`);
+      }
+      return {
+        score: scoreSaberScoreRowToType(scoreRow),
+        leaderboard,
+      };
+    });
+  }
 
   constructor() {
     PlaylistService.init();
@@ -157,13 +211,24 @@ export default class PlaylistService {
     }
 
     const parsedConfig = parseCustomRankedPlaylistSettings(config);
-    const leaderboards = await ScoreSaberLeaderboardModel.find({
-      ranked: true,
-      stars: {
-        $gte: parsedConfig.stars.min,
-        $lte: parsedConfig.stars.max,
-      },
-    }).lean();
+    const mainAlias = alias(scoreSaberLeaderboardsTable, "main");
+    const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
+
+    const rankedJoinRows = await db
+      .select()
+      .from(mainAlias)
+      .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
+      .where(
+        and(
+          eq(mainAlias.ranked, true),
+          isNotNull(mainAlias.stars),
+          gte(mainAlias.stars, parsedConfig.stars.min),
+          lte(mainAlias.stars, parsedConfig.stars.max)
+        )
+      )
+      .orderBy(asc(mainAlias.stars));
+
+    const rankedLeaderboards = leaderboardsOrderedFromJoinedRows(rankedJoinRows);
 
     const title = `Custom Ranked Maps (${formatDateMinimal(new Date())})`;
 
@@ -172,7 +237,7 @@ export default class PlaylistService {
       title,
       env.NEXT_PUBLIC_WEBSITE_NAME,
       this.PLAYLIST_IMAGE_BASE64,
-      leaderboards,
+      rankedLeaderboards,
       "custom-ranked"
     );
   }
@@ -198,7 +263,7 @@ export default class PlaylistService {
       const getSortValue = (score: ScoreSaberScore, field: string): number => {
         switch (field) {
           case "pp":
-            return score.pp;
+            return score.pp ?? 0;
           case "score":
             return score.score;
           case "acc":
@@ -206,77 +271,19 @@ export default class PlaylistService {
           case "date":
             return score.timestamp.getTime();
           default:
-            return score.pp;
+            return score.pp ?? 0;
         }
       };
 
-      const pipeline = [
-        {
-          $match: {
-            playerId: user,
-          },
-        },
-        {
-          $project: {
-            pp: 1,
-            accuracy: 1,
-            timestamp: 1,
-            leaderboardId: 1,
-            playerId: 1,
-            score: 1,
-          },
-        },
-        {
-          $lookup: {
-            from: "scoresaber-leaderboards",
-            localField: "leaderboardId",
-            foreignField: "_id",
-            as: "leaderboard",
-          },
-        },
-        {
-          $unwind: {
-            path: "$leaderboard",
-            preserveNullAndEmptyArrays: false,
-          },
-        },
-        {
-          $match: {
-            ...(settings.rankedStatus === "ranked" ? { pp: { $gt: 0 } } : {}),
-            ...(settings.rankedStatus === "unranked" ? { pp: { $lte: 0 } } : {}),
-            ...(settings.rankedStatus === "ranked" &&
-            settings.starRange.min !== undefined &&
-            settings.starRange.max !== undefined
-              ? {
-                  $and: [
-                    { "leaderboard.stars": { $gte: settings.starRange.min } },
-                    { "leaderboard.stars": { $lte: settings.starRange.max } },
-                  ],
-                }
-              : {}),
-          },
-        },
-      ];
+      const scoredLeaderboards = await PlaylistService.fetchPlayerScoresWithLeaderboards(
+        user,
+        settings.rankedStatus,
+        settings.starRange
+      );
 
-      const results = (await ScoreSaberScoreModel.aggregate(
-        pipeline as Parameters<typeof ScoreSaberScoreModel.aggregate>[0]
-      )) as Array<ScoreSaberScore & { leaderboard: ScoreSaberLeaderboard }>;
-
-      if (results.length === 0) {
+      if (scoredLeaderboards.length === 0) {
         throw new NotFoundError(`Unable to create a self playlist as the user has no scores.`);
       }
-
-      const scoredLeaderboards = results.map(result => ({
-        score: {
-          pp: result.pp,
-          accuracy: result.accuracy,
-          timestamp: result.timestamp,
-          leaderboardId: result.leaderboardId,
-          playerId: result.playerId,
-          score: result.score,
-        } as ScoreSaberScore,
-        leaderboard: leaderboardToObject(result.leaderboard),
-      }));
 
       const filtered = scoredLeaderboards.filter(({ score }) => {
         if (!settings.accuracyRange) {
@@ -345,7 +352,7 @@ export default class PlaylistService {
       const getSortValue = (score: ScoreSaberScore, field: string): number => {
         switch (field) {
           case "pp":
-            return score.pp;
+            return score.pp ?? 0;
           case "score":
             return score.score;
           case "acc":
@@ -353,80 +360,22 @@ export default class PlaylistService {
           case "date":
             return score.timestamp.getTime();
           default:
-            return score.pp;
+            return score.pp ?? 0;
         }
       };
 
       async function getScores(playerId: string) {
-        const pipeline = [
-          {
-            $match: {
-              playerId: playerId,
-            },
-          },
-          {
-            $project: {
-              pp: 1,
-              accuracy: 1,
-              timestamp: 1,
-              leaderboardId: 1,
-              playerId: 1,
-              score: 1,
-            },
-          },
-          {
-            $lookup: {
-              from: "scoresaber-leaderboards",
-              localField: "leaderboardId",
-              foreignField: "_id",
-              as: "leaderboard",
-            },
-          },
-          {
-            $unwind: {
-              path: "$leaderboard",
-              preserveNullAndEmptyArrays: false,
-            },
-          },
-          {
-            $match: {
-              // Apply ranked status filtering
-              ...(settings.rankedStatus === "ranked" ? { pp: { $gt: 0 } } : {}),
-              ...(settings.rankedStatus === "unranked" ? { pp: { $lte: 0 } } : {}),
-              // Apply star range filtering
-              ...(settings.rankedStatus === "ranked" &&
-              settings.starRange.min !== undefined &&
-              settings.starRange.max !== undefined
-                ? {
-                    $and: [
-                      { "leaderboard.stars": { $gte: settings.starRange.min } },
-                      { "leaderboard.stars": { $lte: settings.starRange.max } },
-                    ],
-                  }
-                : {}),
-            },
-          },
-        ];
-
-        const results = (await ScoreSaberScoreModel.aggregate(
-          pipeline as Parameters<typeof ScoreSaberScoreModel.aggregate>[0]
-        )) as Array<ScoreSaberScore & { leaderboard: ScoreSaberLeaderboard }>;
+        const results = await PlaylistService.fetchPlayerScoresWithLeaderboards(
+          playerId,
+          settings.rankedStatus,
+          settings.starRange
+        );
 
         if (results.length === 0) {
           throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
         }
 
-        return results.map(result => ({
-          score: {
-            pp: result.pp,
-            accuracy: result.accuracy,
-            timestamp: result.timestamp,
-            leaderboardId: result.leaderboardId,
-            playerId: result.playerId,
-            score: result.score,
-          } as ScoreSaberScore,
-          leaderboard: leaderboardToObject(result.leaderboard),
-        }));
+        return results;
       }
 
       const [userScores, toSnipeScores] = await Promise.all([getScores(user), getScores(toSnipe)]);

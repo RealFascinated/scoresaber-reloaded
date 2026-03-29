@@ -8,23 +8,26 @@ import { SnipeSettings, snipeSettingsSchema } from "./snipe-settings-schema";
  * @param type the legacy type (old playlists)
  */
 export function parseSnipePlaylistSettings(settingsBase64?: string) {
-  return snipeSettingsSchema.parse({
-    sort: "pp",
-    sortDirection: "desc",
-    rankedStatus: "all",
-    requireBothScores: false,
-    starRange: {
-      min: 0,
-      max: SHARED_CONSTS.maxStars,
+  return snipeSettingsSchema.parse(
+    {
+      sort: "pp",
+      sortDirection: "desc",
+      rankedStatus: "all",
+      requireBothScores: false,
+      starRange: {
+        min: 0,
+        max: SHARED_CONSTS.maxStars,
+      },
+      accuracyRange: {
+        min: 0,
+        max: 100,
+      },
+      ...(settingsBase64
+        ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
+        : {}),
     },
-    accuracyRange: {
-      min: 0,
-      max: 100,
-    },
-    ...(settingsBase64
-      ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
-      : {}),
-  });
+    { reportInput: true }
+  );
 }
 
 /**

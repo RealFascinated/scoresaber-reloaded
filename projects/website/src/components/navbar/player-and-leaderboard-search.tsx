@@ -5,11 +5,9 @@ import PlayerSearchResultItem from "@/components/player/player-search-result-ite
 import { useSearch } from "@/components/providers/search-provider";
 import SearchDialog from "@/components/ui/search-dialog";
 import { StarIcon } from "@heroicons/react/24/solid";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { truncateText } from "@ssr/common/string-utils";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -45,22 +43,20 @@ export default function PlayerAndLeaderboardSearch() {
       return {
         players: playerResults?.players || [],
         leaderboards:
-          leaderboardResults?.leaderboards
-            ?.toSorted((a, b) => {
-              const getStatusPriority = (leaderboard: ScoreSaberLeaderboardToken) => {
-                if (leaderboard.ranked) return 2;
-                if (leaderboard.qualified) return 1;
-                return 0;
-              };
+          leaderboardResults?.items?.toSorted((a, b) => {
+            const getStatusPriority = (leaderboard: ScoreSaberLeaderboard) => {
+              if (leaderboard.ranked) return 2;
+              if (leaderboard.qualified) return 1;
+              return 0;
+            };
 
-              const priorityDifference = getStatusPriority(b) - getStatusPriority(a);
-              if (priorityDifference !== 0) {
-                return priorityDifference;
-              }
+            const priorityDifference = getStatusPriority(b) - getStatusPriority(a);
+            if (priorityDifference !== 0) {
+              return priorityDifference;
+            }
 
-              return b.stars - a.stars;
-            })
-            ?.map(leaderboard => getScoreSaberLeaderboardFromToken(leaderboard)) ?? [],
+            return b.stars - a.stars;
+          }) ?? [],
       };
     },
     refetchInterval: false,

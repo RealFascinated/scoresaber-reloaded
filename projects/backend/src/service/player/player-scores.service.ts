@@ -12,8 +12,7 @@ import type {
   AccSaberScoreType,
 } from "@ssr/common/schemas/accsaber/tokens/query/query";
 import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
-import { MapCharacteristic, MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
-import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import {
   PlayerScoreChartDataPoint,
@@ -35,10 +34,8 @@ import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { and, asc, desc, eq, gte, inArray, isNotNull, sql } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { db } from "../../db";
-import { leaderboardRowToType } from "../../db/converter/scoresaber-leaderboard";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
 import BeatLeaderService from "../beatleader.service";
@@ -379,9 +376,6 @@ export class PlayerScoresService {
    * @returns the score
    */
   public static async getScore(scoreId: number): Promise<PlayerScore> {
-    const mainAlias = alias(scoreSaberLeaderboardsTable, "main");
-    const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
-
     const [scoreResult] = await Promise.all([
       db
         .select()
@@ -400,22 +394,13 @@ export class PlayerScoresService {
 
     const { "scoresaber-scores": rawScore, "scoresaber-leaderboards": rawLeaderboard } = scoreResult[0];
 
-    const leaderboardResult = await db
-      .select()
-      .from(mainAlias)
-      .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
-      .where(eq(mainAlias.id, rawLeaderboard.id));
-
-    const difficulties = leaderboardResult
-      .map(r => r.difficulties)
-      .filter(Boolean)
-      .map(d => ({
-        id: d!.id,
-        difficulty: MapDifficultySchema.parse(d!.difficulty),
-        characteristic: MapCharacteristicSchema.parse(d!.characteristic),
-      }));
-
-    const leaderboard = leaderboardRowToType(rawLeaderboard, difficulties);
+    const leaderboardMap = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds([
+      rawLeaderboard.id,
+    ]);
+    const leaderboard = leaderboardMap.get(rawLeaderboard.id);
+    if (!leaderboard) {
+      throw new NotFoundError("Leaderboard not found");
+    }
     const score = scoreSaberScoreRowToType(rawScore);
 
     const enrichedScore = await ScoreCoreService.insertScoreData(score, leaderboard, {
@@ -592,11 +577,18 @@ export class PlayerScoresService {
         .limit(limit)
         .offset(offset);
 
+      const leaderboardIds = [...new Set(rawScores.map(r => r["scoresaber-leaderboards"].id))];
+      const leaderboardMap =
+        await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(leaderboardIds);
+
       return (
         await Promise.all(
           rawScores.map(
             async ({ "scoresaber-scores": rawScore, "scoresaber-leaderboards": rawLeaderboard }) => {
-              const leaderboard = leaderboardRowToType(rawLeaderboard);
+              const leaderboard = leaderboardMap.get(rawLeaderboard.id);
+              if (!leaderboard) {
+                return undefined;
+              }
               const score = scoreSaberScoreRowToType(rawScore);
 
               return {

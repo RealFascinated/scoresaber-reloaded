@@ -15,7 +15,6 @@ import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { helmet } from "elysia-helmet";
 import fs from "fs";
-import Redis from "ioredis";
 import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
@@ -65,10 +64,6 @@ try {
   Logger.error("Failed to connect to MongoDB:", error);
   process.exit(1);
 }
-
-Logger.info("Testing Redis connection...");
-export const redisClient = new Redis(env.REDIS_URL);
-Logger.info("Connected to Redis :)");
 
 const httpMetricsHooks = createHttpMetricsHooks();
 

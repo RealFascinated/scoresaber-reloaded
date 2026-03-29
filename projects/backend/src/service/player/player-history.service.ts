@@ -15,8 +15,8 @@ import {
 } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { AnyBulkWriteOperation } from "mongoose";
-import { redisClient } from "../..";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { redisClient } from "../../common/redis";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreSaberApiService } from "../scoresaber-api.service";

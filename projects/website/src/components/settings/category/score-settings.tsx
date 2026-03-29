@@ -40,7 +40,7 @@ const ScoreSettings = () => {
   const database = useDatabase();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema, { reportInput: true }),
     defaultValues: {
       replayViewer: "",
     },

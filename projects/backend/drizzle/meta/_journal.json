@@ -29,6 +29,27 @@
       "when": 1774733812834,
       "tag": "0003_boring_purple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1774748655152,
+      "tag": "0004_curvy_demogoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1774748689609,
+      "tag": "0005_sudden_hiroim",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774748769721,
+      "tag": "0006_widen_characteristic_128",
+      "breakpoints": true
     }
   ]
 }

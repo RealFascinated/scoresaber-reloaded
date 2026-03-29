@@ -57,7 +57,7 @@ export const ModifiersSchema = z.array(ModifierSchema);
  * Normalizes a modifier value (code or legacy label) into a modifier code.
  */
 export function normalizeModifier(value: string): Modifier | undefined {
-  const parsed = ModifierSchema.safeParse(value);
+  const parsed = ModifierSchema.safeParse(value, { reportInput: true });
   if (parsed.success) {
     return parsed.data;
   }

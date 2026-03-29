@@ -30,11 +30,11 @@ import { PlayerScoresPageResponse } from "../schemas/response/score/player-score
 import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph";
 import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
+import type { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
 import { ScoreCalendarData } from "../types/player/player-statistic";
 import { ScoreQuery, SortDirection, SortField } from "../types/score-query";
-import ScoreSaberLeaderboardPageToken from "../types/token/scoresaber/leaderboard-page";
 import { getQueryParamsFromObject } from "./utils";
 
 class SSRApi {
@@ -423,7 +423,7 @@ class SSRApi {
       search?: string;
     }
   ) {
-    return await this.request<ScoreSaberLeaderboardPageToken>(`/leaderboard/search`, {
+    return await this.request<Page<ScoreSaberLeaderboard>>(`/leaderboard/search`, {
       page: page.toString(),
       ...(options?.ranked ? { ranked: options.ranked.toString() } : {}),
       ...(options?.qualified ? { qualified: options.qualified.toString() } : {}),

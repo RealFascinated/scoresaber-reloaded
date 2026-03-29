@@ -9,7 +9,7 @@ import { MapDifficulty, MapDifficultySchema } from "../schemas/map/map-difficult
  */
 export function validateMap(difficulty: MapDifficulty, characteristic: MapCharacteristic): void {
   // Validate the difficulty
-  if (!MapDifficultySchema.parse(difficulty)) {
+  if (!MapDifficultySchema.parse(difficulty, { reportInput: true })) {
     throw new Error(`Invalid difficulty: ${difficulty}`);
   }
   // todo: look into this more

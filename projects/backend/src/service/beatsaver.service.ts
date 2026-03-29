@@ -1,9 +1,9 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { DetailType } from "@ssr/common/detail-type";
 import { BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
 import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
 import { getBeatSaverDifficulty } from "@ssr/common/utils/beatsaver.util";
 import CacheService, { CacheId } from "./cache.service";

@@ -17,8 +17,8 @@ export const scoreSaberScoresTable = pgTable("scoresaber-scores", {
   leaderboardId: integer().notNull(),
 
   // Leaderboard information
-  difficulty: varchar({ length: 32 }).notNull(),
-  characteristic: varchar({ length: 32 }).notNull(),
+  difficulty: varchar({ length: 64 }).notNull(),
+  characteristic: varchar({ length: 128 }).notNull(),
 
   // Score information
   score: integer().notNull(),
@@ -46,8 +46,8 @@ export const scoreSaberScoreHistoryTable = pgTable("scoresaber-score-history", {
   scoreId: integer().notNull(),
 
   // Leaderboard information
-  difficulty: varchar({ length: 32 }).notNull(),
-  characteristic: varchar({ length: 32 }).notNull(),
+  difficulty: varchar({ length: 64 }).notNull(),
+  characteristic: varchar({ length: 128 }).notNull(),
 
   // Score information
   score: integer().notNull(),
@@ -74,8 +74,8 @@ export const scoreSaberMedalScoresTable = pgTable("scoresaber-medal-scores", {
   leaderboardId: integer().notNull(),
 
   // Leaderboard information
-  difficulty: varchar({ length: 32 }).notNull(),
-  characteristic: varchar({ length: 32 }).notNull(),
+  difficulty: varchar({ length: 64 }).notNull(),
+  characteristic: varchar({ length: 128 }).notNull(),
 
   // Score information
   score: integer().notNull(),
@@ -110,8 +110,8 @@ export const scoreSaberLeaderboardsTable = pgTable(
     levelAuthorName: varchar({ length: 255 }).notNull(),
 
     // Difficulty information
-    difficulty: varchar({ length: 32 }).notNull(),
-    characteristic: varchar({ length: 32 }).notNull(),
+    difficulty: varchar({ length: 64 }).notNull(),
+    characteristic: varchar({ length: 128 }).notNull(),
     maxScore: integer().notNull(),
 
     // Ranking information

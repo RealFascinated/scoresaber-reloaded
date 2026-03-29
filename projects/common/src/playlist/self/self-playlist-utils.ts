@@ -7,22 +7,25 @@ import { SelfPlaylistSettings, selfPlaylistSettingsSchema } from "./self-playlis
  * @param settingsBase64 the raw settings
  */
 export function parseSelfPlaylistSettings(settingsBase64?: string) {
-  return selfPlaylistSettingsSchema.parse({
-    sort: "pp",
-    sortDirection: "desc",
-    rankedStatus: "all",
-    starRange: {
-      min: 0,
-      max: SHARED_CONSTS.maxStars,
+  return selfPlaylistSettingsSchema.parse(
+    {
+      sort: "pp",
+      sortDirection: "desc",
+      rankedStatus: "all",
+      starRange: {
+        min: 0,
+        max: SHARED_CONSTS.maxStars,
+      },
+      accuracyRange: {
+        min: 0,
+        max: 100,
+      },
+      ...(settingsBase64
+        ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SelfPlaylistSettings)
+        : {}),
     },
-    accuracyRange: {
-      min: 0,
-      max: 100,
-    },
-    ...(settingsBase64
-      ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SelfPlaylistSettings)
-      : {}),
-  });
+    { reportInput: true }
+  );
 }
 
 /**

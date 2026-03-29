@@ -1,179 +1,177 @@
-# SQL migration plan (MongoDB → relational database)
+# SQL migration plan (MongoDB → PostgreSQL)
 
-This document lists what would need to change in this repository to move **persistent application data** from **MongoDB** (Mongoose + Typegoose) to a **SQL** database (e.g. PostgreSQL). It is a planning checklist, not an endorsement of a specific SQL engine or ORM.
+This document tracks moving **persistent application data** from **MongoDB** (Mongoose + Typegoose) to **PostgreSQL** with **Drizzle ORM** in `projects/backend`. **Redis** stays as cache/queues unless you explicitly expand scope.
 
-**Scope note:** **Redis** (`ioredis`) is used for caching, queues, and ephemeral metrics. A “SQL migration” here means replacing **MongoDB** as the system of record. Redis can remain as-is unless you explicitly want to consolidate or remove it.
-
----
-
-## 1. Current state (what you are replacing)
-
-| Layer             | Technology                                                                                                                | Role                                                   |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| Primary datastore | MongoDB                                                                                                                   | Documents, indexes, aggregation pipelines              |
-| ODM               | Mongoose 9 + **Typegoose** (`@typegoose/typegoose`)                                                                       | Schema classes, models, indexes                        |
-| IDs               | String `_id` on players; numeric `_id` on scores via **`@typegoose/auto-increment`** backed by an `increments` collection | Non-trivial to mirror in SQL                           |
-| Secondary         | Redis                                                                                                                     | Cache, job queues, daily uniques, etc. — **not Mongo** |
-
-**Bootstrap / teardown:** `projects/backend/src/index.ts` connects with `mongoose.connect(env.MONGO_CONNECTION_STRING)` and disconnects on shutdown.
-
-**Environment:** `projects/common/src/env.ts` requires `MONGO_CONNECTION_STRING`. This would become something like `DATABASE_URL` (or driver-specific connection settings).
+**Runtime today:** The backend still **connects to MongoDB on startup** (`mongoose.connect` in `projects/backend/src/index.ts`). PostgreSQL is used alongside Mongo for migrated paths; **`DATABASE_URL`** is required in `projects/common/src/env.ts` together with **`MONGO_CONNECTION_STRING`** until cutover.
 
 ---
 
-## 2. MongoDB collections to map to tables
+## Progress summary (what’s done vs left)
 
-These map 1:1 to Typegoose `schemaOptions.collection` (or implied) names:
+### Done on PostgreSQL (Drizzle)
 
-| Collection                           | Primary model location                                                 | Notes                                                              |
-| ------------------------------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `players`                            | `projects/common/src/model/player/player.ts`                           | Text index on `name`, compound indexes for rankings                |
-| `player-history`                     | `projects/common/src/model/player/player-history-entry.ts`             | History entries, bulk writes                                       |
-| `scoresaber-scores`                  | `projects/common/src/model/score/impl/scoresaber-score.ts`             | Largest volume; heavy queries & aggregates                         |
-| `scoresaber-previous-scores`         | `projects/common/src/model/score/impl/scoresaber-previous-score.ts`    | Auto-increment `_id`                                               |
-| `scoresaber-medals-scores`           | `projects/common/src/model/score/impl/scoresaber-medals-score.ts`      | Auto-increment                                                     |
-| `additional-score-data`              | `projects/common/src/model/beatleader-score/beatleader-score.ts`       | BeatLeader enrichment                                              |
-| `beatleader-score-stats`             | `projects/common/src/model/score-stats/score-stats.ts`                 |                                                                    |
-| `scoresaber-leaderboards`            | `projects/common/src/model/leaderboard/impl/scoresaber-leaderboard.ts` |                                                                    |
-| `scoresaber-leaderboard-star-change` | `projects/common/src/model/leaderboard/leaderboard-star-change.ts`     |                                                                    |
-| `beatsaver-maps`                     | `projects/common/src/model/beatsaver/map.ts`                           |                                                                    |
-| `playlists`                          | `projects/common/src/playlist/playlist.ts`                             |                                                                    |
-| `metrics`                            | `projects/backend/src/common/model/metric.ts`                          | Metric snapshots                                                   |
-| `discord-users`                      | `projects/backend/src/common/model/discord-user.ts`                    |                                                                    |
-| `increments`                         | Used by auto-increment plugin for scores                               | Replace with SQL `SERIAL`/`IDENTITY` or application-side sequences |
+| Drizzle table (`projects/backend/src/db/schema.ts`) | Replaces (Mongo collection)  | Notes                                                                |
+| --------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------- |
+| `scoresaber-scores`                                 | `scoresaber-scores`          | Read/write in `score-core`, `player-scores`, `top-scores`, playlists |
+| `scoresaber-score-history`                          | `scoresaber-previous-scores` | Prior score rows; `player-score-history`, `score-core` track flow    |
+| `scoresaber-medal-scores`                           | `scoresaber-medals-scores`   | `medal-scores.service.ts` fully on PG                                |
+| `scoresaber-leaderboards`                           | `scoresaber-leaderboards`    | `leaderboard-core.service.ts` + joins elsewhere                      |
 
-You will need a **schema design** pass: normalize nested documents, decide JSON/JSONB columns vs. child tables, foreign keys, and uniqueness constraints (e.g. `scoreId`).
+**Services largely or fully using PG for the above data**
+
+- `score-core.service.ts` — track score, history move, `scoreExists`
+- `player-score-history.service.ts` — previous score + history queries
+- `player-scores.service.ts` — main score listing / filters / joins to leaderboards
+- `top-scores.service.ts`
+- `medal-scores.service.ts` — medal rows (see caveat below)
+- `leaderboard-core.service.ts` — CRUD/search/ranked lists for leaderboards
+- `playlist.service.ts` — self + snipe playlists (join scores ↔ leaderboards); custom ranked from PG leaderboards
+- `player-friend-scores.service.ts` — friend scores for a leaderboard
+
+**Infra**
+
+- `projects/backend/src/db/index.ts` — Drizzle + `pg`
+- `projects/backend/drizzle/` — SQL migrations
+- Leaderboard **full-text search** on PG (`tsvector` / GIN) in `leaderboard-core.service.ts`
+
+### Still on MongoDB (not optional until migrated)
+
+| Area                         | Examples                                                                                                                |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Players**                  | `player-core.service.ts`, search, history, medals, HMD, ranked helpers, queues, metrics                                 |
+| **Player history entries**   | `player-history.service.ts` → `PlayerHistoryEntryModel`                                                                 |
+| **Medal totals / rankings**  | `player-medals.service.ts` still **aggregates `ScoreSaberMedalsScoreModel` (Mongo)** — out of sync if medals only in PG |
+| **Medal notifications**      | `medal-scores.service.ts` still reads **`PlayerModel`** for `getChanges`                                                |
+| **Leaderboard ranking sync** | `leaderboard-ranking.service.ts` — bulk score/leaderboard/star-change Mongo writes                                      |
+| **Previous scores model**    | Ranking service still uses `ScoreSaberPreviousScoreModel` in places (PG history table is the target replacement)        |
+| **BeatLeader scores**        | `beatleader.service.ts` → `BeatLeaderScoreModel`                                                                        |
+| **BeatSaver maps**           | `beatsaver.service.ts`, `beatsaver-websocket.ts` → `BeatSaverMapModel`                                                  |
+| **Playlists (stored)**       | `playlist.service.ts` — `PlaylistModel` for static playlists (ranked/qualified/queue)                                   |
+| **App stats / metrics**      | `app.service.ts`, `mongo-db-size.ts`, player/score counters                                                             |
+| **Discord users**            | `common/discord/user.ts`                                                                                                |
+| **Metric snapshots**         | `MetricValueModel`                                                                                                      |
+| **Misc**                     | `scoresaber.service.ts` (e.g. `ScoreSaberScoreModel.deleteMany`), seed queues, bot commands, scripts                    |
+
+### Follow-ups inside migrated code
+
+- Align **`score-core.service.ts`** insert shape with **`schema.ts`** (e.g. remove or add columns like `beatLeaderScoreId` if you add them to Drizzle).
+- **`leaderboard-ranking.service.ts`** / **`player-scores.service.ts`**: grep for remaining `ScoreSaberScoreModel` / `ScoreSaberLeaderboardModel` / aggregates and port to PG.
+- **Single import path for `ScoreSaberScore`**: use `@ssr/common/schemas/scoresaber/score/score` consistently to avoid duplicate nominal types from `@ssr/common/schemas/scoresaber/score`.
 
 ---
 
-## 3. `projects/common` — models and shared types
+## 1. Original stack (reference)
 
-### 3.1 Remove or isolate Mongoose/Typegoose
-
-- **Typegoose classes** (`@modelOptions`, `@prop`, `@index`, `getModelForClass`, plugins): replace with **SQL schema definitions** (Drizzle/Prisma/Kysely schema files, or hand-written migrations) and plain TypeScript **types** for API/serialization.
-- **`Document` from `mongoose`**: remove from domain types; use row types from your ORM or explicit interfaces.
-- **`@typegoose/auto-increment`**: replace with database-native identity columns or a single `sequences` table; update all code that assumes Mongo numeric `_id` generation.
-
-### 3.2 Package surface
-
-- Anything exported from `@ssr/common` that currently re-exports **models** (`*Model`) must switch to **repositories**, **DTOs**, or **generated types** so the website and backend do not depend on Mongoose at runtime.
-- **`projects/common/package.json`**: drop `mongoose`, `@typegoose/typegoose`, `@typegoose/auto-increment` when nothing in `common` imports them.
-
-### 3.3 Build
-
-- `bun run build` for `common` should still emit `dist/` without bundling a Mongo driver unless you intentionally keep a thin DB adapter in common (usually **avoid** — keep DB access in `backend`).
+| Layer             | Technology                                                            | Role                                       |
+| ----------------- | --------------------------------------------------------------------- | ------------------------------------------ |
+| Primary datastore | MongoDB                                                               | Still required for unmigrated collections  |
+| SQL               | PostgreSQL + Drizzle                                                  | Partial system of record                   |
+| ODM               | Mongoose 9 + Typegoose                                                | Until removed                              |
+| IDs               | String `_id` players; numeric score IDs (historically auto-increment) | PG uses `integer` / `serial` where defined |
 
 ---
 
-## 4. `projects/backend` — application code
+## 2. Collection → table mapping (updated)
+
+| Legacy collection / concept          | PG table / status          | Notes                                                        |
+| ------------------------------------ | -------------------------- | ------------------------------------------------------------ |
+| `scoresaber-scores`                  | `scoresaber-scores`        | Migrated                                                     |
+| `scoresaber-previous-scores`         | `scoresaber-score-history` | Migrated for track/history; ranking may still touch Mongo    |
+| `scoresaber-medals-scores`           | `scoresaber-medal-scores`  | Migrated; **player medal aggregates** still Mongo            |
+| `scoresaber-leaderboards`            | `scoresaber-leaderboards`  | Migrated in core; ranking bulk ops may still use Mongo model |
+| `scoresaber-leaderboard-star-change` | **Not in Drizzle yet**     | Still Mongo in ranking service                               |
+| `players`                            | **Not in Drizzle yet**     |                                                              |
+| `player-history`                     | **Not in Drizzle yet**     |                                                              |
+| `additional-score-data` / BeatLeader | **Not in Drizzle yet**     |                                                              |
+| `beatleader-score-stats`             | **Not in Drizzle yet**     |                                                              |
+| `beatsaver-maps`                     | **Not in Drizzle yet**     |                                                              |
+| `playlists`                          | **Not in Drizzle yet**     | Self/snipe use PG for scores; stored playlists use Mongo     |
+| `metrics`                            | **Not in Drizzle yet**     |                                                              |
+| `discord-users`                      | **Not in Drizzle yet**     |                                                              |
+| `increments`                         | N/A for new score IDs      | Use API `scoreId` / app rules                                |
+
+---
+
+## 3. `projects/common`
+
+- **Zod schemas** under `schemas/scoresaber/` largely replace old leaderboard/score **types** for API/domain; Mongoose models still exist for unmigrated data.
+- **Remove** `mongoose` / Typegoose from `common` only after **no** model classes are imported by website/backend for persistence.
+- Prefer **one** stable export path per type (avoid duplicate `dist` modules for the same logical type).
+
+---
+
+## 4. `projects/backend` — remaining work
 
 ### 4.1 Connection and lifecycle
 
-- **`src/index.ts`**: replace `mongoose.connect` / `disconnect` with SQL pool creation/teardown (e.g. `pg` Pool, Drizzle disconnect, Prisma `$disconnect`).
-- Add **health checks** and **graceful shutdown** for the SQL pool (similar to existing Mongo/Redis handling).
+- [ ] Optional: initialize **SQL pool health** on boot; ensure graceful shutdown for `pg` if not already tied to process exit.
+- [ ] **Cutover:** make Mongo connection optional or remove after last consumer is migrated.
 
-### 4.2 Services (high-touch rewrites)
+### 4.2 Services — still high-touch (Mongo `*Model` / aggregates)
 
-These files (and any others importing `*Model`) currently assume Mongoose APIs (`find`, `aggregate`, `bulkWrite`, `updateMany`, `$set`, etc.):
+- **Player:** `player-core`, `player-scores` (remaining aggregates/seed paths), `player-beatleader-scores`, `player-history`, `player-search`, **`player-medals`**, `player-accuracies`, `player-hmd`, `player-ranked`, queues.
+- **Leaderboards:** **`leaderboard-ranking`**, `leaderboard-hmd`, `leaderboard-notifications` (verify).
+- **Scores:** `scoresaber.service` cleanup paths; finish ranking/previous-score alignment.
+- **BeatLeader / BeatSaver:** `beatleader.service`, `beatsaver.service`, websocket listener.
+- **Playlists:** migrate **`PlaylistModel`** or replace with PG/file/Redis if desired.
+- **Discord / metrics / app:** `discord/user`, `app.service`, `metrics/*`, `mongo-db-size` → PG metrics.
 
-- **Player:** `player-core.service.ts`, `player-scores.service.ts`, `player-beatleader-scores.service.ts`, `player-history.service.ts`, `player-search.service.ts`, `player-medals.service.ts`, `player-accuracies.service.ts`, `player-score-history.service.ts`, `player-hmd.service.ts`, `player-friend-scores.service.ts`, `player-ranked.service.ts`, and related.
-- **Scores:** `score-core.service.ts`, `medal-scores.service.ts`, `top-scores.service.ts`.
-- **Leaderboards:** `leaderboard-core.service.ts`, `leaderboard-ranking.service.ts`, `leaderboard-hmd.service.ts`.
-- **Other:** `scoresaber.service.ts`, `beatleader.service.ts`, `beatsaver.service.ts`, `playlist.service.ts`, `app.service.ts`.
-- **Discord:** `src/common/discord/user.ts`.
-- **Queues:** `src/queue/impl/*.ts` that query `PlayerModel` / leaderboards.
-- **Websocket:** `beatsaver-websocket.ts` (Mongo updates).
-- **Bot:** `src/bot/command/fetch-missing-player-scores.ts`.
-- **Metrics:** `src/metrics/impl/player/daily-new-accounts.ts`, `tracked-players.ts`.
+### 4.3 Mongo patterns to replace (where still used)
 
-**Pattern to aim for:** thin HTTP/WS handlers → **service layer** → **repository** (SQL queries only). Keeps migration testable.
+Same mapping as before: `aggregate` → `JOIN`/windows; `bulkWrite` → batched SQL; text search on players → PG `tsvector` or external search.
 
-### 4.3 Mongo-specific query features to reimplement
+### 4.4 Scripts
 
-| Mongo pattern                                                                            | SQL-oriented approach                                                         |
-| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| **`aggregate([...])`** (e.g. `player-scores.service.ts`, `player-accuracies.service.ts`) | `JOIN` + window functions, or precomputed materialized views / summary tables |
-| **Text index** (`name: "text"` on players)                                               | PostgreSQL `tsvector` + GIN, or external search (Meilisearch, etc.)           |
-| **`bulkWrite` / `updateMany`**                                                           | `INSERT ... ON CONFLICT`, batched `UPDATE`, or `COPY` for migrations          |
-| **`$set` partial updates**                                                               | `UPDATE ... SET` with nullable column handling                                |
-| **`countDocuments` with filters**                                                        | `SELECT COUNT(*)` with equivalent `WHERE`                                     |
-| **`lean()` documents**                                                                   | Plain row objects from driver/ORM                                             |
-
-### 4.4 Scripts (`projects/backend/src/scripts/`)
-
-All scripts today use `mongoose.connect` and often raw `mongoose.connection.db.collection(...)`:
-
-- `backfill-beatleader-score-ids.ts`
-- `poll-slow-queries.ts` (MongoDB `currentOp` — **replace** with SQL slow-query monitoring, e.g. `pg_stat_statements`)
-- `migrate-modifiers-to-codes.ts`
-- `delete-duplicate-scoreids.ts`
-
-Rewrite against SQL or run one-off SQL migrations.
-
-### 4.5 Metrics
-
-- **`src/metrics/impl/database/mongo-db-size.ts`**: replace with PostgreSQL size metrics (`pg_database_size`, `pg_indexes_size`, etc.) or remove if not applicable.
-- **`src/service/metrics.service.ts`**: rename/register metric types if Mongo-specific names are exposed to Prometheus (`dashboard.yml` may reference Mongo storage — update Grafana/dashboards).
-
-### 4.6 Dependencies
-
-- **`projects/backend/package.json`**: remove `mongoose`, `@typegoose/typegoose`, `@typegoose/auto-increment`; add SQL client + optional ORM migration tool.
+Still Mongo-centric: `backfill-beatleader-score-ids.ts`, `poll-slow-queries.ts`, `migrate-modifiers-to-codes.ts`, `delete-duplicate-scoreids.ts` — rewrite or archive after PG is source of truth.
 
 ---
 
 ## 5. Website (`projects/website`)
 
-- If the site only talks to the **HTTP API**, changes may be **minimal** (response shapes must stay compatible unless you version the API).
-- Search for any **direct** Mongo assumptions in shared types — usually none if everything goes through `@ssr/common` DTOs.
-- Re-run **`bun run lint`** and **`bun run build`** after `common` API changes.
+- Unchanged assumption: site talks to **HTTP API**; verify responses after each migration slice.
 
 ---
 
 ## 6. Infrastructure and ops
 
-- **Connection string / secrets:** new env vars for SQL; rotate and document in deployment (Docker, K8s, etc.).
-- **Backups:** Mongo dump → `pg_dump` / managed backup strategy.
-- **Observability:** update **`dashboard.yml`** (and any alerts) that reference MongoDB storage or Mongo-specific metrics.
-- **CI:** add migration job (e.g. `drizzle-kit migrate` / Prisma migrate) and integration tests against a throwaway SQL instance.
+- Document **`DATABASE_URL`** next to **`MONGO_CONNECTION_STRING`** until dual-store ends.
+- **Backups:** `pg_dump` for SQL; Mongo until retired.
+- **dashboard.yml / Grafana:** add PG sizing; retire Mongo-only panels when cut over.
 
 ---
 
 ## 7. Data migration
 
-1. **Freeze or dual-write** during cutover (optional but safer for production).
-2. **Export** Mongo collections → **staging** format (CSV/JSON).
-3. **Transform** to relational rows (handle `_id`, nested objects, arrays).
-4. **Load** with constraints disabled or deferred, then validate **counts**, **checksums**, and **spot-check** critical queries (player page, leaderboards, score charts).
-5. **Replay** delta if you had a maintenance window.
-6. **Auto-increment** table: ensure score IDs align with application expectations (APIs may expose numeric IDs to clients).
+1. Backfill PG tables from Mongo for scores, history, leaderboards, medals (one-time or incremental ETL).
+2. **Player medals:** after `player-medals` reads from PG medal table, run a full recompute (`updatePlayerGlobalMedalCounts` equivalent).
+3. Validate counts and hot paths (player page, leaderboards, playlists).
 
 ---
 
 ## 8. Testing checklist
 
-- Unit tests for repositories (if added).
-- Integration tests for hottest paths: player fetch, score listing, leaderboard updates, search.
-- Performance: compare explain plans to previous Mongo `aggregate` workloads; add indexes matching query patterns.
+- Integration tests for Drizzle paths: score track, history, friend scores, playlists, medal rescan.
+- Load: indexes on `(playerId)`, `(leaderboardId)`, `(leaderboardId, score DESC)`, etc., matching query patterns.
 
 ---
 
-## 9. Suggested order of work
+## 9. Suggested order of work (remaining)
 
-1. Pick **SQL engine** (PostgreSQL is the usual default) and **ORM/query layer** (Drizzle, Prisma, Kysely, etc.).
-2. Design **tables, keys, indexes**, and how to replace **aggregations** and **full-text search**.
-3. Introduce **repositories** in the backend and migrate **one vertical slice** (e.g. `players` read path only).
-4. Migrate **writes**, then **dependent collections** (scores, leaderboards).
-5. Run **data migration** in staging; fix **scripts** and **metrics**.
-6. Cut over production; **remove** Mongoose from `common` and `backend`.
-
----
-
-## 10. Explicit non-goals (unless you expand scope)
-
-- **Redis** migration or removal (queues, cache, `unique-daily-players`, etc.).
-- **MinIO/S3** object storage (unchanged).
-- Rewriting the **frontend** unless API contracts change.
+1. **`player-medals.service.ts`** — `SUM(medals) GROUP BY player_id` from `scoresaber-medal-scores`; drop `ScoreSaberMedalsScoreModel` reads.
+2. **`leaderboard-ranking.service.ts`** — bulk leaderboard + score writes to PG; retire `ScoreSaberLeaderboardModel` / `ScoreSaberScoreModel` / `ScoreSaberPreviousScoreModel` there.
+3. **`players` table + `player-core`** — largest dependency hub.
+4. **BeatLeader / BeatSaver** tables or keep Mongo until later — your call.
+5. **Playlists, metrics, discord** — smaller surfaces.
+6. Remove **`mongoose.connect`**, delete Mongo-only scripts/metrics, strip deps.
 
 ---
 
-_Generated from repository layout and MongoDB/Typegoose usage as of the plan date; file paths and class names may drift — grep for `mongoose`, `typegoose`, and `Model` imports when executing this plan._
+## 10. Explicit non-goals
+
+- **Redis** migration/removal.
+- **MinIO/S3** unchanged.
+- Frontend rewrite only if API contracts change.
+
+---
+
+_Refresh this doc when a collection moves: grep `projects/backend/src` for `Model\.` / `mongoose` and align the tables above._

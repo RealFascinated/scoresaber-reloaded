@@ -62,7 +62,7 @@ export default function OverlayBuilder() {
   const hasInitialized = useRef(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema, { reportInput: true }),
     defaultValues: defaultOverlaySettings,
   });
 

@@ -52,28 +52,31 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
     status = "Ranked";
   }
 
-  return ScoreSaberLeaderboardSchema.parse({
-    id: token.id,
-    songHash: token.songHash.toUpperCase(),
-    songName: token.songName,
-    songSubName: token.songSubName,
-    fullName: `${token.songName} ${token.songSubName}`.trim(),
-    songAuthorName: token.songAuthorName,
-    levelAuthorName: token.levelAuthorName,
-    songArt: `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${token.songHash}.png`,
-    difficulty: difficulty,
-    difficulties: difficulties,
-    maxScore: token.maxScore,
-    ranked: token.ranked,
-    timestamp: parseDate(token.createdDate),
-    stars: token.stars,
-    plays: token.plays,
-    dailyPlays: token.dailyPlays,
-    qualified: token.qualified,
-    status: status,
-    rankedDate: token.rankedDate ? parseDate(token.rankedDate) : undefined,
-    qualifiedDate: token.qualifiedDate ? parseDate(token.qualifiedDate) : undefined,
-  });
+  return ScoreSaberLeaderboardSchema.parse(
+    {
+      id: token.id,
+      songHash: token.songHash.toUpperCase(),
+      songName: token.songName,
+      songSubName: token.songSubName,
+      fullName: `${token.songName} ${token.songSubName}`.trim(),
+      songAuthorName: token.songAuthorName,
+      levelAuthorName: token.levelAuthorName,
+      songArt: `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${token.songHash}.png`,
+      difficulty: difficulty,
+      difficulties: difficulties,
+      maxScore: token.maxScore,
+      ranked: token.ranked,
+      timestamp: parseDate(token.createdDate),
+      stars: token.stars,
+      plays: token.plays,
+      dailyPlays: token.dailyPlays,
+      qualified: token.qualified,
+      status: status,
+      rankedDate: token.rankedDate ? parseDate(token.rankedDate) : undefined,
+      qualifiedDate: token.qualifiedDate ? parseDate(token.qualifiedDate) : undefined,
+    },
+    { reportInput: true }
+  );
 }
 
 /**
@@ -100,29 +103,32 @@ export function getScoreSaberScoreFromToken(
           return modifier;
         });
 
-  return ScoreSaberScoreSchema.parse({
-    playerId: playerId ?? token.leaderboardPlayerInfo.id,
-    leaderboardId: leaderboard.id,
-    scoreId: token.id,
-    difficulty: leaderboard.difficulty.difficulty,
-    characteristic: leaderboard.difficulty.characteristic ?? "Standard",
-    score: token.baseScore,
-    accuracy: leaderboard.maxScore
-      ? (token.baseScore / leaderboard.maxScore) * 100
-      : Number.POSITIVE_INFINITY,
-    pp: token.pp,
-    weight: token.weight,
-    rank: token.rank,
-    misses: token.missedNotes + token.badCuts,
-    missedNotes: token.missedNotes,
-    badCuts: token.badCuts,
-    maxCombo: token.maxCombo,
-    fullCombo: token.fullCombo,
-    modifiers,
-    hmd: (token.deviceHmd as HMD) ?? (ScoreSaberHMDs[token.hmd] as HMD | undefined),
-    rightController: token.deviceControllerRight,
-    leftController: token.deviceControllerLeft,
-    playerInfo: token.leaderboardPlayerInfo,
-    timestamp: new Date(token.timeSet),
-  });
+  return ScoreSaberScoreSchema.parse(
+    {
+      playerId: playerId ?? token.leaderboardPlayerInfo.id,
+      leaderboardId: leaderboard.id,
+      scoreId: token.id,
+      difficulty: leaderboard.difficulty.difficulty,
+      characteristic: leaderboard.difficulty.characteristic ?? "Standard",
+      score: token.baseScore,
+      accuracy: leaderboard.maxScore
+        ? (token.baseScore / leaderboard.maxScore) * 100
+        : Number.POSITIVE_INFINITY,
+      pp: token.pp,
+      weight: token.weight,
+      rank: token.rank,
+      misses: token.missedNotes + token.badCuts,
+      missedNotes: token.missedNotes,
+      badCuts: token.badCuts,
+      maxCombo: token.maxCombo,
+      fullCombo: token.fullCombo,
+      modifiers,
+      hmd: (token.deviceHmd as HMD) ?? (ScoreSaberHMDs[token.hmd] as HMD | undefined),
+      rightController: token.deviceControllerRight,
+      leftController: token.deviceControllerLeft,
+      playerInfo: token.leaderboardPlayerInfo,
+      timestamp: new Date(token.timeSet),
+    },
+    { reportInput: true }
+  );
 }

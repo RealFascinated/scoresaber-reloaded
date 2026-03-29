@@ -59,7 +59,7 @@ export class BeatLeaderService extends ApiService {
       return undefined;
     }
 
-    const parsed = BeatLeaderPlayersTotalSchema.safeParse(response);
+    const parsed = BeatLeaderPlayersTotalSchema.safeParse(response, { reportInput: true });
     if (!parsed.success) {
       return undefined;
     }
@@ -103,7 +103,7 @@ export class BeatLeaderService extends ApiService {
       return undefined;
     }
 
-    const parsed = BeatLeaderPlayerScoresPageSchema.safeParse(response);
+    const parsed = BeatLeaderPlayerScoresPageSchema.safeParse(response, { reportInput: true });
     if (!parsed.success) {
       this.log(`Failed to parse BeatLeader scores page ${page} for "${playerId}": ${parsed.error.message}`);
       return undefined;

@@ -4,10 +4,10 @@ import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { desc, eq, gt } from "drizzle-orm";
 import { db } from "../../db";
-import { leaderboardRowToType } from "../../db/converter/scoresaber-leaderboard";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
 import BeatSaverService from "../beatsaver.service";
+import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "./score-core.service";
 
 export class TopScoresService {
@@ -40,11 +40,18 @@ export class TopScoresService {
         return [];
       }
 
+      const leaderboardIds = [...new Set(rawScores.map(r => r["scoresaber-leaderboards"].id))];
+      const leaderboardMap =
+        await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(leaderboardIds);
+
       return (
         await Promise.all(
           rawScores.map(
             async ({ "scoresaber-scores": rawScore, "scoresaber-leaderboards": rawLeaderboard }) => {
-              const leaderboard = leaderboardRowToType(rawLeaderboard);
+              const leaderboard = leaderboardMap.get(rawLeaderboard.id);
+              if (!leaderboard) {
+                return undefined;
+              }
               const score = scoreSaberScoreRowToType(rawScore);
 
               return {

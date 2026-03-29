@@ -189,7 +189,7 @@ const WebsiteSettings = () => {
   const database = useDatabase();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema, { reportInput: true }),
     defaultValues: {
       backgroundCover: "",
       backgroundCoverBrightness: 50,

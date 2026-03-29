@@ -12,13 +12,12 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/search",
         async ({
-          query: { page, ranked, qualified, verified, category, minStar, maxStar, sort, search },
+          query: { page, ranked, qualified, category, minStar, maxStar, sort, query },
         }) => {
-          return await ScoreSaberApiService.lookupLeaderboards(page, {
-            search,
+          return await LeaderboardCoreService.lookupLeaderboards(page, {
+            query,
             ranked,
             qualified,
-            verified,
             category,
             stars: {
               min: minStar,
@@ -33,12 +32,11 @@ export default function leaderboardController(app: Elysia) {
             page: z.coerce.number().default(1),
             ranked: z.coerce.boolean().optional(),
             qualified: z.coerce.boolean().optional(),
-            verified: z.coerce.boolean().optional(),
             category: z.coerce.number().optional(),
             minStar: z.coerce.number().optional(),
             maxStar: z.coerce.number().optional(),
             sort: z.coerce.number().optional(),
-            search: z.coerce.string().optional(),
+            query: z.coerce.string().optional(),
           }),
           detail: {
             description: "Search ScoreSaber leaderboards",
@@ -60,10 +58,7 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/by-id/:leaderboardId",
         async ({ params: { leaderboardId } }) => {
-          return await LeaderboardCoreService.getLeaderboard(leaderboardId, {
-            includeBeatSaver: true,
-            includeStarChangeHistory: true,
-          });
+          return await LeaderboardCoreService.getLeaderboard(leaderboardId);
         },
         {
           tags: ["Leaderboard"],
@@ -78,10 +73,7 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/by-hash/:hash/:difficulty/:characteristic",
         async ({ params: { hash, difficulty, characteristic } }) => {
-          const data = await LeaderboardCoreService.getLeaderboardByHash(hash, difficulty, characteristic, {
-            includeBeatSaver: true,
-            includeStarChangeHistory: true,
-          });
+          const data = await LeaderboardCoreService.getLeaderboardByHash(hash, difficulty, characteristic);
           return data;
         },
         {
