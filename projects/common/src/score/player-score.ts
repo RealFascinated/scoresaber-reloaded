@@ -1,4 +1,4 @@
-import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "../schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 
@@ -16,5 +16,5 @@ export interface PlayerScore {
   /**
    * The BeatSaver of the song.
    */
-  readonly beatSaver?: BeatSaverMapResponse;
+  readonly beatSaver?: BeatSaverMap;
 }

@@ -1,8 +1,8 @@
 import { env } from "@ssr/common/env";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getModifierLabel } from "@ssr/common/score/modifier";
@@ -36,19 +36,18 @@ export async function sendScoreNotification(
     BeatSaverService.getMap(
       leaderboard.songHash,
       leaderboard.difficulty.difficulty,
-      leaderboard.difficulty.characteristic,
-      "basic"
+      leaderboard.difficulty.characteristic
     ),
     PlayerScoreHistoryService.getPlayerPreviousScore(score, leaderboard),
   ]);
   const change = previousScore &&
     previousScore.change && {
-      accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
-      pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
-      misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}`,
-      badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}`,
-      maxCombo: previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}`,
-    };
+    accuracy: `${formatChange(previousScore.change.accuracy, value => value.toFixed(2) + "%") || ""}`,
+    pp: `${formatChange(previousScore.change.pp, undefined, true) || ""}`,
+    misses: previousScore.misses == score.misses ? "" : ` vs ${previousScore.misses}`,
+    badCuts: previousScore.badCuts == score.badCuts ? "" : ` vs ${previousScore.badCuts}`,
+    maxCombo: previousScore.maxCombo == score.maxCombo ? "" : ` vs ${previousScore.maxCombo}`,
+  };
 
   const accuracy =
     leaderboard.maxScore > 0
@@ -75,8 +74,7 @@ export async function sendScoreNotification(
             ...(score.pp && score.pp > 0
               ? [`**PP:** ${formatPp(score.pp)}pp ${change ? change.pp : ""}`]
               : []),
-            `**Modifiers:** ${
-              score.modifiers.length > 0 ? score.modifiers.map(getModifierLabel).join(", ") : "None"
+            `**Modifiers:** ${score.modifiers.length > 0 ? score.modifiers.map(getModifierLabel).join(", ") : "None"
             }`,
           ].join("\n"),
           inline: false,
@@ -89,9 +87,9 @@ export async function sendScoreNotification(
             `**Max Combo:** ${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? " (FC)" : ""} ${change ? change.maxCombo : ""}`,
             ...(beatLeaderScore
               ? [
-                  `**Bomb Cuts**: ${beatLeaderScore.misses.bombCuts}`,
-                  `**Wall Hits**: ${beatLeaderScore.misses.wallsHit}`,
-                ]
+                `**Bomb Cuts**: ${beatLeaderScore.misses.bombCuts}`,
+                `**Wall Hits**: ${beatLeaderScore.misses.wallsHit}`,
+              ]
               : []),
           ].join("\n"),
           inline: false,
@@ -125,8 +123,7 @@ export async function sendMedalScoreNotification(
   const beatSaver = await BeatSaverService.getMap(
     leaderboard.songHash,
     leaderboard.difficulty.difficulty,
-    leaderboard.difficulty.characteristic,
-    "basic"
+    leaderboard.difficulty.characteristic
   );
   const description = [
     `**${leaderboard.fullName}**`,
@@ -216,7 +213,7 @@ export async function sendMedalScoreNotification(
 function getScoreButtons(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
-  beatSaver: BeatSaverMapResponse | undefined,
+  beatSaver: BeatSaverMap | undefined,
   beatLeaderScore: BeatLeaderScore | undefined
 ) {
   return [
@@ -235,26 +232,26 @@ function getScoreButtons(
           .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id}`),
         ...(beatSaver
           ? [
-              new ButtonBuilder()
-                .setLabel("Map")
-                .setEmoji("🗺️")
-                .setStyle(ButtonStyle.Link)
-                .setURL(`https://beatsaver.com/maps/${beatSaver.bsr}`),
-            ]
+            new ButtonBuilder()
+              .setLabel("Map")
+              .setEmoji("🗺️")
+              .setStyle(ButtonStyle.Link)
+              .setURL(`https://beatsaver.com/maps/${beatSaver.bsr}`),
+          ]
           : []),
         ...(beatLeaderScore
           ? [
-              new ButtonBuilder()
-                .setLabel("Replay")
-                .setEmoji("🎥")
-                .setStyle(ButtonStyle.Link)
-                .setURL(
-                  ReplayViewers.beatleader.generateUrl(
-                    beatLeaderScore.scoreId,
-                    getBeatLeaderReplayRedirectUrl(beatLeaderScore)
-                  )
-                ),
-            ]
+            new ButtonBuilder()
+              .setLabel("Replay")
+              .setEmoji("🎥")
+              .setStyle(ButtonStyle.Link)
+              .setURL(
+                ReplayViewers.beatleader.generateUrl(
+                  beatLeaderScore.scoreId,
+                  getBeatLeaderReplayRedirectUrl(beatLeaderScore)
+                )
+              ),
+          ]
           : []),
       ],
     },

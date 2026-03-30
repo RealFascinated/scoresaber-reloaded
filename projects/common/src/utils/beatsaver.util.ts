@@ -1,6 +1,6 @@
+import { BeatSaverMap } from "../schemas/beatsaver/map/map";
 import { MapCharacteristic } from "../schemas/map/map-characteristic";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
-import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
 import BeatSaverMapToken from "../types/token/beatsaver/map";
 import BeatSaverMapDifficultyToken from "../types/token/beatsaver/map-difficulty";
 
@@ -10,7 +10,7 @@ import BeatSaverMapDifficultyToken from "../types/token/beatsaver/map-difficulty
  * @param map the beatsaver map
  * @returns the beatsaver mapper profile url
  */
-export function getBeatSaverMapperProfileUrl(map?: BeatSaverMapResponse) {
+export function getBeatSaverMapperProfileUrl(map?: BeatSaverMap) {
   return map != undefined ? `https://beatsaver.com/profile/${map?.author.id}` : undefined;
 }
 

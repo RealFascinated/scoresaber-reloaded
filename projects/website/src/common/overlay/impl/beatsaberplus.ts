@@ -29,8 +29,7 @@ const handlers: EventHandlers = {
           beatSaverMap: await ssrApi.getBeatSaverMap(
             mapHash,
             difficulty as MapDifficulty,
-            characteristic as MapCharacteristic,
-            "full"
+            characteristic as MapCharacteristic
           ),
           leaderboard: (
             await ssrApi.fetchLeaderboardByHash(

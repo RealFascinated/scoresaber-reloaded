@@ -369,8 +369,7 @@ export class PlayerScoresService {
       BeatSaverService.getMap(
         leaderboard.songHash,
         leaderboard.difficulty.difficulty,
-        leaderboard.difficulty.characteristic,
-        "full"
+        leaderboard.difficulty.characteristic
       ),
     ]);
     return { score: enrichedScore, leaderboard, beatSaver };
@@ -433,8 +432,7 @@ export class PlayerScoresService {
             BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
-              leaderboard.difficulty.characteristic,
-              "full"
+              leaderboard.difficulty.characteristic
             ),
           ]);
           return { score: enrichedScore, leaderboard, beatSaver };
@@ -567,8 +565,7 @@ export class PlayerScoresService {
             BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
-              leaderboard.difficulty.characteristic,
-              "full"
+              leaderboard.difficulty.characteristic
             ),
           ]);
           return { score: enrichedScore, leaderboard, beatSaver };

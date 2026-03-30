@@ -1,4 +1,5 @@
 import { prop } from "@typegoose/typegoose";
+import type { MapCharacteristic } from "../../../schemas/map/map-characteristic";
 import type { MapDifficulty } from "../../../schemas/map/map-difficulty";
 import type MapDifficultyParitySummaryToken from "./difficulty-parity-summary";
 
@@ -49,7 +50,7 @@ export default class BeatSaverMapDifficultyToken {
    * The characteristic of this difficulty.
    */
   @prop()
-  public characteristic!: "Standard" | "Lawless";
+  public characteristic!: MapCharacteristic;
 
   /**
    * The difficulty of this difficulty.
@@ -110,4 +111,17 @@ export default class BeatSaverMapDifficultyToken {
    */
   @prop()
   public label!: string;
+
+  @prop()
+  public blStars?: number;
+
+  @prop()
+  public stars?: number;
+
+  /** BeatSaver `MapDifficulty.environment` (large enum in Swagger). */
+  @prop()
+  public environment?: string;
+
+  @prop()
+  public vivify?: boolean;
 }

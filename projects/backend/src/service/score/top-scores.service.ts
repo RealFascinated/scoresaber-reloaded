@@ -56,8 +56,7 @@ export class TopScoresService {
             BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
-              leaderboard.difficulty.characteristic,
-              "full"
+              leaderboard.difficulty.characteristic
             ),
           ]);
 

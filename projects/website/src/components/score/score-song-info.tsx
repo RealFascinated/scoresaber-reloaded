@@ -1,7 +1,7 @@
 import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
 import LeaderboardSongName from "./leaderboard-song-name";
@@ -20,7 +20,7 @@ interface ScoreSongInfoProps {
     value: number;
     icon: React.ComponentType<{ className?: string }>;
   };
-  beatSaverMap?: BeatSaverMapResponse;
+  beatSaverMap?: BeatSaverMap;
   clickableSongName?: boolean;
   leaderboardId?: number;
   imageSize?: number;

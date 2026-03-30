@@ -332,6 +332,107 @@ export const beatLeaderScoresTable = pgTable(
   ]
 );
 
+export const beatSaverUploadersTable = pgTable("beatsaver-uploaders", {
+  id: integer().primaryKey(),
+  name: text(),
+  hash: text(),
+  avatar: text(),
+  type: text(),
+  admin: boolean(),
+  curator: boolean(),
+  seniorCurator: boolean(),
+  verifiedMapper: boolean(),
+  playlistUrl: text(),
+});
+
+export const beatSaverMapsTable = pgTable(
+  "beatsaver-maps",
+  {
+    id: varchar({ length: 32 }).primaryKey(),
+    name: text().notNull(),
+    description: text().notNull(),
+
+    // Uploader
+    uploaderId: integer().references(() => beatSaverUploadersTable.id),
+
+    // Metadata
+    bpm: doublePrecision(),
+    duration: integer(),
+    songName: text(),
+    songSubName: text(),
+    songAuthorName: text(),
+    songAuthorUrl: text(),
+    levelAuthorName: text(),
+
+    uploadedAt: timestamp(),
+    automapper: boolean(),
+    createdAt: timestamp(),
+    updatedAt: timestamp(),
+    lastPublishedAt: timestamp(),
+    tags: text().array(),
+  },
+  table => [
+    index("beatsaver_maps_created_at_idx").on(table.createdAt),
+    index("beatsaver_maps_tags_idx").on(table.tags),
+    index("beatsaver_maps_uploader_id_idx").on(table.uploaderId),
+  ]
+);
+
+export const beatSaverMapVersionsTable = pgTable(
+  "beatsaver-map-versions",
+  {
+    id: serial().primaryKey(),
+    mapId: varchar({ length: 32 })
+      .notNull()
+      .references(() => beatSaverMapsTable.id),
+    hash: varchar({ length: 64 }).notNull(),
+    stage: text(),
+    createdAt: timestamp(),
+    downloadUrl: text(),
+    coverUrl: text(),
+    previewUrl: text(),
+  },
+  table => [
+    uniqueIndex("beatsaver_map_versions_hash_unique").on(table.hash),
+    index("beatsaver_map_versions_map_id_created_at_idx").on(table.mapId, table.createdAt.desc()),
+  ]
+);
+
+export const beatSaverMapDifficultiesTable = pgTable(
+  "beatsaver-map-difficulties",
+  {
+    id: serial().primaryKey(),
+    versionId: integer()
+      .notNull()
+      .references(() => beatSaverMapVersionsTable.id),
+    characteristic: text().$type<MapCharacteristic>(),
+    difficulty: text().$type<MapDifficulty>(),
+    njs: doublePrecision(),
+    offset: doublePrecision(),
+    notes: integer(),
+    bombs: integer(),
+    obstacles: integer(),
+    nps: doublePrecision(),
+    length: doublePrecision(),
+    events: integer(),
+    chroma: boolean(),
+    mappingExtensions: boolean(),
+    noodleExtensions: boolean(),
+    cinema: boolean(),
+    seconds: doublePrecision(),
+    maxScore: integer(),
+    label: text(),
+  },
+  table => [
+    uniqueIndex("beatsaver_map_difficulties_version_char_diff_unique").on(
+      table.versionId,
+      table.characteristic,
+      table.difficulty
+    ),
+    index("beatsaver_map_difficulties_version_id_idx").on(table.versionId),
+  ]
+);
+
 export const metricsTable = pgTable("metrics", {
   id: varchar({ length: 64 }).primaryKey(),
   value: jsonb().$type<unknown>(),
@@ -346,4 +447,8 @@ export type ScoreSaberMedalScoreRow = typeof scoreSaberMedalScoresTable.$inferSe
 export type ScoreSaberLeaderboardRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
 export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;
 export type BeatLeaderScoreRow = typeof beatLeaderScoresTable.$inferSelect;
+export type BeatSaverUploaderRow = typeof beatSaverUploadersTable.$inferSelect;
+export type BeatSaverMapRow = typeof beatSaverMapsTable.$inferSelect;
+export type BeatSaverMapVersionRow = typeof beatSaverMapVersionsTable.$inferSelect;
+export type BeatSaverMapDifficultyRow = typeof beatSaverMapDifficultiesTable.$inferSelect;
 export type MetricRow = typeof metricsTable.$inferSelect;

@@ -4,6 +4,7 @@ export const HmdSchema = z.enum([
   "Unknown",
   "Rift CV1",
   "Vive",
+  "Vive Elite",
   "Vive Pro",
   "Vive Pro 2",
   "HTC Vive Elite",
@@ -53,6 +54,13 @@ const HMD_DEFINITIONS = [
     info: {
       logo: "vive.svg",
       filters: "invert(54%) sepia(78%) saturate(2598%) hue-rotate(157deg) brightness(97%) contrast(101%)",
+    },
+  },
+  {
+    hmd: "Vive Elite",
+    info: {
+      logo: "vive.svg",
+      filters: "invert(25%) sepia(89%) saturate(5057%) hue-rotate(278deg) brightness(108%) contrast(85%)",
     },
   },
   {

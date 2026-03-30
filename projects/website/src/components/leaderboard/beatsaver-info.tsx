@@ -1,13 +1,13 @@
 import Card from "@/components/card";
 import EmbedLinks from "@/components/embed-links";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { useState } from "react";
 
 type LeaderboardBeatSaverInfoProps = {
   /**
    * The beat saver map associated with the leaderboard.
    */
-  beatSaverMap: BeatSaverMapResponse;
+  beatSaverMap: BeatSaverMap;
 };
 
 const descriptionMaxSize = 300;

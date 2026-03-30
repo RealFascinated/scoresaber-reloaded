@@ -11,10 +11,10 @@ import type {
   AccSaberScoreType,
 } from "../schemas/accsaber/tokens/query/query";
 import { AccSaberScore } from "../schemas/accsaber/tokens/score/score";
+import { BeatSaverMap } from "../schemas/beatsaver/map/map";
 import { MapCharacteristic } from "../schemas/map/map-characteristic";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
-import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
 import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard";
 import LeaderboardScoresResponse from "../schemas/response/leaderboard/leaderboard-scores";
 import { PlaysByHmdResponse } from "../schemas/response/leaderboard/plays-by-hmd";
@@ -89,14 +89,10 @@ class SSRApi {
   async getBeatSaverMap(
     hash: string,
     difficulty: MapDifficulty,
-    characteristic: MapCharacteristic,
-    type: DetailType = "basic"
+    characteristic: MapCharacteristic
   ) {
-    return await this.request<BeatSaverMapResponse>(
-      `/beatsaver/map/${hash}/${difficulty}/${characteristic}`,
-      {
-        type: type,
-      }
+    return await this.request<BeatSaverMap>(
+      `/beatsaver/map/${hash}/${difficulty}/${characteristic}`
     );
   }
 
@@ -419,9 +415,9 @@ class SSRApi {
       ...(options?.category ? { category: options.category.toString() } : {}),
       ...(options?.stars
         ? {
-            minStar: (options.stars.min ?? 0).toString(),
-            maxStar: (options.stars.max ?? 0).toString(),
-          }
+          minStar: (options.stars.min ?? 0).toString(),
+          maxStar: (options.stars.max ?? 0).toString(),
+        }
         : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.search ? { search: options.search } : {}),

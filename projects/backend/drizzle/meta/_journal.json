@@ -43,6 +43,13 @@
       "when": 1774920000000,
       "tag": "0005_metrics_table",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774905057974,
+      "tag": "0006_add beatsaver tables",
+      "breakpoints": true
     }
   ]
 }

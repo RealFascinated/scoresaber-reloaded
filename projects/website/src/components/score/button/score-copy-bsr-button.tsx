@@ -2,11 +2,11 @@
 
 import { copyToClipboard } from "@/common/browser-utils";
 import ScoreButton from "@/components/score/button/score-button";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { toast } from "sonner";
 
 type ScoreBsrButtonProps = {
-  beatSaverMap: BeatSaverMapResponse;
+  beatSaverMap: BeatSaverMap;
 };
 
 export function ScoreCopyBsrButton({ beatSaverMap }: ScoreBsrButtonProps) {

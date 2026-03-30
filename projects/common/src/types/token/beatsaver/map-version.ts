@@ -10,10 +10,16 @@ export default class BeatSaverMapVersionToken {
   public hash!: string;
 
   /**
-   * The stage of the map.
+   * Legacy field; BeatSaver Swagger uses `state`.
    */
   @prop()
-  public stage!: "Published"; // todo: find the rest of these
+  public stage?: string;
+
+  /**
+   * BeatSaver API `MapVersion.state` (Swagger).
+   */
+  @prop()
+  public state?: "Uploaded" | "Testplay" | "Published" | "Feedback" | "Scheduled";
 
   /**
    * The date the map was created.
@@ -26,6 +32,22 @@ export default class BeatSaverMapVersionToken {
    */
   @prop()
   public sageScore!: number;
+
+  @prop()
+  public feedback?: string;
+
+  @prop()
+  public key?: string;
+
+  @prop()
+  public scheduledAt?: string;
+
+  @prop()
+  public testplayAt?: string;
+
+  /** `MapTestplay[]` in Swagger; left loose to avoid extra token types. */
+  @prop({ type: () => [Object] })
+  public testplays?: Record<string, unknown>[];
 
   /**
    * The difficulties in the map.

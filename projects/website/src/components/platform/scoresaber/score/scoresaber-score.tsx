@@ -14,7 +14,7 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -29,7 +29,7 @@ export default function ScoreSaberScoreDisplay({
 }: {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMapResponse;
+  beatSaverMap?: BeatSaverMap;
   playerAbove?: ScoreSaberLeaderboardPlayerInfo;
   settings?: {
     noScoreButtons?: boolean;

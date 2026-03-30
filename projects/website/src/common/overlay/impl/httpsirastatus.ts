@@ -94,8 +94,7 @@ async function loadStatusData(status: HttpSiraStatus_Status) {
         beatSaverMap: await ssrApi.getBeatSaverMap(
           beatmap.songHash,
           beatmap.difficultyEnum,
-          beatmap.characteristic,
-          "full"
+          beatmap.characteristic
         ),
         leaderboard: (
           await ssrApi.fetchLeaderboardByHash(

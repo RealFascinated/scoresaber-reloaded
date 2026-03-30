@@ -64,8 +64,7 @@ export default function leaderboardController(app: Elysia) {
             beatsaver: await BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
-              leaderboard.difficulty.characteristic,
-              "full"
+              leaderboard.difficulty.characteristic
             ),
             starChangeHistory: await LeaderboardRankingService.fetchStarChangeHistory(leaderboard),
           } as LeaderboardResponse;
@@ -93,8 +92,7 @@ export default function leaderboardController(app: Elysia) {
             beatsaver: await BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
-              leaderboard.difficulty.characteristic,
-              "full"
+              leaderboard.difficulty.characteristic
             ),
             starChangeHistory: await LeaderboardRankingService.fetchStarChangeHistory(leaderboard),
           } as LeaderboardResponse;

@@ -105,16 +105,17 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         />
 
         {/* Ranked Date */}
-        {leaderboard.leaderboard.dateRanked && (
+        {leaderboard.leaderboard.rankedDate && (
           <LeaderboardInfoItem
             label="Ranked"
             value={
               <SimpleTooltip
-                display={formatDate(leaderboard.leaderboard.dateRanked, "Do MMMM, YYYY HH:mm a")}
+                display={formatDate(leaderboard.leaderboard.rankedDate, "Do MMMM, YYYY HH:mm a")}
               >
+                rankedDate
                 {formatDate(
-                  leaderboard.leaderboard.dateRanked
-                    ? leaderboard.leaderboard.dateRanked
+                  leaderboard.leaderboard.rankedDate
+                    ? leaderboard.leaderboard.rankedDate
                     : leaderboard.leaderboard.timestamp,
                   "Do MMMM, YYYY"
                 )}
