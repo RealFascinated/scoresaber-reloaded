@@ -32,7 +32,7 @@ export const ScoreSaberScoreSchema = z.object({
   modifiers: ModifiersSchema,
 
   // Headset information
-  hmd: z.string().transform(v => v as HMD).nullable(),
+  hmd: z.string().transform(v => v as HMD).default("Unknown"),
   rightController: z.string().nullable(),
   leftController: z.string().nullable(),
 

@@ -38,7 +38,7 @@ export const scoreSaberAccountsTable = pgTable(
     inactive: boolean().notNull(),
     banned: boolean().notNull(),
 
-    hmd: varchar({ length: 32 }).$type<HMD>(),
+    hmd: varchar({ length: 32 }).$type<HMD>().notNull().default("Unknown"),
     pp: doublePrecision().notNull().default(0),
     medals: integer().notNull().default(0),
 
@@ -125,7 +125,7 @@ export const scoreSaberScoresTable = pgTable(
     modifiers: varchar({ length: 32 }).array(),
 
     // Headset information
-    hmd: varchar({ length: 32 }),
+    hmd: varchar({ length: 32 }).$type<HMD>().notNull().default("Unknown"),
     rightController: varchar({ length: 32 }),
     leftController: varchar({ length: 32 }),
 
@@ -161,7 +161,7 @@ export const scoreSaberScoreHistoryTable = pgTable(
     modifiers: varchar({ length: 32 }).array(),
 
     // Headset information
-    hmd: varchar({ length: 32 }),
+    hmd: varchar({ length: 32 }).$type<HMD>().notNull().default("Unknown"),
     rightController: varchar({ length: 32 }),
     leftController: varchar({ length: 32 }),
 
@@ -200,7 +200,7 @@ export const scoreSaberMedalScoresTable = pgTable(
     modifiers: varchar({ length: 32 }).array(),
 
     // Headset information
-    hmd: varchar({ length: 32 }),
+    hmd: varchar({ length: 32 }).$type<HMD>().notNull().default("Unknown"),
     rightController: varchar({ length: 32 }),
     leftController: varchar({ length: 32 }),
 

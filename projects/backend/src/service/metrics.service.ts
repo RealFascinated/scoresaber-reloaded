@@ -12,7 +12,7 @@ import RedisHealthMetric from "../metrics/impl/backend/redis-health";
 import ResponseTimeHistogramMetric from "../metrics/impl/backend/response-time";
 import TotalRequestsMetric from "../metrics/impl/backend/total-requests";
 import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
-import MongoDbSizeMetric from "../metrics/impl/database/mongo-db-size";
+import PostgresDbSizeMetric from "../metrics/impl/database/postgres-db-size";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
 import BeatLeaderPlayersMetric from "../metrics/impl/player/beatleader-players";
@@ -61,7 +61,7 @@ export enum MetricType {
   QUEUE_PROCESSING_DURATION = "queue_processing_duration",
 
   // Database metrics
-  MONGO_DB_SIZE = "mongo_db_size",
+  POSTGRES_DB_SIZE = "postgres_db_size",
 }
 
 export default class MetricsService {
@@ -104,7 +104,7 @@ export default class MetricsService {
     this.registerMetric(new QueueProcessingDurationMetric());
 
     // Database metrics
-    this.registerMetric(new MongoDbSizeMetric());
+    this.registerMetric(new PostgresDbSizeMetric());
 
     void MetricsService.loadPersistedValues();
     MetricsService.startPersistenceLoop();

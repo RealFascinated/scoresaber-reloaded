@@ -1,4 +1,5 @@
 import Logger from "@ssr/common/logger";
+import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -10,7 +11,9 @@ import { scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/sch
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerCoreService } from "../player/player-core.service";
+import { PlayerHmdService } from "../player/player-hmd.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
+import { MedalScoresService } from "./medal-scores.service";
 
 export class ScoreCoreService {
   /**
@@ -25,6 +28,7 @@ export class ScoreCoreService {
    */
   public static async trackScoreSaberScore(
     score: ScoreSaberScore,
+    beatLeaderScore: BeatLeaderScore | undefined,
     leaderboard: ScoreSaberLeaderboard,
     player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfo,
     newScore: boolean = false
@@ -85,26 +89,46 @@ export class ScoreCoreService {
       await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.id, previous.id));
     }
 
+    await PlayerHmdService.updatePlayerHmd(player.id, score);
+
+    // Handle score for medal updates
+    if (leaderboard.ranked && score.rank <= 10) {
+      await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
+    }
+
+    // Update player score stats
+    const scoreStats = await PlayerCoreService.getPlayerScoreStats(player.id);
+    await PlayerCoreService.updatePlayer(player.id, { scoreStats });
+
     const modifiers = score.modifiers.map(modifier => modifier.toString());
-    await db.insert(scoreSaberScoresTable).values({
-      id: score.scoreId,
-      playerId: player.id,
-      leaderboardId: leaderboard.id,
-      difficulty: score.difficulty,
-      characteristic: score.characteristic,
-      score: score.score,
-      accuracy: score.accuracy,
-      pp: score.pp,
-      missedNotes: score.missedNotes,
-      badCuts: score.badCuts,
-      maxCombo: score.maxCombo,
-      fullCombo: score.fullCombo,
-      modifiers: modifiers.length > 0 ? modifiers : null,
-      hmd: score.hmd,
-      rightController: score.rightController,
-      leftController: score.leftController,
-      timestamp: score.timestamp,
-    });
+    const inserted = await db
+      .insert(scoreSaberScoresTable)
+      .values({
+        id: score.scoreId,
+        playerId: player.id,
+        leaderboardId: leaderboard.id,
+        difficulty: score.difficulty,
+        characteristic: score.characteristic,
+        score: score.score,
+        accuracy: score.accuracy,
+        pp: score.pp,
+        missedNotes: score.missedNotes,
+        badCuts: score.badCuts,
+        maxCombo: score.maxCombo,
+        fullCombo: score.fullCombo,
+        modifiers: modifiers.length > 0 ? modifiers : null,
+        hmd: score.hmd,
+        rightController: score.rightController,
+        leftController: score.leftController,
+        timestamp: score.timestamp,
+      })
+      .onConflictDoNothing({ target: scoreSaberScoresTable.id })
+      .returning({ id: scoreSaberScoresTable.id });
+
+    if (inserted.length === 0) {
+      Logger.warn(`Score insert skipped for scoreId "%s" (conflict)`, score.scoreId);
+      return { score: undefined, hasPreviousScore: false, tracked: false };
+    }
 
     // todo: update player hmd, handle medal updates, update player score stats
 
@@ -122,71 +146,6 @@ export class ScoreCoreService {
       );
     }
     return { score: score, hasPreviousScore: isImprovement, tracked: true };
-
-    // const before = performance.now();
-
-    // // Check if score exists and get previous score in parallel
-    // const [scoreExists, previousScore] = await Promise.all([
-    //   ScoreCoreService.scoreExists(score.scoreId, score.score),
-    //   ScoreSaberScoreModel.findOne({
-    //     playerId: player.id,
-    //     leaderboardId: leaderboard.id,
-    //   }).lean(),
-    // ]);
-    // const isImprovement = previousScore !== null && previousScore !== undefined;
-
-    // // Skip saving the score if it already exists
-    // if (scoreExists) {
-    //   return { score: undefined, hasPreviousScore: isImprovement, tracked: false };
-    // }
-
-    // // Handle previous score if it exists
-    // if (isImprovement) {
-    //   // Delete the the old score
-    //   await ScoreSaberScoreModel.deleteOne({ scoreId: previousScore.scoreId });
-
-    //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //   // @ts-expect-error
-    //   delete previousScore._id; // Remove _id to let a new one be generated
-
-    //   await ScoreSaberPreviousScoreModel.create(previousScore);
-    // }
-
-    // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // // @ts-expect-error
-    // delete score.playerInfo;
-
-    // const scoreToCreate: ScoreSaberScore = {
-    //   ...score,
-    //   ...(beatLeaderScore?.scoreId ? { beatLeaderScoreId: beatLeaderScore?.scoreId } : {}),
-    // };
-
-    // await ScoreSaberScoreModel.create(scoreToCreate);
-    // await PlayerHmdService.updatePlayerHmd(player.id, score);
-
-    // // Handle score for medal updates
-    // if (leaderboard.ranked && score.rank <= 10) {
-    //   await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
-    // }
-
-    // // Update player score stats
-    // const scoreStats = await PlayerCoreService.getPlayerScoreStats(player.id);
-    // await PlayerCoreService.updatePlayer(player.id, { scoreStats });
-
-    // if (newScore) {
-    //   Logger.info(
-    //     `Tracked %s ScoreSaber score "%s" for "%s" on "%s" [%s / %s]%s in %s`,
-    //     newScore ? "New" : "Missing",
-    //     score.scoreId,
-    //     player.name,
-    //     leaderboard.songName,
-    //     leaderboard.difficulty.difficulty,
-    //     leaderboard.difficulty.characteristic,
-    //     isImprovement ? ` (improvement)` : "",
-    //     formatDuration(performance.now() - before)
-    //   );
-    // }
-    // return { score: score, hasPreviousScore: isImprovement, tracked: true };
   }
 
   /**

@@ -29,5 +29,5 @@ export interface EventListener {
     player: ScoreSaberLeaderboardPlayerInfo,
     beatLeaderScore: BeatLeaderScoreToken | undefined,
     isTop50GlobalScore: boolean
-  ) => void;
+  ) => void | Promise<void>;
 }

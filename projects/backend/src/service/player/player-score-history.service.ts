@@ -5,7 +5,7 @@ import { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-hist
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { and, count, desc, eq, lt, sql } from "drizzle-orm";
+import { and, desc, eq, lt, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/schema";
@@ -148,10 +148,14 @@ export class PlayerScoreHistoryService {
   /**
    * Gets the total number of previous scores.
    *
-   * @returns the total number of previous scores
+   * @returns the approximate total number of previous scores
    */
   public static async getTotalPreviousScoresCount(): Promise<number> {
-    const [row] = await db.select({ count: count() }).from(scoreSaberScoreHistoryTable);
-    return Number(row?.count ?? 0);
+    const result = await db.execute<{ count: number }>(sql`
+      SELECT GREATEST(0, reltuples)::bigint::integer AS count
+      FROM pg_class
+      WHERE oid = 'scoresaber-score-history'::regclass
+    `);
+    return Number(result.rows[0]?.count ?? 0);
   }
 }

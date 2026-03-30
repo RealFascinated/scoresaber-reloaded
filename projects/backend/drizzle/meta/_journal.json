@@ -50,6 +50,13 @@
       "when": 1774905057974,
       "tag": "0006_add beatsaver tables",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1774908320016,
+      "tag": "0007_add fallback hmd",
+      "breakpoints": true
     }
   ]
 }

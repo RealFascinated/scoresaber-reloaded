@@ -509,6 +509,20 @@ export class LeaderboardCoreService {
   }
 
   /**
+   * Gets the approximate total number of leaderboards.
+   *
+   * @returns the approximate total number of leaderboards
+   */
+  public static async getTotalLeaderboardsCount(): Promise<number> {
+    const result = await db.execute<{ count: number }>(sql`
+      SELECT GREATEST(0, reltuples)::bigint::integer AS count
+      FROM pg_class
+      WHERE oid = 'scoresaber-leaderboards'::regclass
+    `);
+    return Number(result.rows[0]?.count ?? 0);
+  }
+
+  /**
    * Caches the song art for a leaderboard.
    *
    * @param leaderboard the leaderboard to cache the song art for

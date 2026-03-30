@@ -225,6 +225,7 @@ export class PlayerScoresService {
         }
         const trackingResult = await ScoreCoreService.trackScoreSaberScore(
           score,
+          undefined,
           leaderboard,
           playerToken,
           false
@@ -578,10 +579,14 @@ export class PlayerScoresService {
   /**
    * Gets the total number of scores.
    *
-   * @returns the total number of scores
+   * @returns the approximate total number of scores
    */
   public static async getTotalScoresCount(): Promise<number> {
-    const [row] = await db.select({ count: count() }).from(scoreSaberScoresTable);
-    return Number(row?.count ?? 0);
+    const result = await db.execute<{ count: number }>(sql`
+      SELECT GREATEST(0, reltuples)::bigint::integer AS count
+      FROM pg_class
+      WHERE oid = 'scoresaber-scores'::regclass
+    `);
+    return Number(result.rows[0]?.count ?? 0);
   }
 }

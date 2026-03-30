@@ -210,14 +210,18 @@ export class ScoreWebsockets implements EventListener {
 
       // Wait for all event listeners to process the score
       await Promise.all(
-        EventsManager.getListeners().map(listener => {
-          listener.onScoreReceived?.(
-            score,
-            leaderboard,
-            score.playerInfo!,
-            beatLeaderScore,
-            isTop50GlobalScore
-          );
+        EventsManager.getListeners().map(async listener => {
+          try {
+            await listener.onScoreReceived?.(
+              score,
+              leaderboard,
+              score.playerInfo!,
+              beatLeaderScore,
+              isTop50GlobalScore
+            );
+          } catch (error) {
+            Logger.error(`[Scores-WS] Error in listener ${listener.constructor.name}:`, error);
+          }
         })
       );
     }
