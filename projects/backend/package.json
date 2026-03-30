@@ -22,8 +22,6 @@
     "@eslint/js": "^10.0.1",
     "@ssr/common": "workspace:common",
     "@tqman/nice-logger": "^1.1.1",
-    "@typegoose/auto-increment": "^5.0.1",
-    "@typegoose/typegoose": "^13.2.1",
     "@typescript-eslint/eslint-plugin": "^8.57.2",
     "@typescript-eslint/parser": "^8.57.2",
     "devalue": "^5.6.4",
