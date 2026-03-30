@@ -1,4 +1,3 @@
-
 import { Gauge } from "prom-client";
 import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
 import { PlayerScoreHistoryService } from "../../../service/player/player-score-history.service";

@@ -47,10 +47,10 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 
 ### Still on MongoDB (runtime)
 
-| Area                     | Examples                                                                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Metrics / DB telemetry** | `mongo-db-size` reads `dbStats` via `mongoose.connection.db`; Mongo metrics class still registered in `metrics.service.ts`                       |
-| **Connection lifecycle** | Backend startup/shutdown still opens/closes Mongo (`mongoose.connect` / `mongoose.disconnect` in `index.ts`)                                    |
+| Area                       | Examples                                                                                                                   |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Metrics / DB telemetry** | `mongo-db-size` reads `dbStats` via `mongoose.connection.db`; Mongo metrics class still registered in `metrics.service.ts` |
+| **Connection lifecycle**   | Backend startup/shutdown still opens/closes Mongo (`mongoose.connect` / `mongoose.disconnect` in `index.ts`)               |
 
 ### Follow-ups inside migrated code
 
@@ -73,25 +73,25 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 
 ## 2. Collection → table mapping (updated)
 
-| Legacy collection / concept          | PG table / status                    | Notes                                                                                                                                               |
-| ------------------------------------ | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scoresaber-scores`                  | `scoresaber-scores`                  | Migrated for runtime paths (Drizzle)                                                                                                                 |
-| `scoresaber-previous-scores`         | `scoresaber-score-history`           | Migrated for runtime paths (Drizzle)                                                                                                                 |
-| `scoresaber-medals-scores`           | `scoresaber-medal-scores`            | Migrated; **`scoresaber-accounts.medals`** is the denormalized total (maintained by `player-medals.service` / medal flows)                          |
-| `scoresaber-leaderboards`            | `scoresaber-leaderboards`            | Migrated; **`leaderboard-score-seed-queue`** sets `seededScores` on PG                                                                              |
-| `scoresaber-leaderboard-star-change` | `scoresaber-leaderboard-star-change` | **Migrated** — ranking sync writes rows; table created in **`0000_initial`**                                                                        |
-| `players`                            | **`scoresaber-accounts` (PG)**       | Runtime services use Drizzle; **`PlayerModel`** only for **`mongo-to-postgres-scoresaber-accounts.ts`**                                             |
-| `player-history`                     | **`scoresaber-player-history` (PG)** | **`player-history.service`** on Drizzle; physical table name after **`0001_rename-history-table`**. ETL: **`mongo-to-postgres-player-history.ts`**. |
-| `additional-score-data` (BeatLeader) | **`beatleader-scores` (PG)**         | Mongo collection name in Typegoose for ETL / scripts; **`beatleader.service`** and **`app.service`** replay counts use PG only                      |
-| `beatleader-score-stats`             | **Not in Drizzle yet**               | Score stats JSON in **MinIO** (`StorageBucket.BeatLeaderScoreStats`); Mongo model `beatleader-score-stats` may still exist in `common`              |
-| `beatsaver-maps`                     | **`beatsaver-maps` (PG)**            | Runtime save/read uses Drizzle via `beatsaver.service.ts`; uploader/version/difficulty split tables are in `schema.ts`                           |
-| `beatsaver-uploaders`                | **`beatsaver-uploaders` (PG)**       | Upserted from token uploader data in `BeatSaverService.saveMap`                                                                                   |
-| `beatsaver-map-versions`             | **`beatsaver-map-versions` (PG)**    | Upserted by version hash; fetch path currently loads latest map version for conversion                                                            |
-| `beatsaver-map-difficulties`         | **`beatsaver-map-difficulties` (PG)**| Upserted per `(versionId, characteristic, difficulty)` and used for map conversion                                                                |
-| `playlists`                          | Generated from PG data               | Runtime playlist generation reads PG scores/leaderboards                                                                                            |
-| `metrics`                            | `metrics`                            | Persisted metric snapshots are now stored in PostgreSQL and loaded/saved via `metrics.service.ts`                                                 |
-| `discord-users`                      | **Not in Drizzle yet**               |                                                                                                                                                     |
-| `increments`                         | N/A for new score IDs                | Use API `scoreId` / app rules                                                                                                                       |
+| Legacy collection / concept          | PG table / status                     | Notes                                                                                                                                               |
+| ------------------------------------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scoresaber-scores`                  | `scoresaber-scores`                   | Migrated for runtime paths (Drizzle)                                                                                                                |
+| `scoresaber-previous-scores`         | `scoresaber-score-history`            | Migrated for runtime paths (Drizzle)                                                                                                                |
+| `scoresaber-medals-scores`           | `scoresaber-medal-scores`             | Migrated; **`scoresaber-accounts.medals`** is the denormalized total (maintained by `player-medals.service` / medal flows)                          |
+| `scoresaber-leaderboards`            | `scoresaber-leaderboards`             | Migrated; **`leaderboard-score-seed-queue`** sets `seededScores` on PG                                                                              |
+| `scoresaber-leaderboard-star-change` | `scoresaber-leaderboard-star-change`  | **Migrated** — ranking sync writes rows; table created in **`0000_initial`**                                                                        |
+| `players`                            | **`scoresaber-accounts` (PG)**        | Runtime services use Drizzle; **`PlayerModel`** only for **`mongo-to-postgres-scoresaber-accounts.ts`**                                             |
+| `player-history`                     | **`scoresaber-player-history` (PG)**  | **`player-history.service`** on Drizzle; physical table name after **`0001_rename-history-table`**. ETL: **`mongo-to-postgres-player-history.ts`**. |
+| `additional-score-data` (BeatLeader) | **`beatleader-scores` (PG)**          | Mongo collection name in Typegoose for ETL / scripts; **`beatleader.service`** and **`app.service`** replay counts use PG only                      |
+| `beatleader-score-stats`             | **Not in Drizzle yet**                | Score stats JSON in **MinIO** (`StorageBucket.BeatLeaderScoreStats`); Mongo model `beatleader-score-stats` may still exist in `common`              |
+| `beatsaver-maps`                     | **`beatsaver-maps` (PG)**             | Runtime save/read uses Drizzle via `beatsaver.service.ts`; uploader/version/difficulty split tables are in `schema.ts`                              |
+| `beatsaver-uploaders`                | **`beatsaver-uploaders` (PG)**        | Upserted from token uploader data in `BeatSaverService.saveMap`                                                                                     |
+| `beatsaver-map-versions`             | **`beatsaver-map-versions` (PG)**     | Upserted by version hash; fetch path currently loads latest map version for conversion                                                              |
+| `beatsaver-map-difficulties`         | **`beatsaver-map-difficulties` (PG)** | Upserted per `(versionId, characteristic, difficulty)` and used for map conversion                                                                  |
+| `playlists`                          | Generated from PG data                | Runtime playlist generation reads PG scores/leaderboards                                                                                            |
+| `metrics`                            | `metrics`                             | Persisted metric snapshots are now stored in PostgreSQL and loaded/saved via `metrics.service.ts`                                                   |
+| `discord-users`                      | **Not in Drizzle yet**                |                                                                                                                                                     |
+| `increments`                         | N/A for new score IDs                 | Use API `scoreId` / app rules                                                                                                                       |
 
 ---
 

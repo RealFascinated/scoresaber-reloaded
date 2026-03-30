@@ -63,12 +63,15 @@ RUN bun install typescript --global
 COPY --from=runner /app/projects/backend/src ./projects/backend/src
 COPY --from=runner /app/projects/backend/tsconfig.json ./projects/backend/
 
+# SQL migrations for startup `runMigrations()` (resolved via process.cwd()/drizzle; WORKDIR is projects/backend)
+COPY --from=runner /app/projects/backend/drizzle ./projects/backend/drizzle
+
 ARG PORT=8080
 ENV PORT $PORT
 EXPOSE $PORT
 
 # Add healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
 
 WORKDIR /app/projects/backend

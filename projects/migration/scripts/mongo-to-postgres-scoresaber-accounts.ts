@@ -95,7 +95,8 @@ function mongoPlayerDocToRow(doc: MongoPlayerLeanDoc): typeof scoreSaberAccounts
     trackReplays: doc.trackReplays ?? false,
     inactive: doc.inactive ?? false,
     banned: doc.banned ?? false,
-    hmd: truncateVarchar32(doc.hmd) as HMD,
+    // Missing/empty Mongo hmd → null from truncateVarchar32; explicit null skips DB default on insert.
+    hmd: (truncateVarchar32(doc.hmd?.trim() || undefined) ?? "Unknown") as HMD,
     pp: doc.pp ?? 0,
     medals: doc.medals ?? 0,
     scoreStats: normalizeScoreStats(doc.scoreStats),
@@ -123,6 +124,25 @@ const accountUpsertSet: Record<Exclude<keyof ScoreSaberAccountRow, "id">, Return
   trackedSince: sql`excluded."trackedSince"`,
   joinedDate: sql`excluded."joinedDate"`,
 };
+
+/**
+ * Drizzle wraps failures in `DrizzleQueryError` whose `message` includes the full SQL and bound
+ * `params` (huge for batched inserts). Prefer `cause` (usually the real Postgres error).
+ */
+function shortMigrationError(e: unknown): string {
+  if (e instanceof Error) {
+    const c = e.cause;
+    if (c instanceof Error) {
+      return `${c.name}: ${c.message}`;
+    }
+    const m = e.message;
+    if (m.length > 600) {
+      return `${e.name}: ${m.slice(0, 600)}… (truncated)`;
+    }
+    return `${e.name}: ${m}`;
+  }
+  return String(e);
+}
 
 function parseLimit(argv: string[]): number | undefined {
   const raw = argv.find(a => a.startsWith("--limit="));
@@ -180,7 +200,7 @@ async function main() {
       upserted += chunk.length;
     } catch (e) {
       errors += chunk.length;
-      Logger.error(`[mongo-to-postgres] scoresaber-accounts batch failed (${chunk.length} rows): ${e}`);
+      Logger.error(`[mongo-to-postgres] scoresaber-accounts batch failed (${chunk.length} rows): ${shortMigrationError(e)}`);
     }
   }
 
@@ -204,7 +224,7 @@ async function main() {
       }
     } catch (e) {
       errors++;
-      Logger.error(`[mongo-to-postgres] scoresaber-accounts map failed _id=${id}: ${e}`);
+      Logger.error(`[mongo-to-postgres] scoresaber-accounts map failed _id=${id}: ${shortMigrationError(e)}`);
     }
 
     if (processed % 5000 === 0) {
@@ -223,6 +243,6 @@ async function main() {
 }
 
 main().catch(e => {
-  Logger.error(e);
+  Logger.error(shortMigrationError(e));
   process.exit(1);
 });

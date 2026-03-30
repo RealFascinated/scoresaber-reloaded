@@ -37,14 +37,18 @@ export class LeaderboardScoresService {
       getScoreSaberScoreFromToken(token, leaderboard, token.leaderboardPlayerInfo.id)
     );
 
-    const scores = (await Promise.all(parsedScores.map(score => {
-      if (score === undefined) {
-        return undefined;
-      }
-      return ScoreCoreService.insertScoreData(score, leaderboard, {
-        insertBeatLeaderScore: true,
-      });
-    }))).filter(score => score !== undefined) as ScoreSaberScore[];
+    const scores = (
+      await Promise.all(
+        parsedScores.map(score => {
+          if (score === undefined) {
+            return undefined;
+          }
+          return ScoreCoreService.insertScoreData(score, leaderboard, {
+            insertBeatLeaderScore: true,
+          });
+        })
+      )
+    ).filter(score => score !== undefined) as ScoreSaberScore[];
 
     const totalPages = Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage);
 

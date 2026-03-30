@@ -428,7 +428,7 @@ export class PlayerHistoryService {
   ): Promise<ScoreSaberPlayerHistory> {
     const [accuracies, plusOnePp, medals] = await Promise.all([
       PlayerAccuraciesService.getPlayerAverageAccuracies(playerToken.id),
-      PlayerRankedService.getPlayerWeightedPpGainForRawPp(playerToken.id),
+      PlayerRankedService.getPlayerPlusOnePp(playerToken.id),
       PlayerMedalsService.getPlayerMedals(playerToken.id),
     ]);
 

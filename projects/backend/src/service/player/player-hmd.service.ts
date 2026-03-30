@@ -59,16 +59,16 @@ export class PlayerHmdService {
     const rows =
       limit != null
         ? await db
-          .select({ hmd: scoreSaberScoresTable.hmd })
-          .from(scoreSaberScoresTable)
-          .where(eq(scoreSaberScoresTable.playerId, playerId))
-          .orderBy(desc(scoreSaberScoresTable.timestamp))
-          .limit(limit)
+            .select({ hmd: scoreSaberScoresTable.hmd })
+            .from(scoreSaberScoresTable)
+            .where(eq(scoreSaberScoresTable.playerId, playerId))
+            .orderBy(desc(scoreSaberScoresTable.timestamp))
+            .limit(limit)
         : await db
-          .select({ hmd: scoreSaberScoresTable.hmd })
-          .from(scoreSaberScoresTable)
-          .where(eq(scoreSaberScoresTable.playerId, playerId))
-          .orderBy(desc(scoreSaberScoresTable.timestamp));
+            .select({ hmd: scoreSaberScoresTable.hmd })
+            .from(scoreSaberScoresTable)
+            .where(eq(scoreSaberScoresTable.playerId, playerId))
+            .orderBy(desc(scoreSaberScoresTable.timestamp));
 
     const counts = new Map<HMD, number>();
     for (const row of rows) {

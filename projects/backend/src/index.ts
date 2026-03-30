@@ -2,10 +2,9 @@ import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
 import { openapi } from "@elysiajs/openapi";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
 import { mongoose } from "@typegoose/typegoose";
@@ -18,6 +17,7 @@ import fs from "fs";
 import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
+import { runMigrations } from "./db/run-migrations";
 import AppController from "./controller/app.controller";
 import BeatLeaderController from "./controller/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
@@ -29,7 +29,6 @@ import ScoresController from "./controller/scores.controller";
 import { EventsManager } from "./event/events-manager";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { QueueManager } from "./queue/queue-manager";
-import BeatSaverService from "./service/beatsaver.service";
 import CacheService from "./service/cache.service";
 import { LeaderboardNotificationsService } from "./service/leaderboard/leaderboard-notifications.service";
 import { LeaderboardRankingService } from "./service/leaderboard/leaderboard-ranking.service";
@@ -139,50 +138,6 @@ export const app = new Elysia()
       run: async () => {
         await MedalScoresService.rescanMedalScores(); // Refresh medal scores
         await PlayerMedalsService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
-      },
-    })
-  )
-  .use(
-    cron({
-      name: "scrape-beatsaver-maps",
-      pattern: "0 8 * * *", // Every day at 08:00
-      timezone: "Europe/London",
-      protect: true,
-      run: async () => {
-        let shouldScrape = true;
-        let beforeDate = new Date();
-        Logger.info(`Starting to scrape beatsaver maps before ${beforeDate.toISOString()}...`);
-        while (shouldScrape) {
-          const latestMaps = await ApiServiceRegistry.getInstance()
-            .getBeatSaverService()
-            .lookupLatestMaps(false, 100, {
-              before: beforeDate,
-            });
-          if (latestMaps == undefined || latestMaps.docs.length === 0) {
-            Logger.info(`No maps found before ${beforeDate.toISOString()}!`);
-            shouldScrape = false;
-            continue;
-          }
-
-          const sortedMaps = latestMaps.docs.sort(
-            (a, b) => new Date(a.uploaded).getTime() - new Date(b.uploaded).getTime()
-          );
-          beforeDate = new Date(sortedMaps[0].uploaded);
-
-          // Save the maps
-          for (const map of sortedMaps) {
-            await BeatSaverService.saveMap(map);
-          }
-
-          // No more maps to scrape
-          if (latestMaps.docs.length == 0) {
-            shouldScrape = false;
-            continue;
-          }
-          await Bun.sleep(TimeUnit.toMillis(TimeUnit.Minute, 1)); // avoid touching their server inappropriately
-
-          Logger.info(`Scraped ${latestMaps.docs.length} maps before ${beforeDate.toISOString()}!`);
-        }
       },
     })
   )
@@ -342,6 +297,14 @@ app.onStart(async () => {
 
   EventsManager.registerListener(new QueueManager());
 });
+
+try {
+  await runMigrations();
+  Logger.info("Database migrations are up to date.");
+} catch (error) {
+  Logger.error("Database migration failed:", error);
+  process.exit(1);
+}
 
 app.listen({
   port: 8080,

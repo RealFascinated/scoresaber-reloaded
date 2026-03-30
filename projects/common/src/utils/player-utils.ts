@@ -64,10 +64,10 @@ export function getPlayerStatisticChange(
  * @returns the statistic changes
  * @private
  */
-export async function getPlayerStatisticChanges(
+export function getPlayerStatisticChanges(
   history: Record<string, ScoreSaberPlayerHistory>,
   daysAgo: number = 1
-): Promise<ScoreSaberPlayerHistory> {
+): ScoreSaberPlayerHistory {
   return {
     rank: getPlayerStatisticChange(history, "rank", true, daysAgo),
     countryRank: getPlayerStatisticChange(history, "countryRank", true, daysAgo),

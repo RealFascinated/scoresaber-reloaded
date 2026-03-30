@@ -8,12 +8,15 @@ export default class ActiveAccountsMetric extends NumberMetric {
   constructor() {
     super(MetricType.ACTIVE_ACCOUNTS, 0);
 
-    setInterval(async () => {
-      const count = await ScoreSaberApiService.lookupActivePlayerCount();
-      if (count !== undefined) {
-        this.value = count;
-      }
-    }, TimeUnit.toMillis(TimeUnit.Minute, 1));
+    setInterval(
+      async () => {
+        const count = await ScoreSaberApiService.lookupActivePlayerCount();
+        if (count !== undefined) {
+          this.value = count;
+        }
+      },
+      TimeUnit.toMillis(TimeUnit.Minute, 1)
+    );
 
     const gauge = new Gauge({
       name: "active_accounts",

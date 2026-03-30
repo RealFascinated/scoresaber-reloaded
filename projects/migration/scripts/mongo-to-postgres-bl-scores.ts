@@ -120,27 +120,27 @@ function mongoBeatLeaderDocToRow(doc: MongoBeatLeaderLeanDoc): typeof beatLeader
   const improvement =
     impTok.score <= 0
       ? {
-        improvementScore: 0,
-        improvementPauses: 0,
-        improvementMisses: 0,
-        improvementMissedNotes: 0,
-        improvementBombCuts: 0,
-        improvementWallsHit: 0,
-        improvementBadCuts: 0,
-        improvementLeftHandAccuracy: 0,
-        improvementRightHandAccuracy: 0,
-      }
+          improvementScore: 0,
+          improvementPauses: 0,
+          improvementMisses: 0,
+          improvementMissedNotes: 0,
+          improvementBombCuts: 0,
+          improvementWallsHit: 0,
+          improvementBadCuts: 0,
+          improvementLeftHandAccuracy: 0,
+          improvementRightHandAccuracy: 0,
+        }
       : {
-        improvementScore: impTok.score,
-        improvementPauses: impTok.pauses,
-        improvementMisses: getMissesImp(),
-        improvementMissedNotes: impTok.missedNotes,
-        improvementBombCuts: impTok.bombCuts,
-        improvementWallsHit: impTok.wallsHit,
-        improvementBadCuts: impTok.badCuts,
-        improvementLeftHandAccuracy: impTok.accLeft,
-        improvementRightHandAccuracy: impTok.accRight,
-      };
+          improvementScore: impTok.score,
+          improvementPauses: impTok.pauses,
+          improvementMisses: getMissesImp(),
+          improvementMissedNotes: impTok.missedNotes,
+          improvementBombCuts: impTok.bombCuts,
+          improvementWallsHit: impTok.wallsHit,
+          improvementBadCuts: impTok.badCuts,
+          improvementLeftHandAccuracy: impTok.accLeft,
+          improvementRightHandAccuracy: impTok.accRight,
+        };
 
   return {
     id: doc.scoreId,

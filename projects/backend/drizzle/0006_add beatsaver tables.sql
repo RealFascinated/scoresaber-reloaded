@@ -64,12 +64,6 @@ CREATE TABLE "beatsaver-uploaders" (
 	"playlistUrl" text
 );
 --> statement-breakpoint
-CREATE TABLE "metrics" (
-	"id" varchar(64) PRIMARY KEY NOT NULL,
-	"value" jsonb,
-	"updatedAt" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 ALTER TABLE "scoresaber-medal-scores" ALTER COLUMN "characteristic" SET DATA TYPE text;--> statement-breakpoint
 ALTER TABLE "scoresaber-score-history" ALTER COLUMN "characteristic" SET DATA TYPE text;--> statement-breakpoint
 ALTER TABLE "scoresaber-scores" ALTER COLUMN "characteristic" SET DATA TYPE text;--> statement-breakpoint

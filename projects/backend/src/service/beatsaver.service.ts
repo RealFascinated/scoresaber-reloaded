@@ -36,14 +36,21 @@ export default class BeatSaverService {
       let rows = await this.getRowsByHash(normalizedHash);
 
       if (!rows) {
-        const fetchedToken = await ApiServiceRegistry.getInstance().getBeatSaverService().lookupMap(normalizedHash);
+        const fetchedToken = await ApiServiceRegistry.getInstance()
+          .getBeatSaverService()
+          .lookupMap(normalizedHash);
         if (!fetchedToken) {
           return undefined;
         }
         await this.saveMap(fetchedToken);
         rows = await this.getRowsByHash(normalizedHash);
         if (!rows) {
-          const picked = this.pickVersionForLeaderboard(fetchedToken, normalizedHash, difficulty, characteristic);
+          const picked = this.pickVersionForLeaderboard(
+            fetchedToken,
+            normalizedHash,
+            difficulty,
+            characteristic
+          );
           if (picked != null) {
             rows = await this.getRowsByHash(picked.hash.toLowerCase());
           }
@@ -182,7 +189,9 @@ export default class BeatSaverService {
         .select()
         .from(beatSaverMapVersionsTable)
         .where(eq(beatSaverMapVersionsTable.mapId, map.id));
-      const versionIdByHash = new Map(versionRows.map(versionRow => [versionRow.hash.toLowerCase(), versionRow.id]));
+      const versionIdByHash = new Map(
+        versionRows.map(versionRow => [versionRow.hash.toLowerCase(), versionRow.id])
+      );
 
       for (const version of map.versions) {
         const versionId = versionIdByHash.get(version.hash.toLowerCase());
@@ -298,13 +307,13 @@ export default class BeatSaverService {
     const uploaderRow =
       mapRow.uploaderId == null
         ? null
-        : (
-          await db
-            .select()
-            .from(beatSaverUploadersTable)
-            .where(eq(beatSaverUploadersTable.id, mapRow.uploaderId))
-            .limit(1)
-        )[0] ?? null;
+        : ((
+            await db
+              .select()
+              .from(beatSaverUploadersTable)
+              .where(eq(beatSaverUploadersTable.id, mapRow.uploaderId))
+              .limit(1)
+          )[0] ?? null);
 
     const difficulties = await db
       .select()

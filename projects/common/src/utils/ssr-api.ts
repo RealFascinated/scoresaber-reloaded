@@ -4,7 +4,6 @@ import { env } from "../env";
 import { StarFilter } from "../maps/types";
 import type { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
-import { PlayerStatisticHistory } from "../player/player-statistic-history";
 import type {
   AccSaberScoreOrder,
   AccSaberScoreSort,
@@ -30,6 +29,7 @@ import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph
 import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
 import type { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberPlayerHistory } from "../schemas/scoresaber/player/history";
 import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
@@ -86,14 +86,8 @@ class SSRApi {
    * @param difficulty the difficulty to get
    * @param characteristic the characteristic to get
    */
-  async getBeatSaverMap(
-    hash: string,
-    difficulty: MapDifficulty,
-    characteristic: MapCharacteristic
-  ) {
-    return await this.request<BeatSaverMap>(
-      `/beatsaver/map/${hash}/${difficulty}/${characteristic}`
-    );
+  async getBeatSaverMap(hash: string, difficulty: MapDifficulty, characteristic: MapCharacteristic) {
+    return await this.request<BeatSaverMap>(`/beatsaver/map/${hash}/${difficulty}/${characteristic}`);
   }
 
   /**
@@ -309,7 +303,7 @@ class SSRApi {
    * @returns the statistic history
    */
   async getPlayerStatisticHistory(playerId: string, count: number) {
-    return await this.request<PlayerStatisticHistory>(`/player/history/${playerId}`, {
+    return await this.request<ScoreSaberPlayerHistory>(`/player/history/${playerId}`, {
       count: count.toString(),
     });
   }
@@ -415,9 +409,9 @@ class SSRApi {
       ...(options?.category ? { category: options.category.toString() } : {}),
       ...(options?.stars
         ? {
-          minStar: (options.stars.min ?? 0).toString(),
-          maxStar: (options.stars.max ?? 0).toString(),
-        }
+            minStar: (options.stars.min ?? 0).toString(),
+            maxStar: (options.stars.max ?? 0).toString(),
+          }
         : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.search ? { search: options.search } : {}),

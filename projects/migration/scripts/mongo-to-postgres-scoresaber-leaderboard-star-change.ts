@@ -135,7 +135,9 @@ async function main() {
       inserted += chunk.length;
     } catch (e) {
       errors += chunk.length;
-      Logger.error(`[mongo-to-postgres] scoresaber-leaderboard-star-change batch failed (${chunk.length} rows): ${e}`);
+      Logger.error(
+        `[mongo-to-postgres] scoresaber-leaderboard-star-change batch failed (${chunk.length} rows): ${e}`
+      );
     }
   }
 
@@ -153,7 +155,9 @@ async function main() {
     } catch (e) {
       errors++;
       const id = (doc as MongoStarChangeLeanDoc)._id;
-      Logger.error(`[mongo-to-postgres] scoresaber-leaderboard-star-change map failed _id=${String(id)}: ${e}`);
+      Logger.error(
+        `[mongo-to-postgres] scoresaber-leaderboard-star-change map failed _id=${String(id)}: ${e}`
+      );
     }
 
     if (processed % 5000 === 0) {

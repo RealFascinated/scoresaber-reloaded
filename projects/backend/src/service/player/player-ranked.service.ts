@@ -49,7 +49,7 @@ export class PlayerRankedService {
    * @param playerId the player's id
    * @returns the raw pp needed to gain 1 weighted pp
    */
-  public static async getPlayerWeightedPpGainForRawPp(playerId: string): Promise<number> {
+  public static async getPlayerPlusOnePp(playerId: string): Promise<number> {
     const playerScores = await db
       .select({ pp: scoreSaberScoresTable.pp })
       .from(scoreSaberScoresTable)

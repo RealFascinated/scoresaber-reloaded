@@ -6,6 +6,7 @@
     "./db/schema": "./src/db/schema.ts"
   },
   "scripts": {
+    "db:migrate": "bun run scripts/db-migrate.ts",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build --compile --target bun --outfile ssr-backend src/index.js",
     "start": "NODE_ENV=production ./ssr-backend",

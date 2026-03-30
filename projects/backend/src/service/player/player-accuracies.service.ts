@@ -14,8 +14,7 @@ export class PlayerAccuraciesService {
     const [result] = await db
       .select({
         averageAccuracy: sql<number>`coalesce(avg(${scoreSaberScoresTable.accuracy}), 0)`,
-        unrankedAccuracy:
-          sql<number>`coalesce(avg(case when ${scoreSaberScoresTable.pp} = 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
+        unrankedAccuracy: sql<number>`coalesce(avg(case when ${scoreSaberScoresTable.pp} = 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
       })
       .from(scoreSaberScoresTable)
       .where(

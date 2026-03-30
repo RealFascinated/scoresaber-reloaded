@@ -28,8 +28,6 @@
         "@eslint/js": "^10.0.1",
         "@ssr/common": "workspace:common",
         "@tqman/nice-logger": "^1.1.1",
-        "@typegoose/auto-increment": "^5.0.1",
-        "@typegoose/typegoose": "^13.2.1",
         "@typescript-eslint/eslint-plugin": "^8.57.2",
         "@typescript-eslint/parser": "^8.57.2",
         "devalue": "^5.6.4",
@@ -60,8 +58,6 @@
       "version": "1.0.0",
       "dependencies": {
         "@t3-oss/env-core": "^0.13.11",
-        "@typegoose/auto-increment": "^5.0.1",
-        "@typegoose/typegoose": "^13.2.1",
         "dayjs": "^1.11.20",
         "devalue": "^5.6.4",
         "ws": "^8.20.0",
