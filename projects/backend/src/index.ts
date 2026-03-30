@@ -7,7 +7,6 @@ import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
-import { mongoose } from "@typegoose/typegoose";
 import { timingSafeEqual } from "crypto";
 import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
@@ -17,7 +16,6 @@ import fs from "fs";
 import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
-import { runMigrations } from "./db/run-migrations";
 import AppController from "./controller/app.controller";
 import BeatLeaderController from "./controller/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver.controller";
@@ -26,6 +24,7 @@ import PlayerRankingController from "./controller/player-ranking.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
+import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { QueueManager } from "./queue/queue-manager";
@@ -342,11 +341,6 @@ const gracefulShutdown = async (signal: string) => {
       } catch (error) {
         Logger.warn(`Error stopping service ${listener.constructor.name}:`, error);
       }
-    }
-
-    if (mongoose.connection.readyState === 1) {
-      await mongoose.disconnect();
-      Logger.info("MongoDB connection closed");
     }
 
     clearTimeout(forceExit);
