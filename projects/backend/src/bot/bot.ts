@@ -104,7 +104,7 @@ export async function sendEmbedToChannel(
   embed: EmbedBuilder,
   components: ActionRowData<MessageActionRowComponentBuilder>[] = []
 ) {
-  if (!channelId) {
+  if (!channelId || !env.DISCORD_BOT_TOKEN) {
     return;
   }
   try {
@@ -128,7 +128,7 @@ export async function sendMessageToChannel(
   channelId: (typeof DiscordChannels)[keyof typeof DiscordChannels],
   message: string
 ) {
-  if (!channelId) {
+  if (!channelId || !env.DISCORD_BOT_TOKEN) {
     return;
   }
 
