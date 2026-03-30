@@ -10,6 +10,8 @@ export const env = createEnv({
 
     LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).optional(),
 
+    ENABLE_QUEUES: z.boolean(),
+
     MINIO_ENDPOINT: z.string(),
     MINIO_USE_SSL: z.boolean(),
     MINIO_PORT: z.number(),
@@ -54,6 +56,8 @@ export const env = createEnv({
 
     NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV ?? "development",
     NEXT_PUBLIC_APPLICATION_NAME: process.env.NEXT_PUBLIC_APPLICATION_NAME,
+
+    ENABLE_QUEUES: Boolean(process.env.ENABLE_QUEUES ?? true),
 
     // PostgreSQL
     DATABASE_URL: process.env.DATABASE_URL,

@@ -1,5 +1,5 @@
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { isProduction } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
 import { redisClient } from "../common/redis";
 import { QueueId } from "./queue-manager";
@@ -80,8 +80,7 @@ export abstract class Queue<T> {
    * Processes the queue
    */
   public async processQueue() {
-    // don't process in dev mode
-    if (!isProduction()) {
+    if (!env.ENABLE_QUEUES) {
       return;
     }
 

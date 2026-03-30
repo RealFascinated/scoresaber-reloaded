@@ -1,5 +1,6 @@
 import * as dotenv from "@dotenvx/dotenvx";
 import { env } from "@ssr/common/env";
+import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
@@ -150,7 +151,7 @@ function mongoScoreSaberDocToRow(
     maxCombo: asInt(doc.maxCombo, 0),
     fullCombo: Boolean(doc.fullCombo),
     modifiers,
-    hmd: truncateVarchar32(doc.hmd != null ? String(doc.hmd) : undefined),
+    hmd: (truncateVarchar32(doc.hmd != null ? String(doc.hmd) : "") ?? "Unknown") as HMD,
     rightController: truncateVarchar32(c?.rightController != null ? String(c.rightController) : undefined),
     leftController: truncateVarchar32(c?.leftController != null ? String(c.leftController) : undefined),
     timestamp,
