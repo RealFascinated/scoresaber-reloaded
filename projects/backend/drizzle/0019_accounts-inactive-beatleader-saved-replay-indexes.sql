@@ -1,2 +1,0 @@
-CREATE INDEX "beatleader_scores_saved_replay_true_idx" ON "beatleader-scores" USING btree ("savedReplay") WHERE "beatleader-scores"."savedReplay" = true;--> statement-breakpoint
-CREATE INDEX "accounts_inactive_true_idx" ON "scoresaber-accounts" USING btree ("inactive") WHERE "scoresaber-accounts"."inactive" = true;

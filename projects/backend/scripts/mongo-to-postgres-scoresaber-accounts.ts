@@ -5,8 +5,8 @@ import { PlayerModel } from "@ssr/common/model/player/player";
 import type { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
 import { mongoose } from "@typegoose/typegoose";
 import { sql } from "drizzle-orm";
-import { db } from "../db";
-import { scoreSaberAccountsTable, type ScoreSaberAccountRow } from "../db/schema";
+import { db } from "../src/db";
+import { scoreSaberAccountsTable, type ScoreSaberAccountRow } from "../src/db/schema";
 
 dotenv.config();
 

@@ -1,1 +1,0 @@
-CREATE INDEX "leaderboards_song_hash_idx" ON "scoresaber-leaderboards" USING btree ("songHash");

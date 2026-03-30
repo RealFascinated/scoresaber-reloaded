@@ -1,10 +1,10 @@
 import Logger from "@ssr/common/logger";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import { db } from "../db";
-import { scoreSaberLeaderboardsTable } from "../db/schema";
-import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
-import { ScoreSaberApiService } from "../service/scoresaber-api.service";
-import StorageService from "../service/storage.service";
+import { db } from "../src/db";
+import { scoreSaberLeaderboardsTable } from "../src/db/schema";
+import { LeaderboardCoreService } from "../src/service/leaderboard/leaderboard-core.service";
+import { ScoreSaberApiService } from "../src/service/scoresaber-api.service";
+import StorageService from "../src/service/storage.service";
 
 async function createMissingLeaderboards() {
   const existingLeaderboards = await db
