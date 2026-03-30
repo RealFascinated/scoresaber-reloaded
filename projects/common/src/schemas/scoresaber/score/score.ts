@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { HmdSchema } from "../../../hmds";
+import { HMD } from "../../../hmds";
 import { ModifiersSchema } from "../../../score/modifier";
 import { BeatLeaderScoreSchema } from "../../beatleader/score/score";
-import { MapCharacteristicSchema } from "../../map/map-characteristic";
-import { MapDifficultySchema } from "../../map/map-difficulty";
+import { MapCharacteristic } from "../../map/map-characteristic";
+import { MapDifficulty } from "../../map/map-difficulty";
 import { nullToZeroNumberSchema, numberIncludingInfinitySchema } from "../../number";
 import { ScoreSaberLeaderboardPlayerInfoSchema } from "../leaderboard/player-info";
 import { ScoreSaberHistoryScoreSchema } from "./history-score";
@@ -15,8 +15,8 @@ export const ScoreSaberScoreSchema = z.object({
   scoreId: z.number(),
 
   // Leaderboard information
-  difficulty: MapDifficultySchema,
-  characteristic: MapCharacteristicSchema,
+  difficulty: z.string().transform(v => v as MapDifficulty),
+  characteristic: z.string().transform(v => v as MapCharacteristic),
 
   // Score information
   score: z.number(),
@@ -32,14 +32,14 @@ export const ScoreSaberScoreSchema = z.object({
   modifiers: ModifiersSchema,
 
   // Headset information
-  hmd: HmdSchema.nullable(),
+  hmd: z.string().transform(v => v as HMD).nullable(),
   rightController: z.string().nullable(),
   leftController: z.string().nullable(),
 
   // Player information
   playerInfo: ScoreSaberLeaderboardPlayerInfoSchema.nullable(),
 
-  // todo: beatleader score
+  // Other scores
   beatLeaderScore: BeatLeaderScoreSchema.optional(),
   previousScore: ScoreSaberHistoryScoreSchema.optional(),
 
