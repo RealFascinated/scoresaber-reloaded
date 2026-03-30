@@ -71,7 +71,7 @@ export class ScoreWebsockets implements EventListener {
             `${player.id}-${leaderboard.songHash}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`.toUpperCase();
           const pendingScore = ScoreWebsockets.PENDING_SCORES.get(key);
 
-          Logger.info(`[SS-WS] Received score for player ${player.id} with key ${key}`);
+          // Logger.info(`[SS-WS] Received score for player ${player.id} with key ${key}`);
 
           if (pendingScore?.beatLeaderScore) {
             // Found a matching BeatLeader score, process both
@@ -120,7 +120,7 @@ export class ScoreWebsockets implements EventListener {
             `${player.id}-${leaderboard.song.hash}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`.toUpperCase();
           const pendingScore = ScoreWebsockets.PENDING_SCORES.get(key);
 
-          Logger.info(`[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`);
+          // Logger.info(`[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`);
 
           if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
             // Found a matching ScoreSaber score, process both
