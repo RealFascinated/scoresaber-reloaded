@@ -2,7 +2,7 @@ import { getModelForClass, modelOptions, prop, ReturnModelType, Severity } from 
 import { Document } from "mongoose";
 
 /**
- * The model for a metric value.
+ * Mongo metric snapshot document from `metrics` collection.
  */
 @modelOptions({
   options: { allowMixed: Severity.ALLOW },
@@ -10,13 +10,13 @@ import { Document } from "mongoose";
 })
 export class MetricValue {
   /**
-   * The id of the metric.
+   * The metric id.
    */
   @prop()
   public _id!: string;
 
   /**
-   * The value of this metric.
+   * The metric value payload.
    */
   @prop()
   public value?: unknown;

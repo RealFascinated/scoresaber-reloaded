@@ -26,6 +26,7 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 - `score-core.service.ts` — track score, move prior row to history, `scoreExists` (insert matches `schema.ts`)
 - `player-score-history.service.ts` — previous score + history queries
 - `player-scores.service.ts` — listing / filters / joins; **still uses Mongo** for some seed/cleanup aggregates (see below)
+- `player-ranked.service.ts` — ranked pp queries on `scoresaber-scores` (PG)
 - `top-scores.service.ts`
 - `medal-scores.service.ts` — medal rows on PG; notification `getChanges` reads prior medal totals from **`scoresaber-accounts`** (not `PlayerModel`)
 - **`player-core.service.ts`** — create/update/exists/name/token paths on **`scoresaber-accounts`**; still uses **`ScoreSaberScoreModel.countDocuments`** in one flow (tracked-score check)
@@ -49,14 +50,14 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 | Area                                    | Examples                                                                                                                                                                                                                                                                                                                       |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Players (legacy model)**              | **`PlayerModel`** only in **`mongo-to-postgres-scoresaber-accounts.ts`** and any ad-hoc scripts — **runtime account data is `scoresaber-accounts` (PG)**                                                                                                                                                                       |
-| **ScoreSaber scores (legacy)**          | `player-scores.service.ts` (aggregate + `deleteMany`), `player-core` (one `countDocuments`), `player-hmd`, `player-ranked`, `player-accuracies`, `leaderboard-hmd`, `scoresaber.service` (`deleteMany`), **metrics** (`total-tracked-scores`), **bot** (`estimatedDocumentCount`) — **not** `player-history` (that path is PG) |
+| **ScoreSaber scores (legacy)**          | `player-scores.service.ts` (aggregate + `deleteMany`), `player-core` (one `countDocuments`), `player-hmd`, `player-accuracies`, `leaderboard-hmd`, `scoresaber.service` (`deleteMany`), **metrics** (`total-tracked-scores`), **bot** (`estimatedDocumentCount`) — **not** `player-history` (that path is PG) |
 | **Leaderboards / app dashboard counts** | **`app.service.ts`** `getAppStatistics` uses **PG** (`count()` on scores, score-history, leaderboards, BeatLeader `savedReplay`, inactive accounts). **Seed queue** is on PG (`leaderboard-score-seed-queue.ts` → `scoreSaberLeaderboardsTable.seededScores`)                                                                  |
 | **BeatLeader scores**                   | **Runtime + existence checks on PG** (`beatleader.service.ts`); **`BeatLeaderScoreModel`** is **not** referenced in `projects/backend/src` (Mongo collection may remain for one-off ETL only)                                                                                                                                  |
 | **BeatSaver maps**                      | `beatsaver.service.ts`, `beatsaver-websocket.ts` → `BeatSaverMapModel`                                                                                                                                                                                                                                                         |
 | **Playlists (stored)**                  | `playlist.service.ts` — `PlaylistModel` for static playlists (ranked/qualified/queue metadata + song lists)                                                                                                                                                                                                                    |
 | **App stats / metrics**                 | **`app.service`** dashboard counts are **PG** (see above). **`total-tracked-scores`** metric and **`bot`** status still use Mongo **`estimatedDocumentCount`** on **`ScoreSaberScoreModel`** / **`ScoreSaberPreviousScoreModel`** until those gauges are switched to Drizzle                                                   |
 | **Discord users**                       | `common/discord/user.ts`                                                                                                                                                                                                                                                                                                       |
-| **Metric snapshots**                    | `MetricValueModel`                                                                                                                                                                                                                                                                                                             |
+| **Metric snapshots**                    | `metrics` table (Drizzle)                                                                                                                                                                                                                                                                                                      |
 | **Misc**                                | Bot commands / scripts still touching Mongo scores or leaderboards; seed queues read **`scoresaber-accounts`** on PG                                                                                                                                                                                                           |
 
 ### Follow-ups inside migrated code
@@ -94,7 +95,7 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 | `beatleader-score-stats`             | **Not in Drizzle yet**               | Score stats JSON in **MinIO** (`StorageBucket.BeatLeaderScoreStats`); Mongo model `beatleader-score-stats` may still exist in `common`              |
 | `beatsaver-maps`                     | **Not in Drizzle yet**               |                                                                                                                                                     |
 | `playlists`                          | **Not in Drizzle yet**               | Self/snipe use PG for scores; stored playlists use Mongo                                                                                            |
-| `metrics`                            | **Not in Drizzle yet**               |                                                                                                                                                     |
+| `metrics`                            | `metrics`                            | Persisted metric snapshots are now stored in PostgreSQL and loaded/saved via `metrics.service.ts`                                                 |
 | `discord-users`                      | **Not in Drizzle yet**               |                                                                                                                                                     |
 | `increments`                         | N/A for new score IDs                | Use API `scoreId` / app rules                                                                                                                       |
 
@@ -119,7 +120,7 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 ### 4.2 Services — still high-touch (Mongo `*Model` / aggregates)
 
 - **Player accounts (PG):** `player-core` (Drizzle accounts; one Mongo score count), `player-search`, `player-hmd`, `player-medals` (medals on PG), seed queues — **`PlayerModel`** not in these paths.
-- **Player:** `player-scores` (**remaining** aggregates/seed/deleteMany), `player-beatleader-scores`, **`player-history` (PG / Drizzle)**, `player-accuracies`, `player-ranked`, queues that do not touch history.
+- **Player:** `player-scores` (**remaining** aggregates/seed/deleteMany), `player-beatleader-scores`, **`player-history` (PG / Drizzle)**, `player-accuracies`, queues that do not touch history.
 - **Leaderboards:** **`leaderboard-score-seed-queue`** (Drizzle `seededScores` + queue); `leaderboard-hmd` (score aggregates on Mongo); `leaderboard-notifications` only consumes `LeaderboardUpdate` types (no Mongo).
 - **Scores:** `scoresaber.service` cleanup paths; finish aligning **metrics/bot** counts with PG (`app.service` dashboard counts already PG).
 - **BeatLeader / BeatSaver:** `beatleader.service` (PG only for persistence); `beatsaver.service`, websocket listener.
@@ -132,7 +133,7 @@ Same mapping as before: `aggregate` → `JOIN`/windows; `bulkWrite` → batched 
 
 ### 4.4 Scripts
 
-- **ETL (Mongo → PG):** `projects/migration/scripts/mongo-to-postgres-scoresaber-accounts.ts`, **`mongo-to-postgres-bl-scores.ts`**, **`mongo-to-postgres-player-history.ts`** — run with `DATABASE_URL` + `MONGO_CONNECTION_STRING`.
+- **ETL (Mongo → PG):** `projects/migration/scripts/mongo-to-postgres-scoresaber-scores.ts`, `projects/migration/scripts/mongo-to-postgres-scoresaber-accounts.ts`, **`mongo-to-postgres-bl-scores.ts`**, **`mongo-to-postgres-player-history.ts`**, **`mongo-to-postgres-metrics.ts`** — run with `DATABASE_URL` + `MONGO_CONNECTION_STRING`.
 - Still Mongo-centric (rewrite or archive when PG is sole source): `backfill-beatleader-score-ids.ts`, `poll-slow-queries.ts`, `migrate-modifiers-to-codes.ts`, `delete-duplicate-scoreids.ts`. PG-oriented scripts (e.g. `create-missing-leaderboards.ts`) should stay aligned with `schema.ts`.
 
 ---
@@ -153,7 +154,7 @@ Same mapping as before: `aggregate` → `JOIN`/windows; `bulkWrite` → batched 
 
 ## 7. Data migration
 
-1. Backfill PG tables from Mongo for scores, history, leaderboards, medals (one-time or incremental ETL).
+1. Backfill PG tables from Mongo for scores (via `mongo-to-postgres-scoresaber-scores.ts`), history, leaderboards, medals (one-time or incremental ETL).
 2. **`scoresaber-accounts`:** use **`mongo-to-postgres-scoresaber-accounts.ts`** (streams `PlayerModel` → upsert accounts). Run after `DATABASE_URL` and schema are live.
 3. **`beatleader-scores`:** backfill from Mongo `additional-score-data` if PG was introduced after production data existed (column set matches **`beatleader-scores`** in **`0000_initial`** / `schema.ts`).
 4. **Player medals:** run **`updatePlayerGlobalMedalCounts`** (or equivalent) after medal-score rows are authoritative on PG so **`scoresaber-accounts.medals`** matches `SUM` from **`scoresaber-medal-scores`**.

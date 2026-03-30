@@ -36,6 +36,13 @@
       "when": 1774900465995,
       "tag": "0004_drop redundant index on player history",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1774920000000,
+      "tag": "0005_metrics_table",
+      "breakpoints": true
     }
   ]
 }

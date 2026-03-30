@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { MapCharacteristicSchema } from "../../map/map-characteristic";
+import { MapDifficultySchema } from "../../map/map-difficulty";
 
 export const BeatLeaderMissesSchema = z.object({
   misses: z.number(),
@@ -14,6 +16,8 @@ export const BeatLeaderScoreSchema = z.object({
   songHash: z.string(),
   leaderboardId: z.string(),
   scoreId: z.number(),
+  difficulty: MapDifficultySchema,
+  characteristic: MapCharacteristicSchema,
 
   pauses: z.number(),
   fcAccuracy: z.number(),

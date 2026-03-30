@@ -2,6 +2,8 @@ import * as dotenv from "@dotenvx/dotenvx";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import type { BeatLeaderScoreImprovementToken } from "@ssr/common/schemas/beatleader/tokens/score/score-improvement";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { mongoose } from "@typegoose/typegoose";
 import { db } from "backend/db";
 import { beatLeaderScoresTable, type BeatLeaderScoreRow } from "backend/db/schema";
@@ -118,35 +120,35 @@ function mongoBeatLeaderDocToRow(doc: MongoBeatLeaderLeanDoc): typeof beatLeader
   const improvement =
     impTok.score <= 0
       ? {
-          improvementScore: 0,
-          improvementPauses: 0,
-          improvementMisses: 0,
-          improvementMissedNotes: 0,
-          improvementBombCuts: 0,
-          improvementWallsHit: 0,
-          improvementBadCuts: 0,
-          improvementLeftHandAccuracy: 0,
-          improvementRightHandAccuracy: 0,
-        }
+        improvementScore: 0,
+        improvementPauses: 0,
+        improvementMisses: 0,
+        improvementMissedNotes: 0,
+        improvementBombCuts: 0,
+        improvementWallsHit: 0,
+        improvementBadCuts: 0,
+        improvementLeftHandAccuracy: 0,
+        improvementRightHandAccuracy: 0,
+      }
       : {
-          improvementScore: impTok.score,
-          improvementPauses: impTok.pauses,
-          improvementMisses: getMissesImp(),
-          improvementMissedNotes: impTok.missedNotes,
-          improvementBombCuts: impTok.bombCuts,
-          improvementWallsHit: impTok.wallsHit,
-          improvementBadCuts: impTok.badCuts,
-          improvementLeftHandAccuracy: impTok.accLeft,
-          improvementRightHandAccuracy: impTok.accRight,
-        };
+        improvementScore: impTok.score,
+        improvementPauses: impTok.pauses,
+        improvementMisses: getMissesImp(),
+        improvementMissedNotes: impTok.missedNotes,
+        improvementBombCuts: impTok.bombCuts,
+        improvementWallsHit: impTok.wallsHit,
+        improvementBadCuts: impTok.badCuts,
+        improvementLeftHandAccuracy: impTok.accLeft,
+        improvementRightHandAccuracy: impTok.accRight,
+      };
 
   return {
     id: doc.scoreId,
     playerId: doc.playerId,
     songHash: String(doc.songHash).toUpperCase(),
     leaderboardId: String(doc.leaderboardId ?? ""),
-    songDifficulty: String(doc.songDifficulty),
-    songCharacteristic: String(doc.songCharacteristic),
+    songDifficulty: String(doc.songDifficulty) as MapDifficulty,
+    songCharacteristic: String(doc.songCharacteristic) as MapCharacteristic,
     songScore: doc.songScore,
     pauses: doc.pauses ?? 0,
     fcAccuracy: fcApi * 100,

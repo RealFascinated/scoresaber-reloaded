@@ -13,7 +13,9 @@ import { Client } from "discordx";
 
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
+import { count } from "drizzle-orm";
+import { db } from "../db";
+import { scoreSaberScoresTable } from "../db/schema";
 import "./command/fetch-missing-player-scores";
 import "./command/force-track-player-statistics";
 import "./command/refresh-medal-scores";
@@ -77,7 +79,7 @@ export async function initDiscordBot() {
         status: "online",
         activities: [
           {
-            name: `${formatNumberWithCommas(await ScoreSaberScoreModel.estimatedDocumentCount())} Scores!`,
+            name: `${formatNumberWithCommas(Number(await db.select({ c: count() }).from(scoreSaberScoresTable).then(row => row[0]?.c ?? 0)))} Scores!`,
             type: ActivityType.Watching,
             url: "https://ssr.fascinated.cc",
           },

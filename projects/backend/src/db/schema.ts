@@ -1,3 +1,6 @@
+import { HMD } from "@ssr/common/hmds";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
 import { sql } from "drizzle-orm";
 import {
@@ -35,7 +38,7 @@ export const scoreSaberAccountsTable = pgTable(
     inactive: boolean().notNull(),
     banned: boolean().notNull(),
 
-    hmd: varchar({ length: 32 }),
+    hmd: varchar({ length: 32 }).$type<HMD>(),
     pp: doublePrecision().notNull().default(0),
     medals: integer().notNull().default(0),
 
@@ -96,9 +99,7 @@ export const playerHistoryTable = pgTable(
     sspPlays: integer(),
     godPlays: integer(),
   },
-  table => [
-    uniqueIndex("scoresaber_player_history_player_id_date_unique").on(table.playerId, table.date)
-  ]
+  table => [uniqueIndex("scoresaber_player_history_player_id_date_unique").on(table.playerId, table.date)]
 );
 
 export const scoreSaberScoresTable = pgTable(
@@ -110,8 +111,8 @@ export const scoreSaberScoresTable = pgTable(
     leaderboardId: integer().notNull(),
 
     // Leaderboard information
-    difficulty: varchar({ length: 64 }).notNull(),
-    characteristic: varchar({ length: 128 }).notNull(),
+    difficulty: varchar({ length: 64 }).$type<MapDifficulty>().notNull(),
+    characteristic: text().$type<MapCharacteristic>().notNull(),
 
     // Score information
     score: integer().notNull(),
@@ -146,8 +147,8 @@ export const scoreSaberScoreHistoryTable = pgTable(
     scoreId: integer().notNull(),
 
     // Leaderboard information
-    difficulty: varchar({ length: 64 }).notNull(),
-    characteristic: varchar({ length: 128 }).notNull(),
+    difficulty: varchar({ length: 64 }).$type<MapDifficulty>().notNull(),
+    characteristic: text().$type<MapCharacteristic>().notNull(),
 
     // Score information
     score: integer().notNull(),
@@ -185,8 +186,8 @@ export const scoreSaberMedalScoresTable = pgTable(
     leaderboardId: integer().notNull(),
 
     // Leaderboard information
-    difficulty: varchar({ length: 64 }).notNull(),
-    characteristic: varchar({ length: 128 }).notNull(),
+    difficulty: varchar({ length: 64 }).$type<MapDifficulty>().notNull(),
+    characteristic: text().$type<MapCharacteristic>().notNull(),
 
     // Score information
     score: integer().notNull(),
@@ -225,8 +226,8 @@ export const scoreSaberLeaderboardsTable = pgTable(
     levelAuthorName: text().notNull(),
 
     // Difficulty information
-    difficulty: varchar({ length: 64 }).notNull(),
-    characteristic: text().notNull(),
+    difficulty: varchar({ length: 64 }).$type<MapDifficulty>().notNull(),
+    characteristic: text().$type<MapCharacteristic>().notNull(),
     maxScore: integer().notNull(),
 
     // Ranking information
@@ -282,8 +283,8 @@ export const beatLeaderScoresTable = pgTable(
     playerId: varchar({ length: 32 }).notNull(),
     songHash: varchar({ length: 64 }).notNull(),
     leaderboardId: text().notNull(),
-    songDifficulty: varchar({ length: 64 }).notNull(),
-    songCharacteristic: varchar({ length: 128 }).notNull(),
+    songDifficulty: varchar({ length: 64 }).$type<MapDifficulty>().notNull(),
+    songCharacteristic: varchar({ length: 128 }).$type<MapCharacteristic>().notNull(),
     songScore: integer().notNull(),
 
     // Score information
@@ -331,6 +332,12 @@ export const beatLeaderScoresTable = pgTable(
   ]
 );
 
+export const metricsTable = pgTable("metrics", {
+  id: varchar({ length: 64 }).primaryKey(),
+  value: jsonb().$type<unknown>(),
+  updatedAt: timestamp().notNull().defaultNow(),
+});
+
 export type ScoreSaberAccountRow = typeof scoreSaberAccountsTable.$inferSelect;
 export type PlayerHistoryRow = typeof playerHistoryTable.$inferSelect;
 export type ScoreSaberScoreRow = typeof scoreSaberScoresTable.$inferSelect;
@@ -339,3 +346,4 @@ export type ScoreSaberMedalScoreRow = typeof scoreSaberMedalScoresTable.$inferSe
 export type ScoreSaberLeaderboardRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
 export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;
 export type BeatLeaderScoreRow = typeof beatLeaderScoresTable.$inferSelect;
+export type MetricRow = typeof metricsTable.$inferSelect;

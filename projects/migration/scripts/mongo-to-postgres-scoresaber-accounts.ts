@@ -1,5 +1,6 @@
 import * as dotenv from "@dotenvx/dotenvx";
 import { env } from "@ssr/common/env";
+import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
 import type { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
 import { mongoose } from "@typegoose/typegoose";
@@ -94,7 +95,7 @@ function mongoPlayerDocToRow(doc: MongoPlayerLeanDoc): typeof scoreSaberAccounts
     trackReplays: doc.trackReplays ?? false,
     inactive: doc.inactive ?? false,
     banned: doc.banned ?? false,
-    hmd: truncateVarchar32(doc.hmd),
+    hmd: truncateVarchar32(doc.hmd) as HMD,
     pp: doc.pp ?? 0,
     medals: doc.medals ?? 0,
     scoreStats: normalizeScoreStats(doc.scoreStats),

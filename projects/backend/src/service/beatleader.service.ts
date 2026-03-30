@@ -6,9 +6,10 @@ import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreStatsToken } from "@ssr/common/schemas/beatleader/tokens/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/schemas/beatleader/tokens/score/score-improvement";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
-import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import Request from "@ssr/common/utils/request";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -62,11 +63,7 @@ export default class BeatLeaderService {
     const improvement = BeatLeaderService.improvementRowFromToken(rawScoreImprovement, getMisses);
 
     const pendingBl = BeatLeaderService.beatLeaderScoreFromToken(scoreToken, false, getMisses);
-    const replayScoreShim = {
-      difficulty: difficulty.difficultyName,
-      characteristic: difficulty.modeName,
-    } as ScoreSaberScore;
-    const savedReplay = await this.saveReplay(replayScoreShim, pendingBl, account, isTop50GlobalScore);
+    const savedReplay = await this.saveReplay(pendingBl, account, isTop50GlobalScore);
 
     const timestamp = new Date(Number(scoreToken.timeset) * 1000);
     const [row] = await db
@@ -76,8 +73,8 @@ export default class BeatLeaderService {
         playerId: scoreToken.playerId,
         songHash: leaderboard.song.hash.toUpperCase(),
         leaderboardId: leaderboard.id,
-        songDifficulty: difficulty.difficultyName,
-        songCharacteristic: difficulty.modeName,
+        songDifficulty: difficulty.difficultyName as MapDifficulty,
+        songCharacteristic: difficulty.modeName as MapCharacteristic,
         songScore: scoreToken.baseScore,
         pauses: scoreToken.pauses,
         fcAccuracy: scoreToken.fcAccuracy * 100,
@@ -130,8 +127,8 @@ export default class BeatLeaderService {
             and(
               eq(beatLeaderScoresTable.playerId, playerId),
               eq(beatLeaderScoresTable.songHash, songHash.toUpperCase()),
-              eq(beatLeaderScoresTable.songDifficulty, songDifficulty),
-              eq(beatLeaderScoresTable.songCharacteristic, songCharacteristic),
+              eq(beatLeaderScoresTable.songDifficulty, songDifficulty as MapDifficulty),
+              eq(beatLeaderScoresTable.songCharacteristic, songCharacteristic as MapCharacteristic),
               eq(beatLeaderScoresTable.songScore, songScore)
             )
           )
@@ -314,21 +311,19 @@ export default class BeatLeaderService {
   /**
    * Saves a replay to the storage.
    *
-   * @param scoresaberScore the ScoreSaber score to save the replay for
    * @param beatLeaderScore the BeatLeader score to save the replay for
    * @param account the account to save the replay for
    * @param isTop50GlobalScore whether the score is a top 50 global score
    * @returns whether the replay was saved
    */
   public static async saveReplay(
-    scoresaberScore: ScoreSaberScore,
     beatLeaderScore: BeatLeaderScore,
     account: ScoreSaberAccount,
     isTop50GlobalScore: boolean
   ) {
     if (isProduction() && account && (account.trackReplays || isTop50GlobalScore)) {
       try {
-        const replayId = getBeatLeaderReplayId(beatLeaderScore, scoresaberScore);
+        const replayId = getBeatLeaderReplayId(beatLeaderScore);
         const replay = await Request.get<ArrayBuffer>(`https://cdn.replays.beatleader.xyz/${replayId}`, {
           returns: "arraybuffer",
         });
@@ -439,38 +434,40 @@ export default class BeatLeaderService {
     const scoreImprovement =
       rawScoreImprovement && rawScoreImprovement.score > 0
         ? {
-            score: rawScoreImprovement.score,
-            pauses: rawScoreImprovement.pauses,
-            misses: {
-              misses: getMisses(rawScoreImprovement),
-              missedNotes: rawScoreImprovement.missedNotes,
-              bombCuts: rawScoreImprovement.bombCuts,
-              badCuts: rawScoreImprovement.badCuts,
-              wallsHit: rawScoreImprovement.wallsHit,
-            },
-            handAccuracy: {
-              left: rawScoreImprovement.accLeft,
-              right: rawScoreImprovement.accRight,
-            },
-          }
+          score: rawScoreImprovement.score,
+          pauses: rawScoreImprovement.pauses,
+          misses: {
+            misses: getMisses(rawScoreImprovement),
+            missedNotes: rawScoreImprovement.missedNotes,
+            bombCuts: rawScoreImprovement.bombCuts,
+            badCuts: rawScoreImprovement.badCuts,
+            wallsHit: rawScoreImprovement.wallsHit,
+          },
+          handAccuracy: {
+            left: rawScoreImprovement.accLeft,
+            right: rawScoreImprovement.accRight,
+          },
+        }
         : {
-            score: 0,
-            pauses: 0,
-            misses: {
-              misses: 0,
-              missedNotes: 0,
-              bombCuts: 0,
-              wallsHit: 0,
-              badCuts: 0,
-            },
-            handAccuracy: { left: 0, right: 0 },
-          };
+          score: 0,
+          pauses: 0,
+          misses: {
+            misses: 0,
+            missedNotes: 0,
+            bombCuts: 0,
+            wallsHit: 0,
+            badCuts: 0,
+          },
+          handAccuracy: { left: 0, right: 0 },
+        };
 
     return {
       playerId: scoreToken.playerId,
       songHash: scoreToken.leaderboard.song.hash.toUpperCase(),
       leaderboardId: scoreToken.leaderboard.id,
       scoreId: scoreToken.id,
+      difficulty: scoreToken.leaderboard.difficulty.difficultyName as MapDifficulty,
+      characteristic: scoreToken.leaderboard.difficulty.modeName as MapCharacteristic,
       pauses: scoreToken.pauses,
       fcAccuracy: scoreToken.fcAccuracy * 100,
       fullCombo: scoreToken.fullCombo,

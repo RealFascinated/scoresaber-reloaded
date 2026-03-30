@@ -1,6 +1,9 @@
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
+import { sql } from "drizzle-orm";
 import { Registry } from "prom-client";
+import { db } from "../db";
+import { metricsTable } from "../db/schema";
 import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
 import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
 import HttpResponseStatusMetric from "../metrics/impl/backend/http-response-status";
@@ -64,6 +67,9 @@ export enum MetricType {
 export default class MetricsService {
   private static readonly metrics = new Map<MetricType, Metric<unknown>>();
   private static initialized = false;
+  private static readonly persistIntervalMs = 30_000;
+  private static persistInterval: ReturnType<typeof setInterval> | undefined;
+  private static persistInFlight = false;
 
   constructor() {
     if (MetricsService.initialized) {
@@ -99,6 +105,9 @@ export default class MetricsService {
 
     // Database metrics
     this.registerMetric(new MongoDbSizeMetric());
+
+    void MetricsService.loadPersistedValues();
+    MetricsService.startPersistenceLoop();
   }
 
   /**
@@ -127,8 +136,86 @@ export default class MetricsService {
   }
 
   public static cleanup(): void {
+    if (MetricsService.persistInterval) {
+      clearInterval(MetricsService.persistInterval);
+      MetricsService.persistInterval = undefined;
+    }
+    void MetricsService.persistValues();
+
     for (const metric of MetricsService.metrics.values()) {
       metric.cleanup?.();
+    }
+  }
+
+  private static startPersistenceLoop(): void {
+    if (MetricsService.persistInterval) {
+      return;
+    }
+
+    MetricsService.persistInterval = setInterval(() => {
+      void MetricsService.persistValues();
+    }, MetricsService.persistIntervalMs);
+  }
+
+  private static async loadPersistedValues(): Promise<void> {
+    try {
+      const rows = await db.select().from(metricsTable);
+      for (const row of rows) {
+        const metric = MetricsService.metrics.get(row.id as MetricType);
+        if (!metric) {
+          continue;
+        }
+
+        metric.value = row.value;
+      }
+
+      if (rows.length > 0) {
+        Logger.info(`[METRICS] Loaded ${rows.length} persisted metric values from PostgreSQL`);
+      }
+    } catch (error) {
+      Logger.warn("[METRICS] Failed to load persisted metric values from PostgreSQL:", error);
+    }
+  }
+
+  private static async persistValues(): Promise<void> {
+    if (MetricsService.persistInFlight) {
+      return;
+    }
+
+    const valuesToPersist = Array.from(MetricsService.metrics.entries())
+      .map(([id, metric]) => ({
+        id,
+        value: metric.value === undefined ? null : metric.value,
+      }))
+      .filter(({ value }) => {
+        try {
+          JSON.stringify(value);
+          return true;
+        } catch {
+          return false;
+        }
+      });
+
+    if (valuesToPersist.length === 0) {
+      return;
+    }
+
+    MetricsService.persistInFlight = true;
+    try {
+      await db
+        .insert(metricsTable)
+        .values(valuesToPersist)
+        .onConflictDoUpdate({
+          target: metricsTable.id,
+          set: {
+            value: sql`excluded.value`,
+            updatedAt: sql`now()`,
+          },
+        });
+    } catch (error) {
+      Logger.warn("[METRICS] Failed to persist metric values to PostgreSQL:", error);
+    } finally {
+      MetricsService.persistInFlight = false;
     }
   }
 }

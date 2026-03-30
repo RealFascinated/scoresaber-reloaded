@@ -1,6 +1,8 @@
 import * as dotenv from "@dotenvx/dotenvx";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { normalizeModifiers } from "@ssr/common/score/modifier";
 import { mongoose } from "@typegoose/typegoose";
 import { db } from "backend/db";
@@ -138,8 +140,8 @@ function mongoScoreSaberDocToRow(
     id,
     playerId: playerIdRaw,
     leaderboardId,
-    difficulty,
-    characteristic,
+    difficulty: difficulty as MapDifficulty,
+    characteristic: characteristic as MapCharacteristic,
     score: asInt(doc.score, 0),
     accuracy: asFiniteNumber(doc.accuracy, 0),
     pp: asFiniteNumber(doc.pp, 0),

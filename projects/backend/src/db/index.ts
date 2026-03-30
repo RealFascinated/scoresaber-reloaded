@@ -6,7 +6,7 @@ import * as schema from "./schema";
 
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
-  max: 20,                  // max connections
+  max: 20, // max connections
   idleTimeoutMillis: 30000, // close idle connections after 30s
   connectionTimeoutMillis: 2000,
 });

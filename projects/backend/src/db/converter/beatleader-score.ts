@@ -13,6 +13,8 @@ export function beatLeaderScoreRowToType(row: BeatLeaderScoreRow): BeatLeaderSco
     songHash: row.songHash,
     leaderboardId: row.leaderboardId,
     scoreId: row.id,
+    difficulty: row.songDifficulty,
+    characteristic: row.songCharacteristic,
     pauses: row.pauses,
     fcAccuracy: row.fcAccuracy,
     fullCombo: row.fullCombo,

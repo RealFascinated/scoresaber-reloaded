@@ -11,11 +11,7 @@ import type {
 } from "@ssr/common/schemas/accsaber/tokens/query/query";
 import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
-import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
-import {
-  PlayerScoreChartDataPoint,
-  PlayerScoresChartResponse,
-} from "@ssr/common/schemas/response/player/scores-chart";
+import { PlayerScoresChartResponse } from "@ssr/common/schemas/response/player/scores-chart";
 import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
@@ -29,9 +25,7 @@ import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/playe
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
 import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-difficulty";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
 import { EmbedBuilder } from "discord.js";
 import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
@@ -105,9 +99,7 @@ export class PlayerScoresService {
 
     const startTime = performance.now();
     const playerId = playerToken.id;
-    const playerScoresCount = await ScoreSaberScoreModel.countDocuments({
-      playerId: playerId,
-    });
+    const playerScoresCount = await PlayerScoresService.getPlayerScoresCount(playerId);
 
     // The player has the correct number of scores
     if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
@@ -184,9 +176,7 @@ export class PlayerScoresService {
         scoresPage.metadata.total
       );
 
-      await ScoreSaberScoreModel.deleteMany({
-        playerId: playerId,
-      });
+      await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.playerId, playerId));
       result.totalScores = 0;
 
       account.seededScores = false;
@@ -311,17 +301,18 @@ export class PlayerScoresService {
         pp: scoreSaberScoresTable.pp,
         timestamp: scoreSaberScoresTable.timestamp,
         leaderboardId: scoreSaberLeaderboardsTable.id,
+        difficulty: scoreSaberLeaderboardsTable.difficulty,
 
         songName: scoreSaberLeaderboardsTable.songName,
         stars: scoreSaberLeaderboardsTable.stars,
-        leaderboardDifficulty: scoreSaberLeaderboardsTable.difficulty,
       })
       .from(scoreSaberScoresTable)
       .innerJoin(
         scoreSaberLeaderboardsTable,
         eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
       )
-      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)));
+      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)))
+      .orderBy(desc(scoreSaberScoresTable.timestamp));
 
     if (!rows.length) {
       return {
@@ -329,20 +320,16 @@ export class PlayerScoresService {
       };
     }
 
-    const data: PlayerScoreChartDataPoint[] = rows.map(row => ({
-      accuracy: row.accuracy,
-      stars: row.stars ?? 0,
-      pp: row.pp,
-      timestamp: row.timestamp,
-      leaderboardId: row.leaderboardId,
-      leaderboardName: row.songName,
-      leaderboardDifficulty: getDifficultyName(
-        getDifficulty(MapDifficultySchema.parse(row.leaderboardDifficulty))
-      ),
-    }));
-
     return {
-      data,
+      data: rows.map(row => ({
+        accuracy: row.accuracy,
+        stars: row.stars ?? 0,
+        pp: row.pp,
+        timestamp: row.timestamp,
+        leaderboardId: row.leaderboardId,
+        leaderboardName: row.songName,
+        leaderboardDifficulty: row.difficulty,
+      })),
     };
   }
 

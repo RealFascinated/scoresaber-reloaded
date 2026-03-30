@@ -185,10 +185,8 @@ export default class PlaylistService {
 
       PlaylistService.sortPlaylistScoreRows(filtered, settings.sort, settings.sortDirection);
 
-      const title = `Self Playlist (${formatDateMinimal(new Date())})`;
-
       return {
-        playlistTitle: title,
+        playlistTitle: `Self Playlist / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
           syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/self?user=${user}&settings=${settingsBase64}`,

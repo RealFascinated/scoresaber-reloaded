@@ -2,9 +2,9 @@ import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db";
-import { scoreSaberAccountRowToPlayer } from "../../db/converter/scoresaber-account";
 import { scoreSaberAccountsTable } from "../../db/schema";
 import { PlayerBeatLeaderScoresService } from "../../service/player/player-beatleader-scores.service";
+import { PlayerCoreService } from "../../service/player/player-core.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
@@ -19,17 +19,13 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
   protected async processItem(item: QueueItem<string>): Promise<void> {
     const playerId = item.id;
 
-    const [row] = await db
-      .select()
-      .from(scoreSaberAccountsTable)
-      .where(eq(scoreSaberAccountsTable.id, playerId))
-      .limit(1);
-    if (!row) {
+    const account = await PlayerCoreService.getAccount(playerId);
+    if (!account) {
       Logger.warn(`Player "${playerId}" not found for BeatLeader score seed`);
       return;
     }
 
-    await PlayerBeatLeaderScoresService.fetchMissingBeatLeaderScores(scoreSaberAccountRowToPlayer(row), {
+    await PlayerBeatLeaderScoresService.fetchMissingBeatLeaderScores(account, {
       mode: "backfill",
     });
   }

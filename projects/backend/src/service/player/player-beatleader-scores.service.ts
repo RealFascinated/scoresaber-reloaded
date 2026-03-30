@@ -2,9 +2,9 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
 import type { BeatLeaderPlayerScoresPageToken } from "@ssr/common/schemas/beatleader/tokens/score/page";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
+import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { Player } from "@ssr/migration/model/player/player";
 import BeatLeaderService from "../beatleader.service";
 import { PlayerCoreService } from "./player-core.service";
 
@@ -19,7 +19,7 @@ export class PlayerBeatLeaderScoresService {
    * @returns the result
    */
   public static async fetchMissingBeatLeaderScores(
-    player: Player,
+    account: ScoreSaberAccount,
     options: { mode: SeedMode }
   ): Promise<{
     totalPagesFetched: number;
@@ -39,18 +39,13 @@ export class PlayerBeatLeaderScoresService {
       timeTaken: 0,
     });
 
-    const playerId = player._id;
-    if (!playerId) {
-      return empty();
-    }
-
-    if (player.banned) {
-      if (!player.seededBeatLeaderScores) {
-        await PlayerCoreService.updatePlayer(playerId, { seededBeatLeaderScores: true });
+    const playerId = account.id;
+    if (account.banned) {
+      if (!account.seededBeatLeaderScores) {
+        await PlayerCoreService.updatePlayer(account.id, { seededBeatLeaderScores: true });
       }
       return empty();
     }
-
     const startTime = performance.now();
     const beatLeaderApi = ApiServiceRegistry.getInstance().getBeatLeaderService();
 
