@@ -17,6 +17,7 @@ COPY package.json bun.lock ./
 COPY projects/common/package.json ./projects/common/
 COPY projects/website/package.json ./projects/website/
 COPY projects/backend/package.json ./projects/backend/
+COPY projects/migration/package.json ./projects/migration/
 
 # Install dependencies for the specific packages (including dev dependencies for build)
 RUN bun install --frozen-lockfile --filter '@ssr/common' --filter 'website'
