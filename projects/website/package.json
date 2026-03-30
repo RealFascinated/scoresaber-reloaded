@@ -32,7 +32,6 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-switch": "^1.2.6",
     "@ssr/common": "workspace:*",
-    "@ssr/migration": "workspace:*",
     "@tanstack/react-query": "^5.95.2",
     "@types/websocket": "^1.0.10",
     "@uidotdev/usehooks": "^2.4.1",
