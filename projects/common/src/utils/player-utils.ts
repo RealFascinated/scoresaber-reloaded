@@ -53,7 +53,7 @@ export function getPlayerStatisticChange(
     return 0;
   }
 
-  return (statToday ?? 0) - (previousStat ?? 0) * (isNegativeChange ? -1 : 1);
+  return ((statToday ?? 0) - (previousStat ?? 0)) * (isNegativeChange ? -1 : 1);
 }
 
 /**
