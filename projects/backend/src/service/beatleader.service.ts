@@ -14,7 +14,7 @@ import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import Request from "@ssr/common/utils/request";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
-import { and, desc, eq, inArray, lt, or } from "drizzle-orm";
+import { and, desc, eq, inArray, lt } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import { db } from "../db";
@@ -344,55 +344,6 @@ export default class BeatLeaderService {
       }
     }
     return false;
-  }
-
-  /**
-   * Stable key for batch BeatLeader lookups by player + base score (same map difficulty on a leaderboard page).
-   */
-  public static beatLeaderSongLookupKey(playerId: string, songScore: number): string {
-    return `${playerId}:${songScore}`;
-  }
-
-  /**
-   * Loads BeatLeader rows for many (playerId, songScore) pairs on the same ScoreSaber leaderboard in one query.
-   */
-  public static async batchGetBeatLeaderScoresFromSong(
-    songHash: string,
-    leaderboardId: string,
-    requests: ReadonlyArray<{ playerId: string; songScore: number }>
-  ): Promise<Map<string, BeatLeaderScore>> {
-    const result = new Map<string, BeatLeaderScore>();
-    if (requests.length === 0) {
-      return result;
-    }
-
-    const seen = new Map<string, { playerId: string; songScore: number }>();
-    for (const r of requests) {
-      const key = BeatLeaderService.beatLeaderSongLookupKey(r.playerId, r.songScore);
-      seen.set(key, r);
-    }
-
-    const hash = songHash.toUpperCase();
-    const conditions = [...seen.values()].map(r =>
-      and(
-        eq(beatLeaderScoresTable.playerId, r.playerId),
-        eq(beatLeaderScoresTable.songHash, hash),
-        eq(beatLeaderScoresTable.leaderboardId, leaderboardId)
-      )
-    );
-
-    const docs = await db
-      .select()
-      .from(beatLeaderScoresTable)
-      .where(or(...conditions));
-    for (const doc of docs) {
-      const req = [...seen.values()].find(r => r.playerId === doc.playerId);
-      if (req) {
-        const key = BeatLeaderService.beatLeaderSongLookupKey(req.playerId, req.songScore);
-        result.set(key, beatLeaderScoreRowToType(doc));
-      }
-    }
-    return result;
   }
 
   private static improvementRowFromToken(

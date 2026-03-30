@@ -2,8 +2,8 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import LeaderboardScoresResponse from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import BeatLeaderService from "../beatleader.service";
 import BeatSaverService from "../beatsaver.service";
+import { ScoreCoreService } from "../score/score-core.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
 
@@ -37,30 +37,14 @@ export class LeaderboardScoresService {
       getScoreSaberScoreFromToken(token, leaderboard, token.leaderboardPlayerInfo.id)
     );
 
-    const batchRequests = parsedScores
-      .filter((score): score is ScoreSaberScore => score !== undefined)
-      .map(score => ({ playerId: score.playerId, songScore: score.score }));
-
-    const beatLeaderByKey = await BeatLeaderService.batchGetBeatLeaderScoresFromSong(
-      leaderboard.songHash,
-      String(leaderboard.id),
-      batchRequests
-    );
-
-    const scores = parsedScores
-      .map(score => {
-        if (score === undefined) {
-          return undefined;
-        }
-        const bl = beatLeaderByKey.get(
-          BeatLeaderService.beatLeaderSongLookupKey(score.playerId, score.score)
-        );
-        if (bl !== undefined) {
-          score.beatLeaderScore = bl;
-        }
-        return score;
-      })
-      .filter((score): score is ScoreSaberScore => score !== undefined);
+    const scores = (await Promise.all(parsedScores.map(score => {
+      if (score === undefined) {
+        return undefined;
+      }
+      return ScoreCoreService.insertScoreData(score, leaderboard, {
+        insertBeatLeaderScore: true,
+      });
+    }))).filter(score => score !== undefined) as ScoreSaberScore[];
 
     const totalPages = Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage);
 
