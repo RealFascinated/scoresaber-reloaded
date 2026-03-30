@@ -2,12 +2,12 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
 import { StorageBucket } from "@ssr/common/minio-buckets";
-import { Player } from "@ssr/common/model/player/player";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreStatsToken } from "@ssr/common/schemas/beatleader/tokens/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/schemas/beatleader/tokens/score/score-improvement";
 import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
+import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import Request from "@ssr/common/utils/request";
@@ -18,9 +18,9 @@ import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import { db } from "../db";
 import { beatLeaderScoreRowToType } from "../db/converter/beatleader-score";
-import { scoreSaberAccountRowToPlayer } from "../db/converter/scoresaber-account";
-import { beatLeaderScoresTable, scoreSaberAccountsTable } from "../db/schema";
+import { beatLeaderScoresTable } from "../db/schema";
 import CacheService, { CacheId } from "./cache.service";
+import { PlayerCoreService } from "./player/player-core.service";
 import StorageService from "./storage.service";
 
 export default class BeatLeaderService {
@@ -37,21 +37,10 @@ export default class BeatLeaderService {
   ): Promise<BeatLeaderScore | undefined> {
     const before = performance.now();
     const { playerId } = scoreToken;
-    const player: Player | null = await CacheService.fetch(
-      CacheId.ScoreSaber,
-      `player:${playerId}`,
-      async () => {
-        const [row] = await db
-          .select()
-          .from(scoreSaberAccountsTable)
-          .where(eq(scoreSaberAccountsTable.id, playerId))
-          .limit(1);
-        return row ? scoreSaberAccountRowToPlayer(row) : null;
-      }
-    );
+    const account = await PlayerCoreService.getAccount(playerId);
 
     // Only track for players that are being tracked
-    if (player == null) {
+    if (account == null) {
       return undefined;
     }
 
@@ -77,7 +66,7 @@ export default class BeatLeaderService {
       difficulty: difficulty.difficultyName,
       characteristic: difficulty.modeName,
     } as ScoreSaberScore;
-    const savedReplay = await this.saveReplay(replayScoreShim, pendingBl, player, isTop50GlobalScore);
+    const savedReplay = await this.saveReplay(replayScoreShim, pendingBl, account, isTop50GlobalScore);
 
     const timestamp = new Date(Number(scoreToken.timeset) * 1000);
     const [row] = await db
@@ -108,7 +97,7 @@ export default class BeatLeaderService {
 
     const timeTaken = performance.now() - before;
     Logger.info(
-      `Tracked BeatLeader score "${scoreToken.id}" for "${player.name}"(${playerId}) in ${formatDuration(timeTaken)}`
+      `Tracked BeatLeader score "${scoreToken.id}" for "${account.name}"(${playerId}) in ${formatDuration(timeTaken)}`
     );
     return beatLeaderScoreRowToType(row);
   }
@@ -327,17 +316,17 @@ export default class BeatLeaderService {
    *
    * @param scoresaberScore the ScoreSaber score to save the replay for
    * @param beatLeaderScore the BeatLeader score to save the replay for
-   * @param player the player to save the replay for
+   * @param account the account to save the replay for
    * @param isTop50GlobalScore whether the score is a top 50 global score
    * @returns whether the replay was saved
    */
   public static async saveReplay(
     scoresaberScore: ScoreSaberScore,
     beatLeaderScore: BeatLeaderScore,
-    player: Player,
+    account: ScoreSaberAccount,
     isTop50GlobalScore: boolean
   ) {
-    if (isProduction() && player && (player.trackReplays || isTop50GlobalScore)) {
+    if (isProduction() && account && (account.trackReplays || isTop50GlobalScore)) {
       try {
         const replayId = getBeatLeaderReplayId(beatLeaderScore, scoresaberScore);
         const replay = await Request.get<ArrayBuffer>(`https://cdn.replays.beatleader.xyz/${replayId}`, {

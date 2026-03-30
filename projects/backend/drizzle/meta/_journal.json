@@ -8,6 +8,27 @@
       "when": 1774845841960,
       "tag": "0000_initial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774850791676,
+      "tag": "0001_rename-history-table",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774893110633,
+      "tag": "0002_add avatar field to account",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774894000000,
+      "tag": "0003_scores_pp_positive_idx",
+      "breakpoints": true
     }
   ]
 }

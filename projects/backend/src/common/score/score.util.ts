@@ -159,7 +159,7 @@ export async function sendMedalScoreNotification(
   const playerById = new Map(
     await Promise.all(
       [...uniquePlayerIds].map(async playerId => {
-        const player = await PlayerCoreService.getPlayer(playerId);
+        const player = await PlayerCoreService.getOrCreateAccount(playerId);
         return [playerId, player] as const;
       })
     )

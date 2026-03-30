@@ -1,7 +1,7 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerPpsResponse } from "@ssr/common/schemas/response/player/player-pps";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
+import { ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
 import { PlayerCoreService } from "./player-core.service";
 
 export class PlayerRankedService {

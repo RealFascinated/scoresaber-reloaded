@@ -7,6 +7,7 @@ import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberScoresTable } from "../../db/schema";
 import BeatSaverService from "../beatsaver.service";
+import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "./score-core.service";
 
 export class TopScoresService {
@@ -23,38 +24,48 @@ export class TopScoresService {
     const pagination = new Pagination<PlayerScore>().setItemsPerPage(limit).setTotalItems(1000);
 
     return pagination.getPage(page, async () => {
-      const scored = await ScoreCoreService.fetchScores({
-        where: gt(scoreSaberScoresTable.pp, 0),
-        orderBy: s => [desc(s.pp)],
-        limit,
-        offset,
-        sortGroupedScores: (a, b) => b.pp - a.pp || a.id - b.id,
-      });
+      const scoresRows = await db
+        .select()
+        .from(scoreSaberScoresTable)
+        .where(gt(scoreSaberScoresTable.pp, 0))
+        .orderBy(desc(scoreSaberScoresTable.pp))
+        .limit(limit)
+        .offset(offset);
 
-      if (!scored.length) {
+      if (!scoresRows.length) {
         return [];
       }
 
-      return Promise.all(
-        scored.map(async ({ scoreRow, leaderboard, beatLeaderScore }) => {
+      const leaderboards = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(
+        scoresRows.map(scoreRow => scoreRow.leaderboardId)
+      );
+
+      const scores = await Promise.all(
+        scoresRows.map(async scoreRow => {
+          const leaderboard = leaderboards.get(scoreRow.leaderboardId);
+          if (!leaderboard) return undefined;
+
           const score = scoreSaberScoreRowToType(scoreRow);
-          if (beatLeaderScore !== undefined) {
-            score.beatLeaderScore = beatLeaderScore;
-          }
-          return {
-            score: await ScoreCoreService.insertScoreData(score, leaderboard, {
+
+          const [enrichedScore, beatSaver] = await Promise.all([
+            ScoreCoreService.insertScoreData(score, leaderboard, {
               insertPlayerInfo: true,
+              insertBeatLeaderScore: true,
+              insertPreviousScore: false,
             }),
-            leaderboard,
-            beatSaver: await BeatSaverService.getMap(
+            BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic,
               "full"
             ),
-          };
+          ]);
+
+          return { score: enrichedScore, leaderboard, beatSaver };
         })
       );
+
+      return scores.filter(Boolean) as PlayerScore[];
     });
   }
 

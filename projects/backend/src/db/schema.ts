@@ -20,6 +20,7 @@ export const scoreSaberAccountsTable = pgTable(
     id: varchar({ length: 32 }).primaryKey(),
     name: text().notNull(),
     country: varchar({ length: 32 }),
+    avatar: text().default("https://cdn.fascinated.cc/assets/unknown.png"),
 
     // Peak rank
     peakRank: integer(),
@@ -52,22 +53,28 @@ export const scoreSaberAccountsTable = pgTable(
   ]
 );
 
-/** Daily (or per-snapshot) statistics for a tracked player. Matches Mongo `player-history` collection. */
 export const playerHistoryTable = pgTable(
-  "player-history",
+  "scoresaber-player-history",
   {
+    // Identifiers
     id: serial().primaryKey(),
     playerId: varchar({ length: 32 }).notNull(),
     date: timestamp().notNull(),
 
+    // Rank stats
     rank: integer(),
     countryRank: integer(),
+
+    // Medals stats
     medals: integer(),
+
+    // PP stats
     pp: doublePrecision(),
     plusOnePp: doublePrecision(),
+
+    // Score stats
     totalScore: doublePrecision(),
     totalRankedScore: doublePrecision(),
-
     rankedScores: integer(),
     unrankedScores: integer(),
     rankedScoresImproved: integer(),
@@ -76,10 +83,12 @@ export const playerHistoryTable = pgTable(
     totalUnrankedScores: integer(),
     totalScores: integer(),
 
+    // Accuracy stats
     averageRankedAccuracy: doublePrecision(),
     averageUnrankedAccuracy: doublePrecision(),
     averageAccuracy: doublePrecision(),
 
+    // Ranked play stats
     aPlays: integer(),
     sPlays: integer(),
     spPlays: integer(),
@@ -88,8 +97,8 @@ export const playerHistoryTable = pgTable(
     godPlays: integer(),
   },
   table => [
-    uniqueIndex("player_history_player_id_date_unique").on(table.playerId, table.date),
-    index("player_history_player_id_date_idx").on(table.playerId, table.date.desc()),
+    uniqueIndex("scoresaber_player_history_player_id_date_unique").on(table.playerId, table.date),
+    index("scoresaber_player_history_player_id_date_idx").on(table.playerId, table.date.desc()),
   ]
 );
 
@@ -125,9 +134,6 @@ export const scoreSaberScoresTable = pgTable(
   table => [
     index("scores_player_leaderboard_idx").on(table.playerId, table.leaderboardId),
     index("scores_leaderboard_id_idx").on(table.leaderboardId),
-    index("scores_pp_positive_idx")
-      .on(table.pp.desc())
-      .where(sql`${table.pp} > 0`),
   ]
 );
 

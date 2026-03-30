@@ -1,10 +1,10 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger from "@ssr/common/logger";
-import { Player } from "@ssr/common/model/player/player";
 import type { BeatLeaderPlayerScoresPageToken } from "@ssr/common/schemas/beatleader/tokens/score/page";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { Player } from "@ssr/migration/model/player/player";
 import BeatLeaderService from "../beatleader.service";
 import { PlayerCoreService } from "./player-core.service";
 

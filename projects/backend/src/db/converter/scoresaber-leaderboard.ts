@@ -1,7 +1,7 @@
 import { env } from "@ssr/common/env";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
-import { MapCharacteristic, MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
-import { MapDifficulty, MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
+import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardSchema,
@@ -9,75 +9,10 @@ import {
 import type { ScoreSaberLeaderboardStatus } from "@ssr/common/schemas/scoresaber/leaderboard/status";
 import { ScoreSaberLeaderboardRow } from "../schema";
 
-export type LeaderboardMainDiffJoinRow = {
+export type LeaderboardDifficultyJoinRow = {
   leaderboard: ScoreSaberLeaderboardRow;
   difficulties: ScoreSaberLeaderboardRow | null;
 };
-
-/**
- * Parses difficulty rows from a main↔difficulties self-join on song hash (deduped by leaderboard id).
- */
-export function difficultiesFromLeaderboardJoinRows(
-  rows: Array<{ difficulties: ScoreSaberLeaderboardRow | null }>
-): { id: number; difficulty: MapDifficulty; characteristic: MapCharacteristic }[] {
-  const seen = new Set<number>();
-  const out: { id: number; difficulty: MapDifficulty; characteristic: MapCharacteristic }[] = [];
-  for (const r of rows) {
-    const d = r.difficulties;
-    if (!d || seen.has(d.id)) {
-      continue;
-    }
-    seen.add(d.id);
-    out.push({
-      id: d.id,
-      difficulty: MapDifficultySchema.parse(d.difficulty, { reportInput: true }),
-      characteristic: MapCharacteristicSchema.parse(d.characteristic, { reportInput: true }),
-    });
-  }
-  return out;
-}
-
-/**
- * Groups joined leaderboard rows by main leaderboard id.
- */
-export function leaderboardsMapFromJoinedRows(
-  rows: LeaderboardMainDiffJoinRow[]
-): Map<number, ScoreSaberLeaderboard> {
-  const byMainId = new Map<number, LeaderboardMainDiffJoinRow[]>();
-  for (const r of rows) {
-    let group = byMainId.get(r.leaderboard.id);
-    if (!group) {
-      group = [];
-      byMainId.set(r.leaderboard.id, group);
-    }
-    group.push(r);
-  }
-  const out = new Map<number, ScoreSaberLeaderboard>();
-  for (const [id, group] of byMainId) {
-    const main = group[0].leaderboard;
-    const difficulties = difficultiesFromLeaderboardJoinRows(group);
-    out.set(id, leaderboardRowToType(main, difficulties));
-  }
-  return out;
-}
-
-/**
- * Preserves row order by first appearance of each main leaderboard id (for ordered list queries).
- */
-export function leaderboardsOrderedFromJoinedRows(
-  rows: LeaderboardMainDiffJoinRow[]
-): ScoreSaberLeaderboard[] {
-  const map = leaderboardsMapFromJoinedRows(rows);
-  const orderedIds: number[] = [];
-  const seen = new Set<number>();
-  for (const r of rows) {
-    if (!seen.has(r.leaderboard.id)) {
-      seen.add(r.leaderboard.id);
-      orderedIds.push(r.leaderboard.id);
-    }
-  }
-  return orderedIds.map(id => map.get(id)!);
-}
 
 /**
  * Converts a ScoreSaberLeaderboardRow to a ScoreSaberLeaderboard.
@@ -87,7 +22,7 @@ export function leaderboardsOrderedFromJoinedRows(
  */
 export function leaderboardRowToType(
   row: ScoreSaberLeaderboardRow,
-  difficulties?: { id: number; difficulty: MapDifficulty; characteristic: MapCharacteristic }[]
+  difficulties?: ScoreSaberLeaderboard["difficulties"]
 ): ScoreSaberLeaderboard {
   const difficulty = {
     id: row.id,
@@ -131,4 +66,48 @@ export function leaderboardRowToType(
     },
     { reportInput: true }
   );
+}
+/**
+ * Collapses self-joined rows (one row per main×difficulty) into one {@link ScoreSaberLeaderboard} per main row,
+ * with `difficulties` filled from the joined side.
+ *
+ * Output order follows the first occurrence of each main `leaderboard.id` in `rows` (matches `ORDER BY` on the main alias).
+ */
+export function mergeJoinedLeaderboardRows(rows: LeaderboardDifficultyJoinRow[]): ScoreSaberLeaderboard[] {
+  const byMainId = new Map<
+    number,
+    {
+      main: ScoreSaberLeaderboardRow;
+      difficultiesById: Map<number, ScoreSaberLeaderboardRow>;
+    }
+  >();
+  const mainIdOrder: number[] = [];
+
+  for (const row of rows) {
+    const main = row.leaderboard;
+    let acc = byMainId.get(main.id);
+    if (!acc) {
+      mainIdOrder.push(main.id);
+      acc = { main, difficultiesById: new Map() };
+      byMainId.set(main.id, acc);
+    }
+    const d = row.difficulties;
+    if (d) {
+      acc.difficultiesById.set(d.id, d);
+    }
+  }
+
+  return mainIdOrder.map(mainId => {
+    const acc = byMainId.get(mainId)!;
+    const difficultyRows = [...acc.difficultiesById.values()];
+    const picks =
+      difficultyRows.length > 0
+        ? difficultyRows.map(row => ({
+            id: row.id,
+            difficulty: MapDifficultySchema.parse(row.difficulty, { reportInput: true }),
+            characteristic: MapCharacteristicSchema.parse(row.characteristic, { reportInput: true }),
+          }))
+        : undefined;
+    return leaderboardRowToType(acc.main, picks);
+  });
 }

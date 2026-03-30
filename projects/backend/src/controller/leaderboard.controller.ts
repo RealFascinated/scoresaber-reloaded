@@ -1,11 +1,10 @@
+import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
-import { MapDifficultySchema } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristicSchema } from "@ssr/common/types/map-characteristic";
 import { Elysia } from "elysia";
 import { z } from "zod";
 import BeatSaverService from "../service/beatsaver.service";
 import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
-import { LeaderboardHmdService } from "../service/leaderboard/leaderboard-hmd.service";
 import { LeaderboardRankingService } from "../service/leaderboard/leaderboard-ranking.service";
 import { ScoreSaberApiService } from "../service/scoresaber-api.service";
 
@@ -109,21 +108,6 @@ export default function leaderboardController(app: Elysia) {
           }),
           detail: {
             description: "Fetch leaderboard details",
-          },
-        }
-      )
-      .get(
-        "/play-count-by-hmd/:leaderboardId",
-        async ({ params: { leaderboardId } }) => {
-          return LeaderboardHmdService.getPlayCountByHmd(leaderboardId);
-        },
-        {
-          tags: ["Leaderboard"],
-          params: z.object({
-            leaderboardId: z.coerce.number(),
-          }),
-          detail: {
-            description: "Fetch play count by HMD",
           },
         }
       )

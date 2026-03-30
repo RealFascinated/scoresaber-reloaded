@@ -5,6 +5,7 @@ import { ScoreSaberPlayerScoreStatsSchema } from "./player/score-stats";
 export const ScoreSaberAccountSchema = z.object({
   id: z.string(),
   name: z.string(),
+  avatar: z.string(),
   country: z.string().nullable(),
   peakRank: ScoreSaberPeakRankSchema.optional(),
   seededScores: z.boolean().optional(),

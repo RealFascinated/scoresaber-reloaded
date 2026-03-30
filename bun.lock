@@ -73,6 +73,25 @@
         "typescript": "^5.9.3",
       },
     },
+    "projects/migration": {
+      "name": "@ssr/migration",
+      "version": "1.0.0",
+      "dependencies": {
+        "@dotenvx/dotenvx": "^1.57.2",
+        "@ssr/common": "workspace:*",
+        "@typegoose/auto-increment": "^5.0.1",
+        "@typegoose/typegoose": "^13.2.1",
+        "backend": "workspace:*",
+        "dotenv": "^17.3.1",
+        "drizzle-orm": "^0.45.2",
+        "mongoose": "^9.3.3",
+        "pg": "^8.20.0",
+      },
+      "devDependencies": {
+        "@types/node": "^25.5.0",
+        "typescript": "^5.9.3",
+      },
+    },
     "projects/website": {
       "name": "website",
       "version": "1.0.0",
@@ -97,6 +116,7 @@
         "@radix-ui/react-slot": "^1.2.4",
         "@radix-ui/react-switch": "^1.2.6",
         "@ssr/common": "workspace:*",
+        "@ssr/migration": "workspace:*",
         "@tanstack/react-query": "^5.95.2",
         "@types/websocket": "^1.0.10",
         "@uidotdev/usehooks": "^2.4.1",
@@ -565,6 +585,8 @@
     "@sinclair/typebox": ["@sinclair/typebox@0.34.33", "", {}, "sha512-5HAV9exOMcXRUxo+9iYB5n09XxzCXnfy4VTNW4xnDv+FgjzAGY989C28BIdljKqmF+ZltUwujE3aossvcVtq6g=="],
 
     "@ssr/common": ["@ssr/common@workspace:projects/common"],
+
+    "@ssr/migration": ["@ssr/migration@workspace:projects/migration"],
 
     "@standard-schema/spec": ["@standard-schema/spec@1.0.0", "", {}, "sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA=="],
 

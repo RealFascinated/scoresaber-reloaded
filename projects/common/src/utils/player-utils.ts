@@ -1,17 +1,20 @@
-import { FlattenedPlayerHistory } from "../player/player-statistic-history";
+import { ScoreSaberPlayerHistory } from "../schemas/scoresaber/player/history";
 import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "./time-utils";
 
 /**
- * Gets a value from an {@link FlattenedPlayerHistory}
+ * Gets a value from an {@link ScoreSaberPlayerHistory}
  * based on the field
  *
  * @param history the history to get the value from
  * @param field the field to get
  */
-export function getValueFromHistory(history: FlattenedPlayerHistory, field: string): number | undefined {
+export function getValueFromHistory(
+  history: ScoreSaberPlayerHistory,
+  field: keyof ScoreSaberPlayerHistory
+): number | undefined | null {
   if (field in history) {
-    return history[field as keyof FlattenedPlayerHistory];
+    return history[field];
   }
   return undefined;
 }
@@ -27,8 +30,8 @@ export function getValueFromHistory(history: FlattenedPlayerHistory, field: stri
  * @private
  */
 export function getPlayerStatisticChange(
-  history: Record<string, FlattenedPlayerHistory>,
-  statType: keyof FlattenedPlayerHistory,
+  history: Record<string, ScoreSaberPlayerHistory>,
+  statType: keyof ScoreSaberPlayerHistory,
   isNegativeChange: boolean,
   daysAgo: number = 1
 ): number | undefined {
@@ -50,7 +53,7 @@ export function getPlayerStatisticChange(
     return 0;
   }
 
-  return (statToday - previousStat) * (isNegativeChange ? -1 : 1);
+  return (statToday ?? 0) - (previousStat ?? 0) * (isNegativeChange ? -1 : 1);
 }
 
 /**
@@ -62,9 +65,9 @@ export function getPlayerStatisticChange(
  * @private
  */
 export async function getPlayerStatisticChanges(
-  history: Record<string, FlattenedPlayerHistory>,
+  history: Record<string, ScoreSaberPlayerHistory>,
   daysAgo: number = 1
-): Promise<FlattenedPlayerHistory> {
+): Promise<ScoreSaberPlayerHistory> {
   return {
     rank: getPlayerStatisticChange(history, "rank", true, daysAgo),
     countryRank: getPlayerStatisticChange(history, "countryRank", true, daysAgo),

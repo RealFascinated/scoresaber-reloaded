@@ -2,8 +2,6 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import { Player } from "@ssr/common/model/player/player";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
 import type {
@@ -19,6 +17,7 @@ import {
   PlayerScoresChartResponse,
 } from "@ssr/common/schemas/response/player/scores-chart";
 import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
+import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -32,8 +31,9 @@ import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-di
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
 import { EmbedBuilder } from "discord.js";
-import { and, asc, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
@@ -83,7 +83,7 @@ export class PlayerScoresService {
    * @returns the result of the fetch
    */
   public static async fetchMissingPlayerScores(
-    player: Player,
+    account: ScoreSaberAccount,
     playerToken: ScoreSaberPlayerToken
   ): Promise<{
     missingScores: number;
@@ -91,9 +91,9 @@ export class PlayerScoresService {
     totalPagesFetched: number;
     timeTaken: number;
   }> {
-    if (player.banned) {
-      if (!player.seededScores) {
-        await PlayerCoreService.updatePlayer(player._id, { seededScores: true });
+    if (account.banned) {
+      if (!account.seededScores) {
+        await PlayerCoreService.updatePlayer(account.id, { seededScores: true });
       }
       return {
         missingScores: 0,
@@ -112,8 +112,8 @@ export class PlayerScoresService {
     // The player has the correct number of scores
     if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
       // Mark player as seeded
-      if (!player.seededScores) {
-        await PlayerCoreService.updatePlayer(player._id, { seededScores: true });
+      if (!account.seededScores) {
+        await PlayerCoreService.updatePlayer(account.id, { seededScores: true });
       }
 
       return {
@@ -189,7 +189,7 @@ export class PlayerScoresService {
       });
       result.totalScores = 0;
 
-      player.seededScores = false;
+      account.seededScores = false;
       await PlayerCoreService.updatePlayer(playerId, { seededScores: false });
 
       // Notify
@@ -279,8 +279,8 @@ export class PlayerScoresService {
     }
 
     // Mark player as seeded
-    if (!player.seededScores) {
-      await PlayerCoreService.updatePlayer(player._id, { seededScores: true });
+    if (!account.seededScores) {
+      await PlayerCoreService.updatePlayer(account.id, { seededScores: true });
     }
 
     result.timeTaken = performance.now() - startTime;
@@ -371,30 +371,36 @@ export class PlayerScoresService {
 
     const { "scoresaber-scores": rawScore, "scoresaber-leaderboards": rawLeaderboard } = scoreResult[0];
 
-    const leaderboardMap = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds([
-      rawLeaderboard.id,
-    ]);
-    const leaderboard = leaderboardMap.get(rawLeaderboard.id);
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(rawLeaderboard.id);
     if (!leaderboard) {
       throw new NotFoundError("Leaderboard not found");
     }
     const score = scoreSaberScoreRowToType(rawScore);
 
-    const enrichedScore = await ScoreCoreService.insertScoreData(score, leaderboard, {
-      insertPlayerInfo: true,
-      insertBeatLeaderScore: true,
-    });
-
-    return {
-      score: enrichedScore,
-      leaderboard,
-      beatSaver: await BeatSaverService.getMap(
+    const [enrichedScore, beatSaver] = await Promise.all([
+      ScoreCoreService.insertScoreData(score, leaderboard),
+      BeatSaverService.getMap(
         leaderboard.songHash,
         leaderboard.difficulty.difficulty,
         leaderboard.difficulty.characteristic,
         "full"
       ),
-    };
+    ]);
+    return { score: enrichedScore, leaderboard, beatSaver };
+  }
+
+  /**
+   * Gets the number of scores for a player.
+   *
+   * @param playerId the player's id
+   * @returns the number of scores
+   */
+  public static async getPlayerScoresCount(playerId: string): Promise<number> {
+    const [row] = await db
+      .select({ count: count() })
+      .from(scoreSaberScoresTable)
+      .where(eq(scoreSaberScoresTable.playerId, playerId));
+    return row?.count ?? 0;
   }
 
   /**
@@ -432,22 +438,22 @@ export class PlayerScoresService {
         requestedPage.playerScores.map(async playerScore => {
           const leaderboard = getScoreSaberLeaderboardFromToken(playerScore.leaderboard);
 
-          return {
-            score: await ScoreCoreService.insertScoreData(
+          const [enrichedScore, beatSaver] = await Promise.all([
+            ScoreCoreService.insertScoreData(
               getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId),
               leaderboard
             ),
-            leaderboard: leaderboard,
-            beatSaver: await BeatSaverService.getMap(
+            BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic,
               "full"
             ),
-          } as PlayerScore;
+          ]);
+          return { score: enrichedScore, leaderboard, beatSaver };
         })
       );
-      return scores.filter((result): result is PlayerScore => result !== undefined);
+      return scores.filter(Boolean) as PlayerScore[];
     });
   }
 
@@ -490,6 +496,17 @@ export class PlayerScoresService {
     };
   }
 
+  /**
+   * Gets the player's scores.
+   *
+   * @param mode the mode to get the scores for
+   * @param playerId the player's id
+   * @param page the page to get
+   * @param sort the sort to get
+   * @param direction the direction to get
+   * @param filters the filters to get
+   * @returns the player's scores
+   */
   public static async getPlayerScores(
     mode: "ssr" | "medals",
     playerId: string,
@@ -525,6 +542,8 @@ export class PlayerScoresService {
       return conditions;
     }
 
+    // todo: handle medals mode
+
     const conditions = buildConditions();
 
     const [{ count }] = await db
@@ -535,76 +554,40 @@ export class PlayerScoresService {
     const pagination = new Pagination<PlayerScore>().setItemsPerPage(limit).setTotalItems(count);
 
     return pagination.getPage(page, async () => {
-      if (sort === "medals") {
-        const rawScores = await db
-          .select()
-          .from(scoreSaberScoresTable)
-          .innerJoin(
-            scoreSaberLeaderboardsTable,
-            eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
-          )
-          .where(and(...conditions))
-          .orderBy(playerScoresOrderBy(sort, direction, scoreSaberScoresTable, scoreSaberLeaderboardsTable))
-          .limit(limit)
-          .offset(offset);
+      const scoresRows = await db
+        .select()
+        .from(scoreSaberScoresTable)
+        .where(and(...conditions))
+        .orderBy(playerScoresOrderBy(sort, direction, scoreSaberScoresTable, scoreSaberLeaderboardsTable))
+        .limit(limit)
+        .offset(offset);
 
-        const pageLeaderboardIds = [...new Set(rawScores.map(r => r["scoresaber-leaderboards"].id))];
-        const leaderboardMap =
-          await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(pageLeaderboardIds);
-
-        return (
-          await Promise.all(
-            rawScores.map(
-              async ({ "scoresaber-scores": rawScore, "scoresaber-leaderboards": rawLeaderboard }) => {
-                const leaderboard = leaderboardMap.get(rawLeaderboard.id);
-                if (!leaderboard) {
-                  return undefined;
-                }
-                const score = scoreSaberScoreRowToType(rawScore);
-
-                return {
-                  score: await ScoreCoreService.insertScoreData(score, leaderboard),
-                  leaderboard,
-                  beatSaver: await BeatSaverService.getMap(
-                    leaderboard.songHash,
-                    leaderboard.difficulty.difficulty,
-                    leaderboard.difficulty.characteristic,
-                    "full"
-                  ),
-                } as PlayerScore;
-              }
-            )
-          )
-        ).filter(Boolean) as PlayerScore[];
+      if (!scoresRows.length) {
+        return [];
       }
 
-      const scored = await ScoreCoreService.fetchScores({
-        where: and(...conditions),
-        orderBy: s => [playerScoresOrderBy(sort, direction, s, scoreSaberLeaderboardsTable)],
-        limit,
-        offset,
-      });
-
-      return Promise.all(
-        scored.map(async ({ scoreRow, leaderboard, beatLeaderScore }) => {
-          const score = scoreSaberScoreRowToType(scoreRow);
-          if (beatLeaderScore !== undefined) {
-            score.beatLeaderScore = beatLeaderScore;
+      const leaderboards = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(
+        scoresRows.map(scoreRow => scoreRow.leaderboardId)
+      );
+      const scores = await Promise.all(
+        scoresRows.map(async scoreRow => {
+          const leaderboard = leaderboards.get(scoreRow.leaderboardId);
+          if (!leaderboard) {
+            return undefined;
           }
-          return {
-            score: await ScoreCoreService.insertScoreData(score, leaderboard, {
-              insertBeatLeaderScore: false,
-            }),
-            leaderboard,
-            beatSaver: await BeatSaverService.getMap(
+          const [enrichedScore, beatSaver] = await Promise.all([
+            ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(scoreRow), leaderboard),
+            BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic,
               "full"
             ),
-          };
+          ]);
+          return { score: enrichedScore, leaderboard, beatSaver };
         })
       );
+      return scores.filter(Boolean) as PlayerScore[];
     });
   }
 }

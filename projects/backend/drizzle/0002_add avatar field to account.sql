@@ -1,0 +1,1 @@
+ALTER TABLE "scoresaber-accounts" ADD COLUMN "avatar" text DEFAULT 'https://cdn.fascinated.cc/assets/unknown.png';

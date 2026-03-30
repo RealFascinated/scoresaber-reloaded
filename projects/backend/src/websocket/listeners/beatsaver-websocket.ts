@@ -1,6 +1,6 @@
 import Logger from "@ssr/common/logger";
-import { BeatSaverMapModel } from "@ssr/common/model/beatsaver/map";
 import { connectBeatSaverWebsocket } from "@ssr/common/websocket/beatsaver-websocket";
+import { BeatSaverMapModel } from "@ssr/migration/model/beatsaver/map";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import CacheService from "../../service/cache.service";

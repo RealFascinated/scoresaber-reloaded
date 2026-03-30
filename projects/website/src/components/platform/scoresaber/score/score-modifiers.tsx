@@ -1,6 +1,6 @@
-import { PreviousScore } from "@ssr/common/model/score/previous-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getModifierLabel, Modifier } from "@ssr/common/score/modifier";
+import type { PreviousScore } from "@ssr/migration/schemas/scoresaber/score/previous-score";
 
 export function ScoreSaberScoreModifiers({
   score,

@@ -1,7 +1,7 @@
 import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { MapDifficultySchema } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristicSchema } from "@ssr/common/types/map-characteristic";
+import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { Elysia } from "elysia";
 import { z } from "zod";
 import BeatSaverService from "../service/beatsaver.service";

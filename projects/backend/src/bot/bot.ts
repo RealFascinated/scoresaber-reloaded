@@ -11,9 +11,9 @@ import {
 } from "discord.js";
 import { Client } from "discordx";
 
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
 import "./command/fetch-missing-player-scores";
 import "./command/force-track-player-statistics";
 import "./command/refresh-medal-scores";

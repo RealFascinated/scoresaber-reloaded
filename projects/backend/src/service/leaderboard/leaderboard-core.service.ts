@@ -17,10 +17,7 @@ import type { SQL } from "drizzle-orm";
 import { and, asc, count, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "../../db";
-import {
-  leaderboardsMapFromJoinedRows,
-  leaderboardsOrderedFromJoinedRows,
-} from "../../db/converter/scoresaber-leaderboard";
+import { mergeJoinedLeaderboardRows } from "../../db/converter/scoresaber-leaderboard";
 import { scoreSaberLeaderboardsTable } from "../../db/schema";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
@@ -134,7 +131,7 @@ export class LeaderboardCoreService {
       .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
       .where(inArray(mainAlias.id, ids));
 
-    return leaderboardsMapFromJoinedRows(rows);
+    return new Map(mergeJoinedLeaderboardRows(rows).map(lb => [lb.id, lb]));
   }
 
   /**
@@ -475,7 +472,7 @@ export class LeaderboardCoreService {
         .where(eq(mainAlias.ranked, true))
         .orderBy(desc(mainAlias.id));
 
-      return leaderboardsOrderedFromJoinedRows(result);
+      return mergeJoinedLeaderboardRows(result);
     });
   }
 
@@ -493,7 +490,7 @@ export class LeaderboardCoreService {
         .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
         .where(eq(mainAlias.qualified, true));
 
-      return leaderboardsOrderedFromJoinedRows(result);
+      return mergeJoinedLeaderboardRows(result);
     });
   }
 

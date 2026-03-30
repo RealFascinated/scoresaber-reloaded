@@ -2,7 +2,6 @@ import { IsGuildUser } from "@discordx/utilities";
 import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash, SlashOption } from "discordx";
 import { db } from "../../db";
-import { scoreSaberAccountToPlayer } from "../../db/converter/scoresaber-account";
 import { scoreSaberAccountsTable } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
@@ -59,8 +58,8 @@ class FetchMissingPlayerScores {
         throw new Error("Player not found");
       }
 
-      const account = await PlayerCoreService.getPlayer(playerId, playerToken);
-      PlayerScoresService.fetchMissingPlayerScores(scoreSaberAccountToPlayer(account), playerToken);
+      const account = await PlayerCoreService.getOrCreateAccount(playerId, playerToken);
+      PlayerScoresService.fetchMissingPlayerScores(account, playerToken);
 
       interaction.reply({
         content: `Fetching missing scores for ${playerToken.name}...`,

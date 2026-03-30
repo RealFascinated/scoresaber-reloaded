@@ -1,5 +1,5 @@
-import { ScoreSaberPreviousScoreModel } from "@ssr/common/model/score/impl/scoresaber-previous-score";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberPreviousScoreModel } from "@ssr/migration/model/score/impl/scoresaber-previous-score";
+import { ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
 import { Gauge } from "prom-client";
 import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
 import NumberMetric from "../../number-metric";

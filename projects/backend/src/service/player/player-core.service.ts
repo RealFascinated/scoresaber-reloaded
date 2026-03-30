@@ -1,15 +1,16 @@
+import { env } from "@ssr/common/env";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
-import { StorageBucket } from "@ssr/common/minio-buckets";
-import { PlayerScoreStats } from "@ssr/common/model/player/player-score-stats";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
+import { PlayerScoreStats } from "@ssr/migration/model/player/player-score-stats";
+import { ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
 import { and, eq, gt } from "drizzle-orm";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { db } from "../../db";
@@ -23,9 +24,6 @@ import StorageService from "../storage.service";
 
 export const accountCreationLock: Record<string, Promise<ScoreSaberAccount | undefined>> = {};
 
-/** Partial row update for `scoresaber-accounts` (`id` is passed as the first argument). */
-export type ScoreSaberAccountUpdate = Partial<Omit<ScoreSaberAccountRow, "id">>;
-
 export class PlayerCoreService {
   /**
    * Gets a player by id.
@@ -36,15 +34,10 @@ export class PlayerCoreService {
    * @returns the player document if found
    * @throws NotFoundError if the player doesn't exist on ScoreSaber
    */
-  public static async getPlayer(
+  public static async getOrCreateAccount(
     id: string,
-    playerToken?: ScoreSaberPlayerToken,
-    options?: {
-      useCache?: boolean;
-    }
+    playerToken?: ScoreSaberPlayerToken
   ): Promise<ScoreSaberAccount> {
-    const useCache = options?.useCache !== false;
-
     // Wait for the existing lock if it's in progress
     if (accountCreationLock[id] !== undefined) {
       const result = await accountCreationLock[id];
@@ -75,8 +68,29 @@ export class PlayerCoreService {
       }
     }
 
+    const isOculusAccount =
+      playerToken?.id.length === 16 ||
+      playerToken?.profilePicture === "https://cdn.scoresaber.com/avatars/oculus.png";
+    let avatar = playerToken?.profilePicture ?? "https://cdn.fascinated.cc/assets/unknown.png";
+    if (isOculusAccount) {
+      avatar = "https://cdn.fascinated.cc/assets/oculus-avatar.jpg";
+    } else if (playerToken?.profilePicture === "https://cdn.scoresaber.com/avatars/steam.png") {
+      avatar = "https://cdn.fascinated.cc/assets/unknown.png";
+    } else if (account) {
+      avatar = `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.PlayerAvatars)}/${id}.jpg`;
+    }
+
+    if (
+      account &&
+      !isOculusAccount &&
+      !account.cachedProfilePicture &&
+      playerToken?.profilePicture !== "https://cdn.scoresaber.com/avatars/steam.png"
+    ) {
+      await PlayerCoreService.cachePlayerProfilePicture(id);
+    }
+
     let shouldSave = false;
-    const updates: Partial<Pick<ScoreSaberAccountRow, "country" | "banned">> = {};
+    const updates: Partial<Pick<ScoreSaberAccountRow, "country" | "banned" | "avatar">> = {};
     if (playerToken?.country !== account.country) {
       updates.country = playerToken?.country ?? null;
       shouldSave = true;
@@ -85,16 +99,32 @@ export class PlayerCoreService {
       updates.banned = playerToken?.banned ?? false;
       shouldSave = true;
     }
+    if (account.avatar !== avatar) {
+      updates.avatar = avatar;
+      shouldSave = true;
+    }
 
     if (shouldSave) {
-      await db.update(scoreSaberAccountsTable).set(updates).where(eq(scoreSaberAccountsTable.id, id));
+      await PlayerCoreService.updatePlayer(id, updates);
       Object.assign(account, updates);
-      if (!useCache) {
-        await CacheService.invalidate(`player:${id}`);
-      }
     }
 
     return scoreSaberAccountRowToType(account);
+  }
+
+  /**
+   * Gets a player by id.
+   *
+   * @param id the player's id
+   * @returns the player document if found
+   */
+  public static async getAccount(id: string): Promise<ScoreSaberAccount | undefined> {
+    const [account] = await db
+      .select()
+      .from(scoreSaberAccountsTable)
+      .where(eq(scoreSaberAccountsTable.id, id))
+      .limit(1);
+    return account ? scoreSaberAccountRowToType(account) : undefined;
   }
 
   /**
@@ -248,11 +278,16 @@ export class PlayerCoreService {
   }
 
   /**
-   * Partial update on the `scoresaber-accounts` row. Uses table column shapes (e.g. `peakRank` + `peakRankTimestamp`, not nested `peakRank`).
+   * Updates a player.
+   *
+   * @param playerId the player's id
+   * @param patch the patch to apply
+   * @param options optional behavior (e.g. invalidate cache)
+   * @returns the updated player
    */
   public static async updatePlayer(
     playerId: string,
-    patch: ScoreSaberAccountUpdate,
+    patch: Partial<Omit<ScoreSaberAccountRow, "id">>,
     options?: { invalidateCache?: boolean }
   ): Promise<void> {
     if (Object.keys(patch).length === 0) {
@@ -264,28 +299,6 @@ export class PlayerCoreService {
     if (options?.invalidateCache !== false) {
       await CacheService.invalidate(`player:${playerId}`);
     }
-  }
-
-  /**
-   * Updates the player's name.
-   *
-   * @param playerId the player's id
-   * @param name the new name
-   */
-  public static async updatePlayerName(playerId: string, name: string) {
-    // Only update if name has changed
-    const [row] = await db
-      .select()
-      .from(scoreSaberAccountsTable)
-      .where(eq(scoreSaberAccountsTable.id, playerId))
-      .limit(1);
-    if (!row) {
-      return;
-    }
-    if (row.name === name) {
-      return;
-    }
-    await db.update(scoreSaberAccountsTable).set({ name }).where(eq(scoreSaberAccountsTable.id, playerId));
   }
 
   /**

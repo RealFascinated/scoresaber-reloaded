@@ -6,7 +6,6 @@ import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { and, eq } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { db } from "../../db";
-import { scoreSaberAccountToPlayer } from "../../db/converter/scoresaber-account";
 import { scoreSaberAccountsTable } from "../../db/schema";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoresService } from "../../service/player/player-scores.service";
@@ -31,10 +30,9 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       return;
     }
 
-    const account = await PlayerCoreService.getPlayer(playerId, playerToken);
-    const player = scoreSaberAccountToPlayer(account);
+    const account = await PlayerCoreService.getOrCreateAccount(playerId, playerToken);
     const { totalScores, missingScores, totalPagesFetched, timeTaken } =
-      await PlayerScoresService.fetchMissingPlayerScores(player, playerToken);
+      await PlayerScoresService.fetchMissingPlayerScores(account, playerToken);
     if (missingScores == 0) {
       return;
     }
@@ -43,7 +41,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
       new EmbedBuilder()
         .setTitle("Player Score Refresh Complete")
-        .setDescription(`🎯 **${player.name}**'s scores have been fetched`)
+        .setDescription(`🎯 **${account.name}**'s scores have been fetched`)
         .addFields([
           {
             name: "📊 Statistics",
@@ -66,7 +64,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
               .setLabel("Player Profile")
               .setEmoji("👤")
               .setStyle(ButtonStyle.Link)
-              .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player._id}`),
+              .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${account.id}`),
           ],
         },
       ]

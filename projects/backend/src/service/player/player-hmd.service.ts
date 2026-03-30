@@ -1,5 +1,5 @@
 import { HMD } from "@ssr/common/hmds";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
 import { and, count, eq, isNotNull } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberAccountsTable } from "../../db/schema";

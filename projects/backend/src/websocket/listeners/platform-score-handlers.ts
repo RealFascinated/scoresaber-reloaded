@@ -177,7 +177,7 @@ export class ScoreWebsockets implements EventListener {
       if (!(await PlayerCoreService.createPlayer(player.id))) {
         Promise.all([
           // Update the player's name last
-          player.name ? PlayerCoreService.updatePlayerName(player.id, player.name) : undefined,
+          player.name ? PlayerCoreService.updatePlayer(player.id, { name: player.name }) : undefined,
 
           // Update cached player in Redis
           ScoreSaberService.updateCachedPlayer(player.id, score.playerInfo!),

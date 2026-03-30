@@ -3,8 +3,8 @@
 import { DatasetConfig } from "@/common/chart/types";
 import Card from "@/components/card";
 import GenericStatisticChart from "@/components/platform-statistics/generic-statistic-chart";
-import { Statistic } from "@ssr/common/model/statistics/statistic";
-import { StatisticsType } from "@ssr/common/model/statistics/statistic-type";
+import { Statistic } from "@ssr/common/schemas/ssr/statistics/statistic";
+import { StatisticsType } from "@ssr/common/schemas/ssr/statistics/statistic-type";
 import { formatNumberWithCommas, isWholeNumber } from "@ssr/common/utils/number-utils";
 
 type Props = {

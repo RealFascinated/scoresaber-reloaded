@@ -33,7 +33,6 @@ import type { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/le
 import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
-import { ScoreCalendarData } from "../types/player/player-statistic";
 import { ScoreQuery, SortDirection, SortField } from "../types/score-query";
 import { getQueryParamsFromObject } from "./utils";
 
@@ -142,17 +141,6 @@ class SSRApi {
    */
   async getPlayerWeightedPpGainForRawPps(playerId: string, count: number = 1) {
     return await this.request<PpGainResponse>(`/player/pp-gain/${playerId}/${count}`);
-  }
-
-  /**
-   * Gets the score calendar for a player.
-   *
-   * @param playerId the player's id
-   * @param year the year to get the score calendar for
-   * @param month the month to get the score calendar for
-   */
-  async getScoreCalendar(playerId: string, year: number, month: number) {
-    return await this.request<ScoreCalendarData>(`/player/history/calendar/${playerId}/${year}/${month}`);
   }
 
   /**

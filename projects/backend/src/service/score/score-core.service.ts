@@ -1,52 +1,16 @@
 import Logger from "@ssr/common/logger";
-import type { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { and, asc, desc, eq, getTableColumns, sql, type SQL } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
+import { and, eq } from "drizzle-orm";
 import { db } from "../../db";
-import { beatLeaderScoreRowToType } from "../../db/converter/beatleader-score";
-import {
-  leaderboardsMapFromJoinedRows,
-  type LeaderboardMainDiffJoinRow,
-} from "../../db/converter/scoresaber-leaderboard";
-import {
-  beatLeaderScoresTable,
-  scoreSaberLeaderboardsTable,
-  scoreSaberScoreHistoryTable,
-  scoreSaberScoresTable,
-  type BeatLeaderScoreRow,
-  type ScoreSaberLeaderboardRow,
-  type ScoreSaberScoreRow,
-} from "../../db/schema";
+import { scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/schema";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
+import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
-import ScoreSaberService from "../scoresaber.service";
-
-export type ScorePageOrderFn = (scores: typeof scoreSaberScoresTable) => SQL | SQL[];
-
-export type FetchScoresOptions = {
-  where: SQL | undefined;
-  orderBy: ScorePageOrderFn;
-  limit: number;
-  offset: number;
-  /**
-   * When set, the outer query omits `ORDER BY` on the expanded join (large sort on many rows).
-   * Results are ordered by sorting the scores in memory instead.
-   */
-  sortGroupedScores?: (a: ScoreSaberScoreRow, b: ScoreSaberScoreRow) => number;
-};
-
-type ScoreLeaderboardDifficultyJoinRow = {
-  score: ScoreSaberScoreRow;
-  leaderboard: ScoreSaberLeaderboardRow;
-  difficulties: ScoreSaberLeaderboardRow | null;
-  beatLeaderRow: BeatLeaderScoreRow | null;
-};
 
 export class ScoreCoreService {
   /**
@@ -297,8 +261,7 @@ export class ScoreCoreService {
 
     async function getPlayerInfo() {
       if (options?.insertPlayerInfo) {
-        const playerToken = await ScoreSaberService.getCachedPlayer(score.playerId).catch(() => undefined);
-        return await ScoreSaberService.getPlayer(score.playerId, "basic", playerToken);
+        return PlayerCoreService.getAccount(score.playerId);
       }
       return undefined;
     }
@@ -327,146 +290,5 @@ export class ScoreCoreService {
     }
 
     return score;
-  }
-
-  /**
-   * Fetches a page of scores plus full {@link ScoreSaberLeaderboard} objects (all difficulties per song)
-   * in one round-trip: score subquery → main/difficulties self-join on `songHash`.
-   *
-   * `orderBy` applies inside the subquery and is mirrored on the outer query (plus stable tie-breakers).
-   * Only reference {@link scoreSaberScoresTable} columns in `orderBy`.
-   */
-  public static async fetchScores(options: FetchScoresOptions): Promise<
-    Array<{
-      scoreRow: ScoreSaberScoreRow;
-      leaderboard: ScoreSaberLeaderboard;
-      beatLeaderScore: BeatLeaderScore | undefined;
-    }>
-  > {
-    const innerOrder = ScoreCoreService.normalizeOrder(options.orderBy(scoreSaberScoresTable));
-    const topScores = db
-      .select(getTableColumns(scoreSaberScoresTable))
-      .from(scoreSaberScoresTable)
-      .where(options.where ?? sql`true`)
-      .orderBy(...innerOrder)
-      .limit(options.limit)
-      .offset(options.offset)
-      .as("scores");
-
-    const leaderboard = alias(scoreSaberLeaderboardsTable, "leaderboard");
-    const difficulties = alias(scoreSaberLeaderboardsTable, "difficulties");
-
-    const beatLeaderLateral = db
-      .select(getTableColumns(beatLeaderScoresTable))
-      .from(beatLeaderScoresTable)
-      .where(
-        and(
-          eq(beatLeaderScoresTable.playerId, topScores.playerId),
-          sql`upper(${beatLeaderScoresTable.songHash}) = upper(${leaderboard.songHash})`,
-          eq(beatLeaderScoresTable.songDifficulty, leaderboard.difficulty),
-          eq(beatLeaderScoresTable.songCharacteristic, leaderboard.characteristic),
-          eq(beatLeaderScoresTable.songScore, topScores.score)
-        )
-      )
-      .orderBy(desc(beatLeaderScoresTable.timestamp))
-      .limit(1)
-      .as("bl");
-
-    const outerOrder = [
-      ...ScoreCoreService.normalizeOrder(
-        options.orderBy(topScores as unknown as typeof scoreSaberScoresTable)
-      ),
-      asc(topScores.id),
-      asc(difficulties.id),
-    ];
-
-    const baseQuery = db
-      .select()
-      .from(topScores)
-      .innerJoin(leaderboard, eq(topScores.leaderboardId, leaderboard.id))
-      .leftJoin(difficulties, eq(leaderboard.songHash, difficulties.songHash))
-      .leftJoinLateral(beatLeaderLateral, sql`true`);
-
-    const flatRows = await (options.sortGroupedScores ? baseQuery : baseQuery.orderBy(...outerOrder));
-
-    const rows: ScoreLeaderboardDifficultyJoinRow[] = flatRows.map(row => {
-      const r = row as {
-        scores: ScoreSaberScoreRow;
-        leaderboard: ScoreSaberLeaderboardRow;
-        difficulties: ScoreSaberLeaderboardRow | null;
-        bl: BeatLeaderScoreRow | null;
-      };
-      return {
-        score: r.scores,
-        leaderboard: r.leaderboard,
-        difficulties: r.difficulties,
-        beatLeaderRow: r.bl,
-      };
-    });
-
-    return ScoreCoreService.groupScoreRowsWithFullLeaderboards(rows, {
-      sortGroupedScores: options.sortGroupedScores,
-    });
-  }
-
-  private static normalizeOrder(order: SQL | SQL[]): SQL[] {
-    return Array.isArray(order) ? order : [order];
-  }
-
-  private static groupScoreRowsWithFullLeaderboards(
-    rows: ScoreLeaderboardDifficultyJoinRow[],
-    opts?: {
-      sortGroupedScores?: (a: ScoreSaberScoreRow, b: ScoreSaberScoreRow) => number;
-    }
-  ): Array<{
-    scoreRow: ScoreSaberScoreRow;
-    leaderboard: ScoreSaberLeaderboard;
-    beatLeaderScore: BeatLeaderScore | undefined;
-  }> {
-    const byScoreId = new Map<number, ScoreLeaderboardDifficultyJoinRow[]>();
-    const orderSeen: number[] = [];
-
-    for (const row of rows) {
-      const id = row.score.id;
-      if (!byScoreId.has(id)) {
-        orderSeen.push(id);
-        byScoreId.set(id, []);
-      }
-      byScoreId.get(id)!.push(row);
-    }
-
-    if (opts?.sortGroupedScores) {
-      orderSeen.sort((a, b) =>
-        opts.sortGroupedScores!(byScoreId.get(a)![0].score, byScoreId.get(b)![0].score)
-      );
-    }
-
-    const out: Array<{
-      scoreRow: ScoreSaberScoreRow;
-      leaderboard: ScoreSaberLeaderboard;
-      beatLeaderScore: BeatLeaderScore | undefined;
-    }> = [];
-    for (const id of orderSeen) {
-      const chunkRows = byScoreId.get(id)!;
-      const scoreRow = chunkRows[0].score;
-      const joinChunk: LeaderboardMainDiffJoinRow[] = chunkRows.map(r => ({
-        leaderboard: r.leaderboard,
-        difficulties: r.difficulties,
-      }));
-      const map = leaderboardsMapFromJoinedRows(joinChunk);
-      const leaderboard = map.get(scoreRow.leaderboardId);
-      if (!leaderboard) {
-        throw new Error(
-          `Leaderboard ${scoreRow.leaderboardId} missing after grouping join rows for score ${scoreRow.id}`
-        );
-      }
-      const blRow = chunkRows[0].beatLeaderRow;
-      out.push({
-        scoreRow,
-        leaderboard,
-        beatLeaderScore: blRow ? beatLeaderScoreRowToType(blRow) : undefined,
-      });
-    }
-    return out;
   }
 }

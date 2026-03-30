@@ -1,5 +1,5 @@
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
+import { ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
 
 export class PlayerAccuraciesService {
   /**
