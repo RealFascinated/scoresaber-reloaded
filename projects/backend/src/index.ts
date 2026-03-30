@@ -56,15 +56,6 @@ if (fs.existsSync(".env")) {
 new EventsManager();
 new MetricsService();
 
-try {
-  Logger.info("Connecting to MongoDB...");
-  await mongoose.connect(env.MONGO_CONNECTION_STRING);
-  Logger.info("Connected to MongoDB :)");
-} catch (error) {
-  Logger.error("Failed to connect to MongoDB:", error);
-  process.exit(1);
-}
-
 const httpMetricsHooks = createHttpMetricsHooks();
 
 export const app = new Elysia()
