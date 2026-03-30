@@ -5,7 +5,7 @@ import { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-hist
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { and, desc, eq, lt, sql } from "drizzle-orm";
+import { and, count, desc, eq, lt, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/schema";
@@ -143,5 +143,15 @@ export class PlayerScoreHistoryService {
         });
       }
     );
+  }
+
+  /**
+   * Gets the total number of previous scores.
+   *
+   * @returns the total number of previous scores
+   */
+  public static async getTotalPreviousScoresCount(): Promise<number> {
+    const [row] = await db.select({ count: count() }).from(scoreSaberScoreHistoryTable);
+    return Number(row?.count ?? 0);
   }
 }

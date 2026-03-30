@@ -577,4 +577,14 @@ export class PlayerScoresService {
       return scores.filter(Boolean) as PlayerScore[];
     });
   }
+
+  /**
+   * Gets the total number of scores.
+   *
+   * @returns the total number of scores
+   */
+  public static async getTotalScoresCount(): Promise<number> {
+    const [row] = await db.select({ count: count() }).from(scoreSaberScoresTable);
+    return Number(row?.count ?? 0);
+  }
 }

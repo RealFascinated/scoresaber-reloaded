@@ -1,9 +1,9 @@
 import { HMD } from "@ssr/common/hmds";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
-import { and, count, eq, isNotNull } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull } from "drizzle-orm";
 import { db } from "../../db";
-import { scoreSaberAccountsTable } from "../../db/schema";
+import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../../db/schema";
 
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerCoreService } from "./player-core.service";
 
 export class PlayerHmdService {
@@ -56,21 +56,29 @@ export class PlayerHmdService {
    * @returns the player's HMD breakdown
    */
   public static async getPlayerHmdBreakdown(playerId: string, limit?: number): Promise<Record<HMD, number>> {
-    const hmds = await ScoreSaberScoreModel.aggregate([
-      { $match: { playerId: playerId } }, // get all scores for the player
-      { $sort: { timestamp: -1 } }, // sort by timestamp descending
-      ...(limit ? [{ $limit: limit }] : []), // get the last x scores
-      { $project: { hmd: 1 } }, // select only the hmd field
-      { $group: { _id: "$hmd", count: { $sum: 1 } } }, // group by hmd and count the number of scores
-      { $sort: { count: -1 } }, // sort by count descending (most common first)
-    ]);
+    const rows =
+      limit != null
+        ? await db
+          .select({ hmd: scoreSaberScoresTable.hmd })
+          .from(scoreSaberScoresTable)
+          .where(eq(scoreSaberScoresTable.playerId, playerId))
+          .orderBy(desc(scoreSaberScoresTable.timestamp))
+          .limit(limit)
+        : await db
+          .select({ hmd: scoreSaberScoresTable.hmd })
+          .from(scoreSaberScoresTable)
+          .where(eq(scoreSaberScoresTable.playerId, playerId))
+          .orderBy(desc(scoreSaberScoresTable.timestamp));
 
-    return hmds.reduce(
-      (acc, curr) => {
-        acc[curr._id as HMD] = curr.count;
-        return acc;
-      },
-      {} as Record<HMD, number>
-    );
+    const counts = new Map<HMD, number>();
+    for (const row of rows) {
+      if (!row.hmd) {
+        continue;
+      }
+      const hmd = row.hmd as HMD;
+      counts.set(hmd, (counts.get(hmd) ?? 0) + 1);
+    }
+
+    return Object.fromEntries([...counts.entries()].sort((a, b) => b[1] - a[1])) as Record<HMD, number>;
   }
 }

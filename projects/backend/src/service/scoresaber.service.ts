@@ -8,12 +8,11 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import { ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
 import { parse, stringify } from "devalue";
-import { count, gt } from "drizzle-orm";
+import { count, eq, gt } from "drizzle-orm";
 import { redisClient } from "../common/redis";
 import { db } from "../db";
-import { scoreSaberAccountsTable } from "../db/schema";
+import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../db/schema";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import CacheService, { CacheId } from "./cache.service";
 import MetricsService, { MetricType } from "./metrics.service";
@@ -49,7 +48,7 @@ export default class ScoreSaberService {
 
       // delete players scores if banned so they don't fuck up top scores
       if (player.banned) {
-        await ScoreSaberScoreModel.deleteMany({ playerId: id });
+        await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.playerId, id));
       }
 
       const basePlayer = {
@@ -98,15 +97,15 @@ export default class ScoreSaberService {
         // todo: cleanup this mess
         account && player !== undefined
           ? (async () => {
-              const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
-              const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
-              return Object.fromEntries(
-                Object.entries(hmdUsage).map(([hmd, count]) => [
-                  hmd,
-                  totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
-                ])
-              ) as Record<HMD, number>;
-            })()
+            const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
+            const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
+            return Object.fromEntries(
+              Object.entries(hmdUsage).map(([hmd, count]) => [
+                hmd,
+                totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
+              ])
+            ) as Record<HMD, number>;
+          })()
           : undefined,
         account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},
@@ -114,12 +113,12 @@ export default class ScoreSaberService {
         account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(30)), 30) : {},
         account
           ? (async () => {
-              const [row] = await db
-                .select({ c: count() })
-                .from(scoreSaberAccountsTable)
-                .where(gt(scoreSaberAccountsTable.pp, player.pp));
-              return (row?.c ?? 0) + 1;
-            })()
+            const [row] = await db
+              .select({ c: count() })
+              .from(scoreSaberAccountsTable)
+              .where(gt(scoreSaberAccountsTable.pp, player.pp));
+            return (row?.c ?? 0) + 1;
+          })()
           : 0,
       ]);
 

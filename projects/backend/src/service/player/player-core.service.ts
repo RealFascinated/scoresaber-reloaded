@@ -6,11 +6,10 @@ import Logger from "@ssr/common/logger";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
+import { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
-import { PlayerScoreStats } from "@ssr/migration/model/player/player-score-stats";
-import { ScoreSaberScoreModel } from "@ssr/migration/model/score/impl/scoresaber-score";
 import { and, eq, gt } from "drizzle-orm";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { db } from "../../db";
@@ -21,6 +20,7 @@ import { QueueId, QueueManager } from "../../queue/queue-manager";
 import CacheService from "../cache.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import StorageService from "../storage.service";
+import { PlayerScoresService } from "./player-scores.service";
 
 export const accountCreationLock: Record<string, Promise<ScoreSaberAccount | undefined>> = {};
 
@@ -189,7 +189,7 @@ export class PlayerCoreService {
               .returning();
 
             // If the player has less scores tracked than the total play count, add them to the refresh queue
-            const trackedScores = await ScoreSaberScoreModel.countDocuments({ playerId: id });
+            const trackedScores = await PlayerScoresService.getPlayerScoresCount(id);
             if (trackedScores < token.scoreStats.totalPlayCount) {
               const seedQueue = QueueManager.getQueue(
                 QueueId.PlayerScoreRefreshQueue
@@ -365,19 +365,19 @@ export class PlayerCoreService {
    * @param playerId the player's id
    * @returns the player's score stats
    */
-  public static async getPlayerScoreStats(playerId: string): Promise<PlayerScoreStats> {
+  public static async getPlayerScoreStats(playerId: string): Promise<ScoreSaberPlayerScoreStats> {
     const scores = await db
       .select()
       .from(scoreSaberScoresTable)
       .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)));
 
-    const scoreStats: PlayerScoreStats = {
-      godPlays: 0,
-      sspPlays: 0,
-      ssPlays: 0,
-      spPlays: 0,
-      sPlays: 0,
+    const scoreStats: ScoreSaberPlayerScoreStats = {
       aPlays: 0,
+      sPlays: 0,
+      spPlays: 0,
+      ssPlays: 0,
+      sspPlays: 0,
+      godPlays: 0,
     };
 
     for (const playerScore of scores) {

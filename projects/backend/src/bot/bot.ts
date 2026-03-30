@@ -13,9 +13,7 @@ import { Client } from "discordx";
 
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { count } from "drizzle-orm";
-import { db } from "../db";
-import { scoreSaberScoresTable } from "../db/schema";
+import { PlayerScoresService } from "../service/player/player-scores.service";
 import "./command/fetch-missing-player-scores";
 import "./command/force-track-player-statistics";
 import "./command/refresh-medal-scores";
@@ -79,7 +77,7 @@ export async function initDiscordBot() {
         status: "online",
         activities: [
           {
-            name: `${formatNumberWithCommas(Number(await db.select({ c: count() }).from(scoreSaberScoresTable).then(row => row[0]?.c ?? 0)))} Scores!`,
+            name: `${formatNumberWithCommas(await PlayerScoresService.getTotalScoresCount())} Scores!`,
             type: ActivityType.Watching,
             url: "https://ssr.fascinated.cc",
           },
@@ -115,7 +113,7 @@ export async function sendEmbedToChannel(
       return await channel.send({ embeds: [embed], components });
     }
   } catch (error) {
-    Logger.error(`Failed to send message to channel ${channelId}:`, error);
+    Logger.error(`Failed to send message to channel ${channelId}: `, error);
   }
   return undefined;
 }
@@ -140,7 +138,7 @@ export async function sendMessageToChannel(
       return await channel.send(message);
     }
   } catch (error) {
-    Logger.error(`Failed to send message to channel ${channelId}:`, error);
+    Logger.error(`Failed to send message to channel ${channelId}: `, error);
   }
   return undefined;
 }
@@ -175,6 +173,6 @@ export async function sendFile(
       });
     }
   } catch (error) {
-    Logger.error(`Error sending file to channel ${channelId}:`, error);
+    Logger.error(`Error sending file to channel ${channelId}: `, error);
   }
 }

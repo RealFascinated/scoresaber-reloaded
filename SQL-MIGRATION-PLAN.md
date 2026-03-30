@@ -25,7 +25,7 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 
 - `score-core.service.ts` — track score, move prior row to history, `scoreExists` (insert matches `schema.ts`)
 - `player-score-history.service.ts` — previous score + history queries
-- `player-scores.service.ts` — listing / filters / joins; **still uses Mongo** for some seed/cleanup aggregates (see below)
+- `player-scores.service.ts` — listing / filters / joins on PG
 - `player-ranked.service.ts` — ranked pp queries on `scoresaber-scores` (PG)
 - `top-scores.service.ts`
 - `medal-scores.service.ts` — medal rows on PG; notification `getChanges` reads prior medal totals from **`scoresaber-accounts`** (not `PlayerModel`)
@@ -35,7 +35,7 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 - **`player-search.service.ts`**, **`player-hmd.service.ts`** — account queries on PG
 - `leaderboard-core.service.ts` — CRUD/search/lists, `saveLeaderboard`, **`upsertLeaderboardsFromRankingApi`** (batch sync, preserves `seededScores` / `cachedSongArt`)
 - **`leaderboard-ranking.service.ts`** — ranked/qualified refresh: PG upserts for leaderboards + top scores, history PP reweight, star-change inserts, playlist updates; invalidates ranked/qualified list cache keys
-- `playlist.service.ts` — self + snipe use PG for scores/leaderboards; **stored playlist documents** still `PlaylistModel`
+- `playlist.service.ts` — ranked/qualified/queue/self/snipe playlist generation on PG data
 - `player-friend-scores.service.ts` — friend scores for a leaderboard
 - **`beatleader.service.ts`** — BeatLeader scores fully on **`beatleader-scores`** (Drizzle), including **`scoreExists`** / **`scoresExist`**; no `BeatLeaderScoreModel` import here
 
@@ -49,22 +49,16 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 
 | Area                                    | Examples                                                                                                                                                                                                                                                                                                                       |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Players (legacy model)**              | **`PlayerModel`** only in **`mongo-to-postgres-scoresaber-accounts.ts`** and any ad-hoc scripts — **runtime account data is `scoresaber-accounts` (PG)**                                                                                                                                                                       |
-| **ScoreSaber scores (legacy)**          | `player-scores.service.ts` (aggregate + `deleteMany`), `player-core` (one `countDocuments`), `player-hmd`, `player-accuracies`, `leaderboard-hmd`, `scoresaber.service` (`deleteMany`), **metrics** (`total-tracked-scores`), **bot** (`estimatedDocumentCount`) — **not** `player-history` (that path is PG) |
-| **Leaderboards / app dashboard counts** | **`app.service.ts`** `getAppStatistics` uses **PG** (`count()` on scores, score-history, leaderboards, BeatLeader `savedReplay`, inactive accounts). **Seed queue** is on PG (`leaderboard-score-seed-queue.ts` → `scoreSaberLeaderboardsTable.seededScores`)                                                                  |
-| **BeatLeader scores**                   | **Runtime + existence checks on PG** (`beatleader.service.ts`); **`BeatLeaderScoreModel`** is **not** referenced in `projects/backend/src` (Mongo collection may remain for one-off ETL only)                                                                                                                                  |
+| **ScoreSaber scores (legacy touchpoints)** | `scoresaber.service.ts` (`ScoreSaberScoreModel.deleteMany` for banned players), `player-core.service.ts` (`ScoreSaberScoreModel.countDocuments` seed check), `player-accuracies.service.ts` / `player-hmd.service.ts` (`ScoreSaberScoreModel.aggregate`) |
 | **BeatSaver maps**                      | `beatsaver.service.ts`, `beatsaver-websocket.ts` → `BeatSaverMapModel`                                                                                                                                                                                                                                                         |
-| **Playlists (stored)**                  | `playlist.service.ts` — `PlaylistModel` for static playlists (ranked/qualified/queue metadata + song lists)                                                                                                                                                                                                                    |
-| **App stats / metrics**                 | **`app.service`** dashboard counts are **PG** (see above). **`total-tracked-scores`** metric and **`bot`** status still use Mongo **`estimatedDocumentCount`** on **`ScoreSaberScoreModel`** / **`ScoreSaberPreviousScoreModel`** until those gauges are switched to Drizzle                                                   |
-| **Discord users**                       | `common/discord/user.ts`                                                                                                                                                                                                                                                                                                       |
-| **Metric snapshots**                    | `metrics` table (Drizzle)                                                                                                                                                                                                                                                                                                      |
-| **Misc**                                | Bot commands / scripts still touching Mongo scores or leaderboards; seed queues read **`scoresaber-accounts`** on PG                                                                                                                                                                                                           |
+| **Metrics / DB telemetry**              | `total-tracked-scores` still uses Mongo `estimatedDocumentCount` (`ScoreSaberScoreModel`, `ScoreSaberPreviousScoreModel`), and `mongo-db-size` reads `dbStats` via `mongoose.connection.db`                                                                                                                                   |
+| **Connection lifecycle**                | Backend startup/shutdown still opens/closes Mongo (`mongoose.connect` / `mongoose.disconnect` in `index.ts`)                                                                                                                                                                                                                  |
 
 ### Follow-ups inside migrated code
 
-- **`player-scores.service.ts`**: finish removing `ScoreSaberScoreModel` (aggregates, `deleteMany`) in favor of PG + player flags strategy.
 - **`player-core.service.ts`**: replace remaining **`ScoreSaberScoreModel.countDocuments`** with PG `count` on **`scoresaber-scores`** where appropriate.
-- **Metrics / bot** (`total-tracked-scores`, bot `estimatedDocumentCount`): align Prometheus gauges and Discord status with PG (`scoresaber-scores`, `scoresaber-score-history`) so they match **`app.service`** — **`BeatLeader` replay totals are already PG** in `app.service`.
+- **`scoresaber.service.ts` / `player-hmd.service.ts` / `player-accuracies.service.ts`**: replace remaining Mongo score deletes/aggregates with PG queries.
+- **Metrics** (`total-tracked-scores`, `mongo-db-size`): move gauges to PG equivalents and retire Mongo-specific telemetry.
 - **Single import path for `ScoreSaberScore`**: prefer `@ssr/common/schemas/scoresaber/score/score` where possible; Mongoose `ScoreSaberScore` type still appears in legacy paths.
 
 ---
@@ -94,7 +88,7 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 | `additional-score-data` (BeatLeader) | **`beatleader-scores` (PG)**         | Mongo collection name in Typegoose for ETL / scripts; **`beatleader.service`** and **`app.service`** replay counts use PG only                      |
 | `beatleader-score-stats`             | **Not in Drizzle yet**               | Score stats JSON in **MinIO** (`StorageBucket.BeatLeaderScoreStats`); Mongo model `beatleader-score-stats` may still exist in `common`              |
 | `beatsaver-maps`                     | **Not in Drizzle yet**               |                                                                                                                                                     |
-| `playlists`                          | **Not in Drizzle yet**               | Self/snipe use PG for scores; stored playlists use Mongo                                                                                            |
+| `playlists`                          | Generated from PG data               | Runtime playlist generation reads PG scores/leaderboards                                                                                            |
 | `metrics`                            | `metrics`                            | Persisted metric snapshots are now stored in PostgreSQL and loaded/saved via `metrics.service.ts`                                                 |
 | `discord-users`                      | **Not in Drizzle yet**               |                                                                                                                                                     |
 | `increments`                         | N/A for new score IDs                | Use API `scoreId` / app rules                                                                                                                       |
@@ -120,12 +114,11 @@ This document tracks moving **persistent application data** from **MongoDB** (Mo
 ### 4.2 Services — still high-touch (Mongo `*Model` / aggregates)
 
 - **Player accounts (PG):** `player-core` (Drizzle accounts; one Mongo score count), `player-search`, `player-hmd`, `player-medals` (medals on PG), seed queues — **`PlayerModel`** not in these paths.
-- **Player:** `player-scores` (**remaining** aggregates/seed/deleteMany), `player-beatleader-scores`, **`player-history` (PG / Drizzle)**, `player-accuracies`, queues that do not touch history.
-- **Leaderboards:** **`leaderboard-score-seed-queue`** (Drizzle `seededScores` + queue); `leaderboard-hmd` (score aggregates on Mongo); `leaderboard-notifications` only consumes `LeaderboardUpdate` types (no Mongo).
-- **Scores:** `scoresaber.service` cleanup paths; finish aligning **metrics/bot** counts with PG (`app.service` dashboard counts already PG).
+- **Player:** `player-scores` (PG), `player-beatleader-scores`, **`player-history` (PG / Drizzle)**, remaining Mongo score aggregates in `player-accuracies` / `player-hmd`.
+- **Leaderboards:** **`leaderboard-score-seed-queue`** (Drizzle `seededScores` + queue); `leaderboard-notifications` only consumes `LeaderboardUpdate` types (no Mongo).
+- **Scores:** `scoresaber.service` still has Mongo cleanup (`deleteMany`) for banned players.
 - **BeatLeader / BeatSaver:** `beatleader.service` (PG only for persistence); `beatsaver.service`, websocket listener.
-- **Playlists:** migrate **`PlaylistModel`** or replace with PG/file/Redis if desired.
-- **Discord / metrics:** `discord/user`, **`metrics/*`** (`total-tracked-scores` still Mongo), **`mongo-db-size`** → align remaining gauges with PG where possible.
+- **Metrics:** **`metrics/*`** (`total-tracked-scores` still Mongo), **`mongo-db-size`** → align remaining gauges with PG where possible.
 
 ### 4.3 Mongo patterns to replace (where still used)
 
@@ -176,11 +169,11 @@ Same mapping as before: `aggregate` → `JOIN`/windows; `bulkWrite` → batched 
 1. ~~**`player-medals.service.ts`** / medal aggregates~~ — **Done on PG** (`scoresaber-medal-scores` + **`scoresaber-accounts.medals`**); `ScoreSaberMedalsScoreModel` not referenced in backend `src`.
 2. ~~**`scoresaber-accounts` + `player-core` (runtime)**~~ — **Done for main CRUD/search/HMD/medals/queues**; follow-up: drop **`ScoreSaberScoreModel.countDocuments`** in `player-core` and any stragglers.
 3. ~~**`player-history.service.ts`** + **`scoresaber-player-history`**~~ — **Done on PG** (Drizzle); ETL via **`mongo-to-postgres-player-history.ts`** for Mongo backfill.
-4. ~~**`leaderboard-ranking.service.ts`**~~ — **Done on PG** (leaderboards, scores, history reweight, star-change). ~~**`app.service` `getAppStatistics`**~~ — **dashboard counts on PG**; follow-up: **metrics** (`total-tracked-scores`) and **bot** still use Mongo `estimatedDocumentCount` for score totals.
-5. ~~**`leaderboard-score-seed-queue.ts`**~~ — **Done on PG** (`scoreSaberLeaderboardsTable`). Remaining: **`player-scores`**, metrics/bot — drop `ScoreSaberScoreModel` / aggregates where PG is authoritative.
+4. ~~**`leaderboard-ranking.service.ts`**~~ — **Done on PG** (leaderboards, scores, history reweight, star-change). ~~**`app.service` `getAppStatistics`**~~ — **dashboard counts on PG**; follow-up: move remaining Mongo-backed score metrics/aggregates to PG.
+5. ~~**`leaderboard-score-seed-queue.ts`**~~ — **Done on PG** (`scoreSaberLeaderboardsTable`). Remaining: remove remaining `ScoreSaberScoreModel` delete/count/aggregate touchpoints where PG is authoritative.
 6. ~~**`beatleader.service.ts` existence checks**~~ — **`scoreExists` / `scoresExist`** use Drizzle on `beatLeaderScoresTable`. ~~**`app.service`** stored-replay count~~ — **PG** (`savedReplay`).
 7. **BeatSaver** maps (`BeatSaverMapModel`) — table or keep Mongo until later.
-8. **Playlists, metrics, discord** — smaller surfaces.
+8. **Metrics + Mongo lifecycle** — smaller surfaces.
 9. Remove **`mongoose.connect`**, delete Mongo-only scripts/metrics, strip deps.
 
 ---
