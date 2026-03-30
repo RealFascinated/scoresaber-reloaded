@@ -106,6 +106,7 @@ function mongoPlayerDocToRow(doc: MongoPlayerLeanDoc): typeof scoreSaberAccounts
 const accountUpsertSet: Record<Exclude<keyof ScoreSaberAccountRow, "id">, ReturnType<typeof sql>> = {
   name: sql`excluded."name"`,
   country: sql`excluded."country"`,
+  avatar: sql`excluded."avatar"`,
   peakRank: sql`excluded."peakRank"`,
   peakRankTimestamp: sql`excluded."peakRankTimestamp"`,
   seededScores: sql`excluded."seededScores"`,
