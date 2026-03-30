@@ -15,7 +15,11 @@ import {
   scoreSaberMedalScoreRowToScoreSaberScore,
   scoreSaberScoreToMedalScoreInsert,
 } from "../../db/converter/medal-score";
-import { ScoreSaberMedalScoreRow, scoreSaberAccountsTable, scoreSaberMedalScoresTable } from "../../db/schema";
+import {
+  ScoreSaberMedalScoreRow,
+  scoreSaberAccountsTable,
+  scoreSaberMedalScoresTable,
+} from "../../db/schema";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerMedalsService } from "../player/player-medals.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";

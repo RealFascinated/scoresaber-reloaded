@@ -14,8 +14,8 @@ import {
   isToday,
 } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
-import { AnyBulkWriteOperation } from "mongoose";
 import { count, eq, notInArray, sql } from "drizzle-orm";
+import { AnyBulkWriteOperation } from "mongoose";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { redisClient } from "../../common/redis";
 import { db } from "../../db";
@@ -83,10 +83,10 @@ export class PlayerHistoryService {
 
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
-        (async () => {
-          await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
-          redisClient.del(`scoresaber:cached-player:${foundPlayer.id}`);
-        })(),
+          (async () => {
+            await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
+            redisClient.del(`scoresaber:cached-player:${foundPlayer.id}`);
+          })(),
       ]);
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
@@ -141,9 +141,9 @@ export class PlayerHistoryService {
     );
     Logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-      `Successfully processed: ${successCount} players\n` +
-      `Failed to process: ${errorCount} players\n` +
-      `Total inactive players: ${inactivePlayers}`
+        `Successfully processed: ${successCount} players\n` +
+        `Failed to process: ${errorCount} players\n` +
+        `Total inactive players: ${inactivePlayers}`
     );
   }
 
@@ -281,11 +281,11 @@ export class PlayerHistoryService {
       playerId: playerToken.id,
       ...(count > 0
         ? {
-          date: {
-            $gte: new Date(startDate),
-            $lte: new Date(today),
-          },
-        }
+            date: {
+              $gte: new Date(startDate),
+              $lte: new Date(today),
+            },
+          }
         : {}),
     })
       .sort({ date: -1 })

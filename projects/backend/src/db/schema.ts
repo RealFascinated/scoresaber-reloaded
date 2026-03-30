@@ -43,7 +43,13 @@ export const scoreSaberAccountsTable = pgTable(
     trackedSince: timestamp().notNull(),
     joinedDate: timestamp().notNull(),
   },
-  table => [index("accounts_name_idx").on(table.name), index("accounts_medals_idx").on(table.medals.desc())]
+  table => [
+    index("accounts_name_idx").on(table.name),
+    index("accounts_medals_idx").on(table.medals.desc()),
+    index("accounts_inactive_true_idx")
+      .on(table.inactive)
+      .where(sql`${table.inactive} = true`),
+  ]
 );
 
 /** Daily (or per-snapshot) statistics for a tracked player. Matches Mongo `player-history` collection. */
@@ -314,6 +320,9 @@ export const beatLeaderScoresTable = pgTable(
       table.songScore,
       table.timestamp.desc()
     ),
+    index("beatleader_scores_saved_replay_true_idx")
+      .on(table.savedReplay)
+      .where(sql`${table.savedReplay} = true`),
   ]
 );
 

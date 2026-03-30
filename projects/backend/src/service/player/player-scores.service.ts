@@ -37,7 +37,6 @@ import { and, asc, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-or
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
-import { fetchScoresWithLeaderboards } from "../../db/fetch-scores-with-leaderboards";
 import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
 import BeatLeaderService from "../beatleader.service";
 import BeatSaverService from "../beatsaver.service";
@@ -579,7 +578,7 @@ export class PlayerScoresService {
         ).filter(Boolean) as PlayerScore[];
       }
 
-      const scored = await fetchScoresWithLeaderboards({
+      const scored = await ScoreCoreService.fetchScores({
         where: and(...conditions),
         orderBy: s => [playerScoresOrderBy(sort, direction, s, scoreSaberLeaderboardsTable)],
         limit,
@@ -587,16 +586,24 @@ export class PlayerScoresService {
       });
 
       return Promise.all(
-        scored.map(async ({ scoreRow, leaderboard }) => ({
-          score: await ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(scoreRow), leaderboard),
-          leaderboard,
-          beatSaver: await BeatSaverService.getMap(
-            leaderboard.songHash,
-            leaderboard.difficulty.difficulty,
-            leaderboard.difficulty.characteristic,
-            "full"
-          ),
-        }))
+        scored.map(async ({ scoreRow, leaderboard, beatLeaderScore }) => {
+          const score = scoreSaberScoreRowToType(scoreRow);
+          if (beatLeaderScore !== undefined) {
+            score.beatLeaderScore = beatLeaderScore;
+          }
+          return {
+            score: await ScoreCoreService.insertScoreData(score, leaderboard, {
+              insertBeatLeaderScore: false,
+            }),
+            leaderboard,
+            beatSaver: await BeatSaverService.getMap(
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic,
+              "full"
+            ),
+          };
+        })
       );
     });
   }

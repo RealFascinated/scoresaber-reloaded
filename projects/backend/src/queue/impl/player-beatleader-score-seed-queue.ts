@@ -1,6 +1,6 @@
 import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberAccountRowToPlayer } from "../../db/converter/scoresaber-account";
 import { scoreSaberAccountsTable } from "../../db/schema";
@@ -42,7 +42,12 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
       const players = await db
         .select({ id: scoreSaberAccountsTable.id })
         .from(scoreSaberAccountsTable)
-        .where(and(eq(scoreSaberAccountsTable.seededBeatLeaderScores, false), eq(scoreSaberAccountsTable.banned, false)))
+        .where(
+          and(
+            eq(scoreSaberAccountsTable.seededBeatLeaderScores, false),
+            eq(scoreSaberAccountsTable.banned, false)
+          )
+        )
         .limit(100);
       const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {

@@ -41,7 +41,9 @@ function defaultScoreStats(): ScoreSaberPlayerScoreStats {
   };
 }
 
-function normalizeScoreStats(raw: Partial<ScoreSaberPlayerScoreStats> | undefined): ScoreSaberPlayerScoreStats {
+function normalizeScoreStats(
+  raw: Partial<ScoreSaberPlayerScoreStats> | undefined
+): ScoreSaberPlayerScoreStats {
   const d = defaultScoreStats();
   if (!raw) {
     return d;

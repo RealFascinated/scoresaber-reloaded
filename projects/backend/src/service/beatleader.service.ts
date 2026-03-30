@@ -14,13 +14,12 @@ import Request from "@ssr/common/utils/request";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { and, desc, eq, inArray, lt, or } from "drizzle-orm";
-import { scoreSaberAccountRowToPlayer } from "../db/converter/scoresaber-account";
-import { scoreSaberAccountsTable } from "../db/schema";
 import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
 import { createGenericEmbed } from "../common/discord/embed";
 import { db } from "../db";
 import { beatLeaderScoreRowToType } from "../db/converter/beatleader-score";
-import { beatLeaderScoresTable } from "../db/schema";
+import { scoreSaberAccountRowToPlayer } from "../db/converter/scoresaber-account";
+import { beatLeaderScoresTable, scoreSaberAccountsTable } from "../db/schema";
 import CacheService, { CacheId } from "./cache.service";
 import StorageService from "./storage.service";
 

@@ -5,7 +5,6 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import { desc, gt } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
-import { fetchScoresWithLeaderboards } from "../../db/fetch-scores-with-leaderboards";
 import { scoreSaberScoresTable } from "../../db/schema";
 import BeatSaverService from "../beatsaver.service";
 import { ScoreCoreService } from "./score-core.service";
@@ -24,7 +23,7 @@ export class TopScoresService {
     const pagination = new Pagination<PlayerScore>().setItemsPerPage(limit).setTotalItems(1000);
 
     return pagination.getPage(page, async () => {
-      const scored = await fetchScoresWithLeaderboards({
+      const scored = await ScoreCoreService.fetchScores({
         where: gt(scoreSaberScoresTable.pp, 0),
         orderBy: s => [desc(s.pp)],
         limit,
@@ -37,18 +36,24 @@ export class TopScoresService {
       }
 
       return Promise.all(
-        scored.map(async ({ scoreRow, leaderboard }) => ({
-          score: await ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(scoreRow), leaderboard, {
-            insertPlayerInfo: true,
-          }),
-          leaderboard,
-          beatSaver: await BeatSaverService.getMap(
-            leaderboard.songHash,
-            leaderboard.difficulty.difficulty,
-            leaderboard.difficulty.characteristic,
-            "full"
-          ),
-        }))
+        scored.map(async ({ scoreRow, leaderboard, beatLeaderScore }) => {
+          const score = scoreSaberScoreRowToType(scoreRow);
+          if (beatLeaderScore !== undefined) {
+            score.beatLeaderScore = beatLeaderScore;
+          }
+          return {
+            score: await ScoreCoreService.insertScoreData(score, leaderboard, {
+              insertPlayerInfo: true,
+            }),
+            leaderboard,
+            beatSaver: await BeatSaverService.getMap(
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic,
+              "full"
+            ),
+          };
+        })
       );
     });
   }

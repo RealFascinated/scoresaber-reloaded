@@ -45,7 +45,10 @@ async function getMedalRanksForIds(
         ${countryFilter}
     )
     SELECT id, rank::int AS rank FROM ranked
-    WHERE id IN (${sql.join(playerIds.map(id => sql`${id}`), sql`, `)})
+    WHERE id IN (${sql.join(
+      playerIds.map(id => sql`${id}`),
+      sql`, `
+    )})
   `);
 
   const rows = (result as unknown as { rows: { id: string; rank: number }[] }).rows ?? [];
@@ -177,7 +180,9 @@ export class PlayerMedalsService {
       db
         .select({ country: scoreSaberAccountsTable.country, count: count() })
         .from(scoreSaberAccountsTable)
-        .where(and(baseWhere, isNotNull(scoreSaberAccountsTable.country), ne(scoreSaberAccountsTable.country, "")))
+        .where(
+          and(baseWhere, isNotNull(scoreSaberAccountsTable.country), ne(scoreSaberAccountsTable.country, ""))
+        )
         .groupBy(scoreSaberAccountsTable.country)
         .orderBy(desc(count())),
     ]);
@@ -186,7 +191,9 @@ export class PlayerMedalsService {
       return { ...Pagination.empty<ScoreSaberPlayer>(), countryMetadata: {} } as PlayerMedalRankingsResponse;
     }
 
-    const pagination = new Pagination<ScoreSaberPlayer>().setItemsPerPage(itemsPerPage).setTotalItems(totalPlayers);
+    const pagination = new Pagination<ScoreSaberPlayer>()
+      .setItemsPerPage(itemsPerPage)
+      .setTotalItems(totalPlayers);
 
     const pageData = await pagination.getPage(page, async fetchRange => {
       const players = await db

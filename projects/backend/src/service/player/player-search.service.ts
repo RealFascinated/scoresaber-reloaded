@@ -24,10 +24,7 @@ export class PlayerSearchService {
       return [];
     }
 
-    const pattern =
-      normalizedQuery.length > 0
-        ? `%${normalizedQuery.replace(/[%_\\]/g, "\\$&")}%`
-        : "";
+    const pattern = normalizedQuery.length > 0 ? `%${normalizedQuery.replace(/[%_\\]/g, "\\$&")}%` : "";
 
     const [scoreSaberResponse, localMatches] = await Promise.all([
       ScoreSaberApiService.searchPlayers(normalizedQuery.length === 0 ? "" : normalizedQuery),
@@ -43,9 +40,7 @@ export class PlayerSearchService {
 
     const scoreSaberPlayerTokens = scoreSaberResponse?.players;
     const uniquePlayerIds = [
-      ...new Set(
-        localMatches.map(p => p.id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])
-      ),
+      ...new Set(localMatches.map(p => p.id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])),
     ];
 
     // Get players from ScoreSaber
