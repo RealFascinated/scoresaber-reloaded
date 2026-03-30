@@ -37,7 +37,7 @@ export const ScoreSaberMedalScoreSchema = z.object({
   // Player information
   playerInfo: ScoreSaberLeaderboardPlayerInfoSchema.nullable(),
 
-  // todo: beatleader score
+  // Other scores
   beatLeaderScore: BeatLeaderScoreSchema.optional(),
   previousScore: ScoreSaberHistoryScoreSchema.optional(),
 

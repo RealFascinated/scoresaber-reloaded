@@ -48,7 +48,7 @@ export const ScoreSaberHistoryScoreSchema = z.object({
     maxCombo: z.number(),
   }),
 
-  // todo: beatleader score
+  // Other scores
   beatLeaderScore: BeatLeaderScoreSchema.optional(),
 
   timestamp: z.date(),
