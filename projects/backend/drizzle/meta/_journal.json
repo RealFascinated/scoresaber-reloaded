@@ -29,6 +29,13 @@
       "when": 1774894000000,
       "tag": "0003_scores_pp_positive_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1774900465995,
+      "tag": "0004_drop redundant index on player history",
+      "breakpoints": true
     }
   ]
 }

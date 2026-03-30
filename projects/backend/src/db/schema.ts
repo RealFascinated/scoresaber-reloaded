@@ -97,8 +97,7 @@ export const playerHistoryTable = pgTable(
     godPlays: integer(),
   },
   table => [
-    uniqueIndex("scoresaber_player_history_player_id_date_unique").on(table.playerId, table.date),
-    index("scoresaber_player_history_player_id_date_idx").on(table.playerId, table.date.desc()),
+    uniqueIndex("scoresaber_player_history_player_id_date_unique").on(table.playerId, table.date)
   ]
 );
 
