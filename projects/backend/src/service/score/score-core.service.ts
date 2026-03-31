@@ -3,7 +3,7 @@ import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/schema";
 import BeatLeaderService from "../beatleader.service";
@@ -36,21 +36,21 @@ export class ScoreCoreService {
   }> {
     const before = performance.now();
 
+    // Ensure the score is not already tracked (same scoreId and score)
+    const scoreExists = await db
+      .select({ exists: sql`1` })
+      .from(scoreSaberScoresTable)
+      .where(
+        and(eq(scoreSaberScoresTable.scoreId, score.scoreId), eq(scoreSaberScoresTable.score, score.score))
+      )
+      .limit(1);
+    if (scoreExists.length > 0) {
+      return { score: undefined, hasPreviousScore: false, tracked: false };
+    }
+
     const playerId = score.playerId;
     let isImprovement = false;
     if (newScore) {
-      // Ensure the score is not already tracked (same scoreId and score)
-      const scoreExists = await db
-        .select()
-        .from(scoreSaberScoresTable)
-        .where(
-          and(eq(scoreSaberScoresTable.scoreId, score.scoreId), eq(scoreSaberScoresTable.score, score.score))
-        )
-        .limit(1);
-      if (scoreExists.length > 0) {
-        return { score: undefined, hasPreviousScore: false, tracked: false };
-      }
-
       const existingScore = await db
         .select()
         .from(scoreSaberScoresTable)
