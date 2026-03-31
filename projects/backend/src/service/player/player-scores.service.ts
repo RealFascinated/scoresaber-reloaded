@@ -427,11 +427,12 @@ export class PlayerScoresService {
           const [enrichedScore, beatSaver] = await Promise.all([
             ScoreCoreService.insertScoreData(
               getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId),
-              leaderboard, {
-              insertPlayerInfo: false,
-              insertPreviousScore: true,
-              insertBeatLeaderScore: true,
-            }
+              leaderboard,
+              {
+                insertPlayerInfo: false,
+                insertPreviousScore: true,
+                insertBeatLeaderScore: true,
+              }
             ),
             BeatSaverService.getMap(
               leaderboard.songHash,

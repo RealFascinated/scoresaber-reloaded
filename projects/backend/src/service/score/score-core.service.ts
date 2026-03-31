@@ -113,47 +113,33 @@ export class ScoreCoreService {
     await PlayerCoreService.updatePlayer(playerId, { scoreStats });
 
     const modifiers = score.modifiers.map(modifier => modifier.toString());
-    const inserted = await db
+
+    const scoreUpsertSet: typeof scoreSaberScoresTable.$inferInsert = {
+      scoreId: score.scoreId,
+      playerId: playerId,
+      leaderboardId: leaderboard.id,
+      difficulty: score.difficulty,
+      characteristic: score.characteristic,
+      score: score.score,
+      accuracy: score.accuracy,
+      pp: score.pp,
+      missedNotes: score.missedNotes,
+      badCuts: score.badCuts,
+      maxCombo: score.maxCombo,
+      fullCombo: score.fullCombo,
+      modifiers: modifiers.length > 0 ? modifiers : null,
+      hmd: score.hmd,
+      rightController: score.rightController,
+      leftController: score.leftController,
+      timestamp: score.timestamp,
+    };
+
+    await db
       .insert(scoreSaberScoresTable)
-      .values({
-        scoreId: score.scoreId,
-        playerId: playerId,
-        leaderboardId: leaderboard.id,
-        difficulty: score.difficulty,
-        characteristic: score.characteristic,
-        score: score.score,
-        accuracy: score.accuracy,
-        pp: score.pp,
-        missedNotes: score.missedNotes,
-        badCuts: score.badCuts,
-        maxCombo: score.maxCombo,
-        fullCombo: score.fullCombo,
-        modifiers: modifiers.length > 0 ? modifiers : null,
-        hmd: score.hmd,
-        rightController: score.rightController,
-        leftController: score.leftController,
-        timestamp: score.timestamp,
-      })
+      .values(scoreUpsertSet)
       .onConflictDoUpdate({
-        target: scoreSaberScoresTable.scoreId, set: {
-          scoreId: score.scoreId,
-          playerId: playerId,
-          leaderboardId: leaderboard.id,
-          difficulty: score.difficulty,
-          characteristic: score.characteristic,
-          score: score.score,
-          accuracy: score.accuracy,
-          pp: score.pp,
-          missedNotes: score.missedNotes,
-          badCuts: score.badCuts,
-          maxCombo: score.maxCombo,
-          fullCombo: score.fullCombo,
-          modifiers: modifiers.length > 0 ? modifiers : null,
-          hmd: score.hmd,
-          rightController: score.rightController,
-          leftController: score.leftController,
-          timestamp: score.timestamp,
-        }
+        target: scoreSaberScoresTable.scoreId,
+        set: scoreUpsertSet,
       })
       .returning({ scoreId: scoreSaberScoresTable.scoreId });
 

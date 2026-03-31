@@ -28,10 +28,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     let processedAnyScores = false;
     let lastSuccessfulPage = 1;
     while (hasMoreScores) {
-      const response = await ScoreSaberApiService.lookupLeaderboardScores(
-        Number(leaderboardId),
-        currentPage
-      );
+      const response = await ScoreSaberApiService.lookupLeaderboardScores(Number(leaderboardId), currentPage);
       if (!response) {
         Logger.warn(
           `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
@@ -53,7 +50,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       }
 
       await Promise.all(
-        response.scores.map(async (rawScore) => {
+        response.scores.map(async rawScore => {
           const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
           const scoreExists = await ScoreCoreService.scoreExists(score.scoreId);
           if (scoreExists) {

@@ -409,9 +409,9 @@ class SSRApi {
       ...(options?.category ? { category: options.category.toString() } : {}),
       ...(options?.stars
         ? {
-          minStar: (options.stars.min ?? 0).toString(),
-          maxStar: (options.stars.max ?? 0).toString(),
-        }
+            minStar: (options.stars.min ?? 0).toString(),
+            maxStar: (options.stars.max ?? 0).toString(),
+          }
         : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.search ? { search: options.search } : {}),
