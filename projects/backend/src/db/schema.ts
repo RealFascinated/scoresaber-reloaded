@@ -212,7 +212,11 @@ export const scoreSaberMedalScoresTable = pgTable(
     timestamp: timestamp().notNull(),
   },
   table => [
-    index("medal_scores_leaderboard_score_idx").on(table.leaderboardId, table.score.desc(), table.scoreId.desc()),
+    index("medal_scores_leaderboard_score_idx").on(
+      table.leaderboardId,
+      table.score.desc(),
+      table.scoreId.desc()
+    ),
   ]
 );
 

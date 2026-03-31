@@ -162,7 +162,7 @@ export default class PlaylistService {
         throw new NotFoundError(`Unable to create a self playlist as the user isn't tracked.`);
       }
 
-      const scoredLeaderboards = await PlaylistService.fetchPlayerScoresWithLeaderboards(
+      const scoredLeaderboards = await PlaylistService.fetchPlayerScoreSaberScoresWithLeaderboards(
         user,
         settings.rankedStatus,
         settings.starRange
@@ -236,7 +236,7 @@ export default class PlaylistService {
       }
 
       async function getScores(playerId: string) {
-        const results = await PlaylistService.fetchPlayerScoresWithLeaderboards(
+        const results = await PlaylistService.fetchPlayerScoreSaberScoresWithLeaderboards(
           playerId,
           settings.rankedStatus,
           settings.starRange
@@ -381,7 +381,7 @@ export default class PlaylistService {
   /**
    * Loads ScoreSaber scores for a player with leaderboard rows from Postgres (replaces legacy Mongo aggregate + $lookup).
    */
-  private static async fetchPlayerScoresWithLeaderboards(
+  private static async fetchPlayerScoreSaberScoresWithLeaderboards(
     playerId: string,
     rankedStatus: SelfPlaylistSettings["rankedStatus"] | SnipeSettings["rankedStatus"],
     starRange: SelfPlaylistSettings["starRange"] | SnipeSettings["starRange"]

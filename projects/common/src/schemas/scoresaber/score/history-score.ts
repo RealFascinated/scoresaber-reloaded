@@ -41,7 +41,7 @@ export const ScoreSaberHistoryScoreSchema = z.object({
   change: z.object({
     score: z.number(),
     accuracy: numberIncludingInfinitySchema,
-    pp: z.number(),
+    pp: z.number().optional(),
     misses: z.number(),
     missedNotes: z.number(),
     badCuts: z.number(),

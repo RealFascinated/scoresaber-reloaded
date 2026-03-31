@@ -28,12 +28,15 @@ import { PlayerScoresPageResponse } from "../schemas/response/score/player-score
 import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph";
 import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
+import type { PlayerScoresQuery } from "../schemas/score/query/player-scores-query";
+import { ScoreSaberMedalScoreSortField } from "../schemas/score/query/sort/scoresaber-medal-scores-sort";
+import type { ScoreSaberScoreSortField } from "../schemas/score/query/sort/scoresaber-scores-sort";
+import type { SortDirection } from "../schemas/score/query/sort/sort-direction";
 import type { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberPlayerHistoryEntries } from "../schemas/scoresaber/player/history";
 import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
-import { ScoreQuery, SortDirection, SortField } from "../types/score-query";
 import { getQueryParamsFromObject } from "./utils";
 
 class SSRApi {
@@ -189,7 +192,7 @@ class SSRApi {
    * @param leaderboardId the id of the leaderboard
    * @param page the page
    */
-  async fetchPlayerScoresHistory(playerId: string, leaderboardId: string, page: number) {
+  async fetchPlayerScoreSaberScoresHistory(playerId: string, leaderboardId: string, page: number) {
     return await this.request<Page<ScoreSaberScore>>(
       `/player/score-history/${playerId}/${leaderboardId}/${page}`
     );
@@ -255,29 +258,59 @@ class SSRApi {
   }
 
   /**
-   * Fetches the player's scores from the cache.
+   * Fetches the player's ScoreSaber scores.
    *
    * @param id the player id
    * @param page the page
    * @param sort the sort
+   * @param direction the direction
+   * @param filters the filters
    * @param search the search term
    */
-  async fetchPlayerScores(
+  async fetchPlayerScoreSaberScores(
     id: string,
-    mode: "ssr" | "medals",
     page: number,
-    sort: SortField,
+    sort: ScoreSaberScoreSortField,
     direction: SortDirection,
-    filters: ScoreQuery
+    filters: PlayerScoresQuery
   ) {
     const queryParams: Record<string, string> = {};
     if (filters.search) queryParams.search = filters.search;
     if (filters.hmd) queryParams.hmd = filters.hmd;
-    if (filters.includePlayers && filters.includePlayers.length > 0) {
-      queryParams.includePlayers = filters.includePlayers.join(",");
+    if (filters.playerIds && filters.playerIds.length > 0) {
+      queryParams.playerIds = filters.playerIds.join(",");
     }
     return await this.request<PlayerScoresPageResponse>(
-      `/scores/player/${mode}/${id}/${sort}/${direction}/${page}`,
+      `/scores/player/ssr/${id}/${sort}/${direction}/${page}`,
+      queryParams
+    );
+  }
+
+  /**
+   * Fetches the player's ScoreSaber scores.
+   *
+   * @param id the player id
+   * @param page the page
+   * @param sort the sort
+   * @param direction the direction
+   * @param filters the filters
+   * @param search the search term
+   */
+  async fetchPlayerScoreSaberMedalScores(
+    id: string,
+    page: number,
+    sort: ScoreSaberMedalScoreSortField,
+    direction: SortDirection,
+    filters: PlayerScoresQuery
+  ) {
+    const queryParams: Record<string, string> = {};
+    if (filters.search) queryParams.search = filters.search;
+    if (filters.hmd) queryParams.hmd = filters.hmd;
+    if (filters.playerIds && filters.playerIds.length > 0) {
+      queryParams.playerIds = filters.playerIds.join(",");
+    }
+    return await this.request<PlayerScoresPageResponse>(
+      `/scores/player/medals/${id}/${sort}/${direction}/${page}`,
       queryParams
     );
   }
@@ -379,7 +412,7 @@ class SSRApi {
    * @returns the score
    */
   async getScore(scoreId: string) {
-    return await this.request<PlayerScore>(`/scores/${scoreId}`);
+    return await this.request<PlayerScore<ScoreSaberScore>>(`/scores/${scoreId}`);
   }
 
   /**
@@ -409,9 +442,9 @@ class SSRApi {
       ...(options?.category ? { category: options.category.toString() } : {}),
       ...(options?.stars
         ? {
-          minStar: (options.stars.min ?? 0).toString(),
-          maxStar: (options.stars.max ?? 0).toString(),
-        }
+            minStar: (options.stars.min ?? 0).toString(),
+            maxStar: (options.stars.max ?? 0).toString(),
+          }
         : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.query ? { query: options.query } : {}),
@@ -434,7 +467,7 @@ class SSRApi {
    * @returns the top scores
    */
   async fetchTopScores(page: number) {
-    return await this.request<Page<PlayerScore>>(`/scores/top/${page}`);
+    return await this.request<Page<PlayerScore<ScoreSaberScore>>>(`/scores/top/${page}`);
   }
 }
 

@@ -25,7 +25,6 @@ import SimplePagination from "../../simple-pagination";
 import { ButtonGroup, ControlButton, ControlPanel, ControlRow } from "../../ui/control-panel";
 import { EmptyState } from "../../ui/empty-state";
 import ScoreSaberScoreDisplay from "./score/scoresaber-score";
-import { ScoreSaberScoreModeTabs } from "./scoresaber-score-mode-selector";
 
 const DEFAULT_SORT: ScoreSaberScoreSort = "recent";
 
@@ -138,7 +137,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
       if (pageNum !== 1) params.set("page", String(pageNum));
       if (debouncedSearchTerm && debouncedSearchTerm.length >= 3) params.set("search", debouncedSearchTerm);
       const queryString = params.toString();
-      return `/player/${player.id}/scoresaber${queryString ? `?${queryString}` : ""}`;
+      return `/player/${player.id}${queryString ? `?${queryString}` : ""}`;
     },
     [player.id, sort, debouncedSearchTerm]
   );
@@ -202,9 +201,6 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
     <ScoresCard>
       <div className="flex w-full flex-col gap-2">
         <ControlPanel>
-          <ControlRow>
-            <ScoreSaberScoreModeTabs />
-          </ControlRow>
           <ControlRow className="mb-0!">
             <div className="flex w-full flex-col-reverse items-center gap-2">
               <div className="relative w-full sm:w-auto">

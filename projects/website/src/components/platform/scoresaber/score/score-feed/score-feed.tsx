@@ -8,6 +8,7 @@ import { Spinner } from "@/components/spinner";
 import { env } from "@ssr/common/env";
 import { getHMDInfo } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { parseDate } from "@ssr/common/utils/time-utils";
 import { useCallback, useState } from "react";
@@ -24,15 +25,17 @@ const EMPTY_COPY = {
 
 type EmptyVariant = keyof typeof EMPTY_COPY;
 
-type FeedPhase = { kind: "list"; scores: PlayerScore[] } | { kind: "empty"; variant: EmptyVariant };
+type FeedPhase =
+  | { kind: "list"; scores: PlayerScore<ScoreSaberScore>[] }
+  | { kind: "empty"; variant: EmptyVariant };
 
-function sortByNewestFirst(a: PlayerScore, b: PlayerScore): number {
+function sortByNewestFirst(a: PlayerScore<ScoreSaberScore>, b: PlayerScore<ScoreSaberScore>): number {
   return (
     parseDate(b.score.timestamp.toString()).getTime() - parseDate(a.score.timestamp.toString()).getTime()
   );
 }
 
-function getFeedPhase(readyState: ReadyState, scores: PlayerScore[]): FeedPhase {
+function getFeedPhase(readyState: ReadyState, scores: PlayerScore<ScoreSaberScore>[]): FeedPhase {
   if (scores.length > 0) {
     return { kind: "list", scores };
   }
@@ -92,7 +95,7 @@ function FeedEmptyState({ variant }: { variant: EmptyVariant }) {
   );
 }
 
-function FeedScoreList({ scores }: { scores: PlayerScore[] }) {
+function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
   return (
     <div className="flex flex-col gap-(--spacing-sm)">
       {scores.map(scoreToken => {
@@ -140,15 +143,15 @@ function FeedBody({ phase }: { phase: FeedPhase }) {
 }
 
 export default function ScoreFeed() {
-  const [scores, setScores] = useState<PlayerScore[]>([]);
+  const [scores, setScores] = useState<PlayerScore<ScoreSaberScore>[]>([]);
 
   const onMessage = useCallback((event: WebSocketEventMap["message"]) => {
     if (typeof event.data !== "string") {
       return;
     }
-    let parsed: PlayerScore;
+    let parsed: PlayerScore<ScoreSaberScore>;
     try {
-      parsed = JSON.parse(event.data) as PlayerScore;
+      parsed = JSON.parse(event.data) as PlayerScore<ScoreSaberScore>;
     } catch {
       return;
     }
@@ -164,12 +167,15 @@ export default function ScoreFeed() {
     });
   }, []);
 
-  const { readyState } = useWebSocket<PlayerScore>(`${env.NEXT_PUBLIC_WEBSOCKET_URL}/ws/score`, {
-    reconnectAttempts: 10,
-    reconnectInterval: 3000,
-    shouldReconnect: () => true,
-    onMessage,
-  });
+  const { readyState } = useWebSocket<PlayerScore<ScoreSaberScore>>(
+    `${env.NEXT_PUBLIC_WEBSOCKET_URL}/ws/score`,
+    {
+      reconnectAttempts: 10,
+      reconnectInterval: 3000,
+      shouldReconnect: () => true,
+      onMessage,
+    }
+  );
 
   const phase = getFeedPhase(readyState, scores);
 

@@ -37,9 +37,9 @@ async function getMedalRanksForIds(
     )
     SELECT id, rank::int AS rank FROM ranked
     WHERE id IN (${sql.join(
-    playerIds.map(id => sql`${id}`),
-    sql`, `
-  )})
+      playerIds.map(id => sql`${id}`),
+      sql`, `
+    )})
   `);
 
   const rows = (result as unknown as { rows: { id: string; rank: number }[] }).rows ?? [];
@@ -154,7 +154,7 @@ export class PlayerMedalsService {
     country?: string
   ): Promise<PlayerMedalRankingsResponse> {
     const baseWhere = sql`
-      AND medals > 0
+      medals > 0
       AND country IS NOT NULL
       AND country != ''
       ${country ? sql`AND country = ${country}` : sql``}

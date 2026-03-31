@@ -1,6 +1,7 @@
 import HMDIcon from "@/components/hmd-icon";
 import { PlayerAvatar } from "@/components/ranking/player-avatar";
 import { getHMDInfo } from "@ssr/common/hmds";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { formatDate } from "@ssr/common/utils/time-utils";
@@ -11,7 +12,7 @@ import LeaderboardButton from "./buttons/leaderboard-button";
 import PlayerButton from "./buttons/player-button";
 import ReplayButton from "./buttons/replay-button";
 
-export default function ScoreDetails({ score: playerScore }: { score: PlayerScore }) {
+export default function ScoreDetails({ score: playerScore }: { score: PlayerScore<ScoreSaberScore> }) {
   const { leaderboard } = playerScore;
   const score = playerScore.score;
   const playerInfo = score.playerInfo!;

@@ -11,7 +11,7 @@ import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
-import { ScoreSaberScoreSortField } from "@ssr/common/schemas/score/query/sort/scoresaber-scores-sort";
+import { ScoreSaberMedalScoreSortField } from "@ssr/common/schemas/score/query/sort/scoresaber-medal-scores-sort";
 import { SortDirection } from "@ssr/common/schemas/score/query/sort/sort-direction";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -24,9 +24,9 @@ import {
   BarChart3,
   ClockIcon,
   Hash,
+  Medal,
   SearchIcon,
   Target,
-  Trophy,
   XIcon,
 } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
@@ -40,20 +40,20 @@ import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 
 type SortOption = {
   name: string;
-  value: ScoreSaberScoreSortField;
+  value: ScoreSaberMedalScoreSortField;
   icon: React.ReactNode;
   defaultOrder: SortDirection;
 };
 
-const DEFAULT_SORT: ScoreSaberScoreSortField = "date";
+const DEFAULT_SORT: ScoreSaberMedalScoreSortField = "date";
 const DEFAULT_SORT_DIRECTION: SortDirection = "desc";
 const DEFAULT_PAGE = 1;
 
 const SORT_OPTIONS: SortOption[] = [
   {
-    name: "PP",
-    value: "pp",
-    icon: <Trophy className="h-4 w-4" />,
+    name: "Medals",
+    value: "medals",
+    icon: <Medal className="h-4 w-4" />,
     defaultOrder: "desc" as const,
   },
   {
@@ -88,15 +88,15 @@ const SORT_OPTIONS: SortOption[] = [
   },
 ];
 
-export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSaberPlayer }) {
+export default function ScoreSaberPlayerMedalScores({ player }: { player: ScoreSaberPlayer }) {
   const isMobile = useIsMobile();
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
   // Sorting
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(DEFAULT_PAGE));
   const [sort, setSort] = useQueryState("sort", parseAsString.withDefault(DEFAULT_SORT)) as [
-    ScoreSaberScoreSortField,
-    (value: ScoreSaberScoreSortField | null) => void,
+    ScoreSaberMedalScoreSortField,
+    (value: ScoreSaberMedalScoreSortField | null) => void,
   ];
   const [direction, setDirection] = useQueryState(
     "direction",
@@ -137,7 +137,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
   } = useQuery<PlayerScoresPageResponse>({
     queryKey: ["playerScores:ssr", player.id, page, sort, debouncedSearchTerm, direction, hmdFilter],
     queryFn: async () => {
-      const response = await ssrApi.fetchPlayerScoreSaberScores(player.id, page, sort, direction, {
+      const response = await ssrApi.fetchPlayerScoreSaberMedalScores(player.id, page, sort, direction, {
         ...(!invalidSearch ? { search: debouncedSearchTerm } : {}),
         ...(hmdFilter ? { hmd: hmdFilter } : {}),
       });
@@ -151,7 +151,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
   }, [isLoading, isRefetching, scores, setIsLoading]);
 
   const handleSortChange = useCallback(
-    (newSort: ScoreSaberScoreSortField, defaultOrder: SortDirection = "desc") => {
+    (newSort: ScoreSaberMedalScoreSortField, defaultOrder: SortDirection = "desc") => {
       setIsLoading(true);
       if (newSort !== sort) {
         setSort(newSort);
@@ -194,14 +194,13 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
   const buildUrl = useCallback(
     (pageNum: number) => {
       const params = new URLSearchParams();
-      params.set("mode", "ssr");
       if (sort !== DEFAULT_SORT) params.set("sort", sort);
       if (direction !== DEFAULT_SORT_DIRECTION) params.set("direction", direction);
       if (pageNum !== 1) params.set("page", String(pageNum));
       if (debouncedSearchTerm && debouncedSearchTerm.length >= 3) params.set("search", debouncedSearchTerm);
 
       const queryString = params.toString();
-      return `/player/${player.id}?${queryString}`;
+      return `/player/${player.id}/scoresaber?${queryString}`;
     },
     [player.id, sort, direction, debouncedSearchTerm]
   );
@@ -245,6 +244,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
               beatSaverMap={score.beatSaver}
               settings={{
                 defaultLeaderboardScoresPage: 1,
+                medalsMode: true,
               }}
             />
           ))}

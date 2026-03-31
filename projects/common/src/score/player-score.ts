@@ -1,12 +1,11 @@
 import { BeatSaverMap } from "../schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
-import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 
-export interface PlayerScore {
+export interface PlayerScore<T> {
   /**
    * The score.
    */
-  readonly score: ScoreSaberScore;
+  readonly score: T;
 
   /**
    * The leaderboard the score was set on.

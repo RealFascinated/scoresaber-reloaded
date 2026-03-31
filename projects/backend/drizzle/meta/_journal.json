@@ -61,28 +61,28 @@
     {
       "idx": 8,
       "version": "7",
-      "when": 1775000000000,
+      "when": 1774998300857,
       "tag": "0008_rename_scoresaber_scores_id_to_scoreid",
       "breakpoints": true
     },
     {
       "idx": 9,
       "version": "7",
-      "when": 1775100000000,
+      "when": 1774998300860,
       "tag": "0009_scoresaber_score_history_leaderboard_player_score_unique",
       "breakpoints": true
     },
     {
       "idx": 10,
       "version": "7",
-      "when": 1774981196082,
+      "when": 1775200000000,
       "tag": "0010_add-seeded-scores=false-index",
       "breakpoints": true
     },
     {
       "idx": 11,
       "version": "7",
-      "when": 1774992742862,
+      "when": 1775200000001,
       "tag": "0011_rename-medal-score-id-column",
       "breakpoints": true
     }

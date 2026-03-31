@@ -4,43 +4,20 @@ import { PlatformRepository, PlatformType } from "@/common/platform/platform-rep
 import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
 import PlayerViews from "@/components/player/views/player-views";
-import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { useQueryParamSelector } from "@/hooks/use-query-param-selector";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
 import { parseAsStringEnum } from "nuqs";
 import { useMemo } from "react";
-import ScoreSaberPlayerScores from "../platform/scoresaber/scoresaber-player-scores";
+import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
+import ScoreSaberPlayerScoresLive from "../platform/scoresaber/scoresaber-player-scores-live";
+import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-scores-medals";
+import ScoreSaberPlayerScoresSSR from "../platform/scoresaber/scoresaber-player-scores-ssr";
 import { Button } from "../ui/button";
 import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
-
-const AccSaberPlayerScores = dynamic(
-  () => import("../platform/accsaber/accsaber-player-scores").then(m => m.default),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex min-h-[240px] items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    ),
-  }
-);
-
-const ScoreSaberPlayerScoresSSR = dynamic(
-  () => import("../platform/scoresaber/scoresaber-player-scores-ssr").then(m => m.default),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex min-h-[240px] items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    ),
-  }
-);
 
 const platformRepository = PlatformRepository.getInstance();
 const PLATFORM_QUERY = parseAsStringEnum<PlatformType>(Object.values(PlatformType)).withDefault(
@@ -94,9 +71,11 @@ export default function PlayerData({ player }: PlayerDataProps) {
   const platform = useMemo(() => {
     switch (selectedPlatform) {
       case PlatformType.ScoreSaber:
-        return <ScoreSaberPlayerScores player={player} />;
+        return <ScoreSaberPlayerScoresLive player={player} />;
+      case PlatformType.SSR:
+        return <ScoreSaberPlayerScoresSSR player={player} />;
       case PlatformType.MedalScores:
-        return <ScoreSaberPlayerScoresSSR player={player} mode="medals" />;
+        return <ScoreSaberPlayerMedalScores player={player} />;
       case PlatformType.AccSaber:
         return <AccSaberPlayerScores player={player} />;
     }

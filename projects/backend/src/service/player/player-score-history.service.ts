@@ -4,6 +4,7 @@ import { Pagination } from "@ssr/common/pagination";
 import { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-history-graph";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
+import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { and, asc, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
@@ -107,44 +108,38 @@ export class PlayerScoreHistoryService {
    * @returns the previous score
    */
   public static async getPlayerPreviousScore(
-    score: ScoreSaberScore,
+    score: ScoreSaberScore | ScoreSaberMedalScore,
     leaderboard: ScoreSaberLeaderboard
   ): Promise<ScoreSaberHistoryScore | undefined> {
-    return CacheService.fetch(
-      CacheId.PreviousScore,
-      `previous-score:${score.playerId}-${leaderboard.id}-${score.timestamp.getTime()}`,
-      async () => {
-        const [previousScore] = await db
-          .select()
-          .from(scoreSaberScoreHistoryTable)
-          .where(
-            and(
-              eq(scoreSaberScoreHistoryTable.playerId, score.playerId),
-              eq(scoreSaberScoreHistoryTable.leaderboardId, leaderboard.id),
-              lt(scoreSaberScoreHistoryTable.timestamp, score.timestamp)
-            )
-          )
-          .orderBy(desc(scoreSaberScoreHistoryTable.timestamp))
-          .limit(1);
+    const [previousScore] = await db
+      .select()
+      .from(scoreSaberScoreHistoryTable)
+      .where(
+        and(
+          eq(scoreSaberScoreHistoryTable.playerId, score.playerId),
+          eq(scoreSaberScoreHistoryTable.leaderboardId, leaderboard.id),
+          lt(scoreSaberScoreHistoryTable.timestamp, score.timestamp)
+        )
+      )
+      .orderBy(desc(scoreSaberScoreHistoryTable.timestamp))
+      .limit(1);
 
-        if (!previousScore) {
-          return undefined;
-        }
+    if (!previousScore) {
+      return undefined;
+    }
 
-        return {
-          ...scoreSaberScoreRowToType(previousScore),
-          change: {
-            score: score.score - previousScore.score,
-            accuracy: score.accuracy - previousScore.accuracy,
-            misses: score.misses - previousScore.missedNotes - previousScore.badCuts,
-            missedNotes: score.missedNotes - previousScore.missedNotes,
-            badCuts: score.badCuts - previousScore.badCuts,
-            maxCombo: score.maxCombo - previousScore.maxCombo,
-            pp: score.pp - previousScore.pp,
-          },
-        } as ScoreSaberHistoryScore;
-      }
-    );
+    return {
+      ...scoreSaberScoreRowToType(previousScore),
+      change: {
+        score: score.score - previousScore.score,
+        accuracy: score.accuracy - previousScore.accuracy,
+        misses: score.misses - previousScore.missedNotes - previousScore.badCuts,
+        missedNotes: score.missedNotes - previousScore.missedNotes,
+        badCuts: score.badCuts - previousScore.badCuts,
+        maxCombo: score.maxCombo - previousScore.maxCombo,
+        ...("pp" in score ? { pp: score.pp - previousScore.pp } : {}),
+      },
+    } as ScoreSaberHistoryScore;
   }
 
   public static async getPlayerScoreHistoryGraph(

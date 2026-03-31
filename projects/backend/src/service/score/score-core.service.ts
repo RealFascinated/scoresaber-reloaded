@@ -1,6 +1,7 @@
 import Logger from "@ssr/common/logger";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { and, eq, sql } from "drizzle-orm";
@@ -12,6 +13,12 @@ import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerHmdService } from "../player/player-hmd.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import { MedalScoresService } from "./medal-scores.service";
+
+type InsertScoreDataOptions = {
+  insertBeatLeaderScore?: boolean;
+  insertPreviousScore?: boolean;
+  insertPlayerInfo?: boolean;
+};
 
 export class ScoreCoreService {
   /**
@@ -186,12 +193,18 @@ export class ScoreCoreService {
   public static async insertScoreData(
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
-    options?: {
-      insertBeatLeaderScore?: boolean;
-      insertPreviousScore?: boolean;
-      insertPlayerInfo?: boolean;
-    }
-  ) {
+    options?: InsertScoreDataOptions
+  ): Promise<ScoreSaberScore>;
+  public static async insertScoreData(
+    score: ScoreSaberMedalScore,
+    leaderboard: ScoreSaberLeaderboard,
+    options?: InsertScoreDataOptions
+  ): Promise<ScoreSaberMedalScore>;
+  public static async insertScoreData(
+    score: ScoreSaberScore | ScoreSaberMedalScore,
+    leaderboard: ScoreSaberLeaderboard,
+    options?: InsertScoreDataOptions
+  ): Promise<ScoreSaberScore | ScoreSaberMedalScore> {
     options = {
       insertBeatLeaderScore: true,
       insertPreviousScore: true,

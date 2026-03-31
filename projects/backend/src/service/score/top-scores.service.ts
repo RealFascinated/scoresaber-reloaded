@@ -17,11 +17,13 @@ export class TopScoresService {
    * @param page the page number
    * @returns the top scores with pagination metadata
    */
-  public static async getTopScores(page: number = 1): Promise<Page<PlayerScore>> {
+  public static async getTopScores(page: number = 1): Promise<Page<PlayerScore<ScoreSaberScore>>> {
     const limit = 25;
     const offset = (page - 1) * limit;
 
-    const pagination = new Pagination<PlayerScore>().setItemsPerPage(limit).setTotalItems(1000);
+    const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
+      .setItemsPerPage(limit)
+      .setTotalItems(1000);
 
     return pagination.getPage(page, async () => {
       const scoresRows = await db
@@ -64,7 +66,7 @@ export class TopScoresService {
         })
       );
 
-      return scores.filter(Boolean) as PlayerScore[];
+      return scores.filter(Boolean) as PlayerScore<ScoreSaberScore>[];
     });
   }
 

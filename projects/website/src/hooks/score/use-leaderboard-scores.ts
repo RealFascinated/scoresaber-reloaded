@@ -66,7 +66,7 @@ export const useLeaderboardScores = (
         }
         case ScoreModeEnum.History: {
           if (mainPlayer) {
-            const response = await ssrApi.fetchPlayerScoresHistory(
+            const response = await ssrApi.fetchPlayerScoreSaberScoresHistory(
               historyPlayerId,
               leaderboardId.toString(),
               page

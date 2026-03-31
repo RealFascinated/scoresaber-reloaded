@@ -27,8 +27,8 @@ export function FriendScores() {
   } = useQuery({
     queryKey: ["friend-scores", friendIds, page, mainPlayerId],
     queryFn: async () =>
-      ssrApi.fetchPlayerScores(mainPlayerId!, "ssr", page, "date", "desc", {
-        includePlayers: friendIds,
+      ssrApi.fetchPlayerScoreSaberScores(mainPlayerId!, page, "date", "desc", {
+        playerIds: friendIds,
       }),
     enabled: friendIds !== undefined && friendIds.length > 0 && mainPlayerId !== undefined,
     placeholderData: prev => prev,

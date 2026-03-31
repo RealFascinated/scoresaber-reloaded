@@ -144,12 +144,13 @@ export default function AccSaberPlayerScores({ player }: Props) {
   const buildUrl = useCallback(
     (pageNum: number) => {
       const params = new URLSearchParams();
+      params.set("platform", "accsaber");
       if (sort !== "date") params.set("sort", sort);
       if (type !== "overall") params.set("type", type);
       if (order !== "desc") params.set("order", order);
       if (pageNum !== 1) params.set("page", String(pageNum));
       const queryString = params.toString();
-      return `/player/${player.id}/accsaber${queryString ? `?${queryString}` : ""}`;
+      return `/player/${player.id}${queryString ? `?${queryString}` : ""}`;
     },
     [player.id, sort, type, order]
   );

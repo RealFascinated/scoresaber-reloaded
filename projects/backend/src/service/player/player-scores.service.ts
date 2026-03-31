@@ -13,13 +13,17 @@ import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { PlayerScoresChartResponse } from "@ssr/common/schemas/response/player/scores-chart";
 import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
+import { PlayerScoresQuery } from "@ssr/common/schemas/score/query/player-scores-query";
+import { ScoreSaberMedalScoreSortField } from "@ssr/common/schemas/score/query/sort/scoresaber-medal-scores-sort";
+import type { ScoreSaberScoreSortField } from "@ssr/common/schemas/score/query/sort/scoresaber-scores-sort";
+import type { SortDirection } from "@ssr/common/schemas/score/query/sort/sort-direction";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { ScoreQuery, SortDirection, SortField } from "@ssr/common/types/score-query";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/player-score";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/player-scores-page";
@@ -30,43 +34,20 @@ import { EmbedBuilder } from "discord.js";
 import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { db } from "../../db";
+import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
-import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
+import {
+  scoreSaberLeaderboardsTable,
+  scoreSaberMedalScoresTable,
+  scoreSaberScoresTable,
+} from "../../db/schema";
 import BeatLeaderService from "../beatleader.service";
 import BeatSaverService from "../beatsaver.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
+import { MedalScoresService } from "../score/medal-scores.service";
 import { ScoreCoreService } from "../score/score-core.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { PlayerCoreService } from "./player-core.service";
-
-function playerScoresOrderBy(
-  sort: SortField,
-  direction: SortDirection,
-  scores: typeof scoreSaberScoresTable,
-  leaderboards: typeof scoreSaberLeaderboardsTable
-) {
-  const sortOrder = direction === "asc" ? asc : desc;
-  switch (sort) {
-    case "pp":
-      return sortOrder(scores.pp);
-    case "score":
-      return sortOrder(scores.score);
-    case "acc":
-      return sortOrder(scores.accuracy);
-    case "misses":
-      return sortOrder(sql`${scores.missedNotes} + ${scores.badCuts}`);
-    case "maxcombo":
-      return sortOrder(scores.maxCombo);
-    case "date":
-      return sortOrder(scores.timestamp);
-    case "medals":
-      return sortOrder(sql`coalesce(${leaderboards.stars}, 0)`);
-    default: {
-      const _exhaustive: never = sort;
-      return _exhaustive;
-    }
-  }
-}
 
 export class PlayerScoresService {
   /**
@@ -339,7 +320,7 @@ export class PlayerScoresService {
    * @param scoreId the id of the score
    * @returns the score
    */
-  public static async getScore(scoreId: number): Promise<PlayerScore> {
+  public static async getScore(scoreId: number): Promise<PlayerScore<ScoreSaberScore>> {
     const [scoreResult] = await Promise.all([
       db
         .select()
@@ -412,10 +393,10 @@ export class PlayerScoresService {
     });
 
     if (!requestedPage) {
-      return Pagination.empty<PlayerScore>();
+      return Pagination.empty<PlayerScore<ScoreSaberScore>>();
     }
 
-    const pagination = new Pagination<PlayerScore>()
+    const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
       .setItemsPerPage(requestedPage.metadata.itemsPerPage)
       .setTotalItems(requestedPage.metadata.total);
 
@@ -443,14 +424,21 @@ export class PlayerScoresService {
           return { score: enrichedScore, leaderboard, beatSaver };
         })
       );
-      return scores.filter(Boolean) as PlayerScore[];
+      return scores.filter(Boolean) as PlayerScore<ScoreSaberScore>[];
     });
   }
 
   /**
-   * AccSaber player scores from GraphQL, enriched with BeatLeader score data when available (replay, hand acc, etc.).
+   * Gets the player's AccSaber scores.
+   *
+   * @param playerId the player's id
+   * @param pageNumber the page to get
+   * @param sort the sort to get
+   * @param order the order to get
+   * @param type the type to get
+   * @returns the player's AccSaber scores
    */
-  public static async getAccSaberEnrichedPlayerScores(
+  public static async getPlayerAccSaberScores(
     playerId: string,
     pageNumber: number,
     sort: AccSaberScoreSort,
@@ -476,7 +464,7 @@ export class PlayerScoresService {
           songScore
         );
 
-        return beatLeaderScore ? { ...row, beatLeaderScore } : { ...row };
+        return { ...row, beatLeaderScore };
       })
     );
 
@@ -489,32 +477,30 @@ export class PlayerScoresService {
   /**
    * Gets the player's scores.
    *
-   * @param mode the mode to get the scores for
    * @param playerId the player's id
    * @param page the page to get
    * @param sort the sort to get
    * @param direction the direction to get
-   * @param filters the filters to get
+   * @param query the filters to get
    * @returns the player's scores
    */
-  public static async getPlayerScores(
-    mode: "ssr" | "medals",
+  public static async getScoreSaberPlayerScores(
     playerId: string,
     page: number,
-    sort: SortField,
+    sort: ScoreSaberScoreSortField,
     direction: SortDirection,
-    filters: ScoreQuery
+    query: PlayerScoresQuery
   ) {
-    const leaderboardIds = await LeaderboardCoreService.searchLeaderboardIds(filters.search ?? "");
+    const leaderboardIds = await LeaderboardCoreService.searchLeaderboardIds(query.search ?? "");
     if (leaderboardIds == null) {
-      return new Pagination<PlayerScore>().setItemsPerPage(8).getPage(1, async () => []);
+      return new Pagination<PlayerScore<ScoreSaberScore>>().setItemsPerPage(8).getPage(1, async () => []);
     }
 
     const limit = 8;
     const offset = (page - 1) * limit;
 
     function buildConditions() {
-      const uniquePlayerIds = Array.from(new Set([playerId, ...(filters.includePlayers || [])]));
+      const uniquePlayerIds = Array.from(new Set([playerId, ...(query.playerIds || [])]));
       const conditions = [inArray(scoreSaberScoresTable.playerId, uniquePlayerIds)];
 
       if (sort === "acc") {
@@ -525,14 +511,12 @@ export class PlayerScoresService {
         conditions.push(inArray(scoreSaberScoresTable.leaderboardId, leaderboardIds));
       }
 
-      if (filters.hmd) {
-        conditions.push(eq(scoreSaberScoresTable.hmd, filters.hmd));
+      if (query.hmd) {
+        conditions.push(eq(scoreSaberScoresTable.hmd, query.hmd));
       }
 
       return conditions;
     }
-
-    // todo: handle medals mode
 
     const conditions = buildConditions();
 
@@ -541,14 +525,43 @@ export class PlayerScoresService {
       .from(scoreSaberScoresTable)
       .where(and(...conditions));
 
-    const pagination = new Pagination<PlayerScore>().setItemsPerPage(limit).setTotalItems(count);
+    const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
+      .setItemsPerPage(limit)
+      .setTotalItems(count);
 
     return pagination.getPage(page, async () => {
+      const sortOrder = direction === "asc" ? asc : desc;
+      let orderByColumn: Parameters<typeof sortOrder>[0];
+      switch (sort) {
+        case "pp":
+          orderByColumn = scoreSaberScoresTable.pp;
+          break;
+        case "acc":
+          orderByColumn = scoreSaberScoresTable.accuracy;
+          break;
+        case "score":
+          orderByColumn = scoreSaberScoresTable.score;
+          break;
+        case "misses":
+          orderByColumn = sql`${scoreSaberScoresTable.missedNotes} + ${scoreSaberScoresTable.badCuts}`;
+          break;
+        case "maxcombo":
+          orderByColumn = scoreSaberScoresTable.maxCombo;
+          break;
+        case "date":
+          orderByColumn = scoreSaberScoresTable.timestamp;
+          break;
+        default: {
+          const _exhaustive: never = sort;
+          return _exhaustive;
+        }
+      }
+
       const scoresRows = await db
         .select()
         .from(scoreSaberScoresTable)
         .where(and(...conditions))
-        .orderBy(playerScoresOrderBy(sort, direction, scoreSaberScoresTable, scoreSaberLeaderboardsTable))
+        .orderBy(sortOrder(orderByColumn))
         .limit(limit)
         .offset(offset);
 
@@ -576,7 +589,143 @@ export class PlayerScoresService {
           return { score: enrichedScore, leaderboard, beatSaver };
         })
       );
-      return scores.filter(Boolean) as PlayerScore[];
+      return scores.filter(Boolean) as PlayerScore<ScoreSaberScore>[];
+    });
+  }
+
+  /**
+   * Gets the player's scores.
+   *
+   * @param playerId the player's id
+   * @param page the page to get
+   * @param sort the sort to get
+   * @param direction the direction to get
+   * @param query the filters to get
+   * @returns the player's scores
+   */
+  public static async getScoreSaberPlayerMedalScores(
+    playerId: string,
+    page: number,
+    sort: ScoreSaberMedalScoreSortField,
+    direction: SortDirection,
+    query: PlayerScoresQuery
+  ) {
+    const leaderboardIds = await LeaderboardCoreService.searchLeaderboardIds(query.search ?? "");
+    if (leaderboardIds == null) {
+      return new Pagination<PlayerScore<ScoreSaberMedalScore>>()
+        .setItemsPerPage(8)
+        .getPage(1, async () => []);
+    }
+
+    const limit = 8;
+    const offset = (page - 1) * limit;
+
+    function buildConditions() {
+      const uniquePlayerIds = Array.from(new Set([playerId, ...(query.playerIds || [])]));
+      const conditions = [inArray(scoreSaberMedalScoresTable.playerId, uniquePlayerIds)];
+
+      if (sort === "acc") {
+        conditions.push(
+          isNotNull(scoreSaberMedalScoresTable.accuracy),
+          gte(scoreSaberMedalScoresTable.accuracy, 0)
+        );
+      }
+
+      if (leaderboardIds && leaderboardIds.length > 0) {
+        conditions.push(inArray(scoreSaberMedalScoresTable.leaderboardId, leaderboardIds));
+      }
+
+      if (query.hmd) {
+        conditions.push(eq(scoreSaberMedalScoresTable.hmd, query.hmd));
+      }
+
+      return conditions;
+    }
+
+    // todo: handle medals mode
+
+    const conditions = buildConditions();
+
+    const [{ count }] = await db
+      .select({ count: sql<number>`cast(count(*) as integer)` })
+      .from(scoreSaberMedalScoresTable)
+      .where(and(...conditions));
+
+    const pagination = new Pagination<PlayerScore<ScoreSaberMedalScore>>()
+      .setItemsPerPage(limit)
+      .setTotalItems(count);
+
+    return pagination.getPage(page, async () => {
+      const sortOrder = direction === "asc" ? asc : desc;
+      let orderByColumn: Parameters<typeof sortOrder>[0];
+      switch (sort) {
+        case "medals":
+          orderByColumn = scoreSaberMedalScoresTable.medals;
+          break;
+        case "acc":
+          orderByColumn = scoreSaberMedalScoresTable.accuracy;
+          break;
+        case "score":
+          orderByColumn = scoreSaberMedalScoresTable.score;
+          break;
+        case "misses":
+          orderByColumn = sql`${scoreSaberMedalScoresTable.missedNotes} + ${scoreSaberMedalScoresTable.badCuts}`;
+          break;
+        case "maxcombo":
+          orderByColumn = scoreSaberMedalScoresTable.maxCombo;
+          break;
+        case "date":
+          orderByColumn = scoreSaberMedalScoresTable.timestamp;
+          break;
+        default: {
+          const _exhaustive: never = sort;
+          return _exhaustive;
+        }
+      }
+
+      const scoresRows = await db
+        .select()
+        .from(scoreSaberMedalScoresTable)
+        .where(and(...conditions))
+        .orderBy(sortOrder(orderByColumn))
+        .limit(limit)
+        .offset(offset);
+
+      if (!scoresRows.length) {
+        return [];
+      }
+
+      const [rankByScoreId, leaderboards] = await Promise.all([
+        MedalScoresService.getMedalTableScoreRanksForScores(
+          scoresRows.map(r => ({ scoreId: r.scoreId, leaderboardId: r.leaderboardId }))
+        ),
+        LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(
+          scoresRows.map(scoreRow => scoreRow.leaderboardId)
+        ),
+      ]);
+
+      const scores = await Promise.all(
+        scoresRows.map(async scoreRow => {
+          const leaderboard = leaderboards.get(scoreRow.leaderboardId);
+          if (!leaderboard) {
+            return undefined;
+          }
+          const medalScore: ScoreSaberMedalScore = {
+            ...scoreSaberMedalScoreRowToType(scoreRow),
+            rank: rankByScoreId.get(scoreRow.scoreId) ?? 0,
+          };
+          const [enrichedScore, beatSaver] = await Promise.all([
+            ScoreCoreService.insertScoreData(medalScore, leaderboard),
+            BeatSaverService.getMap(
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic
+            ),
+          ]);
+          return { score: enrichedScore, leaderboard, beatSaver };
+        })
+      );
+      return scores.filter(Boolean) as PlayerScore<ScoreSaberMedalScore>[];
     });
   }
 
