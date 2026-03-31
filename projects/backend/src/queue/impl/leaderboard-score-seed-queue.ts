@@ -32,7 +32,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
     const firstPage = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1);
     if (firstPage && totalTrackedScores >= firstPage.metadata.total) {
-      Logger.warn(`Skipping leaderboard "${leaderboardId}" because it already has all scores tracked`);
+      // Logger.warn(`Skipping leaderboard "${leaderboardId}" because it already has all scores tracked`);
       await this.markLeaderboardSeeded(leaderboardId);
       return;
     }
