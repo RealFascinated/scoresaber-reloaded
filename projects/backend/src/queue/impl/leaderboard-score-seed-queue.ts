@@ -1,7 +1,7 @@
 import Logger from "@ssr/common/logger";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberLeaderboardsTable } from "../../db/schema";
 import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
@@ -96,7 +96,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         .select({ id: scoreSaberLeaderboardsTable.id })
         .from(scoreSaberLeaderboardsTable)
         .where(eq(scoreSaberLeaderboardsTable.seededScores, false))
-        .orderBy(desc(scoreSaberLeaderboardsTable.ranked), asc(scoreSaberLeaderboardsTable.plays))
+        .orderBy(asc(scoreSaberLeaderboardsTable.plays))
         .limit(100);
 
       const leaderboardIds = leaderboards.map(l => l.id);
