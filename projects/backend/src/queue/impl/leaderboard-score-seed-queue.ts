@@ -50,8 +50,8 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       if (!response) {
         Logger.warn(`Failed to fetch scores for leaderboard "${leaderboardId}" on page ${page}`);
         consecutiveFailures++;
-        if (consecutiveFailures >= 5) {
-          Logger.warn(`Aborting leaderboard "${leaderboardId}" after 5 consecutive page failures`);
+        if (consecutiveFailures >= 2) {
+          Logger.warn(`Aborting leaderboard "${leaderboardId}" after 2 consecutive page failures`);
           break;
         }
         continue;
