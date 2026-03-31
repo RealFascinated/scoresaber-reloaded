@@ -4,6 +4,7 @@ import { MEDAL_COUNTS } from "@ssr/common/medal";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
@@ -11,10 +12,7 @@ import { isProduction } from "@ssr/common/utils/utils";
 import { desc, eq, inArray } from "drizzle-orm";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { db } from "../../db";
-import {
-  scoreSaberMedalScoreRowToScoreSaberScore,
-  scoreSaberScoreToMedalScoreInsert,
-} from "../../db/converter/medal-score";
+import { scoreSaberMedalScoreRowToType, scoreSaberScoreToMedalScore } from "../../db/converter/medal-score";
 import {
   ScoreSaberMedalScoreRow,
   scoreSaberAccountsTable,
@@ -30,7 +28,37 @@ type MedalScoresQueueItem = {
 };
 
 function sortMedalRowsByLeaderboardOrder(rows: ScoreSaberMedalScoreRow[]): ScoreSaberMedalScoreRow[] {
-  return [...rows].sort((a, b) => b.score - a.score || b.id - a.id);
+  return [...rows].sort((a, b) => b.score - a.score || b.scoreId - a.scoreId);
+}
+
+function medalScoreInsert(score: ScoreSaberScore | ScoreSaberMedalScore): typeof scoreSaberMedalScoresTable.$inferInsert {
+  const modifiers = score.modifiers.map(modifier => modifier.toString());
+
+  const medals =
+    "medals" in score && typeof score.medals === "number"
+      ? score.medals
+      : MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS];
+
+  return {
+    scoreId: score.scoreId,
+    playerId: score.playerId,
+    leaderboardId: score.leaderboardId,
+    difficulty: score.difficulty,
+    characteristic: score.characteristic,
+    score: score.score,
+    accuracy: score.accuracy,
+    medals,
+    missedNotes: score.missedNotes,
+    badCuts: score.badCuts,
+    maxCombo: score.maxCombo,
+    fullCombo: score.fullCombo,
+    modifiers: modifiers.length > 0 ? modifiers : null,
+    hmd: score.hmd ?? "Unknown",
+    rightController: score.rightController,
+    leftController: score.leftController,
+    timestamp: score.timestamp,
+  }
+
 }
 
 export class MedalScoresService {
@@ -113,7 +141,7 @@ export class MedalScoresService {
 
     const existingTop10 = sortMedalRowsByLeaderboardOrder(existingRows).slice(0, 10);
     const existingComparable = existingTop10.map((row, index) => ({
-      scoreId: row.id,
+      scoreId: row.scoreId,
       playerId: row.playerId,
       rank: index + 1,
     }));
@@ -157,14 +185,14 @@ export class MedalScoresService {
     scores: ScoreSaberScoreToken[],
     leaderboard: ScoreSaberLeaderboard
   ): Promise<void> {
-    const rows = [];
+    const rows: typeof scoreSaberMedalScoresTable.$inferInsert[] = [];
     for (const token of scores) {
       if (token.rank > 10) {
         continue;
       }
-      const ssScore = getScoreSaberScoreFromToken(token, leaderboard, token.leaderboardPlayerInfo.id);
+      const score = getScoreSaberScoreFromToken(token, leaderboard, token.leaderboardPlayerInfo.id);
       rows.push(
-        scoreSaberScoreToMedalScoreInsert(ssScore, MEDAL_COUNTS[token.rank as keyof typeof MEDAL_COUNTS])
+        medalScoreInsert(score)
       );
     }
     if (rows.length === 0) {
@@ -220,7 +248,7 @@ export class MedalScoresService {
         .select()
         .from(scoreSaberMedalScoresTable)
         .where(eq(scoreSaberMedalScoresTable.leaderboardId, score.leaderboardId))
-        .orderBy(desc(scoreSaberMedalScoresTable.score), desc(scoreSaberMedalScoresTable.id));
+        .orderBy(desc(scoreSaberMedalScoresTable.score), desc(scoreSaberMedalScoresTable.scoreId));
 
       const oldScoreMedals = new Map<string, number>();
       for (const row of existingRows) {
@@ -228,18 +256,19 @@ export class MedalScoresService {
         oldScoreMedals.set(row.playerId, current + row.medals);
       }
 
-      const allScores: Array<ScoreSaberScore & { medals: number }> = existingRows.map(row => ({
-        ...scoreSaberMedalScoreRowToScoreSaberScore(row),
-        medals: row.medals,
-      }));
+      const allScores: Array<ScoreSaberMedalScore> = existingRows.map(row => scoreSaberMedalScoreRowToType(row));
 
       const existingScoreIndex = allScores.findIndex(
         s => s.playerId === score.playerId && s.leaderboardId === score.leaderboardId
       );
       if (existingScoreIndex >= 0) {
-        allScores[existingScoreIndex] = { ...score, medals: 0 };
+        allScores[existingScoreIndex] = {
+          ...scoreSaberMedalScoreRowToType(existingRows[existingScoreIndex]),
+          ...scoreSaberScoreToMedalScore(score),
+          medals: 0,
+        };
       } else {
-        allScores.push({ ...score, medals: 0 });
+        allScores.push(scoreSaberScoreToMedalScore(score));
       }
 
       allScores.sort((a, b) => b.score - a.score || b.scoreId - a.scoreId);
@@ -265,7 +294,7 @@ export class MedalScoresService {
         if (top10Scores.length > 0) {
           await tx
             .insert(scoreSaberMedalScoresTable)
-            .values(top10Scores.map(s => scoreSaberScoreToMedalScoreInsert(s, s.medals)));
+            .values(top10Scores.map(s => medalScoreInsert(s)));
         }
       });
 

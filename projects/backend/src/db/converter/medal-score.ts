@@ -3,7 +3,7 @@ import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { normalizeModifiers } from "@ssr/common/score/modifier";
-import { ScoreSaberMedalScoreRow, scoreSaberMedalScoresTable } from "../schema";
+import { ScoreSaberMedalScoreRow } from "../schema";
 
 /**
  * Converts a ScoreSaberMedalScoreRow to a ScoreSaberMedalScore.
@@ -18,7 +18,7 @@ export function scoreSaberMedalScoreRowToType(row: ScoreSaberMedalScoreRow): Sco
   return {
     playerId: row.playerId,
     leaderboardId: row.leaderboardId,
-    scoreId: row.id,
+    scoreId: row.scoreId,
     difficulty: MapDifficultySchema.parse(row.difficulty, { reportInput: true }),
     characteristic: MapCharacteristicSchema.parse(row.characteristic, { reportInput: true }),
     score: row.score,
@@ -40,63 +40,32 @@ export function scoreSaberMedalScoreRowToType(row: ScoreSaberMedalScoreRow): Sco
 }
 
 /**
- * Maps a medal score row to {@link ScoreSaberScore} for in-memory medal recomputation (merge with live scores).
+ * Converts a live {@link ScoreSaberScore} into a {@link ScoreSaberMedalScore} for in-memory medal
+ * recomputation (medals/rank are set by the caller).
  */
-export function scoreSaberMedalScoreRowToScoreSaberScore(row: ScoreSaberMedalScoreRow): ScoreSaberScore {
+export function scoreSaberScoreToMedalScore(score: ScoreSaberScore): ScoreSaberMedalScore {
   return {
-    playerId: row.playerId,
-    leaderboardId: row.leaderboardId,
-    scoreId: row.id,
-    difficulty: MapDifficultySchema.parse(row.difficulty, { reportInput: true }),
-    characteristic: MapCharacteristicSchema.parse(row.characteristic, { reportInput: true }),
-    score: row.score,
-    accuracy: row.accuracy,
-    pp: 0,
-    weight: 0,
-    rank: 0,
-    misses: row.missedNotes + row.badCuts,
-    missedNotes: row.missedNotes,
-    badCuts: row.badCuts,
-    maxCombo: row.maxCombo,
-    fullCombo: row.fullCombo,
-    modifiers: normalizeModifiers(row.modifiers ?? []),
-    playerInfo: {
-      id: row.playerId,
-    },
-    hmd: row.hmd ?? null,
-    rightController: row.rightController ?? null,
-    leftController: row.leftController ?? null,
-    timestamp: row.timestamp,
-  };
-}
-
-export type ScoreSaberMedalScoreInsert = typeof scoreSaberMedalScoresTable.$inferInsert;
-
-/**
- * Builds a Drizzle insert row for `scoresaber-medal-scores` from a score and medal count.
- */
-export function scoreSaberScoreToMedalScoreInsert(
-  score: ScoreSaberScore,
-  medals: number
-): ScoreSaberMedalScoreInsert {
-  const modifiers = score.modifiers.map(modifier => modifier.toString());
-  return {
-    id: score.scoreId,
     playerId: score.playerId,
     leaderboardId: score.leaderboardId,
-    difficulty: score.difficulty,
-    characteristic: score.characteristic,
+    scoreId: score.scoreId,
+    difficulty: MapDifficultySchema.parse(String(score.difficulty), { reportInput: true }),
+    characteristic: MapCharacteristicSchema.parse(String(score.characteristic), { reportInput: true }),
     score: score.score,
     accuracy: score.accuracy,
-    medals,
+    medals: 0,
+    rank: score.rank,
+    misses: score.missedNotes + score.badCuts,
     missedNotes: score.missedNotes,
     badCuts: score.badCuts,
     maxCombo: score.maxCombo,
     fullCombo: score.fullCombo,
-    modifiers: modifiers.length > 0 ? modifiers : null,
-    hmd: score.hmd,
+    modifiers: normalizeModifiers(score.modifiers),
+    hmd: score.hmd ?? null,
     rightController: score.rightController,
     leftController: score.leftController,
+    playerInfo: score.playerInfo ?? null,
+    beatLeaderScore: score.beatLeaderScore,
+    previousScore: score.previousScore,
     timestamp: score.timestamp,
   };
 }

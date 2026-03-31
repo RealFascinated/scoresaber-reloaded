@@ -8,15 +8,6 @@ import { db } from "../../db";
 import { scoreSaberAccountsTable, scoreSaberMedalScoresTable } from "../../db/schema";
 import ScoreSaberService from "../scoresaber.service";
 
-function buildMedalRankingWhere(country?: string) {
-  return and(
-    gt(scoreSaberAccountsTable.medals, 0),
-    isNotNull(scoreSaberAccountsTable.country),
-    ne(scoreSaberAccountsTable.country, ""),
-    country ? eq(scoreSaberAccountsTable.country, country) : undefined
-  );
-}
-
 /**
  * Gets medal ranks for a list of player IDs.
  *
@@ -46,9 +37,9 @@ async function getMedalRanksForIds(
     )
     SELECT id, rank::int AS rank FROM ranked
     WHERE id IN (${sql.join(
-      playerIds.map(id => sql`${id}`),
-      sql`, `
-    )})
+    playerIds.map(id => sql`${id}`),
+    sql`, `
+  )})
   `);
 
   const rows = (result as unknown as { rows: { id: string; rank: number }[] }).rows ?? [];
@@ -74,19 +65,11 @@ export class PlayerMedalsService {
       medalCountRows.map(row => [row.playerId, Number(row.totalMedals ?? 0)])
     );
 
-    // Reset players who no longer have medals, upsert the rest
     await db.transaction(async tx => {
       await tx
         .update(scoreSaberAccountsTable)
         .set({ medals: 0 })
-        .where(
-          and(
-            gt(scoreSaberAccountsTable.medals, 0),
-            playerMedalCounts.size > 0
-              ? inArray(scoreSaberAccountsTable.id, [...playerMedalCounts.keys()])
-              : undefined
-          )
-        );
+        .where(gt(scoreSaberAccountsTable.medals, 0));
 
       for (const [playerId, medalCount] of playerMedalCounts) {
         await tx
@@ -126,20 +109,22 @@ export class PlayerMedalsService {
       totalMedals: Number(row.totalMedals ?? 0),
     }));
 
+    const totalsByPlayer = new Map(normalized.map(({ playerId, totalMedals }) => [playerId, totalMedals]));
+
     await db.transaction(async tx => {
-      for (const { playerId, totalMedals } of normalized) {
+      for (const playerId of playerIds) {
         await tx
           .update(scoreSaberAccountsTable)
-          .set({ medals: totalMedals })
+          .set({ medals: totalsByPlayer.get(playerId) ?? 0 })
           .where(eq(scoreSaberAccountsTable.id, playerId));
       }
     });
 
     Logger.info(
-      `[PLAYER MEDALS] Updated ${normalized.length} player medal counts in ${formatDuration(performance.now() - before)}`
+      `[PLAYER MEDALS] Updated ${playerIds.length} player medal counts in ${formatDuration(performance.now() - before)}`
     );
 
-    return Object.fromEntries(normalized.map(({ playerId, totalMedals }) => [playerId, totalMedals]));
+    return Object.fromEntries(playerIds.map(id => [id, totalsByPlayer.get(id) ?? 0]));
   }
 
   /**
@@ -168,7 +153,12 @@ export class PlayerMedalsService {
     page: number,
     country?: string
   ): Promise<PlayerMedalRankingsResponse> {
-    const baseWhere = buildMedalRankingWhere(country);
+    const baseWhere = sql`
+      AND medals > 0
+      AND country IS NOT NULL
+      AND country != ''
+      ${country ? sql`AND country = ${country}` : sql``}
+    `;
     const itemsPerPage = 50;
 
     const [{ totalPlayers }, countryMetadataRows] = await Promise.all([

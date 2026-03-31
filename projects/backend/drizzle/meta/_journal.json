@@ -78,6 +78,13 @@
       "when": 1774981196082,
       "tag": "0010_add-seeded-scores=false-index",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1774992742862,
+      "tag": "0011_rename-medal-score-id-column",
+      "breakpoints": true
     }
   ]
 }

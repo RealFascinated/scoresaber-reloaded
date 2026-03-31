@@ -186,7 +186,7 @@ export const scoreSaberMedalScoresTable = pgTable(
   "scoresaber-medal-scores",
   {
     // Identifiers
-    id: integer().primaryKey(),
+    scoreId: integer().primaryKey(),
     playerId: varchar({ length: 32 }).notNull(),
     leaderboardId: integer().notNull(),
 
@@ -212,7 +212,7 @@ export const scoreSaberMedalScoresTable = pgTable(
     timestamp: timestamp().notNull(),
   },
   table => [
-    index("medal_scores_leaderboard_score_idx").on(table.leaderboardId, table.score.desc(), table.id.desc()),
+    index("medal_scores_leaderboard_score_idx").on(table.leaderboardId, table.score.desc(), table.scoreId.desc()),
   ]
 );
 

@@ -56,7 +56,7 @@ try {
   Logger.info("Database migrations are up to date.");
 } catch (error) {
   Logger.error("Database migration failed:", error);
-  // process.exit(1);
+  process.exit(1);
 }
 
 new EventsManager();

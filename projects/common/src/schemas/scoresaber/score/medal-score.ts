@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { HMD } from "../../../hmds";
 import { ModifiersSchema } from "../../../score/modifier";
 import { BeatLeaderScoreSchema } from "../../beatleader/score/score";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
@@ -30,7 +31,7 @@ export const ScoreSaberMedalScoreSchema = z.object({
   modifiers: ModifiersSchema,
 
   // Headset information
-  hmd: z.string().nullable(),
+  hmd: z.string().transform(v => v as HMD).nullable(),
   rightController: z.string().nullable(),
   leftController: z.string().nullable(),
 
