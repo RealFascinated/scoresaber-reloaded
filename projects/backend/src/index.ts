@@ -186,7 +186,6 @@ export const app = new Elysia()
       Logger.error("Internal server error:", error);
     }
 
-    const shouldExposeMessage = !isProduction();
     const errorMessage =
       typeof error === "object" && error !== null && "message" in error
         ? (error as { message?: unknown }).message
@@ -194,9 +193,7 @@ export const app = new Elysia()
 
     return {
       ...((status && { statusCode: status }) || { status: code }),
-      ...(shouldExposeMessage &&
-        errorMessage != code &&
-        typeof errorMessage === "string" && { message: errorMessage }),
+      ...(errorMessage != code && typeof errorMessage === "string" && { message: errorMessage }),
       timestamp: new Date().toISOString(),
     };
   })

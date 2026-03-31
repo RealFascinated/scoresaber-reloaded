@@ -6,7 +6,10 @@ export const ScoreSaberAccountSchema = z.object({
   id: z.string(),
   name: z.string(),
   avatar: z.string(),
-  country: z.string(),
+  country: z
+    .string()
+    .nullable()
+    .transform(value => value ?? "Unknown"),
   peakRank: ScoreSaberPeakRankSchema.optional(),
   seededScores: z.boolean().optional(),
   seededBeatLeaderScores: z.boolean().optional(),
