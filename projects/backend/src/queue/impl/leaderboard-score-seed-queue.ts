@@ -15,7 +15,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     super(QueueId.LeaderboardScoreSeedQueue, "lifo");
 
     setImmediate(() => this.insertLeaderboards());
-    setInterval(() => this.insertLeaderboards(), TimeUnit.toMillis(TimeUnit.Minute, 1));
+    setInterval(() => this.insertLeaderboards(), TimeUnit.toMillis(TimeUnit.Second, 10));
   }
 
   protected async processItem(item: QueueItem<number>): Promise<void> {
@@ -110,7 +110,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         .from(scoreSaberLeaderboardsTable)
         .where(eq(scoreSaberLeaderboardsTable.seededScores, false))
         .orderBy(asc(scoreSaberLeaderboardsTable.plays))
-        .limit(100);
+        .limit(500);
 
       const leaderboardIds = leaderboards.map(l => l.id);
       if (leaderboardIds.length === 0) {
