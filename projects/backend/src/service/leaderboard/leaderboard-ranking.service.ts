@@ -1,11 +1,10 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger from "@ssr/common/logger";
-import { PlaylistSong } from "@ssr/common/playlist/playlist-song";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { formatDate, formatDuration } from "@ssr/common/utils/time-utils";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
@@ -18,7 +17,6 @@ import {
   scoreSaberScoresTable,
 } from "../../db/schema";
 import CacheService from "../cache.service";
-import PlaylistService, { PLAYLIST_NAMES } from "../playlist/playlist.service";
 import { MedalScoresService } from "../score/medal-scores.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
@@ -273,33 +271,6 @@ export class LeaderboardRankingService {
       }
     }
 
-    const playlistSongs: Map<string, PlaylistSong> = new Map();
-    for (const leaderboard of leaderboards) {
-      if (!leaderboard.ranked) {
-        continue;
-      }
-
-      const song = playlistSongs.get(leaderboard.songHash);
-      if (!song) {
-        playlistSongs.set(leaderboard.songHash, {
-          songName: leaderboard.songName,
-          songAuthor: leaderboard.songAuthorName,
-          songHash: leaderboard.songHash,
-          difficulties: [
-            {
-              difficulty: leaderboard.difficulty.difficulty,
-              characteristic: leaderboard.difficulty.characteristic,
-            },
-          ],
-        });
-        continue;
-      }
-      song.difficulties.push({
-        difficulty: leaderboard.difficulty.difficulty,
-        characteristic: leaderboard.difficulty.characteristic,
-      });
-    }
-
     if (leaderboardsToUpsert.length > 0) {
       Logger.info(`[RANKED UPDATES] Updating ${leaderboardsToUpsert.length} leaderboards...`);
 
@@ -324,12 +295,6 @@ export class LeaderboardRankingService {
           .setColor("#00ff00")
       );
     }
-
-    await PlaylistService.updatePlaylist("scoresaber-ranked-maps", {
-      title: `${PLAYLIST_NAMES["scoresaber-ranked-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
-      songs: Array.from(playlistSongs.values()),
-    });
-    Logger.info(`[RANKED UPDATES] Updated ranked playlist!`);
     return updatedLeaderboards;
   }
 
@@ -390,20 +355,6 @@ export class LeaderboardRankingService {
           .setColor("#00ff00")
       );
     }
-
-    await PlaylistService.updatePlaylist("scoresaber-qualified-maps", {
-      title: `${PLAYLIST_NAMES["scoresaber-qualified-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
-      songs: leaderboards.map(leaderboard => ({
-        songName: leaderboard.songName,
-        songAuthor: leaderboard.songAuthorName,
-        songHash: leaderboard.songHash,
-        difficulties: leaderboard.difficulties.map(difficulty => ({
-          difficulty: difficulty.difficulty,
-          characteristic: difficulty.characteristic,
-        })),
-      })),
-    });
-    Logger.info(`[RANKED UPDATES] Updated qualified playlist!`);
   }
 
   /**
