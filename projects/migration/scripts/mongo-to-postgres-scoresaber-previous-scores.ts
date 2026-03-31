@@ -52,7 +52,7 @@ function truncateVarchar128(s: string): string {
 }
 
 /**
- * ScoreSaber score id for PG `scoreId` (references the superseded score, same as `"scoresaber-scores".id`).
+ * ScoreSaber score id for PG `scoreId` (references the superseded score, same as `"scoresaber-scores"."scoreId"`).
  * Prefer `scoreId` over `_id`: previous-scores uses a separate auto-increment for `_id` (tracker `previous-scores`),
  * so `_id` is not the ScoreSaber id.
  */

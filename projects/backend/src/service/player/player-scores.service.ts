@@ -349,7 +349,7 @@ export class PlayerScoresService {
           scoreSaberLeaderboardsTable,
           eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
         )
-        .where(eq(scoreSaberScoresTable.id, scoreId))
+        .where(eq(scoreSaberScoresTable.scoreId, scoreId))
         .limit(1),
     ]);
 

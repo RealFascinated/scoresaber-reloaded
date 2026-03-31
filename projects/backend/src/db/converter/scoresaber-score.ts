@@ -13,15 +13,10 @@ import { ScoreSaberScoreHistoryRow, ScoreSaberScoreRow } from "../schema";
 export function scoreSaberScoreRowToType(
   row: ScoreSaberScoreRow | ScoreSaberScoreHistoryRow
 ): ScoreSaberScore {
-  const scoreId =
-    "scoreId" in row && (row as ScoreSaberScoreHistoryRow).scoreId != null
-      ? (row as ScoreSaberScoreHistoryRow).scoreId
-      : row.id;
-
   return {
     playerId: row.playerId,
     leaderboardId: row.leaderboardId,
-    scoreId,
+    scoreId: row.scoreId,
     difficulty: MapDifficultySchema.parse(row.difficulty, { reportInput: true }),
     characteristic: MapCharacteristicSchema.parse(row.characteristic, { reportInput: true }),
     score: row.score,

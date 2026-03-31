@@ -17,12 +17,9 @@ import { ScoreCoreService } from "../score/score-core.service";
 const scoreCols = getTableColumns(scoreSaberScoresTable);
 const histCols = getTableColumns(scoreSaberScoreHistoryTable);
 
-/** History row projected to match {@link scoreSaberScoresTable} (`scoreId` → `id`) for UNION + {@link scoreSaberScoreRowToType}. */
+/** History row projected to the same column names as {@link scoreSaberScoresTable} for UNION + {@link scoreSaberScoreRowToType}. */
 const histAsScoreCols = Object.fromEntries(
-  Object.keys(scoreCols).map(name => [
-    name,
-    name === "id" ? histCols.scoreId : histCols[name as keyof typeof histCols],
-  ])
+  Object.keys(scoreCols).map(name => [name, histCols[name as keyof typeof histCols]])
 ) as unknown as typeof scoreCols;
 
 /** Shared filters + full-row UNION for this player/map (only exported helper in this file besides the service). */

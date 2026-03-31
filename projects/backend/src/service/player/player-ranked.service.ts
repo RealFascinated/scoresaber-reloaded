@@ -19,7 +19,7 @@ export class PlayerRankedService {
     const playerScores = await db
       .select({
         pp: scoreSaberScoresTable.pp,
-        scoreId: scoreSaberScoresTable.id,
+        scoreId: scoreSaberScoresTable.scoreId,
       })
       .from(scoreSaberScoresTable)
       .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)))

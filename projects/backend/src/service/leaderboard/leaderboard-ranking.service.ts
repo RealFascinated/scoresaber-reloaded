@@ -145,14 +145,14 @@ export class LeaderboardRankingService {
       const scoreIds = scoreOps.map(s => s.scoreId);
       const existingRows = await db
         .select({
-          scoreId: scoreSaberScoresTable.id,
+          scoreId: scoreSaberScoresTable.scoreId,
           score: scoreSaberScoresTable.score,
           pp: scoreSaberScoresTable.pp,
         })
         .from(scoreSaberScoresTable)
         .where(
           and(
-            inArray(scoreSaberScoresTable.id, scoreIds),
+            inArray(scoreSaberScoresTable.scoreId, scoreIds),
             eq(scoreSaberScoresTable.leaderboardId, leaderboard.id)
           )
         );
@@ -176,7 +176,7 @@ export class LeaderboardRankingService {
         const rows = batch.map(score => {
           const modifiers = score.modifiers.map(m => m.toString());
           return {
-            id: score.scoreId,
+            scoreId: score.scoreId,
             playerId: score.playerId,
             leaderboardId: score.leaderboardId,
             difficulty: score.difficulty,
@@ -196,7 +196,7 @@ export class LeaderboardRankingService {
           };
         });
         await db.insert(scoreSaberScoresTable).values(rows).onConflictDoUpdate({
-          target: scoreSaberScoresTable.id,
+          target: scoreSaberScoresTable.scoreId,
           set: scoreUpsertSet,
         });
         upserted += batch.length;

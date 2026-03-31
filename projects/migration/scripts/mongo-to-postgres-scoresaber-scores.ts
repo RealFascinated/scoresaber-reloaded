@@ -138,7 +138,7 @@ function mongoScoreSaberDocToRow(
   const c = doc.controllers;
 
   return {
-    id,
+    scoreId: id,
     playerId: playerIdRaw,
     leaderboardId,
     difficulty: difficulty as MapDifficulty,
@@ -158,7 +158,7 @@ function mongoScoreSaberDocToRow(
   };
 }
 
-const scoreSaberUpsertSet: Record<Exclude<keyof ScoreSaberScoreRow, "id">, ReturnType<typeof sql>> = {
+const scoreSaberUpsertSet: Record<Exclude<keyof ScoreSaberScoreRow, "scoreId">, ReturnType<typeof sql>> = {
   playerId: sql`excluded."playerId"`,
   leaderboardId: sql`excluded."leaderboardId"`,
   difficulty: sql`excluded."difficulty"`,
@@ -203,7 +203,7 @@ async function flushBatch(rows: (typeof scoreSaberScoresTable.$inferInsert)[]): 
     return;
   }
   await db.insert(scoreSaberScoresTable).values(rows).onConflictDoUpdate({
-    target: scoreSaberScoresTable.id,
+    target: scoreSaberScoresTable.scoreId,
     set: scoreSaberUpsertSet,
   });
 }

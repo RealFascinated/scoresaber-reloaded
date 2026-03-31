@@ -43,7 +43,7 @@ export class ScoreCoreService {
     const scoreExists = await db
       .select()
       .from(scoreSaberScoresTable)
-      .where(and(eq(scoreSaberScoresTable.id, score.scoreId), eq(scoreSaberScoresTable.score, score.score)))
+      .where(and(eq(scoreSaberScoresTable.scoreId, score.scoreId), eq(scoreSaberScoresTable.score, score.score)))
       .limit(1);
     if (scoreExists.length > 0) {
       return { score: undefined, hasPreviousScore: false, tracked: false };
@@ -68,7 +68,7 @@ export class ScoreCoreService {
       await db.insert(scoreSaberScoreHistoryTable).values({
         playerId: player.id,
         leaderboardId: leaderboard.id,
-        scoreId: previous.id,
+        scoreId: previous.scoreId,
         difficulty: previous.difficulty,
         characteristic: previous.characteristic,
         score: previous.score,
@@ -86,7 +86,7 @@ export class ScoreCoreService {
       });
 
       // Delete from current
-      await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.id, previous.id));
+      await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.scoreId, previous.scoreId));
     }
 
     await PlayerHmdService.updatePlayerHmd(player.id, score);
@@ -104,7 +104,7 @@ export class ScoreCoreService {
     const inserted = await db
       .insert(scoreSaberScoresTable)
       .values({
-        id: score.scoreId,
+        scoreId: score.scoreId,
         playerId: player.id,
         leaderboardId: leaderboard.id,
         difficulty: score.difficulty,
@@ -122,8 +122,8 @@ export class ScoreCoreService {
         leftController: score.leftController,
         timestamp: score.timestamp,
       })
-      .onConflictDoNothing({ target: scoreSaberScoresTable.id })
-      .returning({ id: scoreSaberScoresTable.id });
+      .onConflictDoNothing({ target: scoreSaberScoresTable.scoreId })
+      .returning({ scoreId: scoreSaberScoresTable.scoreId });
 
     if (inserted.length === 0) {
       Logger.warn(`Score insert skipped for scoreId "%s" (conflict)`, score.scoreId);
@@ -158,9 +158,9 @@ export class ScoreCoreService {
     return (
       (
         await db
-          .select({ scoreId: scoreSaberScoresTable.id })
+          .select({ scoreId: scoreSaberScoresTable.scoreId })
           .from(scoreSaberScoresTable)
-          .where(eq(scoreSaberScoresTable.id, scoreId))
+          .where(eq(scoreSaberScoresTable.scoreId, scoreId))
           .limit(1)
       ).length > 0
     );
