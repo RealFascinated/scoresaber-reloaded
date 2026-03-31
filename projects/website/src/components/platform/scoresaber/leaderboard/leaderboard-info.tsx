@@ -112,7 +112,6 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
               <SimpleTooltip
                 display={formatDate(leaderboard.leaderboard.rankedDate, "Do MMMM, YYYY HH:mm a")}
               >
-                rankedDate
                 {formatDate(
                   leaderboard.leaderboard.rankedDate
                     ? leaderboard.leaderboard.rankedDate
