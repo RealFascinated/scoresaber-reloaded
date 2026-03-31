@@ -2,6 +2,8 @@ import WebSocket from "ws";
 import Logger from "../logger";
 
 const RECONNECT_DELAY_MS = 5000;
+const HEARTBEAT_INTERVAL_MS = 30000;
+const HEARTBEAT_TIMEOUT_MS = 10000;
 
 /** Optional details when a socket `error` event fired before `close` on the same connection. */
 export type WebsocketDisconnectContext = {
@@ -49,6 +51,8 @@ function formatCloseReason(reason: unknown): string {
  */
 export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websocket) {
   let reconnectTimer: NodeJS.Timeout | undefined;
+  let heartbeatInterval: NodeJS.Timeout | undefined;
+  let heartbeatTimeout: NodeJS.Timeout | undefined;
 
   function connectWs() {
     let precedingSocketError: Error | undefined;
@@ -60,6 +64,14 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
       }
 
       reconnectScheduled = true;
+      if (heartbeatInterval) {
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = undefined;
+      }
+      if (heartbeatTimeout) {
+        clearTimeout(heartbeatTimeout);
+        heartbeatTimeout = undefined;
+      }
       if (reconnectTimer) {
         clearTimeout(reconnectTimer);
       }
@@ -68,10 +80,48 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
 
     const websocket = new WebSocket(url);
 
+    const clearHeartbeatTimeout = () => {
+      if (heartbeatTimeout) {
+        clearTimeout(heartbeatTimeout);
+        heartbeatTimeout = undefined;
+      }
+    };
+
+    const armHeartbeatTimeout = () => {
+      clearHeartbeatTimeout();
+      heartbeatTimeout = setTimeout(() => {
+        if (websocket.readyState === WebSocket.OPEN) {
+          Logger.warn(
+            `WebSocket heartbeat timeout (${name}). Terminating stale connection to trigger reconnect...`
+          );
+          websocket.terminate();
+        }
+      }, HEARTBEAT_TIMEOUT_MS);
+    };
+
     websocket.onopen = () => {
       precedingSocketError = undefined;
       Logger.info(`Connected to the ${name} WebSocket!`);
+
+      // Actively probe socket liveness so silent/stale "open" sockets self-heal.
+      heartbeatInterval = setInterval(() => {
+        if (websocket.readyState !== WebSocket.OPEN) {
+          return;
+        }
+
+        try {
+          armHeartbeatTimeout();
+          websocket.ping();
+        } catch (error) {
+          Logger.warn(`Failed to ping ${name} WebSocket, reconnecting...`, error);
+          websocket.terminate();
+        }
+      }, HEARTBEAT_INTERVAL_MS);
     };
+
+    websocket.on("pong", () => {
+      clearHeartbeatTimeout();
+    });
 
     websocket.onerror = event => {
       const raw = event.error;
@@ -107,6 +157,7 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
     };
 
     websocket.onmessage = messageEvent => {
+      clearHeartbeatTimeout();
       if (typeof messageEvent.data !== "string") return;
 
       try {
