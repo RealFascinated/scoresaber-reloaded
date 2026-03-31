@@ -134,15 +134,28 @@ export class ScoreCoreService {
         leftController: score.leftController,
         timestamp: score.timestamp,
       })
-      .onConflictDoNothing({ target: scoreSaberScoresTable.scoreId })
+      .onConflictDoUpdate({
+        target: scoreSaberScoresTable.scoreId, set: {
+          scoreId: score.scoreId,
+          playerId: playerId,
+          leaderboardId: leaderboard.id,
+          difficulty: score.difficulty,
+          characteristic: score.characteristic,
+          score: score.score,
+          accuracy: score.accuracy,
+          pp: score.pp,
+          missedNotes: score.missedNotes,
+          badCuts: score.badCuts,
+          maxCombo: score.maxCombo,
+          fullCombo: score.fullCombo,
+          modifiers: modifiers.length > 0 ? modifiers : null,
+          hmd: score.hmd,
+          rightController: score.rightController,
+          leftController: score.leftController,
+          timestamp: score.timestamp,
+        }
+      })
       .returning({ scoreId: scoreSaberScoresTable.scoreId });
-
-    if (inserted.length === 0) {
-      Logger.warn(`Score insert skipped for scoreId "%s" (conflict)`, score.scoreId);
-      return { score: undefined, hasPreviousScore: false, tracked: false };
-    }
-
-    // todo: update player hmd, handle medal updates, update player score stats
 
     if (newScore) {
       Logger.info(
