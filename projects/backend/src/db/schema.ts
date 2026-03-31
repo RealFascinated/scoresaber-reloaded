@@ -174,6 +174,11 @@ export const scoreSaberScoreHistoryTable = pgTable(
       table.leaderboardId,
       table.timestamp.desc()
     ),
+    uniqueIndex("scoresaber_score_history_leaderboard_player_score_unique").on(
+      table.leaderboardId,
+      table.playerId,
+      table.score
+    ),
   ]
 );
 

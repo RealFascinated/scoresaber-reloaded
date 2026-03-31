@@ -211,11 +211,23 @@ function parseLeaderboardIdFilter(argv: string[]): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-async function flushBatch(rows: (typeof scoreSaberScoreHistoryTable.$inferInsert)[]): Promise<void> {
+async function flushBatch(rows: (typeof scoreSaberScoreHistoryTable.$inferInsert)[]): Promise<number> {
   if (rows.length === 0) {
-    return;
+    return 0;
   }
-  await db.insert(scoreSaberScoreHistoryTable).values(rows);
+  const insertedRows = await db
+    .insert(scoreSaberScoreHistoryTable)
+    .values(rows)
+    .onConflictDoNothing({
+      target: [
+        scoreSaberScoreHistoryTable.leaderboardId,
+        scoreSaberScoreHistoryTable.playerId,
+        scoreSaberScoreHistoryTable.score,
+      ],
+    })
+    .returning({ id: scoreSaberScoreHistoryTable.id });
+
+  return insertedRows.length;
 }
 
 async function main() {
@@ -248,8 +260,7 @@ async function main() {
     }
     const chunk = batch.splice(0, batch.length);
     try {
-      await flushBatch(chunk);
-      inserted += chunk.length;
+      inserted += await flushBatch(chunk);
     } catch (e) {
       errors += chunk.length;
       Logger.error(

@@ -12,9 +12,9 @@
  *   bun run scripts/create-missing-scoresaber-leaderboards.ts --search=Camellia
  *   bun run scripts/create-missing-scoresaber-leaderboards.ts --limit=500 --max-pages=20
  */
-import "dotenv/config";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
+import "dotenv/config";
 import { db } from "../src/db";
 import { scoreSaberLeaderboardsTable } from "../src/db/schema";
 import { LeaderboardCoreService } from "../src/service/leaderboard/leaderboard-core.service";

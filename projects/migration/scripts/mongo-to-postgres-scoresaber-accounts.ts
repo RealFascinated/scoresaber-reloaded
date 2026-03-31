@@ -200,7 +200,9 @@ async function main() {
       upserted += chunk.length;
     } catch (e) {
       errors += chunk.length;
-      Logger.error(`[mongo-to-postgres] scoresaber-accounts batch failed (${chunk.length} rows): ${shortMigrationError(e)}`);
+      Logger.error(
+        `[mongo-to-postgres] scoresaber-accounts batch failed (${chunk.length} rows): ${shortMigrationError(e)}`
+      );
     }
   }
 

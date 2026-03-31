@@ -64,6 +64,13 @@
       "when": 1775000000000,
       "tag": "0008_rename_scoresaber_scores_id_to_scoreid",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1775100000000,
+      "tag": "0009_scoresaber_score_history_leaderboard_player_score_unique",
+      "breakpoints": true
     }
   ]
 }

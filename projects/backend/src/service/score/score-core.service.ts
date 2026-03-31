@@ -39,54 +39,68 @@ export class ScoreCoreService {
   }> {
     const before = performance.now();
 
-    // Ensure the score is not already tracked (same scoreId and score)
-    const scoreExists = await db
-      .select()
-      .from(scoreSaberScoresTable)
-      .where(and(eq(scoreSaberScoresTable.scoreId, score.scoreId), eq(scoreSaberScoresTable.score, score.score)))
-      .limit(1);
-    if (scoreExists.length > 0) {
-      return { score: undefined, hasPreviousScore: false, tracked: false };
-    }
-
-    const existingScore = await db
-      .select()
-      .from(scoreSaberScoresTable)
-      .where(
-        and(
-          eq(scoreSaberScoresTable.playerId, player.id),
-          eq(scoreSaberScoresTable.leaderboardId, leaderboard.id)
+    let isImprovement = false;
+    if (newScore) {
+      // Ensure the score is not already tracked (same scoreId and score)
+      const scoreExists = await db
+        .select()
+        .from(scoreSaberScoresTable)
+        .where(
+          and(eq(scoreSaberScoresTable.scoreId, score.scoreId), eq(scoreSaberScoresTable.score, score.score))
         )
-      )
-      .limit(1);
+        .limit(1);
+      if (scoreExists.length > 0) {
+        return { score: undefined, hasPreviousScore: false, tracked: false };
+      }
 
-    const isImprovement = existingScore.length > 0;
-    if (isImprovement) {
-      const previous = existingScore[0];
+      const existingScore = await db
+        .select()
+        .from(scoreSaberScoresTable)
+        .where(
+          and(
+            eq(scoreSaberScoresTable.playerId, player.id),
+            eq(scoreSaberScoresTable.leaderboardId, leaderboard.id)
+          )
+        )
+        .limit(1);
 
-      // Move old score to history (snapshot the row being replaced, not the incoming score)
-      await db.insert(scoreSaberScoreHistoryTable).values({
-        playerId: player.id,
-        leaderboardId: leaderboard.id,
-        scoreId: previous.scoreId,
-        difficulty: previous.difficulty,
-        characteristic: previous.characteristic,
-        score: previous.score,
-        accuracy: previous.accuracy,
-        pp: previous.pp,
-        missedNotes: previous.missedNotes,
-        badCuts: previous.badCuts,
-        maxCombo: previous.maxCombo,
-        fullCombo: previous.fullCombo,
-        modifiers: previous.modifiers?.length ? previous.modifiers : null,
-        hmd: previous.hmd,
-        rightController: previous.rightController,
-        leftController: previous.leftController,
-        timestamp: previous.timestamp,
-      });
+      isImprovement = existingScore.length > 0;
+      if (isImprovement) {
+        const previous = existingScore[0];
 
-      // Delete from current
-      await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.scoreId, previous.scoreId));
+        // Move old score to history (snapshot the row being replaced, not the incoming score)
+        await db
+          .insert(scoreSaberScoreHistoryTable)
+          .values({
+            playerId: player.id,
+            leaderboardId: leaderboard.id,
+            scoreId: previous.scoreId,
+            difficulty: previous.difficulty,
+            characteristic: previous.characteristic,
+            score: previous.score,
+            accuracy: previous.accuracy,
+            pp: previous.pp,
+            missedNotes: previous.missedNotes,
+            badCuts: previous.badCuts,
+            maxCombo: previous.maxCombo,
+            fullCombo: previous.fullCombo,
+            modifiers: previous.modifiers?.length ? previous.modifiers : null,
+            hmd: previous.hmd,
+            rightController: previous.rightController,
+            leftController: previous.leftController,
+            timestamp: previous.timestamp,
+          })
+          .onConflictDoNothing({
+            target: [
+              scoreSaberScoreHistoryTable.leaderboardId,
+              scoreSaberScoreHistoryTable.playerId,
+              scoreSaberScoreHistoryTable.score,
+            ],
+          });
+
+        // Delete from current
+        await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.scoreId, previous.scoreId));
+      }
     }
 
     await PlayerHmdService.updatePlayerHmd(player.id, score);
