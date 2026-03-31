@@ -77,6 +77,11 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           newScoresTracked++;
         })
       );
+
+      if (page === totalPages) {
+        scrape = false;
+      }
+      page++;
     }
 
     if (seededAnyScore) {
