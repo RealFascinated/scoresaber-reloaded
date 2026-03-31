@@ -1,9 +1,9 @@
 import Logger from "@ssr/common/logger";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { asc, eq } from "drizzle-orm";
+import { asc, count, eq } from "drizzle-orm";
 import { db } from "../../db";
-import { scoreSaberLeaderboardsTable } from "../../db/schema";
+import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
 import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
 import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
@@ -20,7 +20,22 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
   protected async processItem(item: QueueItem<number>): Promise<void> {
     const leaderboardId = Number(item.id);
+
     const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
+    const totalTrackedScores =
+      (
+        await db
+          .select({ count: count() })
+          .from(scoreSaberScoresTable)
+          .where(eq(scoreSaberScoresTable.leaderboardId, leaderboardId))
+      )[0]?.count ?? 0;
+
+    const firstPage = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1);
+    if (firstPage && totalTrackedScores >= firstPage.metadata.total) {
+      Logger.warn(`Skipping leaderboard "${leaderboardId}" because it already has all scores tracked`);
+      await this.markLeaderboardSeeded(leaderboardId);
+      return;
+    }
 
     let consecutiveFailures = 0;
     let newScoresTracked = 0;
@@ -28,7 +43,10 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     let page = 1;
 
     while (scrape) {
-      const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page);
+      const response =
+        page === 1 && firstPage
+          ? firstPage
+          : await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page);
       if (!response) {
         Logger.warn(`Failed to fetch scores for leaderboard "${leaderboardId}" on page ${page}`);
         consecutiveFailures++;
