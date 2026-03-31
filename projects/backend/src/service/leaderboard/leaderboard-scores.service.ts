@@ -45,6 +45,8 @@ export class LeaderboardScoresService {
           }
           return ScoreCoreService.insertScoreData(score, leaderboard, {
             insertBeatLeaderScore: true,
+            insertPlayerInfo: true,
+            insertPreviousScore: false,
           });
         })
       )
