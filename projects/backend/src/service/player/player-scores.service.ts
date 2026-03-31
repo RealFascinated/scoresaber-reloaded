@@ -1,6 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
@@ -31,7 +32,7 @@ import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-di
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
-import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-orm";
+import { type AnyColumn, SQL, and, asc, count, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { db } from "../../db";
 import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
@@ -48,6 +49,29 @@ import { MedalScoresService } from "../score/medal-scores.service";
 import { ScoreCoreService } from "../score/score-core.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { PlayerCoreService } from "./player-core.service";
+
+/**
+ * Describes how to paginate and enrich a specific score table.
+ */
+type ScoreTableConfig<TRow, TScore> = {
+  /** Selects all rows matching the given conditions, ordered and paginated. */
+  fetchRows: (conditions: SQL[], orderBy: SQL, limit: number, offset: number) => Promise<TRow[]>;
+  /** Counts rows matching the given conditions. */
+  countRows: (conditions: SQL[]) => Promise<number>;
+  /** Builds the WHERE conditions for this query. */
+  buildConditions: (
+    playerIds: string[],
+    sort: string,
+    leaderboardIds: number[] | null,
+    hmd?: HMD
+  ) => SQL[];
+  /** Maps a sort field name to a column or SQL expression for `asc()` / `desc()`. */
+  resolveOrderColumn: (sort: string) => AnyColumn | SQL;
+  /** Converts a raw DB row + leaderboard into the enriched PlayerScore shape. */
+  enrichRow: (row: TRow, leaderboard: ScoreSaberLeaderboard) => Promise<PlayerScore<TScore> | undefined>;
+  /** Leaderboard ID accessor for a given row. */
+  getLeaderboardId: (row: TRow) => number;
+};
 
 export class PlayerScoresService {
   /**
@@ -104,12 +128,6 @@ export class PlayerScoresService {
       timeTaken: 0,
     };
 
-    /**
-     * Gets a page of scores for a player.
-     *
-     * @param page the page to get
-     * @returns the scores page
-     */
     async function getScoresPage(page: number): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
       return ScoreSaberApiService.lookupPlayerScores({
         playerId: playerId,
@@ -120,12 +138,6 @@ export class PlayerScoresService {
       });
     }
 
-    /**
-     * Parse a score token into a score and leaderboard.
-     *
-     * @param scoreToken the score token to process
-     * @returns the score and leaderboard
-     */
     function parseScoreToken(scoreToken: ScoreSaberPlayerScoreToken): {
       score: ScoreSaberScore | undefined;
       leaderboard: ScoreSaberLeaderboard | undefined;
@@ -140,12 +152,6 @@ export class PlayerScoresService {
       return { score: undefined, leaderboard: undefined };
     }
 
-    /**
-     * Handles desynced score count. This will delete the player's scores and re-seed them.
-     *
-     * @param scoresPage the scores page
-     * @param playerScoresCount the current count of player scores in the database
-     */
     async function handleDesyncedScoreCount(
       scoresPage: ScoreSaberPlayerScoresPageToken,
       playerScoresCount: number
@@ -163,7 +169,6 @@ export class PlayerScoresService {
       account.seededScores = false;
       await PlayerCoreService.updatePlayer(playerId, { seededScores: false });
 
-      // Notify
       sendEmbedToChannel(
         DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
         new EmbedBuilder()
@@ -188,12 +193,6 @@ export class PlayerScoresService {
       );
     }
 
-    /**
-     * Processes a page of scores.
-     *
-     * @param page the page to process
-     * @returns whether the page has more scores to process
-     */
     async function processPage(
       currentPage: number,
       scoresPage: ScoreSaberPlayerScoresPageToken
@@ -216,12 +215,10 @@ export class PlayerScoresService {
         }
       }
 
-      // We've found all the scores we need
       if (result.totalScores >= scoresPage.metadata.total) {
         return false;
       }
 
-      // No more pages to fetch
       return currentPage < Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage);
     }
 
@@ -234,7 +231,6 @@ export class PlayerScoresService {
         continue;
       }
 
-      // Only check for desynced score count on the first page
       if (currentPage === 1) {
         const shouldDeleteScores = playerScoresCount > scoresPage.metadata.total;
         if (shouldDeleteScores) {
@@ -249,7 +245,6 @@ export class PlayerScoresService {
       currentPage++;
     }
 
-    // Mark player as seeded
     if (!account.seededScores) {
       await PlayerCoreService.updatePlayer(account.id, { seededScores: true });
     }
@@ -283,7 +278,6 @@ export class PlayerScoresService {
         timestamp: scoreSaberScoresTable.timestamp,
         leaderboardId: scoreSaberLeaderboardsTable.id,
         difficulty: scoreSaberLeaderboardsTable.difficulty,
-
         songName: scoreSaberLeaderboardsTable.songName,
         stars: scoreSaberLeaderboardsTable.stars,
       })
@@ -296,9 +290,7 @@ export class PlayerScoresService {
       .orderBy(desc(scoreSaberScoresTable.timestamp));
 
     if (!rows.length) {
-      return {
-        data: [],
-      };
+      return { data: [] };
     }
 
     return {
@@ -371,12 +363,7 @@ export class PlayerScoresService {
   }
 
   /**
-   * Looks up player scores.
-   *
-   * @param playerId the player id
-   * @param pageNumber the page to get
-   * @param sort the sort to get
-   * @param search the search to get
+   * Looks up player scores from the live ScoreSaber API.
    */
   public static async getScoreSaberLivePlayerScores(
     playerId: string,
@@ -384,7 +371,6 @@ export class PlayerScoresService {
     sort: string,
     search?: string
   ): Promise<PlayerScoresPageResponse> {
-    // Get the requested page directly
     const requestedPage = await ScoreSaberApiService.lookupPlayerScores({
       playerId,
       page: pageNumber,
@@ -430,13 +416,6 @@ export class PlayerScoresService {
 
   /**
    * Gets the player's AccSaber scores.
-   *
-   * @param playerId the player's id
-   * @param pageNumber the page to get
-   * @param sort the sort to get
-   * @param order the order to get
-   * @param type the type to get
-   * @returns the player's AccSaber scores
    */
   public static async getPlayerAccSaberScores(
     playerId: string,
@@ -468,21 +447,62 @@ export class PlayerScoresService {
       })
     );
 
-    return {
-      items,
-      metadata: requested.metadata,
-    };
+    return { items, metadata: requested.metadata };
   }
 
   /**
-   * Gets the player's scores.
+   * Shared pagination engine for player score tables.
    *
-   * @param playerId the player's id
-   * @param page the page to get
-   * @param sort the sort to get
-   * @param direction the direction to get
-   * @param query the filters to get
-   * @returns the player's scores
+   * Handles count, pagination, sort direction, row fetching, and per-row enrichment,
+   * delegating all table-specific concerns to the provided config.
+   */
+  private static async getPaginatedPlayerScores<TRow, TScore>(
+    playerId: string,
+    page: number,
+    sort: string,
+    direction: SortDirection,
+    query: PlayerScoresQuery,
+    config: ScoreTableConfig<TRow, TScore>
+  ): Promise<Page<PlayerScore<TScore>>> {
+    const leaderboardIds = await LeaderboardCoreService.searchLeaderboardIds(query.search ?? "");
+    if (leaderboardIds == null) {
+      return Pagination.empty<PlayerScore<TScore>>();
+    }
+
+    const limit = 8;
+    const offset = (page - 1) * limit;
+    const uniquePlayerIds = Array.from(new Set([playerId, ...(query.playerIds || [])]));
+    const conditions = config.buildConditions(uniquePlayerIds, sort, leaderboardIds, query.hmd);
+
+    const total = await config.countRows(conditions);
+
+    const pagination = new Pagination<PlayerScore<TScore>>().setItemsPerPage(limit).setTotalItems(total);
+
+    return pagination.getPage(page, async () => {
+      const sortOrder = direction === "asc" ? asc : desc;
+      const orderByColumn = config.resolveOrderColumn(sort);
+      const rows = await config.fetchRows(conditions, sortOrder(orderByColumn), limit, offset);
+
+      if (!rows.length) return [];
+
+      const leaderboards = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(
+        rows.map(config.getLeaderboardId)
+      );
+
+      const scores = await Promise.all(
+        rows.map(async row => {
+          const leaderboard = leaderboards.get(config.getLeaderboardId(row));
+          if (!leaderboard) return undefined;
+          return config.enrichRow(row, leaderboard);
+        })
+      );
+
+      return scores.filter(Boolean) as PlayerScore<TScore>[];
+    });
+  }
+
+  /**
+   * Gets the player's ScoreSaber scores from the database.
    */
   public static async getScoreSaberPlayerScores(
     playerId: string,
@@ -491,117 +511,80 @@ export class PlayerScoresService {
     direction: SortDirection,
     query: PlayerScoresQuery
   ) {
-    const leaderboardIds = await LeaderboardCoreService.searchLeaderboardIds(query.search ?? "");
-    if (leaderboardIds == null) {
-      return new Pagination<PlayerScore<ScoreSaberScore>>().setItemsPerPage(8).getPage(1, async () => []);
-    }
+    return PlayerScoresService.getPaginatedPlayerScores(playerId, page, sort, direction, query, {
+      buildConditions(playerIds, sort, leaderboardIds, hmd) {
+        const conditions: SQL[] = [inArray(scoreSaberScoresTable.playerId, playerIds)];
 
-    const limit = 8;
-    const offset = (page - 1) * limit;
-
-    function buildConditions() {
-      const uniquePlayerIds = Array.from(new Set([playerId, ...(query.playerIds || [])]));
-      const conditions = [inArray(scoreSaberScoresTable.playerId, uniquePlayerIds)];
-
-      if (sort === "acc") {
-        conditions.push(isNotNull(scoreSaberScoresTable.accuracy), gte(scoreSaberScoresTable.accuracy, 0));
-      }
-
-      if (leaderboardIds && leaderboardIds.length > 0) {
-        conditions.push(inArray(scoreSaberScoresTable.leaderboardId, leaderboardIds));
-      }
-
-      if (query.hmd) {
-        conditions.push(eq(scoreSaberScoresTable.hmd, query.hmd));
-      }
-
-      return conditions;
-    }
-
-    const conditions = buildConditions();
-
-    const [{ count }] = await db
-      .select({ count: sql<number>`cast(count(*) as integer)` })
-      .from(scoreSaberScoresTable)
-      .where(and(...conditions));
-
-    const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
-      .setItemsPerPage(limit)
-      .setTotalItems(count);
-
-    return pagination.getPage(page, async () => {
-      const sortOrder = direction === "asc" ? asc : desc;
-      let orderByColumn: Parameters<typeof sortOrder>[0];
-      switch (sort) {
-        case "pp":
-          orderByColumn = scoreSaberScoresTable.pp;
-          break;
-        case "acc":
-          orderByColumn = scoreSaberScoresTable.accuracy;
-          break;
-        case "score":
-          orderByColumn = scoreSaberScoresTable.score;
-          break;
-        case "misses":
-          orderByColumn = sql`${scoreSaberScoresTable.missedNotes} + ${scoreSaberScoresTable.badCuts}`;
-          break;
-        case "maxcombo":
-          orderByColumn = scoreSaberScoresTable.maxCombo;
-          break;
-        case "date":
-          orderByColumn = scoreSaberScoresTable.timestamp;
-          break;
-        default: {
-          const _exhaustive: never = sort;
-          return _exhaustive;
+        if (sort === "acc") {
+          conditions.push(isNotNull(scoreSaberScoresTable.accuracy), gte(scoreSaberScoresTable.accuracy, 0));
         }
-      }
+        if (leaderboardIds && leaderboardIds.length > 0) {
+          conditions.push(inArray(scoreSaberScoresTable.leaderboardId, leaderboardIds));
+        }
+        if (hmd) {
+          conditions.push(eq(scoreSaberScoresTable.hmd, hmd));
+        }
 
-      const scoresRows = await db
-        .select()
-        .from(scoreSaberScoresTable)
-        .where(and(...conditions))
-        .orderBy(sortOrder(orderByColumn))
-        .limit(limit)
-        .offset(offset);
+        return conditions;
+      },
 
-      if (!scoresRows.length) {
-        return [];
-      }
+      async countRows(conditions) {
+        const [{ count }] = await db
+          .select({ count: sql<number>`cast(count(*) as integer)` })
+          .from(scoreSaberScoresTable)
+          .where(and(...conditions));
+        return count;
+      },
 
-      const leaderboards = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(
-        scoresRows.map(scoreRow => scoreRow.leaderboardId)
-      );
-      const scores = await Promise.all(
-        scoresRows.map(async scoreRow => {
-          const leaderboard = leaderboards.get(scoreRow.leaderboardId);
-          if (!leaderboard) {
-            return undefined;
+      resolveOrderColumn(sort) {
+        switch (sort as ScoreSaberScoreSortField) {
+          case "pp":
+            return scoreSaberScoresTable.pp;
+          case "acc":
+            return scoreSaberScoresTable.accuracy;
+          case "score":
+            return scoreSaberScoresTable.score;
+          case "misses":
+            return sql`${scoreSaberScoresTable.missedNotes} + ${scoreSaberScoresTable.badCuts}`;
+          case "maxcombo":
+            return scoreSaberScoresTable.maxCombo;
+          case "date":
+            return scoreSaberScoresTable.timestamp;
+          default: {
+            const _exhaustive: never = sort as never;
+            return _exhaustive;
           }
-          const [enrichedScore, beatSaver] = await Promise.all([
-            ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(scoreRow), leaderboard),
-            BeatSaverService.getMap(
-              leaderboard.songHash,
-              leaderboard.difficulty.difficulty,
-              leaderboard.difficulty.characteristic
-            ),
-          ]);
-          return { score: enrichedScore, leaderboard, beatSaver };
-        })
-      );
-      return scores.filter(Boolean) as PlayerScore<ScoreSaberScore>[];
+        }
+      },
+
+      async fetchRows(conditions, orderBy, limit, offset) {
+        return db
+          .select()
+          .from(scoreSaberScoresTable)
+          .where(and(...conditions))
+          .orderBy(orderBy)
+          .limit(limit)
+          .offset(offset);
+      },
+
+      getLeaderboardId: row => row.leaderboardId,
+
+      async enrichRow(row, leaderboard) {
+        const [enrichedScore, beatSaver] = await Promise.all([
+          ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(row), leaderboard),
+          BeatSaverService.getMap(
+            leaderboard.songHash,
+            leaderboard.difficulty.difficulty,
+            leaderboard.difficulty.characteristic
+          ),
+        ]);
+        return { score: enrichedScore, leaderboard, beatSaver };
+      },
     });
   }
 
   /**
-   * Gets the player's scores.
-   *
-   * @param playerId the player's id
-   * @param page the page to get
-   * @param sort the sort to get
-   * @param direction the direction to get
-   * @param query the filters to get
-   * @returns the player's scores
+   * Gets the player's ScoreSaber medal scores from the database.
    */
   public static async getScoreSaberPlayerMedalScores(
     playerId: string,
@@ -610,122 +593,89 @@ export class PlayerScoresService {
     direction: SortDirection,
     query: PlayerScoresQuery
   ) {
-    const leaderboardIds = await LeaderboardCoreService.searchLeaderboardIds(query.search ?? "");
-    if (leaderboardIds == null) {
-      return new Pagination<PlayerScore<ScoreSaberMedalScore>>()
-        .setItemsPerPage(8)
-        .getPage(1, async () => []);
-    }
+    return PlayerScoresService.getPaginatedPlayerScores(playerId, page, sort, direction, query, {
+      buildConditions(playerIds, sort, leaderboardIds, hmd) {
+        const conditions: SQL[] = [inArray(scoreSaberMedalScoresTable.playerId, playerIds)];
 
-    const limit = 8;
-    const offset = (page - 1) * limit;
-
-    function buildConditions() {
-      const uniquePlayerIds = Array.from(new Set([playerId, ...(query.playerIds || [])]));
-      const conditions = [inArray(scoreSaberMedalScoresTable.playerId, uniquePlayerIds)];
-
-      if (sort === "acc") {
-        conditions.push(
-          isNotNull(scoreSaberMedalScoresTable.accuracy),
-          gte(scoreSaberMedalScoresTable.accuracy, 0)
-        );
-      }
-
-      if (leaderboardIds && leaderboardIds.length > 0) {
-        conditions.push(inArray(scoreSaberMedalScoresTable.leaderboardId, leaderboardIds));
-      }
-
-      if (query.hmd) {
-        conditions.push(eq(scoreSaberMedalScoresTable.hmd, query.hmd));
-      }
-
-      return conditions;
-    }
-
-    // todo: handle medals mode
-
-    const conditions = buildConditions();
-
-    const [{ count }] = await db
-      .select({ count: sql<number>`cast(count(*) as integer)` })
-      .from(scoreSaberMedalScoresTable)
-      .where(and(...conditions));
-
-    const pagination = new Pagination<PlayerScore<ScoreSaberMedalScore>>()
-      .setItemsPerPage(limit)
-      .setTotalItems(count);
-
-    return pagination.getPage(page, async () => {
-      const sortOrder = direction === "asc" ? asc : desc;
-      let orderByColumn: Parameters<typeof sortOrder>[0];
-      switch (sort) {
-        case "medals":
-          orderByColumn = scoreSaberMedalScoresTable.medals;
-          break;
-        case "acc":
-          orderByColumn = scoreSaberMedalScoresTable.accuracy;
-          break;
-        case "score":
-          orderByColumn = scoreSaberMedalScoresTable.score;
-          break;
-        case "misses":
-          orderByColumn = sql`${scoreSaberMedalScoresTable.missedNotes} + ${scoreSaberMedalScoresTable.badCuts}`;
-          break;
-        case "maxcombo":
-          orderByColumn = scoreSaberMedalScoresTable.maxCombo;
-          break;
-        case "date":
-          orderByColumn = scoreSaberMedalScoresTable.timestamp;
-          break;
-        default: {
-          const _exhaustive: never = sort;
-          return _exhaustive;
+        if (sort === "acc") {
+          conditions.push(
+            isNotNull(scoreSaberMedalScoresTable.accuracy),
+            gte(scoreSaberMedalScoresTable.accuracy, 0)
+          );
         }
-      }
+        if (leaderboardIds && leaderboardIds.length > 0) {
+          conditions.push(inArray(scoreSaberMedalScoresTable.leaderboardId, leaderboardIds));
+        }
+        if (hmd) {
+          conditions.push(eq(scoreSaberMedalScoresTable.hmd, hmd));
+        }
 
-      const scoresRows = await db
-        .select()
-        .from(scoreSaberMedalScoresTable)
-        .where(and(...conditions))
-        .orderBy(sortOrder(orderByColumn))
-        .limit(limit)
-        .offset(offset);
+        return conditions;
+      },
 
-      if (!scoresRows.length) {
-        return [];
-      }
+      async countRows(conditions) {
+        const [{ count }] = await db
+          .select({ count: sql<number>`cast(count(*) as integer)` })
+          .from(scoreSaberMedalScoresTable)
+          .where(and(...conditions));
+        return count;
+      },
 
-      const [rankByScoreId, leaderboards] = await Promise.all([
-        MedalScoresService.getMedalTableScoreRanksForScores(
-          scoresRows.map(r => ({ scoreId: r.scoreId, leaderboardId: r.leaderboardId }))
-        ),
-        LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(
-          scoresRows.map(scoreRow => scoreRow.leaderboardId)
-        ),
-      ]);
-
-      const scores = await Promise.all(
-        scoresRows.map(async scoreRow => {
-          const leaderboard = leaderboards.get(scoreRow.leaderboardId);
-          if (!leaderboard) {
-            return undefined;
+      resolveOrderColumn(sort) {
+        switch (sort as ScoreSaberMedalScoreSortField) {
+          case "medals":
+            return scoreSaberMedalScoresTable.medals;
+          case "acc":
+            return scoreSaberMedalScoresTable.accuracy;
+          case "score":
+            return scoreSaberMedalScoresTable.score;
+          case "misses":
+            return sql`${scoreSaberMedalScoresTable.missedNotes} + ${scoreSaberMedalScoresTable.badCuts}`;
+          case "maxcombo":
+            return scoreSaberMedalScoresTable.maxCombo;
+          case "date":
+            return scoreSaberMedalScoresTable.timestamp;
+          default: {
+            const _exhaustive: never = sort as never;
+            return _exhaustive;
           }
-          const medalScore: ScoreSaberMedalScore = {
-            ...scoreSaberMedalScoreRowToType(scoreRow),
-            rank: rankByScoreId.get(scoreRow.scoreId) ?? 0,
-          };
-          const [enrichedScore, beatSaver] = await Promise.all([
-            ScoreCoreService.insertScoreData(medalScore, leaderboard),
-            BeatSaverService.getMap(
-              leaderboard.songHash,
-              leaderboard.difficulty.difficulty,
-              leaderboard.difficulty.characteristic
-            ),
-          ]);
-          return { score: enrichedScore, leaderboard, beatSaver };
-        })
-      );
-      return scores.filter(Boolean) as PlayerScore<ScoreSaberMedalScore>[];
+        }
+      },
+
+      async fetchRows(conditions, orderBy, limit, offset) {
+        return db
+          .select()
+          .from(scoreSaberMedalScoresTable)
+          .where(and(...conditions))
+          .orderBy(orderBy)
+          .limit(limit)
+          .offset(offset);
+      },
+
+      getLeaderboardId: row => row.leaderboardId,
+
+      async enrichRow(row, leaderboard) {
+        const [rankByScoreId] = await Promise.all([
+          MedalScoresService.getMedalTableScoreRanksForScores([
+            { scoreId: row.scoreId, leaderboardId: row.leaderboardId },
+          ]),
+        ]);
+
+        const medalScore: ScoreSaberMedalScore = {
+          ...scoreSaberMedalScoreRowToType(row),
+          rank: rankByScoreId.get(row.scoreId) ?? 0,
+        };
+
+        const [enrichedScore, beatSaver] = await Promise.all([
+          ScoreCoreService.insertScoreData(medalScore, leaderboard),
+          BeatSaverService.getMap(
+            leaderboard.songHash,
+            leaderboard.difficulty.difficulty,
+            leaderboard.difficulty.characteristic
+          ),
+        ]);
+        return { score: enrichedScore, leaderboard, beatSaver };
+      },
     });
   }
 
