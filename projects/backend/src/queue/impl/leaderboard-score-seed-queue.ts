@@ -58,6 +58,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           const scoreExists = await ScoreCoreService.scoreExists(score.scoreId);
           if (scoreExists) {
             processedAnyScores = true;
+            return;
           }
 
           await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false);
