@@ -140,6 +140,7 @@ export class PlayerScoreHistoryService {
             missedNotes: score.missedNotes - previousScore.missedNotes,
             badCuts: score.badCuts - previousScore.badCuts,
             maxCombo: score.maxCombo - previousScore.maxCombo,
+            pp: score.pp - previousScore.pp,
           },
         } as ScoreSaberHistoryScore;
       }
