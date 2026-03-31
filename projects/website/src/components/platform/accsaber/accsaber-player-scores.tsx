@@ -9,7 +9,7 @@ import type {
   AccSaberScoreSort,
   AccSaberScoreType,
 } from "@ssr/common/schemas/accsaber/tokens/query/query";
-import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
+import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -91,11 +91,11 @@ export default function AccSaberPlayerScores({ player }: Props) {
     isError,
     isLoading,
     isRefetching,
-  } = useQuery<Page<EnrichedAccSaberScore>>({
+  } = useQuery<Page<AccSaberScore>>({
     queryKey: ["playerScores:accsaber", player.id, page, type, sort, order],
     queryFn: async () =>
       (await ssrApi.fetchAccSaberPlayerScores(player.id, page, sort, order, type)) ??
-      Pagination.empty<EnrichedAccSaberScore>(),
+      Pagination.empty<AccSaberScore>(),
     placeholderData: prev => prev,
   });
 

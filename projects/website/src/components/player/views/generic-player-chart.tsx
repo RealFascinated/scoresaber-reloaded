@@ -3,7 +3,10 @@
 import { buildChartConfig } from "@/common/chart/build-chart-config";
 import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/api/chart/generic-chart-dynamic";
-import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
+import {
+  ScoreSaberPlayerHistory,
+  ScoreSaberPlayerHistoryEntries,
+} from "@ssr/common/schemas/scoresaber/player/history";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 import { formatDateMinimal, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
 import { useMemo } from "react";
@@ -17,7 +20,7 @@ type Props = {
   /**
    * The player the chart is for
    */
-  statisticHistory: PlayerStatisticHistory;
+  statisticHistory: ScoreSaberPlayerHistoryEntries;
 
   /**
    * The data to render.
@@ -35,7 +38,7 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     const histories: Record<string, (number | null)[]> = {};
 
     // Create a map of available data for O(1) lookup
-    const dataMap = new Map<string, (typeof statisticHistory)[string]>();
+    const dataMap = new Map<string, ScoreSaberPlayerHistory>();
     Object.entries(statisticHistory).forEach(([dateString, history]) => {
       dataMap.set(dateString, history);
     });
@@ -68,10 +71,12 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     }
 
     datasetConfig.forEach(config => {
-      histories[config.field] = labelsResult.map((currentDate, i) => {
+      histories[config.field] = labelsResult.map(currentDate => {
         const dateString = formatDateMinimal(currentDate);
         const history = dataMap.get(dateString);
-        const value = history ? getValueFromHistory(history, config.field) : null;
+        const value = history
+          ? getValueFromHistory(history, config.field as keyof ScoreSaberPlayerHistory)
+          : null;
         return value ?? null;
       });
     });

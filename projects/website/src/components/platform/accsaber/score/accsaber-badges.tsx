@@ -2,15 +2,15 @@
 
 import { HandAccuracyBadge } from "@/components/platform/scoresaber/score/badges/hand-accuracy";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badges";
-import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
+import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 
-export const badges: ScoreBadge<EnrichedAccSaberScore, EnrichedAccSaberScore["leaderboard"]>[] = [
+export const badges: ScoreBadge<AccSaberScore, AccSaberScore["leaderboard"]>[] = [
   {
     name: "AP",
     color: () => "bg-statistic",
-    create: (score: EnrichedAccSaberScore) => {
+    create: (score: AccSaberScore) => {
       return (
         <div className="flex cursor-default flex-col items-center justify-center">
           <p>{score.ap.toFixed(2)} AP</p>
@@ -20,10 +20,10 @@ export const badges: ScoreBadge<EnrichedAccSaberScore, EnrichedAccSaberScore["le
   },
   {
     name: "Accuracy",
-    color: (score: EnrichedAccSaberScore) => {
+    color: (score: AccSaberScore) => {
       return getScoreBadgeFromAccuracy(score.acc).color;
     },
-    create: (score: EnrichedAccSaberScore) => {
+    create: (score: AccSaberScore) => {
       return (
         <div className="flex cursor-default flex-col items-center justify-center">
           <p>{score.acc.toFixed(2)}%</p>
@@ -33,7 +33,7 @@ export const badges: ScoreBadge<EnrichedAccSaberScore, EnrichedAccSaberScore["le
   },
   {
     name: "Score",
-    create: (scoreResponse: EnrichedAccSaberScore) => {
+    create: (scoreResponse: AccSaberScore) => {
       return (
         <div className="flex flex-col items-center justify-center">
           <p>{formatNumberWithCommas(scoreResponse.score.score)}</p>
@@ -44,7 +44,7 @@ export const badges: ScoreBadge<EnrichedAccSaberScore, EnrichedAccSaberScore["le
   {
     name: "Left Hand Accuracy",
     color: () => "bg-hands-left",
-    create: (score: EnrichedAccSaberScore) => {
+    create: (score: AccSaberScore) => {
       const beatLeaderScore = score.beatLeaderScore;
       if (!beatLeaderScore) {
         return undefined;
@@ -55,7 +55,7 @@ export const badges: ScoreBadge<EnrichedAccSaberScore, EnrichedAccSaberScore["le
   {
     name: "Right Hand Accuracy",
     color: () => "bg-hands-right",
-    create: (score: EnrichedAccSaberScore) => {
+    create: (score: AccSaberScore) => {
       const beatLeaderScore = score.beatLeaderScore;
       if (!beatLeaderScore) {
         return undefined;
@@ -66,7 +66,7 @@ export const badges: ScoreBadge<EnrichedAccSaberScore, EnrichedAccSaberScore["le
 ];
 
 type AccSaberBadgesProps = {
-  score: EnrichedAccSaberScore;
+  score: AccSaberScore;
 };
 
 export function AccSaberBadges({ score }: AccSaberBadgesProps) {

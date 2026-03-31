@@ -70,7 +70,7 @@ const buttons: ButtonConfig[] = [
       return score?.beatLeaderScore != undefined;
     },
     render: ({ score }: Props) => {
-      return <ScoreReplayButton score={score!} />;
+      return <ScoreReplayButton score={score.beatLeaderScore} />;
     },
   },
   {

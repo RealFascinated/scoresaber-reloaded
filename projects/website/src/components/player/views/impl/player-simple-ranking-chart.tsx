@@ -3,11 +3,11 @@
 import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericPlayerChart from "@/components/player/views/generic-player-chart";
-import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
+import { ScoreSaberPlayerHistoryEntries } from "@ssr/common/schemas/scoresaber/player/history";
 import { formatNumberWithCommas, formatPp, isWholeNumber } from "@ssr/common/utils/number-utils";
 
 type Props = {
-  statisticHistory: PlayerStatisticHistory;
+  statisticHistory: ScoreSaberPlayerHistoryEntries;
   daysAmount: number;
 };
 

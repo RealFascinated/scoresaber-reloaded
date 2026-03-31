@@ -30,7 +30,10 @@ export default function ReplayButton({
   return (
     <SimpleLink
       className="inline-flex"
-      href={viewer.generateUrl(score.beatLeaderScore?.scoreId, getBeatLeaderReplayRedirectUrl(score))}
+      href={viewer.generateUrl(
+        score.beatLeaderScore.scoreId,
+        getBeatLeaderReplayRedirectUrl(score.beatLeaderScore)
+      )}
     >
       <Button variant={variant} size={size} className={cn("gap-1.5 font-medium", className)} {...buttonProps}>
         <PlayCircle className="size-3.5 shrink-0 opacity-90" aria-hidden />

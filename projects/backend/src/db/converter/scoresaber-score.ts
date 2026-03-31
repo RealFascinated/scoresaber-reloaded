@@ -31,10 +31,7 @@ export function scoreSaberScoreRowToType(
     fullCombo: row.fullCombo,
     modifiers: normalizeModifiers(row.modifiers ?? []),
     playerInfo: {
-      id: row.playerId,
-      name: null,
-      profilePicture: null,
-      country: null,
+      id: row.playerId
     },
     hmd: row.hmd ?? null,
     rightController: row.rightController ?? null,

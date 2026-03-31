@@ -10,7 +10,7 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
+import { ScoreSaberPlayerHistoryEntries } from "@ssr/common/schemas/scoresaber/player/history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { Award, CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon, TriangleIcon } from "lucide-react";
@@ -139,7 +139,7 @@ function PlayerViewPanel({
 }: {
   viewIndex: number;
   player: ScoreSaberPlayer;
-  statisticHistory: PlayerStatisticHistory;
+  statisticHistory: ScoreSaberPlayerHistoryEntries;
   actualDaysAgo: number;
   historyMode: HistoryMode;
 }): ReactElement {
