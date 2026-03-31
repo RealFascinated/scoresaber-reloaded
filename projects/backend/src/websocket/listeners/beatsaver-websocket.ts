@@ -1,6 +1,5 @@
 import Logger from "@ssr/common/logger";
 import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
-import { BeatSaverWebsocketMessageToken } from "@ssr/common/types/token/beatsaver/websocket/websocket-message";
 import { connectBeatSaverWebsocket } from "@ssr/common/websocket/beatsaver-websocket";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
@@ -47,13 +46,9 @@ export class BeatSaverWebsocket {
 
     connectBeatSaverWebsocket({
       onMapUpdate: async map => {
-        await ingestMap(map);
-      },
-      onMessage: async message => {
-        const command = message as BeatSaverWebsocketMessageToken;
-        if (command.type === "MAP_CREATE") {
-          await ingestMap(command.msg);
-        }
+        await ingestMap(map).catch(error => {
+          Logger.error(`Failed to ingest BeatSaver map ${map.id}: ${error}`);
+        });
       },
     });
   }

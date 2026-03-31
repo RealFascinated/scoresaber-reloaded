@@ -14,14 +14,14 @@ export default interface BeatSaverMapToken {
   uploader: BeatSaverAccountToken;
   metadata: BeatSaverMapMetadataToken;
   stats: BeatSaverMapStatsToken;
-  uploaded: string;
+  uploaded?: string;
   automapper: boolean;
   ranked: boolean;
   qualified: boolean;
   versions: BeatSaverMapVersionToken[];
   createdAt: string;
   updatedAt: string;
-  lastPublishedAt: string;
+  lastPublishedAt?: string;
   tags: string[];
   declaredAi: BeatSaverMapDeclaredAi;
   blRanked: boolean;

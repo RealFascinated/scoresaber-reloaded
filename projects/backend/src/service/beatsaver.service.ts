@@ -131,11 +131,11 @@ export default class BeatSaverService {
           songAuthorName: map.metadata?.songAuthorName ?? null,
           songAuthorUrl: map.metadata?.songAuthorUrl ?? null,
           levelAuthorName: map.metadata?.levelAuthorName ?? null,
-          uploadedAt: parseDate(map.uploaded),
+          uploadedAt: map.uploaded ? parseDate(map.uploaded) : null,
           automapper: map.automapper,
           createdAt: parseDate(map.createdAt),
           updatedAt: parseDate(map.updatedAt),
-          lastPublishedAt: parseDate(map.lastPublishedAt),
+          lastPublishedAt: map.lastPublishedAt ? parseDate(map.lastPublishedAt) : null,
           tags: map.tags,
         })
         .onConflictDoUpdate({
@@ -151,11 +151,11 @@ export default class BeatSaverService {
             songAuthorName: map.metadata?.songAuthorName ?? null,
             songAuthorUrl: map.metadata?.songAuthorUrl ?? null,
             levelAuthorName: map.metadata?.levelAuthorName ?? null,
-            uploadedAt: parseDate(map.uploaded),
+            uploadedAt: map.uploaded ? parseDate(map.uploaded) : null,
             automapper: map.automapper,
             createdAt: parseDate(map.createdAt),
             updatedAt: parseDate(map.updatedAt),
-            lastPublishedAt: parseDate(map.lastPublishedAt),
+            lastPublishedAt: map.lastPublishedAt ? parseDate(map.lastPublishedAt) : null,
             tags: map.tags,
           },
         });
