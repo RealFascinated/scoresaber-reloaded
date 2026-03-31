@@ -5,7 +5,7 @@ import { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-hist
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { and, asc, desc, eq, getTableColumns, lte, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
 import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
@@ -112,7 +112,7 @@ export class PlayerScoreHistoryService {
   ): Promise<ScoreSaberHistoryScore | undefined> {
     return CacheService.fetch(
       CacheId.PreviousScore,
-      `previous-score:${score.playerId}-${score.scoreId}`,
+      `previous-score:${score.playerId}-${leaderboard.id}-${score.timestamp.getTime()}`,
       async () => {
         const [previousScore] = await db
           .select()
@@ -121,8 +121,7 @@ export class PlayerScoreHistoryService {
             and(
               eq(scoreSaberScoreHistoryTable.playerId, score.playerId),
               eq(scoreSaberScoreHistoryTable.leaderboardId, leaderboard.id),
-              ne(scoreSaberScoreHistoryTable.scoreId, score.scoreId),
-              lte(scoreSaberScoreHistoryTable.timestamp, score.timestamp)
+              lt(scoreSaberScoreHistoryTable.timestamp, score.timestamp)
             )
           )
           .orderBy(desc(scoreSaberScoreHistoryTable.timestamp))
