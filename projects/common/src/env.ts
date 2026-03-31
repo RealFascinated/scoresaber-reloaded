@@ -57,7 +57,7 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV ?? "development",
     NEXT_PUBLIC_APPLICATION_NAME: process.env.NEXT_PUBLIC_APPLICATION_NAME,
 
-    ENABLE_QUEUES: Boolean(process.env.ENABLE_QUEUES ?? true),
+    ENABLE_QUEUES: process.env.ENABLE_QUEUES === "true",
 
     // PostgreSQL
     DATABASE_URL: process.env.DATABASE_URL,

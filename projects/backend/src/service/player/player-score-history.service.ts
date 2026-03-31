@@ -5,7 +5,8 @@ import { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-hist
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { and, desc, eq, lt, sql } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, lte, ne, sql } from "drizzle-orm";
+import { unionAll } from "drizzle-orm/pg-core";
 import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/schema";
@@ -13,14 +14,35 @@ import CacheService, { CacheId } from "../cache.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 
-function allScoresQuery(playerId: string, leaderboardId: number) {
-  return sql`
-    SELECT * FROM "scoresaber-scores"
-    WHERE "playerId" = ${playerId} AND "leaderboardId" = ${leaderboardId}
-    UNION ALL
-    SELECT * FROM "scoresaber-score-history"
-    WHERE "playerId" = ${playerId} AND "leaderboardId" = ${leaderboardId}
-  `;
+const scoreCols = getTableColumns(scoreSaberScoresTable);
+const histCols = getTableColumns(scoreSaberScoreHistoryTable);
+
+/** History row projected to match {@link scoreSaberScoresTable} (`scoreId` → `id`) for UNION + {@link scoreSaberScoreRowToType}. */
+const histAsScoreCols = Object.fromEntries(
+  Object.keys(scoreCols).map(name => [
+    name,
+    name === "id" ? histCols.scoreId : histCols[name as keyof typeof histCols],
+  ])
+) as unknown as typeof scoreCols;
+
+/** Shared filters + full-row UNION for this player/map (only exported helper in this file besides the service). */
+function playerMapQueries(playerId: string, leaderboardId: number) {
+  const onScores = and(
+    eq(scoreSaberScoresTable.playerId, playerId),
+    eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
+  );
+  const onHistory = and(
+    eq(scoreSaberScoreHistoryTable.playerId, playerId),
+    eq(scoreSaberScoreHistoryTable.leaderboardId, leaderboardId)
+  );
+  return {
+    onScores,
+    onHistory,
+    fullRowsUnion: unionAll(
+      db.select(scoreCols).from(scoreSaberScoresTable).where(onScores),
+      db.select(histAsScoreCols).from(scoreSaberScoreHistoryTable).where(onHistory)
+    ),
+  };
 }
 
 export class PlayerScoreHistoryService {
@@ -44,10 +66,12 @@ export class PlayerScoreHistoryService {
     const limit = 8;
     const offset = (page - 1) * limit;
 
-    const countResult = await db.execute<{ total: number }>(sql`
-      SELECT COUNT(*)::integer as total FROM (${allScoresQuery(playerId, leaderboardId)}) combined
-    `);
-    const total = countResult.rows[0]?.total ?? 0;
+    const q = playerMapQueries(playerId, leaderboardId);
+    const [scoresCount, historyCount] = await Promise.all([
+      db.$count(scoreSaberScoresTable, q.onScores),
+      db.$count(scoreSaberScoreHistoryTable, q.onHistory),
+    ]);
+    const total = scoresCount + historyCount;
 
     if (total === 0) {
       throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
@@ -56,16 +80,19 @@ export class PlayerScoreHistoryService {
     const pagination = new Pagination<ScoreSaberScore>().setItemsPerPage(limit).setTotalItems(total);
 
     return pagination.getPage(page, async () => {
-      const rawScores = await db.execute<typeof scoreSaberScoresTable.$inferSelect>(sql`
-        SELECT * FROM (${allScoresQuery(playerId, leaderboardId)}) combined
-        ORDER BY timestamp DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `);
+      const combined = q.fullRowsUnion.as("combined");
+
+      const rawScores = await db
+        .select()
+        .from(combined)
+        .orderBy(desc(sql`"timestamp"`))
+        .limit(limit)
+        .offset(offset);
 
       return Promise.all(
-        rawScores.rows.map(async row => {
-          const score = scoreSaberScoreRowToType(row);
-          const enriched = await ScoreCoreService.insertScoreData(score, leaderboard, {
+        rawScores.map(async row => {
+          const scoreRow = scoreSaberScoreRowToType(row as typeof scoreSaberScoresTable.$inferSelect);
+          const enriched = await ScoreCoreService.insertScoreData(scoreRow, leaderboard, {
             insertPreviousScore: false,
           });
           return enriched;
@@ -97,13 +124,14 @@ export class PlayerScoreHistoryService {
             and(
               eq(scoreSaberScoreHistoryTable.playerId, score.playerId),
               eq(scoreSaberScoreHistoryTable.leaderboardId, leaderboard.id),
-              lt(scoreSaberScoreHistoryTable.timestamp, score.timestamp)
+              ne(scoreSaberScoreHistoryTable.scoreId, score.scoreId),
+              lte(scoreSaberScoreHistoryTable.timestamp, score.timestamp)
             )
           )
           .orderBy(desc(scoreSaberScoreHistoryTable.timestamp))
           .limit(1);
 
-        if (!previousScore || previousScore.scoreId === score.scoreId) {
+        if (!previousScore) {
           return undefined;
         }
 
@@ -130,17 +158,31 @@ export class PlayerScoreHistoryService {
       CacheId.ScoreHistoryGraph,
       `score-history-graph:${playerId}-${leaderboardId}`,
       async () => {
-        const scores = await db.execute<{ timestamp: Date; accuracy: number }>(sql`
-          SELECT timestamp, accuracy FROM (${allScoresQuery(playerId, leaderboardId)}) combined
-          ORDER BY timestamp ASC
-        `);
+        const { onScores, onHistory } = playerMapQueries(playerId, leaderboardId);
 
-        return scores.rows.map(row => {
-          return {
-            timestamp: row.timestamp,
-            accuracy: row.accuracy,
-          };
-        });
+        const graph = unionAll(
+          db
+            .select({
+              timestamp: scoreSaberScoresTable.timestamp,
+              accuracy: scoreSaberScoresTable.accuracy,
+            })
+            .from(scoreSaberScoresTable)
+            .where(onScores),
+          db
+            .select({
+              timestamp: scoreSaberScoreHistoryTable.timestamp,
+              accuracy: scoreSaberScoreHistoryTable.accuracy,
+            })
+            .from(scoreSaberScoreHistoryTable)
+            .where(onHistory)
+        ).as("combined");
+
+        const scores = await db.select().from(graph).orderBy(asc(graph.timestamp));
+
+        return scores.map(row => ({
+          timestamp: row.timestamp,
+          accuracy: row.accuracy,
+        }));
       }
     );
   }

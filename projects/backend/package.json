@@ -7,6 +7,7 @@
   },
   "scripts": {
     "db:migrate": "bun run scripts/db-migrate.ts",
+    "create-missing-leaderboards": "bun run scripts/create-missing-scoresaber-leaderboards.ts",
     "dev": "bun run --watch src/index.ts",
     "build": "bun build --compile --target bun --outfile ssr-backend src/index.js",
     "start": "NODE_ENV=production ./ssr-backend",

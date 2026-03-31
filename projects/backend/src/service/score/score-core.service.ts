@@ -64,25 +64,25 @@ export class ScoreCoreService {
     if (isImprovement) {
       const previous = existingScore[0];
 
-      // Move old score to history
+      // Move old score to history (snapshot the row being replaced, not the incoming score)
       await db.insert(scoreSaberScoreHistoryTable).values({
         playerId: player.id,
         leaderboardId: leaderboard.id,
         scoreId: previous.id,
-        difficulty: score.difficulty,
-        characteristic: score.characteristic,
-        score: score.score,
-        accuracy: score.accuracy,
-        pp: score.pp,
-        missedNotes: score.missedNotes,
-        badCuts: score.badCuts,
-        maxCombo: score.maxCombo,
-        fullCombo: score.fullCombo,
-        modifiers: score.modifiers.map(modifier => modifier.toString()),
-        hmd: score.hmd,
-        rightController: score.rightController,
-        leftController: score.leftController,
-        timestamp: score.timestamp,
+        difficulty: previous.difficulty,
+        characteristic: previous.characteristic,
+        score: previous.score,
+        accuracy: previous.accuracy,
+        pp: previous.pp,
+        missedNotes: previous.missedNotes,
+        badCuts: previous.badCuts,
+        maxCombo: previous.maxCombo,
+        fullCombo: previous.fullCombo,
+        modifiers: previous.modifiers?.length ? previous.modifiers : null,
+        hmd: previous.hmd,
+        rightController: previous.rightController,
+        leftController: previous.leftController,
+        timestamp: previous.timestamp,
       });
 
       // Delete from current

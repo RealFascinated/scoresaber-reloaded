@@ -161,7 +161,8 @@ export class LeaderboardCoreService {
    */
   public static async createLeaderboard(
     id: number,
-    token?: ScoreSaberLeaderboardToken
+    token?: ScoreSaberLeaderboardToken,
+    options?: { skipScoreSeedQueue?: boolean }
   ): Promise<ScoreSaberLeaderboard> {
     const before = performance.now();
     const leaderboardToken = token ?? (await ScoreSaberApiService.lookupLeaderboard(id));
@@ -171,10 +172,12 @@ export class LeaderboardCoreService {
     const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
 
     await LeaderboardCoreService.saveLeaderboard(id, leaderboard);
-    (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
-      id: leaderboard.id.toString(),
-      data: leaderboard.id,
-    });
+    if (!options?.skipScoreSeedQueue) {
+      (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
+        id: leaderboard.id.toString(),
+        data: leaderboard.id,
+      });
+    }
 
     Logger.info(`Created leaderboard "${id}" in ${formatDuration(performance.now() - before)}`);
     return leaderboard;

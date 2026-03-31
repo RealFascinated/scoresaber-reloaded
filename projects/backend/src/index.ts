@@ -51,6 +51,14 @@ if (fs.existsSync(".env")) {
   });
 }
 
+try {
+  await runMigrations();
+  Logger.info("Database migrations are up to date.");
+} catch (error) {
+  Logger.error("Database migration failed:", error);
+  // process.exit(1);
+}
+
 new EventsManager();
 new MetricsService();
 
@@ -296,14 +304,6 @@ app.onStart(async () => {
 
   EventsManager.registerListener(new QueueManager());
 });
-
-try {
-  await runMigrations();
-  Logger.info("Database migrations are up to date.");
-} catch (error) {
-  Logger.error("Database migration failed:", error);
-  process.exit(1);
-}
 
 app.listen({
   port: 8080,
