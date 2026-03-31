@@ -53,7 +53,6 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         consecutiveFailures++;
         if (consecutiveFailures >= 5) {
           Logger.warn(`Aborting leaderboard "${leaderboardId}" after 5 consecutive page failures`);
-          seededAnyScore = true; // Mark as partially seeded so we don't retry endlessly
           break;
         }
         continue;
@@ -73,7 +72,6 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
             return;
           }
           await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false);
-          seededAnyScore = true;
           newScoresTracked++;
         })
       );
@@ -84,14 +82,10 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       page++;
     }
 
-    if (seededAnyScore) {
-      await this.markLeaderboardSeeded(leaderboardId);
-      Logger.info(
-        `Updated seeded scores status for leaderboard "${leaderboardId}" and tracked ${newScoresTracked} new scores`
-      );
-    } else {
-      Logger.warn(`Skipping seeded flag for leaderboard "${leaderboardId}" because no new scores were found`);
-    }
+    await this.markLeaderboardSeeded(leaderboardId);
+    Logger.info(
+      `Updated seeded scores status for leaderboard "${leaderboardId}" and tracked ${newScoresTracked} new scores`
+    );
   }
 
   private async markLeaderboardSeeded(leaderboardId: number): Promise<void> {
