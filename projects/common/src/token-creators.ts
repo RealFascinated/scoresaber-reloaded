@@ -126,6 +126,7 @@ export function getScoreSaberScoreFromToken(
       hmd: (token.deviceHmd as HMD) ?? (ScoreSaberHMDs[token.hmd] as HMD | undefined),
       rightController: token.deviceControllerRight,
       leftController: token.deviceControllerLeft,
+      ...(token.leaderboardPlayerInfo ? { playerInfo: token.leaderboardPlayerInfo } : {}),
       timestamp: new Date(token.timeSet),
     },
     { reportInput: true }
