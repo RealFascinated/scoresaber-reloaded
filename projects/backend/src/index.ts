@@ -67,7 +67,8 @@ const httpMetricsHooks = createHttpMetricsHooks();
 export const app = new Elysia()
   .use(
     logger({
-      mode: "combined"
+      enabled: true,
+      mode: "combined",
     })
   )
   .use(
