@@ -78,12 +78,12 @@ export class ScoreSaberApiService {
         ScoreSaberApiService.totalRequests++;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10_000);
+        const timeoutId = setTimeout(() => controller.abort(), 5_000);
 
         let response: Response | undefined;
         try {
           response = await fetch(
-            `https://p.fascinated.cc/${url}${getQueryParamsFromObject(options?.searchParams || {})}`
+            `https://p.fascinated.cc/${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`
             ,
             {
               signal: controller.signal,
