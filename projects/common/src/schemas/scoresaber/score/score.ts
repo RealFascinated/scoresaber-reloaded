@@ -40,7 +40,7 @@ export const ScoreSaberScoreSchema = z.object({
   leftController: z.string().nullable(),
 
   // Player information
-  playerInfo: ScoreSaberLeaderboardPlayerInfoSchema.nullable(),
+  playerInfo: ScoreSaberLeaderboardPlayerInfoSchema,
 
   // Other scores
   beatLeaderScore: BeatLeaderScoreSchema.optional(),
