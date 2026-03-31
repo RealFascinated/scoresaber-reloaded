@@ -60,7 +60,7 @@ export function FriendScores() {
               const beatSaverMap = playerScore.beatSaver;
               return (
                 <div key={score.scoreId} className="flex flex-col">
-                  <PlayerScoreHeader player={playerScore.score.playerInfo} />
+                  <PlayerScoreHeader player={playerScore.score.playerInfo!} />
                   <Card className="rounded-lg rounded-tl-none p-0">
                     <ScoreSaberScoreDisplay
                       key={score.scoreId}

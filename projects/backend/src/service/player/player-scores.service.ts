@@ -227,7 +227,6 @@ export class PlayerScoresService {
           score,
           undefined,
           leaderboard,
-          playerToken,
           false
         );
         if (trackingResult.tracked) {
@@ -428,7 +427,11 @@ export class PlayerScoresService {
           const [enrichedScore, beatSaver] = await Promise.all([
             ScoreCoreService.insertScoreData(
               getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId),
-              leaderboard
+              leaderboard, {
+              insertPlayerInfo: false,
+              insertPreviousScore: true,
+              insertBeatLeaderScore: true,
+            }
             ),
             BeatSaverService.getMap(
               leaderboard.songHash,

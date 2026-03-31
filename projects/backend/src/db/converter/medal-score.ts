@@ -60,7 +60,9 @@ export function scoreSaberMedalScoreRowToScoreSaberScore(row: ScoreSaberMedalSco
     maxCombo: row.maxCombo,
     fullCombo: row.fullCombo,
     modifiers: normalizeModifiers(row.modifiers ?? []),
-    playerInfo: null,
+    playerInfo: {
+      id: row.playerId,
+    },
     hmd: row.hmd ?? null,
     rightController: row.rightController ?? null,
     leftController: row.leftController ?? null,

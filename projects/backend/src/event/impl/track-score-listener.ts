@@ -37,7 +37,6 @@ export class TrackScoreListener implements EventListener {
       score,
       beatLeaderScore,
       leaderboard,
-      player,
       true
     );
     if (trackedScore == undefined) {

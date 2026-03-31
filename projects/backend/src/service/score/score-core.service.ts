@@ -1,9 +1,7 @@
 import Logger from "@ssr/common/logger";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { and, eq } from "drizzle-orm";
 import { db } from "../../db";
@@ -30,7 +28,6 @@ export class ScoreCoreService {
     score: ScoreSaberScore,
     beatLeaderScore: BeatLeaderScore | undefined,
     leaderboard: ScoreSaberLeaderboard,
-    player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfo,
     newScore: boolean = false
   ): Promise<{
     score: ScoreSaberScore | undefined;
@@ -39,6 +36,7 @@ export class ScoreCoreService {
   }> {
     const before = performance.now();
 
+    const playerId = score.playerId;
     let isImprovement = false;
     if (newScore) {
       // Ensure the score is not already tracked (same scoreId and score)
@@ -58,7 +56,7 @@ export class ScoreCoreService {
         .from(scoreSaberScoresTable)
         .where(
           and(
-            eq(scoreSaberScoresTable.playerId, player.id),
+            eq(scoreSaberScoresTable.playerId, playerId),
             eq(scoreSaberScoresTable.leaderboardId, leaderboard.id)
           )
         )
@@ -72,7 +70,7 @@ export class ScoreCoreService {
         await db
           .insert(scoreSaberScoreHistoryTable)
           .values({
-            playerId: player.id,
+            playerId: playerId,
             leaderboardId: leaderboard.id,
             scoreId: previous.scoreId,
             difficulty: previous.difficulty,
@@ -103,7 +101,7 @@ export class ScoreCoreService {
       }
     }
 
-    await PlayerHmdService.updatePlayerHmd(player.id, score);
+    await PlayerHmdService.updatePlayerHmd(playerId, score);
 
     // Handle score for medal updates
     if (leaderboard.ranked && score.rank <= 10) {
@@ -111,15 +109,15 @@ export class ScoreCoreService {
     }
 
     // Update player score stats
-    const scoreStats = await PlayerCoreService.getPlayerScoreStats(player.id);
-    await PlayerCoreService.updatePlayer(player.id, { scoreStats });
+    const scoreStats = await PlayerCoreService.getPlayerScoreStats(playerId);
+    await PlayerCoreService.updatePlayer(playerId, { scoreStats });
 
     const modifiers = score.modifiers.map(modifier => modifier.toString());
     const inserted = await db
       .insert(scoreSaberScoresTable)
       .values({
         scoreId: score.scoreId,
-        playerId: player.id,
+        playerId: playerId,
         leaderboardId: leaderboard.id,
         difficulty: score.difficulty,
         characteristic: score.characteristic,
@@ -151,7 +149,7 @@ export class ScoreCoreService {
         `Tracked %s ScoreSaber score "%s" for "%s" on "%s" [%s / %s]%s in %s`,
         newScore ? "New" : "Missing",
         score.scoreId,
-        player.name,
+        playerId,
         leaderboard.songName,
         leaderboard.difficulty.difficulty,
         leaderboard.difficulty.characteristic,
