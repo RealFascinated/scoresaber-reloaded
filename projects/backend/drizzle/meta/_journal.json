@@ -71,6 +71,13 @@
       "when": 1775100000000,
       "tag": "0009_scoresaber_score_history_leaderboard_player_score_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1774981196082,
+      "tag": "0010_add-seeded-scores=false-index",
+      "breakpoints": true
     }
   ]
 }

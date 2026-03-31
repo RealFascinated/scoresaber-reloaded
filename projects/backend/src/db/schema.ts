@@ -263,6 +263,9 @@ export const scoreSaberLeaderboardsTable = pgTable(
       table.characteristic
     ),
     index("leaderboards_song_hash_idx").on(table.songHash),
+    index("leaderboards_seeded_scores_false_idx")
+      .on(table.seededScores)
+      .where(sql`${table.seededScores} = false`),
   ]
 );
 
