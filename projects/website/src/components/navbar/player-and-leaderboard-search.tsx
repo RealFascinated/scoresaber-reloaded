@@ -35,7 +35,7 @@ export default function PlayerAndLeaderboardSearch() {
       }
       const playerPromise = ssrApi.searchPlayers(trimmedQuery);
       const leaderboardPromise = ssrApi.searchLeaderboards(1, {
-        search: trimmedQuery,
+        query: trimmedQuery,
       });
 
       const [playerResults, leaderboardResults] = await Promise.all([playerPromise, leaderboardPromise]);
