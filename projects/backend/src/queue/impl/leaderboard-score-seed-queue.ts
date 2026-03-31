@@ -1,4 +1,3 @@
-import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
@@ -31,10 +30,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     while (hasMoreScores) {
       const response = await ScoreSaberApiService.lookupLeaderboardScores(
         Number(leaderboardId),
-        currentPage,
-        {
-          priority: CooldownPriority.BACKGROUND,
-        }
+        currentPage
       );
       if (!response) {
         Logger.warn(
@@ -56,19 +52,18 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         Logger.info(`Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`);
       }
 
-      for (const rawScore of response.scores) {
-        const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
+      await Promise.all(
+        response.scores.map(async (rawScore) => {
+          const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
+          const scoreExists = await ScoreCoreService.scoreExists(score.scoreId);
+          if (scoreExists) {
+            processedAnyScores = true;
+          }
 
-        // Check if the score is already tracked
-        const scoreExists = await ScoreCoreService.scoreExists(score.scoreId);
-        if (scoreExists) {
+          await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false);
           processedAnyScores = true;
-          continue;
-        }
-
-        await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false);
-        processedAnyScores = true;
-      }
+        })
+      );
 
       hasMoreScores = currentPage < totalPages;
       currentPage++;
