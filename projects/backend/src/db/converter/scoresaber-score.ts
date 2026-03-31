@@ -1,5 +1,3 @@
-import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
-import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { normalizeModifiers } from "@ssr/common/score/modifier";
 import { ScoreSaberScoreHistoryRow, ScoreSaberScoreRow } from "../schema";
@@ -17,8 +15,8 @@ export function scoreSaberScoreRowToType(
     playerId: row.playerId,
     leaderboardId: row.leaderboardId,
     scoreId: row.scoreId,
-    difficulty: MapDifficultySchema.parse(row.difficulty, { reportInput: true }),
-    characteristic: MapCharacteristicSchema.parse(row.characteristic, { reportInput: true }),
+    difficulty: row.difficulty,
+    characteristic: row.characteristic,
     score: row.score,
     accuracy: row.accuracy,
     pp: row.pp,

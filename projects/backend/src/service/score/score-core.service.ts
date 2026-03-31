@@ -145,10 +145,9 @@ export class ScoreCoreService {
 
     if (newScore) {
       Logger.info(
-        `Tracked %s ScoreSaber score "%s" for "%s" on "%s" [%s / %s]%s in %s`,
-        newScore ? "New" : "Missing",
+        `Tracked ScoreSaber score "%s" for "%s" on "%s" [%s / %s]%s in %s`,
         score.scoreId,
-        playerId,
+        score.playerInfo?.name ?? playerId,
         leaderboard.songName,
         leaderboard.difficulty.difficulty,
         leaderboard.difficulty.characteristic,
