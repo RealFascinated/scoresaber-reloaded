@@ -78,7 +78,7 @@ export class ScoreSaberApiService {
         ScoreSaberApiService.totalRequests++;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5_000);
+        const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
         let response: Response | undefined;
         try {
@@ -220,7 +220,7 @@ export class ScoreSaberApiService {
     ScoreSaberApiService.log(`Looking up players on page "${page}" for country "${country}"...`);
     const response = await ScoreSaberApiService.fetch<ScoreSaberPlayersPageToken>(
       LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT.replace(":page", page.toString()).replace(":country", country) +
-        (search ? `&search=${search}` : "")
+      (search ? `&search=${search}` : "")
     );
     if (response === undefined) {
       return undefined;
@@ -383,9 +383,9 @@ export class ScoreSaberApiService {
           ...(options?.category ? { category: options.category.toString() } : {}),
           ...(options?.stars
             ? {
-                minStar: (options.stars.min ?? 0).toString(),
-                maxStar: (options.stars.max ?? 0).toString(),
-              }
+              minStar: (options.stars.min ?? 0).toString(),
+              maxStar: (options.stars.max ?? 0).toString(),
+            }
             : {}),
           ...(options?.sort ? { sort: options.sort.toString() } : {}),
           ...(options?.search ? { search: options.search } : {}),
