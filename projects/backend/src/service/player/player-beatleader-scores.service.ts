@@ -120,6 +120,7 @@ export class PlayerBeatLeaderScoresService {
         }
         const tracked = await BeatLeaderService.trackBeatLeaderScore(
           scoreToken as BeatLeaderScoreToken,
+          false,
           false
         );
         if (tracked) {
