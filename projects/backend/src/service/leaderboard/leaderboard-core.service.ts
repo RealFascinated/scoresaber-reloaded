@@ -129,7 +129,18 @@ export class LeaderboardCoreService {
       .select()
       .from(mainAlias)
       .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
-      .where(inArray(mainAlias.id, ids));
+      .where(inArray(mainAlias.id, ids))
+      .orderBy(
+        asc(mainAlias.id),
+        sql`CASE ${difficultiesAlias.difficulty}
+            WHEN 'Easy' THEN 1
+            WHEN 'Normal' THEN 2
+            WHEN 'Hard' THEN 3
+            WHEN 'Expert' THEN 4
+            WHEN 'ExpertPlus' THEN 5
+            ELSE 999
+          END`
+      );
 
     return new Map(mergeJoinedLeaderboardRows(rows).map(lb => [lb.id, lb]));
   }
@@ -144,7 +155,7 @@ export class LeaderboardCoreService {
     return (
       (
         await db
-          .select()
+          .select({ exists: sql`1` })
           .from(scoreSaberLeaderboardsTable)
           .where(eq(scoreSaberLeaderboardsTable.id, id))
           .limit(1)
