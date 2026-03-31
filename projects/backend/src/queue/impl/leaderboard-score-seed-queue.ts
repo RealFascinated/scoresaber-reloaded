@@ -31,27 +31,23 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       )[0]?.count ?? 0;
 
     const firstPage = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1);
-    if (!firstPage) {
-      Logger.warn(`Skipping leaderboard "${leaderboardId}" because it failed to fetch the first page`);
-      return;
-    }
-
-    if (totalTrackedScores >= firstPage.metadata.total) {
+    if (firstPage && totalTrackedScores >= firstPage.metadata.total) {
       Logger.warn(`Skipping leaderboard "${leaderboardId}" because it already has all scores tracked`);
       await this.markLeaderboardSeeded(leaderboardId);
       return;
     }
 
-    const totalPages = Math.ceil(firstPage.metadata.total / firstPage.metadata.itemsPerPage);
     let seededAnyScore = false;
     let consecutiveFailures = 0;
+    let newScoresTracked = 0;
+    let scrape = true;
+    let page = 1;
 
-    for (let page = 1; page <= totalPages; page++) {
+    while (scrape) {
       const response =
-        page === 1
+        page === 1 && firstPage
           ? firstPage
           : await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page);
-
       if (!response) {
         Logger.warn(`Failed to fetch scores for leaderboard "${leaderboardId}" on page ${page}`);
         consecutiveFailures++;
@@ -63,6 +59,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         continue;
       }
 
+      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
       consecutiveFailures = 0;
 
       if (page % 10 === 0 || page === 1 || page === totalPages) {
@@ -77,13 +74,16 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           }
           await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false);
           seededAnyScore = true;
+          newScoresTracked++;
         })
       );
     }
 
     if (seededAnyScore) {
       await this.markLeaderboardSeeded(leaderboardId);
-      Logger.info(`Updated seeded scores status for leaderboard "${leaderboardId}"`);
+      Logger.info(
+        `Updated seeded scores status for leaderboard "${leaderboardId}" and tracked ${newScoresTracked} new scores`
+      );
     } else {
       Logger.warn(`Skipping seeded flag for leaderboard "${leaderboardId}" because no new scores were found`);
     }
