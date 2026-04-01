@@ -135,7 +135,7 @@ export default function ScoreSaberPlayerMedalScores({ player }: { player: ScoreS
     isLoading,
     isRefetching,
   } = useQuery<PlayerScoresPageResponse>({
-    queryKey: ["playerScores:ssr", player.id, page, sort, debouncedSearchTerm, direction, hmdFilter],
+    queryKey: ["playerScores:medals", player.id, page, sort, debouncedSearchTerm, direction, hmdFilter],
     queryFn: async () => {
       const response = await ssrApi.fetchPlayerScoreSaberMedalScores(player.id, page, sort, direction, {
         ...(!invalidSearch ? { search: debouncedSearchTerm } : {}),
