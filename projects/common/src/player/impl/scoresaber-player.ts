@@ -1,6 +1,6 @@
 import { HMD } from "../../hmds";
+import { ScoreSaberPeakRank } from "../../schemas/scoresaber/player/peak-rank";
 import type { ScoreSaberPlayerScoreStats } from "../../schemas/scoresaber/player/score-stats";
-import { PeakRank } from "../peak-rank";
 import Player, { StatisticChange } from "../player";
 
 /**
@@ -20,7 +20,7 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   /**
    * The best rank seen for this player.
    */
-  peakRank?: PeakRank;
+  peakRank?: ScoreSaberPeakRank;
 
   /**
    * The player's score stats.
