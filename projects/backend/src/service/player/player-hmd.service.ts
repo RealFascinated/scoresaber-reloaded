@@ -1,45 +1,25 @@
 import { HMD } from "@ssr/common/hmds";
-import { PlayerModel } from "@ssr/common/model/player/player";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { and, count, eq, isNotNull } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../../db/schema";
 
 export class PlayerHmdService {
-  /**
-   * Updates the player's HMD.
-   *
-   * @param playerId the player's id
-   * @param hmd the player's HMD
-   */
-  public static async updatePlayerHmd(playerId: string, score: ScoreSaberScore): Promise<void> {
-    if (!score.hmd) {
-      return;
-    }
-
-    const player = await PlayerModel.findById(playerId).select("hmd").lean();
-    if (!player || player.hmd == score.hmd) {
-      return;
-    }
-
-    await PlayerModel.updateOne({ _id: playerId }, { $set: { hmd: score.hmd } });
-  }
-
   /**
    * Gets the hmd usage from the current day.
    *
    * @returns the hmd usage
    */
   public static async getActiveHmdUsage(): Promise<Record<string, number>> {
-    const hmdUsage = await PlayerModel.aggregate([
-      {
-        $match: {
-          hmd: { $nin: [null] },
-          inactive: false,
-        },
-      },
-      { $group: { _id: "$hmd", count: { $sum: 1 } } },
-      { $project: { _id: 0, hmd: "$_id", count: 1 } },
-    ]).then(results => Object.fromEntries(results.map(r => [r.hmd, r.count])));
+    const rows = await db
+      .select({
+        hmd: scoreSaberAccountsTable.hmd,
+        c: count(),
+      })
+      .from(scoreSaberAccountsTable)
+      .where(and(isNotNull(scoreSaberAccountsTable.hmd), eq(scoreSaberAccountsTable.inactive, false)))
+      .groupBy(scoreSaberAccountsTable.hmd);
 
-    return hmdUsage;
+    return Object.fromEntries(rows.map(r => [r.hmd as string, r.c]));
   }
 
   /**
@@ -50,21 +30,24 @@ export class PlayerHmdService {
    * @returns the player's HMD breakdown
    */
   public static async getPlayerHmdBreakdown(playerId: string, limit?: number): Promise<Record<HMD, number>> {
-    const hmds = await ScoreSaberScoreModel.aggregate([
-      { $match: { playerId: playerId } }, // get all scores for the player
-      { $sort: { timestamp: -1 } }, // sort by timestamp descending
-      ...(limit ? [{ $limit: limit }] : []), // get the last x scores
-      { $project: { hmd: 1 } }, // select only the hmd field
-      { $group: { _id: "$hmd", count: { $sum: 1 } } }, // group by hmd and count the number of scores
-      { $sort: { count: -1 } }, // sort by count descending (most common first)
-    ]);
+    const rows =
+      limit != null
+        ? await db
+            .select({ hmd: scoreSaberScoresTable.hmd })
+            .from(scoreSaberScoresTable)
+            .where(eq(scoreSaberScoresTable.playerId, playerId))
+            .limit(limit)
+        : await db
+            .select({ hmd: scoreSaberScoresTable.hmd })
+            .from(scoreSaberScoresTable)
+            .where(eq(scoreSaberScoresTable.playerId, playerId));
 
-    return hmds.reduce(
-      (acc, curr) => {
-        acc[curr._id as HMD] = curr.count;
-        return acc;
-      },
-      {} as Record<HMD, number>
-    );
+    const counts = new Map<HMD, number>();
+    for (const row of rows) {
+      const hmd = row.hmd;
+      counts.set(hmd, (counts.get(hmd) ?? 0) + 1);
+    }
+
+    return Object.fromEntries([...counts.entries()].sort((a, b) => b[1] - a[1])) as Record<HMD, number>;
   }
 }

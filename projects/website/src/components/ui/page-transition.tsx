@@ -46,19 +46,28 @@ export default function PageTransition({ children, className }: { children: Reac
   const [stablePage, setStablePage] = useState(currentPage);
   const [stableChildren, setStableChildren] = useState<ReactNode>(children);
   const prevIsLoadingRef = useRef(isLoading);
+  const prevRenderedPageRef = useRef(currentPage);
+  const prevRenderedChildrenRef = useRef<ReactNode>(children);
   const transitionDuration = shouldReduceMotion ? 0 : 0.2;
   const filterDuration = shouldReduceMotion ? 0 : 0.15;
 
-  // Capture page and children in state when loading starts (no refs read during render)
+  // Keep track of what was last rendered while not loading.
+  // This lets us freeze the outgoing view if loading starts in the same update as a page change.
+  useEffect(() => {
+    if (!isLoading) {
+      prevRenderedPageRef.current = currentPage;
+      prevRenderedChildrenRef.current = children;
+    }
+  }, [isLoading, currentPage, children]);
+
+  // Capture the previous rendered page/children when loading starts.
   useEffect(() => {
     if (isLoading && !prevIsLoadingRef.current) {
-      queueMicrotask(() => {
-        setStablePage(currentPage);
-        setStableChildren(children);
-      });
+      setStablePage(prevRenderedPageRef.current);
+      setStableChildren(prevRenderedChildrenRef.current);
     }
     prevIsLoadingRef.current = isLoading;
-  }, [isLoading, currentPage, children]);
+  }, [isLoading]);
 
   const transitionKey = isLoading ? stablePage : currentPage;
   const displayChildren = isLoading ? stableChildren : children;

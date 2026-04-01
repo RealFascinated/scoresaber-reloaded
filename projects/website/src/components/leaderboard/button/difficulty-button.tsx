@@ -1,45 +1,35 @@
 import { cn } from "@/common/utils";
-import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristic } from "@ssr/common/types/map-characteristic";
+import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import SimpleLink from "../../simple-link";
 
 type DifficultyButtonProps = {
-  difficulty: MapDifficulty;
-  characteristic: MapCharacteristic;
-  leaderboardId: number;
+  leaderboardDifficulty: ScoreSaberLeaderboardDifficulty;
   selectedId: number;
-  inGameDifficulty: string | undefined;
 };
 
-export function DifficultyButton({
-  difficulty,
-  characteristic,
-  leaderboardId,
-  selectedId,
-  inGameDifficulty,
-}: DifficultyButtonProps) {
+export function DifficultyButton({ leaderboardDifficulty, selectedId }: DifficultyButtonProps) {
+  const { characteristic, difficulty, id } = leaderboardDifficulty;
   if (characteristic !== "Standard") {
     return null;
   }
 
-  const isSelected = leaderboardId === selectedId;
+  const isSelected = id === selectedId;
   const difficultyData = getDifficulty(difficulty);
   const color = difficultyData.color;
 
-  const buttonId = `difficulty-btn-${leaderboardId}`;
-  let button = (
-    <SimpleLink href={`/leaderboard/${leaderboardId}`}>
+  const buttonId = `difficulty-btn-${id}`;
+  return (
+    <SimpleLink href={`/leaderboard/${id}`}>
       <style>{`
-        @media (hover: hover) {
-          #${buttonId}.difficulty-button-hover:hover {
-            border-color: ${color} !important;
-            background-color: ${color}00 !important;
-          }
-        }
-      `}</style>
+    @media (hover: hover) {
+      #${buttonId}.difficulty-button-hover:hover {
+        border-color: ${color} !important;
+        background-color: ${color}00 !important;
+      }
+    }
+  `}</style>
       <Button
         id={buttonId}
         variant="ghost"
@@ -56,6 +46,4 @@ export function DifficultyButton({
       </Button>
     </SimpleLink>
   );
-
-  return inGameDifficulty ? <SimpleTooltip display={inGameDifficulty}>{button}</SimpleTooltip> : button;
 }

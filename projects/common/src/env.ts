@@ -3,10 +3,14 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
+    // Databases
     MONGO_CONNECTION_STRING: z.string(),
+    DATABASE_URL: z.string(),
     REDIS_URL: z.string(),
 
     LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).optional(),
+
+    ENABLE_QUEUES: z.boolean(),
 
     MINIO_ENDPOINT: z.string(),
     MINIO_USE_SSL: z.boolean(),
@@ -52,6 +56,11 @@ export const env = createEnv({
 
     NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV ?? "development",
     NEXT_PUBLIC_APPLICATION_NAME: process.env.NEXT_PUBLIC_APPLICATION_NAME,
+
+    ENABLE_QUEUES: process.env.ENABLE_QUEUES === "true",
+
+    // PostgreSQL
+    DATABASE_URL: process.env.DATABASE_URL,
 
     // Mongo
     MONGO_CONNECTION_STRING: process.env.MONGO_CONNECTION_STRING,

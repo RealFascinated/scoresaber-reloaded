@@ -1,8 +1,9 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import LeaderboardScoresResponse from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import BeatLeaderService from "../beatleader.service";
+import BeatSaverService from "../beatsaver.service";
+import { ScoreCoreService } from "../score/score-core.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import { LeaderboardCoreService } from "./leaderboard-core.service";
 
@@ -20,12 +21,10 @@ export class LeaderboardScoresService {
     page: number,
     country?: string
   ): Promise<LeaderboardScoresResponse | undefined> {
-    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(leaderboardId);
-    if (leaderboardResponse == undefined) {
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
+    if (leaderboard == undefined) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }
-    const leaderboard = leaderboardResponse.leaderboard;
-    const beatSaverMap = leaderboardResponse.beatsaver;
 
     const leaderboardScores = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page, {
       country: country,
@@ -35,41 +34,34 @@ export class LeaderboardScoresService {
     }
 
     const parsedScores = leaderboardScores.scores.map(token =>
-      getScoreSaberScoreFromToken(token, leaderboardResponse.leaderboard, token.leaderboardPlayerInfo.id)
+      getScoreSaberScoreFromToken(token, leaderboard, token.leaderboardPlayerInfo.id)
     );
 
-    const batchRequests = parsedScores
-      .filter((score): score is ScoreSaberScore => score !== undefined)
-      .map(score => ({ playerId: score.playerId, songScore: score.score }));
-
-    const beatLeaderByKey = await BeatLeaderService.batchGetBeatLeaderScoresFromSong(
-      leaderboard.songHash,
-      leaderboard.difficulty.difficulty,
-      leaderboard.difficulty.characteristic,
-      batchRequests
-    );
-
-    const scores = parsedScores
-      .map(score => {
-        if (score === undefined) {
-          return undefined;
-        }
-        const bl = beatLeaderByKey.get(
-          BeatLeaderService.beatLeaderSongLookupKey(score.playerId, score.score)
-        );
-        if (bl !== undefined) {
-          score.beatLeaderScore = bl;
-        }
-        return score;
-      })
-      .filter((score): score is ScoreSaberScore => score !== undefined);
+    const scores = (
+      await Promise.all(
+        parsedScores.map(score => {
+          if (score === undefined) {
+            return undefined;
+          }
+          return ScoreCoreService.insertScoreData(score, leaderboard, {
+            insertBeatLeaderScore: true,
+            insertPlayerInfo: true,
+            insertPreviousScore: false,
+          });
+        })
+      )
+    ).filter(score => score !== undefined) as ScoreSaberScore[];
 
     const totalPages = Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage);
 
     return {
       scores,
       leaderboard: leaderboard,
-      beatSaver: beatSaverMap,
+      beatSaver: await BeatSaverService.getMap(
+        leaderboard.songHash,
+        leaderboard.difficulty.difficulty,
+        leaderboard.difficulty.characteristic
+      ),
       metadata: {
         totalPages,
         totalItems: leaderboardScores.metadata.total,

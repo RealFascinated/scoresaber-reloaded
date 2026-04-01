@@ -1,7 +1,8 @@
 import { IsGuildUser } from "@discordx/utilities";
-import { PlayerModel } from "@ssr/common/model/player/player";
 import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash, SlashOption } from "discordx";
+import { db } from "../../db";
+import { scoreSaberAccountsTable } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { PlayerCoreService } from "../../service/player/player-core.service";
@@ -32,8 +33,8 @@ class FetchMissingPlayerScores {
         interaction.reply({
           content: "Adding all players to the fetch missing scores queue...",
         });
-        const players = await PlayerModel.find().select("_id").lean();
-        const playerIds = players.map(p => p._id);
+        const players = await db.select({ id: scoreSaberAccountsTable.id }).from(scoreSaberAccountsTable);
+        const playerIds = players.map(p => p.id);
         if (playerIds.length === 0) {
           interaction.editReply({
             content: "No players to fetch missing scores for",
@@ -57,11 +58,11 @@ class FetchMissingPlayerScores {
         throw new Error("Player not found");
       }
 
-      const player = await PlayerCoreService.getPlayer(playerId, playerToken);
-      PlayerScoresService.fetchMissingPlayerScores(player, playerToken);
+      const account = await PlayerCoreService.getOrCreateAccount(playerId, playerToken);
+      PlayerScoresService.fetchMissingPlayerScores(account, playerToken);
 
       interaction.reply({
-        content: `Fetching missing scores for ${player.name}...`,
+        content: `Fetching missing scores for ${playerToken.name}...`,
       });
     } catch (error) {
       interaction.reply({

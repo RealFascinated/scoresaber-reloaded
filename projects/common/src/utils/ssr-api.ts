@@ -2,18 +2,18 @@ import { parse } from "devalue";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
 import { StarFilter } from "../maps/types";
-import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
 import type { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
-import { PlayerStatisticHistory } from "../player/player-statistic-history";
 import type {
   AccSaberScoreOrder,
   AccSaberScoreSort,
   AccSaberScoreType,
 } from "../schemas/accsaber/tokens/query/query";
-import type { EnrichedAccSaberScore } from "../schemas/accsaber/tokens/score/score";
+import { AccSaberScore } from "../schemas/accsaber/tokens/score/score";
+import { BeatSaverMap } from "../schemas/beatsaver/map/map";
+import { MapCharacteristic } from "../schemas/map/map-characteristic";
+import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
-import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
 import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard";
 import LeaderboardScoresResponse from "../schemas/response/leaderboard/leaderboard-scores";
 import { PlaysByHmdResponse } from "../schemas/response/leaderboard/plays-by-hmd";
@@ -28,13 +28,15 @@ import { PlayerScoresPageResponse } from "../schemas/response/score/player-score
 import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph";
 import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
-import { MapDifficulty } from "../score/map-difficulty";
+import type { PlayerScoresQuery } from "../schemas/score/query/player-scores-query";
+import { ScoreSaberMedalScoreSortField } from "../schemas/score/query/sort/scoresaber-medal-scores-sort";
+import type { ScoreSaberScoreSortField } from "../schemas/score/query/sort/scoresaber-scores-sort";
+import type { SortDirection } from "../schemas/score/query/sort/sort-direction";
+import type { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberPlayerHistoryEntries } from "../schemas/scoresaber/player/history";
+import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
-import { MapCharacteristic } from "../types/map-characteristic";
-import { ScoreCalendarData } from "../types/player/player-statistic";
-import { ScoreQuery, SortDirection, SortField } from "../types/score-query";
-import ScoreSaberLeaderboardPageToken from "../types/token/scoresaber/leaderboard-page";
 import { getQueryParamsFromObject } from "./utils";
 
 class SSRApi {
@@ -87,18 +89,8 @@ class SSRApi {
    * @param difficulty the difficulty to get
    * @param characteristic the characteristic to get
    */
-  async getBeatSaverMap(
-    hash: string,
-    difficulty: MapDifficulty,
-    characteristic: MapCharacteristic,
-    type: DetailType = "basic"
-  ) {
-    return await this.request<BeatSaverMapResponse>(
-      `/beatsaver/map/${hash}/${difficulty}/${characteristic}`,
-      {
-        type: type,
-      }
-    );
+  async getBeatSaverMap(hash: string, difficulty: MapDifficulty, characteristic: MapCharacteristic) {
+    return await this.request<BeatSaverMap>(`/beatsaver/map/${hash}/${difficulty}/${characteristic}`);
   }
 
   /**
@@ -142,17 +134,6 @@ class SSRApi {
    */
   async getPlayerWeightedPpGainForRawPps(playerId: string, count: number = 1) {
     return await this.request<PpGainResponse>(`/player/pp-gain/${playerId}/${count}`);
-  }
-
-  /**
-   * Gets the score calendar for a player.
-   *
-   * @param playerId the player's id
-   * @param year the year to get the score calendar for
-   * @param month the month to get the score calendar for
-   */
-  async getScoreCalendar(playerId: string, year: number, month: number) {
-    return await this.request<ScoreCalendarData>(`/player/history/calendar/${playerId}/${year}/${month}`);
   }
 
   /**
@@ -211,7 +192,7 @@ class SSRApi {
    * @param leaderboardId the id of the leaderboard
    * @param page the page
    */
-  async fetchPlayerScoresHistory(playerId: string, leaderboardId: string, page: number) {
+  async fetchPlayerScoreSaberScoresHistory(playerId: string, leaderboardId: string, page: number) {
     return await this.request<Page<ScoreSaberScore>>(
       `/player/score-history/${playerId}/${leaderboardId}/${page}`
     );
@@ -269,7 +250,7 @@ class SSRApi {
     order: AccSaberScoreOrder,
     type: AccSaberScoreType
   ) {
-    return await this.request<Page<EnrichedAccSaberScore>>(`/scores/player/accsaber/${id}/${page}`, {
+    return await this.request<Page<AccSaberScore>>(`/scores/player/accsaber/${id}/${page}`, {
       sort,
       order,
       type,
@@ -277,29 +258,59 @@ class SSRApi {
   }
 
   /**
-   * Fetches the player's scores from the cache.
+   * Fetches the player's ScoreSaber scores.
    *
    * @param id the player id
    * @param page the page
    * @param sort the sort
+   * @param direction the direction
+   * @param filters the filters
    * @param search the search term
    */
-  async fetchPlayerScores(
+  async fetchPlayerScoreSaberScores(
     id: string,
-    mode: "ssr" | "medals",
     page: number,
-    sort: SortField,
+    sort: ScoreSaberScoreSortField,
     direction: SortDirection,
-    filters: ScoreQuery
+    filters: PlayerScoresQuery
   ) {
     const queryParams: Record<string, string> = {};
     if (filters.search) queryParams.search = filters.search;
     if (filters.hmd) queryParams.hmd = filters.hmd;
-    if (filters.includePlayers && filters.includePlayers.length > 0) {
-      queryParams.includePlayers = filters.includePlayers.join(",");
+    if (filters.playerIds && filters.playerIds.length > 0) {
+      queryParams.playerIds = filters.playerIds.join(",");
     }
     return await this.request<PlayerScoresPageResponse>(
-      `/scores/player/${mode}/${id}/${sort}/${direction}/${page}`,
+      `/scores/player/ssr/${id}/${sort}/${direction}/${page}`,
+      queryParams
+    );
+  }
+
+  /**
+   * Fetches the player's ScoreSaber scores.
+   *
+   * @param id the player id
+   * @param page the page
+   * @param sort the sort
+   * @param direction the direction
+   * @param filters the filters
+   * @param search the search term
+   */
+  async fetchPlayerScoreSaberMedalScores(
+    id: string,
+    page: number,
+    sort: ScoreSaberMedalScoreSortField,
+    direction: SortDirection,
+    filters: PlayerScoresQuery
+  ) {
+    const queryParams: Record<string, string> = {};
+    if (filters.search) queryParams.search = filters.search;
+    if (filters.hmd) queryParams.hmd = filters.hmd;
+    if (filters.playerIds && filters.playerIds.length > 0) {
+      queryParams.playerIds = filters.playerIds.join(",");
+    }
+    return await this.request<PlayerScoresPageResponse>(
+      `/scores/player/medals/${id}/${sort}/${direction}/${page}`,
       queryParams
     );
   }
@@ -325,7 +336,7 @@ class SSRApi {
    * @returns the statistic history
    */
   async getPlayerStatisticHistory(playerId: string, count: number) {
-    return await this.request<PlayerStatisticHistory>(`/player/history/${playerId}`, {
+    return await this.request<ScoreSaberPlayerHistoryEntries>(`/player/history/${playerId}`, {
       count: count.toString(),
     });
   }
@@ -401,7 +412,7 @@ class SSRApi {
    * @returns the score
    */
   async getScore(scoreId: string) {
-    return await this.request<PlayerScore>(`/scores/${scoreId}`);
+    return await this.request<PlayerScore<ScoreSaberScore>>(`/scores/${scoreId}`);
   }
 
   /**
@@ -420,10 +431,10 @@ class SSRApi {
       category?: number;
       stars?: StarFilter;
       sort?: number;
-      search?: string;
+      query?: string;
     }
   ) {
-    return await this.request<ScoreSaberLeaderboardPageToken>(`/leaderboard/search`, {
+    return await this.request<Page<ScoreSaberLeaderboard>>(`/leaderboard/search`, {
       page: page.toString(),
       ...(options?.ranked ? { ranked: options.ranked.toString() } : {}),
       ...(options?.qualified ? { qualified: options.qualified.toString() } : {}),
@@ -436,7 +447,7 @@ class SSRApi {
           }
         : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
-      ...(options?.search ? { search: options.search } : {}),
+      ...(options?.query ? { query: options.query } : {}),
     });
   }
 
@@ -456,7 +467,7 @@ class SSRApi {
    * @returns the top scores
    */
   async fetchTopScores(page: number) {
-    return await this.request<Page<PlayerScore>>(`/scores/top/${page}`);
+    return await this.request<Page<PlayerScore<ScoreSaberScore>>>(`/scores/top/${page}`);
   }
 }
 

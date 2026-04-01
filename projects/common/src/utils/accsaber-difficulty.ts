@@ -1,4 +1,4 @@
-import type { MapDifficulty } from "../score/map-difficulty";
+import { MapDifficulty } from "../schemas/map/map-difficulty";
 
 /**
  * Normalizes AccSaber GraphQL difficulty strings to MapDifficulty for BeatLeader lookups.

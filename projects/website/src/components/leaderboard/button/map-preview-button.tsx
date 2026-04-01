@@ -1,11 +1,11 @@
 import ScoreButton from "@/components/score/button/score-button";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { PlayCircleIcon } from "lucide-react";
 
 type MapPreviewButtonProps = {
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap: BeatSaverMapResponse;
+  beatSaverMap: BeatSaverMap;
 };
 
 export function MapPreviewButton({ leaderboard, beatSaverMap }: MapPreviewButtonProps) {

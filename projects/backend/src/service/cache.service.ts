@@ -12,7 +12,6 @@ export enum CacheId {
   ScoreSaberApi = "scoresaberApi",
   Leaderboards = "leaderboards",
   BeatLeaderScore = "beatLeaderScore",
-  Players = "players",
   PreviousScore = "previousScore",
   ScoreHistoryGraph = "scoreHistoryGraph",
 }
@@ -39,10 +38,6 @@ export default class CacheService {
     },
     [CacheId.Leaderboards]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
-      mode: "MEMORY",
-    },
-    [CacheId.Players]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 30),
       mode: "MEMORY",
     },
 

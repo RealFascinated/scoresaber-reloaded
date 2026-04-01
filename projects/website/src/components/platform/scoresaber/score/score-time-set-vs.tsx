@@ -1,6 +1,6 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import { format } from "@formkit/tempo";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 
 export function ScoreSaberScoreTimeSetVs({ score }: { score: ScoreSaberScore }) {

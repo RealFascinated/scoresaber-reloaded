@@ -48,7 +48,7 @@ export function TopScoresData() {
 
             return (
               <div key={score.scoreId} className="flex flex-col">
-                <PlayerScoreHeader player={player} />
+                <PlayerScoreHeader player={player!} />
 
                 <Card className="rounded-lg rounded-tl-none p-0">
                   <ScoreSaberScoreDisplay

@@ -3,15 +3,12 @@ import {
   accSaberScoreSortSchema,
   accSaberScoreTypeSchema,
 } from "@ssr/common/schemas/accsaber/tokens/query/query";
+import { PlayerScoresQuerySchema } from "@ssr/common/schemas/score/query/player-scores-query";
+import { ScoreSaberMedalScoreSortFieldSchema } from "@ssr/common/schemas/score/query/sort/scoresaber-medal-scores-sort";
+import { ScoreSaberScoreSortFieldSchema } from "@ssr/common/schemas/score/query/sort/scoresaber-scores-sort";
+import { SortDirectionSchema } from "@ssr/common/schemas/score/query/sort/sort-direction";
 import { ScoreSaberScoreSortSchema } from "@ssr/common/score/score-sort";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
-import {
-  QuerySchema,
-  SortDirection,
-  SortDirectionSchema,
-  SortField,
-  SortFieldSchema,
-} from "@ssr/common/types/score-query";
 import { Elysia } from "elysia";
 import { z } from "zod";
 import { LeaderboardScoresService } from "../service/leaderboard/leaderboard-scores.service";
@@ -31,7 +28,7 @@ export default function scoresController(app: Elysia) {
         {
           tags: ["Scores"],
           params: z.object({
-            scoreId: z.string(),
+            scoreId: z.coerce.number(),
           }),
 
           detail: {
@@ -62,7 +59,7 @@ export default function scoresController(app: Elysia) {
       .get(
         "/player/accsaber/:playerId/:page",
         async ({ params: { playerId, page }, query: { sort, order, type } }) => {
-          return await PlayerScoresService.getAccSaberEnrichedPlayerScores(playerId, page, sort, order, type);
+          return await PlayerScoresService.getPlayerAccSaberScores(playerId, page, sort, order, type);
         },
         {
           tags: ["Scores"],
@@ -81,29 +78,46 @@ export default function scoresController(app: Elysia) {
         }
       )
       .get(
-        "/player/:mode/:playerId/:field/:direction/:page",
-        async ({ params: { mode, playerId, page, field, direction }, query }) => {
-          return await PlayerScoresService.getPlayerScores(
-            mode,
+        "/player/ssr/:playerId/:field/:direction/:page",
+        async ({ params: { playerId, page, field, direction }, query }) => {
+          return await PlayerScoresService.getScoreSaberPlayerScores(playerId, page, field, direction, query);
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            playerId: z.string(),
+            field: ScoreSaberScoreSortFieldSchema,
+            direction: SortDirectionSchema,
+            page: z.coerce.number().default(1),
+          }),
+          query: PlayerScoresQuerySchema,
+          detail: {
+            description: "Fetch player scores",
+          },
+        }
+      )
+      .get(
+        "/player/medals/:playerId/:field/:direction/:page",
+        async ({ params: { playerId, page, field, direction }, query }) => {
+          return await PlayerScoresService.getScoreSaberPlayerMedalScores(
             playerId,
             page,
-            field as SortField,
-            direction as SortDirection,
+            field,
+            direction,
             query
           );
         },
         {
           tags: ["Scores"],
           params: z.object({
-            mode: z.enum(["ssr", "medals"]),
             playerId: z.string(),
-            field: SortFieldSchema,
+            field: ScoreSaberMedalScoreSortFieldSchema,
             direction: SortDirectionSchema,
             page: z.coerce.number().default(1),
           }),
-          query: QuerySchema,
+          query: PlayerScoresQuerySchema,
           detail: {
-            description: "Fetch player scores",
+            description: "Fetch player medal scores",
           },
         }
       )

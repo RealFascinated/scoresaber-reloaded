@@ -1,3 +1,4 @@
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { parse, stringify } from "devalue";
 import { redisClient } from "../common/redis";
@@ -79,6 +80,10 @@ export abstract class Queue<T> {
    * Processes the queue
    */
   public async processQueue() {
+    if (!env.ENABLE_QUEUES) {
+      return;
+    }
+
     // Don't process the queue if it's locked or stopped
     if (this.lock || this.isStopped) {
       return;

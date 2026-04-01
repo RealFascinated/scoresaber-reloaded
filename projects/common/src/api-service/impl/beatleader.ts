@@ -59,7 +59,7 @@ export class BeatLeaderService extends ApiService {
       return undefined;
     }
 
-    const parsed = BeatLeaderPlayersTotalSchema.safeParse(response);
+    const parsed = BeatLeaderPlayersTotalSchema.safeParse(response, { reportInput: true });
     if (!parsed.success) {
       return undefined;
     }
@@ -84,26 +84,53 @@ export class BeatLeaderService extends ApiService {
       order?: "desc" | "asc";
       leaderboardContext?: "general";
       includeIO?: boolean;
+      thenSortBy?: string;
+      thenOrder?: string;
+      noSearchSort?: boolean;
+      search?: string;
+      diff?: string;
+      mode?: string;
+      requirements?: string;
+      type?: string;
+      hmd?: string;
+      modifiers?: string;
+      stars_from?: string;
+      stars_to?: string;
+      eventId?: string;
     }
   ): Promise<BeatLeaderPlayerScoresPageToken | undefined> {
     const before = performance.now();
     this.log(`Looking up BeatLeader scores page ${page} for "${playerId}"...`);
 
+    const o = options ?? {};
     const response = await this.fetch<unknown>(LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":playerId", playerId), {
       searchParams: {
-        leaderboardContext: options?.leaderboardContext ?? "general",
+        leaderboardContext: o.leaderboardContext ?? "general",
         page,
-        count: options?.count ?? 100,
-        sortBy: options?.sortBy ?? "date",
-        order: options?.order ?? "desc",
-        includeIO: options?.includeIO ?? true,
+        sortBy: o.sortBy ?? "date",
+        order: o.order ?? "desc",
+        thenSortBy: o.thenSortBy ?? "",
+        thenOrder: o.thenOrder ?? "",
+        noSearchSort: o.noSearchSort ?? false,
+        search: o.search ?? "",
+        diff: o.diff ?? "",
+        mode: o.mode ?? "",
+        requirements: o.requirements ?? "",
+        type: o.type ?? "",
+        hmd: o.hmd ?? "",
+        modifiers: o.modifiers ?? "",
+        stars_from: o.stars_from ?? "",
+        stars_to: o.stars_to ?? "",
+        eventId: o.eventId ?? "",
+        count: o.count ?? 100,
+        includeIO: o.includeIO ?? true,
       },
     });
     if (response == undefined) {
       return undefined;
     }
 
-    const parsed = BeatLeaderPlayerScoresPageSchema.safeParse(response);
+    const parsed = BeatLeaderPlayerScoresPageSchema.safeParse(response, { reportInput: true });
     if (!parsed.success) {
       this.log(`Failed to parse BeatLeader scores page ${page} for "${playerId}": ${parsed.error.message}`);
       return undefined;

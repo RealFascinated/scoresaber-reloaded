@@ -1,8 +1,9 @@
-import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
-import { ScoreSaberLeaderboardModel } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { asc, count, eq } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
 import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
 import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
@@ -14,80 +15,83 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     super(QueueId.LeaderboardScoreSeedQueue, "lifo");
 
     setImmediate(() => this.insertLeaderboards());
-    setInterval(() => this.insertLeaderboards(), TimeUnit.toMillis(TimeUnit.Hour, 1));
+    setInterval(() => this.insertLeaderboards(), TimeUnit.toMillis(TimeUnit.Second, 10));
   }
 
   protected async processItem(item: QueueItem<number>): Promise<void> {
     const leaderboardId = Number(item.id);
 
-    const leaderboardResponse = await LeaderboardCoreService.getLeaderboard(leaderboardId);
-    if (!leaderboardResponse) {
-      Logger.warn(`Leaderboard "${leaderboardId}" not found`);
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
+    const totalTrackedScores =
+      (
+        await db
+          .select({ count: count() })
+          .from(scoreSaberScoresTable)
+          .where(eq(scoreSaberScoresTable.leaderboardId, leaderboardId))
+      )[0]?.count ?? 0;
+
+    const firstPage = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1);
+    if (firstPage && totalTrackedScores >= firstPage.metadata.total) {
+      // Logger.warn(`Skipping leaderboard "${leaderboardId}" because it already has all scores tracked`);
+      await this.markLeaderboardSeeded(leaderboardId);
       return;
     }
-    const leaderboard = leaderboardResponse.leaderboard;
 
-    let currentPage = 1;
-    let hasMoreScores = true;
-    let processedAnyScores = false;
-    let lastSuccessfulPage = 1;
-    while (hasMoreScores) {
-      const response = await ScoreSaberApiService.lookupLeaderboardScores(
-        Number(leaderboardId),
-        currentPage,
-        {
-          priority: CooldownPriority.BACKGROUND,
-        }
-      );
+    let consecutiveFailures = 0;
+    let newScoresTracked = 0;
+    let scrape = true;
+    let page = 1;
+
+    while (scrape) {
+      const response =
+        page === 1 && firstPage
+          ? firstPage
+          : await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page);
       if (!response) {
-        Logger.warn(
-          `Failed to fetch scoresaber api scores for leaderboard "${leaderboardId}" on page ${currentPage}`
-        );
-        currentPage++;
-
-        if (currentPage > lastSuccessfulPage + 5) {
-          Logger.warn(`Skipping leaderboard "${leaderboardId}" because it has too many failed pages`);
-          processedAnyScores = true;
+        Logger.warn(`Failed to fetch scores for leaderboard "${leaderboardId}" on page ${page}`);
+        consecutiveFailures++;
+        if (consecutiveFailures >= 2) {
+          Logger.warn(`Aborting leaderboard "${leaderboardId}" after 2 consecutive page failures`);
           break;
         }
         continue;
       }
+
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      consecutiveFailures = 0;
 
-      // Log every 10 pages, the first page, and the last page
-      if (currentPage % 10 === 0 || currentPage === 1 || currentPage === totalPages) {
-        Logger.info(`Fetched scores for leaderboard "${leaderboardId}" on page ${currentPage}/${totalPages}`);
+      if (page % 10 === 0 || page === 1 || page === totalPages) {
+        Logger.info(`Fetching scores for leaderboard "${leaderboardId}" on page ${page}/${totalPages}`);
       }
 
-      for (const rawScore of response.scores) {
-        const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
+      await Promise.all(
+        response.scores.map(async rawScore => {
+          const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
+          if (await ScoreCoreService.scoreExists(score.scoreId)) {
+            return;
+          }
+          await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false);
+          newScoresTracked++;
+        })
+      );
 
-        // Check if the score is already tracked
-        const scoreExists = await ScoreCoreService.scoreExists(score.scoreId);
-        if (scoreExists) {
-          processedAnyScores = true;
-          continue;
-        }
-
-        await ScoreCoreService.trackScoreSaberScore(score, leaderboard, score.playerInfo, undefined, false);
-        processedAnyScores = true;
+      if (page === totalPages) {
+        scrape = false;
       }
-
-      hasMoreScores = currentPage < totalPages;
-      currentPage++;
-      lastSuccessfulPage = currentPage;
+      page++;
     }
 
-    // Update the seeded scores status only if we processed at least one score
-    if (processedAnyScores) {
-      await ScoreSaberLeaderboardModel.updateOne(
-        { _id: leaderboardId },
-        { $set: { seededScores: true } }
-      ).lean();
-      Logger.info(`Updated seeded scores status for leaderboard "${leaderboardId}"`);
-    } else {
-      Logger.warn(`Skipping seeded flag for leaderboard "${leaderboardId}" because no scores were processed`);
-    }
+    await this.markLeaderboardSeeded(leaderboardId);
+    Logger.info(
+      `Updated seeded scores status for leaderboard "${leaderboardId}" and tracked ${newScoresTracked} new scores`
+    );
+  }
+
+  private async markLeaderboardSeeded(leaderboardId: number): Promise<void> {
+    await db
+      .update(scoreSaberLeaderboardsTable)
+      .set({ seededScores: true })
+      .where(eq(scoreSaberLeaderboardsTable.id, leaderboardId));
   }
 
   /**
@@ -99,13 +103,14 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       return;
     }
     try {
-      const leaderboards = await ScoreSaberLeaderboardModel.find({
-        seededScores: { $in: [null, false] },
-      })
-        .select("_id")
-        .sort({ ranked: -1, plays: 1 }) // Ranked first, then least plays
-        .lean();
-      const leaderboardIds = leaderboards.map(p => p._id);
+      const leaderboards = await db
+        .select({ id: scoreSaberLeaderboardsTable.id })
+        .from(scoreSaberLeaderboardsTable)
+        .where(eq(scoreSaberLeaderboardsTable.seededScores, false))
+        .orderBy(asc(scoreSaberLeaderboardsTable.plays))
+        .limit(500);
+
+      const leaderboardIds = leaderboards.map(l => l.id);
       if (leaderboardIds.length === 0) {
         Logger.info("No leaderboard to seed scores for");
         return;

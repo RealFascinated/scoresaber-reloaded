@@ -1,22 +1,28 @@
+import { env } from "@ssr/common/env";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
-import { StorageBucket } from "@ssr/common/minio-buckets";
-import { Player, PlayerModel } from "@ssr/common/model/player/player";
-import { PlayerScoreStats } from "@ssr/common/model/player/player-score-stats";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
+import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
+import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
+import { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
+import { and, eq, gt } from "drizzle-orm";
 import { logNewTrackedPlayer } from "../../common/embds";
+import { db } from "../../db";
+import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
+import { scoreSaberAccountsTable, scoreSaberScoresTable, type ScoreSaberAccountRow } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
-import CacheService, { CacheId } from "../cache.service";
+import CacheService from "../cache.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
 import StorageService from "../storage.service";
+import { PlayerScoresService } from "./player-scores.service";
 
-export const accountCreationLock: Record<string, Promise<Player | undefined>> = {};
+export const accountCreationLock: Record<string, Promise<ScoreSaberAccount | undefined>> = {};
 
 export class PlayerCoreService {
   /**
@@ -28,15 +34,10 @@ export class PlayerCoreService {
    * @returns the player document if found
    * @throws NotFoundError if the player doesn't exist on ScoreSaber
    */
-  public static async getPlayer(
+  public static async getOrCreateAccount(
     id: string,
-    playerToken?: ScoreSaberPlayerToken,
-    options?: {
-      useCache?: boolean;
-    }
-  ): Promise<Player> {
-    const useCache = options?.useCache !== false;
-
+    playerToken?: ScoreSaberPlayerToken
+  ): Promise<ScoreSaberAccount> {
     // Wait for the existing lock if it's in progress
     if (accountCreationLock[id] !== undefined) {
       const result = await accountCreationLock[id];
@@ -46,56 +47,84 @@ export class PlayerCoreService {
       return result;
     }
 
-    let player: Player | null | undefined = await (useCache
-      ? CacheService.fetch(CacheId.Players, `player:${id}`, async () =>
-          PlayerModel.findOne({ _id: id }).lean()
-        )
-      : PlayerModel.findOne({ _id: id }).lean());
+    let [account] = await db
+      .select()
+      .from(scoreSaberAccountsTable)
+      .where(eq(scoreSaberAccountsTable.id, id))
+      .limit(1);
 
-    if (player === null) {
-      player = await PlayerCoreService.createPlayer(id, playerToken);
-      if (!player) {
+    if (!account) {
+      const created = await PlayerCoreService.createPlayer(id, playerToken);
+      if (!created) {
+        throw new NotFoundError(`Player "${id}" not found after creation`);
+      }
+      [account] = await db
+        .select()
+        .from(scoreSaberAccountsTable)
+        .where(eq(scoreSaberAccountsTable.id, id))
+        .limit(1);
+      if (!account) {
         throw new NotFoundError(`Player "${id}" not found after creation`);
       }
     }
 
-    let shouldSave = false;
-    const updates: Partial<Player> = {};
-
-    if (playerToken) {
-      if (playerToken.name !== player.name) {
-        updates.name = playerToken.name;
-        shouldSave = true;
-      }
-      if (playerToken.pp !== player.pp) {
-        updates.pp = playerToken.pp;
-        shouldSave = true;
-      }
-      if (playerToken.country !== player.country) {
-        updates.country = playerToken.country;
-        shouldSave = true;
-      }
-      if (playerToken.banned !== player.banned) {
-        updates.banned = playerToken.banned;
-        shouldSave = true;
-      }
+    const isOculusAccount =
+      playerToken?.id.length === 16 ||
+      playerToken?.profilePicture === "https://cdn.scoresaber.com/avatars/oculus.png";
+    let avatar = playerToken?.profilePicture ?? "https://cdn.fascinated.cc/assets/unknown.png";
+    if (isOculusAccount) {
+      avatar = "https://cdn.fascinated.cc/assets/oculus-avatar.jpg";
+    } else if (playerToken?.profilePicture === "https://cdn.scoresaber.com/avatars/steam.png") {
+      avatar = "https://cdn.fascinated.cc/assets/unknown.png";
+    } else if (account) {
+      avatar = `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.PlayerAvatars)}/${id}.jpg`;
     }
 
-    // insert score stats if missing
-    if (!player.scoreStats) {
-      updates.scoreStats = await PlayerCoreService.getPlayerScoreStats(id);
+    if (
+      account &&
+      !isOculusAccount &&
+      !account.cachedProfilePicture &&
+      playerToken?.profilePicture !== "https://cdn.scoresaber.com/avatars/steam.png"
+    ) {
+      await PlayerCoreService.cachePlayerProfilePicture(id);
+    }
+
+    let shouldSave = false;
+    const updates: Partial<Pick<ScoreSaberAccountRow, "country" | "banned" | "avatar">> = {};
+    if (playerToken?.country !== account.country) {
+      updates.country = playerToken?.country ?? null;
+      shouldSave = true;
+    }
+    if (playerToken?.banned !== account.banned) {
+      updates.banned = playerToken?.banned ?? false;
+      shouldSave = true;
+    }
+    if (account.avatar !== avatar) {
+      updates.avatar = avatar;
       shouldSave = true;
     }
 
     if (shouldSave) {
-      await PlayerModel.updateOne({ _id: id }, { $set: updates });
-      Object.assign(player, updates);
-      if (!useCache) {
-        await CacheService.invalidate(`player:${id}`);
-      }
+      await PlayerCoreService.updatePlayer(id, updates);
+      Object.assign(account, updates);
     }
 
-    return player;
+    return scoreSaberAccountRowToType(account);
+  }
+
+  /**
+   * Gets a player by id.
+   *
+   * @param id the player's id
+   * @returns the player document if found
+   */
+  public static async getAccount(id: string): Promise<ScoreSaberAccount | undefined> {
+    const [account] = await db
+      .select()
+      .from(scoreSaberAccountsTable)
+      .where(eq(scoreSaberAccountsTable.id, id))
+      .limit(1);
+    return account ? scoreSaberAccountRowToType(account) : undefined;
   }
 
   /**
@@ -108,13 +137,18 @@ export class PlayerCoreService {
   public static async createPlayer(
     id: string,
     playerToken?: ScoreSaberPlayerToken
-  ): Promise<Player | undefined> {
+  ): Promise<ScoreSaberAccount | undefined> {
     let lockPromise = accountCreationLock[id];
     if (lockPromise === undefined) {
-      lockPromise = (async (): Promise<Player | undefined> => {
+      lockPromise = (async (): Promise<ScoreSaberAccount | undefined> => {
         try {
-          if (await PlayerCoreService.playerExists(id)) {
-            return (await PlayerModel.findOne({ _id: id }).lean()) ?? undefined;
+          const [existingRow] = await db
+            .select()
+            .from(scoreSaberAccountsTable)
+            .where(eq(scoreSaberAccountsTable.id, id))
+            .limit(1);
+          if (existingRow) {
+            return scoreSaberAccountRowToType(existingRow);
           }
 
           const token = playerToken || (await ScoreSaberApiService.lookupPlayer(id));
@@ -124,16 +158,38 @@ export class PlayerCoreService {
 
           try {
             Logger.info(`Creating player "${id}"...`);
-            const newPlayer = await PlayerModel.create({
-              _id: id,
-              joinedDate: new Date(token.firstSeen),
-              inactive: token.inactive,
-              name: token.name,
-              trackedSince: new Date(),
-            });
+            const newAccount = await db
+              .insert(scoreSaberAccountsTable)
+              .values({
+                id: id,
+                name: token.name,
+                country: token.country ?? null,
+                peakRank: token.rank,
+                peakRankTimestamp: new Date(),
+                seededScores: false,
+                seededBeatLeaderScores: false,
+                cachedProfilePicture: false,
+                trackReplays: false,
+                inactive: token.inactive,
+                banned: token.banned,
+                pp: token.pp,
+                medals: 0,
+                hmd: "Unknown" as HMD,
+                scoreStats: {
+                  aPlays: 0,
+                  sPlays: 0,
+                  spPlays: 0,
+                  ssPlays: 0,
+                  sspPlays: 0,
+                  godPlays: 0,
+                },
+                trackedSince: new Date(),
+                joinedDate: new Date(token.firstSeen),
+              })
+              .returning();
 
             // If the player has less scores tracked than the total play count, add them to the refresh queue
-            const trackedScores = await ScoreSaberScoreModel.countDocuments({ playerId: id });
+            const trackedScores = await PlayerScoresService.getPlayerScoresCount(id);
             if (trackedScores < token.scoreStats.totalPlayCount) {
               const seedQueue = QueueManager.getQueue(
                 QueueId.PlayerScoreRefreshQueue
@@ -146,13 +202,20 @@ export class PlayerCoreService {
               }
             } else {
               // Mark player as seeded
-              await PlayerModel.updateOne({ _id: newPlayer._id }, { $set: { seededScores: true } });
+              await db
+                .update(scoreSaberAccountsTable)
+                .set({ seededScores: true })
+                .where(eq(scoreSaberAccountsTable.id, id));
             }
 
             if (isProduction()) {
               await logNewTrackedPlayer(token);
             }
-            return newPlayer.toObject();
+            const [inserted] = newAccount;
+            if (!inserted) {
+              throw new InternalServerError(`Insert did not return a row for player "${id}"`);
+            }
+            return scoreSaberAccountRowToType(inserted);
           } catch (err) {
             Logger.error(`Failed to create player document for "${id}"`, err);
             throw new InternalServerError(`Failed to create player document for "${id}"`);
@@ -181,11 +244,16 @@ export class PlayerCoreService {
    * @returns whether the player exists
    */
   public static async playerExists(id: string, throwIfNotFound: boolean = false): Promise<boolean> {
-    const player = await PlayerModel.exists({ _id: id });
-    if (throwIfNotFound && !player) {
+    const [row] = await db
+      .select()
+      .from(scoreSaberAccountsTable)
+      .where(eq(scoreSaberAccountsTable.id, id))
+      .limit(1);
+    const exists = row !== undefined;
+    if (throwIfNotFound && !exists) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
-    return player !== null;
+    return exists;
   }
 
   /**
@@ -210,18 +278,27 @@ export class PlayerCoreService {
   }
 
   /**
-   * Updates the player's name.
+   * Updates a player.
    *
    * @param playerId the player's id
-   * @param name the new name
+   * @param patch the patch to apply
+   * @param options optional behavior (e.g. invalidate cache)
+   * @returns the updated player
    */
-  public static async updatePlayerName(playerId: string, name: string) {
-    // Only update if name has changed
-    const player = await PlayerModel.findById(playerId).select("name").lean();
-    if (player && player.name === name) {
-      return; // Name hasn't changed, skip write
+  public static async updatePlayer(
+    playerId: string,
+    patch: Partial<Omit<ScoreSaberAccountRow, "id">>,
+    options?: { invalidateCache?: boolean }
+  ): Promise<void> {
+    if (Object.keys(patch).length === 0) {
+      return;
     }
-    await PlayerModel.updateOne({ _id: playerId }, { $set: { name } });
+
+    await db.update(scoreSaberAccountsTable).set(patch).where(eq(scoreSaberAccountsTable.id, playerId));
+
+    if (options?.invalidateCache !== false) {
+      await CacheService.invalidate(`player:${playerId}`);
+    }
   }
 
   /**
@@ -230,28 +307,29 @@ export class PlayerCoreService {
    * @param playerToken the player's token
    */
   public static async updatePeakRank(playerToken: ScoreSaberPlayerToken) {
-    const player = await PlayerModel.findById(playerToken.id).select("peakRank").lean();
-    if (!player) {
+    const [account] = await db
+      .select()
+      .from(scoreSaberAccountsTable)
+      .where(eq(scoreSaberAccountsTable.id, playerToken.id))
+      .limit(1);
+    if (!account) {
+      return;
+    }
+    if (account.peakRank === playerToken.rank) {
+      return;
+    }
+    if (playerToken.rank == 0) {
       return;
     }
 
-    if (playerToken.rank == 0) {
-      return player;
+    if (!account.peakRank || (account.peakRank && playerToken.rank < account.peakRank)) {
+      await db
+        .update(scoreSaberAccountsTable)
+        .set({ peakRank: playerToken.rank, peakRankTimestamp: new Date() })
+        .where(eq(scoreSaberAccountsTable.id, playerToken.id));
     }
 
-    if (!player.peakRank || (player.peakRank && playerToken.rank < player.peakRank.rank)) {
-      const newPeakRank = {
-        rank: playerToken.rank,
-        date: new Date(),
-      };
-
-      await PlayerModel.updateOne({ _id: player._id }, { $set: { peakRank: newPeakRank } });
-
-      // Update the local player object
-      player.peakRank = newPeakRank;
-    }
-
-    return player;
+    return scoreSaberAccountRowToType(account);
   }
 
   /**
@@ -268,7 +346,10 @@ export class PlayerCoreService {
       });
       if (request) {
         await StorageService.saveFile(StorageBucket.PlayerAvatars, `${playerId}.jpg`, Buffer.from(request));
-        await PlayerModel.updateOne({ _id: playerId }, { $set: { cachedProfilePicture: true } });
+        await db
+          .update(scoreSaberAccountsTable)
+          .set({ cachedProfilePicture: true })
+          .where(eq(scoreSaberAccountsTable.id, playerId));
         await CacheService.invalidate(`player:${playerId}`);
         Logger.info(`Cached profile picture for player ${playerId}${force ? " (force)" : ""}`);
         return;
@@ -284,23 +365,19 @@ export class PlayerCoreService {
    * @param playerId the player's id
    * @returns the player's score stats
    */
-  public static async getPlayerScoreStats(playerId: string): Promise<PlayerScoreStats> {
-    const scores = await ScoreSaberScoreModel.find({
-      playerId: playerId,
-      pp: { $gt: 0 },
-    })
-      .select({
-        accuracy: 1,
-      })
-      .lean();
+  public static async getPlayerScoreStats(playerId: string): Promise<ScoreSaberPlayerScoreStats> {
+    const scores = await db
+      .select()
+      .from(scoreSaberScoresTable)
+      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)));
 
-    const scoreStats: PlayerScoreStats = {
-      godPlays: 0,
-      sspPlays: 0,
-      ssPlays: 0,
-      spPlays: 0,
-      sPlays: 0,
+    const scoreStats: ScoreSaberPlayerScoreStats = {
       aPlays: 0,
+      sPlays: 0,
+      spPlays: 0,
+      ssPlays: 0,
+      sspPlays: 0,
+      godPlays: 0,
     };
 
     for (const playerScore of scores) {

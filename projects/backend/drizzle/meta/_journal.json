@@ -1,0 +1,90 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1774845841960,
+      "tag": "0000_initial",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774850791676,
+      "tag": "0001_rename-history-table",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774893110633,
+      "tag": "0002_add avatar field to account",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774894000000,
+      "tag": "0003_scores_pp_positive_idx",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1774900465995,
+      "tag": "0004_drop redundant index on player history",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1774920000000,
+      "tag": "0005_metrics_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774905057974,
+      "tag": "0006_add beatsaver tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1774908320016,
+      "tag": "0007_add fallback hmd",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1774998300857,
+      "tag": "0008_rename_scoresaber_scores_id_to_scoreid",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1774998300860,
+      "tag": "0009_scoresaber_score_history_leaderboard_player_score_unique",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1775200000000,
+      "tag": "0010_add-seeded-scores=false-index",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1775200000001,
+      "tag": "0011_rename-medal-score-id-column",
+      "breakpoints": true
+    }
+  ]
+}

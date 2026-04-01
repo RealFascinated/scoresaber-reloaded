@@ -1,12 +1,15 @@
+import { env } from "./env";
 import type { HMD } from "./hmds";
-import { validateMap } from "./maps/validators";
-import ScoreSaberLeaderboard from "./model/leaderboard/impl/scoresaber-leaderboard";
-import LeaderboardDifficulty from "./model/leaderboard/leaderboard-difficulty";
-import { LeaderboardStatus } from "./model/leaderboard/leaderboard-status";
-import { Controllers } from "./model/score/controllers";
-import { ScoreSaberScore } from "./model/score/impl/scoresaber-score";
+import { getS3BucketName, StorageBucket } from "./minio-buckets";
+import { MapCharacteristic } from "./schemas/map/map-characteristic";
+import { ScoreSaberLeaderboardDifficulty } from "./schemas/scoresaber/leaderboard/difficulty";
+import {
+  ScoreSaberLeaderboard,
+  ScoreSaberLeaderboardSchema,
+} from "./schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberLeaderboardStatus } from "./schemas/scoresaber/leaderboard/status";
+import { ScoreSaberScore, ScoreSaberScoreSchema } from "./schemas/scoresaber/score/score";
 import { Modifier } from "./score/modifier";
-import { MapCharacteristic } from "./types/map-characteristic";
 import ScoreSaberLeaderboardToken from "./types/token/scoresaber/leaderboard";
 import ScoreSaberScoreToken from "./types/token/scoresaber/score";
 import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
@@ -19,63 +22,61 @@ import { parseDate } from "./utils/time-utils";
  */
 export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardToken): ScoreSaberLeaderboard {
   const characteristic = token.difficulty.gameMode.replace("Solo", "");
-  const difficulty: LeaderboardDifficulty = {
-    leaderboardId: token.difficulty.leaderboardId,
+  const difficulty: ScoreSaberLeaderboardDifficulty = {
+    id: token.difficulty.leaderboardId,
     difficulty: getDifficultyFromScoreSaberDifficulty(token.difficulty.difficulty),
     characteristic:
       characteristic == "" || characteristic == undefined
         ? "Standard"
         : (characteristic as MapCharacteristic),
-    difficultyRaw: token.difficulty.difficultyRaw,
   };
-  validateMap(difficulty.difficulty, difficulty.characteristic);
+  const difficulties: ScoreSaberLeaderboardDifficulty[] =
+    token.difficulties != null
+      ? token.difficulties.map(difficulty => {
+          const characteristic = difficulty.gameMode.replace("Solo", "");
+          return {
+            id: difficulty.leaderboardId,
+            difficulty: getDifficultyFromScoreSaberDifficulty(difficulty.difficulty),
+            characteristic:
+              characteristic == "" || characteristic == undefined
+                ? "Standard"
+                : (characteristic as MapCharacteristic),
+          };
+        })
+      : [difficulty];
 
-  let status: LeaderboardStatus = "Unranked";
+  let status: ScoreSaberLeaderboardStatus = "Unranked";
   if (token.qualified) {
     status = "Qualified";
   } else if (token.ranked) {
     status = "Ranked";
   }
 
-  return {
-    id: token.id,
-    songHash: token.songHash.toUpperCase(),
-    songName: token.songName,
-    songSubName: token.songSubName,
-    fullName: `${token.songName} ${token.songSubName}`.trim(),
-    songAuthorName: token.songAuthorName,
-    levelAuthorName: token.levelAuthorName,
-    difficulty: difficulty,
-    difficulties:
-      token.difficulties != undefined && token.difficulties.length > 0
-        ? token.difficulties.map(difficulty => {
-            const characteristic = difficulty.gameMode.replace("Solo", "");
-            const diff: LeaderboardDifficulty = {
-              leaderboardId: difficulty.leaderboardId,
-              difficulty: getDifficultyFromScoreSaberDifficulty(difficulty.difficulty),
-              characteristic:
-                characteristic == "" || characteristic == undefined
-                  ? "Standard"
-                  : (characteristic as MapCharacteristic),
-              difficultyRaw: difficulty.difficultyRaw,
-            };
-
-            validateMap(diff.difficulty, diff.characteristic);
-            return diff;
-          })
-        : [difficulty],
-    maxScore: token.maxScore,
-    ranked: token.ranked,
-    songArt: token.coverImage,
-    timestamp: parseDate(token.createdDate),
-    stars: token.stars,
-    plays: token.plays,
-    dailyPlays: token.dailyPlays,
-    qualified: token.qualified,
-    status: status,
-    dateRanked: token.rankedDate ? parseDate(token.rankedDate) : undefined,
-    dateQualified: token.qualifiedDate ? parseDate(token.qualifiedDate) : undefined,
-  };
+  return ScoreSaberLeaderboardSchema.parse(
+    {
+      id: token.id,
+      songHash: token.songHash.toUpperCase(),
+      songName: token.songName,
+      songSubName: token.songSubName,
+      fullName: `${token.songName} ${token.songSubName}`.trim(),
+      songAuthorName: token.songAuthorName,
+      levelAuthorName: token.levelAuthorName,
+      songArt: `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${token.songHash}.png`,
+      difficulty: difficulty,
+      difficulties: difficulties,
+      maxScore: token.maxScore,
+      ranked: token.ranked,
+      timestamp: parseDate(token.createdDate),
+      stars: token.stars,
+      plays: token.plays,
+      dailyPlays: token.dailyPlays,
+      qualified: token.qualified,
+      status: status,
+      rankedDate: token.rankedDate ? parseDate(token.rankedDate) : undefined,
+      qualifiedDate: token.qualifiedDate ? parseDate(token.qualifiedDate) : undefined,
+    },
+    { reportInput: true }
+  );
 }
 
 /**
@@ -102,34 +103,32 @@ export function getScoreSaberScoreFromToken(
           return modifier;
         });
 
-  const controllers: Controllers | undefined =
-    token.deviceControllerRight && token.deviceControllerLeft
-      ? {
-          rightController: token.deviceControllerRight,
-          leftController: token.deviceControllerLeft,
-        }
-      : undefined;
-
-  return {
-    playerId: playerId || token.leaderboardPlayerInfo.id,
-    leaderboardId: leaderboard.id,
-    difficulty: leaderboard.difficulty.difficulty,
-    characteristic: leaderboard.difficulty.characteristic ?? "Standard",
-    score: token.baseScore,
-    accuracy: leaderboard.maxScore ? (token.baseScore / leaderboard.maxScore) * 100 : Infinity,
-    rank: token.rank,
-    modifiers: modifiers,
-    misses: token.missedNotes + token.badCuts,
-    missedNotes: token.missedNotes,
-    badCuts: token.badCuts,
-    fullCombo: token.fullCombo,
-    timestamp: new Date(token.timeSet),
-    scoreId: token.id,
-    pp: token.pp,
-    weight: token.weight,
-    maxCombo: token.maxCombo,
-    playerInfo: token.leaderboardPlayerInfo,
-    hmd: (token.deviceHmd as HMD) ?? (ScoreSaberHMDs[token.hmd] as HMD | undefined),
-    controllers: controllers,
-  } as ScoreSaberScore;
+  return ScoreSaberScoreSchema.parse(
+    {
+      playerId: playerId ?? token.leaderboardPlayerInfo.id,
+      leaderboardId: leaderboard.id,
+      scoreId: token.id,
+      difficulty: leaderboard.difficulty.difficulty,
+      characteristic: leaderboard.difficulty.characteristic ?? "Standard",
+      score: token.baseScore,
+      accuracy: leaderboard.maxScore
+        ? (token.baseScore / leaderboard.maxScore) * 100
+        : Number.POSITIVE_INFINITY,
+      pp: token.pp,
+      weight: token.weight,
+      rank: token.rank,
+      misses: token.missedNotes + token.badCuts,
+      missedNotes: token.missedNotes,
+      badCuts: token.badCuts,
+      maxCombo: token.maxCombo,
+      fullCombo: token.fullCombo,
+      modifiers,
+      hmd: (token.deviceHmd as HMD) ?? (ScoreSaberHMDs[token.hmd] as HMD | undefined),
+      rightController: token.deviceControllerRight,
+      leftController: token.deviceControllerLeft,
+      ...(token.leaderboardPlayerInfo ? { playerInfo: token.leaderboardPlayerInfo } : {}),
+      timestamp: new Date(token.timeSet),
+    },
+    { reportInput: true }
+  );
 }

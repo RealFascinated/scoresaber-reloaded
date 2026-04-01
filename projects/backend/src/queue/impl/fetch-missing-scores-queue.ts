@@ -1,10 +1,12 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { PlayerModel } from "@ssr/common/model/player/player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
+import { and, eq } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { db } from "../../db";
+import { scoreSaberAccountsTable } from "../../db/schema";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoresService } from "../../service/player/player-scores.service";
 import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
@@ -28,9 +30,9 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       return;
     }
 
-    const player = await PlayerCoreService.getPlayer(playerId, playerToken);
+    const account = await PlayerCoreService.getOrCreateAccount(playerId, playerToken);
     const { totalScores, missingScores, totalPagesFetched, timeTaken } =
-      await PlayerScoresService.fetchMissingPlayerScores(player, playerToken);
+      await PlayerScoresService.fetchMissingPlayerScores(account, playerToken);
     if (missingScores == 0) {
       return;
     }
@@ -39,7 +41,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
       new EmbedBuilder()
         .setTitle("Player Score Refresh Complete")
-        .setDescription(`🎯 **${player.name}**'s scores have been fetched`)
+        .setDescription(`🎯 **${account.name}**'s scores have been fetched`)
         .addFields([
           {
             name: "📊 Statistics",
@@ -62,7 +64,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
               .setLabel("Player Profile")
               .setEmoji("👤")
               .setStyle(ButtonStyle.Link)
-              .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${player._id}`),
+              .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${account.id}`),
           ],
         },
       ]
@@ -75,13 +77,13 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       if ((await this.getSize()) !== 0) {
         return;
       }
-      const players = await PlayerModel.find({
-        seededScores: { $in: [null, false] },
-        banned: false,
-      })
-        .select("_id")
-        .lean();
-      const playerIds = players.map(p => p._id);
+      const players = await db
+        .select({ id: scoreSaberAccountsTable.id })
+        .from(scoreSaberAccountsTable)
+        .where(
+          and(eq(scoreSaberAccountsTable.seededScores, false), eq(scoreSaberAccountsTable.banned, false))
+        );
+      const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {
         Logger.info("No players to seed scores for");
         return;

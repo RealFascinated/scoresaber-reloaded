@@ -1,9 +1,12 @@
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
-import { scoreToObject } from "@ssr/common/utils/model-converters";
+import { desc, gt } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
+import { scoreSaberScoresTable } from "../../db/schema";
+import BeatSaverService from "../beatsaver.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "./score-core.service";
 
@@ -14,81 +17,56 @@ export class TopScoresService {
    * @param page the page number
    * @returns the top scores with pagination metadata
    */
-  public static async getTopScores(page: number = 1): Promise<Page<PlayerScore>> {
-    const pagination = new Pagination<PlayerScore>().setItemsPerPage(25).setTotalItems(1000);
+  public static async getTopScores(page: number = 1): Promise<Page<PlayerScore<ScoreSaberScore>>> {
+    const limit = 25;
+    const offset = (page - 1) * limit;
 
-    return pagination.getPageWithCursor(page, {
-      sortField: "pp",
-      sortDirection: -1,
-      getCursor: (item: { pp: number; _id: unknown }) => ({
-        sortValue: item.pp,
-        id: item._id,
-      }),
-      buildCursorQuery: cursor => {
-        if (!cursor) return { pp: { $gt: 0 } };
-        return {
-          $or: [{ pp: { $lt: cursor.sortValue } }, { pp: cursor.sortValue, _id: { $lt: cursor.id } }],
-          pp: { $gt: 0 },
-        };
-      },
-      getPreviousPageItem: async () => {
-        // Get the last item from the previous page
-        // For page 2, we want item at position 24 (last item of page 1)
-        // For page 3, we want item at position 49 (last item of page 2)
-        const skip = Math.min((page - 1) * pagination.itemsPerPage - 1, pagination.totalItems - 1);
-        if (skip < 0) return null;
-        const items = await ScoreSaberScoreModel.aggregate([
-          { $match: { pp: { $gt: 0 } } },
-          { $sort: { pp: -1, _id: -1 } },
-          { $skip: skip },
-          { $limit: 1 },
-          { $project: { pp: 1, _id: 1 } },
-        ]).hint({ pp: -1, _id: -1 });
-        return (items[0] as { pp: number; _id: unknown }) || null;
-      },
-      fetchItems: async cursorInfo => {
-        const scoreObjects = (
-          await ScoreSaberScoreModel.aggregate([
-            { $match: cursorInfo.query },
-            { $sort: { pp: -1, _id: -1 } },
-            { $limit: cursorInfo.limit },
-          ]).hint({ pp: -1, _id: -1 })
-        ).map(scoreToObject);
+    const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
+      .setItemsPerPage(limit)
+      .setTotalItems(1000);
 
-        if (!scoreObjects.length) {
-          return [];
-        }
+    return pagination.getPage(page, async () => {
+      const scoresRows = await db
+        .select()
+        .from(scoreSaberScoresTable)
+        .where(gt(scoreSaberScoresTable.pp, 0))
+        .orderBy(desc(scoreSaberScoresTable.pp))
+        .limit(limit)
+        .offset(offset);
 
-        const leaderboardMap = await LeaderboardCoreService.batchFetchLeaderboards(
-          scoreObjects,
-          (score: ScoreSaberScore) => score.leaderboardId,
-          { includeBeatSaver: true }
-        );
+      if (!scoresRows.length) {
+        return [];
+      }
 
-        // Process scores in parallel
-        const processedScores = await Promise.all(
-          scoreObjects.map(async (score: ScoreSaberScore) => {
-            const leaderboardResponse = leaderboardMap.get(score.leaderboardId);
-            if (!leaderboardResponse) {
-              return null;
-            }
+      const leaderboards = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(
+        scoresRows.map(scoreRow => scoreRow.leaderboardId)
+      );
 
-            const { leaderboard, beatsaver } = leaderboardResponse;
+      const scores = await Promise.all(
+        scoresRows.map(async scoreRow => {
+          const leaderboard = leaderboards.get(scoreRow.leaderboardId);
+          if (!leaderboard) return undefined;
 
-            const processedScore = await ScoreCoreService.insertScoreData(score, leaderboard, {
-              removeScoreWeightAndRank: true,
+          const score = scoreSaberScoreRowToType(scoreRow);
+
+          const [enrichedScore, beatSaver] = await Promise.all([
+            ScoreCoreService.insertScoreData(score, leaderboard, {
               insertPlayerInfo: true,
-            });
-            return {
-              score: processedScore,
-              leaderboard: leaderboard,
-              beatSaver: beatsaver,
-            } as PlayerScore;
-          })
-        );
+              insertBeatLeaderScore: true,
+              insertPreviousScore: false,
+            }),
+            BeatSaverService.getMap(
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic
+            ),
+          ]);
 
-        return processedScores.filter(Boolean) as PlayerScore[];
-      },
+          return { score: enrichedScore, leaderboard, beatSaver };
+        })
+      );
+
+      return scores.filter(Boolean) as PlayerScore<ScoreSaberScore>[];
     });
   }
 
@@ -98,21 +76,23 @@ export class TopScoresService {
    * @param score the score to check
    * @returns whether the score is in the top 50 global scores
    */
-  public static async isTop50GlobalScore(score: ScoreSaberScore | ScoreSaberScoreToken) {
-    // Only check top 50 if score is in top 10 and has positive PP
+  public static async isTop50GlobalScore(score: ScoreSaberScore): Promise<boolean> {
     if (score.pp <= 0 || score.rank >= 10) {
       return false;
     }
 
-    // Get the 50th highest PP score directly from the database
-    const top50Scores = await ScoreSaberScoreModel.aggregate([
-      { $match: { pp: { $gt: 0 } } },
-      { $sort: { pp: -1 } },
-      { $limit: 50 },
-      { $group: { _id: null, minPp: { $min: "$pp" } } },
-    ]);
+    const top50 = await db
+      .select({ pp: scoreSaberScoresTable.pp })
+      .from(scoreSaberScoresTable)
+      .where(gt(scoreSaberScoresTable.pp, 0))
+      .orderBy(desc(scoreSaberScoresTable.pp))
+      .limit(50);
 
-    const lowestPp = top50Scores[0]?.minPp ?? Infinity;
+    if (!top50.length) {
+      return false;
+    }
+
+    const lowestPp = top50[top50.length - 1].pp;
     return score.pp >= lowestPp;
   }
 }

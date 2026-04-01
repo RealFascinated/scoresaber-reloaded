@@ -1,4 +1,4 @@
-import { MapDifficulty } from "../score/map-difficulty";
+import { MapDifficulty } from "../schemas/map/map-difficulty";
 
 export type Difficulty = {
   /**

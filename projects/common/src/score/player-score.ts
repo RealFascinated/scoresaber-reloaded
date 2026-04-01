@@ -1,12 +1,11 @@
-import { ScoreSaberLeaderboard } from "../model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "../model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "../schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "../schemas/beatsaver/map/map";
+import { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
 
-export interface PlayerScore {
+export interface PlayerScore<T> {
   /**
    * The score.
    */
-  readonly score: ScoreSaberScore;
+  readonly score: T;
 
   /**
    * The leaderboard the score was set on.
@@ -16,5 +15,5 @@ export interface PlayerScore {
   /**
    * The BeatSaver of the song.
    */
-  readonly beatSaver?: BeatSaverMapResponse;
+  readonly beatSaver?: BeatSaverMap;
 }

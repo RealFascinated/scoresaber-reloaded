@@ -2,7 +2,7 @@
 
 import { DatasetConfig } from "@/common/chart/types";
 import GenericPlayerChart from "@/components/player/views/generic-player-chart";
-import { PlayerStatisticHistory } from "@ssr/common/player/player-statistic-history";
+import { ScoreSaberPlayerHistoryEntries } from "@ssr/common/schemas/scoresaber/player/history";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 const sharedAxis = {
@@ -69,7 +69,7 @@ export default function PlayerAccuracyBadgesChart({
   statisticHistory,
   daysAmount,
 }: {
-  statisticHistory: PlayerStatisticHistory;
+  statisticHistory: ScoreSaberPlayerHistoryEntries;
   daysAmount: number;
 }) {
   return (

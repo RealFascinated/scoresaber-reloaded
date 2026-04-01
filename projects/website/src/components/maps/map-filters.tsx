@@ -81,7 +81,6 @@ export default function MapFilters() {
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={String(MapCategory.Trending)}>Trending</SelectItem>
             <SelectItem value={String(MapCategory.DateRanked)}>Date Ranked</SelectItem>
             <SelectItem value={String(MapCategory.ScoresSet)}>Scores Set</SelectItem>
             <SelectItem value={String(MapCategory.StarDifficulty)}>Star Difficulty</SelectItem>

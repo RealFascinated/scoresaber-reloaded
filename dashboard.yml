@@ -725,24 +725,24 @@
           [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
-              "expr": 'mongo_db_index_size_bytes{environment="production",job="scoresaber_reloaded"}',
+              "expr": 'sum(postgres_table_size_bytes{type="index",environment="production",job="scoresaber_reloaded"})',
               "legendFormat": "Index",
               "refId": "A",
             },
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
-              "expr": 'mongo_db_collections_size_bytes{environment="production",job="scoresaber_reloaded"}',
-              "legendFormat": "Collections",
+              "expr": 'sum(postgres_table_size_bytes{type="data",environment="production",job="scoresaber_reloaded"})',
+              "legendFormat": "Data",
               "refId": "B",
             },
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
-              "expr": 'mongo_db_size_bytes{type="total",environment="production",job="scoresaber_reloaded"}',
+              "expr": 'postgres_db_size_bytes{environment="production",job="scoresaber_reloaded"}',
               "legendFormat": "Total",
               "refId": "C",
             },
           ],
-        "title": "MongoDB Storage",
+        "title": "PostgreSQL Storage",
         "type": "timeseries",
       },
       {

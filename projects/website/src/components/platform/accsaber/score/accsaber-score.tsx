@@ -5,13 +5,13 @@ import ScoreSongInfo from "@/components/score/score-song-info";
 import { SparklesIcon } from "@heroicons/react/24/solid";
 import { env } from "@ssr/common/env";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
-import type { EnrichedAccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
-import { MapDifficulty } from "@ssr/common/score/map-difficulty";
+import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { AccSaberBadges } from "./accsaber-badges";
 import { AccSaberRankTime } from "./accsaber-rank-time";
 
 type AccSaberScoreProps = {
-  score: EnrichedAccSaberScore;
+  score: AccSaberScore;
 };
 
 export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
@@ -41,7 +41,7 @@ export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
           />
         </div>
         <div className="flex items-center justify-end gap-(--spacing-md) px-(--spacing-md)">
-          <ScoreReplayButton score={score} />
+          <ScoreReplayButton score={score.beatLeaderScore} />
         </div>
         <AccSaberBadges score={score} />
       </div>

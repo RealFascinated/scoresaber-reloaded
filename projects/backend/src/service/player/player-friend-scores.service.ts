@@ -1,7 +1,10 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { Page, Pagination } from "@ssr/common/pagination";
-import { scoreToObject } from "@ssr/common/utils/model-converters";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
+import { scoreSaberScoresTable } from "../../db/schema";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { ScoreCoreService } from "../score/score-core.service";
 
@@ -18,112 +21,54 @@ export class PlayerFriendScoresService {
     leaderboardId: number,
     page: number
   ): Promise<Page<ScoreSaberScore>> {
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId, {
-      includeBeatSaver: false,
-    });
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
+    if (!leaderboard) {
+      throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
+    }
 
-    const totalCount = await ScoreSaberScoreModel.countDocuments({
-      playerId: { $in: friendIds },
-      leaderboardId: leaderboardId,
-    });
+    const limit = 8;
+    const offset = (page - 1) * limit;
+    const conditions = and(
+      inArray(scoreSaberScoresTable.playerId, friendIds),
+      eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
+    );
 
-    if (totalCount === 0) {
+    const [{ total }] = await db
+      .select({ total: sql<number>`cast(count(*) as integer)` })
+      .from(scoreSaberScoresTable)
+      .where(conditions);
+
+    if (total === 0) {
       throw new NotFoundError(
         `No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`
       );
     }
 
-    const pagination = new Pagination<ScoreSaberScore>().setTotalItems(totalCount).setItemsPerPage(8);
+    const pagination = new Pagination<ScoreSaberScore>().setTotalItems(total).setItemsPerPage(limit);
 
-    return pagination.getPageWithCursor(page, {
-      sortField: "score",
-      sortDirection: -1,
-      getCursor: (item: { score: number; _id: unknown }) => ({
-        sortValue: item.score,
-        id: item._id,
-      }),
-      buildCursorQuery: cursor => {
-        const baseMatch = {
-          playerId: { $in: friendIds },
-          leaderboardId: leaderboardId,
-        };
-        if (!cursor) return baseMatch;
-        return {
-          ...baseMatch,
-          $or: [{ score: { $lt: cursor.sortValue } }, { score: cursor.sortValue, _id: { $lt: cursor.id } }],
-        };
-      },
-      getPreviousPageItem: async () => {
-        // Get the last item from the previous page
-        const previousPageSkip = (page - 1) * pagination.itemsPerPage - 1;
-        if (previousPageSkip < 0) return null;
-        const items = await ScoreSaberScoreModel.aggregate([
-          {
-            $match: {
-              playerId: { $in: friendIds },
-              leaderboardId: leaderboardId,
-            },
-          },
-          {
-            $sort: {
-              score: -1,
-              _id: -1,
-            },
-          },
-          {
-            $skip: previousPageSkip,
-          },
-          {
-            $limit: 1,
-          },
-          {
-            $project: {
-              score: 1,
-              _id: 1,
-            },
-          },
-        ]);
-        return (items[0] as { score: number; _id: unknown }) || null;
-      },
-      fetchItems: async cursorInfo => {
-        const friendScores = await ScoreSaberScoreModel.aggregate([
-          {
-            $match: cursorInfo.query,
-          },
-          {
-            $sort: {
-              score: -1,
-              _id: -1,
-            },
-          },
-          {
-            $limit: cursorInfo.limit,
-          },
-        ]);
+    return pagination.getPage(page, async () => {
+      const rawScores = await db
+        .select()
+        .from(scoreSaberScoresTable)
+        .where(conditions)
+        .orderBy(desc(scoreSaberScoresTable.score))
+        .limit(limit)
+        .offset(offset);
 
-        if (!friendScores.length) {
-          return [];
-        }
+      if (!rawScores.length) {
+        return [];
+      }
 
-        // Process scores in parallel
-        const scores = await Promise.all(
-          friendScores.map(async friendScore => {
-            const processedScore = await ScoreCoreService.insertScoreData(
-              scoreToObject(friendScore),
-              leaderboard.leaderboard,
-              {
-                insertBeatLeaderScore: true,
-                insertPreviousScore: false,
-                insertPlayerInfo: true,
-                removeScoreWeightAndRank: true,
-              }
-            );
-            return processedScore;
-          })
-        );
-
-        return scores;
-      },
+      return Promise.all(
+        rawScores.map(async rawScore => {
+          const score = scoreSaberScoreRowToType(rawScore);
+          return ScoreCoreService.insertScoreData(score, leaderboard, {
+            insertBeatLeaderScore: true,
+            insertPreviousScore: false,
+            insertPlayerInfo: true,
+          });
+        })
+      );
     });
   }
 }

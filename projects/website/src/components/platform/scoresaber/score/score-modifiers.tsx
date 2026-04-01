@@ -1,5 +1,5 @@
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { PreviousScore } from "@ssr/common/model/score/previous-score";
+import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getModifierLabel, Modifier } from "@ssr/common/score/modifier";
 
 export function ScoreSaberScoreModifiers({
@@ -7,7 +7,7 @@ export function ScoreSaberScoreModifiers({
   type,
   limit,
 }: {
-  score: ScoreSaberScore | PreviousScore;
+  score: ScoreSaberScore | ScoreSaberHistoryScore;
   type: "full" | "simple";
   limit?: number;
 }) {

@@ -1,3 +1,13 @@
+/** BeatSaver API `MapStats.sentiment` (Swagger). */
+export type BeatSaverMapStatsSentiment =
+  | "PENDING"
+  | "VERY_NEGATIVE"
+  | "MOSTLY_NEGATIVE"
+  | "MIXED"
+  | "MOSTLY_POSITIVE"
+  | "VERY_POSITIVE";
+
+/** Shapes `MapStats` (BeatSaver Swagger). */
 export default interface BeatSaverMapStatsToken {
   /**
    * The amount of time the map has been played.
@@ -28,4 +38,7 @@ export default interface BeatSaverMapStatsToken {
    * The amount of reviews for the map.
    */
   reviews: number;
+
+  scoreOneDP?: number;
+  sentiment?: BeatSaverMapStatsSentiment;
 }

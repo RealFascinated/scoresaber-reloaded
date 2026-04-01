@@ -14,10 +14,10 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { ChevronDown } from "lucide-react";
 import ScoreDetailsDropdown from "./score-details-dropdown";
 
@@ -29,8 +29,8 @@ export default function ScoreSaberScoreDisplay({
 }: {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMapResponse;
-  playerAbove?: ScoreSaberLeaderboardPlayerInfoToken;
+  beatSaverMap?: BeatSaverMap;
+  playerDetails?: ScoreSaberLeaderboardPlayerInfo;
   settings?: {
     noScoreButtons?: boolean;
     hideDetailsDropdown?: boolean;
@@ -57,7 +57,7 @@ export default function ScoreSaberScoreDisplay({
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
   const pp = baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
 
-  const isTracked = score.isTracked && score.beatLeaderScore;
+  const isTracked = score.beatLeaderScore != undefined;
 
   return (
     <div data-ss-score-row className="relative px-2 pt-2 pb-2 lg:pl-0">

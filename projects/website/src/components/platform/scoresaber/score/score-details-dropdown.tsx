@@ -4,9 +4,9 @@ import { cn } from "@/common/utils";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
 import { MapStats } from "@/components/score/map-stats";
 import { useLeaderboardDropdownData } from "@/hooks/use-leaderboard-dropdown-data";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { useEffect } from "react";
@@ -25,7 +25,7 @@ export default function ScoreDetailsDropdown({
 }: {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMapResponse;
+  beatSaverMap?: BeatSaverMap;
   highlightedPlayerId?: string;
   isExpanded: boolean;
   showLeaderboardScores?: boolean;

@@ -39,7 +39,7 @@ export async function generateMetadata(props: ScorePageProps): Promise<Metadata>
   }
 
   const { score, leaderboard } = playerScore;
-  const playerName = score.playerInfo.name ?? "Unknown";
+  const playerName = score.playerInfo!.name;
   const songTitle = leaderboard.fullName;
   const diffLabel = getDifficultyName(leaderboard.difficulty.difficulty);
   const ppOrScore =

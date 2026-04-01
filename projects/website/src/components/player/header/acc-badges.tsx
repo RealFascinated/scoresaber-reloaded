@@ -1,10 +1,10 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import StatValue from "@/components/statistic/stat-value";
-import { PlayerScoreStats } from "@ssr/common/model/player/player-score-stats";
+import type { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getAccDetails, getScoreBadgeFromName } from "@ssr/common/utils/song-utils";
 
-const badges: Record<keyof PlayerScoreStats, string> = {
+const badges: Record<keyof ScoreSaberPlayerScoreStats, string> = {
   aPlays: "A",
   sPlays: "S",
   spPlays: "S+",
@@ -13,7 +13,7 @@ const badges: Record<keyof PlayerScoreStats, string> = {
   godPlays: "GOD",
 };
 
-export default function PlayerAccBadges({ scoreStats }: { scoreStats: PlayerScoreStats }) {
+export default function PlayerAccBadges({ scoreStats }: { scoreStats: ScoreSaberPlayerScoreStats }) {
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
       {Object.entries(badges).map(([name, displayName]) => {
@@ -33,7 +33,7 @@ export default function PlayerAccBadges({ scoreStats }: { scoreStats: PlayerScor
             <StatValue
               name={badge.name}
               color={badge.color}
-              value={formatNumberWithCommas(scoreStats[name as keyof PlayerScoreStats] ?? 0)}
+              value={formatNumberWithCommas(scoreStats[name as keyof ScoreSaberPlayerScoreStats] ?? 0)}
               className="h-full"
               size="lg"
             />

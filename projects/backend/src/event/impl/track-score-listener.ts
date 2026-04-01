@@ -1,9 +1,9 @@
-import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { DiscordChannels } from "../../bot/bot";
 import { sendScoreNotification } from "../../common/score/score.util";
 import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
@@ -19,11 +19,11 @@ export class TrackScoreListener implements EventListener {
   async onScoreReceived(
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
-    player: ScoreSaberLeaderboardPlayerInfoToken,
+    player: ScoreSaberLeaderboardPlayerInfo,
     beatLeaderScoreToken: BeatLeaderScoreToken | undefined,
     isTop50GlobalScore: boolean
   ) {
-    const playerInfo = score.playerInfo;
+    const playerInfo = score.playerInfo!;
 
     let beatLeaderScore: BeatLeaderScore | undefined;
     if (beatLeaderScoreToken) {
@@ -35,9 +35,8 @@ export class TrackScoreListener implements EventListener {
 
     const { score: trackedScore, hasPreviousScore } = await ScoreCoreService.trackScoreSaberScore(
       score,
-      leaderboard,
-      player,
       beatLeaderScore,
+      leaderboard,
       true
     );
     if (trackedScore == undefined) {
@@ -56,7 +55,6 @@ export class TrackScoreListener implements EventListener {
       DiscordChannels.SCORE_FLOODGATE_FEED,
       score,
       leaderboard,
-      player,
       beatLeaderScore,
       `${playerInfo.name} just set a rank #${score.rank}!`
     );
@@ -69,7 +67,6 @@ export class TrackScoreListener implements EventListener {
           DiscordChannels.NUMBER_ONE_FEED,
           score,
           leaderboard,
-          player,
           beatLeaderScore,
           `${playerInfo.name} just set a #1!`
         );
@@ -81,7 +78,6 @@ export class TrackScoreListener implements EventListener {
           DiscordChannels.TOP_50_SCORES_FEED,
           score,
           leaderboard,
-          player,
           beatLeaderScore,
           `${playerInfo.name} just set a new top 50 score!`
         );
@@ -93,7 +89,7 @@ export class TrackScoreListener implements EventListener {
     trackedScoresMetric?.increment();
 
     // Publish the score to the websocket
-    WebsocketManager.get<PlayerScore>("score")?.publish({
+    WebsocketManager.get<PlayerScore<ScoreSaberScore>>("score")?.publish({
       score: await ScoreCoreService.insertScoreData(trackedScore, leaderboard, {
         insertBeatLeaderScore: true,
       }),

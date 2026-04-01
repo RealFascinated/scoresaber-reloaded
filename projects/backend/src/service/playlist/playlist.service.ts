@@ -3,23 +3,24 @@ import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import {
-  ScoreSaberLeaderboard,
-  ScoreSaberLeaderboardModel,
-} from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore, ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
-import { Playlist, PlaylistModel } from "@ssr/common/playlist/playlist";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
-import { SelfPlaylist } from "@ssr/common/playlist/self/self-playlist";
+import type { SelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-settings-schema";
 import { parseSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
-import { SnipePlaylist } from "@ssr/common/playlist/snipe/snipe-playlist";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
+import { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
+import type { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
-import { leaderboardToObject, playlistToObject } from "@ssr/common/utils/model-converters";
-import { formatDate, formatDateMinimal, TimeUnit } from "@ssr/common/utils/time-utils";
+import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { and, asc, eq, gt, gte, isNotNull, lte } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import { db } from "../../db";
+import { mergeJoinedLeaderboardRows } from "../../db/converter/scoresaber-leaderboard";
+import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
+import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerCoreService } from "../player/player-core.service";
-import ScoreSaberService from "../scoresaber.service";
 
 export type SnipeType = "top" | "recent";
 export type PlaylistId =
@@ -36,113 +37,67 @@ export const PLAYLIST_NAMES: Record<PlaylistId, string> = {
 };
 
 export default class PlaylistService {
-  public static PLAYLIST_IMAGE_BASE64 = "";
+  public static async getRankedMapsPlaylist(): Promise<Playlist> {
+    const leaderboards = await LeaderboardCoreService.getRankedLeaderboards();
 
-  constructor() {
-    PlaylistService.init();
-  }
-
-  /**
-   * Initializes the playlist service
-   */
-  private static async init() {
-    this.PLAYLIST_IMAGE_BASE64 = `data:image/png;base64,${Buffer.from(await (await fetch("https://cdn.fascinated.cc/MW5WDvKW69.png")).arrayBuffer()).toString("base64")}`;
-    Logger.info(`Loaded playlists image!`);
-
-    for (const id of [
-      "scoresaber-ranked-maps",
-      "scoresaber-qualified-maps",
-      "scoresaber-ranking-queue-maps",
-    ] as PlaylistId[]) {
-      if (!(await this.playlistExists(id))) {
-        await this.createPlaylist(
-          new Playlist(
-            id,
-            `${PLAYLIST_NAMES[id]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
-            env.NEXT_PUBLIC_WEBSITE_NAME,
-            this.PLAYLIST_IMAGE_BASE64,
-            []
-          )
-        );
-
-        Logger.info(`Created playlist ${id}!`);
-      }
-    }
-
-    // Update the ranking queue playlist
-    setInterval(
-      async () => {
-        const rankingQueue = await LeaderboardCoreService.getRankingQueueLeaderboards();
-        await this.updatePlaylist("scoresaber-ranking-queue-maps", {
-          title: `${PLAYLIST_NAMES["scoresaber-ranking-queue-maps"]} (${formatDate(new Date(), "Do MMMM, YYYY")})`,
-          songs: rankingQueue.map(leaderboard => ({
-            songName: leaderboard.songName,
-            songAuthor: leaderboard.songAuthorName,
-            songHash: leaderboard.songHash,
-            difficulties: leaderboard.difficulties.map(difficulty => ({
-              difficulty: difficulty.difficulty,
-              characteristic: difficulty.characteristic,
-            })),
-          })),
-        });
+    return {
+      playlistTitle: "Ranked Maps",
+      playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
+      customData: {
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/ranked-maps`,
       },
-      TimeUnit.toMillis(TimeUnit.Hour, 6)
-    );
+      songs: leaderboards.map(leaderboard => ({
+        songName: leaderboard.songName,
+        levelAuthorName: leaderboard.songAuthorName,
+        hash: leaderboard.songHash,
+        difficulties: leaderboard.difficulties.map(difficulty => ({
+          difficulty: difficulty.difficulty,
+          characteristic: difficulty.characteristic,
+        })),
+      })),
+    };
   }
 
-  /**
-   * Gets a playlist by ID
-   *
-   * @param playlistId the ID of the playlist to get
-   * @returns the requested playlist
-   */
-  public static async getPlaylist(playlistId: PlaylistId | string): Promise<Playlist> {
-    const playlist = await PlaylistModel.findOne({ id: playlistId }).lean();
-    if (!playlist) {
-      throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
-    }
-    return playlistToObject(playlist);
+  public static async getQualifiedMapsPlaylist(): Promise<Playlist> {
+    const leaderboards = await LeaderboardCoreService.getQualifiedLeaderboards();
+
+    return {
+      playlistTitle: "Qualified Maps",
+      playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
+      customData: {
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/qualified-maps`,
+      },
+      songs: leaderboards.map(leaderboard => ({
+        songName: leaderboard.songName,
+        levelAuthorName: leaderboard.songAuthorName,
+        hash: leaderboard.songHash,
+        difficulties: leaderboard.difficulties.map(difficulty => ({
+          difficulty: difficulty.difficulty,
+          characteristic: difficulty.characteristic,
+        })),
+      })),
+    };
   }
 
-  /**
-   * Checks if a playlist exists
-   *
-   * @param playlistId the ID of the playlist to check
-   * @returns true if the playlist exists, false otherwise
-   */
-  public static async playlistExists(playlistId: PlaylistId | string): Promise<boolean> {
-    return (await PlaylistModel.exists({ id: playlistId })) !== null;
-  }
+  public static async getRankingQueueMapsPlaylist(): Promise<Playlist> {
+    const leaderboards = await LeaderboardCoreService.getRankingQueueLeaderboards();
 
-  /**
-   * Creates a playlist
-   *
-   * @param playlist the playlist to create
-   */
-  public static async createPlaylist(playlist: Playlist) {
-    const existingPlaylist = await PlaylistModel.findOne({ id: playlist.id });
-    if (existingPlaylist) {
-      throw new BadRequestError(`Playlist with id ${playlist.id} already exists`);
-    }
-
-    await PlaylistModel.create(playlist);
-    return playlist;
-  }
-
-  /**
-   * Updates a playlist
-   *
-   * @param playlistId the ID of the playlist to update
-   * @param updates the updates to apply
-   */
-  public static async updatePlaylist(playlistId: PlaylistId | string, updates: Partial<Playlist>) {
-    const playlist = await PlaylistModel.findOne({ id: playlistId });
-    if (!playlist) {
-      throw new NotFoundError(`Playlist with id ${playlistId} does not exist`);
-    }
-
-    await PlaylistModel.updateOne({ id: playlistId }, updates);
-    return playlist;
+    return {
+      playlistTitle: "Ranking Queue Maps",
+      playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
+      customData: {
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/ranking-queue-maps`,
+      },
+      songs: leaderboards.map(leaderboard => ({
+        songName: leaderboard.songName,
+        levelAuthorName: leaderboard.songAuthorName,
+        hash: leaderboard.songHash,
+        difficulties: leaderboard.difficulties.map(difficulty => ({
+          difficulty: difficulty.difficulty,
+          characteristic: difficulty.characteristic,
+        })),
+      })),
+    };
   }
 
   /**
@@ -151,30 +106,45 @@ export default class PlaylistService {
    * @param config the configuration for the custom ranked playlist
    * @returns the created custom ranked playlist
    */
-  public static async createCustomRankedPlaylist(config?: string): Promise<Playlist> {
-    if (!config) {
-      throw new BadRequestError("Config is required for custom ranked playlists");
-    }
+  public static async createCustomRankedPlaylist(settingsBase64?: string): Promise<Playlist> {
+    const parsedConfig = parseCustomRankedPlaylistSettings(settingsBase64);
+    const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
+    const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
 
-    const parsedConfig = parseCustomRankedPlaylistSettings(config);
-    const leaderboards = await ScoreSaberLeaderboardModel.find({
-      ranked: true,
-      stars: {
-        $gte: parsedConfig.stars.min,
-        $lte: parsedConfig.stars.max,
-      },
-    }).lean();
+    const rankedJoinRows = await db
+      .select()
+      .from(mainAlias)
+      .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
+      .where(
+        and(
+          eq(mainAlias.ranked, true),
+          isNotNull(mainAlias.stars),
+          gte(mainAlias.stars, parsedConfig.stars.min),
+          lte(mainAlias.stars, parsedConfig.stars.max)
+        )
+      )
+      .orderBy(asc(mainAlias.stars));
+
+    const rankedLeaderboards = mergeJoinedLeaderboardRows(rankedJoinRows);
 
     const title = `Custom Ranked Maps (${formatDateMinimal(new Date())})`;
 
-    return new Playlist(
-      "scoresaber-custom-ranked-maps",
-      title,
-      env.NEXT_PUBLIC_WEBSITE_NAME,
-      this.PLAYLIST_IMAGE_BASE64,
-      leaderboards,
-      "custom-ranked"
-    );
+    return {
+      playlistTitle: title,
+      playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
+      customData: {
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/custom-ranked-maps?settings=${settingsBase64}`,
+      },
+      songs: rankedLeaderboards.map(leaderboard => ({
+        songName: leaderboard.songName,
+        levelAuthorName: leaderboard.songAuthorName,
+        hash: leaderboard.songHash,
+        difficulties: leaderboard.difficulties.map(difficulty => ({
+          difficulty: difficulty.difficulty,
+          characteristic: difficulty.characteristic,
+        })),
+      })),
+    };
   }
 
   /**
@@ -192,91 +162,15 @@ export default class PlaylistService {
         throw new NotFoundError(`Unable to create a self playlist as the user isn't tracked.`);
       }
 
-      const sortField = settings.sort;
-      const sortDirection = settings.sortDirection;
+      const scoredLeaderboards = await PlaylistService.fetchPlayerScoreSaberScoresWithLeaderboards(
+        user,
+        settings.rankedStatus,
+        settings.starRange
+      );
 
-      const getSortValue = (score: ScoreSaberScore, field: string): number => {
-        switch (field) {
-          case "pp":
-            return score.pp;
-          case "score":
-            return score.score;
-          case "acc":
-            return score.accuracy;
-          case "date":
-            return score.timestamp.getTime();
-          default:
-            return score.pp;
-        }
-      };
-
-      const pipeline = [
-        {
-          $match: {
-            playerId: user,
-          },
-        },
-        {
-          $project: {
-            pp: 1,
-            accuracy: 1,
-            timestamp: 1,
-            leaderboardId: 1,
-            playerId: 1,
-            score: 1,
-          },
-        },
-        {
-          $lookup: {
-            from: "scoresaber-leaderboards",
-            localField: "leaderboardId",
-            foreignField: "_id",
-            as: "leaderboard",
-          },
-        },
-        {
-          $unwind: {
-            path: "$leaderboard",
-            preserveNullAndEmptyArrays: false,
-          },
-        },
-        {
-          $match: {
-            ...(settings.rankedStatus === "ranked" ? { pp: { $gt: 0 } } : {}),
-            ...(settings.rankedStatus === "unranked" ? { pp: { $lte: 0 } } : {}),
-            ...(settings.rankedStatus === "ranked" &&
-            settings.starRange.min !== undefined &&
-            settings.starRange.max !== undefined
-              ? {
-                  $and: [
-                    { "leaderboard.stars": { $gte: settings.starRange.min } },
-                    { "leaderboard.stars": { $lte: settings.starRange.max } },
-                  ],
-                }
-              : {}),
-          },
-        },
-      ];
-
-      const results = (await ScoreSaberScoreModel.aggregate(
-        pipeline as Parameters<typeof ScoreSaberScoreModel.aggregate>[0]
-      )) as Array<ScoreSaberScore & { leaderboard: ScoreSaberLeaderboard }>;
-
-      if (results.length === 0) {
+      if (scoredLeaderboards.length === 0) {
         throw new NotFoundError(`Unable to create a self playlist as the user has no scores.`);
       }
-
-      const scoredLeaderboards = results.map(result => ({
-        score: {
-          pp: result.pp,
-          accuracy: result.accuracy,
-          timestamp: result.timestamp,
-          leaderboardId: result.leaderboardId,
-          playerId: result.playerId,
-          score: result.score,
-        } as ScoreSaberScore,
-        leaderboard: leaderboardToObject(result.leaderboard),
-      }));
 
       const filtered = scoredLeaderboards.filter(({ score }) => {
         if (!settings.accuracyRange) {
@@ -289,21 +183,24 @@ export default class PlaylistService {
         throw new NotFoundError(`Unable to create a self playlist as no scores match the filters.`);
       }
 
-      const title = `Self Playlist (${formatDateMinimal(new Date())})`;
+      PlaylistService.sortPlaylistScoreRows(filtered, settings.sort, settings.sortDirection);
 
-      return new SelfPlaylist(
-        user,
-        settings,
-        title,
-        filtered
-          .sort((a, b) => {
-            const valueA = getSortValue(a.score, sortField);
-            const valueB = getSortValue(b.score, sortField);
-            return sortDirection === "desc" ? valueB - valueA : valueA - valueB;
-          })
-          .map(({ leaderboard }) => leaderboard),
-        this.PLAYLIST_IMAGE_BASE64
-      );
+      return {
+        playlistTitle: `Self Playlist / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
+        playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
+        customData: {
+          syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/self?user=${user}&settings=${settingsBase64}`,
+        },
+        songs: filtered.map(({ leaderboard }) => ({
+          songName: leaderboard.songName,
+          levelAuthorName: leaderboard.songAuthorName,
+          hash: leaderboard.songHash,
+          difficulties: leaderboard.difficulties.map(difficulty => ({
+            difficulty: difficulty.difficulty,
+            characteristic: difficulty.characteristic,
+          })),
+        })),
+      };
     } catch (error) {
       Logger.error("Error creating self playlist", error);
       throw new InternalServerError((error as Error).message);
@@ -338,95 +235,18 @@ export default class PlaylistService {
         );
       }
 
-      const sortField = settings.sort;
-      const sortDirection = settings.sortDirection;
-
-      // Map sort field names to actual property names on the score object
-      const getSortValue = (score: ScoreSaberScore, field: string): number => {
-        switch (field) {
-          case "pp":
-            return score.pp;
-          case "score":
-            return score.score;
-          case "acc":
-            return score.accuracy;
-          case "date":
-            return score.timestamp.getTime();
-          default:
-            return score.pp;
-        }
-      };
-
       async function getScores(playerId: string) {
-        const pipeline = [
-          {
-            $match: {
-              playerId: playerId,
-            },
-          },
-          {
-            $project: {
-              pp: 1,
-              accuracy: 1,
-              timestamp: 1,
-              leaderboardId: 1,
-              playerId: 1,
-              score: 1,
-            },
-          },
-          {
-            $lookup: {
-              from: "scoresaber-leaderboards",
-              localField: "leaderboardId",
-              foreignField: "_id",
-              as: "leaderboard",
-            },
-          },
-          {
-            $unwind: {
-              path: "$leaderboard",
-              preserveNullAndEmptyArrays: false,
-            },
-          },
-          {
-            $match: {
-              // Apply ranked status filtering
-              ...(settings.rankedStatus === "ranked" ? { pp: { $gt: 0 } } : {}),
-              ...(settings.rankedStatus === "unranked" ? { pp: { $lte: 0 } } : {}),
-              // Apply star range filtering
-              ...(settings.rankedStatus === "ranked" &&
-              settings.starRange.min !== undefined &&
-              settings.starRange.max !== undefined
-                ? {
-                    $and: [
-                      { "leaderboard.stars": { $gte: settings.starRange.min } },
-                      { "leaderboard.stars": { $lte: settings.starRange.max } },
-                    ],
-                  }
-                : {}),
-            },
-          },
-        ];
-
-        const results = (await ScoreSaberScoreModel.aggregate(
-          pipeline as Parameters<typeof ScoreSaberScoreModel.aggregate>[0]
-        )) as Array<ScoreSaberScore & { leaderboard: ScoreSaberLeaderboard }>;
+        const results = await PlaylistService.fetchPlayerScoreSaberScoresWithLeaderboards(
+          playerId,
+          settings.rankedStatus,
+          settings.starRange
+        );
 
         if (results.length === 0) {
           throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
         }
 
-        return results.map(result => ({
-          score: {
-            pp: result.pp,
-            accuracy: result.accuracy,
-            timestamp: result.timestamp,
-            leaderboardId: result.leaderboardId,
-            playerId: result.playerId,
-            score: result.score,
-          } as ScoreSaberScore,
-          leaderboard: leaderboardToObject(result.leaderboard),
-        }));
+        return results;
       }
 
       const [userScores, toSnipeScores] = await Promise.all([getScores(user), getScores(toSnipe)]);
@@ -485,27 +305,125 @@ export default class PlaylistService {
         }
       }
 
-      const player = await ScoreSaberService.getPlayer(toSnipe, "basic");
+      PlaylistService.sortPlaylistScoreRows(filteredScores, settings.sort, settings.sortDirection);
 
-      return new SnipePlaylist(
-        toSnipe,
-        user,
-        settings,
-        `${truncateText(player.name ?? "", 16)} / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
-        filteredScores
-          .sort((a, b) => {
-            const scoreA = a.score;
-            const scoreB = b.score;
-            const valueA = getSortValue(scoreA, sortField);
-            const valueB = getSortValue(scoreB, sortField);
-            return sortDirection === "desc" ? valueB - valueA : valueA - valueB;
-          })
-          .map(({ leaderboard }) => leaderboard),
-        this.PLAYLIST_IMAGE_BASE64
-      );
+      const player = await PlayerCoreService.getAccount(toSnipe);
+      if (!player) {
+        throw new NotFoundError(
+          `Unable to create a snipe playlist for ${toSnipe} as the user isn't tracked.`
+        );
+      }
+
+      return {
+        playlistTitle: `${truncateText(player.name ?? "", 16)} / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
+        playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
+        customData: {
+          syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/snipe?user=${user}&toSnipe=${toSnipe}&settings=${settingsBase64}`,
+        },
+        songs: filteredScores.map(({ leaderboard }) => ({
+          songName: leaderboard.songName,
+          levelAuthorName: leaderboard.songAuthorName,
+          hash: leaderboard.songHash,
+          difficulties: leaderboard.difficulties.map(difficulty => ({
+            difficulty: difficulty.difficulty,
+            characteristic: difficulty.characteristic,
+          })),
+        })),
+      };
     } catch (error) {
       Logger.error("Error creating snipe playlist", error);
       throw new InternalServerError((error as Error).message);
     }
+  }
+
+  /**
+   * Sorts playlist rows in memory (we already load the full filtered set from Postgres).
+   */
+  private static sortPlaylistScoreRows(
+    rows: Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>,
+    sort: SelfPlaylistSettings["sort"] | SnipeSettings["sort"] | undefined,
+    sortDirection: SelfPlaylistSettings["sortDirection"] | SnipeSettings["sortDirection"] | undefined
+  ): void {
+    const field = sort ?? "pp";
+    const dir = sortDirection ?? "desc";
+    const mult = dir === "asc" ? 1 : -1;
+    rows.sort((a, b) => {
+      const va = PlaylistService.scoreSortValue(a.score, field);
+      const vb = PlaylistService.scoreSortValue(b.score, field);
+      if (va !== vb) {
+        return (va - vb) * mult;
+      }
+      return (a.score.scoreId - b.score.scoreId) * mult;
+    });
+  }
+
+  private static scoreSortValue(score: ScoreSaberScore, field: string): number {
+    switch (field) {
+      case "pp":
+        return score.pp;
+      case "score":
+        return score.score;
+      case "acc":
+        return score.accuracy;
+      case "date":
+        return score.timestamp.getTime();
+      case "misses":
+        return score.misses;
+      case "maxcombo":
+        return score.maxCombo;
+      case "medals":
+        return score.rank;
+      default:
+        return score.pp;
+    }
+  }
+
+  /**
+   * Loads ScoreSaber scores for a player with leaderboard rows from Postgres (replaces legacy Mongo aggregate + $lookup).
+   */
+  private static async fetchPlayerScoreSaberScoresWithLeaderboards(
+    playerId: string,
+    rankedStatus: SelfPlaylistSettings["rankedStatus"] | SnipeSettings["rankedStatus"],
+    starRange: SelfPlaylistSettings["starRange"] | SnipeSettings["starRange"]
+  ): Promise<Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>> {
+    const conditions = [eq(scoreSaberScoresTable.playerId, playerId)];
+
+    if (rankedStatus === "ranked") {
+      conditions.push(gt(scoreSaberScoresTable.pp, 0));
+    } else if (rankedStatus === "unranked") {
+      conditions.push(lte(scoreSaberScoresTable.pp, 0));
+    }
+
+    if (rankedStatus === "ranked" && starRange.min !== undefined && starRange.max !== undefined) {
+      conditions.push(isNotNull(scoreSaberLeaderboardsTable.stars));
+      conditions.push(gte(scoreSaberLeaderboardsTable.stars, starRange.min));
+      conditions.push(lte(scoreSaberLeaderboardsTable.stars, starRange.max));
+    }
+
+    const rows = await db
+      .select({
+        scoreRow: scoreSaberScoresTable,
+        lbRow: scoreSaberLeaderboardsTable,
+      })
+      .from(scoreSaberScoresTable)
+      .innerJoin(
+        scoreSaberLeaderboardsTable,
+        eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
+      )
+      .where(and(...conditions));
+
+    const leaderboardIds = [...new Set(rows.map(r => r.lbRow.id))];
+    const leaderboardMap = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(leaderboardIds);
+
+    return rows.map(({ scoreRow, lbRow }) => {
+      const leaderboard = leaderboardMap.get(lbRow.id);
+      if (!leaderboard) {
+        throw new InternalServerError(`Missing leaderboard ${lbRow.id} for playlist scores`);
+      }
+      return {
+        score: scoreSaberScoreRowToType(scoreRow),
+        leaderboard,
+      };
+    });
   }
 }

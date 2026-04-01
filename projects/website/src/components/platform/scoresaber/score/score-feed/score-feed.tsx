@@ -8,9 +8,10 @@ import { Spinner } from "@/components/spinner";
 import { env } from "@ssr/common/env";
 import { getHMDInfo } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { parseDate } from "@ssr/common/utils/time-utils";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import HMDIcon from "../../../../hmd-icon";
 
@@ -24,15 +25,17 @@ const EMPTY_COPY = {
 
 type EmptyVariant = keyof typeof EMPTY_COPY;
 
-type FeedPhase = { kind: "list"; scores: PlayerScore[] } | { kind: "empty"; variant: EmptyVariant };
+type FeedPhase =
+  | { kind: "list"; scores: PlayerScore<ScoreSaberScore>[] }
+  | { kind: "empty"; variant: EmptyVariant };
 
-function sortByNewestFirst(a: PlayerScore, b: PlayerScore): number {
+function sortByNewestFirst(a: PlayerScore<ScoreSaberScore>, b: PlayerScore<ScoreSaberScore>): number {
   return (
     parseDate(b.score.timestamp.toString()).getTime() - parseDate(a.score.timestamp.toString()).getTime()
   );
 }
 
-function getFeedPhase(readyState: ReadyState, scores: PlayerScore[]): FeedPhase {
+function getFeedPhase(readyState: ReadyState, scores: PlayerScore<ScoreSaberScore>[]): FeedPhase {
   if (scores.length > 0) {
     return { kind: "list", scores };
   }
@@ -92,7 +95,7 @@ function FeedEmptyState({ variant }: { variant: EmptyVariant }) {
   );
 }
 
-function FeedScoreList({ scores }: { scores: PlayerScore[] }) {
+function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
   return (
     <div className="flex flex-col gap-(--spacing-sm)">
       {scores.map(scoreToken => {
@@ -107,7 +110,7 @@ function FeedScoreList({ scores }: { scores: PlayerScore[] }) {
         return (
           <div key={score.scoreId} className="flex flex-col">
             <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
-              <PlayerScoreHeader player={player} />
+              <PlayerScoreHeader player={player!} />
               <div className="flex items-center gap-2">
                 <HMDIcon hmd={getHMDInfo(score.hmd)} />
                 <span className="text-muted-foreground text-xs">
@@ -140,31 +143,39 @@ function FeedBody({ phase }: { phase: FeedPhase }) {
 }
 
 export default function ScoreFeed() {
-  const { readyState, lastJsonMessage } = useWebSocket<PlayerScore>(
+  const [scores, setScores] = useState<PlayerScore<ScoreSaberScore>[]>([]);
+
+  const onMessage = useCallback((event: WebSocketEventMap["message"]) => {
+    if (typeof event.data !== "string") {
+      return;
+    }
+    let parsed: PlayerScore<ScoreSaberScore>;
+    try {
+      parsed = JSON.parse(event.data) as PlayerScore<ScoreSaberScore>;
+    } catch {
+      return;
+    }
+    if (!parsed.leaderboard || !parsed.score) {
+      Logger.error("Invalid leaderboard or score data:", parsed);
+      return;
+    }
+
+    setScores(prev => {
+      const id = parsed.score.scoreId;
+      const withoutDup = prev.filter(s => s.score.scoreId !== id);
+      return [...withoutDup, parsed].sort(sortByNewestFirst).slice(0, LIVE_FEED_MAX_ITEMS);
+    });
+  }, []);
+
+  const { readyState } = useWebSocket<PlayerScore<ScoreSaberScore>>(
     `${env.NEXT_PUBLIC_WEBSOCKET_URL}/ws/score`,
     {
       reconnectAttempts: 10,
       reconnectInterval: 3000,
       shouldReconnect: () => true,
+      onMessage,
     }
   );
-  const [scores, setScores] = useState<PlayerScore[]>([]);
-
-  useEffect(() => {
-    if (!lastJsonMessage) {
-      return;
-    }
-    if (!lastJsonMessage.leaderboard || !lastJsonMessage.score) {
-      Logger.error("Invalid leaderboard or score data:", lastJsonMessage);
-      return;
-    }
-
-    setScores(prev => {
-      const id = lastJsonMessage.score.scoreId;
-      const withoutDup = prev.filter(s => s.score.scoreId !== id);
-      return [...withoutDup, lastJsonMessage].sort(sortByNewestFirst).slice(0, LIVE_FEED_MAX_ITEMS);
-    });
-  }, [lastJsonMessage]);
 
   const phase = getFeedPhase(readyState, scores);
 

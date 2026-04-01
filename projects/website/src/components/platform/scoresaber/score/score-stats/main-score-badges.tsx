@@ -4,8 +4,8 @@ import ScoreMissesAndPausesBadge from "@/components/platform/scoresaber/score/ba
 import { ScorePpBadge } from "@/components/platform/scoresaber/score/badges/score-pp";
 import { ScoreScoreBadge } from "@/components/platform/scoresaber/score/badges/score-score";
 import { ScoreBadge, ScoreBadges } from "@/components/score/score-badges";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 import { ScoreMedalsBadge } from "../badges/score-medals";
 

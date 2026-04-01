@@ -8,9 +8,8 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import ScoreSaberLeaderboard from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
 import { useEffect } from "react";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
@@ -21,13 +20,7 @@ function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;
 }
 
-export default function LeaderboardScores({
-  leaderboard,
-  beatSaver,
-}: {
-  leaderboard: ScoreSaberLeaderboard;
-  beatSaver?: BeatSaverMapResponse;
-}) {
+export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreSaberLeaderboard }) {
   const isMobile = useIsMobile();
   const database = useDatabase();
   const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
@@ -64,10 +57,9 @@ export default function LeaderboardScores({
         <div className="flex flex-wrap justify-center gap-(--spacing-sm)">
           {leaderboard.difficulties.map(difficultyData => (
             <DifficultyButton
-              key={String(difficultyData.difficulty)}
-              {...difficultyData}
+              key={String(difficultyData.id)}
+              leaderboardDifficulty={difficultyData}
               selectedId={leaderboard.id}
-              inGameDifficulty={beatSaver?.difficultyLabels?.[difficultyData.difficulty] ?? undefined}
             />
           ))}
         </div>

@@ -1,10 +1,9 @@
-import { ScoreSaberScore } from "../../src/model/score/impl/scoresaber-score";
 import { HMD } from "../hmds";
 import { ScoreSaberCurve } from "../leaderboard-curve/scoresaber-curve";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
-import { MapDifficulty } from "../score/map-difficulty";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "../types/token/scoresaber/leaderboard-player-info";
-import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
+import { MapDifficulty } from "../schemas/map/map-difficulty";
+import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
+import { ScoreSaberLeaderboardPlayerInfo } from "../schemas/scoresaber/leaderboard/player-info";
 
 export type ScoreSaberRole = {
   /**
@@ -102,14 +101,16 @@ export const ScoreSaberHMDs: Record<number, HMD> = {
  * @returns the role
  */
 export function getScoreSaberRoles(
-  player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayer
+  player: ScoreSaberLeaderboardPlayerInfo | ScoreSaberPlayer
 ): ScoreSaberRole[] {
   const toReturn: ScoreSaberRole[] = [];
-  const rawRoles = player.role?.split(", ") || [player.role];
-  for (const role of rawRoles) {
-    const found = scoreSaberRoles.find(r => r.roleId === role);
-    if (found) {
-      toReturn.push(found);
+  if ("role" in player) {
+    const rawRoles = player.role?.split(", ") || [player.role];
+    for (const role of rawRoles) {
+      const found = scoreSaberRoles.find(r => r.roleId === role);
+      if (found) {
+        toReturn.push(found);
+      }
     }
   }
   return toReturn;
@@ -144,14 +145,35 @@ export function getDifficultyFromScoreSaberDifficulty(ssDifficultyNumber: number
 }
 
 /**
+ * Gets the ScoreSaber difficulty from a difficulty.
+ *
+ * @param difficulty the difficulty
+ * @returns the ScoreSaber difficulty
+ */
+export function getScoreSaberDifficultyFromDifficulty(difficulty: MapDifficulty): number {
+  switch (difficulty) {
+    case "Easy":
+      return 1;
+    case "Normal":
+      return 3;
+    case "Hard":
+      return 5;
+    case "Expert":
+      return 7;
+    case "ExpertPlus":
+      return 9;
+    default:
+      throw new Error(`Unknown difficulty: ${difficulty}`);
+  }
+}
+
+/**
  * Gets the avatar for a player.
  *
  * @param player the player
  * @returns the avatar
  */
-export function getScoreSaberAvatar(
-  player: ScoreSaberPlayerToken | ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayer
-): string {
+export function getScoreSaberAvatar(player: ScoreSaberLeaderboardPlayerInfo | ScoreSaberPlayer): string {
   const fallbackAvatar = `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
 
   if ("profilePicture" in player) {
@@ -169,7 +191,7 @@ export function getScoreSaberAvatar(
  *
  * @param scores the scores
  */
-export function updateScoreWeights(scores: Pick<ScoreSaberScore, "pp" | "weight" | "scoreId">[]) {
+export function updateScoreWeights(scores: PlayerPpsResponse["scores"]) {
   for (let i = 0; i < scores.length; i++) {
     scores[i].weight = Math.pow(ScoreSaberCurve.WEIGHT_COEFFICIENT, i);
   }

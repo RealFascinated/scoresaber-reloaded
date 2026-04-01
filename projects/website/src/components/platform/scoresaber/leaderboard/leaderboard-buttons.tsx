@@ -3,13 +3,13 @@ import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-bu
 import { OneClickInstallButton } from "@/components/leaderboard/button/one-click-install-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import LeaderboardPpChartButton from "./chart/leaderboard-pp-chart";
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMapResponse;
+  beatSaverMap?: BeatSaverMap;
 };
 
 const buttons = [

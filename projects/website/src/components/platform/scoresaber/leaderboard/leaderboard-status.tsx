@@ -1,5 +1,5 @@
 import { cn } from "@/common/utils";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 
 export function LeaderboardStatus({ leaderboard }: { leaderboard: ScoreSaberLeaderboard }) {
   const colors = {

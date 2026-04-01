@@ -4,9 +4,9 @@ import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-but
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { useIsMobile } from "@/contexts/viewport-context";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { useMemo } from "react";
 import { ScoreInstallMapButton } from "../../../../score/button/score-install-map-button";
 import ScoreEditorButton from "./score-editor-button";
@@ -15,7 +15,7 @@ import ScoreHistoryGraphButton from "./score-history-graph-buton";
 type Props = {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
-  beatSaverMap?: BeatSaverMapResponse;
+  beatSaverMap?: BeatSaverMap;
   isLeaderboardLoading?: boolean;
   isPreviousScore?: boolean;
   updateScore?: (score: ScoreSaberScore) => void;
@@ -70,7 +70,7 @@ const buttons: ButtonConfig[] = [
       return score?.beatLeaderScore != undefined;
     },
     render: ({ score }: Props) => {
-      return <ScoreReplayButton score={score!} />;
+      return <ScoreReplayButton score={score.beatLeaderScore} />;
     },
   },
   {

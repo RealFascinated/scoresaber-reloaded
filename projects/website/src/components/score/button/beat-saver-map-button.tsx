@@ -1,10 +1,10 @@
 import BeatSaverLogo from "@/components/logos/logos/beatsaver-logo";
 import ScoreButton from "@/components/score/button/score-button";
 import SimpleLink from "@/components/simple-link";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 
 type BeatSaverMapProps = {
-  beatSaverMap: BeatSaverMapResponse;
+  beatSaverMap: BeatSaverMap;
 };
 
 export function BeatSaverMapButton({ beatSaverMap }: BeatSaverMapProps) {

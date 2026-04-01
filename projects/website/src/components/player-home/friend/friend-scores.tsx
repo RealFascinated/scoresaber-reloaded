@@ -27,8 +27,8 @@ export function FriendScores() {
   } = useQuery({
     queryKey: ["friend-scores", friendIds, page, mainPlayerId],
     queryFn: async () =>
-      ssrApi.fetchPlayerScores(mainPlayerId!, "ssr", page, "date", "desc", {
-        includePlayers: friendIds,
+      ssrApi.fetchPlayerScoreSaberScores(mainPlayerId!, page, "date", "desc", {
+        playerIds: friendIds,
       }),
     enabled: friendIds !== undefined && friendIds.length > 0 && mainPlayerId !== undefined,
     placeholderData: prev => prev,
@@ -60,7 +60,7 @@ export function FriendScores() {
               const beatSaverMap = playerScore.beatSaver;
               return (
                 <div key={score.scoreId} className="flex flex-col">
-                  <PlayerScoreHeader player={playerScore.score.playerInfo} />
+                  <PlayerScoreHeader player={playerScore.score.playerInfo!} />
                   <Card className="rounded-lg rounded-tl-none p-0">
                     <ScoreSaberScoreDisplay
                       key={score.scoreId}

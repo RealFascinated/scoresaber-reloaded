@@ -5,6 +5,7 @@ import { FancyLoader } from "@/components/fancy-loader";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
 import { MapStats } from "@/components/score/map-stats";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -35,8 +36,7 @@ const SwingSpeedChart = dynamic(() => import("./components/charts/swing-speed-ch
 
 type ScorePageDataProps = {
   scoreId: string;
-  /** From RSC; avoids a duplicate client fetch on first paint when present */
-  initialScore?: PlayerScore;
+  initialScore?: PlayerScore<ScoreSaberScore>;
 };
 
 export default function ScorePageData({ scoreId, initialScore }: ScorePageDataProps) {

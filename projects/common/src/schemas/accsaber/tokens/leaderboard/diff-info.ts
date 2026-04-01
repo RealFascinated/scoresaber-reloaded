@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MapDifficultySchema } from "../../../../score/map-difficulty";
+import { MapDifficultySchema } from "../../../map/map-difficulty";
 
 export const accSaberDiffInfoSchema = z.object({
   type: z.string(),

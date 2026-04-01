@@ -1,19 +1,18 @@
 import { DetailType } from "@ssr/common/detail-type";
-import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
-import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
-import { PlayerModel } from "@ssr/common/model/player/player";
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
+import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
-import { getDaysAgoDate, TimeUnit } from "@ssr/common/utils/time-utils";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
+import { count, eq, gt } from "drizzle-orm";
 import { redisClient } from "../common/redis";
+import { db } from "../db";
+import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../db/schema";
 import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
 import CacheService, { CacheId } from "./cache.service";
 import MetricsService, { MetricType } from "./metrics.service";
@@ -45,39 +44,17 @@ export default class ScoreSaberService {
     }
 
     return CacheService.fetch(CacheId.ScoreSaber, `scoresaber:player:${id}:${type}`, async () => {
-      const account = await PlayerCoreService.getPlayer(id, player).catch(() => undefined);
-      const isOculusAccount =
-        player.id.length === 16 || player.profilePicture === "https://cdn.scoresaber.com/avatars/oculus.png";
+      const account = await PlayerCoreService.getOrCreateAccount(id, player).catch(() => undefined);
 
       // delete players scores if banned so they don't fuck up top scores
       if (player.banned) {
-        await ScoreSaberScoreModel.deleteMany({ playerId: id });
-      }
-
-      if (
-        account &&
-        !isOculusAccount &&
-        !account.cachedProfilePicture &&
-        player.profilePicture !== "https://cdn.scoresaber.com/avatars/steam.png"
-      ) {
-        await PlayerCoreService.cachePlayerProfilePicture(id);
-      }
-
-      let avatar: string;
-      if (isOculusAccount) {
-        avatar = "https://cdn.fascinated.cc/assets/oculus-avatar.jpg";
-      } else if (player.profilePicture === "https://cdn.scoresaber.com/avatars/steam.png") {
-        avatar = "https://cdn.fascinated.cc/assets/unknown.png";
-      } else if (account) {
-        avatar = `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.PlayerAvatars)}/${id}.jpg`;
-      } else {
-        avatar = player.profilePicture;
+        await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.playerId, id));
       }
 
       const basePlayer = {
         id: player.id,
         name: player.name,
-        avatar,
+        avatar: account?.avatar ?? "https://cdn.fascinated.cc/assets/unknown.png",
         country: player.country,
         rank: player.rank,
         countryRank: player.countryRank,
@@ -96,27 +73,8 @@ export default class ScoreSaberService {
         return basePlayer;
       }
 
-      /**
-       * Gets a player's statistic history for a specific date range.
-       *
-       * @param player the player to get the statistic history for
-       * @param daysAgo the amount of days to look back
-       * @returns the statistic history
-       */
-      async function getStatisticHistory(player: ScoreSaberPlayerToken, date: Date) {
-        return await PlayerHistoryService.getPlayerStatisticHistory(player, date, true);
-      }
-
-      const [
-        plusOnePp,
-        hmdBreakdown,
-        medalsRank,
-        dailyChanges,
-        weeklyChanges,
-        monthlyChanges,
-        rankWithInactives,
-      ] = await Promise.all([
-        account ? PlayerRankedService.getPlayerWeightedPpGainForRawPp(id) : 0,
+      const [plusOnePp, hmdBreakdown, medalsRank, statisticHistory, rankWithInactives] = await Promise.all([
+        account ? PlayerRankedService.getPlayerPlusOnePp(id) : 0,
         // todo: cleanup this mess
         account && player !== undefined
           ? (async () => {
@@ -131,10 +89,16 @@ export default class ScoreSaberService {
             })()
           : undefined,
         account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
-        account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(1)), 1) : {},
-        account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(7)), 7) : {},
-        account ? getPlayerStatisticChanges(await getStatisticHistory(player, getDaysAgoDate(30)), 30) : {},
-        account ? (await PlayerModel.countDocuments({ pp: { $gt: player.pp } })) + 1 : 0,
+        PlayerHistoryService.getPlayerStatisticHistories(player, 30),
+        account
+          ? (async () => {
+              const [row] = await db
+                .select({ c: count() })
+                .from(scoreSaberAccountsTable)
+                .where(gt(scoreSaberAccountsTable.pp, player.pp));
+              return (row?.c ?? 0) + 1;
+            })()
+          : 0,
       ]);
 
       return {
@@ -149,9 +113,9 @@ export default class ScoreSaberService {
             description: badge.description,
           })) || [],
         statisticChange: {
-          daily: dailyChanges,
-          weekly: weeklyChanges,
-          monthly: monthlyChanges,
+          daily: getPlayerStatisticChanges(statisticHistory, 1),
+          weekly: getPlayerStatisticChanges(statisticHistory, 7),
+          monthly: getPlayerStatisticChanges(statisticHistory, 30),
         },
         plusOnePp: plusOnePp,
         peakRank: account?.peakRank,
@@ -210,7 +174,7 @@ export default class ScoreSaberService {
    */
   public static async updateCachedPlayer(
     id: string,
-    player: ScoreSaberLeaderboardPlayerInfoToken | ScoreSaberPlayerToken
+    player: ScoreSaberLeaderboardPlayerInfo | ScoreSaberPlayerToken
   ) {
     const cachedPlayer = await redisClient.get(`scoresaber:cached-player:${player.id}`);
 

@@ -1,5 +1,7 @@
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { PlayerAccuracies } from "@ssr/common/player/player-accuracies";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberScoresTable } from "../../db/schema";
 
 export class PlayerAccuraciesService {
   /**
@@ -9,59 +11,23 @@ export class PlayerAccuraciesService {
    * @returns the player's accuracy
    */
   public static async getPlayerAverageAccuracies(playerId: string): Promise<PlayerAccuracies> {
-    const accuracies = {
-      unrankedAccuracy: 0,
-      averageAccuracy: 0,
+    const [result] = await db
+      .select({
+        averageAccuracy: sql<number>`coalesce(avg(${scoreSaberScoresTable.accuracy}), 0)`,
+        unrankedAccuracy: sql<number>`coalesce(avg(case when ${scoreSaberScoresTable.pp} = 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
+      })
+      .from(scoreSaberScoresTable)
+      .where(
+        and(
+          eq(scoreSaberScoresTable.playerId, playerId),
+          gte(scoreSaberScoresTable.accuracy, 0),
+          lte(scoreSaberScoresTable.accuracy, 100)
+        )
+      );
+
+    return {
+      averageAccuracy: Number(result?.averageAccuracy ?? 0),
+      unrankedAccuracy: Number(result?.unrankedAccuracy ?? 0),
     };
-
-    const result = await ScoreSaberScoreModel.aggregate([
-      {
-        $match: {
-          playerId: playerId,
-          accuracy: { $gte: 0, $lte: 100 },
-        },
-      },
-      {
-        $facet: {
-          totalStats: [
-            {
-              $group: {
-                _id: null,
-                totalAccuracy: { $sum: "$accuracy" },
-                count: { $sum: 1 },
-              },
-            },
-          ],
-          unrankedStats: [
-            {
-              $match: { pp: 0 },
-            },
-            {
-              $group: {
-                _id: null,
-                totalAccuracy: { $sum: "$accuracy" },
-                count: { $sum: 1 },
-              },
-            },
-          ],
-        },
-      },
-    ]);
-
-    if (result.length > 0) {
-      const { totalStats, unrankedStats } = result[0];
-
-      // Calculate total average accuracy
-      if (totalStats.length > 0) {
-        accuracies.averageAccuracy = totalStats[0].totalAccuracy / totalStats[0].count;
-      }
-
-      // Calculate unranked average accuracy
-      if (unrankedStats.length > 0) {
-        accuracies.unrankedAccuracy = unrankedStats[0].totalAccuracy / unrankedStats[0].count;
-      }
-    }
-
-    return accuracies;
   }
 }

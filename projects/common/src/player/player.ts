@@ -1,4 +1,4 @@
-import type { FlattenedPlayerHistory } from "./player-statistic-history";
+import { ScoreSaberPlayerHistory } from "../schemas/scoresaber/player/history";
 
 export default class Player {
   /**
@@ -62,5 +62,5 @@ export default class Player {
 
 export type StatisticRange = "daily" | "weekly" | "monthly";
 export type StatisticChange = {
-  [key in StatisticRange]: FlattenedPlayerHistory;
+  [key in StatisticRange]: ScoreSaberPlayerHistory;
 };

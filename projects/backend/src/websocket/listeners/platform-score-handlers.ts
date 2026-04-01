@@ -7,6 +7,9 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
+import { eq } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberLeaderboardsTable } from "../../db/schema";
 import { EventListener } from "../../event/event-listener";
 import { EventsManager } from "../../event/events-manager";
 import BeatLeaderSeenScoresMetric from "../../metrics/impl/player/beatleader-seen-scores";
@@ -166,9 +169,7 @@ export class ScoreWebsockets implements EventListener {
     beatLeaderScore?: BeatLeaderScoreToken
   ) {
     if (scoreSaberToken && leaderboardToken && player) {
-      const { leaderboard } = await LeaderboardCoreService.processLeaderboard(
-        getScoreSaberLeaderboardFromToken(leaderboardToken)
-      );
+      const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
       const score = getScoreSaberScoreFromToken(scoreSaberToken, leaderboard, player.id);
       const isTop50GlobalScore = await TopScoresService.isTop50GlobalScore(score);
 
@@ -176,10 +177,10 @@ export class ScoreWebsockets implements EventListener {
       if (!(await PlayerCoreService.createPlayer(player.id))) {
         Promise.all([
           // Update the player's name last
-          player.name ? PlayerCoreService.updatePlayerName(player.id, player.name) : undefined,
+          player.name ? PlayerCoreService.updatePlayer(player.id, { name: player.name }) : undefined,
 
           // Update cached player in Redis
-          ScoreSaberService.updateCachedPlayer(player.id, player),
+          ScoreSaberService.updateCachedPlayer(player.id, score.playerInfo!),
         ]);
       }
 
@@ -187,10 +188,14 @@ export class ScoreWebsockets implements EventListener {
       if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id))) {
         await LeaderboardCoreService.createLeaderboard(leaderboard.id, leaderboardToken);
       } else {
-        await LeaderboardCoreService.updateLeaderboard(leaderboard.id, {
-          plays: leaderboard.plays,
-          dailyPlays: leaderboard.dailyPlays,
-        });
+        await db
+          .update(scoreSaberLeaderboardsTable)
+          .set({
+            plays: leaderboard.plays,
+            dailyPlays: leaderboard.dailyPlays,
+            maxScore: leaderboard.maxScore,
+          })
+          .where(eq(scoreSaberLeaderboardsTable.id, leaderboard.id));
       }
 
       // Track unique daily players in Redis
@@ -205,8 +210,18 @@ export class ScoreWebsockets implements EventListener {
 
       // Wait for all event listeners to process the score
       await Promise.all(
-        EventsManager.getListeners().map(listener => {
-          listener.onScoreReceived?.(score, leaderboard, player, beatLeaderScore, isTop50GlobalScore);
+        EventsManager.getListeners().map(async listener => {
+          try {
+            await listener.onScoreReceived?.(
+              score,
+              leaderboard,
+              score.playerInfo!,
+              beatLeaderScore,
+              isTop50GlobalScore
+            );
+          } catch (error) {
+            Logger.error(`[Scores-WS] Error in listener ${listener.constructor.name}:`, error);
+          }
         })
       );
     }

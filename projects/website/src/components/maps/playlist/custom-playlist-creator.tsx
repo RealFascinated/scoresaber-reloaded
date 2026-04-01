@@ -28,7 +28,7 @@ export default function CustomPlaylistCreator() {
   const [downloading, setDownloading] = useState(false);
 
   const form = useForm<CustomRankedPlaylist>({
-    resolver: zodResolver(customRankedPlaylistSchema),
+    resolver: zodResolver(customRankedPlaylistSchema, { reportInput: true }),
     defaultValues: {
       stars: {
         min: 0,

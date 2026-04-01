@@ -10,7 +10,6 @@ import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { StarIcon } from "@heroicons/react/24/solid";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
@@ -43,12 +42,12 @@ export default function Leaderboards() {
         ranked: filterDebounced.ranked,
         qualified: filterDebounced.qualified,
         verified: filterDebounced.verified,
-        search: filterDebounced.search.length > 3 ? filterDebounced.search : undefined,
+        query: filterDebounced.search.length > 3 ? filterDebounced.search : undefined,
       }),
     placeholderData: data => data,
   });
 
-  const leaderboards = leaderboardResponse?.leaderboards;
+  const leaderboards = leaderboardResponse?.items;
   return (
     <Card>
       {isLoading && leaderboardResponse == undefined && (
@@ -71,13 +70,12 @@ export default function Leaderboards() {
         {leaderboards && leaderboards.length > 0 && (
           <div className="flex flex-col gap-1 pb-2">
             <div className="flex flex-col gap-1.5 border-none">
-              {leaderboards.map((leaderboardToken, index) => {
-                const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+              {leaderboards.map(leaderboard => {
                 let date: Date | undefined = leaderboard.timestamp;
-                if (leaderboard.ranked) {
-                  date = leaderboard.dateRanked;
-                } else if (leaderboard.qualified) {
-                  date = leaderboard.dateQualified;
+                if (leaderboard.ranked && leaderboard.rankedDate) {
+                  date = leaderboard.rankedDate;
+                } else if (leaderboard.qualified && leaderboard.qualifiedDate) {
+                  date = leaderboard.qualifiedDate;
                 }
 
                 return (
@@ -136,7 +134,7 @@ export default function Leaderboards() {
           <SimplePagination
             mobilePagination={isMobile}
             page={page}
-            totalItems={leaderboardResponse.metadata.total}
+            totalItems={leaderboardResponse.metadata.totalItems}
             itemsPerPage={leaderboardResponse.metadata.itemsPerPage}
             loadingPage={isLoading || isRefetching ? page : undefined}
             onPageChange={newPage => setPage(newPage)}

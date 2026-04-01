@@ -126,6 +126,7 @@ const GenericChart = ({ config, labels }: Props) => {
 
                 const date =
                   labels[labelIndex] instanceof Date ? labels[labelIndex] : parseDate(labels[labelIndex]);
+                if (!date) return "";
                 const daysAgo = getDaysAgo(date);
                 const currentYear = new Date().getUTCFullYear();
                 const dateYear = date.getUTCFullYear();
@@ -273,6 +274,7 @@ const GenericChart = ({ config, labels }: Props) => {
               }
 
               const date = value instanceof Date ? value : parseDate(value);
+              if (!date) return "";
               const differenceInDays = getDaysAgo(date);
               const formattedDate = formatDate(date, "dddd, DD MMM, YYYY");
 

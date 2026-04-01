@@ -1,12 +1,50 @@
 import Logger from "@ssr/common/logger";
-import { Player, PlayerModel } from "@ssr/common/model/player/player";
-import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerMedalRankingsResponse } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import type { QueryFilter } from "mongoose";
+import { and, asc, count, desc, eq, gt, inArray, isNotNull, ne, sql, sum } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberAccountsTable, scoreSaberMedalScoresTable } from "../../db/schema";
 import ScoreSaberService from "../scoresaber.service";
+
+/**
+ * Gets medal ranks for a list of player IDs.
+ *
+ * @param playerIds the player ids to get ranks for
+ * @param options.country optional country filter
+ * @param options.partitionByCountry whether to partition ranks by country
+ * @returns a map of player id to rank
+ */
+async function getMedalRanksForIds(
+  playerIds: string[],
+  options: { country?: string; partitionByCountry?: boolean }
+): Promise<Map<string, number>> {
+  if (playerIds.length === 0) return new Map();
+
+  const { country, partitionByCountry } = options;
+  const partitionClause = partitionByCountry ? sql`PARTITION BY country` : sql``;
+  const countryFilter = country ? sql`AND country = ${country}` : sql``;
+
+  const result = await db.execute(sql`
+    WITH ranked AS (
+      SELECT id, ROW_NUMBER() OVER (${partitionClause} ORDER BY medals DESC, id ASC) AS rank
+      FROM "scoresaber-accounts"
+      WHERE medals > 0
+        AND country IS NOT NULL
+        AND country != ''
+        ${countryFilter}
+    )
+    SELECT id, rank::int AS rank FROM ranked
+    WHERE id IN (${sql.join(
+      playerIds.map(id => sql`${id}`),
+      sql`, `
+    )})
+  `);
+
+  const rows = (result as unknown as { rows: { id: string; rank: number }[] }).rows ?? [];
+  return new Map(rows.map(r => [r.id, Number(r.rank)]));
+}
 
 export class PlayerMedalsService {
   /**
@@ -15,63 +53,34 @@ export class PlayerMedalsService {
   public static async updatePlayerGlobalMedalCounts(): Promise<void> {
     const before = performance.now();
 
-    const medalCounts = await ScoreSaberMedalsScoreModel.aggregate([
-      {
-        $group: {
-          _id: "$playerId",
-          totalMedals: { $sum: "$medals" },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          playerId: "$_id",
-          totalMedals: 1,
-        },
-      },
-    ]);
+    const medalCountRows = await db
+      .select({
+        playerId: scoreSaberMedalScoresTable.playerId,
+        totalMedals: sum(scoreSaberMedalScoresTable.medals),
+      })
+      .from(scoreSaberMedalScoresTable)
+      .groupBy(scoreSaberMedalScoresTable.playerId);
 
-    const playerMedalCounts = new Map<string, number>();
-    for (const result of medalCounts) {
-      playerMedalCounts.set(result.playerId, result.totalMedals);
-    }
+    const playerMedalCounts = new Map(
+      medalCountRows.map(row => [row.playerId, Number(row.totalMedals ?? 0)])
+    );
 
-    const bulkOps = [];
+    await db.transaction(async tx => {
+      await tx
+        .update(scoreSaberAccountsTable)
+        .set({ medals: 0 })
+        .where(gt(scoreSaberAccountsTable.medals, 0));
 
-    const playersWithMedals = await PlayerModel.find({
-      medals: { $gt: 0 },
-    })
-      .select("_id")
-      .lean();
-
-    const playersWithMedalsSet = new Set(playersWithMedals.map(p => p._id.toString()));
-
-    for (const playerId of playersWithMedalsSet) {
-      if (!playerMedalCounts.has(playerId)) {
-        bulkOps.push({
-          updateOne: {
-            filter: { _id: playerId },
-            update: { $set: { medals: 0 } },
-          },
-        });
+      for (const [playerId, medalCount] of playerMedalCounts) {
+        await tx
+          .update(scoreSaberAccountsTable)
+          .set({ medals: medalCount })
+          .where(eq(scoreSaberAccountsTable.id, playerId));
       }
-    }
-
-    for (const [playerId, medalCount] of playerMedalCounts) {
-      bulkOps.push({
-        updateOne: {
-          filter: { _id: playerId },
-          update: { $set: { medals: medalCount } },
-        },
-      });
-    }
-
-    if (bulkOps.length > 0) {
-      await PlayerModel.bulkWrite(bulkOps);
-    }
+    });
 
     Logger.info(
-      `[PLAYER MEDALS] Updated ${bulkOps.length} player medal counts in ${formatDuration(performance.now() - before)}`
+      `[PLAYER MEDALS] Updated ${playerMedalCounts.size} player medal counts in ${formatDuration(performance.now() - before)}`
     );
   }
 
@@ -79,60 +88,58 @@ export class PlayerMedalsService {
    * Updates the medal count for a list of players.
    *
    * @param playerIds the ids of the players
+   * @returns a map of player id to medal count
    */
   public static async updatePlayerMedalCounts(...playerIds: string[]): Promise<Record<string, number>> {
     const before = performance.now();
-    const medalCounts = await ScoreSaberMedalsScoreModel.aggregate([
-      {
-        $match: {
-          playerId: { $in: playerIds },
-        },
-      },
-      {
-        $group: {
-          _id: "$playerId",
-          totalMedals: { $sum: "$medals" },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          playerId: "$_id",
-          totalMedals: 1,
-        },
-      },
-    ]);
 
-    await PlayerModel.bulkWrite(
-      medalCounts.map(result => {
-        return {
-          updateOne: {
-            filter: { _id: result.playerId },
-            update: { $set: { medals: result.totalMedals } },
-          },
-        };
+    if (playerIds.length === 0) return {};
+
+    const medalCounts = await db
+      .select({
+        playerId: scoreSaberMedalScoresTable.playerId,
+        totalMedals: sum(scoreSaberMedalScoresTable.medals),
       })
-    );
+      .from(scoreSaberMedalScoresTable)
+      .where(inArray(scoreSaberMedalScoresTable.playerId, playerIds))
+      .groupBy(scoreSaberMedalScoresTable.playerId);
+
+    const normalized = medalCounts.map(row => ({
+      playerId: row.playerId,
+      totalMedals: Number(row.totalMedals ?? 0),
+    }));
+
+    const totalsByPlayer = new Map(normalized.map(({ playerId, totalMedals }) => [playerId, totalMedals]));
+
+    await db.transaction(async tx => {
+      for (const playerId of playerIds) {
+        await tx
+          .update(scoreSaberAccountsTable)
+          .set({ medals: totalsByPlayer.get(playerId) ?? 0 })
+          .where(eq(scoreSaberAccountsTable.id, playerId));
+      }
+    });
 
     Logger.info(
-      `[PLAYER MEDALS] Updated ${medalCounts.length} player medal counts in ${formatDuration(performance.now() - before)}`
+      `[PLAYER MEDALS] Updated ${playerIds.length} player medal counts in ${formatDuration(performance.now() - before)}`
     );
 
-    return medalCounts.reduce(
-      (acc, curr) => {
-        acc[curr.playerId] = curr.totalMedals;
-        return acc;
-      },
-      {} as Record<string, number>
-    );
+    return Object.fromEntries(playerIds.map(id => [id, totalsByPlayer.get(id) ?? 0]));
   }
 
   /**
    * Gets the amount of medals a player has.
+   *
+   * @param playerId the id of the player
+   * @returns the medal count
    */
   public static async getPlayerMedals(playerId: string): Promise<number> {
-    const player = await PlayerModel.findById(playerId).select("medals").lean();
-    return player?.medals ?? 0;
+    const [row] = await db
+      .select({ medals: scoreSaberAccountsTable.medals })
+      .from(scoreSaberAccountsTable)
+      .where(eq(scoreSaberAccountsTable.id, playerId))
+      .limit(1);
+    return row?.medals ?? 0;
   }
 
   /**
@@ -146,180 +153,114 @@ export class PlayerMedalsService {
     page: number,
     country?: string
   ): Promise<PlayerMedalRankingsResponse> {
-    const filter: QueryFilter<Player> = {
-      medals: { $gt: 0 },
-      country: { $nin: [null, ""] },
-      ...(country && { country: { $nin: [null, ""], $in: [country] } }),
-    };
+    const baseWhere = sql`
+      medals > 0
+      AND country IS NOT NULL
+      AND country != ''
+      ${country ? sql`AND country = ${country}` : sql``}
+    `;
+    const itemsPerPage = 50;
 
-    const totalPlayers = await PlayerModel.countDocuments(filter);
+    const [{ totalPlayers }, countryMetadataRows] = await Promise.all([
+      db
+        .select({ totalPlayers: count() })
+        .from(scoreSaberAccountsTable)
+        .where(baseWhere)
+        .then(([r]) => ({ totalPlayers: r?.totalPlayers ?? 0 })),
+      db
+        .select({ country: scoreSaberAccountsTable.country, count: count() })
+        .from(scoreSaberAccountsTable)
+        .where(
+          and(baseWhere, isNotNull(scoreSaberAccountsTable.country), ne(scoreSaberAccountsTable.country, ""))
+        )
+        .groupBy(scoreSaberAccountsTable.country)
+        .orderBy(desc(count())),
+    ]);
+
     if (totalPlayers === 0) {
-      return {
-        ...Pagination.empty<ScoreSaberPlayer>(),
-        countryMetadata: {},
-      } as PlayerMedalRankingsResponse;
+      return { ...Pagination.empty<ScoreSaberPlayer>(), countryMetadata: {} } as PlayerMedalRankingsResponse;
     }
 
-    const pagination = new Pagination<ScoreSaberPlayer>().setItemsPerPage(50).setTotalItems(totalPlayers);
+    const pagination = new Pagination<ScoreSaberPlayer>()
+      .setItemsPerPage(itemsPerPage)
+      .setTotalItems(totalPlayers);
 
-    const [pageData, countryMetadata] = await Promise.all([
-      pagination.getPageWithCursor(page, {
-        sortField: "medals",
-        sortDirection: -1,
-        getCursor: (item: { medals: number; _id: unknown }) => ({
-          sortValue: item.medals,
-          id: item._id,
-        }),
-        buildCursorQuery: cursor => {
-          if (!cursor) return filter;
-          // Sort by medals descending, then by _id ascending for consistent tiebreaking
-          return {
-            ...filter,
-            $or: [
-              { medals: { $lt: cursor.sortValue } },
-              { medals: cursor.sortValue, _id: { $gt: cursor.id } },
-            ],
-          };
-        },
-        getPreviousPageItem: async () => {
-          // Get the last item from the previous page
-          const previousPageStart = (page - 1) * pagination.itemsPerPage - 1;
-          if (previousPageStart < 0) return null;
-          const items = await PlayerModel.aggregate([
-            { $match: filter },
-            { $sort: { medals: -1, _id: 1 } },
-            { $skip: previousPageStart },
-            { $limit: 1 },
-            { $project: { medals: 1, _id: 1 } },
-          ]);
-          return (items[0] as { medals: number; _id: unknown }) || null;
-        },
-        fetchItems: async cursorInfo => {
-          // Get players sorted by medal count
-          const players = await PlayerModel.aggregate([
-            { $match: cursorInfo.query },
-            // Sort by medals descending, then by _id ascending for consistent tiebreaking
-            { $sort: { medals: -1, _id: 1 } },
-            { $limit: cursorInfo.limit },
-          ]);
+    const pageData = await pagination.getPage(page, async fetchRange => {
+      const players = await db
+        .select({
+          id: scoreSaberAccountsTable.id,
+          medals: scoreSaberAccountsTable.medals,
+          country: scoreSaberAccountsTable.country,
+        })
+        .from(scoreSaberAccountsTable)
+        .where(baseWhere)
+        .orderBy(desc(scoreSaberAccountsTable.medals), asc(scoreSaberAccountsTable.id))
+        .limit(fetchRange.end - fetchRange.start)
+        .offset(fetchRange.start);
 
-          if (players.length === 0) {
-            return [];
-          }
+      if (!players.length) return [];
 
-          const [globalRankings, countryRankings] = await Promise.all([
-            // Global rankings for current page players
-            PlayerModel.aggregate([
-              { $match: { medals: { $gt: 0 } } },
-              { $sort: { medals: -1, _id: 1 } },
-              { $group: { _id: null, players: { $push: { id: "$_id", medals: "$medals" } } } },
-              { $unwind: { path: "$players", includeArrayIndex: "rank" } },
-              { $match: { "players.id": { $in: players.map(p => p._id) } } },
-              { $project: { playerId: "$players.id", globalRank: { $add: ["$rank", 1] } } },
-            ]),
-            // Country rankings for current page players
-            PlayerModel.aggregate([
-              {
-                $match: {
-                  medals: { $gt: 0 },
-                  country: { $in: [...new Set(players.map(p => p.country).filter(Boolean))] },
-                },
-              },
-              { $sort: { country: 1, medals: -1, _id: 1 } },
-              {
-                $group: { _id: "$country", players: { $push: { id: "$_id", medals: "$medals" } } },
-              },
-              { $unwind: { path: "$players", includeArrayIndex: "rank" } },
-              { $match: { "players.id": { $in: players.map(p => p._id) } } },
-              {
-                $project: {
-                  playerId: "$players.id",
-                  country: "$_id",
-                  countryRank: { $add: ["$rank", 1] },
-                },
-              },
-            ]),
-          ]);
+      const playerIds = players.map(p => p.id);
+      const [globalRankMap, countryRankMap] = await Promise.all([
+        getMedalRanksForIds(playerIds, { country }),
+        getMedalRanksForIds(playerIds, { partitionByCountry: true }),
+      ]);
 
-          // Create lookup maps
-          const globalRankMap = new Map(globalRankings.map(r => [r.playerId.toString(), r.globalRank]));
-          const countryRankMap = new Map(countryRankings.map(r => [r.playerId.toString(), r.countryRank]));
-
-          const result = await Promise.all(
-            players.map(async player => {
-              const playerId = player._id.toString();
-
-              const playerData = await ScoreSaberService.getPlayer(
-                playerId,
-                "basic",
-                await ScoreSaberService.getCachedPlayer(playerId)
-              );
-
-              // Use pre-calculated rankings
-              playerData.medalsRank = globalRankMap.get(playerId) ?? 0;
-              playerData.countryMedalsRank = countryRankMap.get(playerId) ?? 0;
-
-              return playerData;
-            })
+      return Promise.all(
+        players.map(async ({ id }) => {
+          const playerData = await ScoreSaberService.getPlayer(
+            id,
+            "basic",
+            await ScoreSaberService.getCachedPlayer(id)
           );
-
-          return result;
-        },
-      }),
-      // Country metadata aggregation
-      PlayerModel.aggregate([
-        { $match: { ...filter, country: { $nin: [null, "", undefined] } } },
-        { $group: { _id: "$country", count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-      ]),
-    ]);
+          playerData.medalsRank = globalRankMap.get(id) ?? 0;
+          playerData.countryMedalsRank = countryRankMap.get(id) ?? 0;
+          return playerData;
+        })
+      );
+    });
 
     return {
       ...pageData,
-      countryMetadata: countryMetadata.reduce(
-        (acc, curr) => {
-          acc[curr._id] = curr.count;
-          return acc;
-        },
-        {} as Record<string, number>
+      countryMetadata: Object.fromEntries(
+        countryMetadataRows.filter(r => r.country).map(r => [r.country!, r.count])
       ),
     } as PlayerMedalRankingsResponse;
   }
 
   /**
-   * Gets a player's medal rank.
+   * Gets a player's global medal rank.
    *
    * @param playerId the id of the player
-   * @returns the rank
+   * @returns the rank, or null if the player has no medals
    */
   public static async getPlayerMedalRank(playerId: string): Promise<number | null> {
-    const player = await PlayerModel.findById(playerId).select("medals").lean();
-    if (!player || (player.medals ?? 0) <= 0) return null;
-
-    // Count how many players have more medals than this player
-    const rank = await PlayerModel.countDocuments({
-      medals: { $gt: player.medals ?? 0 },
-    });
-
-    return rank + 1; // +1 because rank is 1-indexed
+    const result = await db.execute<{ rank: number }>(sql`
+      SELECT rank::int FROM (
+        SELECT id, ROW_NUMBER() OVER (ORDER BY medals DESC, id ASC) AS rank
+        FROM "scoresaber-accounts"
+        WHERE medals > 0 AND country IS NOT NULL AND country != ''
+      ) ranked
+      WHERE id = ${playerId}
+    `);
+    return result.rows[0]?.rank ?? null;
   }
 
   /**
-   * Gets a player's country medal rank on-demand.
+   * Gets a player's country medal rank.
    *
    * @param playerId the id of the player
-   * @returns the rank
+   * @returns the rank, or null if the player has no medals
    */
   public static async getPlayerCountryMedalRank(playerId: string): Promise<number | null> {
-    const player = await PlayerModel.findById(playerId).select("medals country").lean();
-    if (!player || (player.medals ?? 0) <= 0 || !player.country) return null;
-
-    // Count how many players from the same country have more medals
-    const rank = await PlayerModel.countDocuments({
-      medals: { $gt: player.medals ?? 0 },
-      country: player.country,
-    });
-
-    return rank + 1; // +1 because rank is 1-indexed
+    const result = await db.execute<{ rank: number }>(sql`
+      SELECT rank::int FROM (
+        SELECT id, ROW_NUMBER() OVER (PARTITION BY country ORDER BY medals DESC, id ASC) AS rank
+        FROM "scoresaber-accounts"
+        WHERE medals > 0 AND country IS NOT NULL AND country != ''
+      ) ranked
+      WHERE id = ${playerId}
+    `);
+    return result.rows[0]?.rank ?? null;
   }
 }

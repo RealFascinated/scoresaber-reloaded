@@ -37,11 +37,13 @@ export const ModifierLabels: Readonly<Record<Modifier, string>> = {
   [Modifier.NA]: "No Arrows",
 };
 
-const modifierByLabel: Readonly<Record<string, Modifier>> = Object.freeze(
+const modifierCodes = new Set<string>(Object.values(Modifier));
+
+const modifierByLabel = Object.freeze(
   Object.fromEntries(
-    Object.entries(ModifierLabels).map(([code, label]) => [label, code as Modifier])
-  ) as Record<string, Modifier>
-);
+    (Object.entries(ModifierLabels) as [Modifier, string][]).map(([code, label]) => [label, code])
+  )
+) as Readonly<Record<string, Modifier>>;
 
 /**
  * Zod schema for a single modifier code.
@@ -57,9 +59,8 @@ export const ModifiersSchema = z.array(ModifierSchema);
  * Normalizes a modifier value (code or legacy label) into a modifier code.
  */
 export function normalizeModifier(value: string): Modifier | undefined {
-  const parsed = ModifierSchema.safeParse(value);
-  if (parsed.success) {
-    return parsed.data;
+  if (modifierCodes.has(value)) {
+    return value as Modifier;
   }
 
   // Legacy DB/UI values stored as labels (e.g. "No Fail")
@@ -70,34 +71,21 @@ export function normalizeModifier(value: string): Modifier | undefined {
  * Normalizes a list of modifier values (codes or legacy labels) into modifier codes.
  */
 export function normalizeModifiers(values: readonly string[] | undefined): Modifier[] {
-  if (!values || values.length === 0) {
+  if (!values?.length) {
     return [];
   }
 
-  const out: Modifier[] = [];
-  for (const value of values) {
+  return values.flatMap(value => {
     const normalized = normalizeModifier(value);
-    if (normalized) {
-      out.push(normalized);
-    }
-  }
-  return out;
+    return normalized ? [normalized] : [];
+  });
 }
 
 /**
  * Checks whether a modifier list contains a given modifier (supports codes or legacy labels).
  */
 export function hasModifier(values: readonly string[] | undefined, modifier: Modifier): boolean {
-  if (!values || values.length === 0) {
-    return false;
-  }
-
-  for (const value of values) {
-    if (normalizeModifier(value) === modifier) {
-      return true;
-    }
-  }
-  return false;
+  return values?.some(value => normalizeModifier(value) === modifier) ?? false;
 }
 
 /**

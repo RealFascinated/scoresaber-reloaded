@@ -26,8 +26,9 @@ export default interface BeatSaverMapMetadataToken {
 
   /**
    * The song's author's url.
+   * Not in Swagger `MapDetailMetadata`; kept optional for compatibility.
    */
-  songAuthorUrl: string;
+  songAuthorUrl?: string;
 
   /**
    * The level mapper(s) name.

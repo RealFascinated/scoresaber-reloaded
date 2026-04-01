@@ -1,9 +1,11 @@
-import { MapDifficultySchema } from "@ssr/common/score/map-difficulty";
-import { MapCharacteristicSchema } from "@ssr/common/types/map-characteristic";
+import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
+import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { Elysia } from "elysia";
 import { z } from "zod";
+import BeatSaverService from "../service/beatsaver.service";
 import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
-import { LeaderboardHmdService } from "../service/leaderboard/leaderboard-hmd.service";
+import { LeaderboardRankingService } from "../service/leaderboard/leaderboard-ranking.service";
 import { ScoreSaberApiService } from "../service/scoresaber-api.service";
 
 export default function leaderboardController(app: Elysia) {
@@ -11,14 +13,11 @@ export default function leaderboardController(app: Elysia) {
     app
       .get(
         "/search",
-        async ({
-          query: { page, ranked, qualified, verified, category, minStar, maxStar, sort, search },
-        }) => {
-          return await ScoreSaberApiService.lookupLeaderboards(page, {
-            search,
+        async ({ query: { page, ranked, qualified, category, minStar, maxStar, sort, query } }) => {
+          return await LeaderboardCoreService.lookupLeaderboards(page, {
+            query,
             ranked,
             qualified,
-            verified,
             category,
             stars: {
               min: minStar,
@@ -33,12 +32,11 @@ export default function leaderboardController(app: Elysia) {
             page: z.coerce.number().default(1),
             ranked: z.coerce.boolean().optional(),
             qualified: z.coerce.boolean().optional(),
-            verified: z.coerce.boolean().optional(),
             category: z.coerce.number().optional(),
             minStar: z.coerce.number().optional(),
             maxStar: z.coerce.number().optional(),
             sort: z.coerce.number().optional(),
-            search: z.coerce.string().optional(),
+            query: z.coerce.string().optional(),
           }),
           detail: {
             description: "Search ScoreSaber leaderboards",
@@ -60,10 +58,16 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/by-id/:leaderboardId",
         async ({ params: { leaderboardId } }) => {
-          return await LeaderboardCoreService.getLeaderboard(leaderboardId, {
-            includeBeatSaver: true,
-            includeStarChangeHistory: true,
-          });
+          const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
+          return {
+            leaderboard: leaderboard,
+            beatsaver: await BeatSaverService.getMap(
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic
+            ),
+            starChangeHistory: await LeaderboardRankingService.fetchStarChangeHistory(leaderboard),
+          } as LeaderboardResponse;
         },
         {
           tags: ["Leaderboard"],
@@ -78,11 +82,20 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/by-hash/:hash/:difficulty/:characteristic",
         async ({ params: { hash, difficulty, characteristic } }) => {
-          const data = await LeaderboardCoreService.getLeaderboardByHash(hash, difficulty, characteristic, {
-            includeBeatSaver: true,
-            includeStarChangeHistory: true,
-          });
-          return data;
+          const leaderboard = await LeaderboardCoreService.getLeaderboardByHash(
+            hash,
+            difficulty,
+            characteristic
+          );
+          return {
+            leaderboard: leaderboard,
+            beatsaver: await BeatSaverService.getMap(
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic
+            ),
+            starChangeHistory: await LeaderboardRankingService.fetchStarChangeHistory(leaderboard),
+          } as LeaderboardResponse;
         },
         {
           tags: ["Leaderboard"],
@@ -93,21 +106,6 @@ export default function leaderboardController(app: Elysia) {
           }),
           detail: {
             description: "Fetch leaderboard details",
-          },
-        }
-      )
-      .get(
-        "/play-count-by-hmd/:leaderboardId",
-        async ({ params: { leaderboardId } }) => {
-          return LeaderboardHmdService.getPlayCountByHmd(leaderboardId);
-        },
-        {
-          tags: ["Leaderboard"],
-          params: z.object({
-            leaderboardId: z.coerce.number(),
-          }),
-          detail: {
-            description: "Fetch play count by HMD",
           },
         }
       )

@@ -18,18 +18,18 @@ export type PlayerStatChangeType = "Rank" | "CountryRank" | "PerformancePoints" 
 export const PlayerStatChange: Record<PlayerStatChangeType, PlayerStatValue> = {
   Rank: {
     type: "Rank",
-    value: (player, range) => player.statisticChange?.[range].rank,
+    value: (player, range) => player.statisticChange?.[range].rank ?? undefined,
   },
   CountryRank: {
     type: "Country Rank",
-    value: (player, range) => player.statisticChange?.[range].countryRank,
+    value: (player, range) => player.statisticChange?.[range].countryRank ?? undefined,
   },
   PerformancePoints: {
     type: "Performance Points",
-    value: (player, range) => player.statisticChange?.[range].pp,
+    value: (player, range) => player.statisticChange?.[range].pp ?? undefined,
   },
   Medals: {
     type: "Medals",
-    value: (player, range) => player.statisticChange?.[range].medals,
+    value: (player, range) => player.statisticChange?.[range].medals ?? undefined,
   },
 };

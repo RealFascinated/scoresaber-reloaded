@@ -11,9 +11,9 @@ import {
 } from "discord.js";
 import { Client } from "discordx";
 
-import { ScoreSaberScoreModel } from "@ssr/common/model/score/impl/scoresaber-score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { PlayerScoresService } from "../service/player/player-scores.service";
 import "./command/fetch-missing-player-scores";
 import "./command/force-track-player-statistics";
 import "./command/refresh-medal-scores";
@@ -77,7 +77,7 @@ export async function initDiscordBot() {
         status: "online",
         activities: [
           {
-            name: `${formatNumberWithCommas(await ScoreSaberScoreModel.estimatedDocumentCount())} Scores!`,
+            name: `${formatNumberWithCommas(await PlayerScoresService.getTotalScoresCount())} Scores!`,
             type: ActivityType.Watching,
             url: "https://ssr.fascinated.cc",
           },
@@ -104,7 +104,7 @@ export async function sendEmbedToChannel(
   embed: EmbedBuilder,
   components: ActionRowData<MessageActionRowComponentBuilder>[] = []
 ) {
-  if (!channelId) {
+  if (!channelId || !env.DISCORD_BOT_TOKEN) {
     return;
   }
   try {
@@ -113,7 +113,7 @@ export async function sendEmbedToChannel(
       return await channel.send({ embeds: [embed], components });
     }
   } catch (error) {
-    Logger.error(`Failed to send message to channel ${channelId}:`, error);
+    Logger.error(`Failed to send message to channel ${channelId}: `, error);
   }
   return undefined;
 }
@@ -128,7 +128,7 @@ export async function sendMessageToChannel(
   channelId: (typeof DiscordChannels)[keyof typeof DiscordChannels],
   message: string
 ) {
-  if (!channelId) {
+  if (!channelId || !env.DISCORD_BOT_TOKEN) {
     return;
   }
 
@@ -138,7 +138,7 @@ export async function sendMessageToChannel(
       return await channel.send(message);
     }
   } catch (error) {
-    Logger.error(`Failed to send message to channel ${channelId}:`, error);
+    Logger.error(`Failed to send message to channel ${channelId}: `, error);
   }
   return undefined;
 }
@@ -173,6 +173,6 @@ export async function sendFile(
       });
     }
   } catch (error) {
-    Logger.error(`Error sending file to channel ${channelId}:`, error);
+    Logger.error(`Error sending file to channel ${channelId}: `, error);
   }
 }

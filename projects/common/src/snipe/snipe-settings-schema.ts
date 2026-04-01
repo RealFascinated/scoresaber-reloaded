@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { SortDirectionSchema, SortFieldSchema } from "../types/score-query";
+import { ScoreSaberScoreSortFieldSchema } from "../schemas/score/query/sort/scoresaber-scores-sort";
+import { SortDirectionSchema } from "../schemas/score/query/sort/sort-direction";
 
 export const snipeSettingsSchema = z.object({
-  sort: SortFieldSchema,
+  sort: ScoreSaberScoreSortFieldSchema,
   sortDirection: SortDirectionSchema,
   rankedStatus: z.enum(["all", "ranked", "unranked"]),
   requireBothScores: z.boolean(),

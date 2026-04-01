@@ -1,16 +1,23 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
-import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { PlayerModel } from "@ssr/common/model/player/player";
-import { ScoreSaberMedalsScoreModel } from "@ssr/common/model/score/impl/scoresaber-medals-score";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { isProduction } from "@ssr/common/utils/utils";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
+import { db } from "../../db";
+import { scoreSaberMedalScoreRowToType, scoreSaberScoreToMedalScore } from "../../db/converter/medal-score";
+import {
+  ScoreSaberMedalScoreRow,
+  scoreSaberAccountsTable,
+  scoreSaberMedalScoresTable,
+} from "../../db/schema";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerMedalsService } from "../player/player-medals.service";
 import { ScoreSaberApiService } from "../scoresaber-api.service";
@@ -20,10 +27,91 @@ type MedalScoresQueueItem = {
   beatLeaderScore: BeatLeaderScore | undefined;
 };
 
+/** ScoreSaber top-10 order; used when diffing against the API. Display rank uses medals → timestamp in {@link MedalScoresService.getMedalTableScoreRanksForScores}. */
+function sortMedalRowsByLeaderboardOrder(rows: ScoreSaberMedalScoreRow[]): ScoreSaberMedalScoreRow[] {
+  return [...rows].sort((a, b) => b.score - a.score || b.scoreId - a.scoreId);
+}
+
+function medalScoreInsert(
+  score: ScoreSaberScore | ScoreSaberMedalScore
+): typeof scoreSaberMedalScoresTable.$inferInsert {
+  const modifiers = score.modifiers.map(modifier => modifier.toString());
+
+  const medals =
+    "medals" in score && typeof score.medals === "number"
+      ? score.medals
+      : MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS];
+
+  return {
+    scoreId: score.scoreId,
+    playerId: score.playerId,
+    leaderboardId: score.leaderboardId,
+    difficulty: score.difficulty,
+    characteristic: score.characteristic,
+    score: score.score,
+    accuracy: score.accuracy,
+    medals,
+    missedNotes: score.missedNotes,
+    badCuts: score.badCuts,
+    maxCombo: score.maxCombo,
+    fullCombo: score.fullCombo,
+    modifiers: modifiers.length > 0 ? modifiers : null,
+    hmd: score.hmd ?? "Unknown",
+    rightController: score.rightController,
+    leftController: score.leftController,
+    timestamp: score.timestamp,
+  };
+}
+
 export class MedalScoresService {
   private static IGNORE_SCORES = false;
-  /** Deduped by `scoreId` — a Set of `{ score }` objects would keep every duplicate reference during rescan. */
-  private static SCORES_INGEST_QUEUE = new Map<string, MedalScoresQueueItem>();
+  private static SCORES_INGEST_QUEUE = new Map<number, MedalScoresQueueItem>();
+
+  /**
+   * 1-based rank on each score's leaderboard in `scoresaber-medal-scores`
+   * (medals desc, timestamp desc, scoreId desc).
+   *
+   * The window runs over every row in the relevant leaderboards (required for a correct rank);
+   * only `targets` score IDs are returned.
+   */
+  public static async getMedalTableScoreRanksForScores(
+    targets: { scoreId: number; leaderboardId: number }[]
+  ): Promise<Map<number, number>> {
+    if (targets.length === 0) {
+      return new Map();
+    }
+    const leaderboardIds = [...new Set(targets.map(t => t.leaderboardId))];
+    const scoreIds = targets.map(t => t.scoreId);
+
+    const result = await db.execute(sql`
+      WITH ranked AS (
+        SELECT
+          "scoreId",
+          cast(
+            row_number() over (
+              partition by "leaderboardId"
+              order by
+                medals desc,
+                timestamp desc,
+                "scoreId" desc
+            ) as integer
+          ) AS rank
+        FROM "scoresaber-medal-scores"
+        WHERE "leaderboardId" IN (${sql.join(
+          leaderboardIds.map(id => sql`${id}`),
+          sql`, `
+        )})
+      )
+      SELECT "scoreId", rank FROM ranked
+      WHERE "scoreId" IN (${sql.join(
+        scoreIds.map(id => sql`${id}`),
+        sql`, `
+      )})
+    `);
+
+    const rows = (result as unknown as { rows: { scoreId: number; rank: number }[] }).rows ?? [];
+    return new Map(rows.map(r => [Number(r.scoreId), Number(r.rank)]));
+  }
 
   /**
    * Refreshes the medal scores for all ranked leaderboards.
@@ -75,13 +163,7 @@ export class MedalScoresService {
    * @returns true if scores were updated, false if they were unchanged
    */
   public static async rescanLeaderboardIfChanged(leaderboardId: number): Promise<boolean> {
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId, {
-      includeBeatSaver: false,
-      includeStarChangeHistory: false,
-    });
-    if (!leaderboard) {
-      return false;
-    }
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
 
     const page = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1, {
       priority: isProduction() ? CooldownPriority.BACKGROUND : CooldownPriority.NORMAL,
@@ -90,34 +172,38 @@ export class MedalScoresService {
       return false;
     }
 
-    // Get top 10 scores from API
     const top10ApiScores = page.scores
-      .filter(score => score.rank <= 10)
-      .map(score => ({
-        scoreId: String(score.id),
-        playerId: score.leaderboardPlayerInfo.id,
-        score: score.baseScore,
-        rank: score.rank,
+      .filter(s => s.rank <= 10)
+      .map(s => ({
+        scoreId: Number(s.id),
+        playerId: s.leaderboardPlayerInfo.id,
+        score: s.baseScore,
+        rank: s.rank,
       }))
       .sort((a, b) => a.rank - b.rank);
 
-    // Get existing medal scores from database
-    const existingScores = await ScoreSaberMedalsScoreModel.find({ leaderboardId })
-      .select("scoreId playerId score rank")
-      .lean()
-      .sort({ rank: 1 });
+    const existingRows = await db
+      .select()
+      .from(scoreSaberMedalScoresTable)
+      .where(eq(scoreSaberMedalScoresTable.leaderboardId, leaderboardId));
 
-    // Compare scores - check if they're different
-    if (existingScores.length !== top10ApiScores.length) {
-      // Different number of scores, needs update
-      await ScoreSaberMedalsScoreModel.deleteMany({ leaderboardId });
-      await this.insertMedalScores(page.scores, leaderboard.leaderboard);
+    const existingTop10 = sortMedalRowsByLeaderboardOrder(existingRows).slice(0, 10);
+    const existingComparable = existingTop10.map((row, index) => ({
+      scoreId: row.scoreId,
+      playerId: row.playerId,
+      rank: index + 1,
+    }));
+
+    if (existingComparable.length !== top10ApiScores.length) {
+      await db
+        .delete(scoreSaberMedalScoresTable)
+        .where(eq(scoreSaberMedalScoresTable.leaderboardId, leaderboardId));
+      await this.insertMedalScores(page.scores, leaderboard);
       return true;
     }
 
-    // Compare each score by scoreId and rank
     const scoresChanged = top10ApiScores.some((apiScore, index) => {
-      const existingScore = existingScores[index];
+      const existingScore = existingComparable[index];
       return (
         !existingScore ||
         existingScore.scoreId !== apiScore.scoreId ||
@@ -127,13 +213,13 @@ export class MedalScoresService {
     });
 
     if (scoresChanged) {
-      // Scores have changed, delete and re-insert
-      await ScoreSaberMedalsScoreModel.deleteMany({ leaderboardId });
-      await this.insertMedalScores(page.scores, leaderboard.leaderboard);
+      await db
+        .delete(scoreSaberMedalScoresTable)
+        .where(eq(scoreSaberMedalScoresTable.leaderboardId, leaderboardId));
+      await this.insertMedalScores(page.scores, leaderboard);
       return true;
     }
 
-    // No changes, skip update
     return false;
   }
 
@@ -147,18 +233,18 @@ export class MedalScoresService {
     scores: ScoreSaberScoreToken[],
     leaderboard: ScoreSaberLeaderboard
   ): Promise<void> {
-    for (const score of scores) {
-      // Ignore scores that aren't top 10
-      if (score.rank > 10) {
+    const rows: (typeof scoreSaberMedalScoresTable.$inferInsert)[] = [];
+    for (const token of scores) {
+      if (token.rank > 10) {
         continue;
       }
-
-      // Create a new medal score
-      await new ScoreSaberMedalsScoreModel({
-        ...getScoreSaberScoreFromToken(score, leaderboard, score.leaderboardPlayerInfo.id),
-        medals: MEDAL_COUNTS[score.rank as keyof typeof MEDAL_COUNTS],
-      }).save();
+      const score = getScoreSaberScoreFromToken(token, leaderboard, token.leaderboardPlayerInfo.id);
+      rows.push(medalScoreInsert(score));
     }
+    if (rows.length === 0) {
+      return;
+    }
+    await db.insert(scoreSaberMedalScoresTable).values(rows);
   }
 
   /**
@@ -168,16 +254,12 @@ export class MedalScoresService {
    */
   public static async rescanLeaderboard(leaderboardId: number, deleteScores: boolean = false) {
     if (deleteScores) {
-      await ScoreSaberMedalsScoreModel.deleteMany({ leaderboardId });
+      await db
+        .delete(scoreSaberMedalScoresTable)
+        .where(eq(scoreSaberMedalScoresTable.leaderboardId, leaderboardId));
     }
 
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId, {
-      includeBeatSaver: false,
-      includeStarChangeHistory: false,
-    });
-    if (!leaderboard) {
-      return;
-    }
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
 
     const page = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1, {
       priority: isProduction() ? CooldownPriority.BACKGROUND : CooldownPriority.NORMAL,
@@ -186,7 +268,7 @@ export class MedalScoresService {
       return;
     }
 
-    await this.insertMedalScores(page.scores, leaderboard.leaderboard);
+    await this.insertMedalScores(page.scores, leaderboard);
   }
 
   /**
@@ -198,48 +280,46 @@ export class MedalScoresService {
     score: ScoreSaberScore,
     beatLeaderScore: BeatLeaderScore | undefined
   ) {
-    // Invalid score
     if (score.rank > 10 || score.pp <= 0) {
       return;
     }
 
-    // Add to update queue
     if (MedalScoresService.IGNORE_SCORES) {
       MedalScoresService.SCORES_INGEST_QUEUE.set(score.scoreId, { score, beatLeaderScore });
       return;
     }
 
-    /**
-     * Updates the medal scores for the leaderboard.
-     *
-     * @returns the affected player ids
-     */
     async function updateMedalScores(): Promise<string[]> {
-      const existingScores = await ScoreSaberMedalsScoreModel.find({
-        leaderboardId: score.leaderboardId,
-      })
-        .sort({ score: -1 })
-        .lean();
+      const existingRows = await db
+        .select()
+        .from(scoreSaberMedalScoresTable)
+        .where(eq(scoreSaberMedalScoresTable.leaderboardId, score.leaderboardId))
+        .orderBy(desc(scoreSaberMedalScoresTable.score), desc(scoreSaberMedalScoresTable.scoreId));
 
       const oldScoreMedals = new Map<string, number>();
-      for (const score of existingScores) {
-        const current = oldScoreMedals.get(score.playerId) ?? 0;
-        oldScoreMedals.set(score.playerId, current + score.medals);
+      for (const row of existingRows) {
+        const current = oldScoreMedals.get(row.playerId) ?? 0;
+        oldScoreMedals.set(row.playerId, current + row.medals);
       }
 
-      const existingScoreIndex = existingScores.findIndex(
-        s => s.playerId === score.playerId && s.leaderboardId === score.leaderboardId
+      const allScores: Array<ScoreSaberMedalScore> = existingRows.map(row =>
+        scoreSaberMedalScoreRowToType(row)
       );
 
-      const allScores = [...existingScores];
+      const existingScoreIndex = allScores.findIndex(
+        s => s.playerId === score.playerId && s.leaderboardId === score.leaderboardId
+      );
       if (existingScoreIndex >= 0) {
-        const existingScore = existingScores[existingScoreIndex];
-        allScores[existingScoreIndex] = { ...existingScore, ...score, medals: 0 };
+        allScores[existingScoreIndex] = {
+          ...scoreSaberMedalScoreRowToType(existingRows[existingScoreIndex]),
+          ...scoreSaberScoreToMedalScore(score),
+          medals: 0,
+        };
       } else {
-        allScores.push({ ...score, medals: 0 } as (typeof existingScores)[0]);
+        allScores.push(scoreSaberScoreToMedalScore(score));
       }
 
-      allScores.sort((a, b) => b.score - a.score);
+      allScores.sort((a, b) => b.score - a.score || b.scoreId - a.scoreId);
 
       for (let i = 0; i < allScores.length; i++) {
         const rank = i + 1;
@@ -248,38 +328,21 @@ export class MedalScoresService {
       }
 
       const top10Scores = allScores.slice(0, 10);
-      const belowTop10 = allScores.slice(10);
 
       const newScoreMedals = new Map<string, number>();
-      for (const score of top10Scores) {
-        const current = newScoreMedals.get(score.playerId) ?? 0;
-        newScoreMedals.set(score.playerId, current + score.medals);
+      for (const s of top10Scores) {
+        const current = newScoreMedals.get(s.playerId) ?? 0;
+        newScoreMedals.set(s.playerId, current + s.medals);
       }
 
-      if (top10Scores.length > 0) {
-        await ScoreSaberMedalsScoreModel.bulkWrite(
-          top10Scores.map(score => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { _id, __v, ...data } = score;
-            return {
-              updateOne: {
-                filter: { playerId: score.playerId, leaderboardId: score.leaderboardId },
-                update: { $set: data },
-                upsert: true,
-              },
-            };
-          })
-        );
-      }
-
-      if (belowTop10.length > 0) {
-        await ScoreSaberMedalsScoreModel.deleteMany({
-          $or: belowTop10.map(s => ({
-            playerId: s.playerId,
-            leaderboardId: s.leaderboardId,
-          })),
-        });
-      }
+      await db.transaction(async tx => {
+        await tx
+          .delete(scoreSaberMedalScoresTable)
+          .where(eq(scoreSaberMedalScoresTable.leaderboardId, score.leaderboardId));
+        if (top10Scores.length > 0) {
+          await tx.insert(scoreSaberMedalScoresTable).values(top10Scores.map(s => medalScoreInsert(s)));
+        }
+      });
 
       const allPlayerIds = new Set([...oldScoreMedals.keys(), ...newScoreMedals.keys()]);
       return Array.from(allPlayerIds).filter(playerId => {
@@ -289,17 +352,13 @@ export class MedalScoresService {
       });
     }
 
-    /**
-     * Gets the changes in medal counts for the players.
-     */
     async function getChanges(affectedPlayerIds: string[]): Promise<Map<string, MedalChange>> {
-      const playersBefore = await PlayerModel.find({
-        _id: { $in: Array.from(affectedPlayerIds) },
-      })
-        .select("_id medals")
-        .lean();
+      const playersBefore = await db
+        .select({ id: scoreSaberAccountsTable.id, medals: scoreSaberAccountsTable.medals })
+        .from(scoreSaberAccountsTable)
+        .where(inArray(scoreSaberAccountsTable.id, Array.from(affectedPlayerIds)));
 
-      const medalsBefore = Object.fromEntries(playersBefore.map(p => [p._id.toString(), p.medals ?? 0]));
+      const medalsBefore = Object.fromEntries(playersBefore.map(p => [p.id, p.medals ?? 0]));
       const medalsAfter = await PlayerMedalsService.updatePlayerMedalCounts(...affectedPlayerIds);
 
       const changes = new Map<string, MedalChange>();
@@ -316,7 +375,6 @@ export class MedalScoresService {
 
     const medalChanges = await updateMedalScores();
 
-    // No medal changes
     if (medalChanges.length === 0) {
       return;
     }
@@ -328,9 +386,7 @@ export class MedalScoresService {
         .join(", ")}`
     );
 
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(score.leaderboardId, {
-      includeBeatSaver: false,
-    });
-    await sendMedalScoreNotification(score, leaderboard.leaderboard, beatLeaderScore, changes);
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(score.leaderboardId);
+    await sendMedalScoreNotification(score, leaderboard, beatLeaderScore, changes);
   }
 }

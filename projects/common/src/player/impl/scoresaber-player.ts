@@ -1,5 +1,5 @@
 import { HMD } from "../../hmds";
-import { PlayerScoreStats } from "../../model/player/player-score-stats";
+import type { ScoreSaberPlayerScoreStats } from "../../schemas/scoresaber/player/score-stats";
 import { PeakRank } from "../peak-rank";
 import Player, { StatisticChange } from "../player";
 
@@ -25,7 +25,7 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   /**
    * The player's score stats.
    */
-  scoreStats: PlayerScoreStats;
+  scoreStats: ScoreSaberPlayerScoreStats;
 
   /**
    * The pages for the players positions.

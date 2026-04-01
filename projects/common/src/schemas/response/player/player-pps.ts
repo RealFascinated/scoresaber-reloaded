@@ -5,7 +5,7 @@ export const PlayerPpsResponseSchema = z.object({
     z.object({
       pp: z.number(),
       weight: z.number(),
-      scoreId: z.string(),
+      scoreId: z.number(),
     })
   ),
 });

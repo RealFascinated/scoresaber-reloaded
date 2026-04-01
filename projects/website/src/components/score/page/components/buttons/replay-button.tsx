@@ -5,7 +5,7 @@ import SimpleLink from "@/components/simple-link";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 import { PlayCircle } from "lucide-react";
 
@@ -30,7 +30,10 @@ export default function ReplayButton({
   return (
     <SimpleLink
       className="inline-flex"
-      href={viewer.generateUrl(score.beatLeaderScore?.scoreId, getBeatLeaderReplayRedirectUrl(score))}
+      href={viewer.generateUrl(
+        score.beatLeaderScore.scoreId,
+        getBeatLeaderReplayRedirectUrl(score.beatLeaderScore)
+      )}
     >
       <Button variant={variant} size={size} className={cn("gap-1.5 font-medium", className)} {...buttonProps}>
         <PlayCircle className="size-3.5 shrink-0 opacity-90" aria-hidden />

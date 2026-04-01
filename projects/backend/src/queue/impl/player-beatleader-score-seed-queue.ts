@@ -1,7 +1,10 @@
 import Logger from "@ssr/common/logger";
-import { PlayerModel } from "@ssr/common/model/player/player";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { and, eq } from "drizzle-orm";
+import { db } from "../../db";
+import { scoreSaberAccountsTable } from "../../db/schema";
 import { PlayerBeatLeaderScoresService } from "../../service/player/player-beatleader-scores.service";
+import { PlayerCoreService } from "../../service/player/player-core.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
@@ -16,13 +19,15 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
   protected async processItem(item: QueueItem<string>): Promise<void> {
     const playerId = item.id;
 
-    const player = await PlayerModel.findOne({ _id: playerId }).lean();
-    if (!player) {
+    const account = await PlayerCoreService.getAccount(playerId);
+    if (!account) {
       Logger.warn(`Player "${playerId}" not found for BeatLeader score seed`);
       return;
     }
 
-    await PlayerBeatLeaderScoresService.fetchMissingBeatLeaderScores(player, { mode: "backfill" });
+    await PlayerBeatLeaderScoresService.fetchMissingBeatLeaderScores(account, {
+      mode: "backfill",
+    });
   }
 
   private async insertPlayers() {
@@ -30,14 +35,17 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
       return;
     }
     try {
-      const players = await PlayerModel.find({
-        seededBeatLeaderScores: { $in: [null, false] },
-        banned: false,
-      })
-        .select("_id")
-        .limit(100)
-        .lean();
-      const playerIds = players.map(p => p._id);
+      const players = await db
+        .select({ id: scoreSaberAccountsTable.id })
+        .from(scoreSaberAccountsTable)
+        .where(
+          and(
+            eq(scoreSaberAccountsTable.seededBeatLeaderScores, false),
+            eq(scoreSaberAccountsTable.banned, false)
+          )
+        )
+        .limit(100);
+      const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {
         Logger.info("No players to seed BeatLeader scores for");
         return;

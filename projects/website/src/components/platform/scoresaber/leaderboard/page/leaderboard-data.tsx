@@ -18,7 +18,7 @@ type LeaderboardDataProps = {
 
 export function ScoreSaberLeaderboardData({ leaderboardData }: LeaderboardDataProps) {
   const isMobile = useIsMobile();
-  const { leaderboard, beatsaver } = leaderboardData;
+  const { leaderboard, starChangeHistory } = leaderboardData;
 
   return (
     <LeaderboardFilterProvider>
@@ -31,15 +31,12 @@ export function ScoreSaberLeaderboardData({ leaderboardData }: LeaderboardDataPr
           <div className="flex w-full flex-col gap-2">
             {/* Leaderboard Scores */}
             <Card className="relative w-full gap-(--spacing-sm)">
-              <LeaderboardScores leaderboard={leaderboard} beatSaver={beatsaver} />
+              <LeaderboardScores leaderboard={leaderboard} />
 
               {/* Star Change History */}
-              {leaderboardData.starChangeHistory && leaderboardData.starChangeHistory.length > 0 && (
+              {starChangeHistory && starChangeHistory.length > 0 && (
                 <div className="pt-2">
-                  <LeaderboardStarChangeHistory
-                    key={leaderboard.id}
-                    starChangeHistory={leaderboardData.starChangeHistory}
-                  />
+                  <LeaderboardStarChangeHistory key={leaderboard.id} starChangeHistory={starChangeHistory} />
                 </div>
               )}
             </Card>

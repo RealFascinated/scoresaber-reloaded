@@ -1,12 +1,10 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { Playlist } from "@ssr/common/playlist/playlist";
-import { playlistToBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
+import { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
 import { uploadPaste } from "@ssr/common/utils/paste-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { DiscordChannels, sendFile, sendMessageToChannel } from "../../bot/bot";
-import PlaylistService from "../playlist/playlist.service";
 import { LeaderboardUpdate } from "./leaderboard-ranking.service";
 
 export class LeaderboardNotificationsService {
@@ -89,27 +87,27 @@ export class LeaderboardNotificationsService {
     const playlistId = `scoresaber-ranked-batch-${date}`;
 
     // Create a playlist of the changes
-    const playlist = new Playlist(
-      playlistId,
-      `Ranked Batch (${formatDate(new Date(), "Do MMMM, YYYY")})`,
-      env.NEXT_PUBLIC_WEBSITE_NAME,
-      PlaylistService.PLAYLIST_IMAGE_BASE64,
-      newlyRankedMaps.map(update => update.newLeaderboard),
-      "ranked-batch"
-    );
+    const playlist: Playlist = {
+      playlistTitle: `Ranked Batch (${formatDate(new Date(), "Do MMMM, YYYY")})`,
+      playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
+      customData: {
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/ranked-batch`,
+      },
+      songs: newlyRankedMaps.map(update => ({
+        songName: update.newLeaderboard.songName,
+        levelAuthorName: update.newLeaderboard.levelAuthorName,
+        hash: update.newLeaderboard.songHash,
+        difficulties: update.newLeaderboard.difficulties.map(difficulty => ({
+          difficulty: difficulty.difficulty,
+          characteristic: difficulty.characteristic,
+        })),
+      })),
+    };
 
-    if (await PlaylistService.playlistExists(playlistId)) {
-      const existingPlaylist = await PlaylistService.getPlaylist(playlistId);
-      await PlaylistService.updatePlaylist(playlistId, {
-        songs: [...existingPlaylist.songs, ...playlist.songs],
-      });
-    } else {
-      await PlaylistService.createPlaylist(playlist);
-    }
     await sendFile(
       DiscordChannels.RANKED_BATCH_LOGS,
       `${playlistId}.bplist`,
-      JSON.stringify(await playlistToBeatSaberPlaylist(playlist), null, 2)
+      JSON.stringify(playlist, null, 2)
     );
   }
 }

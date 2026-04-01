@@ -1,6 +1,6 @@
-import { ScoreSaberLeaderboard } from "../../../model/leaderboard/impl/scoresaber-leaderboard";
+import { BeatSaverMap } from "../../beatsaver/map/map";
 import { LeaderboardStarChange } from "../../leaderboard/leaderboard-star-change";
-import { BeatSaverMapResponse } from "../beatsaver/beatsaver-map";
+import { ScoreSaberLeaderboard } from "../../scoresaber/leaderboard/leaderboard";
 
 export type LeaderboardResponse = {
   /**
@@ -11,7 +11,7 @@ export type LeaderboardResponse = {
   /**
    * The beatsaver map associated with this leaderboard.
    */
-  beatsaver?: BeatSaverMapResponse;
+  beatsaver?: BeatSaverMap;
 
   /**
    * The star change history for this leaderboard.

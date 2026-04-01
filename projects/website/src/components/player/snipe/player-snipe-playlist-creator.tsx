@@ -75,7 +75,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
   const [downloading, setDownloading] = useState(false);
 
   const form = useForm<SnipeSettings>({
-    resolver: zodResolver(snipeSettingsSchema),
+    resolver: zodResolver(snipeSettingsSchema, { reportInput: true }),
     defaultValues: {
       sort: "pp",
       sortDirection: "desc",

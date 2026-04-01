@@ -1,7 +1,7 @@
-import { ScoreSaberLeaderboard } from "../../../model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "../../../model/score/impl/scoresaber-score";
 import { Metadata } from "../../../types/metadata";
-import { BeatSaverMapResponse } from "../beatsaver/beatsaver-map";
+import { BeatSaverMap } from "../../beatsaver/map/map";
+import { ScoreSaberLeaderboard } from "../../scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "../../scoresaber/score/score";
 
 export default interface LeaderboardScoresResponse {
   /**
@@ -17,7 +17,7 @@ export default interface LeaderboardScoresResponse {
   /**
    * The beatsaver map for the song.
    */
-  readonly beatSaver?: BeatSaverMapResponse;
+  readonly beatSaver?: BeatSaverMap;
 
   /**
    * The pagination metadata.

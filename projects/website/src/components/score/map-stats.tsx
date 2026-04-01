@@ -1,6 +1,6 @@
 import StatValue from "@/components/statistic/stat-value";
 import { CubeIcon } from "@heroicons/react/24/solid";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatTime } from "@ssr/common/utils/time-utils";
 import { BombIcon, BrickWallIcon, DrumIcon, GaugeIcon, MusicIcon, TimerIcon } from "lucide-react";
@@ -9,7 +9,7 @@ type MapAndScoreData = {
   /**
    * The map that the score was set on.
    */
-  beatSaver: BeatSaverMapResponse;
+  beatSaver: BeatSaverMap;
 };
 
 export function MapStats({ beatSaver }: MapAndScoreData) {

@@ -10,8 +10,8 @@ import { ScoreTimeSet } from "@/components/score/score-time-set";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { ChevronDown } from "lucide-react";
@@ -130,7 +130,7 @@ export default function ScoreSaberLeaderboardScore({
         <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[37px]")}>
           {score.beatLeaderScore && (
             <div className="flex justify-center">
-              <ScoreReplayButton score={score} />
+              <ScoreReplayButton score={score.beatLeaderScore} />
             </div>
           )}
         </td>

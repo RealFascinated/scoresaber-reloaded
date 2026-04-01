@@ -1,3 +1,10 @@
+/** BeatSaver API `UserDetail.type` (Swagger). */
+export type BeatSaverAccountType = "DISCORD" | "SIMPLE" | "DUAL";
+
+/** BeatSaver API `UserDetail.patreon` (Swagger). */
+export type BeatSaverAccountPatreon = "None" | "Supporter" | "SupporterPlus";
+
+/** Shapes `UserDetail` where we use uploader / author in-app (BeatSaver Swagger). */
 export default interface BeatSaverAccountToken {
   /**
    * The id of the mapper
@@ -22,7 +29,7 @@ export default interface BeatSaverAccountToken {
   /**
    * The way the account was created
    */
-  type: string;
+  type: BeatSaverAccountType;
 
   /**
    * Whether the account is an admin or not.
@@ -48,4 +55,15 @@ export default interface BeatSaverAccountToken {
    * The playlist for the mappers songs.
    */
   playlistUrl: string;
+
+  blurnsfw?: boolean;
+  curatorTab?: boolean;
+  description?: string;
+  email?: string;
+  patreon?: BeatSaverAccountPatreon;
+  suspendedAt?: string;
+  testplay?: boolean;
+  uniqueSet?: boolean;
+  uploadLimit?: number;
+  vivifyLimit?: number;
 }

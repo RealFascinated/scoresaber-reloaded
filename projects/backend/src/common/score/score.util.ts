@@ -1,12 +1,11 @@
 import { env } from "@ssr/common/env";
-import { BeatLeaderScore } from "@ssr/common/model/beatleader-score/beatleader-score";
-import { ScoreSaberLeaderboard } from "@ssr/common/model/leaderboard/impl/scoresaber-leaderboard";
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
+import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
-import { BeatSaverMapResponse } from "@ssr/common/schemas/response/beatsaver/beatsaver-map";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getModifierLabel } from "@ssr/common/score/modifier";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
@@ -30,7 +29,6 @@ export async function sendScoreNotification(
   channel: (typeof DiscordChannels)[keyof typeof DiscordChannels],
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
-  player: ScoreSaberLeaderboardPlayerInfoToken,
   beatLeaderScore: BeatLeaderScore | undefined,
   title: string
 ) {
@@ -38,10 +36,9 @@ export async function sendScoreNotification(
     BeatSaverService.getMap(
       leaderboard.songHash,
       leaderboard.difficulty.difficulty,
-      leaderboard.difficulty.characteristic,
-      "basic"
+      leaderboard.difficulty.characteristic
     ),
-    PlayerScoreHistoryService.getPlayerPreviousScore(player.id, score, leaderboard, score.timestamp),
+    PlayerScoreHistoryService.getPlayerPreviousScore(score, leaderboard),
   ]);
   const change = previousScore &&
     previousScore.change && {
@@ -74,7 +71,9 @@ export async function sendScoreNotification(
           name: "**__Performance__**",
           value: [
             `**Accuracy:** ${accuracy}`,
-            ...(score.pp > 0 ? [`**PP:** ${formatPp(score.pp)}pp ${change ? change.pp : ""}`] : []),
+            ...(score.pp && score.pp > 0
+              ? [`**PP:** ${formatPp(score.pp)}pp ${change ? change.pp : ""}`]
+              : []),
             `**Modifiers:** ${
               score.modifiers.length > 0 ? score.modifiers.map(getModifierLabel).join(", ") : "None"
             }`,
@@ -102,7 +101,7 @@ export async function sendScoreNotification(
       .setFooter({
         text: `Powered by ${env.NEXT_PUBLIC_WEBSITE_URL}`,
       })
-      .setColor(score.pp > 0 ? "#d4af37" : "#808080"),
+      .setColor(score.pp && score.pp > 0 ? "#d4af37" : "#808080"),
     getScoreButtons(score, leaderboard, beatSaver, beatLeaderScore)
   );
 
@@ -125,8 +124,7 @@ export async function sendMedalScoreNotification(
   const beatSaver = await BeatSaverService.getMap(
     leaderboard.songHash,
     leaderboard.difficulty.difficulty,
-    leaderboard.difficulty.characteristic,
-    "basic"
+    leaderboard.difficulty.characteristic
   );
   const description = [
     `**${leaderboard.fullName}**`,
@@ -159,7 +157,7 @@ export async function sendMedalScoreNotification(
   const playerById = new Map(
     await Promise.all(
       [...uniquePlayerIds].map(async playerId => {
-        const player = await PlayerCoreService.getPlayer(playerId);
+        const player = await PlayerCoreService.getOrCreateAccount(playerId);
         return [playerId, player] as const;
       })
     )
@@ -216,7 +214,7 @@ export async function sendMedalScoreNotification(
 function getScoreButtons(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,
-  beatSaver: BeatSaverMapResponse | undefined,
+  beatSaver: BeatSaverMap | undefined,
   beatLeaderScore: BeatLeaderScore | undefined
 ) {
   return [
@@ -251,7 +249,7 @@ function getScoreButtons(
                 .setURL(
                   ReplayViewers.beatleader.generateUrl(
                     beatLeaderScore.scoreId,
-                    getBeatLeaderReplayRedirectUrl(score)
+                    getBeatLeaderReplayRedirectUrl(beatLeaderScore)
                   )
                 ),
             ]

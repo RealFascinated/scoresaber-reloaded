@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "leaderboards_seeded_scores_false_idx" ON "scoresaber-leaderboards" USING btree ("seededScores") WHERE "scoresaber-leaderboards"."seededScores" = false;--> statement-breakpoint

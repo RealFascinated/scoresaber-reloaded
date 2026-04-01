@@ -1,4 +1,3 @@
-import { playlistToBeatSaberPlaylist } from "@ssr/common/playlist/playlist-utils";
 import { Elysia } from "elysia";
 import { z } from "zod";
 import PlaylistService from "../service/playlist/playlist.service";
@@ -7,28 +6,45 @@ export default function playlistController(app: Elysia) {
   return app.group("/playlist", app =>
     app
       .get(
-        "/:playlistId",
-        async ({ params: { playlistId } }) => {
-          return playlistToBeatSaberPlaylist(
-            await PlaylistService.getPlaylist(
-              playlistId.includes(".") ? playlistId.split(".")[0] : playlistId
-            )
-          );
+        "/ranked-maps",
+        async () => {
+          return await PlaylistService.getRankedMapsPlaylist();
         },
         {
           tags: ["Playlist"],
-          params: z.object({
-            playlistId: z.string().regex(/^[^/]+(?:\.[a-zA-Z0-9]+)?$/),
-          }),
           detail: {
-            description: "Fetch playlist",
+            description: "Gets the ranked maps playlist",
+          },
+        }
+      )
+      .get(
+        "/qualified-maps",
+        async () => {
+          return await PlaylistService.getQualifiedMapsPlaylist();
+        },
+        {
+          tags: ["Playlist"],
+          detail: {
+            description: "Gets the qualified maps playlist",
+          },
+        }
+      )
+      .get(
+        "/ranking-queue-maps",
+        async () => {
+          return await PlaylistService.getRankingQueueMapsPlaylist();
+        },
+        {
+          tags: ["Playlist"],
+          detail: {
+            description: "Gets the ranking queue maps playlist",
           },
         }
       )
       .get(
         "/scoresaber-custom-ranked-maps",
         async ({ query: { config } }) => {
-          return playlistToBeatSaberPlaylist(await PlaylistService.createCustomRankedPlaylist(config));
+          return await PlaylistService.createCustomRankedPlaylist(config);
         },
         {
           tags: ["Playlist"],
@@ -43,7 +59,7 @@ export default function playlistController(app: Elysia) {
       .get(
         "/snipe",
         async ({ query: { user, toSnipe, settings } }) => {
-          return playlistToBeatSaberPlaylist(await PlaylistService.getSnipePlaylist(user, toSnipe, settings));
+          return await PlaylistService.getSnipePlaylist(user, toSnipe, settings);
         },
         {
           tags: ["Playlist"],
@@ -60,7 +76,7 @@ export default function playlistController(app: Elysia) {
       .get(
         "/self",
         async ({ query: { user, settings } }) => {
-          return playlistToBeatSaberPlaylist(await PlaylistService.getSelfPlaylist(user, settings));
+          return await PlaylistService.getSelfPlaylist(user, settings);
         },
         {
           tags: ["Playlist"],

@@ -2,20 +2,17 @@ import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
 import { openapi } from "@elysiajs/openapi";
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
-import { mongoose } from "@typegoose/typegoose";
 import { timingSafeEqual } from "crypto";
 import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { helmet } from "elysia-helmet";
 import fs from "fs";
-import Redis from "ioredis";
 import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
@@ -27,12 +24,11 @@ import PlayerRankingController from "./controller/player-ranking.controller";
 import PlayerController from "./controller/player.controller";
 import PlaylistController from "./controller/playlist.controller";
 import ScoresController from "./controller/scores.controller";
+import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { QueueManager } from "./queue/queue-manager";
-import BeatSaverService from "./service/beatsaver.service";
 import CacheService from "./service/cache.service";
-import { LeaderboardCoreService } from "./service/leaderboard/leaderboard-core.service";
 import { LeaderboardNotificationsService } from "./service/leaderboard/leaderboard-notifications.service";
 import { LeaderboardRankingService } from "./service/leaderboard/leaderboard-ranking.service";
 import MetricsService, { prometheusRegistry } from "./service/metrics.service";
@@ -55,28 +51,23 @@ if (fs.existsSync(".env")) {
   });
 }
 
-new EventsManager();
-new MetricsService();
-
 try {
-  Logger.info("Connecting to MongoDB...");
-  await mongoose.connect(env.MONGO_CONNECTION_STRING);
-  Logger.info("Connected to MongoDB :)");
+  await runMigrations();
+  Logger.info("Database migrations are up to date.");
 } catch (error) {
-  Logger.error("Failed to connect to MongoDB:", error);
+  Logger.error("Database migration failed:", error);
   process.exit(1);
 }
 
-Logger.info("Testing Redis connection...");
-export const redisClient = new Redis(env.REDIS_URL);
-Logger.info("Connected to Redis :)");
+new EventsManager();
+new MetricsService();
 
 const httpMetricsHooks = createHttpMetricsHooks();
 
 export const app = new Elysia()
   .use(
     logger({
-      enabled: !isProduction(),
+      enabled: true,
       mode: "combined",
     })
   )
@@ -157,50 +148,6 @@ export const app = new Elysia()
       },
     })
   )
-  .use(
-    cron({
-      name: "scrape-beatsaver-maps",
-      pattern: "0 8 * * *", // Every day at 08:00
-      timezone: "Europe/London",
-      protect: true,
-      run: async () => {
-        let shouldScrape = true;
-        let beforeDate = new Date();
-        Logger.info(`Starting to scrape beatsaver maps before ${beforeDate.toISOString()}...`);
-        while (shouldScrape) {
-          const latestMaps = await ApiServiceRegistry.getInstance()
-            .getBeatSaverService()
-            .lookupLatestMaps(false, 100, {
-              before: beforeDate,
-            });
-          if (latestMaps == undefined || latestMaps.docs.length === 0) {
-            Logger.info(`No maps found before ${beforeDate.toISOString()}!`);
-            shouldScrape = false;
-            continue;
-          }
-
-          const sortedMaps = latestMaps.docs.sort(
-            (a, b) => new Date(a.uploaded).getTime() - new Date(b.uploaded).getTime()
-          );
-          beforeDate = new Date(sortedMaps[0].uploaded);
-
-          // Save the maps
-          for (const map of sortedMaps) {
-            await BeatSaverService.saveMap(map);
-          }
-
-          // No more maps to scrape
-          if (latestMaps.docs.length == 0) {
-            shouldScrape = false;
-            continue;
-          }
-          await Bun.sleep(TimeUnit.toMillis(TimeUnit.Minute, 1)); // avoid touching their server inappropriately
-
-          Logger.info(`Scraped ${latestMaps.docs.length} maps before ${beforeDate.toISOString()}!`);
-        }
-      },
-    })
-  )
   .onRequest(httpMetricsHooks.onRequest)
   .onError({ as: "global" }, ({ code, error }) => {
     // Return default error for type validation. JSON round-trip drops Elysia class instances (e.g. RequestParams in `value`) so mapResponse's devalue can serialize.
@@ -239,7 +186,6 @@ export const app = new Elysia()
       Logger.error("Internal server error:", error);
     }
 
-    const shouldExposeMessage = !isProduction();
     const errorMessage =
       typeof error === "object" && error !== null && "message" in error
         ? (error as { message?: unknown }).message
@@ -247,9 +193,7 @@ export const app = new Elysia()
 
     return {
       ...((status && { statusCode: status }) || { status: code }),
-      ...(shouldExposeMessage &&
-        errorMessage != code &&
-        typeof errorMessage === "string" && { message: errorMessage }),
+      ...(errorMessage != code && typeof errorMessage === "string" && { message: errorMessage }),
       timestamp: new Date().toISOString(),
     };
   })
@@ -352,8 +296,6 @@ app.onStart(async () => {
   new BeatSaverWebsocket();
   new StorageService();
 
-  LeaderboardCoreService.startPendingLeaderboardUpdateFlush();
-
   new CacheService();
   new PlaylistService();
 
@@ -396,11 +338,6 @@ const gracefulShutdown = async (signal: string) => {
       } catch (error) {
         Logger.warn(`Error stopping service ${listener.constructor.name}:`, error);
       }
-    }
-
-    if (mongoose.connection.readyState === 1) {
-      await mongoose.disconnect();
-      Logger.info("MongoDB connection closed");
     }
 
     clearTimeout(forceExit);

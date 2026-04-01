@@ -1,7 +1,7 @@
 "use client";
 
-import { ScoreSaberScore } from "@ssr/common/model/score/impl/scoresaber-score";
 import type { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-history-graph";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, getDaysAgo, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
