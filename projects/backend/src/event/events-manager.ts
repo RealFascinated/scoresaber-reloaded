@@ -1,8 +1,9 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { EventListener } from "./event-listener";
 import { TrackScoreListener } from "./impl/track-score-listener";
 
 export class EventsManager {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Events");
   /**
    * The registered event listeners.
    */
@@ -19,7 +20,7 @@ export class EventsManager {
    */
   public static registerListener(eventListener: EventListener) {
     if (EventsManager.events.includes(eventListener)) {
-      Logger.warn(`Event listener ${eventListener.constructor.name} already registered`);
+      EventsManager.logger.warn(`Event listener ${eventListener.constructor.name} already registered`);
       return;
     }
     EventsManager.events.push(eventListener);

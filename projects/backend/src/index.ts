@@ -41,7 +41,9 @@ import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
 
-Logger.info("Starting SSR Backend...");
+const ssrLog = Logger.withTopic("SSR Backend");
+
+ssrLog.info("Starting SSR Backend...");
 
 // Load .env file
 if (fs.existsSync(".env")) {
@@ -53,9 +55,9 @@ if (fs.existsSync(".env")) {
 
 try {
   await runMigrations();
-  Logger.info("Database migrations are up to date.");
+  ssrLog.info("Database migrations are up to date.");
 } catch (error) {
-  Logger.error("Database migration failed:", error);
+  ssrLog.error("Database migration failed:", error);
   process.exit(1);
 }
 
@@ -183,7 +185,7 @@ export const app = new Elysia()
     }
 
     if (status === 500) {
-      Logger.error("Internal server error:", error);
+      ssrLog.error("Internal server error:", error);
     }
 
     const errorMessage =
@@ -281,14 +283,14 @@ app.onStart(async () => {
     listener.onStart?.();
   });
 
-  Logger.info("Listening on port http://localhost:8080");
+  ssrLog.info("Listening on port http://localhost:8080");
   await initDiscordBot();
   sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder().setDescription("Backend started!"));
 
   // Log all registered routes
-  Logger.info("Registered routes:");
+  ssrLog.info("Registered routes:");
   for (const route of app.routes) {
-    Logger.info(`${route.method} ${route.path}`);
+    ssrLog.info(`${route.method} ${route.path}`);
   }
 
   // Must be registered first
@@ -314,37 +316,37 @@ const gracefulShutdown = async (signal: string) => {
   if (isShuttingDown) return;
   isShuttingDown = true;
 
-  Logger.info(`Received ${signal}, starting graceful shutdown...`);
+  ssrLog.info(`Received ${signal}, starting graceful shutdown...`);
 
   const forceExit = setTimeout(() => {
-    Logger.error("Forced shutdown after timeout");
+    ssrLog.error("Forced shutdown after timeout");
     process.exit(1);
   }, 10000);
 
   try {
     await app.stop();
-    Logger.info("Server stopped accepting new requests");
+    ssrLog.info("Server stopped accepting new requests");
 
     await sendEmbedToChannel(
       DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder().setDescription("Backend shutting down...")
     );
 
-    Logger.info("Stopping all services...");
+    ssrLog.info("Stopping all services...");
     MetricsService.cleanup();
     for (const listener of EventsManager.getListeners()) {
       try {
         await listener.onStop?.();
       } catch (error) {
-        Logger.warn(`Error stopping service ${listener.constructor.name}:`, error);
+        ssrLog.warn(`Error stopping service ${listener.constructor.name}:`, error);
       }
     }
 
     clearTimeout(forceExit);
-    Logger.info("Shutdown complete");
+    ssrLog.info("Shutdown complete");
     process.exit(0);
   } catch (error) {
-    Logger.error("Error during shutdown:", error);
+    ssrLog.error("Error during shutdown:", error);
     clearTimeout(forceExit);
     process.exit(1);
   }

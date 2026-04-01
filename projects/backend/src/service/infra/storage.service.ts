@@ -1,6 +1,6 @@
 import { SSRCache } from "@ssr/common/cache";
 import { env } from "@ssr/common/env";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { Client } from "minio";
 import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
@@ -15,6 +15,7 @@ const minioClient = new Client({
 });
 
 export default class StorageService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Storage");
   private static CACHE: SSRCache;
   private static readonly STORAGE_FILE_CACHE_ID = "s3_file_content";
 
@@ -68,7 +69,7 @@ export default class StorageService {
       await minioClient.putObject(getS3BucketName(bucket), filename, data);
       StorageService.CACHE.set(`${bucket}:${filename}`, data);
     } catch (error) {
-      Logger.error(`Failed to save file to Minio: ${error}`);
+      StorageService.logger.error(`Failed to save file to Minio: ${error}`);
     }
   }
 
@@ -83,7 +84,7 @@ export default class StorageService {
       await minioClient.removeObject(getS3BucketName(bucket), filename);
       StorageService.CACHE.remove(`${bucket}:${filename}`);
     } catch (error) {
-      Logger.error(`Failed to delete file from Minio: ${error}`);
+      StorageService.logger.error(`Failed to delete file from Minio: ${error}`);
     }
   }
 

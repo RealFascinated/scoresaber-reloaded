@@ -1,4 +1,4 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
 import { connectBeatSaverWebsocket } from "@ssr/common/websocket/beatsaver-websocket";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
@@ -8,6 +8,8 @@ import BeatSaverService from "../../service/external/beatsaver.service";
 import CacheService from "../../service/infra/cache.service";
 
 export class BeatSaverWebsocket {
+  private static readonly logger: ScopedLogger = Logger.withTopic("BeatSaver WebSocket");
+
   constructor() {
     const ingestMap = async (map: BeatSaverMapToken) => {
       const latestVersion = map.versions.sort(
@@ -21,7 +23,7 @@ export class BeatSaverWebsocket {
       await BeatSaverService.saveMap(map);
 
       await CacheService.invalidate(beatSaverMapCacheKey(mapHash)); // Invalidate the cache for the map
-      Logger.info(`BeatSaver map ${mapHash} updated`);
+      BeatSaverWebsocket.logger.info(`BeatSaver map ${mapHash} updated`);
 
       await sendEmbedToChannel(
         DiscordChannels.BEATSAVER_LOGS,
@@ -48,7 +50,7 @@ export class BeatSaverWebsocket {
     connectBeatSaverWebsocket({
       onMapUpdate: async map => {
         await ingestMap(map).catch(error => {
-          Logger.error(`Failed to ingest BeatSaver map ${map.id}: ${error}`);
+          BeatSaverWebsocket.logger.error(`Failed to ingest BeatSaver map ${map.id}: ${error}`);
         });
       },
     });

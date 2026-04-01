@@ -1,5 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import type { BeatLeaderPlayerScoresPageToken } from "@ssr/common/schemas/beatleader/tokens/score/page";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
@@ -12,6 +12,8 @@ import { PlayerCoreService } from "./player-core.service";
 type SeedMode = "backfill" | "requested";
 
 export class PlayerBeatLeaderScoresService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("BeatLeader Player Scores");
+
   /**
    * Fetches missing BeatLeader scores for a player.
    *
@@ -166,8 +168,8 @@ export class PlayerBeatLeaderScoresService {
     await PlayerCoreService.updatePlayer(playerId, { seededBeatLeaderScores: true });
 
     if (currentPage !== 1) {
-      Logger.info(
-        `[BeatLeader Seed] Player %s fetched %s page(s), tracked %s new score(s), in %s`,
+      PlayerBeatLeaderScoresService.logger.info(
+        `Player %s fetched %s page(s), tracked %s new score(s), in %s`,
         playerId,
         formatNumberWithCommas(result.totalPagesFetched),
         formatNumberWithCommas(result.newScoresTracked),

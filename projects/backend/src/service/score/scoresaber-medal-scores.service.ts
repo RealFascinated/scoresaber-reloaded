@@ -1,5 +1,5 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { MEDAL_COUNTS } from "@ssr/common/medal";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
@@ -61,6 +61,7 @@ function medalScoreInsert(score: ScoreSaberScore | ScoreSaberMedalScore): ScoreS
 }
 
 export class ScoreSaberMedalScoresService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("ScoreSaber Medal Scores");
   private static IGNORE_SCORES = false;
   private static SCORES_INGEST_QUEUE = new Map<number, MedalScoresQueueItem>();
 
@@ -90,14 +91,14 @@ export class ScoreSaberMedalScoresService {
         }
 
         if (index % 100 === 0) {
-          Logger.info(
-            `[MEDAL SCORES] Processed ${index} of ${rankedLeaderboards.length} ranked leaderboards (${updatedCount} updated, ${skippedCount} skipped)`
+          ScoreSaberMedalScoresService.logger.info(
+            `Processed ${index} of ${rankedLeaderboards.length} ranked leaderboards (${updatedCount} updated, ${skippedCount} skipped)`
           );
         }
       }
 
-      Logger.info(
-        `[MEDAL SCORES] Refreshed all ranked leaderboards: ${updatedCount} updated, ${skippedCount} skipped`
+      ScoreSaberMedalScoresService.logger.info(
+        `Refreshed all ranked leaderboards: ${updatedCount} updated, ${skippedCount} skipped`
       );
     } finally {
       ScoreSaberMedalScoresService.IGNORE_SCORES = false;
@@ -109,7 +110,7 @@ export class ScoreSaberMedalScoresService {
             item.beatLeaderScore
           );
         } catch (error) {
-          Logger.error("[MEDAL SCORES] Failed to process queued score after rescan:", error);
+          ScoreSaberMedalScoresService.logger.error("Failed to process queued score after rescan:", error);
         }
       }
       ScoreSaberMedalScoresService.SCORES_INGEST_QUEUE.clear();
@@ -324,8 +325,8 @@ export class ScoreSaberMedalScoresService {
     }
     const changes = await getChanges(medalChanges);
 
-    Logger.info(
-      `[MEDAL SCORES] Medal changes on leaderboard ${score.leaderboardId}: ${Array.from(changes.entries())
+    ScoreSaberMedalScoresService.logger.info(
+      `Medal changes on leaderboard ${score.leaderboardId}: ${Array.from(changes.entries())
         .map(([playerId, change]) => `${playerId}: ${change.before} -> ${change.after}`)
         .join(", ")}`
     );

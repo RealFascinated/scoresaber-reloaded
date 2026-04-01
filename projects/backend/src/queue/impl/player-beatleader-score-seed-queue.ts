@@ -1,4 +1,4 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { PlayerBeatLeaderScoresService } from "../../service/player/player-beatleader-scores.service";
@@ -7,6 +7,8 @@ import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
 export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Player BeatLeader Score Seed Queue");
+
   constructor() {
     super(QueueId.PlayerBeatLeaderScoreSeedQueue, "lifo");
 
@@ -19,7 +21,7 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
 
     const account = await PlayerCoreService.getAccount(playerId);
     if (!account) {
-      Logger.warn(`Player "${playerId}" not found for BeatLeader score seed`);
+      PlayerBeatLeaderScoreSeedQueue.logger.warn(`Player "${playerId}" not found for BeatLeader score seed`);
       return;
     }
 
@@ -36,7 +38,7 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
       const players = await ScoreSaberAccountsRepository.selectIdsNeedingBeatLeaderSeed(500);
       const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {
-        Logger.info("No players to seed BeatLeader scores for");
+        PlayerBeatLeaderScoreSeedQueue.logger.info("No players to seed BeatLeader scores for");
         return;
       }
 
@@ -45,9 +47,11 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
       }
 
       await this.processQueue();
-      Logger.info(`Added ${playerIds.length} players to BeatLeader score seed queue`);
+      PlayerBeatLeaderScoreSeedQueue.logger.info(
+        `Added ${playerIds.length} players to BeatLeader score seed queue`
+      );
     } catch (error) {
-      Logger.error("Failed to load players for BeatLeader score seed:", error);
+      PlayerBeatLeaderScoreSeedQueue.logger.error("Failed to load players for BeatLeader score seed:", error);
     }
   }
 }

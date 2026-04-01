@@ -1,5 +1,5 @@
 import { env } from "@ssr/common/env";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
 import { uploadPaste } from "@ssr/common/utils/paste-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
@@ -8,6 +8,8 @@ import { DiscordChannels, sendFile, sendMessageToChannel } from "../../bot/bot";
 import { LeaderboardUpdate } from "./leaderboard-ranked-sync.service";
 
 export class LeaderboardRankedSyncNotificationsService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Ranked Sync Notifications");
+
   /**
    * Logs the leaderboard updates to Discord.
    */
@@ -16,7 +18,7 @@ export class LeaderboardRankedSyncNotificationsService {
       return;
     }
 
-    Logger.info(`Logging ${updates.length} leaderboard updates...`);
+    LeaderboardRankedSyncNotificationsService.logger.info(`Logging ${updates.length} leaderboard updates...`);
 
     const newlyRankedMaps = updates.filter(
       update => update.newLeaderboard.ranked && !update.previousLeaderboard?.ranked

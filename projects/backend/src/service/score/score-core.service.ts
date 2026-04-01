@@ -1,4 +1,4 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
@@ -23,6 +23,8 @@ type InsertScoreDataOptions = {
 };
 
 export class ScoreCoreService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Score Core");
+
   /**
    * Tracks ScoreSaber score.
    *
@@ -106,7 +108,7 @@ export class ScoreCoreService {
     await ScoreSaberScoresRepository.upsertScore(scoreUpsertSet);
 
     if (newScore) {
-      Logger.info(
+      ScoreCoreService.logger.info(
         `Tracked ScoreSaber score "%s" for "%s" on "%s" [%s / %s]%s in %s`,
         score.scoreId,
         score.playerInfo?.name ?? playerId,

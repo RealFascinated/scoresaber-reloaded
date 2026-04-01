@@ -1,6 +1,6 @@
 import { SSRCache } from "@ssr/common/cache";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
@@ -19,6 +19,7 @@ export enum CacheId {
 export type CacheMode = "REDIS" | "MEMORY";
 
 export default class CacheService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Cache");
   private static readonly memoryCaches = new Map<CacheId, SSRCache>();
   /**
    * In-flight request coalescing per cache key.
@@ -77,7 +78,7 @@ export default class CacheService {
           CachePerformanceMetric.recordHit(cache, mode);
           return parse(cachedData) as T;
         } catch {
-          Logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
+          CacheService.logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
           await redisClient.del(cacheKey);
         }
       }
@@ -158,7 +159,7 @@ export default class CacheService {
             CachePerformanceMetric.recordHit(cache, mode);
             return parse(cachedData) as T;
           } catch {
-            Logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
+            CacheService.logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
             await redisClient.del(cacheKey);
           }
         }

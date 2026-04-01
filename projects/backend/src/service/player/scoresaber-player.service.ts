@@ -1,7 +1,7 @@
 import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
@@ -35,6 +35,8 @@ function computeHmdUsagePercentages(hmdUsage: Record<HMD, number>): Record<HMD, 
 }
 
 export default class ScoreSaberPlayerService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("ScoreSaber Player");
+
   /**
    * Gets a ScoreSaber player using their account id.
    *
@@ -145,7 +147,9 @@ export default class ScoreSaberPlayerService {
       try {
         return parse(cachedData) as ScoreSaberPlayerToken;
       } catch {
-        Logger.warn(`Failed to parse cached player data for ${id}, removing from cache`);
+        ScoreSaberPlayerService.logger.warn(
+          `Failed to parse cached player data for ${id}, removing from cache`
+        );
         await redisClient.del(cacheKey);
       }
     }
@@ -187,7 +191,9 @@ export default class ScoreSaberPlayerService {
         );
       }
     } catch {
-      Logger.warn(`Failed to update cached player data for ${id}, removing from cache`);
+      ScoreSaberPlayerService.logger.warn(
+        `Failed to update cached player data for ${id}, removing from cache`
+      );
       await redisClient.del(cachedPlayerTokenCacheKey(id));
     }
   }

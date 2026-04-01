@@ -1,4 +1,4 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { Gauge } from "prom-client";
 import { redisClient } from "../../../common/redis";
@@ -6,6 +6,7 @@ import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.s
 import Metric from "../../metric";
 
 export default class UniqueDailyPlayersMetric extends Metric<null> {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Metric: Unique Daily Players");
   private readonly gauge: Gauge;
   private lastCollectedAt = 0;
   private lastKnownCount = 0;
@@ -60,7 +61,7 @@ export default class UniqueDailyPlayersMetric extends Metric<null> {
       this.lastKnownCount = count;
       this.gauge.set(count);
     } catch (error) {
-      Logger.error("Failed to collect unique daily players metric:", error);
+      UniqueDailyPlayersMetric.logger.error("Failed to collect unique daily players metric:", error);
       this.gauge.set(this.lastKnownCount);
     }
   }

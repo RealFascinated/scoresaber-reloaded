@@ -1,4 +1,4 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import {
   ScoreSaberPlayerHistory,
@@ -34,6 +34,8 @@ import { PlayerRankedService } from "./player-ranked.service";
 const INACTIVE_RANK = 999_999;
 
 export class PlayerHistoryService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Player History");
+
   /**
    * Updates the player statistics for all players.
    *
@@ -41,17 +43,19 @@ export class PlayerHistoryService {
    */
   public static async updatePlayerStatistics() {
     const now = new Date();
-    Logger.info("Starting player statistics update...");
+    PlayerHistoryService.logger.info("Starting player statistics update...");
 
     const firstPage = await ScoreSaberApiService.lookupPlayers(1);
     if (firstPage == undefined) {
-      Logger.error("Failed to fetch players on page 1, skipping player statistics update...");
+      PlayerHistoryService.logger.error(
+        "Failed to fetch players on page 1, skipping player statistics update..."
+      );
       return;
     }
 
     const pages = Math.ceil(firstPage.metadata.total / (firstPage.metadata.itemsPerPage ?? 100));
-    Logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
-    Logger.info(`Fetching page 1 of ${pages}...`);
+    PlayerHistoryService.logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
+    PlayerHistoryService.logger.info(`Fetching page 1 of ${pages}...`);
 
     let successCount = 0;
     let errorCount = 0;
@@ -60,17 +64,17 @@ export class PlayerHistoryService {
 
     for (let page = 2; page <= pages; page++) {
       if (page % 10 === 0 || page === pages) {
-        Logger.info(`Fetching page ${page} of ${pages}...`);
+        PlayerHistoryService.logger.info(`Fetching page ${page} of ${pages}...`);
       }
       const response = await ScoreSaberApiService.lookupPlayers(page);
       if (response == undefined) {
-        Logger.error(`Failed to fetch players on page ${page}, skipping page...`);
+        PlayerHistoryService.logger.error(`Failed to fetch players on page ${page}, skipping page...`);
         errorCount++;
         continue;
       }
       players.push(...(response.players ?? []));
     }
-    Logger.info(`Found ${players.length} active players from ScoreSaber API`);
+    PlayerHistoryService.logger.info(`Found ${players.length} active players from ScoreSaber API`);
 
     await processInBatches(players, 25, async player => {
       const foundPlayer = await PlayerCoreService.getOrCreateAccount(player.id, player);
@@ -84,15 +88,17 @@ export class PlayerHistoryService {
 
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
-        (async () => {
-          await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
-          redisClient.del(cachedPlayerTokenCacheKey(foundPlayer.id));
-        })(),
+          (async () => {
+            await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
+            redisClient.del(cachedPlayerTokenCacheKey(foundPlayer.id));
+          })(),
       ]);
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
       if (trackedScores < player.scoreStats.totalPlayCount && !player.banned) {
-        Logger.info(`Player ${player.id} has missing scores. Adding them to the refresh queue...`);
+        PlayerHistoryService.logger.info(
+          `Player ${player.id} has missing scores. Adding them to the refresh queue...`
+        );
         // Add the player to the refresh queue
         (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
           id: player.id,
@@ -105,13 +111,13 @@ export class PlayerHistoryService {
 
     const playerIds = new Set(players.map(player => player.id));
     const activePlayerIdsArray = Array.from(playerIds);
-    Logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
+    PlayerHistoryService.logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
 
     // Mark players as inactive (Mongo `$nin: []` matches all ids when the list is empty)
     const inactiveUpdate = await ScoreSaberAccountsRepository.markInactiveWhereIdNotIn(activePlayerIdsArray);
 
     if ((inactiveUpdate.rowCount ?? 0) > 0) {
-      Logger.info(`Marked ${inactiveUpdate.rowCount} players as inactive`);
+      PlayerHistoryService.logger.info(`Marked ${inactiveUpdate.rowCount} players as inactive`);
     }
 
     const inactivePlayers = await ScoreSaberAccountsRepository.countInactive();
@@ -129,11 +135,11 @@ export class PlayerHistoryService {
         )
         .setColor("#00ff00")
     );
-    Logger.info(
+    PlayerHistoryService.logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-      `Successfully processed: ${successCount} players\n` +
-      `Failed to process: ${errorCount} players\n` +
-      `Total inactive players: ${inactivePlayers}`
+        `Successfully processed: ${successCount} players\n` +
+        `Failed to process: ${errorCount} players\n` +
+        `Total inactive players: ${inactivePlayers}`
     );
   }
 
@@ -177,7 +183,9 @@ export class PlayerHistoryService {
 
     await PlayerHistoryRepository.upsertByPlayerAndDate(player.id, date, existingEntry, updatedHistory);
 
-    Logger.info(`Tracked player "${player.id}" in ${(performance.now() - before).toFixed(0)}ms`);
+    PlayerHistoryService.logger.info(
+      `Tracked player "${player.id}" in ${(performance.now() - before).toFixed(0)}ms`
+    );
   }
 
   /**
@@ -306,8 +314,8 @@ export class PlayerHistoryService {
           PlayerHistoryRepository.upsertRank(playerToken.id, date, rank)
         )
       );
-      Logger.info(
-        `[PLAYER HISTORY] Bulk-upserted ${missingRankUpserts.length} missing history entries for ${playerToken.name ?? playerToken.id}`
+      PlayerHistoryService.logger.info(
+        `Bulk-upserted ${missingRankUpserts.length} missing history entries for ${playerToken.name ?? playerToken.id}`
       );
     }
 

@@ -1,4 +1,4 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { asc, eq } from "drizzle-orm";
@@ -12,6 +12,8 @@ import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
 export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Leaderboard Score Seed Queue");
+
   constructor() {
     super(QueueId.LeaderboardScoreSeedQueue, "lifo");
 
@@ -27,7 +29,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
     const firstPage = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1);
     if (firstPage && totalTrackedScores >= firstPage.metadata.total) {
-      // Logger.warn(`Skipping leaderboard "${leaderboardId}" because it already has all scores tracked`);
+      // Optional: log skip when leaderboard already has all scores tracked
       await this.markLeaderboardSeeded(leaderboardId);
       return;
     }
@@ -43,10 +45,14 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           ? firstPage
           : await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page);
       if (!response) {
-        Logger.warn(`Failed to fetch scores for leaderboard "${leaderboardId}" on page ${page}`);
+        LeaderboardScoreSeedQueue.logger.warn(
+          `Failed to fetch scores for leaderboard "${leaderboardId}" on page ${page}`
+        );
         consecutiveFailures++;
         if (consecutiveFailures >= 2) {
-          Logger.warn(`Aborting leaderboard "${leaderboardId}" after 2 consecutive page failures`);
+          LeaderboardScoreSeedQueue.logger.warn(
+            `Aborting leaderboard "${leaderboardId}" after 2 consecutive page failures`
+          );
           break;
         }
         continue;
@@ -56,7 +62,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       consecutiveFailures = 0;
 
       if (page % 10 === 0 || page === 1 || page === totalPages) {
-        Logger.info(`Fetching scores for leaderboard "${leaderboardId}" on page ${page}/${totalPages}`);
+        LeaderboardScoreSeedQueue.logger.info(
+          `Fetching scores for leaderboard "${leaderboardId}" on page ${page}/${totalPages}`
+        );
       }
 
       await Promise.all(
@@ -77,7 +85,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     }
 
     await this.markLeaderboardSeeded(leaderboardId);
-    Logger.info(
+    LeaderboardScoreSeedQueue.logger.info(
       `Updated seeded scores status for leaderboard "${leaderboardId}" and tracked ${newScoresTracked} new scores`
     );
   }
@@ -107,7 +115,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
       const leaderboardIds = leaderboards.map(l => l.id);
       if (leaderboardIds.length === 0) {
-        Logger.info("No leaderboard to seed scores for");
+        LeaderboardScoreSeedQueue.logger.info("No leaderboard to seed scores for");
         return;
       }
 
@@ -116,9 +124,11 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       }
 
       await this.processQueue(); // Process the queue immediately
-      Logger.info(`Added ${leaderboardIds.length} leaderboards to score seed queue`);
+      LeaderboardScoreSeedQueue.logger.info(
+        `Added ${leaderboardIds.length} leaderboards to score seed queue`
+      );
     } catch (error) {
-      Logger.error("Failed to load unseeded leaderboards:", error);
+      LeaderboardScoreSeedQueue.logger.error("Failed to load unseeded leaderboards:", error);
       return;
     }
   }

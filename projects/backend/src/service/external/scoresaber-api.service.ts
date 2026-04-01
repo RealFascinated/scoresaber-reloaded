@@ -18,6 +18,8 @@ import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import { scoreSaberApiResponseCacheKey } from "../../common/cache-keys";
 import CacheService, { CacheId } from "../infra/cache.service";
 
+const scoreSaberApiLog = Logger.withTopic("ScoreSaber API");
+
 const API_BASE = "https://scoresaber.com/api";
 
 /**
@@ -506,6 +508,6 @@ export class ScoreSaberApiService {
   }
 
   private static log(message: string): void {
-    Logger.debug(`[ScoreSaberService] ${message}`);
+    scoreSaberApiLog.debug(message);
   }
 }

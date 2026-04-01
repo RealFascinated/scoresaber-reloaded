@@ -1,5 +1,5 @@
 import { env } from "@ssr/common/env";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
@@ -12,6 +12,8 @@ import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
 export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Player ScoreSaber Scores Queue");
+
   constructor() {
     super(QueueId.PlayerScoreRefreshQueue, "lifo");
 
@@ -24,7 +26,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
 
     const playerToken = await ScoreSaberApiService.lookupPlayer(playerId);
     if (!playerToken) {
-      Logger.warn(`Player "${playerId}" not found on ScoreSaber`);
+      FetchMissingScoresQueue.logger.warn(`Player "${playerId}" not found on ScoreSaber`);
       return;
     }
 
@@ -78,7 +80,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       const players = await ScoreSaberAccountsRepository.selectIdsNeedingScoreSeed(500);
       const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {
-        Logger.info("No players to seed scores for");
+        FetchMissingScoresQueue.logger.info("No players to seed scores for");
         return;
       }
 
@@ -87,9 +89,9 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       }
 
       await this.processQueue(); // Process the queue immediately
-      Logger.info(`Added ${playerIds.length} players to score refresh queue`);
+      FetchMissingScoresQueue.logger.info(`Added ${playerIds.length} players to score refresh queue`);
     } catch (error) {
-      Logger.error("Failed to load unseeded players:", error);
+      FetchMissingScoresQueue.logger.error("Failed to load unseeded players:", error);
     }
   }
 }

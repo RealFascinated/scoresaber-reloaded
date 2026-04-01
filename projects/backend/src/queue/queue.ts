@@ -4,6 +4,8 @@ import { parse, stringify } from "devalue";
 import { redisClient } from "../common/redis";
 import { QueueId } from "./queue-manager";
 
+const queueLogger = Logger.withTopic("Queue");
+
 export type QueueItem<T> = {
   id: string;
   data: T;
@@ -104,7 +106,7 @@ export abstract class Queue<T> {
 
       const item = parse(rawItem) as T;
       if (!item) {
-        Logger.info(`Invalid queue item found in the queue ${this.id}: ${rawItem}`);
+        queueLogger.info(`Invalid queue item found in the queue ${this.id}: ${rawItem}`);
         this.processQueue(); // Keep going
         return;
       }
@@ -122,7 +124,7 @@ export abstract class Queue<T> {
         });
       }
     } catch (error) {
-      Logger.error(`Error processing queue ${this.id}:`, error);
+      queueLogger.error(`Error processing queue ${this.id}:`, error);
     } finally {
       this.lock = false;
       // If there are more items in the queue and we're not stopped, process the next one

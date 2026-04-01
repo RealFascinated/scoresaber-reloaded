@@ -20,6 +20,8 @@ import { scoreSaberLeaderboardsTable } from "../src/db/schema";
 import { ScoreSaberApiService } from "../src/service/external/scoresaber-api.service";
 import { ScoreSaberLeaderboardsService } from "../src/service/leaderboard/scoresaber-leaderboards.service";
 
+const scriptLog = Logger.withTopic("Script: Create Missing Leaderboards");
+
 async function loadExistingLeaderboardIds(): Promise<Set<number>> {
   const rows = await db.select({ id: scoreSaberLeaderboardsTable.id }).from(scoreSaberLeaderboardsTable);
   return new Set(rows.map(r => r.id));
@@ -63,7 +65,7 @@ async function main(): Promise<void> {
   const maxPages = parseMaxPages(process.argv);
 
   const existingIds = await loadExistingLeaderboardIds();
-  Logger.info(`[create-missing-leaderboards] loaded ${existingIds.size} leaderboard id(s) from DB`);
+  scriptLog.info(`Loaded ${existingIds.size} leaderboard id(s) from DB`);
 
   let page = 1;
   let totalPages = 1;
@@ -80,7 +82,7 @@ async function main(): Promise<void> {
 
     if (response == null || response.leaderboards.length === 0) {
       if (page === 1) {
-        Logger.warn(`[create-missing-leaderboards] no leaderboards on page 1 (search=${search ?? "(none)"})`);
+        scriptLog.warn(`No leaderboards on page 1 (search=${search ?? "(none)"})`);
       }
       break;
     }
@@ -91,19 +93,19 @@ async function main(): Promise<void> {
     );
 
     if (maxPages != null && page > maxPages) {
-      Logger.info(`[create-missing-leaderboards] stopping at --max-pages=${maxPages}`);
+      scriptLog.info(`Stopping at --max-pages=${maxPages}`);
       break;
     }
 
-    Logger.info(
-      `[create-missing-leaderboards] page ${page}/${totalPages} (items=${response.leaderboards.length}, total=${response.metadata.total})`
+    scriptLog.info(
+      `Page ${page}/${totalPages} (items=${response.leaderboards.length}, total=${response.metadata.total})`
     );
 
     for (const token of response.leaderboards) {
       if (createLimit != null && created >= createLimit) {
-        Logger.info(`[create-missing-leaderboards] stopping at --limit=${createLimit} created`);
-        Logger.info(
-          `[create-missing-leaderboards] done created=${created} skippedExisting=${skippedExisting} failed=${failed} seen=${seen}`
+        scriptLog.info(`Stopping at --limit=${createLimit} created`);
+        scriptLog.info(
+          `Done created=${created} skippedExisting=${skippedExisting} failed=${failed} seen=${seen}`
         );
         return;
       }
@@ -133,15 +135,15 @@ async function main(): Promise<void> {
           continue;
         }
         failed++;
-        Logger.error(`[create-missing-leaderboards] id=${id}: ${e}`);
+        scriptLog.error(`id=${id}: ${e}`);
       }
     }
 
     page++;
   } while (page <= totalPages);
 
-  Logger.info(
-    `[create-missing-leaderboards] done created=${created} skippedExisting=${skippedExisting} failed=${failed} seen=${seen}${dryRun ? " (dry-run)" : ""}`
+  scriptLog.info(
+    `Done created=${created} skippedExisting=${skippedExisting} failed=${failed} seen=${seen}${dryRun ? " (dry-run)" : ""}`
   );
 }
 

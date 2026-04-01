@@ -1,4 +1,4 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
 import { Registry } from "prom-client";
 import { ApiServicesMetric } from "../../metrics/impl/backend/api-services";
@@ -67,6 +67,7 @@ export enum MetricType {
 }
 
 export default class MetricsService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Metrics");
   private static readonly metrics = new Map<MetricType, Metric<unknown>>();
   private static initialized = false;
   private static readonly persistIntervalMs = 30_000;
@@ -121,12 +122,12 @@ export default class MetricsService {
    */
   private registerMetric(metric: Metric<unknown>): void {
     if (MetricsService.metrics.has(metric.id)) {
-      Logger.warn(`[METRICS] Metric ${metric.id} already registered, skipping duplicate registration`);
+      MetricsService.logger.warn(`Metric ${metric.id} already registered, skipping duplicate registration`);
       return;
     }
 
     MetricsService.metrics.set(metric.id, metric);
-    Logger.debug(`[METRICS] Registered metric ${metric.id}`);
+    MetricsService.logger.debug(`Registered metric ${metric.id}`);
   }
 
   /**
@@ -174,10 +175,10 @@ export default class MetricsService {
       }
 
       if (rows.length > 0) {
-        Logger.info(`[METRICS] Loaded ${rows.length} persisted metric values from PostgreSQL`);
+        MetricsService.logger.info(`Loaded ${rows.length} persisted metric values from PostgreSQL`);
       }
     } catch (error) {
-      Logger.warn("[METRICS] Failed to load persisted metric values from PostgreSQL:", error);
+      MetricsService.logger.warn("Failed to load persisted metric values from PostgreSQL:", error);
     }
   }
 
@@ -209,7 +210,7 @@ export default class MetricsService {
     try {
       await MetricsRepository.upsertMany(valuesToPersist);
     } catch (error) {
-      Logger.warn("[METRICS] Failed to persist metric values to PostgreSQL:", error);
+      MetricsService.logger.warn("Failed to persist metric values to PostgreSQL:", error);
     } finally {
       MetricsService.persistInFlight = false;
     }

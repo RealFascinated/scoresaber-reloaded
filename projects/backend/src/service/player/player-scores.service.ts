@@ -2,7 +2,7 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
 import type {
@@ -65,6 +65,8 @@ type ScoreTableConfig<TRow, TScore> = {
 };
 
 export class PlayerScoresService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("ScoreSaber Player Scores");
+
   /**
    * Fetches missing scores for a player.
    *
@@ -194,17 +196,14 @@ export class PlayerScoresService {
 
     result.timeTaken = performance.now() - startTime;
     result.totalPagesFetched = currentPage - 1;
-    if (currentPage !== 1) {
-      Logger.info(
-        `[Score Refresh] Fetched missing scores for %s, total pages fetched: %s, total scores: %s, missing scores: %s, in %s`,
-        playerId,
-        formatNumberWithCommas(result.totalPagesFetched),
-        formatNumberWithCommas(result.totalScores),
-        formatNumberWithCommas(result.missingScores),
-        formatDuration(result.timeTaken)
-      );
-    }
-
+    PlayerScoresService.logger.info(
+      `Fetched missing scores for %s, total pages fetched: %s, total scores: %s, missing scores: %s, in %s`,
+      playerId,
+      formatNumberWithCommas(result.totalPagesFetched),
+      formatNumberWithCommas(result.totalScores),
+      formatNumberWithCommas(result.missingScores),
+      formatDuration(result.timeTaken)
+    );
     return result;
   }
 

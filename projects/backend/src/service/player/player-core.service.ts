@@ -2,7 +2,7 @@ import { env } from "@ssr/common/env";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
@@ -25,6 +25,8 @@ import StorageService from "../infra/storage.service";
 export const accountCreationLock: Record<string, Promise<ScoreSaberAccount | undefined>> = {};
 
 export class PlayerCoreService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Player Core");
+
   /**
    * Gets a player by id.
    *
@@ -141,7 +143,7 @@ export class PlayerCoreService {
           }
 
           try {
-            Logger.info(`Creating player "${id}"...`);
+            PlayerCoreService.logger.info(`Creating player "${id}"...`);
             const newAccount = await ScoreSaberAccountsRepository.insert({
               id: id,
               name: token.name,
@@ -195,7 +197,7 @@ export class PlayerCoreService {
             }
             return scoreSaberAccountRowToType(inserted);
           } catch (err) {
-            Logger.error(`Failed to create player document for "${id}"`, err);
+            PlayerCoreService.logger.error(`Failed to create player document for "${id}"`, err);
             throw new InternalServerError(`Failed to create player document for "${id}"`);
           } finally {
             delete accountCreationLock[id];
@@ -204,7 +206,7 @@ export class PlayerCoreService {
           if (err instanceof InternalServerError) {
             throw err;
           }
-          Logger.error(`Failed to create player document for "${id}"`, err);
+          PlayerCoreService.logger.error(`Failed to create player document for "${id}"`, err);
           return undefined;
         } finally {
           delete accountCreationLock[id];
@@ -326,11 +328,13 @@ export class PlayerCoreService {
           CacheService.invalidate(playerCacheKey(playerId, "basic")),
           CacheService.invalidate(playerCacheKey(playerId, "full")),
         ]);
-        Logger.info(`Cached profile picture for player ${playerId}${force ? " (force)" : ""}`);
+        PlayerCoreService.logger.info(
+          `Cached profile picture for player ${playerId}${force ? " (force)" : ""}`
+        );
         return;
       }
 
-      Logger.warn(`Failed to cache profile picture for player ${playerId}`);
+      PlayerCoreService.logger.warn(`Failed to cache profile picture for player ${playerId}`);
     }
   }
 

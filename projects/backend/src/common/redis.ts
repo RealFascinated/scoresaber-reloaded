@@ -3,9 +3,10 @@ import Logger from "@ssr/common/logger";
 import { InternalServerError } from "elysia";
 import Redis from "ioredis";
 
-Logger.info("Testing Redis connection...");
+const logger = Logger.withTopic("Redis");
+logger.info("Testing Redis connection...");
 export const redisClient = new Redis(env.REDIS_URL);
-Logger.info("Connected to Redis :)");
+logger.info("Connected to Redis :)");
 
 export const testRedisConnection = async () => {
   const result = await redisClient.ping();

@@ -9,6 +9,8 @@ import { z } from "zod";
 import BeatLeaderService from "../../service/beatleader/beatleader.service";
 import { PlayerReplayService } from "../../service/player/player-replay.service";
 
+const beatLeaderControllerLog = Logger.withTopic("BeatLeader Controller");
+
 export default function beatleaderController(app: Elysia) {
   return app.group("/beatleader", app =>
     app
@@ -35,7 +37,7 @@ export default function beatleaderController(app: Elysia) {
           if (!replayUrl) {
             throw new NotFoundError(`Replay not found for score "${scoreId}"`);
           }
-          Logger.info(`Redirecting to replay URL "${replayUrl}" for score "${scoreId}"`);
+          beatLeaderControllerLog.info(`Redirecting to replay URL "${replayUrl}" for score "${scoreId}"`);
           return redirect(replayUrl);
         },
         {

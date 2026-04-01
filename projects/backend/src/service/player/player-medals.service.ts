@@ -1,4 +1,4 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerMedalRankingsResponse } from "@ssr/common/schemas/response/ranking/medal-rankings";
@@ -8,6 +8,8 @@ import { ScoreSaberMedalScoresRepository } from "../../repositories/scoresaber-m
 import ScoreSaberPlayerService from "./scoresaber-player.service";
 
 export class PlayerMedalsService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Player Medals");
+
   /**
    * Updates the global medal count for all players.
    */
@@ -19,8 +21,8 @@ export class PlayerMedalsService {
 
     await ScoreSaberAccountsRepository.syncGlobalMedalTotalsFromMap(playerMedalCounts);
 
-    Logger.info(
-      `[PLAYER MEDALS] Updated ${playerMedalCounts.size} player medal counts in ${formatDuration(performance.now() - before)}`
+    PlayerMedalsService.logger.info(
+      `Updated ${playerMedalCounts.size} player medal counts in ${formatDuration(performance.now() - before)}`
     );
   }
 
@@ -40,8 +42,8 @@ export class PlayerMedalsService {
 
     await ScoreSaberAccountsRepository.setMedalsForPlayerIds(totalsByPlayer, playerIds);
 
-    Logger.info(
-      `[PLAYER MEDALS] Updated ${playerIds.length} player medal counts in ${formatDuration(performance.now() - before)}`
+    PlayerMedalsService.logger.info(
+      `Updated ${playerIds.length} player medal counts in ${formatDuration(performance.now() - before)}`
     );
 
     return Object.fromEntries(playerIds.map(id => [id, totalsByPlayer.get(id) ?? 0]));

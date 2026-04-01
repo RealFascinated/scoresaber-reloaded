@@ -2,100 +2,81 @@ import dayjs from "dayjs";
 import { env } from "./env";
 import { ConsoleColors } from "./utils/console-colors";
 
+type LogLevel = "debug" | "info" | "warn" | "error";
+
+const LEVEL_RANK: Record<LogLevel, number> = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3,
+};
+
+const LEVEL_COLOR: Record<LogLevel, string> = {
+  debug: ConsoleColors.magenta,
+  info: ConsoleColors.green,
+  warn: ConsoleColors.yellow,
+  error: ConsoleColors.red,
+};
+
+const SEP = `${ConsoleColors.gray} │ ${ConsoleColors.reset}`;
+
+const CONFIGURED_LEVEL: LogLevel =
+  (typeof window === "undefined" ? (env.LOG_LEVEL as LogLevel | undefined) : undefined) ?? "info";
+
+export type ScopedLogger = ReturnType<typeof Logger.withTopic>;
+
 export default class Logger {
-  private static readonly LogLevel = {
-    debug: 0,
-    info: 1,
-    warn: 2,
-    error: 3,
-  };
+  public static withTopic(topic: string) {
+    return {
+      log: (level: LogLevel, message: string, ...args: unknown[]) =>
+        Logger.emit(level, topic, message, args),
+      debug: (message: string, ...args: unknown[]) =>
+        Logger.emit("debug", topic, message, args),
+      info: (message: string, ...args: unknown[]) =>
+        Logger.emit("info", topic, message, args),
+      warn: (message: string, ...args: unknown[]) =>
+        Logger.emit("warn", topic, message, args),
+      error: (message: string, ...args: unknown[]) =>
+        Logger.emit("error", topic, message, args),
+    };
+  }
 
-  private static readonly LogColors = {
-    debug: ConsoleColors.magenta,
-    info: ConsoleColors.green,
-    warn: ConsoleColors.yellow,
-    error: ConsoleColors.red,
-  };
+  public static log(level: LogLevel, message: string, ...args: unknown[]) {
+    Logger.emit(level, undefined, message, args);
+  }
 
-  /**
-   * Logs a message to the console.
-   *
-   * @param level the log level to use
-   * @param message the message to log
-   * @param args the arguments to log
-   */
-  public static log(level: keyof typeof Logger.LogLevel, message: string, ...args: unknown[]) {
-    if (!Logger.shouldLog(level)) {
+  public static debug(message: string, ...args: unknown[]) {
+    Logger.emit("debug", undefined, message, args);
+  }
+
+  public static info(message: string, ...args: unknown[]) {
+    Logger.emit("info", undefined, message, args);
+  }
+
+  public static warn(message: string, ...args: unknown[]) {
+    Logger.emit("warn", undefined, message, args);
+  }
+
+  public static error(message: string, ...args: unknown[]) {
+    Logger.emit("error", undefined, message, args);
+  }
+
+  private static emit(
+    level: LogLevel,
+    topic: string | undefined,
+    message: string,
+    args: unknown[]
+  ) {
+    if (LEVEL_RANK[level] < LEVEL_RANK[CONFIGURED_LEVEL]) {
       return;
     }
 
-    const color = Logger.LogColors[level];
-    let formattedMessage = message;
-    const remainingArgs: unknown[] = [];
+    const timestamp = `${ConsoleColors.gray}${dayjs().format("HH:mm:ss")}${ConsoleColors.reset}`;
+    const label = `${LEVEL_COLOR[level]}${level.toUpperCase().padEnd(5)}${ConsoleColors.reset}`;
+    const prefix = topic
+      ? `${timestamp}${SEP}${label}${SEP}${topic}${SEP}`
+      : `${timestamp}${SEP}${label}${SEP}`;
 
-    for (let i = 0; i < args.length; i++) {
-      if (formattedMessage.includes("%s")) {
-        formattedMessage = formattedMessage.replace("%s", String(args[i]));
-      } else {
-        remainingArgs.push(...args.slice(i));
-        break;
-      }
-    }
-
-    console[level](
-      `${ConsoleColors.gray}${dayjs().format("HH:mm:ss")} ${color}[SSR / ${level.toUpperCase()}]: ${ConsoleColors.reset}${formattedMessage}`,
-      ...remainingArgs
-    );
-  }
-
-  /**
-   * Logs a debug message to the console.
-   *
-   * @param message the message to log
-   * @param args the arguments to log
-   */
-  public static debug(message: string, ...args: unknown[]) {
-    Logger.log("debug", message, ...args);
-  }
-
-  /**
-   * Logs an info message to the console.
-   *
-   * @param message the message to log
-   * @param args the arguments to log
-   */
-  public static info(message: string, ...args: unknown[]) {
-    Logger.log("info", message, ...args);
-  }
-
-  /**
-   * Logs a warning message to the console.
-   *
-   * @param message the message to log
-   * @param args the arguments to log
-   */
-  public static warn(message: string, ...args: unknown[]) {
-    Logger.log("warn", message, ...args);
-  }
-
-  /**
-   * Logs an error message to the console.
-   *
-   * @param message the message to log
-   * @param args the arguments to log
-   */
-  public static error(message: string, ...args: unknown[]) {
-    Logger.log("error", message, ...args);
-  }
-
-  /**
-   * Checks if a log level should be logged.
-   *
-   * @param level the log level to check
-   * @returns true if the log level should be logged, false otherwise
-   */
-  private static shouldLog(level: keyof typeof Logger.LogLevel): boolean {
-    const configuredLevel = (typeof window === "undefined" ? env.LOG_LEVEL : undefined) || "info";
-    return Logger.LogLevel[level] >= Logger.LogLevel[configuredLevel];
+    console[level](`${prefix}${message}`, ...args);
   }
 }

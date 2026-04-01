@@ -1,4 +1,4 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Gauge } from "prom-client";
 import { redisClient } from "../../../common/redis";
 import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
@@ -7,6 +7,7 @@ import Metric from "../../metric";
 const REDIS_REFRESH_INTERVAL_MS = 10_000;
 
 export default class RedisHealthMetric extends Metric<null> {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Metric: Redis Health");
   private lastCollectedAt = 0;
   private readonly redisUpGauge: Gauge;
   private readonly redisPingMsGauge: Gauge;
@@ -48,7 +49,7 @@ export default class RedisHealthMetric extends Metric<null> {
       this.redisPingMsGauge.set(pingMs);
     } catch (error) {
       this.redisUpGauge.set(0);
-      Logger.error("Failed to collect Redis health metrics:", error);
+      RedisHealthMetric.logger.error("Failed to collect Redis health metrics:", error);
     }
   }
 }

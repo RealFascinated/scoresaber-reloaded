@@ -20,6 +20,8 @@ import "./command/refresh-medal-scores";
 import "./command/refresh-ranked-leaderboards";
 import "./command/update-player-medals";
 
+const discordBotLog = Logger.withTopic("Discord Bot");
+
 export const DiscordChannels = {
   TRACKED_PLAYER_LOGS: env.DISCORD_CHANNEL_TRACKED_PLAYER_LOGS,
   PLAYER_SCORE_REFRESH_LOGS: env.DISCORD_CHANNEL_PLAYER_SCORE_REFRESH_LOGS,
@@ -45,14 +47,14 @@ const client = new Client({
 client.once("clientReady", async () => {
   await client.initApplicationCommands();
 
-  Logger.info("Discord bot ready!");
+  discordBotLog.info("Discord bot ready!");
 });
 
 client.on("interactionCreate", interaction => {
   try {
     client.executeInteraction(interaction);
   } catch (error) {
-    Logger.error("Error executing interaction:", error);
+    discordBotLog.error("Error executing interaction:", error);
     if (interaction.isCommand() || interaction.isContextMenuCommand()) {
       interaction.reply({
         content: "An error occurred while processing your request. Please try again later.",
@@ -64,11 +66,11 @@ client.on("interactionCreate", interaction => {
 
 export async function initDiscordBot() {
   if (!env.DISCORD_BOT_TOKEN) {
-    Logger.warn("Discord bot token not found, skipping initialization");
+    discordBotLog.warn("Discord bot token not found, skipping initialization");
     return;
   }
 
-  Logger.info("Initializing discord bot...");
+  discordBotLog.info("Initializing discord bot...");
   try {
     await client.login(env.DISCORD_BOT_TOKEN);
 
@@ -88,7 +90,7 @@ export async function initDiscordBot() {
     updatePresence();
     setInterval(updatePresence, TimeUnit.toMillis(TimeUnit.Minute, 1));
   } catch (error) {
-    Logger.error("Failed to login to Discord:", error);
+    discordBotLog.error("Failed to login to Discord:", error);
     throw error; // Re-throw to handle it in the application
   }
 }
@@ -113,7 +115,7 @@ export async function sendEmbedToChannel(
       return await channel.send({ embeds: [embed], components });
     }
   } catch (error) {
-    Logger.error(`Failed to send message to channel ${channelId}: `, error);
+    discordBotLog.error(`Failed to send message to channel ${channelId}: `, error);
   }
   return undefined;
 }
@@ -138,7 +140,7 @@ export async function sendMessageToChannel(
       return await channel.send(message);
     }
   } catch (error) {
-    Logger.error(`Failed to send message to channel ${channelId}: `, error);
+    discordBotLog.error(`Failed to send message to channel ${channelId}: `, error);
   }
   return undefined;
 }
@@ -173,6 +175,6 @@ export async function sendFile(
       });
     }
   } catch (error) {
-    Logger.error(`Error sending file to channel ${channelId}: `, error);
+    discordBotLog.error(`Error sending file to channel ${channelId}: `, error);
   }
 }

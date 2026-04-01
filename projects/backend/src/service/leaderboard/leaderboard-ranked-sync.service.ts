@@ -1,5 +1,5 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -37,6 +37,8 @@ export type LeaderboardUpdate = {
 };
 
 export class LeaderboardRankedSyncService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Ranked Leaderboard Sync");
+
   /**
    * Refreshes the ranked leaderboards
    *
@@ -45,12 +47,14 @@ export class LeaderboardRankedSyncService {
   public static async refreshRankedLeaderboards(): Promise<LeaderboardUpdate[]> {
     const before = performance.now();
 
-    Logger.info(`[RANKED UPDATES] Refreshing ranked leaderboards...`);
+    LeaderboardRankedSyncService.logger.info(`Refreshing ranked leaderboards...`);
     const { leaderboards } = await ScoreSaberLeaderboardsService.fetchLeaderboardsFromAPI("ranked", true);
-    Logger.info(`[RANKED UPDATES] Found ${leaderboards.length} ranked leaderboards.`);
+    LeaderboardRankedSyncService.logger.info(`Found ${leaderboards.length} ranked leaderboards.`);
 
     async function reweightHistoryScores(leaderboard: ScoreSaberLeaderboard) {
-      Logger.info(`[RANKED UPDATES] Reweighting history scores for leaderboard "${leaderboard.id}"...`);
+      LeaderboardRankedSyncService.logger.info(
+        `Reweighting history scores for leaderboard "${leaderboard.id}"...`
+      );
 
       const rows = await ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(leaderboard.id);
 
@@ -63,18 +67,18 @@ export class LeaderboardRankedSyncService {
 
       if (updates.length > 0) {
         await ScoreSaberScoreHistoryRepository.batchUpdatePpByIds(updates);
-        Logger.info(
-          `[RANKED UPDATES] Reweighted ${updates.length} of ${rows.length} history scores for leaderboard "${leaderboard.id}".`
+        LeaderboardRankedSyncService.logger.info(
+          `Reweighted ${updates.length} of ${rows.length} history scores for leaderboard "${leaderboard.id}".`
         );
       } else {
-        Logger.info(
-          `[RANKED UPDATES] No PP changes needed for ${rows.length} history scores for leaderboard "${leaderboard.id}".`
+        LeaderboardRankedSyncService.logger.info(
+          `No PP changes needed for ${rows.length} history scores for leaderboard "${leaderboard.id}".`
         );
       }
     }
 
     async function updateLeaderboardScores(leaderboard: ScoreSaberLeaderboard) {
-      Logger.info(`[RANKED UPDATES] Updating scores for leaderboard "${leaderboard.id}"...`);
+      LeaderboardRankedSyncService.logger.info(`Updating scores for leaderboard "${leaderboard.id}"...`);
       let hasMorePages = true;
       let page = 1;
       const scoreOps: ScoreSaberScore[] = [];
@@ -94,8 +98,8 @@ export class LeaderboardRankedSyncService {
 
         const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
         if (page % 10 === 0 || page === 1 || page >= totalPages) {
-          Logger.info(
-            `[RANKED UPDATES] Queued scores for leaderboard "${leaderboard.id}" on page ${page}/${totalPages}.`
+          LeaderboardRankedSyncService.logger.info(
+            `Queued scores for leaderboard "${leaderboard.id}" on page ${page}/${totalPages}.`
           );
         }
 
@@ -121,8 +125,8 @@ export class LeaderboardRankedSyncService {
       });
 
       if (toWrite.length === 0) {
-        Logger.info(
-          `[RANKED UPDATES] No score changes needed for leaderboard "${leaderboard.id}" (${scoreOps.length} scores checked).`
+        LeaderboardRankedSyncService.logger.info(
+          `No score changes needed for leaderboard "${leaderboard.id}" (${scoreOps.length} scores checked).`
         );
         return;
       }
@@ -155,8 +159,8 @@ export class LeaderboardRankedSyncService {
         upserted += batch.length;
       }
 
-      Logger.info(
-        `[RANKED UPDATES] Upserted ${upserted} of ${scoreOps.length} scores for leaderboard "${leaderboard.id}" (${scoreOps.length - toWrite.length} skipped).`
+      LeaderboardRankedSyncService.logger.info(
+        `Upserted ${upserted} of ${scoreOps.length} scores for leaderboard "${leaderboard.id}" (${scoreOps.length - toWrite.length} skipped).`
       );
     }
 
@@ -171,7 +175,9 @@ export class LeaderboardRankedSyncService {
     for (const apiLeaderboard of leaderboards) {
       checked++;
       if (checked % 500 === 0 || checked === 1 || checked === leaderboards.length) {
-        Logger.info(`[RANKED UPDATES] Checked ${checked} of ${leaderboards.length} leaderboards.`);
+        LeaderboardRankedSyncService.logger.info(
+          `Checked ${checked} of ${leaderboards.length} leaderboards.`
+        );
       }
 
       const dbLeaderboard = rankedLeaderboards.get(apiLeaderboard.id);
@@ -217,17 +223,17 @@ export class LeaderboardRankedSyncService {
     }
 
     if (leaderboardsToUpsert.length > 0) {
-      Logger.info(`[RANKED UPDATES] Updating ${leaderboardsToUpsert.length} leaderboards...`);
+      LeaderboardRankedSyncService.logger.info(`Updating ${leaderboardsToUpsert.length} leaderboards...`);
 
       for (const batch of chunkArray(leaderboardsToUpsert, 250)) {
         await ScoreSaberLeaderboardsRepository.upsertLeaderboards(batch);
-        Logger.info(`[RANKED UPDATES] Updated batch of ${batch.length} leaderboards!`);
+        LeaderboardRankedSyncService.logger.info(`Updated batch of ${batch.length} leaderboards!`);
       }
 
       await CacheService.invalidate(rankedLeaderboardsCacheKey);
 
-      Logger.info(
-        `[RANKED UPDATES] Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
+      LeaderboardRankedSyncService.logger.info(
+        `Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
       );
 
       sendEmbedToChannel(
@@ -249,9 +255,9 @@ export class LeaderboardRankedSyncService {
   public static async refreshQualifiedLeaderboards() {
     const before = performance.now();
 
-    Logger.info(`[RANKED UPDATES] Refreshing qualified leaderboards...`);
+    LeaderboardRankedSyncService.logger.info(`Refreshing qualified leaderboards...`);
     const { leaderboards } = await ScoreSaberLeaderboardsService.fetchLeaderboardsFromAPI("qualified", true);
-    Logger.info(`[RANKED UPDATES] Found ${leaderboards.length} qualified leaderboards.`);
+    LeaderboardRankedSyncService.logger.info(`Found ${leaderboards.length} qualified leaderboards.`);
 
     const dbQualifiedRows = await ScoreSaberLeaderboardsRepository.getQualifiedSnapshots();
 
@@ -275,11 +281,11 @@ export class LeaderboardRankedSyncService {
     }
 
     if (leaderboardsToUpsert.length > 0) {
-      Logger.info(`[RANKED UPDATES] Updating ${leaderboardsToUpsert.length} leaderboards...`);
+      LeaderboardRankedSyncService.logger.info(`Updating ${leaderboardsToUpsert.length} leaderboards...`);
       await ScoreSaberLeaderboardsRepository.upsertLeaderboards(leaderboardsToUpsert);
       await CacheService.invalidate(qualifiedLeaderboardsCacheKey);
-      Logger.info(
-        `[RANKED UPDATES] Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
+      LeaderboardRankedSyncService.logger.info(
+        `Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
       );
 
       sendEmbedToChannel(

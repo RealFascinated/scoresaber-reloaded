@@ -20,6 +20,10 @@ import { PlayerCoreService } from "../../service/player/player-core.service";
 import ScoreSaberPlayerService from "../../service/player/scoresaber-player.service";
 import { TopScoresService } from "../../service/score/top-scores.service";
 
+const scoreSaberWsLog = Logger.withTopic("ScoreSaber WebSocket");
+const beatLeaderWsLog = Logger.withTopic("BeatLeader WebSocket");
+const scoresWsLog = Logger.withTopic("Scores WebSocket");
+
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
   leaderboardToken?: ScoreSaberLeaderboardToken;
@@ -69,7 +73,7 @@ export class ScoreWebsockets implements EventListener {
             `${player.id}-${leaderboard.songHash}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`.toUpperCase();
           const pendingScore = ScoreWebsockets.PENDING_SCORES.get(key);
 
-          Logger.info(`[SS-WS] Received score for player ${player.id} with key ${key}`);
+          scoreSaberWsLog.info(`Received score for player ${player.id} with key ${key}`);
 
           if (pendingScore?.beatLeaderScore) {
             // Found a matching BeatLeader score, process both
@@ -90,11 +94,11 @@ export class ScoreWebsockets implements EventListener {
             });
           }
         } catch (error) {
-          Logger.error("[SS-WS] Error processing ScoreSaber score:", error);
+          scoreSaberWsLog.error("Error processing ScoreSaber score:", error);
         }
       },
       onDisconnect: event => {
-        Logger.warn("[SS-WS] ScoreSaber websocket disconnected:", event);
+        scoreSaberWsLog.warn("ScoreSaber websocket disconnected:", event);
       },
     });
 
@@ -118,7 +122,7 @@ export class ScoreWebsockets implements EventListener {
             `${player.id}-${leaderboard.song.hash}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`.toUpperCase();
           const pendingScore = ScoreWebsockets.PENDING_SCORES.get(key);
 
-          Logger.info(`[BL-WS] Received score for player ${player.id}(${player.platform}) with key ${key}`);
+          beatLeaderWsLog.info(`Received score for player ${player.id}(${player.platform}) with key ${key}`);
 
           if (pendingScore?.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
             // Found a matching ScoreSaber score, process both
@@ -137,7 +141,7 @@ export class ScoreWebsockets implements EventListener {
             });
           }
         } catch (error) {
-          Logger.error("[BL-WS] Error processing BeatLeader score:", error);
+          beatLeaderWsLog.error("Error processing BeatLeader score:", error);
         }
       },
     });
@@ -215,7 +219,7 @@ export class ScoreWebsockets implements EventListener {
               isTop50GlobalScore
             );
           } catch (error) {
-            Logger.error(`[Scores-WS] Error in listener ${listener.constructor.name}:`, error);
+            scoresWsLog.error(`Error in listener ${listener.constructor.name}:`, error);
           }
         })
       );

@@ -1,4 +1,4 @@
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { sql } from "drizzle-orm";
 import { Gauge } from "prom-client";
 import { db } from "../../../db";
@@ -17,6 +17,7 @@ function toSafeNumber(value: number | string): number {
 }
 
 export default class PostgresDbSizeMetric extends NumberMetric {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Metric: PostgreSQL Size");
   private readonly totalSizeGauge: Gauge;
   private readonly tableSizeGauge: Gauge<"table" | "type">;
   private inFlightCollection: Promise<void> | undefined;
@@ -86,7 +87,7 @@ export default class PostgresDbSizeMetric extends NumberMetric {
         this.value = totalDatabaseSize;
         this.totalSizeGauge.set(totalDatabaseSize);
       } catch (error) {
-        Logger.error("Failed to collect PostgreSQL database size metric:", error);
+        PostgresDbSizeMetric.logger.error("Failed to collect PostgreSQL database size metric:", error);
       } finally {
         this.inFlightCollection = undefined;
       }

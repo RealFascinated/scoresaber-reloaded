@@ -1,6 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { StorageBucket } from "@ssr/common/minio-buckets";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreStatsToken } from "@ssr/common/schemas/beatleader/tokens/score-stats/score-stats";
@@ -27,6 +27,8 @@ import StorageService from "../infra/storage.service";
 import { PlayerCoreService } from "../player/player-core.service";
 
 export default class BeatLeaderService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("BeatLeader");
+
   /**
    * Tracks BeatLeader score.
    *
@@ -91,7 +93,7 @@ export default class BeatLeaderService {
 
     const timeTaken = performance.now() - before;
     if (log) {
-      Logger.info(
+      BeatLeaderService.logger.info(
         `Tracked BeatLeader score "${scoreToken.id}" for "${account.name}"(${playerId}) in ${formatDuration(timeTaken)}`
       );
     }
@@ -261,7 +263,7 @@ export default class BeatLeaderService {
             `Failed to save replay for ${beatLeaderScore.scoreId}: ${error}`
           )
         );
-        Logger.error(`Failed to save replay for ${beatLeaderScore.scoreId}: ${error}`);
+        BeatLeaderService.logger.error(`Failed to save replay for ${beatLeaderScore.scoreId}: ${error}`);
       }
     }
     return false;

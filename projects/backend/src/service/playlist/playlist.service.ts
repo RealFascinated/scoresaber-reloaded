@@ -2,7 +2,7 @@ import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import type { SelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-settings-schema";
 import { parseSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
@@ -36,6 +36,7 @@ export const PLAYLIST_NAMES: Record<PlaylistId, string> = {
 };
 
 export default class PlaylistService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Playlist");
   public static async getRankedMapsPlaylist(): Promise<Playlist> {
     const leaderboards = await ScoreSaberLeaderboardsService.getRankedLeaderboards();
 
@@ -187,7 +188,7 @@ export default class PlaylistService {
         })),
       };
     } catch (error) {
-      Logger.error("Error creating self playlist", error);
+      PlaylistService.logger.error("Error creating self playlist", error);
       throw new InternalServerError((error as Error).message);
     }
   }
@@ -316,7 +317,7 @@ export default class PlaylistService {
         })),
       };
     } catch (error) {
-      Logger.error("Error creating snipe playlist", error);
+      PlaylistService.logger.error("Error creating snipe playlist", error);
       throw new InternalServerError((error as Error).message);
     }
   }

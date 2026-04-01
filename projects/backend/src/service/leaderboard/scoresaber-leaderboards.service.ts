@@ -1,6 +1,6 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import Logger from "@ssr/common/logger";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { StarFilter } from "@ssr/common/maps/types";
 import { StorageBucket } from "@ssr/common/minio-buckets";
 import type { Page } from "@ssr/common/pagination";
@@ -29,6 +29,8 @@ import CacheService, { CacheId } from "../infra/cache.service";
 import StorageService from "../infra/storage.service";
 
 export class ScoreSaberLeaderboardsService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("ScoreSaber Leaderboards");
+
   public static async getLeaderboard(id: number): Promise<ScoreSaberLeaderboard> {
     return await CacheService.fetch(
       CacheId.SCORESABER_LEADERBOARDS,
@@ -87,7 +89,7 @@ export class ScoreSaberLeaderboardsService {
           data: leaderboard.id,
         });
 
-        Logger.info(
+        ScoreSaberLeaderboardsService.logger.info(
           `Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`
         );
         return leaderboard;
@@ -146,7 +148,9 @@ export class ScoreSaberLeaderboardsService {
       });
     }
 
-    Logger.info(`Created leaderboard "${id}" in ${formatDuration(performance.now() - before)}`);
+    ScoreSaberLeaderboardsService.logger.info(
+      `Created leaderboard "${id}" in ${formatDuration(performance.now() - before)}`
+    );
     return leaderboard;
   }
 
@@ -188,7 +192,9 @@ export class ScoreSaberLeaderboardsService {
       }
 
       if (logProgress && (page % 10 === 0 || page === 1 || page >= totalPages)) {
-        Logger.info(`Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`);
+        ScoreSaberLeaderboardsService.logger.info(
+          `Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`
+        );
       }
 
       page++;
@@ -263,11 +269,15 @@ export class ScoreSaberLeaderboardsService {
         cachedSongArt: true,
       });
 
-      Logger.info(`Cached song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
+      ScoreSaberLeaderboardsService.logger.info(
+        `Cached song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`
+      );
       return true;
     }
 
-    Logger.warn(`Failed to cache song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
+    ScoreSaberLeaderboardsService.logger.warn(
+      `Failed to cache song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`
+    );
     return false;
   }
 }
