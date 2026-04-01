@@ -3,6 +3,7 @@ import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { Client } from "minio";
+import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
 
 const minioClient = new Client({
   endPoint: env.MINIO_ENDPOINT,
@@ -15,6 +16,7 @@ const minioClient = new Client({
 
 export default class StorageService {
   private static CACHE: SSRCache;
+  private static readonly STORAGE_FILE_CACHE_ID = "s3_file_content";
 
   constructor() {
     StorageService.CACHE = new SSRCache({
@@ -34,8 +36,10 @@ export default class StorageService {
     const cacheKey = `${bucket}:${filename}`;
     const cached = StorageService.CACHE.get<Buffer>(cacheKey);
     if (cached !== undefined) {
+      CachePerformanceMetric.recordHit(StorageService.STORAGE_FILE_CACHE_ID, "MEMORY");
       return cached;
     }
+    CachePerformanceMetric.recordMiss(StorageService.STORAGE_FILE_CACHE_ID, "MEMORY");
 
     try {
       const data = await minioClient.getObject(getS3BucketName(bucket), filename);
