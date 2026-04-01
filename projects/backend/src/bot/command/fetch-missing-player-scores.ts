@@ -1,7 +1,7 @@
 import { IsGuildUser } from "@discordx/utilities";
 import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash, SlashOption } from "discordx";
-import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
+import { FetchMissingScoresQueue } from "../../queue/impl/player-scoresaber-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";

@@ -14,7 +14,7 @@ import { playerCacheKey } from "../../common/cache-keys";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
 import { type ScoreSaberAccountRow } from "../../db/schema";
-import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
+import { FetchMissingScoresQueue } from "../../queue/impl/player-scoresaber-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";

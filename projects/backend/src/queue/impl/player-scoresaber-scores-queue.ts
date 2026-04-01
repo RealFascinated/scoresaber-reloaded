@@ -16,7 +16,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
     super(QueueId.PlayerScoreRefreshQueue, "lifo");
 
     setImmediate(() => this.addPlayersToQueue());
-    setInterval(() => this.addPlayersToQueue(), TimeUnit.toMillis(TimeUnit.Hour, 1));
+    setInterval(() => this.addPlayersToQueue(), TimeUnit.toMillis(TimeUnit.Minute, 1));
   }
 
   protected async processItem(item: QueueItem<string>): Promise<void> {
@@ -75,7 +75,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       if ((await this.getSize()) !== 0) {
         return;
       }
-      const players = await ScoreSaberAccountsRepository.selectIdsNeedingScoreSeed();
+      const players = await ScoreSaberAccountsRepository.selectIdsNeedingScoreSeed(500);
       const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {
         Logger.info("No players to seed scores for");
