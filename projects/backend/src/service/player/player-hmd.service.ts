@@ -1,5 +1,5 @@
 import { HMD } from "@ssr/common/hmds";
-import { and, count, desc, eq, isNotNull } from "drizzle-orm";
+import { and, count, eq, isNotNull } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../../db/schema";
 
@@ -49,20 +49,15 @@ export class PlayerHmdService {
           .select({ hmd: scoreSaberScoresTable.hmd })
           .from(scoreSaberScoresTable)
           .where(eq(scoreSaberScoresTable.playerId, playerId))
-          .orderBy(desc(scoreSaberScoresTable.timestamp))
           .limit(limit)
         : await db
           .select({ hmd: scoreSaberScoresTable.hmd })
           .from(scoreSaberScoresTable)
-          .where(eq(scoreSaberScoresTable.playerId, playerId))
-          .orderBy(desc(scoreSaberScoresTable.timestamp));
+          .where(eq(scoreSaberScoresTable.playerId, playerId));
 
     const counts = new Map<HMD, number>();
     for (const row of rows) {
-      if (!row.hmd) {
-        continue;
-      }
-      const hmd = row.hmd as HMD;
+      const hmd = row.hmd;
       counts.set(hmd, (counts.get(hmd) ?? 0) + 1);
     }
 
