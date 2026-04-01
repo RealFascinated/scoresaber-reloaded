@@ -332,7 +332,7 @@ export class PlayerCoreService {
    * @returns the player's score stats
    */
   public static async getPlayerScoreStats(playerId: string): Promise<ScoreSaberPlayerScoreStats> {
-    const scores = await ScoreSaberScoresRepository.selectRankedRowsByPlayerId(playerId);
+    const scores = await ScoreSaberScoresRepository.getRankedRowsByPlayerId(playerId);
 
     const scoreStats: ScoreSaberPlayerScoreStats = {
       aPlays: 0,

@@ -24,7 +24,7 @@ export class TopScoresService {
       .setTotalItems(1000);
 
     return pagination.getPage(page, async () => {
-      const scoresRows = await ScoreSaberScoresRepository.selectTopScoresRows(limit, offset);
+      const scoresRows = await ScoreSaberScoresRepository.getTopScores(limit, offset);
 
       if (!scoresRows.length) {
         return [];

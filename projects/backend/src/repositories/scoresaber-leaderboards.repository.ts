@@ -303,7 +303,7 @@ export class ScoreSaberLeaderboardsRepository {
     return result.map(r => r.id);
   }
 
-  public static async selectRankedJoined(): Promise<ScoreSaberLeaderboard[]> {
+  public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
     const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
 
@@ -317,7 +317,7 @@ export class ScoreSaberLeaderboardsRepository {
     return mergeJoinedLeaderboardRows(result);
   }
 
-  public static async selectRankedByStarsBetween(
+  public static async getRankedLeaderboardsByStarsBetween(
     minStars: number,
     maxStars: number
   ): Promise<ScoreSaberLeaderboard[]> {
@@ -341,7 +341,7 @@ export class ScoreSaberLeaderboardsRepository {
     return mergeJoinedLeaderboardRows(rankedJoinRows);
   }
 
-  public static async selectQualifiedJoined(): Promise<ScoreSaberLeaderboard[]> {
+  public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
     const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
 
@@ -363,7 +363,7 @@ export class ScoreSaberLeaderboardsRepository {
     return Number(result.rows[0]?.count ?? 0);
   }
 
-  public static async selectRankedSnapshots(): Promise<RankedLeaderboardSnapshotRow[]> {
+  public static async getRankedSnapshots(): Promise<RankedLeaderboardSnapshotRow[]> {
     return db
       .select({
         id: scoreSaberLeaderboardsTable.id,
@@ -377,7 +377,7 @@ export class ScoreSaberLeaderboardsRepository {
       .where(eq(scoreSaberLeaderboardsTable.ranked, true));
   }
 
-  public static async selectQualifiedSnapshots(): Promise<QualifiedLeaderboardSnapshotRow[]> {
+  public static async getQualifiedSnapshots(): Promise<QualifiedLeaderboardSnapshotRow[]> {
     return db
       .select({
         id: scoreSaberLeaderboardsTable.id,

@@ -100,7 +100,7 @@ export class ScoreSaberScoreHistoryRepository {
     return scoresCount + historyCount;
   }
 
-  public static async selectCombinedScoresPageForPlayerMap(
+  public static async getCombinedScoresPageForPlayerMap(
     playerId: string,
     leaderboardId: number,
     limit: number,
@@ -121,7 +121,7 @@ export class ScoreSaberScoreHistoryRepository {
     return rawScores as ScoreSaberScoreRow[];
   }
 
-  public static async selectAccuracySeriesForPlayerMap(
+  public static async getAccuracySeriesForPlayerMap(
     playerId: string,
     leaderboardId: number
   ): Promise<Array<{ timestamp: Date; accuracy: number }>> {
@@ -150,7 +150,7 @@ export class ScoreSaberScoreHistoryRepository {
     }));
   }
 
-  public static async selectPpAccuracyByLeaderboardId(
+  public static async getPpAccuracyByLeaderboardId(
     leaderboardId: number
   ): Promise<{ id: number; pp: number; accuracy: number }[]> {
     return db

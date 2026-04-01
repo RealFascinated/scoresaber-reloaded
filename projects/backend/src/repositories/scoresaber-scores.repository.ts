@@ -137,7 +137,7 @@ export class ScoreSaberScoresRepository {
       .offset(offset);
   }
 
-  public static async selectTopScoresRows(limit: number, offset: number): Promise<ScoreSaberScoreRow[]> {
+  public static async getTopScores(limit: number, offset: number): Promise<ScoreSaberScoreRow[]> {
     return db
       .select()
       .from(scoreSaberScoresTable)
@@ -156,7 +156,7 @@ export class ScoreSaberScoresRepository {
       .limit(limit);
   }
 
-  public static async selectPpAndScoreIdByPlayer(
+  public static async getPpAndScoreIdByPlayer(
     playerId: string
   ): Promise<{ pp: number; scoreId: number }[]> {
     return db
@@ -169,7 +169,7 @@ export class ScoreSaberScoresRepository {
       .orderBy(desc(scoreSaberScoresTable.pp));
   }
 
-  public static async selectPpByPlayer(playerId: string): Promise<{ pp: number }[]> {
+  public static async getPpByPlayer(playerId: string): Promise<{ pp: number }[]> {
     return db
       .select({ pp: scoreSaberScoresTable.pp })
       .from(scoreSaberScoresTable)
@@ -177,14 +177,14 @@ export class ScoreSaberScoresRepository {
       .orderBy(desc(scoreSaberScoresTable.pp));
   }
 
-  public static async selectRankedRowsByPlayerId(playerId: string): Promise<ScoreSaberScoreRow[]> {
+  public static async getRankedRowsByPlayerId(playerId: string): Promise<ScoreSaberScoreRow[]> {
     return db
       .select()
       .from(scoreSaberScoresTable)
       .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)));
   }
 
-  public static async selectAverageAccuracies(playerId: string): Promise<{
+  public static async getAverageAccuracies(playerId: string): Promise<{
     averageAccuracy: number;
     unrankedAccuracy: number;
   }> {
@@ -242,7 +242,7 @@ export class ScoreSaberScoresRepository {
       .offset(offset);
   }
 
-  public static async selectHmdByPlayerId(playerId: string, limit?: number): Promise<{ hmd: HMD }[]> {
+  public static async getHmdByPlayerId(playerId: string, limit?: number): Promise<{ hmd: HMD }[]> {
     const q = db
       .select({ hmd: scoreSaberScoresTable.hmd })
       .from(scoreSaberScoresTable)
@@ -270,7 +270,7 @@ export class ScoreSaberScoresRepository {
       );
   }
 
-  public static async selectChartRowsByPlayer(playerId: string): Promise<
+  public static async getChartRowsByPlayer(playerId: string): Promise<
     {
       accuracy: number;
       pp: number;

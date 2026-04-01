@@ -264,7 +264,7 @@ export class PlayerScoresService {
    * @param playerId the player's id
    */
   public static async getPlayerScoreChart(playerId: string): Promise<PlayerScoresChartResponse> {
-    const rows = await ScoreSaberScoresRepository.selectChartRowsByPlayer(playerId);
+    const rows = await ScoreSaberScoresRepository.getChartRowsByPlayer(playerId);
 
     if (!rows.length) {
       return { data: [] };

@@ -22,7 +22,7 @@ export class PlayerHmdService {
    * @returns the player's HMD breakdown
    */
   public static async getPlayerHmdBreakdown(playerId: string, limit?: number): Promise<Record<HMD, number>> {
-    const rows = await ScoreSaberScoresRepository.selectHmdByPlayerId(playerId, limit);
+    const rows = await ScoreSaberScoresRepository.getHmdByPlayerId(playerId, limit);
 
     const counts = new Map<HMD, number>();
     for (const row of rows) {

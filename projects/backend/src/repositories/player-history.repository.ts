@@ -38,7 +38,7 @@ export class PlayerHistoryRepository {
     }
   }
 
-  public static async listByPlayerOrderedByDateDesc(
+  public static async getByPlayerOrderedByDateDesc(
     playerId: string,
     options: { count: number; alignedStart: Date; today: Date }
   ): Promise<PlayerHistoryRow[]> {

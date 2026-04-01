@@ -51,7 +51,7 @@ export class LeaderboardRankedSyncService {
     async function reweightHistoryScores(leaderboard: ScoreSaberLeaderboard) {
       Logger.info(`[RANKED UPDATES] Reweighting history scores for leaderboard "${leaderboard.id}"...`);
 
-      const rows = await ScoreSaberScoreHistoryRepository.selectPpAccuracyByLeaderboardId(leaderboard.id);
+      const rows = await ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(leaderboard.id);
 
       const updates = rows
         .map(row => {
@@ -159,7 +159,7 @@ export class LeaderboardRankedSyncService {
       );
     }
 
-    const dbRankedRows = await ScoreSaberLeaderboardsRepository.selectRankedSnapshots();
+    const dbRankedRows = await ScoreSaberLeaderboardsRepository.getRankedSnapshots();
 
     const rankedLeaderboards = new Map<number, RankedLeaderboardSnapshot>(dbRankedRows.map(r => [r.id, r]));
 
@@ -252,7 +252,7 @@ export class LeaderboardRankedSyncService {
     const { leaderboards } = await ScoreSaberLeaderboardsService.fetchLeaderboardsFromAPI("qualified", true);
     Logger.info(`[RANKED UPDATES] Found ${leaderboards.length} qualified leaderboards.`);
 
-    const dbQualifiedRows = await ScoreSaberLeaderboardsRepository.selectQualifiedSnapshots();
+    const dbQualifiedRows = await ScoreSaberLeaderboardsRepository.getQualifiedSnapshots();
 
     const dbById = new Map(dbQualifiedRows.map(r => [r.id, r]));
 

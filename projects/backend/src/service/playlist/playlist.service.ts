@@ -107,7 +107,7 @@ export default class PlaylistService {
    */
   public static async createCustomRankedPlaylist(settingsBase64?: string): Promise<Playlist> {
     const parsedConfig = parseCustomRankedPlaylistSettings(settingsBase64);
-    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.selectRankedByStarsBetween(
+    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboardsByStarsBetween(
       parsedConfig.stars.min,
       parsedConfig.stars.max
     );

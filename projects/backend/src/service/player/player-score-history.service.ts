@@ -45,7 +45,7 @@ export class PlayerScoreHistoryService {
     const pagination = new Pagination<ScoreSaberScore>().setItemsPerPage(limit).setTotalItems(total);
 
     return pagination.getPage(page, async () => {
-      const rawScores = await ScoreSaberScoreHistoryRepository.selectCombinedScoresPageForPlayerMap(
+      const rawScores = await ScoreSaberScoreHistoryRepository.getCombinedScoresPageForPlayerMap(
         playerId,
         leaderboardId,
         limit,
@@ -108,7 +108,7 @@ export class PlayerScoreHistoryService {
       CacheId.SCORESABER_SCORE_HISTORY_GRAPH,
       `score-history-graph:${playerId}-${leaderboardId}`,
       async () => {
-        return ScoreSaberScoreHistoryRepository.selectAccuracySeriesForPlayerMap(playerId, leaderboardId);
+        return ScoreSaberScoreHistoryRepository.getAccuracySeriesForPlayerMap(playerId, leaderboardId);
       }
     );
   }

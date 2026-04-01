@@ -211,7 +211,7 @@ export class ScoreSaberLeaderboardsService {
       CacheId.SCORESABER_LEADERBOARDS,
       "leaderboard:ranked-leaderboards",
       async () => {
-        return ScoreSaberLeaderboardsRepository.selectRankedJoined();
+        return ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
       }
     );
   }
@@ -221,7 +221,7 @@ export class ScoreSaberLeaderboardsService {
       CacheId.SCORESABER_LEADERBOARDS,
       "leaderboard:qualified-leaderboards",
       async () => {
-        return ScoreSaberLeaderboardsRepository.selectQualifiedJoined();
+        return ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();
       }
     );
   }

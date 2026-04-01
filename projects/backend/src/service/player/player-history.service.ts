@@ -255,7 +255,7 @@ export class PlayerHistoryService {
     const startTimestamp = alignedStart.getTime();
     const endTimestamp = today.getTime();
 
-    const entries = await PlayerHistoryRepository.listByPlayerOrderedByDateDesc(playerToken.id, {
+    const entries = await PlayerHistoryRepository.getByPlayerOrderedByDateDesc(playerToken.id, {
       count,
       alignedStart,
       today,
@@ -373,7 +373,7 @@ export class PlayerHistoryService {
     existingEntry?: PlayerHistoryRow
   ): Promise<ScoreSaberPlayerHistory> {
     const [accuracies, plusOnePp, medals] = await Promise.all([
-      ScoreSaberScoresRepository.selectAverageAccuracies(playerToken.id),
+      ScoreSaberScoresRepository.getAverageAccuracies(playerToken.id),
       PlayerRankedService.getPlayerPlusOnePp(playerToken.id),
       ScoreSaberAccountsRepository.getMedalsForPlayerId(playerToken.id),
     ]);
