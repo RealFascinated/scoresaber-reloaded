@@ -5,7 +5,7 @@ import NumberMetric from "../../number-metric";
 
 export default class QueueSizesMetric extends NumberMetric {
   constructor() {
-    super(MetricType.QUEUE_SIZES, 0);
+    super(MetricType.QUEUE_SIZES, 0, { persist: false });
 
     const gauge = new Gauge({
       name: "queue_size",

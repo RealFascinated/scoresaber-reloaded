@@ -166,7 +166,7 @@ export default class MetricsService {
       const rows = await MetricsRepository.loadAll();
       for (const row of rows) {
         const metric = MetricsService.metrics.get(row.id as MetricType);
-        if (!metric) {
+        if (!metric || !metric.persist) {
           continue;
         }
 
@@ -187,6 +187,7 @@ export default class MetricsService {
     }
 
     const valuesToPersist = Array.from(MetricsService.metrics.entries())
+      .filter(([, metric]) => metric.persist)
       .map(([id, metric]) => ({
         id,
         value: metric.value === undefined ? null : metric.value,

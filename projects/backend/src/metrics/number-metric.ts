@@ -1,9 +1,9 @@
 import { MetricType } from "../service/infra/metrics.service";
-import Metric from "./metric";
+import Metric, { type MetricOptions } from "./metric";
 
 export default class NumberMetric extends Metric<number> {
-  constructor(id: MetricType, defaultValue: number) {
-    super(id, defaultValue);
+  constructor(id: MetricType, defaultValue: number, options?: MetricOptions) {
+    super(id, defaultValue, options);
   }
 
   /**

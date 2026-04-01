@@ -12,7 +12,7 @@ export default class RedisHealthMetric extends Metric<null> {
   private readonly redisPingMsGauge: Gauge;
 
   constructor() {
-    super(MetricType.REDIS_HEALTH, null);
+    super(MetricType.REDIS_HEALTH, null, { persist: false });
 
     this.redisUpGauge = new Gauge({
       name: "redis_up",

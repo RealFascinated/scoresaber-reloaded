@@ -16,10 +16,10 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import {
   leaderboardByHashCacheKey,
   leaderboardByIdCacheKey,
+  normalizeSongHash,
   qualifiedLeaderboardsCacheKey,
   rankedLeaderboardsCacheKey,
   rankingQueueLeaderboardsCacheKey,
-  normalizeSongHash,
 } from "../../common/cache-keys";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
@@ -34,12 +34,12 @@ export class ScoreSaberLeaderboardsService {
       CacheId.SCORESABER_LEADERBOARDS,
       leaderboardByIdCacheKey(id),
       async () => {
-      const map = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds([id]);
-      const leaderboard = map.get(id);
-      if (!leaderboard) {
-        return await ScoreSaberLeaderboardsService.createLeaderboard(id);
-      }
-      return leaderboard;
+        const map = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds([id]);
+        const leaderboard = map.get(id);
+        if (!leaderboard) {
+          return await ScoreSaberLeaderboardsService.createLeaderboard(id);
+        }
+        return leaderboard;
       }
     );
   }
@@ -50,8 +50,10 @@ export class ScoreSaberLeaderboardsService {
     characteristic: MapCharacteristic
   ): Promise<ScoreSaberLeaderboard> {
     const hashNorm = normalizeSongHash(hash);
-    return await CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, leaderboardByHashCacheKey(hashNorm, difficulty, characteristic), async () => {
-
+    return await CacheService.fetch(
+      CacheId.SCORESABER_LEADERBOARDS,
+      leaderboardByHashCacheKey(hashNorm, difficulty, characteristic),
+      async () => {
         const matchId = await ScoreSaberLeaderboardsRepository.findIdBySongHashDifficultyCharacteristic(
           hashNorm,
           difficulty,
@@ -89,7 +91,8 @@ export class ScoreSaberLeaderboardsService {
           `Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`
         );
         return leaderboard;
-    });
+      }
+    );
   }
 
   public static async getLeaderboardsWithDifficultiesByIds(
@@ -215,23 +218,15 @@ export class ScoreSaberLeaderboardsService {
   }
 
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(
-      CacheId.SCORESABER_LEADERBOARDS,
-      rankedLeaderboardsCacheKey,
-      async () => {
-        return ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
-      }
-    );
+    return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, rankedLeaderboardsCacheKey, async () => {
+      return ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
+    });
   }
 
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(
-      CacheId.SCORESABER_LEADERBOARDS,
-      qualifiedLeaderboardsCacheKey,
-      async () => {
-        return ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();
-      }
-    );
+    return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, qualifiedLeaderboardsCacheKey, async () => {
+      return ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();
+    });
   }
 
   public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {

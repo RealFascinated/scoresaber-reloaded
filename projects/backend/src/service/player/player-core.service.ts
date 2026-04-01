@@ -10,8 +10,8 @@ import { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/playe
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
-import { logNewTrackedPlayer } from "../../common/embds";
 import { playerCacheKey } from "../../common/cache-keys";
+import { logNewTrackedPlayer } from "../../common/embds";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
 import { type ScoreSaberAccountRow } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";

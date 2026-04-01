@@ -23,7 +23,7 @@ export default class PostgresDbSizeMetric extends NumberMetric {
   private lastCollectedAt = 0;
 
   constructor() {
-    super(MetricType.POSTGRES_DB_SIZE, 0);
+    super(MetricType.POSTGRES_DB_SIZE, 0, { persist: false });
 
     this.totalSizeGauge = new Gauge({
       name: "postgres_db_size_bytes",

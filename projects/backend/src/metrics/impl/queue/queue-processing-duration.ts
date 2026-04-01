@@ -8,7 +8,7 @@ export default class QueueProcessingDurationMetric extends Metric<null> {
   private readonly failedCounter: Counter<"queue">;
 
   constructor() {
-    super(MetricType.QUEUE_PROCESSING_DURATION, null);
+    super(MetricType.QUEUE_PROCESSING_DURATION, null, { persist: false });
 
     this.durationHistogram = new Histogram({
       name: "queue_processing_duration_ms",

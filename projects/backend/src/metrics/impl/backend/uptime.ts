@@ -4,7 +4,7 @@ import NumberMetric from "../../number-metric";
 
 export default class ProcessUptimeMetric extends NumberMetric {
   constructor() {
-    super(MetricType.PROCESS_UPTIME, 0);
+    super(MetricType.PROCESS_UPTIME, 0, { persist: false });
 
     const gauge = new Gauge({
       name: "process_uptime_seconds",

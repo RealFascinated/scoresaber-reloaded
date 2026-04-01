@@ -8,7 +8,7 @@ export default class EventLoopLagMetric extends Metric<number> {
   private measureInterval: NodeJS.Timeout | null = null;
 
   constructor() {
-    super(MetricType.EVENT_LOOP_LAG, 0);
+    super(MetricType.EVENT_LOOP_LAG, 0, { persist: false });
 
     this.lastCheck = performance.now();
     this.lag = 0;

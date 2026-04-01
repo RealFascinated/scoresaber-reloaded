@@ -223,9 +223,7 @@ export class ScoreSaberLeaderboardsRepository {
       CacheService.invalidate(rankedLeaderboardsCacheKey),
       CacheService.invalidate(qualifiedLeaderboardsCacheKey),
       CacheService.invalidate(rankingQueueLeaderboardsCacheKey),
-      ...leaderboards.map(leaderboard =>
-        CacheService.invalidate(leaderboardByIdCacheKey(leaderboard.id))
-      ),
+      ...leaderboards.map(leaderboard => CacheService.invalidate(leaderboardByIdCacheKey(leaderboard.id))),
       ...leaderboards.map(leaderboard =>
         CacheService.invalidate(
           leaderboardByHashCacheKey(

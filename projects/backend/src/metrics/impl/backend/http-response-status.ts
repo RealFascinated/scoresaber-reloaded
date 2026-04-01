@@ -6,7 +6,7 @@ export default class HttpResponseStatusMetric extends Metric<null> {
   private readonly counter: Counter<"route" | "status_class">;
 
   constructor() {
-    super(MetricType.HTTP_RESPONSES, null);
+    super(MetricType.HTTP_RESPONSES, null, { persist: false });
 
     this.counter = new Counter({
       name: "http_responses_total",

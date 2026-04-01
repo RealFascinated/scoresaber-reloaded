@@ -6,7 +6,7 @@ import NumberMetric from "../../number-metric";
 
 export class ApiServicesMetric extends NumberMetric {
   constructor() {
-    super(MetricType.API_SERVICES, 0);
+    super(MetricType.API_SERVICES, 0, { persist: false });
 
     const callsGauge = new Gauge({
       name: "api_service_calls_total",

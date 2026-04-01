@@ -156,9 +156,7 @@ export class ScoreSaberScoresRepository {
       .limit(limit);
   }
 
-  public static async getPpAndScoreIdByPlayer(
-    playerId: string
-  ): Promise<{ pp: number; scoreId: number }[]> {
+  public static async getPpAndScoreIdByPlayer(playerId: string): Promise<{ pp: number; scoreId: number }[]> {
     return db
       .select({
         pp: scoreSaberScoresTable.pp,

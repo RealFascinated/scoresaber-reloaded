@@ -15,8 +15,8 @@ import {
 } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { redisClient } from "../../common/redis";
 import { cachedPlayerTokenCacheKey } from "../../common/cache-keys";
+import { redisClient } from "../../common/redis";
 import { playerHistoryRowToType } from "../../db/converter/player-history";
 import { type PlayerHistoryRow } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";

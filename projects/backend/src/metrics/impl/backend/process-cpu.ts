@@ -9,7 +9,7 @@ export default class ProcessCpuMetric extends NumberMetric {
   private readonly cpuCores = Math.max(1, (os.availableParallelism?.() ?? os.cpus().length) || 1);
 
   constructor() {
-    super(MetricType.PROCESS_CPU, 0);
+    super(MetricType.PROCESS_CPU, 0, { persist: false });
 
     const cpuPercentGauge = new Gauge({
       name: "process_cpu_percent",

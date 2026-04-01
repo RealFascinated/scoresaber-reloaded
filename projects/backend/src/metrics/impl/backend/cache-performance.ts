@@ -25,7 +25,7 @@ export default class CachePerformanceMetric extends NumberMetric {
   });
 
   constructor() {
-    super(MetricType.CACHE_PERFORMANCE, 0);
+    super(MetricType.CACHE_PERFORMANCE, 0, { persist: false });
   }
 
   public static recordHit(cacheId: string, mode: "REDIS" | "MEMORY"): void {

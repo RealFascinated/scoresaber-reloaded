@@ -5,7 +5,7 @@ import NumberMetric from "../../number-metric";
 
 export default class MemoryUsageMetric extends NumberMetric {
   constructor() {
-    super(MetricType.MEMORY_USAGE, 0);
+    super(MetricType.MEMORY_USAGE, 0, { persist: false });
 
     const heapSizeGauge = new Gauge({
       name: "memory_usage_heap_size_bytes",

@@ -6,7 +6,7 @@ export default class ResponseTimeHistogramMetric extends Metric<number> {
   private histogram: Histogram;
 
   constructor() {
-    super(MetricType.RESPONSE_TIME_MS, 0);
+    super(MetricType.RESPONSE_TIME_MS, 0, { persist: false });
 
     this.histogram = new Histogram({
       name: "response_time_ms",
