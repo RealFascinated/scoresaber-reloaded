@@ -3,6 +3,7 @@ import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
 import { connectBeatSaverWebsocket } from "@ssr/common/websocket/beatsaver-websocket";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { beatSaverMapCacheKey } from "../../common/cache-keys";
 import BeatSaverService from "../../service/external/beatsaver.service";
 import CacheService from "../../service/infra/cache.service";
 
@@ -19,7 +20,7 @@ export class BeatSaverWebsocket {
 
       await BeatSaverService.saveMap(map);
 
-      await CacheService.invalidate(`beatsaver:${mapHash}`); // Invalidate the cache for the map
+      await CacheService.invalidate(beatSaverMapCacheKey(mapHash)); // Invalidate the cache for the map
       Logger.info(`BeatSaver map ${mapHash} updated`);
 
       await sendEmbedToChannel(

@@ -16,6 +16,7 @@ import {
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { redisClient } from "../../common/redis";
+import { cachedPlayerTokenCacheKey } from "../../common/cache-keys";
 import { playerHistoryRowToType } from "../../db/converter/player-history";
 import { type PlayerHistoryRow } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
@@ -85,7 +86,7 @@ export class PlayerHistoryService {
         foundPlayer.inactive !== player.inactive &&
           (async () => {
             await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
-            redisClient.del(`scoresaber:cached-player:${foundPlayer.id}`);
+            redisClient.del(cachedPlayerTokenCacheKey(foundPlayer.id));
           })(),
       ]);
 

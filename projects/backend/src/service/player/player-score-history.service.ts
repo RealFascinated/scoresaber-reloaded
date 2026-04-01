@@ -6,6 +6,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
+import { scoreHistoryGraphCacheKey } from "../../common/cache-keys";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import CacheService, { CacheId } from "../infra/cache.service";
@@ -106,7 +107,7 @@ export class PlayerScoreHistoryService {
   ): Promise<ScoreHistoryGraph> {
     return CacheService.fetch(
       CacheId.SCORESABER_SCORE_HISTORY_GRAPH,
-      `score-history-graph:${playerId}-${leaderboardId}`,
+      scoreHistoryGraphCacheKey(playerId, leaderboardId),
       async () => {
         return ScoreSaberScoreHistoryRepository.getAccuracySeriesForPlayerMap(playerId, leaderboardId);
       }

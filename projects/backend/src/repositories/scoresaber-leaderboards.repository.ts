@@ -6,6 +6,13 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import type { SQL } from "drizzle-orm";
 import { and, asc, count, desc, eq, gte, inArray, isNotNull, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import {
+  leaderboardByHashCacheKey,
+  leaderboardByIdCacheKey,
+  qualifiedLeaderboardsCacheKey,
+  rankedLeaderboardsCacheKey,
+  rankingQueueLeaderboardsCacheKey,
+} from "../common/cache-keys";
 import { db } from "../db";
 import { mergeJoinedLeaderboardRows } from "../db/converter/scoresaber-leaderboard";
 import { ScoreSaberLeaderboardRow, scoreSaberLeaderboardsTable } from "../db/schema";
@@ -30,6 +37,23 @@ export type QualifiedLeaderboardSnapshotRow = {
 };
 
 export class ScoreSaberLeaderboardsRepository {
+  private static async invalidateLeaderboardCaches(leaderboard: {
+    id: number;
+    songHash: string;
+    difficulty: MapDifficulty;
+    characteristic: MapCharacteristic;
+  }): Promise<void> {
+    await Promise.all([
+      CacheService.invalidate(leaderboardByIdCacheKey(leaderboard.id)),
+      CacheService.invalidate(
+        leaderboardByHashCacheKey(leaderboard.songHash, leaderboard.difficulty, leaderboard.characteristic)
+      ),
+      CacheService.invalidate(rankedLeaderboardsCacheKey),
+      CacheService.invalidate(qualifiedLeaderboardsCacheKey),
+      CacheService.invalidate(rankingQueueLeaderboardsCacheKey),
+    ]);
+  }
+
   public static leaderboardFtsMatch(search: string): SQL {
     return sql`to_tsvector('english', ${scoreSaberLeaderboardsTable.songName} || ' ' || ${scoreSaberLeaderboardsTable.songSubName} || ' ' || ${scoreSaberLeaderboardsTable.songAuthorName} || ' ' || ${scoreSaberLeaderboardsTable.levelAuthorName}) @@ plainto_tsquery('english', ${search})`;
   }
@@ -124,11 +148,20 @@ export class ScoreSaberLeaderboardsRepository {
       cachedSongArt: cachedSongArt,
       timestamp: leaderboard.timestamp,
     });
+    await ScoreSaberLeaderboardsRepository.invalidateLeaderboardCaches({
+      id,
+      songHash: leaderboard.songHash,
+      difficulty: leaderboard.difficulty.difficulty,
+      characteristic: leaderboard.difficulty.characteristic,
+    });
   }
 
   public static async updateLeaderboardById(id: number, partial: Partial<ScoreSaberLeaderboardRow>) {
     await db.update(scoreSaberLeaderboardsTable).set(partial).where(eq(scoreSaberLeaderboardsTable.id, id));
-    await CacheService.invalidate(`leaderboard:id:${id}`);
+    await CacheService.invalidate(leaderboardByIdCacheKey(id));
+    await CacheService.invalidate(rankedLeaderboardsCacheKey);
+    await CacheService.invalidate(qualifiedLeaderboardsCacheKey);
+    await CacheService.invalidate(rankingQueueLeaderboardsCacheKey);
   }
 
   public static async upsertLeaderboards(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
@@ -185,6 +218,24 @@ export class ScoreSaberLeaderboardsRepository {
           cachedSongArt: sql`"scoresaber-leaderboards"."cachedSongArt"`,
         },
       });
+
+    await Promise.all([
+      CacheService.invalidate(rankedLeaderboardsCacheKey),
+      CacheService.invalidate(qualifiedLeaderboardsCacheKey),
+      CacheService.invalidate(rankingQueueLeaderboardsCacheKey),
+      ...leaderboards.map(leaderboard =>
+        CacheService.invalidate(leaderboardByIdCacheKey(leaderboard.id))
+      ),
+      ...leaderboards.map(leaderboard =>
+        CacheService.invalidate(
+          leaderboardByHashCacheKey(
+            leaderboard.songHash,
+            leaderboard.difficulty.difficulty,
+            leaderboard.difficulty.characteristic
+          )
+        )
+      ),
+    ]);
   }
 
   public static async lookupLeaderboards(

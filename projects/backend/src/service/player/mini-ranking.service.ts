@@ -1,6 +1,7 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MiniRankingResponse } from "@ssr/common/schemas/response/player/around-player";
+import { miniRankingCacheKey } from "../../common/cache-keys";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 import { PlayerMedalsService } from "./player-medals.service";
@@ -74,7 +75,7 @@ export default class MiniRankingService {
         Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
           CacheService.fetch(
             CacheId.SCORESABER_PLAYER,
-            `scoresaber:mini-ranking:medals:${player.id}:${page}`,
+            miniRankingCacheKey(player.id, "medals", page),
             async () => PlayerMedalsService.getPlayerMedalRanking(page)
           )
         )
@@ -98,7 +99,7 @@ export default class MiniRankingService {
       Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
         CacheService.fetch(
           CacheId.SCORESABER_PLAYER,
-          `scoresaber:mini-ranking:${player.id}:${type}${type === "country" ? `:${player.country}` : ""}:${page}`,
+          miniRankingCacheKey(player.id, type, page, player.country),
           async () =>
             type === "global"
               ? ScoreSaberApiService.lookupPlayers(page)

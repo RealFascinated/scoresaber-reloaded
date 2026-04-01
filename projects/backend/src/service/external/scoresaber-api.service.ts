@@ -15,6 +15,7 @@ import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/p
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
+import { scoreSaberApiResponseCacheKey } from "../../common/cache-keys";
 import CacheService, { CacheId } from "../infra/cache.service";
 
 const API_BASE = "https://scoresaber.com/api";
@@ -73,7 +74,7 @@ export class ScoreSaberApiService {
 
     const data = await CacheService.fetch<CachedResponse<T> | undefined>(
       CacheId.SCORESABER_API_RESPONSE,
-      `scoresaber:api-cache:${cacheHash}`,
+      scoreSaberApiResponseCacheKey(cacheHash),
       async () => {
         ScoreSaberApiService.totalRequests++;
 

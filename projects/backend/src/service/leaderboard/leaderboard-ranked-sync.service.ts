@@ -8,6 +8,7 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { qualifiedLeaderboardsCacheKey, rankedLeaderboardsCacheKey } from "../../common/cache-keys";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
@@ -223,7 +224,7 @@ export class LeaderboardRankedSyncService {
         Logger.info(`[RANKED UPDATES] Updated batch of ${batch.length} leaderboards!`);
       }
 
-      await CacheService.invalidate("leaderboard:ranked-leaderboards");
+      await CacheService.invalidate(rankedLeaderboardsCacheKey);
 
       Logger.info(
         `[RANKED UPDATES] Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
@@ -276,7 +277,7 @@ export class LeaderboardRankedSyncService {
     if (leaderboardsToUpsert.length > 0) {
       Logger.info(`[RANKED UPDATES] Updating ${leaderboardsToUpsert.length} leaderboards...`);
       await ScoreSaberLeaderboardsRepository.upsertLeaderboards(leaderboardsToUpsert);
-      await CacheService.invalidate("leaderboard:qualified-leaderboards");
+      await CacheService.invalidate(qualifiedLeaderboardsCacheKey);
       Logger.info(
         `[RANKED UPDATES] Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
       );

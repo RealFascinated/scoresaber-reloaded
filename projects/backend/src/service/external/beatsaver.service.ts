@@ -3,6 +3,7 @@ import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
+import { beatSaverMapCacheKey, normalizeSongHash } from "../../common/cache-keys";
 import { beatSaverRowsToMap } from "../../db/converter/beatsaver-map";
 import { BeatSaverRepository } from "../../repositories/beatsaver.repository";
 import CacheService, { CacheId } from "../infra/cache.service";
@@ -22,11 +23,11 @@ export default class BeatSaverService {
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic
   ): Promise<BeatSaverMap | undefined> {
-    const normalizedHash = hash.trim().toLowerCase();
+    const normalizedHash = normalizeSongHash(hash);
 
     return await CacheService.fetch(
       CacheId.BEATSAVER_MAP_BY_HASH,
-      `beatsaver:${normalizedHash}`,
+      beatSaverMapCacheKey(normalizedHash),
       async () => {
         let rows = await this.getRowsByHash(normalizedHash);
 

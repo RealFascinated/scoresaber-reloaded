@@ -5,6 +5,7 @@ import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { DiscordChannels } from "../../bot/bot";
+import { cachedPlayerTokenCacheKey, playerCacheKey } from "../../common/cache-keys";
 import { sendScoreNotification } from "../../common/score/score.util";
 import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
 import BeatLeaderService from "../../service/beatleader/beatleader.service";
@@ -47,9 +48,9 @@ export class TrackScoreListener implements EventListener {
     PlayerHistoryService.updatePlayerDailyScoreStats(score.playerId, leaderboard.stars > 0, hasPreviousScore);
 
     // Invalidate player caches
-    CacheService.invalidate(`scoresaber:temp-cached-player:${player.id}`);
-    CacheService.invalidate(`scoresaber:player:${player.id}:basic`);
-    CacheService.invalidate(`scoresaber:player:${player.id}:full`);
+    CacheService.invalidate(cachedPlayerTokenCacheKey(player.id));
+    CacheService.invalidate(playerCacheKey(player.id, "basic"));
+    CacheService.invalidate(playerCacheKey(player.id, "full"));
 
     sendScoreNotification(
       DiscordChannels.SCORE_FLOODGATE_FEED,

@@ -15,6 +15,7 @@ import Request from "@ssr/common/utils/request";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { beatLeaderScoreByIdCacheKey, beatLeaderScoreBySongCacheKey } from "../../common/cache-keys";
 import { createGenericEmbed } from "../../common/discord/embed";
 import { beatLeaderScoreRowToType } from "../../db/converter/beatleader-score";
 import {
@@ -116,7 +117,7 @@ export default class BeatLeaderService {
   ): Promise<BeatLeaderScore | undefined> {
     return CacheService.fetch(
       CacheId.BEATLEADER_SCORE,
-      `beatleader-score:${playerId}-${songHash}-${songDifficulty}-${songScore}`,
+      beatLeaderScoreBySongCacheKey(playerId, songHash, songDifficulty, songScore),
       async () => {
         const beatLeaderScore = await BeatLeaderScoresRepository.findLatestBySong(
           playerId,
@@ -140,7 +141,7 @@ export default class BeatLeaderService {
    * @returns the BeatLeader score, or undefined if none
    */
   public static async getBeatLeaderScore(scoreId: number): Promise<BeatLeaderScore | undefined> {
-    return CacheService.fetch(CacheId.BEATLEADER_SCORE, `beatleader-score:${scoreId}`, async () => {
+    return CacheService.fetch(CacheId.BEATLEADER_SCORE, beatLeaderScoreByIdCacheKey(scoreId), async () => {
       const beatLeaderScore = await BeatLeaderScoresRepository.findRowById(scoreId);
       if (!beatLeaderScore) {
         return undefined;

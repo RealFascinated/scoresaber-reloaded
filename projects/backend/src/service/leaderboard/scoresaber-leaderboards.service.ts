@@ -13,6 +13,14 @@ import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leade
 import Request from "@ssr/common/utils/request";
 import { getScoreSaberDifficultyFromDifficulty } from "@ssr/common/utils/scoresaber.util";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import {
+  leaderboardByHashCacheKey,
+  leaderboardByIdCacheKey,
+  qualifiedLeaderboardsCacheKey,
+  rankedLeaderboardsCacheKey,
+  rankingQueueLeaderboardsCacheKey,
+  normalizeSongHash,
+} from "../../common/cache-keys";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
@@ -22,14 +30,18 @@ import StorageService from "../infra/storage.service";
 
 export class ScoreSaberLeaderboardsService {
   public static async getLeaderboard(id: number): Promise<ScoreSaberLeaderboard> {
-    return await CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, `leaderboard:id:${id}`, async () => {
+    return await CacheService.fetch(
+      CacheId.SCORESABER_LEADERBOARDS,
+      leaderboardByIdCacheKey(id),
+      async () => {
       const map = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds([id]);
       const leaderboard = map.get(id);
       if (!leaderboard) {
         return await ScoreSaberLeaderboardsService.createLeaderboard(id);
       }
       return leaderboard;
-    });
+      }
+    );
   }
 
   public static async getLeaderboardByHash(
@@ -37,11 +49,8 @@ export class ScoreSaberLeaderboardsService {
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic
   ): Promise<ScoreSaberLeaderboard> {
-    return await CacheService.fetch(
-      CacheId.SCORESABER_LEADERBOARDS,
-      `leaderboard:hash:${hash}:${difficulty}:${characteristic}`,
-      async () => {
-        const hashNorm = hash.trim().toLowerCase();
+    const hashNorm = normalizeSongHash(hash);
+    return await CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, leaderboardByHashCacheKey(hashNorm, difficulty, characteristic), async () => {
 
         const matchId = await ScoreSaberLeaderboardsRepository.findIdBySongHashDifficultyCharacteristic(
           hashNorm,
@@ -59,7 +68,7 @@ export class ScoreSaberLeaderboardsService {
 
         const before = performance.now();
         const leaderboardToken = await ScoreSaberApiService.lookupLeaderboardByHash(
-          hash,
+          hashNorm,
           getScoreSaberDifficultyFromDifficulty(difficulty),
           characteristic
         );
@@ -80,8 +89,7 @@ export class ScoreSaberLeaderboardsService {
           `Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`
         );
         return leaderboard;
-      }
-    );
+    });
   }
 
   public static async getLeaderboardsWithDifficultiesByIds(
@@ -94,7 +102,7 @@ export class ScoreSaberLeaderboardsService {
     for (const id of uniqueIds) {
       const leaderboard = await CacheService.get<ScoreSaberLeaderboard>(
         CacheId.SCORESABER_LEADERBOARDS,
-        `leaderboard:id:${id}`
+        leaderboardByIdCacheKey(id)
       );
       if (leaderboard !== undefined) {
         result.set(id, leaderboard);
@@ -108,7 +116,7 @@ export class ScoreSaberLeaderboardsService {
         await ScoreSaberLeaderboardsRepository.getLeaderboardsWithDifficultiesByIds(missingIds);
       for (const [id, leaderboard] of dbLeaderboards) {
         result.set(id, leaderboard);
-        await CacheService.insert(CacheId.SCORESABER_LEADERBOARDS, `leaderboard:id:${id}`, leaderboard);
+        await CacheService.insert(CacheId.SCORESABER_LEADERBOARDS, leaderboardByIdCacheKey(id), leaderboard);
       }
     }
 
@@ -209,7 +217,7 @@ export class ScoreSaberLeaderboardsService {
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     return CacheService.fetch(
       CacheId.SCORESABER_LEADERBOARDS,
-      "leaderboard:ranked-leaderboards",
+      rankedLeaderboardsCacheKey,
       async () => {
         return ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
       }
@@ -219,7 +227,7 @@ export class ScoreSaberLeaderboardsService {
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     return CacheService.fetch(
       CacheId.SCORESABER_LEADERBOARDS,
-      "leaderboard:qualified-leaderboards",
+      qualifiedLeaderboardsCacheKey,
       async () => {
         return ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();
       }
@@ -227,7 +235,7 @@ export class ScoreSaberLeaderboardsService {
   }
 
   public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, "leaderboard:ranking-queue-maps", async () => {
+    return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, rankingQueueLeaderboardsCacheKey, async () => {
       const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
       if (!rankingQueueTokens) {
         return [];

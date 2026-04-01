@@ -10,6 +10,7 @@ import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
 import { redisClient } from "../../common/redis";
+import { cachedPlayerTokenCacheKey, playerCacheKey } from "../../common/cache-keys";
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
@@ -51,7 +52,7 @@ export default class ScoreSaberPlayerService {
       throw new NotFoundError(`Player "${id}" not found`);
     }
 
-    return CacheService.fetch(CacheId.SCORESABER_PLAYER, `scoresaber:player:${id}:${type}`, async () => {
+    return CacheService.fetch(CacheId.SCORESABER_PLAYER, playerCacheKey(id, type), async () => {
       const account = await PlayerCoreService.getOrCreateAccount(id, player).catch(() => undefined);
 
       // delete players scores if banned so they don't fuck up top scores
@@ -137,7 +138,7 @@ export default class ScoreSaberPlayerService {
    * @returns the player token
    */
   public static async getCachedPlayer(id: string): Promise<ScoreSaberPlayerToken> {
-    const cacheKey = `scoresaber:cached-player:${id}`;
+    const cacheKey = cachedPlayerTokenCacheKey(id);
 
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
@@ -168,7 +169,7 @@ export default class ScoreSaberPlayerService {
     id: string,
     player: ScoreSaberLeaderboardPlayerInfo | ScoreSaberPlayerToken
   ) {
-    const cachedPlayer = await redisClient.get(`scoresaber:cached-player:${player.id}`);
+    const cachedPlayer = await redisClient.get(cachedPlayerTokenCacheKey(player.id));
 
     try {
       if (cachedPlayer && player.name && player.profilePicture && player.country) {
@@ -179,7 +180,7 @@ export default class ScoreSaberPlayerService {
         cachedPlayerData.country = player.country;
 
         await redisClient.set(
-          `scoresaber:cached-player:${id}`,
+          cachedPlayerTokenCacheKey(id),
           stringify(cachedPlayerData),
           "EX",
           CACHED_PLAYER_EXPIRY
@@ -187,7 +188,7 @@ export default class ScoreSaberPlayerService {
       }
     } catch {
       Logger.warn(`Failed to update cached player data for ${id}, removing from cache`);
-      await redisClient.del(`scoresaber:cached-player:${id}`);
+      await redisClient.del(cachedPlayerTokenCacheKey(id));
     }
   }
 }

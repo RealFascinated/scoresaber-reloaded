@@ -11,6 +11,7 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logNewTrackedPlayer } from "../../common/embds";
+import { playerCacheKey } from "../../common/cache-keys";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
 import { type ScoreSaberAccountRow } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
@@ -238,8 +239,10 @@ export class PlayerCoreService {
   public static async refreshPlayer(id: string): Promise<PlayerRefreshResponse> {
     const response = await ScoreSaberApiService.refreshPlayer(id);
     if (response !== undefined) {
-      CacheService.invalidate(`scoresaber:player:${id}`);
-      CacheService.invalidate(`player:${id}`);
+      await Promise.all([
+        CacheService.invalidate(playerCacheKey(id, "basic")),
+        CacheService.invalidate(playerCacheKey(id, "full")),
+      ]);
 
       const isOculusAccount = id.length === 16;
       if (!isOculusAccount) {
@@ -270,7 +273,10 @@ export class PlayerCoreService {
     await ScoreSaberAccountsRepository.updateAccount(playerId, patch);
 
     if (options?.invalidateCache !== false) {
-      await CacheService.invalidate(`player:${playerId}`);
+      await Promise.all([
+        CacheService.invalidate(playerCacheKey(playerId, "basic")),
+        CacheService.invalidate(playerCacheKey(playerId, "full")),
+      ]);
     }
   }
 
@@ -316,7 +322,10 @@ export class PlayerCoreService {
       if (request) {
         await StorageService.saveFile(StorageBucket.PlayerAvatars, `${playerId}.jpg`, Buffer.from(request));
         await ScoreSaberAccountsRepository.updateAccount(playerId, { cachedProfilePicture: true });
-        await CacheService.invalidate(`player:${playerId}`);
+        await Promise.all([
+          CacheService.invalidate(playerCacheKey(playerId, "basic")),
+          CacheService.invalidate(playerCacheKey(playerId, "full")),
+        ]);
         Logger.info(`Cached profile picture for player ${playerId}${force ? " (force)" : ""}`);
         return;
       }
