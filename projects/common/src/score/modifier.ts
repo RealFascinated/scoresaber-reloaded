@@ -75,7 +75,7 @@ export function normalizeModifiers(values: readonly string[] | undefined): Modif
     return [];
   }
 
-  return values.flatMap((value) => {
+  return values.flatMap(value => {
     const normalized = normalizeModifier(value);
     return normalized ? [normalized] : [];
   });
@@ -85,7 +85,7 @@ export function normalizeModifiers(values: readonly string[] | undefined): Modif
  * Checks whether a modifier list contains a given modifier (supports codes or legacy labels).
  */
 export function hasModifier(values: readonly string[] | undefined, modifier: Modifier): boolean {
-  return values?.some((value) => normalizeModifier(value) === modifier) ?? false;
+  return values?.some(value => normalizeModifier(value) === modifier) ?? false;
 }
 
 /**

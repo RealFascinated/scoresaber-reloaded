@@ -32,7 +32,20 @@ import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-di
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
-import { type AnyColumn, SQL, and, asc, count, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-orm";
+import {
+  type AnyColumn,
+  SQL,
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  gte,
+  inArray,
+  isNotNull,
+  sql,
+} from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { db } from "../../db";
 import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
@@ -59,12 +72,7 @@ type ScoreTableConfig<TRow, TScore> = {
   /** Counts rows matching the given conditions. */
   countRows: (conditions: SQL[]) => Promise<number>;
   /** Builds the WHERE conditions for this query. */
-  buildConditions: (
-    playerIds: string[],
-    sort: string,
-    leaderboardIds: number[] | null,
-    hmd?: HMD
-  ) => SQL[];
+  buildConditions: (playerIds: string[], sort: string, leaderboardIds: number[] | null, hmd?: HMD) => SQL[];
   /** Maps a sort field name to a column or SQL expression for `asc()` / `desc()`. */
   resolveOrderColumn: (sort: string) => AnyColumn | SQL;
   /** Converts a raw DB row + leaderboard into the enriched PlayerScore shape. */

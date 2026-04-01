@@ -33,14 +33,14 @@ export class PlayerHmdService {
     const rows =
       limit != null
         ? await db
-          .select({ hmd: scoreSaberScoresTable.hmd })
-          .from(scoreSaberScoresTable)
-          .where(eq(scoreSaberScoresTable.playerId, playerId))
-          .limit(limit)
+            .select({ hmd: scoreSaberScoresTable.hmd })
+            .from(scoreSaberScoresTable)
+            .where(eq(scoreSaberScoresTable.playerId, playerId))
+            .limit(limit)
         : await db
-          .select({ hmd: scoreSaberScoresTable.hmd })
-          .from(scoreSaberScoresTable)
-          .where(eq(scoreSaberScoresTable.playerId, playerId));
+            .select({ hmd: scoreSaberScoresTable.hmd })
+            .from(scoreSaberScoresTable)
+            .where(eq(scoreSaberScoresTable.playerId, playerId));
 
     const counts = new Map<HMD, number>();
     for (const row of rows) {
