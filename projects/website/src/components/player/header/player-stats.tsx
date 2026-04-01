@@ -163,7 +163,7 @@ const playerStats: Stat[] = [
       return {
         tooltip: (
           <p>
-            {formatDate(player.peakRank.date, "DD MMMM YYYY")} ({timeAgo(player.peakRank.date)})
+            {formatDate(player.peakRank.timestamp, "DD MMMM YYYY")} ({timeAgo(player.peakRank.timestamp)})
           </p>
         ),
         value: `#${formatNumberWithCommas(player.peakRank.rank)}`,
