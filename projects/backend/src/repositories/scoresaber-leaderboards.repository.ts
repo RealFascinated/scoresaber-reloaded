@@ -126,9 +126,9 @@ export class ScoreSaberLeaderboardsRepository {
     });
   }
 
-  public static async updateLeaderboard(leaderboardId: number, partial: Partial<ScoreSaberLeaderboardRow>) {
-    await db.update(scoreSaberLeaderboardsTable).set(partial).where(eq(scoreSaberLeaderboardsTable.id, leaderboardId));
-    await CacheService.invalidate(`leaderboard:id:${leaderboardId}`);
+  public static async updateLeaderboardById(id: number, partial: Partial<ScoreSaberLeaderboardRow>) {
+    await db.update(scoreSaberLeaderboardsTable).set(partial).where(eq(scoreSaberLeaderboardsTable.id, id));
+    await CacheService.invalidate(`leaderboard:id:${id}`);
   }
 
   public static async upsertLeaderboards(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {

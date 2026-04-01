@@ -4,8 +4,8 @@ import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
-import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
 import { redisClient } from "../../common/redis";
+import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
 
 export enum CacheId {
   BEATSAVER_MAP_BY_HASH = "beatsaver_map_by_hash",
@@ -111,12 +111,7 @@ export default class CacheService {
 
     const mode = this.CACHE_INFO[cache].mode;
     if (mode === "REDIS") {
-      const result = await redisClient.set(
-        cacheKey,
-        stringify(data),
-        "EX",
-        this.CACHE_INFO[cache].ttl
-      );
+      const result = await redisClient.set(cacheKey, stringify(data), "EX", this.CACHE_INFO[cache].ttl);
       if (result !== "OK") {
         throw new InternalServerError(`Failed to set cache for ${cacheKey}`);
       }
@@ -233,5 +228,4 @@ export default class CacheService {
     this.memoryCaches.set(cacheId, created);
     return created;
   }
-
 }

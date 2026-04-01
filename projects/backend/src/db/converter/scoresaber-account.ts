@@ -13,9 +13,10 @@ export function scoreSaberAccountRowToType(row: ScoreSaberAccountRow): ScoreSabe
     name: row.name,
     avatar: row.avatar,
     country: row.country,
-    peakRank: row.peakRank && row.peakRankTimestamp
-      ? { rank: row.peakRank, timestamp: new Date(row.peakRankTimestamp) }
-      : undefined,
+    peakRank:
+      row.peakRank && row.peakRankTimestamp
+        ? { rank: row.peakRank, timestamp: new Date(row.peakRankTimestamp) }
+        : undefined,
     seededScores: row.seededScores,
     seededBeatLeaderScores: row.seededBeatLeaderScores,
     cachedProfilePicture: row.cachedProfilePicture,

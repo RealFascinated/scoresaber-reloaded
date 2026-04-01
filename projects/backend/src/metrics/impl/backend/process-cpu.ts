@@ -29,6 +29,5 @@ export default class ProcessCpuMetric extends NumberMetric {
         this.value = percent;
       },
     });
-
   }
 }

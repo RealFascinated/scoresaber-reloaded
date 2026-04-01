@@ -108,12 +108,8 @@ export class PlayerScoreHistoryService {
       CacheId.SCORESABER_SCORE_HISTORY_GRAPH,
       `score-history-graph:${playerId}-${leaderboardId}`,
       async () => {
-        return ScoreSaberScoreHistoryRepository.selectAccuracySeriesForPlayerMap(
-          playerId,
-          leaderboardId
-        );
+        return ScoreSaberScoreHistoryRepository.selectAccuracySeriesForPlayerMap(playerId, leaderboardId);
       }
     );
   }
-
 }

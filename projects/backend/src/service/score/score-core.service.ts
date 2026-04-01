@@ -62,11 +62,7 @@ export class ScoreCoreService {
         const previous = previousRow;
 
         // Move old score to history (snapshot the row being replaced, not the incoming score)
-        await ScoreSaberScoreHistoryRepository.insertSnapshot(
-          previous,
-          playerId,
-          leaderboard.id
-        );
+        await ScoreSaberScoreHistoryRepository.insertSnapshot(previous, playerId, leaderboard.id);
 
         await ScoreSaberScoresRepository.deleteByScoreId(previous.scoreId);
       }

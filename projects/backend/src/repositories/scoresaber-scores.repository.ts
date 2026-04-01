@@ -53,10 +53,7 @@ export class ScoreSaberScoresRepository {
     return rows.length > 0;
   }
 
-  public static async existsByScoreIdAndScore(
-    scoreId: number,
-    scoreValue: number
-  ): Promise<boolean> {
+  public static async existsByScoreIdAndScore(scoreId: number, scoreValue: number): Promise<boolean> {
     const rows = await db
       .select({ exists: sql`1` })
       .from(scoreSaberScoresTable)

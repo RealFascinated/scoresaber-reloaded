@@ -24,45 +24,49 @@ export default class BeatSaverService {
   ): Promise<BeatSaverMap | undefined> {
     const normalizedHash = hash.trim().toLowerCase();
 
-    return await CacheService.fetch(CacheId.BEATSAVER_MAP_BY_HASH, `beatsaver:${normalizedHash}`, async () => {
-      let rows = await this.getRowsByHash(normalizedHash);
+    return await CacheService.fetch(
+      CacheId.BEATSAVER_MAP_BY_HASH,
+      `beatsaver:${normalizedHash}`,
+      async () => {
+        let rows = await this.getRowsByHash(normalizedHash);
 
-      if (!rows) {
-        const fetchedToken = await ApiServiceRegistry.getInstance()
-          .getBeatSaverService()
-          .lookupMap(normalizedHash);
-        if (!fetchedToken) {
-          return undefined;
-        }
-        await this.saveMap(fetchedToken);
-        rows = await this.getRowsByHash(normalizedHash);
         if (!rows) {
-          const picked = this.pickVersionForLeaderboard(
-            fetchedToken,
-            normalizedHash,
-            difficulty,
-            characteristic
-          );
-          if (picked != null) {
-            rows = await this.getRowsByHash(picked.hash.toLowerCase());
+          const fetchedToken = await ApiServiceRegistry.getInstance()
+            .getBeatSaverService()
+            .lookupMap(normalizedHash);
+          if (!fetchedToken) {
+            return undefined;
+          }
+          await this.saveMap(fetchedToken);
+          rows = await this.getRowsByHash(normalizedHash);
+          if (!rows) {
+            const picked = this.pickVersionForLeaderboard(
+              fetchedToken,
+              normalizedHash,
+              difficulty,
+              characteristic
+            );
+            if (picked != null) {
+              rows = await this.getRowsByHash(picked.hash.toLowerCase());
+            }
+          }
+          if (!rows) {
+            return undefined;
           }
         }
-        if (!rows) {
-          return undefined;
-        }
-      }
 
-      const map = beatSaverRowsToMap({
-        hash: rows.version.hash.toLowerCase(),
-        characteristic,
-        difficulty,
-        map: rows.map,
-        uploader: rows.uploader,
-        version: rows.version,
-        difficulties: rows.difficulties,
-      });
-      return map;
-    });
+        const map = beatSaverRowsToMap({
+          hash: rows.version.hash.toLowerCase(),
+          characteristic,
+          difficulty,
+          map: rows.map,
+          uploader: rows.uploader,
+          version: rows.version,
+          difficulties: rows.difficulties,
+        });
+        return map;
+      }
+    );
   }
 
   /**

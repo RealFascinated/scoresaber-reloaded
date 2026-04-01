@@ -182,7 +182,7 @@ export class PlayerCoreService {
               }
             } else {
               // Mark player as seeded
-              await ScoreSaberAccountsRepository.updateById(id, { seededScores: true });
+              await ScoreSaberAccountsRepository.updateAccount(id, { seededScores: true });
             }
 
             if (isProduction()) {
@@ -267,7 +267,7 @@ export class PlayerCoreService {
       return;
     }
 
-    await ScoreSaberAccountsRepository.updateById(playerId, patch);
+    await ScoreSaberAccountsRepository.updateAccount(playerId, patch);
 
     if (options?.invalidateCache !== false) {
       await CacheService.invalidate(`player:${playerId}`);
@@ -292,7 +292,7 @@ export class PlayerCoreService {
     }
 
     if (!account.peakRank || (account.peakRank && playerToken.rank < account.peakRank)) {
-      await ScoreSaberAccountsRepository.updateById(playerToken.id, {
+      await ScoreSaberAccountsRepository.updateAccount(playerToken.id, {
         peakRank: playerToken.rank,
         peakRankTimestamp: new Date(),
       });
@@ -315,7 +315,7 @@ export class PlayerCoreService {
       });
       if (request) {
         await StorageService.saveFile(StorageBucket.PlayerAvatars, `${playerId}.jpg`, Buffer.from(request));
-        await ScoreSaberAccountsRepository.updateById(playerId, { cachedProfilePicture: true });
+        await ScoreSaberAccountsRepository.updateAccount(playerId, { cachedProfilePicture: true });
         await CacheService.invalidate(`player:${playerId}`);
         Logger.info(`Cached profile picture for player ${playerId}${force ? " (force)" : ""}`);
         return;

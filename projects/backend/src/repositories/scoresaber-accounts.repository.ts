@@ -32,11 +32,11 @@ export class ScoreSaberAccountsRepository {
     return db.insert(scoreSaberAccountsTable).values(row).returning();
   }
 
-  public static async updateById(
-    playerId: string,
+  public static async updateAccount(
+    id: string,
     patch: Partial<Omit<ScoreSaberAccountRow, "id">>
   ): Promise<void> {
-    await db.update(scoreSaberAccountsTable).set(patch).where(eq(scoreSaberAccountsTable.id, playerId));
+    await db.update(scoreSaberAccountsTable).set(patch).where(eq(scoreSaberAccountsTable.id, id));
   }
 
   public static async searchIdsByNameIlike(pattern: string, limit: number): Promise<{ id: string }[]> {

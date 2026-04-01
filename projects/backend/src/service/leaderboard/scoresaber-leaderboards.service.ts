@@ -207,9 +207,13 @@ export class ScoreSaberLeaderboardsService {
   }
 
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, "leaderboard:ranked-leaderboards", async () => {
-      return ScoreSaberLeaderboardsRepository.selectRankedJoined();
-    });
+    return CacheService.fetch(
+      CacheId.SCORESABER_LEADERBOARDS,
+      "leaderboard:ranked-leaderboards",
+      async () => {
+        return ScoreSaberLeaderboardsRepository.selectRankedJoined();
+      }
+    );
   }
 
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
@@ -238,7 +242,9 @@ export class ScoreSaberLeaderboardsService {
 
     const exists = await StorageService.fileExists(StorageBucket.LeaderboardSongArt, objectKey);
     if (exists) {
-      await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, { cachedSongArt: true });
+      await ScoreSaberLeaderboardsRepository.updateLeaderboardById(leaderboard.id, {
+        cachedSongArt: true,
+      });
       return true;
     }
 
@@ -250,7 +256,9 @@ export class ScoreSaberLeaderboardsService {
     );
     if (request) {
       await StorageService.saveFile(StorageBucket.LeaderboardSongArt, objectKey, Buffer.from(request));
-      await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, { cachedSongArt: true });
+      await ScoreSaberLeaderboardsRepository.updateLeaderboardById(leaderboard.id, {
+        cachedSongArt: true,
+      });
 
       Logger.info(`Cached song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
       return true;

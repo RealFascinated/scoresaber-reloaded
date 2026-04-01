@@ -604,5 +604,4 @@ export class PlayerScoresService {
       },
     });
   }
-
 }
