@@ -1,5 +1,5 @@
 import { Gauge } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
+import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
 import { PlayerHmdService } from "../../../service/player/player-hmd.service";
 import NumberMetric from "../../number-metric";
 

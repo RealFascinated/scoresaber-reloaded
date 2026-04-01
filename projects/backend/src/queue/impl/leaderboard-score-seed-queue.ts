@@ -1,12 +1,13 @@
 import Logger from "@ssr/common/logger";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { asc, count, eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "../../db";
-import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
-import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
+import { scoreSaberLeaderboardsTable } from "../../db/schema";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
+import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
-import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
@@ -21,14 +22,8 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   protected async processItem(item: QueueItem<number>): Promise<void> {
     const leaderboardId = Number(item.id);
 
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
-    const totalTrackedScores =
-      (
-        await db
-          .select({ count: count() })
-          .from(scoreSaberScoresTable)
-          .where(eq(scoreSaberScoresTable.leaderboardId, leaderboardId))
-      )[0]?.count ?? 0;
+    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
+    const totalTrackedScores = await ScoreSaberScoresRepository.countByLeaderboardId(leaderboardId);
 
     const firstPage = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1);
     if (firstPage && totalTrackedScores >= firstPage.metadata.total) {

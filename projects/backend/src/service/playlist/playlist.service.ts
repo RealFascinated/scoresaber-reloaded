@@ -13,13 +13,12 @@ import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-uti
 import type { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { formatDateMinimal } from "@ssr/common/utils/time-utils";
-import { and, asc, eq, gt, gte, isNotNull, lte } from "drizzle-orm";
-import { alias } from "drizzle-orm/pg-core";
-import { db } from "../../db";
-import { mergeJoinedLeaderboardRows } from "../../db/converter/scoresaber-leaderboard";
+import { eq, gt, gte, isNotNull, lte } from "drizzle-orm";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
-import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
+import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
 
 export type SnipeType = "top" | "recent";
@@ -38,7 +37,7 @@ export const PLAYLIST_NAMES: Record<PlaylistId, string> = {
 
 export default class PlaylistService {
   public static async getRankedMapsPlaylist(): Promise<Playlist> {
-    const leaderboards = await LeaderboardCoreService.getRankedLeaderboards();
+    const leaderboards = await ScoreSaberLeaderboardsService.getRankedLeaderboards();
 
     return {
       playlistTitle: "Ranked Maps",
@@ -59,7 +58,7 @@ export default class PlaylistService {
   }
 
   public static async getQualifiedMapsPlaylist(): Promise<Playlist> {
-    const leaderboards = await LeaderboardCoreService.getQualifiedLeaderboards();
+    const leaderboards = await ScoreSaberLeaderboardsService.getQualifiedLeaderboards();
 
     return {
       playlistTitle: "Qualified Maps",
@@ -80,7 +79,7 @@ export default class PlaylistService {
   }
 
   public static async getRankingQueueMapsPlaylist(): Promise<Playlist> {
-    const leaderboards = await LeaderboardCoreService.getRankingQueueLeaderboards();
+    const leaderboards = await ScoreSaberLeaderboardsService.getRankingQueueLeaderboards();
 
     return {
       playlistTitle: "Ranking Queue Maps",
@@ -108,24 +107,10 @@ export default class PlaylistService {
    */
   public static async createCustomRankedPlaylist(settingsBase64?: string): Promise<Playlist> {
     const parsedConfig = parseCustomRankedPlaylistSettings(settingsBase64);
-    const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
-    const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
-
-    const rankedJoinRows = await db
-      .select()
-      .from(mainAlias)
-      .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
-      .where(
-        and(
-          eq(mainAlias.ranked, true),
-          isNotNull(mainAlias.stars),
-          gte(mainAlias.stars, parsedConfig.stars.min),
-          lte(mainAlias.stars, parsedConfig.stars.max)
-        )
-      )
-      .orderBy(asc(mainAlias.stars));
-
-    const rankedLeaderboards = mergeJoinedLeaderboardRows(rankedJoinRows);
+    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.selectRankedJoinedWhereStarsBetween(
+      parsedConfig.stars.min,
+      parsedConfig.stars.max
+    );
 
     const title = `Custom Ranked Maps (${formatDateMinimal(new Date())})`;
 
@@ -400,20 +385,11 @@ export default class PlaylistService {
       conditions.push(lte(scoreSaberLeaderboardsTable.stars, starRange.max));
     }
 
-    const rows = await db
-      .select({
-        scoreRow: scoreSaberScoresTable,
-        lbRow: scoreSaberLeaderboardsTable,
-      })
-      .from(scoreSaberScoresTable)
-      .innerJoin(
-        scoreSaberLeaderboardsTable,
-        eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
-      )
-      .where(and(...conditions));
+    const rows = await ScoreSaberScoresRepository.selectScoresJoinedLeaderboardsWhere(conditions);
 
     const leaderboardIds = [...new Set(rows.map(r => r.lbRow.id))];
-    const leaderboardMap = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(leaderboardIds);
+    const leaderboardMap =
+      await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds(leaderboardIds);
 
     return rows.map(({ scoreRow, lbRow }) => {
       const leaderboard = leaderboardMap.get(lbRow.id);

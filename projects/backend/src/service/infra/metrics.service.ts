@@ -1,31 +1,29 @@
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
-import { sql } from "drizzle-orm";
 import { Registry } from "prom-client";
-import { db } from "../db";
-import { metricsTable } from "../db/schema";
-import { ApiServicesMetric } from "../metrics/impl/backend/api-services";
-import EventLoopLagMetric from "../metrics/impl/backend/event-loop-lag";
-import HttpResponseStatusMetric from "../metrics/impl/backend/http-response-status";
-import MemoryUsageMetric from "../metrics/impl/backend/memory-usage";
-import RedisHealthMetric from "../metrics/impl/backend/redis-health";
-import ResponseTimeHistogramMetric from "../metrics/impl/backend/response-time";
-import TotalRequestsMetric from "../metrics/impl/backend/total-requests";
-import ProcessUptimeMetric from "../metrics/impl/backend/uptime";
-import PostgresDbSizeMetric from "../metrics/impl/database/postgres-db-size";
-import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
-import ActivePlayerHmdStatisticMetric from "../metrics/impl/player/active-player-hmd-statistic";
-import BeatLeaderPlayersMetric from "../metrics/impl/player/beatleader-players";
-import BeatLeaderSeenScoresMetric from "../metrics/impl/player/beatleader-seen-scores";
-import BeatLeaderUniqueDailyPlayersMetric from "../metrics/impl/player/beatleader-unique-daily-players";
-import DailyNewAccountsMetric from "../metrics/impl/player/daily-new-accounts";
-import TotalTrackedScoresMetric from "../metrics/impl/player/total-tracked-scores";
-import TrackedPlayersMetric from "../metrics/impl/player/tracked-players";
-import TrackedScoresMetric from "../metrics/impl/player/tracked-scores";
-import UniqueDailyPlayersMetric from "../metrics/impl/player/unique-daily-players";
-import QueueProcessingDurationMetric from "../metrics/impl/queue/queue-processing-duration";
-import QueueSizesMetric from "../metrics/impl/queue/queue-sizes";
-import Metric from "../metrics/metric";
+import { ApiServicesMetric } from "../../metrics/impl/backend/api-services";
+import EventLoopLagMetric from "../../metrics/impl/backend/event-loop-lag";
+import HttpResponseStatusMetric from "../../metrics/impl/backend/http-response-status";
+import MemoryUsageMetric from "../../metrics/impl/backend/memory-usage";
+import RedisHealthMetric from "../../metrics/impl/backend/redis-health";
+import ResponseTimeHistogramMetric from "../../metrics/impl/backend/response-time";
+import TotalRequestsMetric from "../../metrics/impl/backend/total-requests";
+import ProcessUptimeMetric from "../../metrics/impl/backend/uptime";
+import PostgresDbSizeMetric from "../../metrics/impl/database/postgres-db-size";
+import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
+import ActivePlayerHmdStatisticMetric from "../../metrics/impl/player/active-player-hmd-statistic";
+import BeatLeaderPlayersMetric from "../../metrics/impl/player/beatleader-players";
+import BeatLeaderSeenScoresMetric from "../../metrics/impl/player/beatleader-seen-scores";
+import BeatLeaderUniqueDailyPlayersMetric from "../../metrics/impl/player/beatleader-unique-daily-players";
+import DailyNewAccountsMetric from "../../metrics/impl/player/daily-new-accounts";
+import TotalTrackedScoresMetric from "../../metrics/impl/player/total-tracked-scores";
+import TrackedPlayersMetric from "../../metrics/impl/player/tracked-players";
+import TrackedScoresMetric from "../../metrics/impl/player/tracked-scores";
+import UniqueDailyPlayersMetric from "../../metrics/impl/player/unique-daily-players";
+import QueueProcessingDurationMetric from "../../metrics/impl/queue/queue-processing-duration";
+import QueueSizesMetric from "../../metrics/impl/queue/queue-sizes";
+import Metric from "../../metrics/metric";
+import { MetricsRepository } from "../../repositories/metrics.repository";
 
 // Create Prometheus registry with default labels
 export const prometheusRegistry = new Registry();
@@ -159,7 +157,7 @@ export default class MetricsService {
 
   private static async loadPersistedValues(): Promise<void> {
     try {
-      const rows = await db.select().from(metricsTable);
+      const rows = await MetricsRepository.loadAll();
       for (const row of rows) {
         const metric = MetricsService.metrics.get(row.id as MetricType);
         if (!metric) {
@@ -202,16 +200,7 @@ export default class MetricsService {
 
     MetricsService.persistInFlight = true;
     try {
-      await db
-        .insert(metricsTable)
-        .values(valuesToPersist)
-        .onConflictDoUpdate({
-          target: metricsTable.id,
-          set: {
-            value: sql`excluded.value`,
-            updatedAt: sql`now()`,
-          },
-        });
+      await MetricsRepository.upsertMany(valuesToPersist);
     } catch (error) {
       Logger.warn("[METRICS] Failed to persist metric values to PostgreSQL:", error);
     } finally {

@@ -15,12 +15,12 @@ import { EventsManager } from "../../event/events-manager";
 import BeatLeaderSeenScoresMetric from "../../metrics/impl/player/beatleader-seen-scores";
 import BeatLeaderUniqueDailyPlayersMetric from "../../metrics/impl/player/beatleader-unique-daily-players";
 import UniqueDailyPlayersMetric from "../../metrics/impl/player/unique-daily-players";
-import BeatLeaderService from "../../service/beatleader.service";
-import { LeaderboardCoreService } from "../../service/leaderboard/leaderboard-core.service";
-import MetricsService, { MetricType } from "../../service/metrics.service";
+import BeatLeaderService from "../../service/beatleader/beatleader.service";
+import MetricsService, { MetricType } from "../../service/infra/metrics.service";
+import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
+import ScoreSaberPlayerService from "../../service/player/scoresaber-player.service";
 import { TopScoresService } from "../../service/score/top-scores.service";
-import ScoreSaberService from "../../service/scoresaber.service";
 
 interface PendingScore {
   scoreSaberToken?: ScoreSaberScoreToken;
@@ -180,13 +180,13 @@ export class ScoreWebsockets implements EventListener {
           player.name ? PlayerCoreService.updatePlayer(player.id, { name: player.name }) : undefined,
 
           // Update cached player in Redis
-          ScoreSaberService.updateCachedPlayer(player.id, score.playerInfo!),
+          ScoreSaberPlayerService.updateCachedPlayer(player.id, score.playerInfo!),
         ]);
       }
 
       // Fetch the leaderboard if it doesn't exist
-      if (!(await LeaderboardCoreService.leaderboardExists(leaderboard.id))) {
-        await LeaderboardCoreService.createLeaderboard(leaderboard.id, leaderboardToken);
+      if (!(await ScoreSaberLeaderboardsService.leaderboardExists(leaderboard.id))) {
+        await ScoreSaberLeaderboardsService.createLeaderboard(leaderboard.id, leaderboardToken);
       } else {
         await db
           .update(scoreSaberLeaderboardsTable)

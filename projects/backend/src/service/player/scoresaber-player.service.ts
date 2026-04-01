@@ -9,23 +9,32 @@ import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
-import { count, eq, gt } from "drizzle-orm";
-import { redisClient } from "../common/redis";
-import { db } from "../db";
-import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../db/schema";
-import ActiveAccountsMetric from "../metrics/impl/player/active-accounts";
-import CacheService, { CacheId } from "./cache.service";
-import MetricsService, { MetricType } from "./metrics.service";
-import { PlayerCoreService } from "./player/player-core.service";
-import { PlayerHistoryService } from "./player/player-history.service";
-import { PlayerHmdService } from "./player/player-hmd.service";
-import { PlayerMedalsService } from "./player/player-medals.service";
-import { PlayerRankedService } from "./player/player-ranked.service";
-import { ScoreSaberApiService } from "./scoresaber-api.service";
+import { redisClient } from "../../common/redis";
+import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
+import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import { ScoreSaberApiService } from "../external/scoresaber-api.service";
+import CacheService, { CacheId } from "../infra/cache.service";
+import MetricsService, { MetricType } from "../infra/metrics.service";
+import { PlayerCoreService } from "./player-core.service";
+import { PlayerHistoryService } from "./player-history.service";
+import { PlayerHmdService } from "./player-hmd.service";
+import { PlayerMedalsService } from "./player-medals.service";
+import { PlayerRankedService } from "./player-ranked.service";
 
 const CACHED_PLAYER_EXPIRY = TimeUnit.toSeconds(TimeUnit.Month, 3);
 
-export default class ScoreSaberService {
+function computeHmdUsagePercentages(hmdUsage: Record<HMD, number>): Record<HMD, number> {
+  const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, c) => sum + c, 0);
+  return Object.fromEntries(
+    Object.entries(hmdUsage).map(([hmd, c]) => [
+      hmd,
+      totalKnownHmdScores > 0 ? (c / totalKnownHmdScores) * 100 : 0,
+    ])
+  ) as Record<HMD, number>;
+}
+
+export default class ScoreSaberPlayerService {
   /**
    * Gets a ScoreSaber player using their account id.
    *
@@ -48,7 +57,7 @@ export default class ScoreSaberService {
 
       // delete players scores if banned so they don't fuck up top scores
       if (player.banned) {
-        await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.playerId, id));
+        await ScoreSaberScoresRepository.deleteByPlayerId(id);
       }
 
       const basePlayer = {
@@ -75,29 +84,13 @@ export default class ScoreSaberService {
 
       const [plusOnePp, hmdBreakdown, medalsRank, statisticHistory, rankWithInactives] = await Promise.all([
         account ? PlayerRankedService.getPlayerPlusOnePp(id) : 0,
-        // todo: cleanup this mess
         account && player !== undefined
-          ? (async () => {
-              const hmdUsage = await PlayerHmdService.getPlayerHmdBreakdown(id);
-              const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, count) => sum + count, 0);
-              return Object.fromEntries(
-                Object.entries(hmdUsage).map(([hmd, count]) => [
-                  hmd,
-                  totalKnownHmdScores > 0 ? (count / totalKnownHmdScores) * 100 : 0,
-                ])
-              ) as Record<HMD, number>;
-            })()
+          ? PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages)
           : undefined,
         account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
         PlayerHistoryService.getPlayerStatisticHistories(player, 30),
         account
-          ? (async () => {
-              const [row] = await db
-                .select({ c: count() })
-                .from(scoreSaberAccountsTable)
-                .where(gt(scoreSaberAccountsTable.pp, player.pp));
-              return (row?.c ?? 0) + 1;
-            })()
+          ? (async () => (await ScoreSaberAccountsRepository.countWithPpGreaterThan(player.pp)) + 1)()
           : 0,
       ]);
 

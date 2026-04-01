@@ -5,9 +5,9 @@ import { uploadPaste } from "@ssr/common/utils/paste-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { DiscordChannels, sendFile, sendMessageToChannel } from "../../bot/bot";
-import { LeaderboardUpdate } from "./leaderboard-ranking.service";
+import { LeaderboardUpdate } from "./leaderboard-ranked-sync.service";
 
-export class LeaderboardNotificationsService {
+export class LeaderboardRankedSyncNotificationsService {
   /**
    * Logs the leaderboard updates to Discord.
    */

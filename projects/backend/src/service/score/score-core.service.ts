@@ -4,14 +4,17 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { and, eq, sql } from "drizzle-orm";
-import { db } from "../../db";
-import { ScoreSaberAccountRow, scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/schema";
-import BeatLeaderService from "../beatleader.service";
-import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
+import { ScoreSaberAccountRow } from "../../db/schema";
+import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
+import {
+  type ScoreSaberScoreUpsertRow,
+  ScoreSaberScoresRepository,
+} from "../../repositories/scoresaber-scores.repository";
+import BeatLeaderService from "../beatleader/beatleader.service";
+import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
-import { MedalScoresService } from "./medal-scores.service";
+import { ScoreSaberMedalScoresService } from "./scoresaber-medal-scores.service";
 
 type InsertScoreDataOptions = {
   insertBeatLeaderScore?: boolean;
@@ -42,68 +45,30 @@ export class ScoreCoreService {
   }> {
     const before = performance.now();
 
-    // Ensure the score is not already tracked (same scoreId and score)
-    const scoreExists = await db
-      .select({ exists: sql`1` })
-      .from(scoreSaberScoresTable)
-      .where(
-        and(eq(scoreSaberScoresTable.scoreId, score.scoreId), eq(scoreSaberScoresTable.score, score.score))
-      )
-      .limit(1);
-    if (scoreExists.length > 0) {
+    if (await ScoreSaberScoresRepository.rowExistsMatchingScoreIdAndScore(score.scoreId, score.score)) {
       return { score: undefined, hasPreviousScore: false, tracked: false };
     }
 
     const playerId = score.playerId;
     let isImprovement = false;
     if (newScore) {
-      const existingScore = await db
-        .select()
-        .from(scoreSaberScoresTable)
-        .where(
-          and(
-            eq(scoreSaberScoresTable.playerId, playerId),
-            eq(scoreSaberScoresTable.leaderboardId, leaderboard.id)
-          )
-        )
-        .limit(1);
+      const previousRow = await ScoreSaberScoresRepository.findFirstRowByPlayerAndLeaderboard(
+        playerId,
+        leaderboard.id
+      );
 
-      isImprovement = existingScore.length > 0;
-      if (isImprovement) {
-        const previous = existingScore[0];
+      isImprovement = previousRow !== undefined;
+      if (isImprovement && previousRow) {
+        const previous = previousRow;
 
         // Move old score to history (snapshot the row being replaced, not the incoming score)
-        await db
-          .insert(scoreSaberScoreHistoryTable)
-          .values({
-            playerId: playerId,
-            leaderboardId: leaderboard.id,
-            scoreId: previous.scoreId,
-            difficulty: previous.difficulty,
-            characteristic: previous.characteristic,
-            score: previous.score,
-            accuracy: previous.accuracy,
-            pp: previous.pp,
-            missedNotes: previous.missedNotes,
-            badCuts: previous.badCuts,
-            maxCombo: previous.maxCombo,
-            fullCombo: previous.fullCombo,
-            modifiers: previous.modifiers?.length ? previous.modifiers : null,
-            hmd: previous.hmd,
-            rightController: previous.rightController,
-            leftController: previous.leftController,
-            timestamp: previous.timestamp,
-          })
-          .onConflictDoNothing({
-            target: [
-              scoreSaberScoreHistoryTable.leaderboardId,
-              scoreSaberScoreHistoryTable.playerId,
-              scoreSaberScoreHistoryTable.score,
-            ],
-          });
+        await ScoreSaberScoreHistoryRepository.insertSnapshotFromPreviousScoreRow(
+          previous,
+          playerId,
+          leaderboard.id
+        );
 
-        // Delete from current
-        await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.scoreId, previous.scoreId));
+        await ScoreSaberScoresRepository.deleteByScoreId(previous.scoreId);
       }
     }
 
@@ -118,11 +83,11 @@ export class ScoreCoreService {
 
     // Handle score for medal updates
     if (leaderboard.ranked && score.rank <= 10) {
-      await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
+      await ScoreSaberMedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
     }
 
     const modifiers = score.modifiers.map(modifier => modifier.toString());
-    const scoreUpsertSet: typeof scoreSaberScoresTable.$inferInsert = {
+    const scoreUpsertSet: ScoreSaberScoreUpsertRow = {
       scoreId: score.scoreId,
       playerId: playerId,
       leaderboardId: leaderboard.id,
@@ -142,14 +107,7 @@ export class ScoreCoreService {
       timestamp: score.timestamp,
     };
 
-    await db
-      .insert(scoreSaberScoresTable)
-      .values(scoreUpsertSet)
-      .onConflictDoUpdate({
-        target: scoreSaberScoresTable.scoreId,
-        set: scoreUpsertSet,
-      })
-      .returning({ scoreId: scoreSaberScoresTable.scoreId });
+    await ScoreSaberScoresRepository.upsertScore(scoreUpsertSet);
 
     if (newScore) {
       Logger.info(
@@ -173,15 +131,7 @@ export class ScoreCoreService {
    * @param score the score to check if it exists to do an exact match
    */
   public static async scoreExists(scoreId: number): Promise<boolean> {
-    return (
-      (
-        await db
-          .select({ scoreId: scoreSaberScoresTable.scoreId })
-          .from(scoreSaberScoresTable)
-          .where(eq(scoreSaberScoresTable.scoreId, scoreId))
-          .limit(1)
-      ).length > 0
-    );
+    return ScoreSaberScoresRepository.rowExistsByScoreId(scoreId);
   }
 
   /**
@@ -214,7 +164,7 @@ export class ScoreCoreService {
     };
 
     leaderboard = !leaderboard
-      ? await LeaderboardCoreService.getLeaderboard(score.leaderboardId)
+      ? await ScoreSaberLeaderboardsService.getLeaderboard(score.leaderboardId)
       : leaderboard;
 
     // If the leaderboard is not found, return the plain score

@@ -6,8 +6,8 @@ import {
 } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { Elysia, redirect } from "elysia";
 import { z } from "zod";
-import BeatLeaderService from "../service/beatleader.service";
-import { PlayerReplayService } from "../service/player/player-replay.service";
+import BeatLeaderService from "../../service/beatleader/beatleader.service";
+import { PlayerReplayService } from "../../service/player/player-replay.service";
 
 export default function beatleaderController(app: Elysia) {
   return app.group("/beatleader", app =>

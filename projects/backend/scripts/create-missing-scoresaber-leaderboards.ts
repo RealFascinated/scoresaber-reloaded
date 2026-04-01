@@ -1,7 +1,7 @@
 /**
  * Loads all `scoresaber-leaderboards` ids into a `Set` once, then paginates ScoreSaber
  * `GET /api/leaderboards` via {@link ScoreSaberApiService.lookupLeaderboards} (optional `--search=`).
- * For each list item whose id is not in the set, calls {@link LeaderboardCoreService.createLeaderboard}
+ * For each list item whose id is not in the set, calls {@link ScoreSaberLeaderboardsService.createLeaderboard}
  * and adds the id to the set (so we avoid per-row DB existence checks).
  * Passes the list token through so we do not re-fetch by id. Uses `skipScoreSeedQueue` so this
  * CLI does not require `QueueManager` / Redis workers.
@@ -17,8 +17,8 @@ import Logger from "@ssr/common/logger";
 import "dotenv/config";
 import { db } from "../src/db";
 import { scoreSaberLeaderboardsTable } from "../src/db/schema";
-import { LeaderboardCoreService } from "../src/service/leaderboard/leaderboard-core.service";
-import { ScoreSaberApiService } from "../src/service/scoresaber-api.service";
+import { ScoreSaberApiService } from "../src/service/external/scoresaber-api.service";
+import { ScoreSaberLeaderboardsService } from "../src/service/leaderboard/scoresaber-leaderboards.service";
 
 async function loadExistingLeaderboardIds(): Promise<Set<number>> {
   const rows = await db.select({ id: scoreSaberLeaderboardsTable.id }).from(scoreSaberLeaderboardsTable);
@@ -122,7 +122,7 @@ async function main(): Promise<void> {
       }
 
       try {
-        await LeaderboardCoreService.createLeaderboard(id, token, { skipScoreSeedQueue: true });
+        await ScoreSaberLeaderboardsService.createLeaderboard(id, token, { skipScoreSeedQueue: true });
         existingIds.add(id);
         created++;
       } catch (e) {

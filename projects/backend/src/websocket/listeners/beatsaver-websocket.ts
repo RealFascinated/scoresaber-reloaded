@@ -3,8 +3,8 @@ import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
 import { connectBeatSaverWebsocket } from "@ssr/common/websocket/beatsaver-websocket";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import BeatSaverService from "../../service/beatsaver.service";
-import CacheService from "../../service/cache.service";
+import BeatSaverService from "../../service/external/beatsaver.service";
+import CacheService from "../../service/infra/cache.service";
 
 export class BeatSaverWebsocket {
   constructor() {

@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
-import { PlayerMedalsService } from "../service/player/player-medals.service";
-import { PlayerSearchService } from "../service/player/player-search.service";
+import { PlayerMedalsService } from "../../service/player/player-medals.service";
+import { PlayerSearchService } from "../../service/player/player-search.service";
 
 export default function playerRankingController(app: Elysia) {
   return app.group("/ranking", app =>

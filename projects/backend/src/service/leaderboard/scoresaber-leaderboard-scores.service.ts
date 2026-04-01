@@ -2,12 +2,12 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import LeaderboardScoresResponse from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import BeatSaverService from "../beatsaver.service";
+import BeatSaverService from "../external/beatsaver.service";
+import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { ScoreCoreService } from "../score/score-core.service";
-import { ScoreSaberApiService } from "../scoresaber-api.service";
-import { LeaderboardCoreService } from "./leaderboard-core.service";
+import { ScoreSaberLeaderboardsService } from "./scoresaber-leaderboards.service";
 
-export class LeaderboardScoresService {
+export class ScoreSaberLeaderboardScoresService {
   /**
    * Gets scores for a leaderboard.
    *
@@ -21,7 +21,7 @@ export class LeaderboardScoresService {
     page: number,
     country?: string
   ): Promise<LeaderboardScoresResponse | undefined> {
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
+    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
     if (leaderboard == undefined) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }

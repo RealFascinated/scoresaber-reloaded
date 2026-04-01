@@ -4,7 +4,7 @@ import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
-import { redisClient } from "../common/redis";
+import { redisClient } from "../../common/redis";
 
 export enum CacheId {
   BeatSaver = "beatSaver",

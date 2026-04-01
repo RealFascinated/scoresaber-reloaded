@@ -2,7 +2,7 @@ import Logger from "@ssr/common/logger";
 import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { Gauge } from "prom-client";
 import { redisClient } from "../../../common/redis";
-import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
+import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
 import Metric from "../../metric";
 
 export default class BeatLeaderUniqueDailyPlayersMetric extends Metric<null> {

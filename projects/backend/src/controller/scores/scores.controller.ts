@@ -11,11 +11,11 @@ import { ScoreSaberScoreSortSchema } from "@ssr/common/score/score-sort";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { Elysia } from "elysia";
 import { z } from "zod";
-import { LeaderboardScoresService } from "../service/leaderboard/leaderboard-scores.service";
-import { PlayerFriendScoresService } from "../service/player/player-friend-scores.service";
-import { PlayerScoreHistoryService } from "../service/player/player-score-history.service";
-import { PlayerScoresService } from "../service/player/player-scores.service";
-import { TopScoresService } from "../service/score/top-scores.service";
+import { ScoreSaberLeaderboardScoresService } from "../../service/leaderboard/scoresaber-leaderboard-scores.service";
+import { PlayerFriendScoresService } from "../../service/player/player-friend-scores.service";
+import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
+import { PlayerScoresService } from "../../service/player/player-scores.service";
+import { TopScoresService } from "../../service/score/top-scores.service";
 
 export default function scoresController(app: Elysia) {
   return app.group("/scores", app =>
@@ -140,7 +140,7 @@ export default function scoresController(app: Elysia) {
       .get(
         "/leaderboard/:leaderboardId/:page",
         async ({ params: { leaderboardId, page }, query: { country } }) => {
-          return await LeaderboardScoresService.getLeaderboardScores(leaderboardId, page, country);
+          return await ScoreSaberLeaderboardScoresService.getLeaderboardScores(leaderboardId, page, country);
         },
         {
           tags: ["Scores"],

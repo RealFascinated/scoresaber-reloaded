@@ -57,7 +57,7 @@ function truncateVarchar128(s: string): string {
  * so `_id` is not the ScoreSaber id.
  */
 function parseHistoryScoreId(doc: MongoScoreSaberPreviousScoreLeanDoc): number | null {
-  const raw = doc.scoreId ?? doc._id;
+  const raw = doc.scoreId;
   if (raw == null) {
     return null;
   }

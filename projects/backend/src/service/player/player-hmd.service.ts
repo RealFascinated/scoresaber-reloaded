@@ -1,7 +1,6 @@
 import { HMD } from "@ssr/common/hmds";
-import { and, count, eq, isNotNull } from "drizzle-orm";
-import { db } from "../../db";
-import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../../db/schema";
+import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 
 export class PlayerHmdService {
   /**
@@ -10,14 +9,7 @@ export class PlayerHmdService {
    * @returns the hmd usage
    */
   public static async getActiveHmdUsage(): Promise<Record<string, number>> {
-    const rows = await db
-      .select({
-        hmd: scoreSaberAccountsTable.hmd,
-        c: count(),
-      })
-      .from(scoreSaberAccountsTable)
-      .where(and(isNotNull(scoreSaberAccountsTable.hmd), eq(scoreSaberAccountsTable.inactive, false)))
-      .groupBy(scoreSaberAccountsTable.hmd);
+    const rows = await ScoreSaberAccountsRepository.selectHmdCountsActiveAccounts();
 
     return Object.fromEntries(rows.map(r => [r.hmd as string, r.c]));
   }
@@ -30,17 +22,7 @@ export class PlayerHmdService {
    * @returns the player's HMD breakdown
    */
   public static async getPlayerHmdBreakdown(playerId: string, limit?: number): Promise<Record<HMD, number>> {
-    const rows =
-      limit != null
-        ? await db
-            .select({ hmd: scoreSaberScoresTable.hmd })
-            .from(scoreSaberScoresTable)
-            .where(eq(scoreSaberScoresTable.playerId, playerId))
-            .limit(limit)
-        : await db
-            .select({ hmd: scoreSaberScoresTable.hmd })
-            .from(scoreSaberScoresTable)
-            .where(eq(scoreSaberScoresTable.playerId, playerId));
+    const rows = await ScoreSaberScoresRepository.selectHmdByPlayerId(playerId, limit);
 
     const counts = new Map<HMD, number>();
     for (const row of rows) {

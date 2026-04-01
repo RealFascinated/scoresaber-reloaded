@@ -1,4 +1,4 @@
-import { MetricType } from "../service/metrics.service";
+import { MetricType } from "../service/infra/metrics.service";
 import Metric from "./metric";
 
 export default class NumberMetric extends Metric<number> {

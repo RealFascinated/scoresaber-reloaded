@@ -1,6 +1,6 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { getBeatLeaderReplayCdnUrl } from "@ssr/common/utils/beatleader-utils";
-import BeatLeaderService from "../beatleader.service";
+import BeatLeaderService from "../beatleader/beatleader.service";
 
 export class PlayerReplayService {
   /**

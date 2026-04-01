@@ -1,9 +1,7 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { PlayerPpsResponse } from "@ssr/common/schemas/response/player/player-pps";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
-import { and, desc, eq, gt } from "drizzle-orm";
-import { db } from "../../db";
-import { scoreSaberScoresTable } from "../../db/schema";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { PlayerCoreService } from "./player-core.service";
 
 export class PlayerRankedService {
@@ -16,14 +14,7 @@ export class PlayerRankedService {
   public static async getPlayerPps(playerId: string): Promise<PlayerPpsResponse> {
     await PlayerCoreService.playerExists(playerId, true);
 
-    const playerScores = await db
-      .select({
-        pp: scoreSaberScoresTable.pp,
-        scoreId: scoreSaberScoresTable.scoreId,
-      })
-      .from(scoreSaberScoresTable)
-      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)))
-      .orderBy(desc(scoreSaberScoresTable.pp));
+    const playerScores = await ScoreSaberScoresRepository.selectPpAndScoreIdByPlayerRankedOrdered(playerId);
 
     if (playerScores.length === 0) {
       return {
@@ -50,11 +41,7 @@ export class PlayerRankedService {
    * @returns the raw pp needed to gain 1 weighted pp
    */
   public static async getPlayerPlusOnePp(playerId: string): Promise<number> {
-    const playerScores = await db
-      .select({ pp: scoreSaberScoresTable.pp })
-      .from(scoreSaberScoresTable)
-      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)))
-      .orderBy(desc(scoreSaberScoresTable.pp));
+    const playerScores = await ScoreSaberScoresRepository.selectPpByPlayerRankedOrdered(playerId);
 
     // No ranked score set
     if (playerScores.length === 0) {

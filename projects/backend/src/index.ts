@@ -16,27 +16,27 @@ import fs from "fs";
 import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
-import AppController from "./controller/app.controller";
-import BeatLeaderController from "./controller/beatleader.controller";
-import BeatSaverController from "./controller/beatsaver.controller";
-import LeaderboardController from "./controller/leaderboard.controller";
-import PlayerRankingController from "./controller/player-ranking.controller";
-import PlayerController from "./controller/player.controller";
-import PlaylistController from "./controller/playlist.controller";
-import ScoresController from "./controller/scores.controller";
+import AppController from "./controller/app/app.controller";
+import BeatLeaderController from "./controller/beatleader/beatleader.controller";
+import BeatSaverController from "./controller/beatsaver/beatsaver.controller";
+import LeaderboardController from "./controller/leaderboard/leaderboard.controller";
+import PlayerRankingController from "./controller/player/player-ranking.controller";
+import PlayerController from "./controller/player/player.controller";
+import PlaylistController from "./controller/playlist/playlist.controller";
+import ScoresController from "./controller/scores/scores.controller";
 import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { QueueManager } from "./queue/queue-manager";
-import CacheService from "./service/cache.service";
-import { LeaderboardNotificationsService } from "./service/leaderboard/leaderboard-notifications.service";
-import { LeaderboardRankingService } from "./service/leaderboard/leaderboard-ranking.service";
-import MetricsService, { prometheusRegistry } from "./service/metrics.service";
+import CacheService from "./service/infra/cache.service";
+import MetricsService, { prometheusRegistry } from "./service/infra/metrics.service";
+import StorageService from "./service/infra/storage.service";
+import { LeaderboardRankedSyncNotificationsService } from "./service/leaderboard/leaderboard-ranked-sync-notifications.service";
+import { LeaderboardRankedSyncService } from "./service/leaderboard/leaderboard-ranked-sync.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
 import { PlayerMedalsService } from "./service/player/player-medals.service";
 import PlaylistService from "./service/playlist/playlist.service";
-import { MedalScoresService } from "./service/score/medal-scores.service";
-import StorageService from "./service/storage.service";
+import { ScoreSaberMedalScoresService } from "./service/score/scoresaber-medal-scores.service";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
@@ -128,10 +128,10 @@ export const app = new Elysia()
       timezone: "Europe/London",
       protect: true,
       run: async () => {
-        await LeaderboardNotificationsService.logLeaderboardUpdates(
-          await LeaderboardRankingService.refreshRankedLeaderboards()
+        await LeaderboardRankedSyncNotificationsService.logLeaderboardUpdates(
+          await LeaderboardRankedSyncService.refreshRankedLeaderboards()
         );
-        await LeaderboardRankingService.refreshQualifiedLeaderboards();
+        await LeaderboardRankedSyncService.refreshQualifiedLeaderboards();
       },
     })
   )
@@ -143,7 +143,7 @@ export const app = new Elysia()
       timezone: "Europe/London",
       protect: true,
       run: async () => {
-        await MedalScoresService.rescanMedalScores(); // Refresh medal scores
+        await ScoreSaberMedalScoresService.rescanMedalScores(); // Refresh medal scores
         await PlayerMedalsService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
       },
     })

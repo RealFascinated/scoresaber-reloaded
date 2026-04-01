@@ -3,10 +3,10 @@ import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { Elysia } from "elysia";
 import { z } from "zod";
-import BeatSaverService from "../service/beatsaver.service";
-import { LeaderboardCoreService } from "../service/leaderboard/leaderboard-core.service";
-import { LeaderboardRankingService } from "../service/leaderboard/leaderboard-ranking.service";
-import { ScoreSaberApiService } from "../service/scoresaber-api.service";
+import BeatSaverService from "../../service/external/beatsaver.service";
+import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
+import { LeaderboardRankedSyncService } from "../../service/leaderboard/leaderboard-ranked-sync.service";
+import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 
 export default function leaderboardController(app: Elysia) {
   return app.group("/leaderboard", app =>
@@ -14,7 +14,7 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/search",
         async ({ query: { page, ranked, qualified, category, minStar, maxStar, sort, query } }) => {
-          return await LeaderboardCoreService.lookupLeaderboards(page, {
+          return await ScoreSaberLeaderboardsService.lookupLeaderboards(page, {
             query,
             ranked,
             qualified,
@@ -58,7 +58,7 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/by-id/:leaderboardId",
         async ({ params: { leaderboardId } }) => {
-          const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
+          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
           return {
             leaderboard: leaderboard,
             beatsaver: await BeatSaverService.getMap(
@@ -66,7 +66,7 @@ export default function leaderboardController(app: Elysia) {
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic
             ),
-            starChangeHistory: await LeaderboardRankingService.fetchStarChangeHistory(leaderboard),
+            starChangeHistory: await LeaderboardRankedSyncService.fetchStarChangeHistory(leaderboard),
           } as LeaderboardResponse;
         },
         {
@@ -82,7 +82,7 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/by-hash/:hash/:difficulty/:characteristic",
         async ({ params: { hash, difficulty, characteristic } }) => {
-          const leaderboard = await LeaderboardCoreService.getLeaderboardByHash(
+          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboardByHash(
             hash,
             difficulty,
             characteristic
@@ -94,7 +94,7 @@ export default function leaderboardController(app: Elysia) {
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic
             ),
-            starChangeHistory: await LeaderboardRankingService.fetchStarChangeHistory(leaderboard),
+            starChangeHistory: await LeaderboardRankedSyncService.fetchStarChangeHistory(leaderboard),
           } as LeaderboardResponse;
         },
         {

@@ -2,11 +2,9 @@ import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import { and, asc, count, desc, eq, ilike, isNotNull, ne } from "drizzle-orm";
-import { db } from "../../db";
-import { scoreSaberAccountsTable } from "../../db/schema";
-import { ScoreSaberApiService } from "../scoresaber-api.service";
-import ScoreSaberService from "../scoresaber.service";
+import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberApiService } from "../external/scoresaber-api.service";
+import ScoreSaberPlayerService from "./scoresaber-player.service";
 
 export class PlayerSearchService {
   /**
@@ -28,14 +26,7 @@ export class PlayerSearchService {
 
     const [scoreSaberResponse, localMatches] = await Promise.all([
       ScoreSaberApiService.searchPlayers(normalizedQuery.length === 0 ? "" : normalizedQuery),
-      normalizedQuery.length > 0
-        ? db
-            .select({ id: scoreSaberAccountsTable.id })
-            .from(scoreSaberAccountsTable)
-            .where(ilike(scoreSaberAccountsTable.name, pattern))
-            .orderBy(asc(scoreSaberAccountsTable.name))
-            .limit(20)
-        : [],
+      normalizedQuery.length > 0 ? ScoreSaberAccountsRepository.searchIdsByNameIlike(pattern, 20) : [],
     ]);
 
     const scoreSaberPlayerTokens = scoreSaberResponse?.players;
@@ -47,11 +38,11 @@ export class PlayerSearchService {
     return (
       await Promise.all(
         uniquePlayerIds.map(async id =>
-          ScoreSaberService.getPlayer(
+          ScoreSaberPlayerService.getPlayer(
             id,
             "basic",
             scoreSaberPlayerTokens?.find(token => token.id === id) ||
-              (await ScoreSaberService.getCachedPlayer(id)) // Use the cache for inactive players
+              (await ScoreSaberPlayerService.getCachedPlayer(id)) // Use the cache for inactive players
           )
         )
       )
@@ -90,21 +81,7 @@ export class PlayerSearchService {
      * @returns the amount of players in each country
      */
     async function getPlayerCountryCounts() {
-      const rows = await db
-        .select({
-          country: scoreSaberAccountsTable.country,
-          c: count(),
-        })
-        .from(scoreSaberAccountsTable)
-        .where(
-          and(
-            eq(scoreSaberAccountsTable.inactive, false),
-            isNotNull(scoreSaberAccountsTable.country),
-            ne(scoreSaberAccountsTable.country, "")
-          )
-        )
-        .groupBy(scoreSaberAccountsTable.country)
-        .orderBy(desc(count()));
+      const rows = await ScoreSaberAccountsRepository.selectCountryCountsActivePlayers();
 
       return rows.reduce(
         (acc, curr) => {

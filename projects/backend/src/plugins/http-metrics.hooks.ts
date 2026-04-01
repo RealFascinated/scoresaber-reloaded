@@ -1,7 +1,7 @@
 import HttpResponseStatusMetric from "../metrics/impl/backend/http-response-status";
 import ResponseTimeHistogramMetric from "../metrics/impl/backend/response-time";
 import TotalRequestsMetric from "../metrics/impl/backend/total-requests";
-import MetricsService, { MetricType } from "../service/metrics.service";
+import MetricsService, { MetricType } from "../service/infra/metrics.service";
 
 type RequestHookContext = {
   request: Request;

@@ -3,13 +3,11 @@ import Logger from "@ssr/common/logger";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
-import { and, eq } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { db } from "../../db";
-import { scoreSaberAccountsTable } from "../../db/schema";
+import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoresService } from "../../service/player/player-scores.service";
-import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
@@ -77,12 +75,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       if ((await this.getSize()) !== 0) {
         return;
       }
-      const players = await db
-        .select({ id: scoreSaberAccountsTable.id })
-        .from(scoreSaberAccountsTable)
-        .where(
-          and(eq(scoreSaberAccountsTable.seededScores, false), eq(scoreSaberAccountsTable.banned, false))
-        );
+      const players = await ScoreSaberAccountsRepository.selectIdsNeedingScoreSeed();
       const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {
         Logger.info("No players to seed scores for");

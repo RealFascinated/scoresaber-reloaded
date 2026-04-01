@@ -5,7 +5,7 @@ import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/scor
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import BeatLeaderService from "../beatleader.service";
+import BeatLeaderService from "../beatleader/beatleader.service";
 import { PlayerCoreService } from "./player-core.service";
 
 type SeedMode = "backfill" | "requested";

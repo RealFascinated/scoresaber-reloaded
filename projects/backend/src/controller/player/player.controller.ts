@@ -2,15 +2,15 @@ import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { Elysia } from "elysia";
 import { z } from "zod";
-import MiniRankingService from "../service/mini-ranking.service";
-import { PlayerCoreService } from "../service/player/player-core.service";
-import { PlayerHistoryService } from "../service/player/player-history.service";
-import { PlayerRankedService } from "../service/player/player-ranked.service";
-import { PlayerScoreHistoryService } from "../service/player/player-score-history.service";
-import { PlayerScoresService } from "../service/player/player-scores.service";
-import { PlayerSearchService } from "../service/player/player-search.service";
-import { ScoreSaberApiService } from "../service/scoresaber-api.service";
-import ScoreSaberService from "../service/scoresaber.service";
+import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
+import MiniRankingService from "../../service/player/mini-ranking.service";
+import { PlayerCoreService } from "../../service/player/player-core.service";
+import { PlayerHistoryService } from "../../service/player/player-history.service";
+import { PlayerRankedService } from "../../service/player/player-ranked.service";
+import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
+import { PlayerScoresService } from "../../service/player/player-scores.service";
+import { PlayerSearchService } from "../../service/player/player-search.service";
+import ScoreSaberPlayerService from "../../service/player/scoresaber-player.service";
 
 export default function playerController(app: Elysia) {
   return app.group("/player", app =>
@@ -18,7 +18,7 @@ export default function playerController(app: Elysia) {
       .get(
         "/:playerId",
         async ({ params: { playerId }, query: { type } }) => {
-          return ScoreSaberService.getPlayer(playerId, type);
+          return ScoreSaberPlayerService.getPlayer(playerId, type);
         },
         {
           tags: ["Player"],

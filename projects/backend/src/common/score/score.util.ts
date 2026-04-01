@@ -14,7 +14,7 @@ import { format, pluralize } from "@ssr/common/utils/string.util";
 import { formatChange } from "@ssr/common/utils/utils";
 import { ButtonBuilder, ButtonStyle, Colors, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import BeatSaverService from "../../service/beatsaver.service";
+import BeatSaverService from "../../service/external/beatsaver.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
 

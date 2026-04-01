@@ -2,12 +2,10 @@ import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import { desc, gt } from "drizzle-orm";
-import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
-import { scoreSaberScoresTable } from "../../db/schema";
-import BeatSaverService from "../beatsaver.service";
-import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import BeatSaverService from "../external/beatsaver.service";
+import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { ScoreCoreService } from "./score-core.service";
 
 export class TopScoresService {
@@ -26,19 +24,13 @@ export class TopScoresService {
       .setTotalItems(1000);
 
     return pagination.getPage(page, async () => {
-      const scoresRows = await db
-        .select()
-        .from(scoreSaberScoresTable)
-        .where(gt(scoreSaberScoresTable.pp, 0))
-        .orderBy(desc(scoreSaberScoresTable.pp))
-        .limit(limit)
-        .offset(offset);
+      const scoresRows = await ScoreSaberScoresRepository.selectTopScoresRows(limit, offset);
 
       if (!scoresRows.length) {
         return [];
       }
 
-      const leaderboards = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(
+      const leaderboards = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds(
         scoresRows.map(scoreRow => scoreRow.leaderboardId)
       );
 
@@ -81,12 +73,7 @@ export class TopScoresService {
       return false;
     }
 
-    const top50 = await db
-      .select({ pp: scoreSaberScoresTable.pp })
-      .from(scoreSaberScoresTable)
-      .where(gt(scoreSaberScoresTable.pp, 0))
-      .orderBy(desc(scoreSaberScoresTable.pp))
-      .limit(50);
+    const top50 = await ScoreSaberScoresRepository.selectTop50PpDescending();
 
     if (!top50.length) {
       return false;

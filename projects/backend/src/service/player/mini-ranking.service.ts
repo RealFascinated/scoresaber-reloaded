@@ -1,10 +1,10 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MiniRankingResponse } from "@ssr/common/schemas/response/player/around-player";
-import CacheService, { CacheId } from "./cache.service";
-import { PlayerMedalsService } from "./player/player-medals.service";
-import { ScoreSaberApiService } from "./scoresaber-api.service";
-import ScoreSaberService from "./scoresaber.service";
+import { ScoreSaberApiService } from "../external/scoresaber-api.service";
+import CacheService, { CacheId } from "../infra/cache.service";
+import { PlayerMedalsService } from "./player-medals.service";
+import ScoreSaberPlayerService from "./scoresaber-player.service";
 
 type MiniRankingType = "global" | "country" | "medals";
 
@@ -15,7 +15,7 @@ export default class MiniRankingService {
    * @param id the player to get around
    */
   public static async getPlayerMiniRankings(id: string): Promise<MiniRankingResponse> {
-    const player = await ScoreSaberService.getPlayer(id, "basic");
+    const player = await ScoreSaberPlayerService.getPlayer(id, "basic");
     if (player == undefined) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
@@ -111,7 +111,7 @@ export default class MiniRankingService {
     const allPlayers = pageResponses
       .filter((response): response is NonNullable<typeof response> => response !== undefined)
       .flatMap(response => response.players)
-      .map(async player => await ScoreSaberService.getPlayer(player.id, "basic", player));
+      .map(async player => await ScoreSaberPlayerService.getPlayer(player.id, "basic", player));
 
     return this.processPlayersAndBuildResult(allPlayers, player, type, getRank);
   }

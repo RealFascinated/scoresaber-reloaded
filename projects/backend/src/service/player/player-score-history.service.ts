@@ -6,42 +6,11 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { and, asc, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
-import { unionAll } from "drizzle-orm/pg-core";
-import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
-import { scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/schema";
-import CacheService, { CacheId } from "../cache.service";
-import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
+import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
+import CacheService, { CacheId } from "../infra/cache.service";
+import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { ScoreCoreService } from "../score/score-core.service";
-
-const scoreCols = getTableColumns(scoreSaberScoresTable);
-const histCols = getTableColumns(scoreSaberScoreHistoryTable);
-
-/** History row projected to the same column names as {@link scoreSaberScoresTable} for UNION + {@link scoreSaberScoreRowToType}. */
-const histAsScoreCols = Object.fromEntries(
-  Object.keys(scoreCols).map(name => [name, histCols[name as keyof typeof histCols]])
-) as unknown as typeof scoreCols;
-
-/** Shared filters + full-row UNION for this player/map (only exported helper in this file besides the service). */
-function playerMapQueries(playerId: string, leaderboardId: number) {
-  const onScores = and(
-    eq(scoreSaberScoresTable.playerId, playerId),
-    eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
-  );
-  const onHistory = and(
-    eq(scoreSaberScoreHistoryTable.playerId, playerId),
-    eq(scoreSaberScoreHistoryTable.leaderboardId, leaderboardId)
-  );
-  return {
-    onScores,
-    onHistory,
-    fullRowsUnion: unionAll(
-      db.select(scoreCols).from(scoreSaberScoresTable).where(onScores),
-      db.select(histAsScoreCols).from(scoreSaberScoreHistoryTable).where(onHistory)
-    ),
-  };
-}
 
 export class PlayerScoreHistoryService {
   /**
@@ -56,7 +25,7 @@ export class PlayerScoreHistoryService {
     leaderboardId: number,
     page: number
   ): Promise<Page<ScoreSaberScore>> {
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
+    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
     if (!leaderboard) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }
@@ -64,12 +33,10 @@ export class PlayerScoreHistoryService {
     const limit = 8;
     const offset = (page - 1) * limit;
 
-    const q = playerMapQueries(playerId, leaderboardId);
-    const [scoresCount, historyCount] = await Promise.all([
-      db.$count(scoreSaberScoresTable, q.onScores),
-      db.$count(scoreSaberScoreHistoryTable, q.onHistory),
-    ]);
-    const total = scoresCount + historyCount;
+    const total = await ScoreSaberScoreHistoryRepository.countCombinedScoresForPlayerMap(
+      playerId,
+      leaderboardId
+    );
 
     if (total === 0) {
       throw new NotFoundError(`No previous scores found for ${playerId} in ${leaderboardId}`);
@@ -78,18 +45,16 @@ export class PlayerScoreHistoryService {
     const pagination = new Pagination<ScoreSaberScore>().setItemsPerPage(limit).setTotalItems(total);
 
     return pagination.getPage(page, async () => {
-      const combined = q.fullRowsUnion.as("combined");
-
-      const rawScores = await db
-        .select()
-        .from(combined)
-        .orderBy(desc(sql`"timestamp"`))
-        .limit(limit)
-        .offset(offset);
+      const rawScores = await ScoreSaberScoreHistoryRepository.selectCombinedScoresPageForPlayerMap(
+        playerId,
+        leaderboardId,
+        limit,
+        offset
+      );
 
       return Promise.all(
         rawScores.map(async row => {
-          const scoreRow = scoreSaberScoreRowToType(row as typeof scoreSaberScoresTable.$inferSelect);
+          const scoreRow = scoreSaberScoreRowToType(row);
           const enriched = await ScoreCoreService.insertScoreData(scoreRow, leaderboard, {
             insertPreviousScore: false,
           });
@@ -111,18 +76,11 @@ export class PlayerScoreHistoryService {
     score: ScoreSaberScore | ScoreSaberMedalScore,
     leaderboard: ScoreSaberLeaderboard
   ): Promise<ScoreSaberHistoryScore | undefined> {
-    const [previousScore] = await db
-      .select()
-      .from(scoreSaberScoreHistoryTable)
-      .where(
-        and(
-          eq(scoreSaberScoreHistoryTable.playerId, score.playerId),
-          eq(scoreSaberScoreHistoryTable.leaderboardId, leaderboard.id),
-          lt(scoreSaberScoreHistoryTable.timestamp, score.timestamp)
-        )
-      )
-      .orderBy(desc(scoreSaberScoreHistoryTable.timestamp))
-      .limit(1);
+    const previousScore = await ScoreSaberScoreHistoryRepository.findLatestRowBeforeTimestamp(
+      score.playerId,
+      leaderboard.id,
+      score.timestamp
+    );
 
     if (!previousScore) {
       return undefined;
@@ -150,31 +108,10 @@ export class PlayerScoreHistoryService {
       CacheId.ScoreHistoryGraph,
       `score-history-graph:${playerId}-${leaderboardId}`,
       async () => {
-        const { onScores, onHistory } = playerMapQueries(playerId, leaderboardId);
-
-        const graph = unionAll(
-          db
-            .select({
-              timestamp: scoreSaberScoresTable.timestamp,
-              accuracy: scoreSaberScoresTable.accuracy,
-            })
-            .from(scoreSaberScoresTable)
-            .where(onScores),
-          db
-            .select({
-              timestamp: scoreSaberScoreHistoryTable.timestamp,
-              accuracy: scoreSaberScoreHistoryTable.accuracy,
-            })
-            .from(scoreSaberScoreHistoryTable)
-            .where(onHistory)
-        ).as("combined");
-
-        const scores = await db.select().from(graph).orderBy(asc(graph.timestamp));
-
-        return scores.map(row => ({
-          timestamp: row.timestamp,
-          accuracy: row.accuracy,
-        }));
+        return ScoreSaberScoreHistoryRepository.selectGraphAccuracySeriesForPlayerMap(
+          playerId,
+          leaderboardId
+        );
       }
     );
   }
@@ -185,11 +122,6 @@ export class PlayerScoreHistoryService {
    * @returns the approximate total number of previous scores
    */
   public static async getTotalPreviousScoresCount(): Promise<number> {
-    const result = await db.execute<{ count: number }>(sql`
-      SELECT GREATEST(0, reltuples)::bigint::integer AS count
-      FROM pg_class
-      WHERE oid = 'scoresaber-score-history'::regclass
-    `);
-    return Number(result.rows[0]?.count ?? 0);
+    return ScoreSaberScoreHistoryRepository.getApproximateTotalRowCount();
   }
 }

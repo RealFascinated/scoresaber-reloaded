@@ -53,7 +53,7 @@ function truncateVarchar128(s: string): string {
 }
 
 function parsePositiveIntId(doc: MongoScoreSaberScoreLeanDoc): number | null {
-  const raw = doc._id ?? doc.scoreId;
+  const raw = doc.scoreId;
   if (raw == null) {
     return null;
   }

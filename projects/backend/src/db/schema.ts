@@ -105,7 +105,7 @@ export const playerHistoryTable = pgTable(
 export const scoreSaberScoresTable = pgTable(
   "scoresaber-scores",
   {
-    // Identifiers (aligned with history table FK name `scoreId`)
+    // Identifiers
     scoreId: integer().primaryKey(),
     playerId: varchar({ length: 32 }).notNull(),
     leaderboardId: integer().notNull(),

@@ -1,13 +1,12 @@
 import { IsGuildUser } from "@discordx/utilities";
 import { ApplicationCommandOptionType, CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash, SlashOption } from "discordx";
-import { db } from "../../db";
-import { scoreSaberAccountsTable } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
+import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoresService } from "../../service/player/player-scores.service";
-import { ScoreSaberApiService } from "../../service/scoresaber-api.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
@@ -33,7 +32,7 @@ class FetchMissingPlayerScores {
         interaction.reply({
           content: "Adding all players to the fetch missing scores queue...",
         });
-        const players = await db.select({ id: scoreSaberAccountsTable.id }).from(scoreSaberAccountsTable);
+        const players = await ScoreSaberAccountsRepository.selectAllIds();
         const playerIds = players.map(p => p.id);
         if (playerIds.length === 0) {
           interaction.editReply({

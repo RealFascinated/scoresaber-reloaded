@@ -2,7 +2,7 @@ import Logger from "@ssr/common/logger";
 import { sql } from "drizzle-orm";
 import { Gauge } from "prom-client";
 import { db } from "../../../db";
-import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
+import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
 import NumberMetric from "../../number-metric";
 
 type TableSizeRow = {

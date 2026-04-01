@@ -1,7 +1,7 @@
 import Logger from "@ssr/common/logger";
 import { Gauge } from "prom-client";
 import { redisClient } from "../../../common/redis";
-import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
+import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
 import Metric from "../../metric";
 
 const REDIS_REFRESH_INTERVAL_MS = 10_000;

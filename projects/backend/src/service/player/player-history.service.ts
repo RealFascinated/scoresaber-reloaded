@@ -14,15 +14,18 @@ import {
   isToday,
 } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
-import { and, count, desc, eq, gte, lte, notInArray, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { redisClient } from "../../common/redis";
-import { db } from "../../db";
 import { playerHistoryRowToType } from "../../db/converter/player-history";
-import { type PlayerHistoryRow, playerHistoryTable, scoreSaberAccountsTable } from "../../db/schema";
+import { type PlayerHistoryRow } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/fetch-missing-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
-import { ScoreSaberApiService } from "../scoresaber-api.service";
+import {
+  PlayerHistoryRepository,
+  type DailyScoreCounterKey,
+} from "../../repositories/player-history.repository";
+import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerAccuraciesService } from "./player-accuracies.service";
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerMedalsService } from "./player-medals.service";
@@ -106,24 +109,13 @@ export class PlayerHistoryService {
     Logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
 
     // Mark players as inactive (Mongo `$nin: []` matches all ids when the list is empty)
-    const inactiveUpdate = await db
-      .update(scoreSaberAccountsTable)
-      .set({ inactive: true })
-      .where(
-        activePlayerIdsArray.length > 0
-          ? notInArray(scoreSaberAccountsTable.id, activePlayerIdsArray)
-          : sql`true`
-      );
+    const inactiveUpdate = await ScoreSaberAccountsRepository.markInactiveWhereIdNotIn(activePlayerIdsArray);
 
     if ((inactiveUpdate.rowCount ?? 0) > 0) {
       Logger.info(`Marked ${inactiveUpdate.rowCount} players as inactive`);
     }
 
-    const [inactiveRow] = await db
-      .select({ c: count() })
-      .from(scoreSaberAccountsTable)
-      .where(eq(scoreSaberAccountsTable.inactive, true));
-    const inactivePlayers = inactiveRow?.c ?? 0;
+    const inactivePlayers = await ScoreSaberAccountsRepository.countInactive();
 
     sendEmbedToChannel(
       DiscordChannels.BACKEND_LOGS,
@@ -176,11 +168,7 @@ export class PlayerHistoryService {
 
     const date = getMidnightAlignedDate(trackTime);
 
-    const [existingEntry] = await db
-      .select()
-      .from(playerHistoryTable)
-      .where(and(eq(playerHistoryTable.playerId, player.id), eq(playerHistoryTable.date, date)))
-      .limit(1);
+    const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(player.id, date);
 
     const updatedHistory = await PlayerHistoryService.createHistoryEntry(
       playerToken,
@@ -188,18 +176,7 @@ export class PlayerHistoryService {
       existingEntry ?? undefined
     );
 
-    if (existingEntry) {
-      await db
-        .update(playerHistoryTable)
-        .set(updatedHistory)
-        .where(and(eq(playerHistoryTable.playerId, player.id), eq(playerHistoryTable.date, date)));
-    } else {
-      await db.insert(playerHistoryTable).values({
-        playerId: player.id,
-        date,
-        ...updatedHistory,
-      });
-    }
+    await PlayerHistoryRepository.saveHistoryEntry(player.id, date, existingEntry, updatedHistory);
 
     Logger.info(`Tracked player "${player.id}" in ${(performance.now() - before).toFixed(0)}ms`);
   }
@@ -224,12 +201,7 @@ export class PlayerHistoryService {
 
     const history: ScoreSaberPlayerHistoryEntries = {};
 
-    // Get entry from database
-    const [entry] = await db
-      .select()
-      .from(playerHistoryTable)
-      .where(and(eq(playerHistoryTable.playerId, playerToken.id), eq(playerHistoryTable.date, targetDate)))
-      .limit(1);
+    const entry = await PlayerHistoryRepository.findByPlayerAndDate(playerToken.id, targetDate);
 
     if (entry) {
       history[dateKey] = playerHistoryRowToType(entry);
@@ -285,19 +257,11 @@ export class PlayerHistoryService {
     const startTimestamp = alignedStart.getTime();
     const endTimestamp = today.getTime();
 
-    const entries = await db
-      .select()
-      .from(playerHistoryTable)
-      .where(
-        count > 0
-          ? and(
-              eq(playerHistoryTable.playerId, playerToken.id),
-              gte(playerHistoryTable.date, alignedStart),
-              lte(playerHistoryTable.date, today)
-            )
-          : eq(playerHistoryTable.playerId, playerToken.id)
-      )
-      .orderBy(desc(playerHistoryTable.date));
+    const entries = await PlayerHistoryRepository.listByPlayerOrderedByDateDesc(playerToken.id, {
+      count,
+      alignedStart,
+      today,
+    });
 
     const history: ScoreSaberPlayerHistoryEntries = {};
     for (const entry of entries) {
@@ -340,13 +304,7 @@ export class PlayerHistoryService {
     if (missingRankUpserts.length > 0) {
       await Promise.all(
         missingRankUpserts.map(({ date, rank }) =>
-          db
-            .insert(playerHistoryTable)
-            .values({ playerId: playerToken.id, date, rank })
-            .onConflictDoUpdate({
-              target: [playerHistoryTable.playerId, playerHistoryTable.date],
-              set: { rank },
-            })
+          PlayerHistoryRepository.upsertRankOnConflict(playerToken.id, date, rank)
         )
       );
       Logger.info(
@@ -376,11 +334,7 @@ export class PlayerHistoryService {
     playerToken: ScoreSaberPlayerToken
   ): Promise<ScoreSaberPlayerHistory | undefined> {
     const today = getMidnightAlignedDate(new Date());
-    const [existingEntry] = await db
-      .select()
-      .from(playerHistoryTable)
-      .where(and(eq(playerHistoryTable.playerId, playerToken.id), eq(playerHistoryTable.date, today)))
-      .limit(1);
+    const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(playerToken.id, today);
 
     const player = await PlayerCoreService.getOrCreateAccount(playerToken.id, playerToken);
     return await PlayerHistoryService.createHistoryEntry(playerToken, player, existingEntry ?? undefined);
@@ -404,13 +358,7 @@ export class PlayerHistoryService {
       // last element is "today" => 0d ago, then 1d ago, etc.
       const daysAgo = historyLength - 1 - i;
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
-      await db
-        .insert(playerHistoryTable)
-        .values({ playerId: account.id, date, rank })
-        .onConflictDoUpdate({
-          target: [playerHistoryTable.playerId, playerHistoryTable.date],
-          set: { rank },
-        });
+      await PlayerHistoryRepository.upsertRankOnConflict(account.id, date, rank);
     }
   }
 
@@ -479,44 +427,15 @@ export class PlayerHistoryService {
     };
 
     const today = getMidnightAlignedDate(new Date());
-    const counterKey = getCounterToIncrement(isRanked, isImprovement);
+    const counterKey = getCounterToIncrement(isRanked, isImprovement) as DailyScoreCounterKey;
 
-    const incrementSet = (() => {
-      switch (counterKey) {
-        case "rankedScores":
-          return { rankedScores: sql`COALESCE(${playerHistoryTable.rankedScores}, 0) + 1` };
-        case "unrankedScores":
-          return { unrankedScores: sql`COALESCE(${playerHistoryTable.unrankedScores}, 0) + 1` };
-        case "rankedScoresImproved":
-          return { rankedScoresImproved: sql`COALESCE(${playerHistoryTable.rankedScoresImproved}, 0) + 1` };
-        case "unrankedScoresImproved":
-          return {
-            unrankedScoresImproved: sql`COALESCE(${playerHistoryTable.unrankedScoresImproved}, 0) + 1`,
-          };
-      }
-    })();
-
-    await db
-      .insert(playerHistoryTable)
-      .values({
-        playerId,
-        date: today,
-        [counterKey]: 1,
-      })
-      .onConflictDoUpdate({
-        target: [playerHistoryTable.playerId, playerHistoryTable.date],
-        set: incrementSet,
-      });
+    await PlayerHistoryRepository.upsertIncrementDailyCounter(playerId, today, counterKey);
   }
 
   /**
    * Gets the number of days tracked for a player.
    */
   public static async getDaysTracked(playerId: string): Promise<number> {
-    const [row] = await db
-      .select({ c: count() })
-      .from(playerHistoryTable)
-      .where(eq(playerHistoryTable.playerId, playerId));
-    return row?.c ?? 0;
+    return PlayerHistoryRepository.countRowsForPlayer(playerId);
   }
 }

@@ -3,48 +3,9 @@ import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerMedalRankingsResponse } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { and, asc, count, desc, eq, gt, inArray, isNotNull, ne, sql, sum } from "drizzle-orm";
-import { db } from "../../db";
-import { scoreSaberAccountsTable, scoreSaberMedalScoresTable } from "../../db/schema";
-import ScoreSaberService from "../scoresaber.service";
-
-/**
- * Gets medal ranks for a list of player IDs.
- *
- * @param playerIds the player ids to get ranks for
- * @param options.country optional country filter
- * @param options.partitionByCountry whether to partition ranks by country
- * @returns a map of player id to rank
- */
-async function getMedalRanksForIds(
-  playerIds: string[],
-  options: { country?: string; partitionByCountry?: boolean }
-): Promise<Map<string, number>> {
-  if (playerIds.length === 0) return new Map();
-
-  const { country, partitionByCountry } = options;
-  const partitionClause = partitionByCountry ? sql`PARTITION BY country` : sql``;
-  const countryFilter = country ? sql`AND country = ${country}` : sql``;
-
-  const result = await db.execute(sql`
-    WITH ranked AS (
-      SELECT id, ROW_NUMBER() OVER (${partitionClause} ORDER BY medals DESC, id ASC) AS rank
-      FROM "scoresaber-accounts"
-      WHERE medals > 0
-        AND country IS NOT NULL
-        AND country != ''
-        ${countryFilter}
-    )
-    SELECT id, rank::int AS rank FROM ranked
-    WHERE id IN (${sql.join(
-      playerIds.map(id => sql`${id}`),
-      sql`, `
-    )})
-  `);
-
-  const rows = (result as unknown as { rows: { id: string; rank: number }[] }).rows ?? [];
-  return new Map(rows.map(r => [r.id, Number(r.rank)]));
-}
+import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberMedalScoresRepository } from "../../repositories/scoresaber-medal-scores.repository";
+import ScoreSaberPlayerService from "./scoresaber-player.service";
 
 export class PlayerMedalsService {
   /**
@@ -53,31 +14,10 @@ export class PlayerMedalsService {
   public static async updatePlayerGlobalMedalCounts(): Promise<void> {
     const before = performance.now();
 
-    const medalCountRows = await db
-      .select({
-        playerId: scoreSaberMedalScoresTable.playerId,
-        totalMedals: sum(scoreSaberMedalScoresTable.medals),
-      })
-      .from(scoreSaberMedalScoresTable)
-      .groupBy(scoreSaberMedalScoresTable.playerId);
+    const medalCountRows = await ScoreSaberMedalScoresRepository.sumMedalsGroupedByPlayerId();
+    const playerMedalCounts = new Map(medalCountRows.map(row => [row.playerId, row.totalMedals]));
 
-    const playerMedalCounts = new Map(
-      medalCountRows.map(row => [row.playerId, Number(row.totalMedals ?? 0)])
-    );
-
-    await db.transaction(async tx => {
-      await tx
-        .update(scoreSaberAccountsTable)
-        .set({ medals: 0 })
-        .where(gt(scoreSaberAccountsTable.medals, 0));
-
-      for (const [playerId, medalCount] of playerMedalCounts) {
-        await tx
-          .update(scoreSaberAccountsTable)
-          .set({ medals: medalCount })
-          .where(eq(scoreSaberAccountsTable.id, playerId));
-      }
-    });
+    await ScoreSaberAccountsRepository.syncGlobalMedalTotalsFromMap(playerMedalCounts);
 
     Logger.info(
       `[PLAYER MEDALS] Updated ${playerMedalCounts.size} player medal counts in ${formatDuration(performance.now() - before)}`
@@ -95,30 +35,10 @@ export class PlayerMedalsService {
 
     if (playerIds.length === 0) return {};
 
-    const medalCounts = await db
-      .select({
-        playerId: scoreSaberMedalScoresTable.playerId,
-        totalMedals: sum(scoreSaberMedalScoresTable.medals),
-      })
-      .from(scoreSaberMedalScoresTable)
-      .where(inArray(scoreSaberMedalScoresTable.playerId, playerIds))
-      .groupBy(scoreSaberMedalScoresTable.playerId);
+    const medalCounts = await ScoreSaberMedalScoresRepository.sumMedalsGroupedByPlayerIdIn(playerIds);
+    const totalsByPlayer = new Map(medalCounts.map(({ playerId, totalMedals }) => [playerId, totalMedals]));
 
-    const normalized = medalCounts.map(row => ({
-      playerId: row.playerId,
-      totalMedals: Number(row.totalMedals ?? 0),
-    }));
-
-    const totalsByPlayer = new Map(normalized.map(({ playerId, totalMedals }) => [playerId, totalMedals]));
-
-    await db.transaction(async tx => {
-      for (const playerId of playerIds) {
-        await tx
-          .update(scoreSaberAccountsTable)
-          .set({ medals: totalsByPlayer.get(playerId) ?? 0 })
-          .where(eq(scoreSaberAccountsTable.id, playerId));
-      }
-    });
+    await ScoreSaberAccountsRepository.setMedalsForPlayerIds(totalsByPlayer, playerIds);
 
     Logger.info(
       `[PLAYER MEDALS] Updated ${playerIds.length} player medal counts in ${formatDuration(performance.now() - before)}`
@@ -134,12 +54,7 @@ export class PlayerMedalsService {
    * @returns the medal count
    */
   public static async getPlayerMedals(playerId: string): Promise<number> {
-    const [row] = await db
-      .select({ medals: scoreSaberAccountsTable.medals })
-      .from(scoreSaberAccountsTable)
-      .where(eq(scoreSaberAccountsTable.id, playerId))
-      .limit(1);
-    return row?.medals ?? 0;
+    return ScoreSaberAccountsRepository.getMedalsForPlayerId(playerId);
   }
 
   /**
@@ -153,28 +68,11 @@ export class PlayerMedalsService {
     page: number,
     country?: string
   ): Promise<PlayerMedalRankingsResponse> {
-    const baseWhere = sql`
-      medals > 0
-      AND country IS NOT NULL
-      AND country != ''
-      ${country ? sql`AND country = ${country}` : sql``}
-    `;
     const itemsPerPage = 50;
 
-    const [{ totalPlayers }, countryMetadataRows] = await Promise.all([
-      db
-        .select({ totalPlayers: count() })
-        .from(scoreSaberAccountsTable)
-        .where(baseWhere)
-        .then(([r]) => ({ totalPlayers: r?.totalPlayers ?? 0 })),
-      db
-        .select({ country: scoreSaberAccountsTable.country, count: count() })
-        .from(scoreSaberAccountsTable)
-        .where(
-          and(baseWhere, isNotNull(scoreSaberAccountsTable.country), ne(scoreSaberAccountsTable.country, ""))
-        )
-        .groupBy(scoreSaberAccountsTable.country)
-        .orderBy(desc(count())),
+    const [totalPlayers, countryMetadataRows] = await Promise.all([
+      ScoreSaberAccountsRepository.countMedalRankingEligible(country),
+      ScoreSaberAccountsRepository.selectMedalRankingCountryMetadata(country),
     ]);
 
     if (totalPlayers === 0) {
@@ -186,32 +84,26 @@ export class PlayerMedalsService {
       .setTotalItems(totalPlayers);
 
     const pageData = await pagination.getPage(page, async fetchRange => {
-      const players = await db
-        .select({
-          id: scoreSaberAccountsTable.id,
-          medals: scoreSaberAccountsTable.medals,
-          country: scoreSaberAccountsTable.country,
-        })
-        .from(scoreSaberAccountsTable)
-        .where(baseWhere)
-        .orderBy(desc(scoreSaberAccountsTable.medals), asc(scoreSaberAccountsTable.id))
-        .limit(fetchRange.end - fetchRange.start)
-        .offset(fetchRange.start);
+      const players = await ScoreSaberAccountsRepository.selectMedalRankingPage(
+        country,
+        fetchRange.start,
+        fetchRange.end - fetchRange.start
+      );
 
       if (!players.length) return [];
 
       const playerIds = players.map(p => p.id);
       const [globalRankMap, countryRankMap] = await Promise.all([
-        getMedalRanksForIds(playerIds, { country }),
-        getMedalRanksForIds(playerIds, { partitionByCountry: true }),
+        ScoreSaberAccountsRepository.getMedalRanksForIds(playerIds, { country }),
+        ScoreSaberAccountsRepository.getMedalRanksForIds(playerIds, { partitionByCountry: true }),
       ]);
 
       return Promise.all(
         players.map(async ({ id }) => {
-          const playerData = await ScoreSaberService.getPlayer(
+          const playerData = await ScoreSaberPlayerService.getPlayer(
             id,
             "basic",
-            await ScoreSaberService.getCachedPlayer(id)
+            await ScoreSaberPlayerService.getCachedPlayer(id)
           );
           playerData.medalsRank = globalRankMap.get(id) ?? 0;
           playerData.countryMedalsRank = countryRankMap.get(id) ?? 0;
@@ -235,15 +127,7 @@ export class PlayerMedalsService {
    * @returns the rank, or null if the player has no medals
    */
   public static async getPlayerMedalRank(playerId: string): Promise<number | null> {
-    const result = await db.execute<{ rank: number }>(sql`
-      SELECT rank::int FROM (
-        SELECT id, ROW_NUMBER() OVER (ORDER BY medals DESC, id ASC) AS rank
-        FROM "scoresaber-accounts"
-        WHERE medals > 0 AND country IS NOT NULL AND country != ''
-      ) ranked
-      WHERE id = ${playerId}
-    `);
-    return result.rows[0]?.rank ?? null;
+    return ScoreSaberAccountsRepository.getPlayerGlobalMedalRank(playerId);
   }
 
   /**
@@ -253,14 +137,6 @@ export class PlayerMedalsService {
    * @returns the rank, or null if the player has no medals
    */
   public static async getPlayerCountryMedalRank(playerId: string): Promise<number | null> {
-    const result = await db.execute<{ rank: number }>(sql`
-      SELECT rank::int FROM (
-        SELECT id, ROW_NUMBER() OVER (PARTITION BY country ORDER BY medals DESC, id ASC) AS rank
-        FROM "scoresaber-accounts"
-        WHERE medals > 0 AND country IS NOT NULL AND country != ''
-      ) ranked
-      WHERE id = ${playerId}
-    `);
-    return result.rows[0]?.rank ?? null;
+    return ScoreSaberAccountsRepository.getPlayerCountryMedalRank(playerId);
   }
 }

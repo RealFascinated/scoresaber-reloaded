@@ -1,4 +1,4 @@
-import { MetricType } from "../service/metrics.service";
+import { MetricType } from "../service/infra/metrics.service";
 
 export default abstract class Metric<T> {
   /**

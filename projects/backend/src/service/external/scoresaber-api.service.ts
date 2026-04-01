@@ -15,7 +15,7 @@ import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/p
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
-import CacheService, { CacheId } from "./cache.service";
+import CacheService, { CacheId } from "../infra/cache.service";
 
 const API_BASE = "https://scoresaber.com/api";
 

@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
-import PlaylistService from "../service/playlist/playlist.service";
+import PlaylistService from "../../service/playlist/playlist.service";
 
 export default function playlistController(app: Elysia) {
   return app.group("/playlist", app =>

@@ -1,11 +1,9 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { Page, Pagination } from "@ssr/common/pagination";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
-import { db } from "../../db";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
-import { scoreSaberScoresTable } from "../../db/schema";
-import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { ScoreCoreService } from "../score/score-core.service";
 
 export class PlayerFriendScoresService {
@@ -21,22 +19,14 @@ export class PlayerFriendScoresService {
     leaderboardId: number,
     page: number
   ): Promise<Page<ScoreSaberScore>> {
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(leaderboardId);
+    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
     if (!leaderboard) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }
 
     const limit = 8;
     const offset = (page - 1) * limit;
-    const conditions = and(
-      inArray(scoreSaberScoresTable.playerId, friendIds),
-      eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
-    );
-
-    const [{ total }] = await db
-      .select({ total: sql<number>`cast(count(*) as integer)` })
-      .from(scoreSaberScoresTable)
-      .where(conditions);
+    const total = await ScoreSaberScoresRepository.countFriendScoresOnLeaderboard(friendIds, leaderboardId);
 
     if (total === 0) {
       throw new NotFoundError(
@@ -47,13 +37,12 @@ export class PlayerFriendScoresService {
     const pagination = new Pagination<ScoreSaberScore>().setTotalItems(total).setItemsPerPage(limit);
 
     return pagination.getPage(page, async () => {
-      const rawScores = await db
-        .select()
-        .from(scoreSaberScoresTable)
-        .where(conditions)
-        .orderBy(desc(scoreSaberScoresTable.score))
-        .limit(limit)
-        .offset(offset);
+      const rawScores = await ScoreSaberScoresRepository.findFriendScoresOnLeaderboardPage(
+        friendIds,
+        leaderboardId,
+        limit,
+        offset
+      );
 
       if (!rawScores.length) {
         return [];

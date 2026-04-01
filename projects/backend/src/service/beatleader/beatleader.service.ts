@@ -14,15 +14,16 @@ import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import Request from "@ssr/common/utils/request";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
-import { and, desc, eq, inArray, lt } from "drizzle-orm";
-import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
-import { createGenericEmbed } from "../common/discord/embed";
-import { db } from "../db";
-import { beatLeaderScoreRowToType } from "../db/converter/beatleader-score";
-import { beatLeaderScoresTable } from "../db/schema";
-import CacheService, { CacheId } from "./cache.service";
-import { PlayerCoreService } from "./player/player-core.service";
-import StorageService from "./storage.service";
+import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { createGenericEmbed } from "../../common/discord/embed";
+import { beatLeaderScoreRowToType } from "../../db/converter/beatleader-score";
+import {
+  type BeatLeaderScoreInsert,
+  BeatLeaderScoresRepository,
+} from "../../repositories/beatleader-scores.repository";
+import CacheService, { CacheId } from "../infra/cache.service";
+import StorageService from "../infra/storage.service";
+import { PlayerCoreService } from "../player/player-core.service";
 
 export default class BeatLeaderService {
   /**
@@ -46,13 +47,9 @@ export default class BeatLeaderService {
       return undefined;
     }
 
-    const existing = await db
-      .select()
-      .from(beatLeaderScoresTable)
-      .where(eq(beatLeaderScoresTable.id, scoreToken.id))
-      .limit(1);
-    if (existing.length > 0) {
-      return beatLeaderScoreRowToType(existing[0]);
+    const existing = await BeatLeaderScoresRepository.findRowById(scoreToken.id);
+    if (existing) {
+      return beatLeaderScoreRowToType(existing);
     }
 
     const getMisses = (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) =>
@@ -67,31 +64,29 @@ export default class BeatLeaderService {
     const savedReplay = await this.saveReplay(pendingBl, account, isTop50GlobalScore);
 
     const timestamp = new Date(Number(scoreToken.timeset) * 1000);
-    const [row] = await db
-      .insert(beatLeaderScoresTable)
-      .values({
-        id: scoreToken.id,
-        playerId: scoreToken.playerId,
-        songHash: leaderboard.song.hash.toUpperCase(),
-        leaderboardId: leaderboard.id,
-        songDifficulty: difficulty.difficultyName as MapDifficulty,
-        songCharacteristic: difficulty.modeName as MapCharacteristic,
-        songScore: scoreToken.baseScore,
-        pauses: scoreToken.pauses,
-        fcAccuracy: scoreToken.fcAccuracy * 100,
-        fullCombo: scoreToken.fullCombo,
-        savedReplay,
-        leftHandAccuracy: scoreToken.accLeft,
-        rightHandAccuracy: scoreToken.accRight,
-        misses: getMisses(scoreToken),
-        missedNotes: scoreToken.missedNotes,
-        bombCuts: scoreToken.bombCuts,
-        wallsHit: scoreToken.wallsHit,
-        badCuts: scoreToken.badCuts,
-        ...improvement,
-        timestamp,
-      })
-      .returning();
+    const insertRow: BeatLeaderScoreInsert = {
+      id: scoreToken.id,
+      playerId: scoreToken.playerId,
+      songHash: leaderboard.song.hash.toUpperCase(),
+      leaderboardId: leaderboard.id,
+      songDifficulty: difficulty.difficultyName as MapDifficulty,
+      songCharacteristic: difficulty.modeName as MapCharacteristic,
+      songScore: scoreToken.baseScore,
+      pauses: scoreToken.pauses,
+      fcAccuracy: scoreToken.fcAccuracy * 100,
+      fullCombo: scoreToken.fullCombo,
+      savedReplay,
+      leftHandAccuracy: scoreToken.accLeft,
+      rightHandAccuracy: scoreToken.accRight,
+      misses: getMisses(scoreToken),
+      missedNotes: scoreToken.missedNotes,
+      bombCuts: scoreToken.bombCuts,
+      wallsHit: scoreToken.wallsHit,
+      badCuts: scoreToken.badCuts,
+      ...improvement,
+      timestamp,
+    };
+    const row = await BeatLeaderScoresRepository.insertReturning(insertRow);
 
     const timeTaken = performance.now() - before;
     if (log) {
@@ -123,24 +118,17 @@ export default class BeatLeaderService {
       CacheId.BeatLeaderScore,
       `beatleader-score:${playerId}-${songHash}-${songDifficulty}-${songScore}`,
       async () => {
-        const beatLeaderScore = await db
-          .select()
-          .from(beatLeaderScoresTable)
-          .where(
-            and(
-              eq(beatLeaderScoresTable.playerId, playerId),
-              eq(beatLeaderScoresTable.songHash, songHash.toUpperCase()),
-              eq(beatLeaderScoresTable.songDifficulty, songDifficulty as MapDifficulty),
-              eq(beatLeaderScoresTable.songCharacteristic, songCharacteristic as MapCharacteristic),
-              eq(beatLeaderScoresTable.songScore, songScore)
-            )
-          )
-          .orderBy(desc(beatLeaderScoresTable.timestamp))
-          .limit(1);
-        if (beatLeaderScore.length === 0) {
+        const beatLeaderScore = await BeatLeaderScoresRepository.findLatestBySongComposite(
+          playerId,
+          songHash.toUpperCase(),
+          songDifficulty as MapDifficulty,
+          songCharacteristic as MapCharacteristic,
+          songScore
+        );
+        if (!beatLeaderScore) {
           return undefined;
         }
-        return beatLeaderScoreRowToType(beatLeaderScore[0]);
+        return beatLeaderScoreRowToType(beatLeaderScore);
       }
     );
   }
@@ -153,15 +141,11 @@ export default class BeatLeaderService {
    */
   public static async getBeatLeaderScore(scoreId: number): Promise<BeatLeaderScore | undefined> {
     return CacheService.fetch(CacheId.BeatLeaderScore, `beatleader-score:${scoreId}`, async () => {
-      const beatLeaderScore = await db
-        .select()
-        .from(beatLeaderScoresTable)
-        .where(eq(beatLeaderScoresTable.id, scoreId))
-        .limit(1);
+      const beatLeaderScore = await BeatLeaderScoresRepository.findRowById(scoreId);
       if (!beatLeaderScore) {
         return undefined;
       }
-      return beatLeaderScoreRowToType(beatLeaderScore[0]);
+      return beatLeaderScoreRowToType(beatLeaderScore);
     });
   }
 
@@ -171,12 +155,7 @@ export default class BeatLeaderService {
    * Used by the BeatLeader missing-scores seeding flow to avoid wasting pages.
    */
   public static async scoreExists(scoreId: number): Promise<boolean> {
-    const row = await db
-      .select({ id: beatLeaderScoresTable.id })
-      .from(beatLeaderScoresTable)
-      .where(eq(beatLeaderScoresTable.id, scoreId))
-      .limit(1);
-    return row.length > 0;
+    return BeatLeaderScoresRepository.rowExistsById(scoreId);
   }
 
   /**
@@ -185,16 +164,7 @@ export default class BeatLeaderService {
    * @returns a set containing all scoreIds that already exist
    */
   public static async scoresExist(scoreIds: ReadonlyArray<number>): Promise<Set<number>> {
-    const unique = Array.from(new Set(scoreIds));
-    if (unique.length === 0) {
-      return new Set();
-    }
-
-    const rows = await db
-      .select({ id: beatLeaderScoresTable.id })
-      .from(beatLeaderScoresTable)
-      .where(inArray(beatLeaderScoresTable.id, unique));
-    return new Set(rows.map(r => r.id));
+    return BeatLeaderScoresRepository.findExistingIds(Array.from(new Set(scoreIds)));
   }
 
   /**
@@ -291,23 +261,12 @@ export default class BeatLeaderService {
     leaderboardId: string,
     timestamp: Date
   ): Promise<number | undefined> {
-    const beatLeaderScore = await db
-      .select({ id: beatLeaderScoresTable.id })
-      .from(beatLeaderScoresTable)
-      .where(
-        and(
-          eq(beatLeaderScoresTable.playerId, playerId),
-          eq(beatLeaderScoresTable.songHash, songHash.toUpperCase()),
-          eq(beatLeaderScoresTable.leaderboardId, leaderboardId),
-          lt(beatLeaderScoresTable.timestamp, timestamp)
-        )
-      )
-      .orderBy(desc(beatLeaderScoresTable.timestamp))
-      .limit(1);
-    if (beatLeaderScore.length === 0) {
-      return undefined;
-    }
-    return beatLeaderScore[0].id;
+    return BeatLeaderScoresRepository.findPreviousScoreIdBeforeTimestamp(
+      playerId,
+      songHash.toUpperCase(),
+      leaderboardId,
+      timestamp
+    );
   }
 
   /**

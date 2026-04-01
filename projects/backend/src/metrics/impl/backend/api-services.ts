@@ -1,7 +1,7 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { Gauge } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
-import { ScoreSaberApiService } from "../../../service/scoresaber-api.service";
+import { ScoreSaberApiService } from "../../../service/external/scoresaber-api.service";
+import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
 import NumberMetric from "../../number-metric";
 
 export class ApiServicesMetric extends NumberMetric {

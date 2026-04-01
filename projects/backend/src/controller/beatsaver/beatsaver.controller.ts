@@ -3,7 +3,7 @@ import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteris
 import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { Elysia } from "elysia";
 import { z } from "zod";
-import BeatSaverService from "../service/beatsaver.service";
+import BeatSaverService from "../../service/external/beatsaver.service";
 
 export default function beatsaverController(app: Elysia) {
   return app.group("/beatsaver", app =>

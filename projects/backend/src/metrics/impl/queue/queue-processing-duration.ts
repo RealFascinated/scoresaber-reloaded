@@ -1,6 +1,6 @@
 import { Counter, Histogram } from "prom-client";
 import { Queue, QueueProcessEvent } from "../../../queue/queue";
-import { MetricType, prometheusRegistry } from "../../../service/metrics.service";
+import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
 import Metric from "../../metric";
 
 export default class QueueProcessingDurationMetric extends Metric<null> {

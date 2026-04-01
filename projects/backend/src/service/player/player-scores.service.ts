@@ -32,35 +32,19 @@ import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-di
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
-import {
-  type AnyColumn,
-  SQL,
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  gte,
-  inArray,
-  isNotNull,
-  sql,
-} from "drizzle-orm";
+import { type AnyColumn, SQL, asc, desc, eq, gte, inArray, isNotNull, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { db } from "../../db";
 import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
-import {
-  scoreSaberLeaderboardsTable,
-  scoreSaberMedalScoresTable,
-  scoreSaberScoresTable,
-} from "../../db/schema";
-import BeatLeaderService from "../beatleader.service";
-import BeatSaverService from "../beatsaver.service";
-import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
-import { MedalScoresService } from "../score/medal-scores.service";
+import { scoreSaberMedalScoresTable, scoreSaberScoresTable } from "../../db/schema";
+import { ScoreSaberMedalScoresRepository } from "../../repositories/scoresaber-medal-scores.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import BeatLeaderService from "../beatleader/beatleader.service";
+import BeatSaverService from "../external/beatsaver.service";
+import { ScoreSaberApiService } from "../external/scoresaber-api.service";
+import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { ScoreCoreService } from "../score/score-core.service";
-import { ScoreSaberApiService } from "../scoresaber-api.service";
+import { ScoreSaberMedalScoresService } from "../score/scoresaber-medal-scores.service";
 import { PlayerCoreService } from "./player-core.service";
 
 /**
@@ -171,7 +155,7 @@ export class PlayerScoresService {
         scoresPage.metadata.total
       );
 
-      await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.playerId, playerId));
+      await ScoreSaberScoresRepository.deleteByPlayerId(playerId);
       result.totalScores = 0;
 
       account.seededScores = false;
@@ -279,23 +263,7 @@ export class PlayerScoresService {
    * @param playerId the player's id
    */
   public static async getPlayerScoreChart(playerId: string): Promise<PlayerScoresChartResponse> {
-    const rows = await db
-      .select({
-        accuracy: scoreSaberScoresTable.accuracy,
-        pp: scoreSaberScoresTable.pp,
-        timestamp: scoreSaberScoresTable.timestamp,
-        leaderboardId: scoreSaberLeaderboardsTable.id,
-        difficulty: scoreSaberLeaderboardsTable.difficulty,
-        songName: scoreSaberLeaderboardsTable.songName,
-        stars: scoreSaberLeaderboardsTable.stars,
-      })
-      .from(scoreSaberScoresTable)
-      .innerJoin(
-        scoreSaberLeaderboardsTable,
-        eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
-      )
-      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)))
-      .orderBy(desc(scoreSaberScoresTable.timestamp));
+    const rows = await ScoreSaberScoresRepository.selectChartRowsWithLeaderboardForPlayer(playerId);
 
     if (!rows.length) {
       return { data: [] };
@@ -308,7 +276,7 @@ export class PlayerScoresService {
         pp: row.pp,
         timestamp: row.timestamp,
         leaderboardId: row.leaderboardId,
-        leaderboardName: row.songName,
+        leaderboardName: row.songName ?? "",
         leaderboardDifficulty: row.difficulty,
       })),
     };
@@ -321,17 +289,13 @@ export class PlayerScoresService {
    * @returns the score
    */
   public static async getScore(scoreId: number): Promise<PlayerScore<ScoreSaberScore>> {
-    const [scoreRow] = await db
-      .select()
-      .from(scoreSaberScoresTable)
-      .where(eq(scoreSaberScoresTable.scoreId, scoreId))
-      .limit(1);
+    const scoreRow = await ScoreSaberScoresRepository.findRowByScoreId(scoreId);
 
     if (!scoreRow) {
       throw new NotFoundError("Score not found");
     }
 
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(scoreRow.leaderboardId);
+    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(scoreRow.leaderboardId);
     const [score, beatSaver] = await Promise.all([
       ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(scoreRow), leaderboard),
       BeatSaverService.getMap(
@@ -350,11 +314,7 @@ export class PlayerScoresService {
    * @returns the number of scores
    */
   public static async getPlayerScoresCount(playerId: string): Promise<number> {
-    const [row] = await db
-      .select({ count: count() })
-      .from(scoreSaberScoresTable)
-      .where(eq(scoreSaberScoresTable.playerId, playerId));
-    return row?.count ?? 0;
+    return ScoreSaberScoresRepository.countByPlayerId(playerId);
   }
 
   /**
@@ -459,7 +419,7 @@ export class PlayerScoresService {
     query: PlayerScoresQuery,
     config: ScoreTableConfig<TRow, TScore>
   ): Promise<Page<PlayerScore<TScore>>> {
-    const leaderboardIds = await LeaderboardCoreService.searchLeaderboardIds(query.search ?? "");
+    const leaderboardIds = await ScoreSaberLeaderboardsService.searchLeaderboardIds(query.search ?? "");
     if (leaderboardIds == null) {
       return Pagination.empty<PlayerScore<TScore>>();
     }
@@ -480,7 +440,7 @@ export class PlayerScoresService {
 
       if (!rows.length) return [];
 
-      const leaderboards = await LeaderboardCoreService.getLeaderboardsWithDifficultiesByIds(
+      const leaderboards = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds(
         rows.map(config.getLeaderboardId)
       );
 
@@ -524,11 +484,7 @@ export class PlayerScoresService {
       },
 
       async countRows(conditions) {
-        const [{ count }] = await db
-          .select({ count: sql<number>`cast(count(*) as integer)` })
-          .from(scoreSaberScoresTable)
-          .where(and(...conditions));
-        return count;
+        return ScoreSaberScoresRepository.countByConditions(conditions);
       },
 
       resolveOrderColumn(sort) {
@@ -553,13 +509,7 @@ export class PlayerScoresService {
       },
 
       async fetchRows(conditions, orderBy, limit, offset) {
-        return db
-          .select()
-          .from(scoreSaberScoresTable)
-          .where(and(...conditions))
-          .orderBy(orderBy)
-          .limit(limit)
-          .offset(offset);
+        return ScoreSaberScoresRepository.findRowsByConditions(conditions, orderBy, limit, offset);
       },
 
       getLeaderboardId: row => row.leaderboardId,
@@ -609,11 +559,7 @@ export class PlayerScoresService {
       },
 
       async countRows(conditions) {
-        const [{ count }] = await db
-          .select({ count: sql<number>`cast(count(*) as integer)` })
-          .from(scoreSaberMedalScoresTable)
-          .where(and(...conditions));
-        return count;
+        return ScoreSaberMedalScoresRepository.countByConditions(conditions);
       },
 
       resolveOrderColumn(sort) {
@@ -638,20 +584,14 @@ export class PlayerScoresService {
       },
 
       async fetchRows(conditions, orderBy, limit, offset) {
-        return db
-          .select()
-          .from(scoreSaberMedalScoresTable)
-          .where(and(...conditions))
-          .orderBy(orderBy)
-          .limit(limit)
-          .offset(offset);
+        return ScoreSaberMedalScoresRepository.findRowsByConditions(conditions, orderBy, limit, offset);
       },
 
       getLeaderboardId: row => row.leaderboardId,
 
       async enrichRow(row, leaderboard) {
         const [rankByScoreId] = await Promise.all([
-          MedalScoresService.getMedalTableScoreRanksForScores([
+          ScoreSaberMedalScoresService.getMedalTableScoreRanksForScores([
             { scoreId: row.scoreId, leaderboardId: row.leaderboardId },
           ]),
         ]);
@@ -680,11 +620,6 @@ export class PlayerScoresService {
    * @returns the approximate total number of scores
    */
   public static async getTotalScoresCount(): Promise<number> {
-    const result = await db.execute<{ count: number }>(sql`
-      SELECT GREATEST(0, reltuples)::bigint::integer AS count
-      FROM pg_class
-      WHERE oid = 'scoresaber-scores'::regclass
-    `);
-    return Number(result.rows[0]?.count ?? 0);
+    return ScoreSaberScoresRepository.getApproximateTotalRowCount();
   }
 }

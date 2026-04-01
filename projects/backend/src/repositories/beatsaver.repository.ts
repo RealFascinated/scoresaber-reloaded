@@ -1,87 +1,18 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
-import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
-import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
 import { parseDate } from "@ssr/common/utils/time-utils";
 import { eq } from "drizzle-orm";
 import { db } from "../db";
-import { beatSaverRowsToMap } from "../db/converter/beatsaver-map";
 import {
   beatSaverMapDifficultiesTable,
   beatSaverMapsTable,
   beatSaverMapVersionsTable,
   beatSaverUploadersTable,
 } from "../db/schema";
-import CacheService, { CacheId } from "./cache.service";
 
-export default class BeatSaverService {
-  /**
-   * Fetches a BeatSaver map
-   *
-   * @param hash the hash of the map
-   * @param difficulty the difficulty to get
-   * @param characteristic the characteristic to get
-   * @param token the optional token to use
-   * @returns the map response or undefined if not found
-   */
-  public static async getMap(
-    hash: string,
-    difficulty: MapDifficulty,
-    characteristic: MapCharacteristic
-  ): Promise<BeatSaverMap | undefined> {
-    const normalizedHash = hash.trim().toLowerCase();
-
-    return await CacheService.fetch(CacheId.BeatSaver, `beatsaver:${normalizedHash}`, async () => {
-      let rows = await this.getRowsByHash(normalizedHash);
-
-      if (!rows) {
-        const fetchedToken = await ApiServiceRegistry.getInstance()
-          .getBeatSaverService()
-          .lookupMap(normalizedHash);
-        if (!fetchedToken) {
-          return undefined;
-        }
-        await this.saveMap(fetchedToken);
-        rows = await this.getRowsByHash(normalizedHash);
-        if (!rows) {
-          const picked = this.pickVersionForLeaderboard(
-            fetchedToken,
-            normalizedHash,
-            difficulty,
-            characteristic
-          );
-          if (picked != null) {
-            rows = await this.getRowsByHash(picked.hash.toLowerCase());
-          }
-        }
-        if (!rows) {
-          return undefined;
-        }
-      }
-
-      const map = beatSaverRowsToMap({
-        hash: rows.version.hash.toLowerCase(),
-        characteristic,
-        difficulty,
-        map: rows.map,
-        uploader: rows.uploader,
-        version: rows.version,
-        difficulties: rows.difficulties,
-      });
-      return map;
-    });
-  }
-
-  /**
-   * Saves a BeatSaver map to the database
-   *
-   * @param map the map to save
-   * @returns the saved map
-   */
-  public static async saveMap(map: BeatSaverMapToken): Promise<void> {
+export class BeatSaverRepository {
+  public static async saveMapToken(map: BeatSaverMapToken): Promise<void> {
     map.versions.forEach(version => {
-      version.hash = version.hash.toLowerCase(); // Ensure the hash is lowercase
+      version.hash = version.hash.toLowerCase();
     });
 
     await db.transaction(async tx => {
@@ -250,41 +181,7 @@ export default class BeatSaverService {
     });
   }
 
-  /**
-   * When ScoreSaber's `songHash` no longer matches any BeatSaver `version.hash` (e.g. re-upload),
-   * BeatSaver may still resolve `/maps/hash/{songHash}` to the map. Pick a version from the token:
-   * prefer exact hash match, else newest version that has the requested difficulty, else newest overall.
-   */
-  private static pickVersionForLeaderboard(
-    token: BeatSaverMapToken,
-    songHashNormalized: string,
-    difficulty: MapDifficulty,
-    characteristic: MapCharacteristic
-  ) {
-    const versions = token.versions;
-    if (versions.length === 0) {
-      return undefined;
-    }
-
-    const exact = versions.find(v => v.hash.toLowerCase() === songHashNormalized);
-    if (exact) {
-      return exact;
-    }
-
-    const byCreatedDesc = [...versions].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    for (const v of byCreatedDesc) {
-      if (v.diffs?.some(d => d.characteristic === characteristic && d.difficulty === difficulty)) {
-        return v;
-      }
-    }
-
-    return byCreatedDesc[0];
-  }
-
-  private static async getRowsByHash(hash: string) {
+  public static async findMapBundleByVersionHash(hash: string) {
     const normalizedHash = hash.toLowerCase();
     const [matchedVersion] = await db
       .select()

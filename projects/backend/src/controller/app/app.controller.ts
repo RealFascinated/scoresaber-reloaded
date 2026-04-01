@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
-import { getAppVersion } from "../common/app.util";
-import { AppService } from "../service/app.service";
+import { getAppVersion } from "../../common/app.util";
+import { AppService } from "../../service/app/app.service";
 
 export default function appController(app: Elysia) {
   return app

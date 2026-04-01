@@ -7,19 +7,18 @@ import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { db } from "../../db";
+import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
+import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
+import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import {
-  scoreSaberLeaderboardsTable,
-  scoreSaberLeaderboardStarChangeTable,
-  scoreSaberScoreHistoryTable,
-  scoreSaberScoresTable,
-} from "../../db/schema";
-import CacheService from "../cache.service";
-import { MedalScoresService } from "../score/medal-scores.service";
-import { ScoreSaberApiService } from "../scoresaber-api.service";
-import { LeaderboardCoreService } from "./leaderboard-core.service";
+  type ScoreSaberScoreUpsertRow,
+  ScoreSaberScoresRepository,
+} from "../../repositories/scoresaber-scores.repository";
+import { ScoreSaberApiService } from "../external/scoresaber-api.service";
+import CacheService from "../infra/cache.service";
+import { ScoreSaberMedalScoresService } from "../score/scoresaber-medal-scores.service";
+import { ScoreSaberLeaderboardsService } from "./scoresaber-leaderboards.service";
 
 /** Row shape from Postgres for ranked maps we compare during sync. */
 export type RankedLeaderboardSnapshot = {
@@ -36,26 +35,7 @@ export type LeaderboardUpdate = {
   newLeaderboard: ScoreSaberLeaderboard;
 };
 
-const scoreUpsertSet = {
-  playerId: sql`excluded."playerId"`,
-  leaderboardId: sql`excluded."leaderboardId"`,
-  difficulty: sql`excluded."difficulty"`,
-  characteristic: sql`excluded."characteristic"`,
-  score: sql`excluded."score"`,
-  accuracy: sql`excluded."accuracy"`,
-  pp: sql`excluded."pp"`,
-  missedNotes: sql`excluded."missedNotes"`,
-  badCuts: sql`excluded."badCuts"`,
-  maxCombo: sql`excluded."maxCombo"`,
-  fullCombo: sql`excluded."fullCombo"`,
-  modifiers: sql`excluded."modifiers"`,
-  hmd: sql`excluded."hmd"`,
-  rightController: sql`excluded."rightController"`,
-  leftController: sql`excluded."leftController"`,
-  timestamp: sql`excluded."timestamp"`,
-} as const;
-
-export class LeaderboardRankingService {
+export class LeaderboardRankedSyncService {
   /**
    * Refreshes the ranked leaderboards
    *
@@ -65,20 +45,13 @@ export class LeaderboardRankingService {
     const before = performance.now();
 
     Logger.info(`[RANKED UPDATES] Refreshing ranked leaderboards...`);
-    const { leaderboards } = await LeaderboardCoreService.fetchLeaderboardsFromAPI("ranked", true);
+    const { leaderboards } = await ScoreSaberLeaderboardsService.fetchLeaderboardsFromAPI("ranked", true);
     Logger.info(`[RANKED UPDATES] Found ${leaderboards.length} ranked leaderboards.`);
 
     async function reweightHistoryScores(leaderboard: ScoreSaberLeaderboard) {
       Logger.info(`[RANKED UPDATES] Reweighting history scores for leaderboard "${leaderboard.id}"...`);
 
-      const rows = await db
-        .select({
-          id: scoreSaberScoreHistoryTable.id,
-          pp: scoreSaberScoreHistoryTable.pp,
-          accuracy: scoreSaberScoreHistoryTable.accuracy,
-        })
-        .from(scoreSaberScoreHistoryTable)
-        .where(eq(scoreSaberScoreHistoryTable.leaderboardId, leaderboard.id));
+      const rows = await ScoreSaberScoreHistoryRepository.selectPpAccuracyRowsForLeaderboard(leaderboard.id);
 
       const updates = rows
         .map(row => {
@@ -88,14 +61,7 @@ export class LeaderboardRankingService {
         .filter((u): u is { id: number; newPp: number } => u !== null);
 
       if (updates.length > 0) {
-        await Promise.all(
-          updates.map(u =>
-            db
-              .update(scoreSaberScoreHistoryTable)
-              .set({ pp: u.newPp })
-              .where(eq(scoreSaberScoreHistoryTable.id, u.id))
-          )
-        );
+        await ScoreSaberScoreHistoryRepository.batchUpdatePpByIds(updates);
         Logger.info(
           `[RANKED UPDATES] Reweighted ${updates.length} of ${rows.length} history scores for leaderboard "${leaderboard.id}".`
         );
@@ -141,19 +107,10 @@ export class LeaderboardRankingService {
       }
 
       const scoreIds = scoreOps.map(s => s.scoreId);
-      const existingRows = await db
-        .select({
-          scoreId: scoreSaberScoresTable.scoreId,
-          score: scoreSaberScoresTable.score,
-          pp: scoreSaberScoresTable.pp,
-        })
-        .from(scoreSaberScoresTable)
-        .where(
-          and(
-            inArray(scoreSaberScoresTable.scoreId, scoreIds),
-            eq(scoreSaberScoresTable.leaderboardId, leaderboard.id)
-          )
-        );
+      const existingRows = await ScoreSaberScoresRepository.selectScoreSnapshotsByLeaderboardAndScoreIds(
+        leaderboard.id,
+        scoreIds
+      );
 
       const existingMap = new Map(existingRows.map(r => [r.scoreId, { score: r.score, pp: r.pp }]));
 
@@ -171,7 +128,7 @@ export class LeaderboardRankingService {
 
       let upserted = 0;
       for (const batch of chunkArray(toWrite, 100)) {
-        const rows = batch.map(score => {
+        const rows: ScoreSaberScoreUpsertRow[] = batch.map(score => {
           const modifiers = score.modifiers.map(m => m.toString());
           return {
             scoreId: score.scoreId,
@@ -193,10 +150,7 @@ export class LeaderboardRankingService {
             timestamp: score.timestamp,
           };
         });
-        await db.insert(scoreSaberScoresTable).values(rows).onConflictDoUpdate({
-          target: scoreSaberScoresTable.scoreId,
-          set: scoreUpsertSet,
-        });
+        await ScoreSaberScoresRepository.bulkUpsertScores(rows);
         upserted += batch.length;
       }
 
@@ -205,17 +159,7 @@ export class LeaderboardRankingService {
       );
     }
 
-    const dbRankedRows = await db
-      .select({
-        id: scoreSaberLeaderboardsTable.id,
-        stars: scoreSaberLeaderboardsTable.stars,
-        ranked: scoreSaberLeaderboardsTable.ranked,
-        qualified: scoreSaberLeaderboardsTable.qualified,
-        plays: scoreSaberLeaderboardsTable.plays,
-        dailyPlays: scoreSaberLeaderboardsTable.dailyPlays,
-      })
-      .from(scoreSaberLeaderboardsTable)
-      .where(eq(scoreSaberLeaderboardsTable.ranked, true));
+    const dbRankedRows = await ScoreSaberLeaderboardsRepository.selectRankedSnapshots();
 
     const rankedLeaderboards = new Map<number, RankedLeaderboardSnapshot>(dbRankedRows.map(r => [r.id, r]));
 
@@ -257,7 +201,7 @@ export class LeaderboardRankingService {
 
       if (dbLeaderboard && dbLeaderboard.stars !== apiLeaderboard.stars) {
         await reweightHistoryScores(apiLeaderboard);
-        await db.insert(scoreSaberLeaderboardStarChangeTable).values({
+        await ScoreSaberLeaderboardStarChangeRepository.insertRow({
           leaderboardId: apiLeaderboard.id,
           previousStars: dbLeaderboard.stars ?? 0,
           newStars: apiLeaderboard.stars,
@@ -266,7 +210,7 @@ export class LeaderboardRankingService {
       }
 
       if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
-        await MedalScoresService.rescanLeaderboard(apiLeaderboard.id, true);
+        await ScoreSaberMedalScoresService.rescanLeaderboard(apiLeaderboard.id, true);
         await updateLeaderboardScores(apiLeaderboard);
       }
     }
@@ -275,7 +219,7 @@ export class LeaderboardRankingService {
       Logger.info(`[RANKED UPDATES] Updating ${leaderboardsToUpsert.length} leaderboards...`);
 
       for (const batch of chunkArray(leaderboardsToUpsert, 250)) {
-        await LeaderboardCoreService.upsertLeaderboardsFromRankingApi(batch);
+        await ScoreSaberLeaderboardsService.upsertLeaderboardsFromRankingApi(batch);
         Logger.info(`[RANKED UPDATES] Updated batch of ${batch.length} leaderboards!`);
       }
 
@@ -305,18 +249,10 @@ export class LeaderboardRankingService {
     const before = performance.now();
 
     Logger.info(`[RANKED UPDATES] Refreshing qualified leaderboards...`);
-    const { leaderboards } = await LeaderboardCoreService.fetchLeaderboardsFromAPI("qualified", true);
+    const { leaderboards } = await ScoreSaberLeaderboardsService.fetchLeaderboardsFromAPI("qualified", true);
     Logger.info(`[RANKED UPDATES] Found ${leaderboards.length} qualified leaderboards.`);
 
-    const dbQualifiedRows = await db
-      .select({
-        id: scoreSaberLeaderboardsTable.id,
-        stars: scoreSaberLeaderboardsTable.stars,
-        ranked: scoreSaberLeaderboardsTable.ranked,
-        qualified: scoreSaberLeaderboardsTable.qualified,
-      })
-      .from(scoreSaberLeaderboardsTable)
-      .where(eq(scoreSaberLeaderboardsTable.qualified, true));
+    const dbQualifiedRows = await ScoreSaberLeaderboardsRepository.selectQualifiedSnapshots();
 
     const dbById = new Map(dbQualifiedRows.map(r => [r.id, r]));
 
@@ -339,7 +275,7 @@ export class LeaderboardRankingService {
 
     if (leaderboardsToUpsert.length > 0) {
       Logger.info(`[RANKED UPDATES] Updating ${leaderboardsToUpsert.length} leaderboards...`);
-      await LeaderboardCoreService.upsertLeaderboardsFromRankingApi(leaderboardsToUpsert);
+      await ScoreSaberLeaderboardsService.upsertLeaderboardsFromRankingApi(leaderboardsToUpsert);
       await CacheService.invalidate("leaderboard:qualified-leaderboards");
       Logger.info(
         `[RANKED UPDATES] Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
@@ -363,11 +299,9 @@ export class LeaderboardRankingService {
   public static async fetchStarChangeHistory(
     leaderboard: ScoreSaberLeaderboard
   ): Promise<LeaderboardStarChange[]> {
-    const rows = await db
-      .select()
-      .from(scoreSaberLeaderboardStarChangeTable)
-      .where(eq(scoreSaberLeaderboardStarChangeTable.leaderboardId, leaderboard.id))
-      .orderBy(desc(scoreSaberLeaderboardStarChangeTable.timestamp));
+    const rows = await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
+      leaderboard.id
+    );
 
     return rows.map(starChange => ({
       previousStars: starChange.previousStars,
