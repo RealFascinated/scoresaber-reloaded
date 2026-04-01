@@ -108,7 +108,10 @@ export class ScoreCoreService {
       }
     }
 
-    await PlayerHmdService.updatePlayerHmd(playerId, score);
+    // We only want to update the player's HMD if the score is new
+    if (newScore) {
+      await PlayerHmdService.updatePlayerHmd(playerId, score);
+    }
 
     // Handle score for medal updates
     if (leaderboard.ranked && score.rank <= 10) {

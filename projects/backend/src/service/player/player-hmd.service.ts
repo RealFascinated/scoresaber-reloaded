@@ -14,19 +14,6 @@ export class PlayerHmdService {
    * @param hmd the player's HMD
    */
   public static async updatePlayerHmd(playerId: string, score: ScoreSaberScore): Promise<void> {
-    if (!score.hmd) {
-      return;
-    }
-
-    const [player] = await db
-      .select({ hmd: scoreSaberAccountsTable.hmd })
-      .from(scoreSaberAccountsTable)
-      .where(eq(scoreSaberAccountsTable.id, playerId))
-      .limit(1);
-    if (!player || player.hmd == score.hmd) {
-      return;
-    }
-
     await PlayerCoreService.updatePlayer(playerId, { hmd: score.hmd });
   }
 
@@ -59,16 +46,16 @@ export class PlayerHmdService {
     const rows =
       limit != null
         ? await db
-            .select({ hmd: scoreSaberScoresTable.hmd })
-            .from(scoreSaberScoresTable)
-            .where(eq(scoreSaberScoresTable.playerId, playerId))
-            .orderBy(desc(scoreSaberScoresTable.timestamp))
-            .limit(limit)
+          .select({ hmd: scoreSaberScoresTable.hmd })
+          .from(scoreSaberScoresTable)
+          .where(eq(scoreSaberScoresTable.playerId, playerId))
+          .orderBy(desc(scoreSaberScoresTable.timestamp))
+          .limit(limit)
         : await db
-            .select({ hmd: scoreSaberScoresTable.hmd })
-            .from(scoreSaberScoresTable)
-            .where(eq(scoreSaberScoresTable.playerId, playerId))
-            .orderBy(desc(scoreSaberScoresTable.timestamp));
+          .select({ hmd: scoreSaberScoresTable.hmd })
+          .from(scoreSaberScoresTable)
+          .where(eq(scoreSaberScoresTable.playerId, playerId))
+          .orderBy(desc(scoreSaberScoresTable.timestamp));
 
     const counts = new Map<HMD, number>();
     for (const row of rows) {
