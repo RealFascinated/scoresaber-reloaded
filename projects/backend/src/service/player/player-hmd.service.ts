@@ -3,20 +3,7 @@ import { and, count, eq, isNotNull } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../../db/schema";
 
-import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { PlayerCoreService } from "./player-core.service";
-
 export class PlayerHmdService {
-  /**
-   * Updates the player's HMD.
-   *
-   * @param playerId the player's id
-   * @param hmd the player's HMD
-   */
-  public static async updatePlayerHmd(playerId: string, score: ScoreSaberScore): Promise<void> {
-    await PlayerCoreService.updatePlayer(playerId, { hmd: score.hmd });
-  }
-
   /**
    * Gets the hmd usage from the current day.
    *

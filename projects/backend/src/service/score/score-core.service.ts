@@ -6,11 +6,10 @@ import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "../../db";
-import { scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/schema";
+import { ScoreSaberAccountRow, scoreSaberScoreHistoryTable, scoreSaberScoresTable } from "../../db/schema";
 import BeatLeaderService from "../beatleader.service";
 import { LeaderboardCoreService } from "../leaderboard/leaderboard-core.service";
 import { PlayerCoreService } from "../player/player-core.service";
-import { PlayerHmdService } from "../player/player-hmd.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import { MedalScoresService } from "./medal-scores.service";
 
@@ -108,22 +107,21 @@ export class ScoreCoreService {
       }
     }
 
+    const playerUpdates: Partial<ScoreSaberAccountRow> = {
+      scoreStats: await PlayerCoreService.getPlayerScoreStats(playerId),
+    };
     // We only want to update the player's HMD if the score is new
     if (newScore) {
-      await PlayerHmdService.updatePlayerHmd(playerId, score);
+      playerUpdates.hmd = score.hmd;
     }
+    await PlayerCoreService.updatePlayer(playerId, playerUpdates);
 
     // Handle score for medal updates
     if (leaderboard.ranked && score.rank <= 10) {
       await MedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
     }
 
-    // Update player score stats
-    const scoreStats = await PlayerCoreService.getPlayerScoreStats(playerId);
-    await PlayerCoreService.updatePlayer(playerId, { scoreStats });
-
     const modifiers = score.modifiers.map(modifier => modifier.toString());
-
     const scoreUpsertSet: typeof scoreSaberScoresTable.$inferInsert = {
       scoreId: score.scoreId,
       playerId: playerId,

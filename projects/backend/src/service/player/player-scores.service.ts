@@ -313,39 +313,26 @@ export class PlayerScoresService {
    * @returns the score
    */
   public static async getScore(scoreId: number): Promise<PlayerScore<ScoreSaberScore>> {
-    const [scoreResult] = await Promise.all([
-      db
-        .select()
-        .from(scoreSaberScoresTable)
-        .innerJoin(
-          scoreSaberLeaderboardsTable,
-          eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
-        )
-        .where(eq(scoreSaberScoresTable.scoreId, scoreId))
-        .limit(1),
-    ]);
+    const [scoreRow] = await db
+      .select()
+      .from(scoreSaberScoresTable)
+      .where(eq(scoreSaberScoresTable.scoreId, scoreId))
+      .limit(1);
 
-    if (!scoreResult.length) {
+    if (!scoreRow) {
       throw new NotFoundError("Score not found");
     }
 
-    const { "scoresaber-scores": rawScore, "scoresaber-leaderboards": rawLeaderboard } = scoreResult[0];
-
-    const leaderboard = await LeaderboardCoreService.getLeaderboard(rawLeaderboard.id);
-    if (!leaderboard) {
-      throw new NotFoundError("Leaderboard not found");
-    }
-    const score = scoreSaberScoreRowToType(rawScore);
-
-    const [enrichedScore, beatSaver] = await Promise.all([
-      ScoreCoreService.insertScoreData(score, leaderboard),
+    const leaderboard = await LeaderboardCoreService.getLeaderboard(scoreRow.leaderboardId);
+    const [score, beatSaver] = await Promise.all([
+      ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(scoreRow), leaderboard),
       BeatSaverService.getMap(
         leaderboard.songHash,
         leaderboard.difficulty.difficulty,
         leaderboard.difficulty.characteristic
       ),
     ]);
-    return { score: enrichedScore, leaderboard, beatSaver };
+    return { score, leaderboard, beatSaver };
   }
 
   /**
