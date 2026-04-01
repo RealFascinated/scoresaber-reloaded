@@ -30,7 +30,7 @@ export default function ScoreSaberScoreDisplay({
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMap;
-  playerAbove?: ScoreSaberLeaderboardPlayerInfo;
+  playerDetails?: ScoreSaberLeaderboardPlayerInfo;
   settings?: {
     noScoreButtons?: boolean;
     hideDetailsDropdown?: boolean;
