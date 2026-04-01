@@ -31,9 +31,7 @@ import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/
 import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-difficulty";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { EmbedBuilder } from "discord.js";
 import { type AnyColumn, SQL, asc, desc, eq, gte, inArray, isNotNull, sql } from "drizzle-orm";
-import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberMedalScoresTable, scoreSaberScoresTable } from "../../db/schema";
@@ -145,47 +143,6 @@ export class PlayerScoresService {
       return { score: undefined, leaderboard: undefined };
     }
 
-    async function handleDesyncedScoreCount(
-      scoresPage: ScoreSaberPlayerScoresPageToken,
-      playerScoresCount: number
-    ): Promise<void> {
-      Logger.info(
-        `[Score Refresh] Player %s has more scores than they should (%s > %s). Deleteing their scores and re-seeding...`,
-        playerId,
-        playerScoresCount,
-        scoresPage.metadata.total
-      );
-
-      await ScoreSaberScoresRepository.deleteByPlayerId(playerId);
-      result.totalScores = 0;
-
-      account.seededScores = false;
-      await PlayerCoreService.updatePlayer(playerId, { seededScores: false });
-
-      sendEmbedToChannel(
-        DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
-        new EmbedBuilder()
-          .setTitle("Player Has More Scores Than They Should!")
-          .setDescription(
-            `**${playerToken.name}** has more scores than they should. Deleting their scores and re-seeding...`
-          )
-          .addFields([
-            {
-              name: "Has",
-              value: formatNumberWithCommas(playerScoresCount),
-              inline: true,
-            },
-            {
-              name: "Should Have",
-              value: formatNumberWithCommas(scoresPage.metadata.total),
-              inline: true,
-            },
-          ])
-          .setTimestamp()
-          .setColor("#ff0000")
-      );
-    }
-
     async function processPage(
       currentPage: number,
       scoresPage: ScoreSaberPlayerScoresPageToken
@@ -222,13 +179,6 @@ export class PlayerScoresService {
       if (!scoresPage) {
         hasMoreScores = false;
         continue;
-      }
-
-      if (currentPage === 1) {
-        const shouldDeleteScores = playerScoresCount > scoresPage.metadata.total;
-        if (shouldDeleteScores) {
-          await handleDesyncedScoreCount(scoresPage, playerScoresCount);
-        }
       }
 
       hasMoreScores = await processPage(currentPage, scoresPage);

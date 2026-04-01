@@ -121,7 +121,7 @@ export class ScoreSaberMedalScoresRepository {
       .orderBy(desc(scoreSaberMedalScoresTable.score), desc(scoreSaberMedalScoresTable.scoreId));
   }
 
-  public static async deleteByLeaderboardId(leaderboardId: number): Promise<void> {
+  public static async deleteAllByLeaderboardId(leaderboardId: number): Promise<void> {
     await db
       .delete(scoreSaberMedalScoresTable)
       .where(eq(scoreSaberMedalScoresTable.leaderboardId, leaderboardId));

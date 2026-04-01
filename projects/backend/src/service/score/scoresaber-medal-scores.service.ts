@@ -152,7 +152,7 @@ export class ScoreSaberMedalScoresService {
     }));
 
     if (existingComparable.length !== top10ApiScores.length) {
-      await ScoreSaberMedalScoresRepository.deleteByLeaderboardId(leaderboardId);
+      await ScoreSaberMedalScoresRepository.deleteAllByLeaderboardId(leaderboardId);
       await this.insertMedalScores(page.scores, leaderboard);
       return true;
     }
@@ -168,7 +168,7 @@ export class ScoreSaberMedalScoresService {
     });
 
     if (scoresChanged) {
-      await ScoreSaberMedalScoresRepository.deleteByLeaderboardId(leaderboardId);
+      await ScoreSaberMedalScoresRepository.deleteAllByLeaderboardId(leaderboardId);
       await this.insertMedalScores(page.scores, leaderboard);
       return true;
     }
@@ -207,7 +207,7 @@ export class ScoreSaberMedalScoresService {
    */
   public static async rescanLeaderboard(leaderboardId: number, deleteScores: boolean = false) {
     if (deleteScores) {
-      await ScoreSaberMedalScoresRepository.deleteByLeaderboardId(leaderboardId);
+      await ScoreSaberMedalScoresRepository.deleteAllByLeaderboardId(leaderboardId);
     }
 
     const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);

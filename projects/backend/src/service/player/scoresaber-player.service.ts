@@ -57,7 +57,7 @@ export default class ScoreSaberPlayerService {
 
       // delete players scores if banned so they don't fuck up top scores
       if (player.banned) {
-        await ScoreSaberScoresRepository.deleteByPlayerId(id);
+        await ScoreSaberScoresRepository.deleteAllByPlayerId(id);
       }
 
       const basePlayer = {

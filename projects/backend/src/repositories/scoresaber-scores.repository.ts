@@ -6,7 +6,6 @@ import { scoreSaberLeaderboardsTable, scoreSaberScoresTable, type ScoreSaberScor
 
 export type ScoreSaberScoreUpsertRow = typeof scoreSaberScoresTable.$inferInsert;
 
-/** `ON CONFLICT DO UPDATE` column map for bulk ranked sync (matches prior leaderboard-ranked-sync.service). */
 export const scoresaberScoresBulkUpsertSet = {
   playerId: sql`excluded."playerId"`,
   leaderboardId: sql`excluded."leaderboardId"`,
@@ -27,7 +26,7 @@ export const scoresaberScoresBulkUpsertSet = {
 } as const;
 
 export class ScoreSaberScoresRepository {
-  public static async deleteByPlayerId(playerId: string): Promise<void> {
+  public static async deleteAllByPlayerId(playerId: string): Promise<void> {
     await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.playerId, playerId));
   }
 
