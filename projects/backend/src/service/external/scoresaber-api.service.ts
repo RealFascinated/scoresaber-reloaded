@@ -72,7 +72,7 @@ export class ScoreSaberApiService {
     const cacheHash = Bun.hash(JSON.stringify({ url, options })).toString();
 
     const data = await CacheService.fetch<CachedResponse<T> | undefined>(
-      CacheId.ScoreSaberApi,
+      CacheId.SCORESABER_API_RESPONSE,
       `scoresaber:api-cache:${cacheHash}`,
       async () => {
         ScoreSaberApiService.totalRequests++;

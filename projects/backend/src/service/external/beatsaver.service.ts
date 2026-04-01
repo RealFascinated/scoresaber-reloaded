@@ -24,7 +24,7 @@ export default class BeatSaverService {
   ): Promise<BeatSaverMap | undefined> {
     const normalizedHash = hash.trim().toLowerCase();
 
-    return await CacheService.fetch(CacheId.BeatSaver, `beatsaver:${normalizedHash}`, async () => {
+    return await CacheService.fetch(CacheId.BEATSAVER_MAP_BY_HASH, `beatsaver:${normalizedHash}`, async () => {
       let rows = await this.getRowsByHash(normalizedHash);
 
       if (!rows) {

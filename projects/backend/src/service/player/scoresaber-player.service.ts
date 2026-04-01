@@ -52,7 +52,7 @@ export default class ScoreSaberPlayerService {
       throw new NotFoundError(`Player "${id}" not found`);
     }
 
-    return CacheService.fetch(CacheId.ScoreSaber, `scoresaber:player:${id}:${type}`, async () => {
+    return CacheService.fetch(CacheId.SCORESABER_PLAYER, `scoresaber:player:${id}:${type}`, async () => {
       const account = await PlayerCoreService.getOrCreateAccount(id, player).catch(() => undefined);
 
       // delete players scores if banned so they don't fuck up top scores

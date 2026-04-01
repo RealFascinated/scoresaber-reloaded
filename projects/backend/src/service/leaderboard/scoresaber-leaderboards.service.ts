@@ -22,7 +22,7 @@ import StorageService from "../infra/storage.service";
 
 export class ScoreSaberLeaderboardsService {
   public static async getLeaderboard(id: number): Promise<ScoreSaberLeaderboard> {
-    return await CacheService.fetch(CacheId.Leaderboards, `leaderboard:id:${id}`, async () => {
+    return await CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, `leaderboard:id:${id}`, async () => {
       const map = await ScoreSaberLeaderboardsRepository.getLeaderboardsWithDifficultiesByIds([id]);
       const leaderboard = map.get(id);
       if (!leaderboard) {
@@ -38,7 +38,7 @@ export class ScoreSaberLeaderboardsService {
     characteristic: MapCharacteristic
   ): Promise<ScoreSaberLeaderboard> {
     return await CacheService.fetch(
-      CacheId.Leaderboards,
+      CacheId.SCORESABER_LEADERBOARDS,
       `leaderboard:hash:${hash}:${difficulty}:${characteristic}`,
       async () => {
         const hashNorm = hash.trim().toLowerCase();
@@ -195,19 +195,23 @@ export class ScoreSaberLeaderboardsService {
   }
 
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(CacheId.Leaderboards, "leaderboard:ranked-leaderboards", async () => {
+    return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, "leaderboard:ranked-leaderboards", async () => {
       return ScoreSaberLeaderboardsRepository.selectRankedJoined();
     });
   }
 
   public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(CacheId.Leaderboards, "leaderboard:qualified-leaderboards", async () => {
+    return CacheService.fetch(
+      CacheId.SCORESABER_LEADERBOARDS,
+      "leaderboard:qualified-leaderboards",
+      async () => {
       return ScoreSaberLeaderboardsRepository.selectQualifiedJoined();
-    });
+      }
+    );
   }
 
   public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(CacheId.Leaderboards, "leaderboard:ranking-queue-maps", async () => {
+    return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, "leaderboard:ranking-queue-maps", async () => {
       const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
       if (!rankingQueueTokens) {
         return [];

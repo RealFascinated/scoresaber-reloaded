@@ -105,7 +105,7 @@ export class PlayerScoreHistoryService {
     leaderboardId: number
   ): Promise<ScoreHistoryGraph> {
     return CacheService.fetch(
-      CacheId.ScoreHistoryGraph,
+      CacheId.SCORESABER_SCORE_HISTORY_GRAPH,
       `score-history-graph:${playerId}-${leaderboardId}`,
       async () => {
         return ScoreSaberScoreHistoryRepository.selectGraphAccuracySeriesForPlayerMap(

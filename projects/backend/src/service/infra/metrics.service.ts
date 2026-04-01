@@ -2,9 +2,11 @@ import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
 import { Registry } from "prom-client";
 import { ApiServicesMetric } from "../../metrics/impl/backend/api-services";
+import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
 import EventLoopLagMetric from "../../metrics/impl/backend/event-loop-lag";
 import HttpResponseStatusMetric from "../../metrics/impl/backend/http-response-status";
 import MemoryUsageMetric from "../../metrics/impl/backend/memory-usage";
+import ProcessCpuMetric from "../../metrics/impl/backend/process-cpu";
 import RedisHealthMetric from "../../metrics/impl/backend/redis-health";
 import ResponseTimeHistogramMetric from "../../metrics/impl/backend/response-time";
 import TotalRequestsMetric from "../../metrics/impl/backend/total-requests";
@@ -51,7 +53,9 @@ export enum MetricType {
   TOTAL_REQUESTS = "total_requests",
   HTTP_RESPONSES = "http_responses",
   API_SERVICES = "api_services",
+  CACHE_PERFORMANCE = "cache_performance",
   PROCESS_UPTIME = "process_uptime",
+  PROCESS_CPU = "process_cpu",
   REDIS_HEALTH = "redis_health",
 
   // Queue metrics
@@ -94,7 +98,9 @@ export default class MetricsService {
     this.registerMetric(new TotalRequestsMetric());
     this.registerMetric(new HttpResponseStatusMetric());
     this.registerMetric(new ApiServicesMetric());
+    this.registerMetric(new CachePerformanceMetric());
     this.registerMetric(new ProcessUptimeMetric());
+    this.registerMetric(new ProcessCpuMetric());
     this.registerMetric(new RedisHealthMetric());
 
     // Queue metrics

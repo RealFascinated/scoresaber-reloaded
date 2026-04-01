@@ -73,7 +73,7 @@ export default class MiniRankingService {
       const pageResponses = await Promise.all(
         Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
           CacheService.fetch(
-            CacheId.ScoreSaber,
+            CacheId.SCORESABER_PLAYER,
             `scoresaber:mini-ranking:medals:${player.id}:${page}`,
             async () => PlayerMedalsService.getPlayerMedalRanking(page)
           )
@@ -97,7 +97,7 @@ export default class MiniRankingService {
     const pageResponses = await Promise.all(
       Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
         CacheService.fetch(
-          CacheId.ScoreSaber,
+          CacheId.SCORESABER_PLAYER,
           `scoresaber:mini-ranking:${player.id}:${type}${type === "country" ? `:${player.country}` : ""}:${page}`,
           async () =>
             type === "global"

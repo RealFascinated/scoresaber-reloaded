@@ -4,16 +4,16 @@ import Logger from "@ssr/common/logger";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
+import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
 import { redisClient } from "../../common/redis";
 
 export enum CacheId {
-  BeatSaver = "beatSaver",
-  ScoreSaber = "scoresaber",
-  ScoreSaberApi = "scoresaberApi",
-  Leaderboards = "leaderboards",
-  BeatLeaderScore = "beatLeaderScore",
-  PreviousScore = "previousScore",
-  ScoreHistoryGraph = "scoreHistoryGraph",
+  BEATSAVER_MAP_BY_HASH = "beatsaver_map_by_hash",
+  SCORESABER_PLAYER = "scoresaber_player",
+  SCORESABER_API_RESPONSE = "scoresaber_api_response",
+  SCORESABER_LEADERBOARDS = "scoresaber_leaderboards",
+  BEATLEADER_SCORE = "beatleader_score",
+  SCORESABER_SCORE_HISTORY_GRAPH = "scoresaber_score_history_graph",
 }
 
 export type CacheMode = "REDIS" | "MEMORY";
@@ -28,33 +28,29 @@ export default class CacheService {
 
   public static readonly CACHE_INFO: Record<CacheId, { ttl: number; mode: CacheMode }> = {
     // Memory caches
-    [CacheId.ScoreSaber]: {
+    [CacheId.SCORESABER_PLAYER]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
       mode: "MEMORY",
     },
-    [CacheId.ScoreSaberApi]: {
+    [CacheId.SCORESABER_API_RESPONSE]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
       mode: "MEMORY",
     },
-    [CacheId.Leaderboards]: {
+    [CacheId.SCORESABER_LEADERBOARDS]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
       mode: "MEMORY",
     },
 
     // Redis caches
-    [CacheId.BeatSaver]: {
+    [CacheId.BEATSAVER_MAP_BY_HASH]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
       mode: "REDIS",
     },
-    [CacheId.BeatLeaderScore]: {
+    [CacheId.BEATLEADER_SCORE]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
       mode: "REDIS",
     },
-    [CacheId.PreviousScore]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "REDIS",
-    },
-    [CacheId.ScoreHistoryGraph]: {
+    [CacheId.SCORESABER_SCORE_HISTORY_GRAPH]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
       mode: "REDIS",
     },
@@ -93,6 +89,7 @@ export default class CacheService {
         const cachedData = await redisClient.get(cacheKey);
         if (cachedData !== null) {
           try {
+            CachePerformanceMetric.recordHit(cache, mode);
             return parse(cachedData) as T;
           } catch {
             Logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
@@ -102,10 +99,12 @@ export default class CacheService {
       } else {
         const cached = this.getMemoryCache(cache).get<T>(cacheKey);
         if (cached !== undefined) {
+          CachePerformanceMetric.recordHit(cache, mode);
           return cached;
         }
       }
 
+      CachePerformanceMetric.recordMiss(cache, mode);
       const data = await fetchFn();
 
       // Cache only when the fetch produced a concrete value (not `undefined` which is a "no result" signal).
@@ -163,4 +162,5 @@ export default class CacheService {
     this.memoryCaches.set(cacheId, created);
     return created;
   }
+
 }
