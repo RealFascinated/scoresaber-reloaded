@@ -72,7 +72,7 @@ const links: {
     },
     {
       name: "Statistics",
-      href: "/statistics",
+      href: "https://grafana.fascinated.cc/d/5783f85b-a2b3-49d8-854d-b67bb524053d/ssr-public?orgId=2",
     },
   ],
 };
