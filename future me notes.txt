@@ -1,0 +1,15 @@
+ALTER TABLE "scoresaber-scores" SET (
+  autovacuum_analyze_scale_factor = 0,
+  autovacuum_analyze_threshold = 5000
+);
+
+ALTER TABLE "scoresaber-score-history" SET (
+  autovacuum_analyze_scale_factor = 0,
+  autovacuum_analyze_threshold = 500
+);
+
+can reset with:
+ALTER TABLE "scoresaber-scores" RESET (
+  autovacuum_analyze_scale_factor,
+  autovacuum_analyze_threshold
+);

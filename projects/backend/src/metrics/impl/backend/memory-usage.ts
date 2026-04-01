@@ -26,5 +26,14 @@ export default class MemoryUsageMetric extends NumberMetric {
         heapCapacityGauge.set(stats.heapCapacity);
       },
     });
+
+    const rssGauge = new Gauge({
+      name: "memory_usage_rss_bytes",
+      help: "Resident set size in bytes",
+      registers: [prometheusRegistry],
+      collect: () => {
+        rssGauge.set(process.memoryUsage().rss);
+      },
+    });
   }
 }
