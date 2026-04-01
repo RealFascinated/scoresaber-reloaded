@@ -13,7 +13,7 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
     super(QueueId.PlayerBeatLeaderScoreSeedQueue, "lifo");
 
     setImmediate(() => this.insertPlayers());
-    setInterval(() => this.insertPlayers(), TimeUnit.toMillis(TimeUnit.Minute, 5));
+    setInterval(() => this.insertPlayers(), TimeUnit.toMillis(TimeUnit.Second, 10));
   }
 
   protected async processItem(item: QueueItem<string>): Promise<void> {
@@ -44,7 +44,7 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
             eq(scoreSaberAccountsTable.banned, false)
           )
         )
-        .limit(100);
+        .limit(500);
       const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {
         Logger.info("No players to seed BeatLeader scores for");
