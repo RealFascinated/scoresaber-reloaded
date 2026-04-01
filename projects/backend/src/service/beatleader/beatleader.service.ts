@@ -118,7 +118,7 @@ export default class BeatLeaderService {
       CacheId.BEATLEADER_SCORE,
       `beatleader-score:${playerId}-${songHash}-${songDifficulty}-${songScore}`,
       async () => {
-        const beatLeaderScore = await BeatLeaderScoresRepository.findLatestBySongComposite(
+        const beatLeaderScore = await BeatLeaderScoresRepository.findLatestBySong(
           playerId,
           songHash.toUpperCase(),
           songDifficulty as MapDifficulty,
@@ -147,24 +147,6 @@ export default class BeatLeaderService {
       }
       return beatLeaderScoreRowToType(beatLeaderScore);
     });
-  }
-
-  /**
-   * Checks whether a BeatLeader score has already been tracked.
-   *
-   * Used by the BeatLeader missing-scores seeding flow to avoid wasting pages.
-   */
-  public static async scoreExists(scoreId: number): Promise<boolean> {
-    return BeatLeaderScoresRepository.rowExistsById(scoreId);
-  }
-
-  /**
-   * Batch existence check for BeatLeader score ids.
-   *
-   * @returns a set containing all scoreIds that already exist
-   */
-  public static async scoresExist(scoreIds: ReadonlyArray<number>): Promise<Set<number>> {
-    return BeatLeaderScoresRepository.findExistingIds(Array.from(new Set(scoreIds)));
   }
 
   /**
@@ -225,9 +207,9 @@ export default class BeatLeaderService {
       };
     }
 
-    const previousScoreId = await this.getPreviousBeatLeaderScoreId(
+    const previousScoreId = await BeatLeaderScoresRepository.findPreviousIdBeforeTimestamp(
       current.playerId,
-      current.songHash,
+      current.songHash.toUpperCase(),
       current.leaderboardId,
       current.timestamp
     );
@@ -244,29 +226,6 @@ export default class BeatLeaderService {
       current: currentStats,
       previous: previousStats,
     };
-  }
-
-  /**
-   * Gets the player's previous BeatLeader score for a map.
-   *
-   * @param playerId the player's id to get the previous BeatLeader score for
-   * @param songHash the hash of the map to get the previous BeatLeader score for
-   * @param leaderboardId the leaderboard id to get the previous BeatLeader score for
-   * @param timestamp the timestamp to get the previous BeatLeader score for
-   * @returns the BeatLeader score, or undefined if none
-   */
-  public static async getPreviousBeatLeaderScoreId(
-    playerId: string,
-    songHash: string,
-    leaderboardId: string,
-    timestamp: Date
-  ): Promise<number | undefined> {
-    return BeatLeaderScoresRepository.findPreviousScoreIdBeforeTimestamp(
-      playerId,
-      songHash.toUpperCase(),
-      leaderboardId,
-      timestamp
-    );
   }
 
   /**

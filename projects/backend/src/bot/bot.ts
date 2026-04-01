@@ -13,7 +13,7 @@ import { Client } from "discordx";
 
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { PlayerScoresService } from "../service/player/player-scores.service";
+import { ScoreSaberScoresRepository } from "../repositories/scoresaber-scores.repository";
 import "./command/fetch-missing-player-scores";
 import "./command/force-track-player-statistics";
 import "./command/refresh-medal-scores";
@@ -77,7 +77,7 @@ export async function initDiscordBot() {
         status: "online",
         activities: [
           {
-            name: `${formatNumberWithCommas(await PlayerScoresService.getTotalScoresCount())} Scores!`,
+            name: `${formatNumberWithCommas(await ScoreSaberScoresRepository.getApproximateTotalRowCount())} Scores!`,
             type: ActivityType.Watching,
             url: "https://ssr.fascinated.cc",
           },

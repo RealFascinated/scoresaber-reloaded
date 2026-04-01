@@ -72,7 +72,7 @@ export default class BeatSaverService {
    * @returns the saved map
    */
   public static async saveMap(map: BeatSaverMapToken): Promise<void> {
-    await BeatSaverRepository.saveMapToken(map);
+    await BeatSaverRepository.upsertMap(map);
   }
 
   /**

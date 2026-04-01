@@ -7,14 +7,12 @@ import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
-import { eq } from "drizzle-orm";
-import { db } from "../../db";
-import { scoreSaberLeaderboardsTable } from "../../db/schema";
 import { EventListener } from "../../event/event-listener";
 import { EventsManager } from "../../event/events-manager";
 import BeatLeaderSeenScoresMetric from "../../metrics/impl/player/beatleader-seen-scores";
 import BeatLeaderUniqueDailyPlayersMetric from "../../metrics/impl/player/beatleader-unique-daily-players";
 import UniqueDailyPlayersMetric from "../../metrics/impl/player/unique-daily-players";
+import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import BeatLeaderService from "../../service/beatleader/beatleader.service";
 import MetricsService, { MetricType } from "../../service/infra/metrics.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
@@ -185,17 +183,14 @@ export class ScoreWebsockets implements EventListener {
       }
 
       // Fetch the leaderboard if it doesn't exist
-      if (!(await ScoreSaberLeaderboardsService.leaderboardExists(leaderboard.id))) {
+      if (!(await ScoreSaberLeaderboardsRepository.existsById(leaderboard.id))) {
         await ScoreSaberLeaderboardsService.createLeaderboard(leaderboard.id, leaderboardToken);
       } else {
-        await db
-          .update(scoreSaberLeaderboardsTable)
-          .set({
-            plays: leaderboard.plays,
-            dailyPlays: leaderboard.dailyPlays,
-            maxScore: leaderboard.maxScore,
-          })
-          .where(eq(scoreSaberLeaderboardsTable.id, leaderboard.id));
+        await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, {
+          plays: leaderboard.plays,
+          dailyPlays: leaderboard.dailyPlays,
+          maxScore: leaderboard.maxScore,
+        });
       }
 
       // Track unique daily players in Redis

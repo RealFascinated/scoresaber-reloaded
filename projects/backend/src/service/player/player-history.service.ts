@@ -25,12 +25,10 @@ import {
   type DailyScoreCounterKey,
 } from "../../repositories/player-history.repository";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
-import { PlayerAccuraciesService } from "./player-accuracies.service";
 import { PlayerCoreService } from "./player-core.service";
-import { PlayerMedalsService } from "./player-medals.service";
 import { PlayerRankedService } from "./player-ranked.service";
-import { PlayerScoresService } from "./player-scores.service";
 
 const INACTIVE_RANK = 999_999;
 
@@ -81,7 +79,7 @@ export class PlayerHistoryService {
         PlayerHistoryService.trackPlayerHistory(foundPlayer, now, player),
 
         // Get the number of scores tracked for the player
-        PlayerScoresService.getPlayerScoresCount(player.id),
+        ScoreSaberScoresRepository.countByPlayerId(player.id),
 
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
@@ -161,7 +159,7 @@ export class PlayerHistoryService {
 
     await PlayerCoreService.updatePeakRank(playerToken);
 
-    const daysTracked = await PlayerHistoryService.getDaysTracked(player.id);
+    const daysTracked = await PlayerHistoryRepository.countRowsForPlayer(player.id);
     if (daysTracked === 0) {
       await PlayerHistoryService.seedPlayerRankHistory(player, playerToken);
     }
@@ -176,7 +174,7 @@ export class PlayerHistoryService {
       existingEntry ?? undefined
     );
 
-    await PlayerHistoryRepository.saveHistoryEntry(player.id, date, existingEntry, updatedHistory);
+    await PlayerHistoryRepository.upsertByPlayerAndDate(player.id, date, existingEntry, updatedHistory);
 
     Logger.info(`Tracked player "${player.id}" in ${(performance.now() - before).toFixed(0)}ms`);
   }
@@ -304,7 +302,7 @@ export class PlayerHistoryService {
     if (missingRankUpserts.length > 0) {
       await Promise.all(
         missingRankUpserts.map(({ date, rank }) =>
-          PlayerHistoryRepository.upsertRankOnConflict(playerToken.id, date, rank)
+          PlayerHistoryRepository.upsertRank(playerToken.id, date, rank)
         )
       );
       Logger.info(
@@ -358,7 +356,7 @@ export class PlayerHistoryService {
       // last element is "today" => 0d ago, then 1d ago, etc.
       const daysAgo = historyLength - 1 - i;
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
-      await PlayerHistoryRepository.upsertRankOnConflict(account.id, date, rank);
+      await PlayerHistoryRepository.upsertRank(account.id, date, rank);
     }
   }
 
@@ -375,9 +373,9 @@ export class PlayerHistoryService {
     existingEntry?: PlayerHistoryRow
   ): Promise<ScoreSaberPlayerHistory> {
     const [accuracies, plusOnePp, medals] = await Promise.all([
-      PlayerAccuraciesService.getPlayerAverageAccuracies(playerToken.id),
+      ScoreSaberScoresRepository.selectAverageAccuracies(playerToken.id),
       PlayerRankedService.getPlayerPlusOnePp(playerToken.id),
-      PlayerMedalsService.getPlayerMedals(playerToken.id),
+      ScoreSaberAccountsRepository.getMedalsForPlayerId(playerToken.id),
     ]);
 
     return {
@@ -429,13 +427,6 @@ export class PlayerHistoryService {
     const today = getMidnightAlignedDate(new Date());
     const counterKey = getCounterToIncrement(isRanked, isImprovement) as DailyScoreCounterKey;
 
-    await PlayerHistoryRepository.upsertIncrementDailyCounter(playerId, today, counterKey);
-  }
-
-  /**
-   * Gets the number of days tracked for a player.
-   */
-  public static async getDaysTracked(playerId: string): Promise<number> {
-    return PlayerHistoryRepository.countRowsForPlayer(playerId);
+    await PlayerHistoryRepository.incrementDailyCounter(playerId, today, counterKey);
   }
 }

@@ -51,7 +51,7 @@ export class LeaderboardRankedSyncService {
     async function reweightHistoryScores(leaderboard: ScoreSaberLeaderboard) {
       Logger.info(`[RANKED UPDATES] Reweighting history scores for leaderboard "${leaderboard.id}"...`);
 
-      const rows = await ScoreSaberScoreHistoryRepository.selectPpAccuracyRowsForLeaderboard(leaderboard.id);
+      const rows = await ScoreSaberScoreHistoryRepository.selectPpAccuracyByLeaderboardId(leaderboard.id);
 
       const updates = rows
         .map(row => {
@@ -107,7 +107,7 @@ export class LeaderboardRankedSyncService {
       }
 
       const scoreIds = scoreOps.map(s => s.scoreId);
-      const existingRows = await ScoreSaberScoresRepository.selectScoreSnapshotsByLeaderboardAndScoreIds(
+      const existingRows = await ScoreSaberScoresRepository.selectSnapshotsByLeaderboardAndScoreIds(
         leaderboard.id,
         scoreIds
       );
@@ -219,7 +219,7 @@ export class LeaderboardRankedSyncService {
       Logger.info(`[RANKED UPDATES] Updating ${leaderboardsToUpsert.length} leaderboards...`);
 
       for (const batch of chunkArray(leaderboardsToUpsert, 250)) {
-        await ScoreSaberLeaderboardsService.upsertLeaderboardsFromRankingApi(batch);
+        await ScoreSaberLeaderboardsRepository.upsertLeaderboards(batch);
         Logger.info(`[RANKED UPDATES] Updated batch of ${batch.length} leaderboards!`);
       }
 
@@ -275,7 +275,7 @@ export class LeaderboardRankedSyncService {
 
     if (leaderboardsToUpsert.length > 0) {
       Logger.info(`[RANKED UPDATES] Updating ${leaderboardsToUpsert.length} leaderboards...`);
-      await ScoreSaberLeaderboardsService.upsertLeaderboardsFromRankingApi(leaderboardsToUpsert);
+      await ScoreSaberLeaderboardsRepository.upsertLeaderboards(leaderboardsToUpsert);
       await CacheService.invalidate("leaderboard:qualified-leaderboards");
       Logger.info(
         `[RANKED UPDATES] Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`

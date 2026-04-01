@@ -45,14 +45,14 @@ export class ScoreCoreService {
   }> {
     const before = performance.now();
 
-    if (await ScoreSaberScoresRepository.rowExistsMatchingScoreIdAndScore(score.scoreId, score.score)) {
+    if (await ScoreSaberScoresRepository.existsByScoreIdAndScore(score.scoreId, score.score)) {
       return { score: undefined, hasPreviousScore: false, tracked: false };
     }
 
     const playerId = score.playerId;
     let isImprovement = false;
     if (newScore) {
-      const previousRow = await ScoreSaberScoresRepository.findFirstRowByPlayerAndLeaderboard(
+      const previousRow = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
         playerId,
         leaderboard.id
       );
@@ -62,7 +62,7 @@ export class ScoreCoreService {
         const previous = previousRow;
 
         // Move old score to history (snapshot the row being replaced, not the incoming score)
-        await ScoreSaberScoreHistoryRepository.insertSnapshotFromPreviousScoreRow(
+        await ScoreSaberScoreHistoryRepository.insertSnapshot(
           previous,
           playerId,
           leaderboard.id
@@ -122,16 +122,6 @@ export class ScoreCoreService {
       );
     }
     return { score: score, hasPreviousScore: isImprovement, tracked: true };
-  }
-
-  /**
-   * Checks if a ScoreSaber score already exists.
-   *
-   * @param scoreId the id of the score
-   * @param score the score to check if it exists to do an exact match
-   */
-  public static async scoreExists(scoreId: number): Promise<boolean> {
-    return ScoreSaberScoresRepository.rowExistsByScoreId(scoreId);
   }
 
   /**

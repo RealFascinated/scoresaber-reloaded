@@ -8,7 +8,8 @@ import { and, asc, count, desc, eq, gte, inArray, isNotNull, lte, sql } from "dr
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import { mergeJoinedLeaderboardRows } from "../db/converter/scoresaber-leaderboard";
-import { scoreSaberLeaderboardsTable } from "../db/schema";
+import { ScoreSaberLeaderboardRow, scoreSaberLeaderboardsTable } from "../db/schema";
+import CacheService from "../service/infra/cache.service";
 
 const LEADERBOARD_SEARCH_PAGE_SIZE = 20;
 
@@ -97,7 +98,7 @@ export class ScoreSaberLeaderboardsRepository {
     );
   }
 
-  public static async insertLeaderboardRow(
+  public static async insert(
     id: number,
     leaderboard: ScoreSaberLeaderboard,
     cachedSongArt: boolean
@@ -125,7 +126,12 @@ export class ScoreSaberLeaderboardsRepository {
     });
   }
 
-  public static async upsertLeaderboardsFromRankingApi(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
+  public static async updateLeaderboard(leaderboardId: number, partial: Partial<ScoreSaberLeaderboardRow>) {
+    await db.update(scoreSaberLeaderboardsTable).set(partial).where(eq(scoreSaberLeaderboardsTable.id, leaderboardId));
+    await CacheService.invalidate(`leaderboard:id:${leaderboardId}`);
+  }
+
+  public static async upsertLeaderboards(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
     if (leaderboards.length === 0) {
       return;
     }
@@ -311,7 +317,7 @@ export class ScoreSaberLeaderboardsRepository {
     return mergeJoinedLeaderboardRows(result);
   }
 
-  public static async selectRankedJoinedWhereStarsBetween(
+  public static async selectRankedByStarsBetween(
     minStars: number,
     maxStars: number
   ): Promise<ScoreSaberLeaderboard[]> {
@@ -355,28 +361,6 @@ export class ScoreSaberLeaderboardsRepository {
       WHERE oid = 'scoresaber-leaderboards'::regclass
     `);
     return Number(result.rows[0]?.count ?? 0);
-  }
-
-  public static async setCachedSongArtTrueWhereHashLowerMatches(
-    hashNorm: string,
-    onlyIfCachedSongArtFalse: boolean
-  ): Promise<void> {
-    if (onlyIfCachedSongArtFalse) {
-      await db
-        .update(scoreSaberLeaderboardsTable)
-        .set({ cachedSongArt: true })
-        .where(
-          and(
-            sql`lower(${scoreSaberLeaderboardsTable.songHash}) = ${hashNorm}`,
-            eq(scoreSaberLeaderboardsTable.cachedSongArt, false)
-          )
-        );
-    } else {
-      await db
-        .update(scoreSaberLeaderboardsTable)
-        .set({ cachedSongArt: true })
-        .where(sql`lower(${scoreSaberLeaderboardsTable.songHash}) = ${hashNorm}`);
-    }
   }
 
   public static async selectRankedSnapshots(): Promise<RankedLeaderboardSnapshotRow[]> {

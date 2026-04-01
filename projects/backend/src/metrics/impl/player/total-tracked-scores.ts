@@ -1,7 +1,7 @@
 import { Gauge } from "prom-client";
+import { ScoreSaberScoreHistoryRepository } from "../../../repositories/scoresaber-score-history.repository";
+import { ScoreSaberScoresRepository } from "../../../repositories/scoresaber-scores.repository";
 import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
-import { PlayerScoreHistoryService } from "../../../service/player/player-score-history.service";
-import { PlayerScoresService } from "../../../service/player/player-scores.service";
 import NumberMetric from "../../number-metric";
 
 export default class TotalTrackedScoresMetric extends NumberMetric {
@@ -13,7 +13,7 @@ export default class TotalTrackedScoresMetric extends NumberMetric {
       help: "Total number of tracked scores",
       registers: [prometheusRegistry],
       collect: async () => {
-        const total = await PlayerScoresService.getTotalScoresCount();
+        const total = await ScoreSaberScoresRepository.getApproximateTotalRowCount();
         totalScoresGauge.set(total);
       },
     });
@@ -23,7 +23,7 @@ export default class TotalTrackedScoresMetric extends NumberMetric {
       help: "Total number of tracked previous scores",
       registers: [prometheusRegistry],
       collect: async () => {
-        const totalPrevious = await PlayerScoreHistoryService.getTotalPreviousScoresCount();
+        const totalPrevious = await ScoreSaberScoreHistoryRepository.getApproximateTotalRowCount();
         totalPreviousScoresGauge.set(totalPrevious);
       },
     });

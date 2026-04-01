@@ -19,7 +19,6 @@ import MetricsService, { MetricType } from "../infra/metrics.service";
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerHistoryService } from "./player-history.service";
 import { PlayerHmdService } from "./player-hmd.service";
-import { PlayerMedalsService } from "./player-medals.service";
 import { PlayerRankedService } from "./player-ranked.service";
 
 const CACHED_PLAYER_EXPIRY = TimeUnit.toSeconds(TimeUnit.Month, 3);
@@ -87,7 +86,7 @@ export default class ScoreSaberPlayerService {
         account && player !== undefined
           ? PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages)
           : undefined,
-        account ? PlayerMedalsService.getPlayerMedalRank(id) : undefined,
+        account ? ScoreSaberAccountsRepository.getPlayerGlobalMedalRank(id) : undefined,
         PlayerHistoryService.getPlayerStatisticHistories(player, 30),
         account
           ? (async () => (await ScoreSaberAccountsRepository.countWithPpGreaterThan(player.pp)) + 1)()

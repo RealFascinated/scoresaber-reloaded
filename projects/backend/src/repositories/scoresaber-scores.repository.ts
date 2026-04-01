@@ -53,7 +53,7 @@ export class ScoreSaberScoresRepository {
     return rows.length > 0;
   }
 
-  public static async rowExistsMatchingScoreIdAndScore(
+  public static async existsByScoreIdAndScore(
     scoreId: number,
     scoreValue: number
   ): Promise<boolean> {
@@ -65,7 +65,7 @@ export class ScoreSaberScoresRepository {
     return rows.length > 0;
   }
 
-  public static async findFirstRowByPlayerAndLeaderboard(
+  public static async findByPlayerAndLeaderboard(
     playerId: string,
     leaderboardId: number
   ): Promise<ScoreSaberScoreRow | undefined> {
@@ -150,16 +150,16 @@ export class ScoreSaberScoresRepository {
       .offset(offset);
   }
 
-  public static async selectTop50PpDescending(): Promise<{ pp: number }[]> {
+  public static async selectTopPp(limit: number = 50): Promise<{ pp: number }[]> {
     return db
       .select({ pp: scoreSaberScoresTable.pp })
       .from(scoreSaberScoresTable)
       .where(gt(scoreSaberScoresTable.pp, 0))
       .orderBy(desc(scoreSaberScoresTable.pp))
-      .limit(50);
+      .limit(limit);
   }
 
-  public static async selectPpAndScoreIdByPlayerRankedOrdered(
+  public static async selectPpAndScoreIdByPlayer(
     playerId: string
   ): Promise<{ pp: number; scoreId: number }[]> {
     return db
@@ -172,7 +172,7 @@ export class ScoreSaberScoresRepository {
       .orderBy(desc(scoreSaberScoresTable.pp));
   }
 
-  public static async selectPpByPlayerRankedOrdered(playerId: string): Promise<{ pp: number }[]> {
+  public static async selectPpByPlayer(playerId: string): Promise<{ pp: number }[]> {
     return db
       .select({ pp: scoreSaberScoresTable.pp })
       .from(scoreSaberScoresTable)
@@ -253,7 +253,7 @@ export class ScoreSaberScoresRepository {
     return limit != null ? q.limit(limit) : q;
   }
 
-  public static async selectScoreSnapshotsByLeaderboardAndScoreIds(
+  public static async selectSnapshotsByLeaderboardAndScoreIds(
     leaderboardId: number,
     scoreIds: number[]
   ): Promise<{ scoreId: number; score: number; pp: number }[]> {
@@ -273,7 +273,7 @@ export class ScoreSaberScoresRepository {
       );
   }
 
-  public static async selectChartRowsWithLeaderboardForPlayer(playerId: string): Promise<
+  public static async selectChartRowsByPlayer(playerId: string): Promise<
     {
       accuracy: number;
       pp: number;

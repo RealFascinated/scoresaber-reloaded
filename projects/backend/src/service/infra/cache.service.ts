@@ -55,6 +55,77 @@ export default class CacheService {
       mode: "REDIS",
     },
   };
+
+  public static async get<T>(cache: CacheId, cacheKey: string): Promise<T | undefined> {
+    // Skip cache in development
+    if (!isProduction()) {
+      return undefined;
+    }
+
+    if (cache == undefined) {
+      throw new InternalServerError(`Cache is not defined`);
+    }
+    if (cacheKey === "" || cacheKey === undefined) {
+      throw new InternalServerError(`Cache key is not defined`);
+    }
+
+    const mode = this.CACHE_INFO[cache].mode;
+    if (mode === "REDIS") {
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData !== null) {
+        try {
+          CachePerformanceMetric.recordHit(cache, mode);
+          return parse(cachedData) as T;
+        } catch {
+          Logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
+          await redisClient.del(cacheKey);
+        }
+      }
+    } else {
+      const cached = this.getMemoryCache(cache).get<T>(cacheKey);
+      if (cached !== undefined) {
+        CachePerformanceMetric.recordHit(cache, mode);
+        return cached;
+      }
+    }
+
+    CachePerformanceMetric.recordMiss(cache, mode);
+    return undefined;
+  }
+
+  public static async insert<T>(cache: CacheId, cacheKey: string, data: T): Promise<void> {
+    // Skip cache in development
+    if (!isProduction()) {
+      return;
+    }
+
+    if (cache == undefined) {
+      throw new InternalServerError(`Cache is not defined`);
+    }
+    if (cacheKey === "" || cacheKey === undefined) {
+      throw new InternalServerError(`Cache key is not defined`);
+    }
+    if (data === undefined) {
+      return;
+    }
+
+    const mode = this.CACHE_INFO[cache].mode;
+    if (mode === "REDIS") {
+      const result = await redisClient.set(
+        cacheKey,
+        stringify(data),
+        "EX",
+        this.CACHE_INFO[cache].ttl
+      );
+      if (result !== "OK") {
+        throw new InternalServerError(`Failed to set cache for ${cacheKey}`);
+      }
+      return;
+    }
+
+    this.getMemoryCache(cache).set(cacheKey, data);
+  }
+
   /**
    * Fetches data with caching. If the data is not in cache, the fetchFn is called and the data is cached.
    * If the data is in cache, it is returned immediately.

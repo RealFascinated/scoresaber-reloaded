@@ -108,7 +108,7 @@ export class PlayerScoreHistoryService {
       CacheId.SCORESABER_SCORE_HISTORY_GRAPH,
       `score-history-graph:${playerId}-${leaderboardId}`,
       async () => {
-        return ScoreSaberScoreHistoryRepository.selectGraphAccuracySeriesForPlayerMap(
+        return ScoreSaberScoreHistoryRepository.selectAccuracySeriesForPlayerMap(
           playerId,
           leaderboardId
         );
@@ -116,12 +116,4 @@ export class PlayerScoreHistoryService {
     );
   }
 
-  /**
-   * Gets the total number of previous scores.
-   *
-   * @returns the approximate total number of previous scores
-   */
-  public static async getTotalPreviousScoresCount(): Promise<number> {
-    return ScoreSaberScoreHistoryRepository.getApproximateTotalRowCount();
-  }
 }

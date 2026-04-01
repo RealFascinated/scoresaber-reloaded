@@ -24,7 +24,7 @@ function playerMapFilters(playerId: string, leaderboardId: number) {
 }
 
 export class ScoreSaberScoreHistoryRepository {
-  public static async insertSnapshotFromPreviousScoreRow(
+  public static async insertSnapshot(
     previous: ScoreSaberScoreRow,
     playerId: string,
     leaderboardId: number
@@ -121,7 +121,7 @@ export class ScoreSaberScoreHistoryRepository {
     return rawScores as ScoreSaberScoreRow[];
   }
 
-  public static async selectGraphAccuracySeriesForPlayerMap(
+  public static async selectAccuracySeriesForPlayerMap(
     playerId: string,
     leaderboardId: number
   ): Promise<Array<{ timestamp: Date; accuracy: number }>> {
@@ -150,7 +150,7 @@ export class ScoreSaberScoreHistoryRepository {
     }));
   }
 
-  public static async selectPpAccuracyRowsForLeaderboard(
+  public static async selectPpAccuracyByLeaderboardId(
     leaderboardId: number
   ): Promise<{ id: number; pp: number; accuracy: number }[]> {
     return db

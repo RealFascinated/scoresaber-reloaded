@@ -5,6 +5,7 @@ import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/scor
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { BeatLeaderScoresRepository } from "../../repositories/beatleader-scores.repository";
 import BeatLeaderService from "../beatleader/beatleader.service";
 import { PlayerCoreService } from "./player-core.service";
 
@@ -105,7 +106,7 @@ export class PlayerBeatLeaderScoresService {
       }
 
       const scoreIds = scores.map(score => score.id);
-      const existing = await BeatLeaderService.scoresExist(scoreIds);
+      const existing = await BeatLeaderScoresRepository.findExistingIds(Array.from(new Set(scoreIds)));
       const uniqueIdsCount = new Set(scoreIds).size;
       const fullPageAlreadyTracked = existing.size >= uniqueIdsCount;
 

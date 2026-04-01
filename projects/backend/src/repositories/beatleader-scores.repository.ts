@@ -24,7 +24,7 @@ export class BeatLeaderScoresRepository {
     return inserted;
   }
 
-  public static async findLatestBySongComposite(
+  public static async findLatestBySong(
     playerId: string,
     songHashUpper: string,
     songDifficulty: MapDifficulty,
@@ -67,7 +67,7 @@ export class BeatLeaderScoresRepository {
     return new Set(rows.map(r => r.id));
   }
 
-  public static async findPreviousScoreIdBeforeTimestamp(
+  public static async findPreviousIdBeforeTimestamp(
     playerId: string,
     songHashUpper: string,
     leaderboardId: string,

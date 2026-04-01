@@ -14,7 +14,7 @@ export class PlayerRankedService {
   public static async getPlayerPps(playerId: string): Promise<PlayerPpsResponse> {
     await PlayerCoreService.playerExists(playerId, true);
 
-    const playerScores = await ScoreSaberScoresRepository.selectPpAndScoreIdByPlayerRankedOrdered(playerId);
+    const playerScores = await ScoreSaberScoresRepository.selectPpAndScoreIdByPlayer(playerId);
 
     if (playerScores.length === 0) {
       return {
@@ -41,7 +41,7 @@ export class PlayerRankedService {
    * @returns the raw pp needed to gain 1 weighted pp
    */
   public static async getPlayerPlusOnePp(playerId: string): Promise<number> {
-    const playerScores = await ScoreSaberScoresRepository.selectPpByPlayerRankedOrdered(playerId);
+    const playerScores = await ScoreSaberScoresRepository.selectPpByPlayer(playerId);
 
     // No ranked score set
     if (playerScores.length === 0) {

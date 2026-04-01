@@ -23,7 +23,7 @@ import StorageService from "../infra/storage.service";
 export class ScoreSaberLeaderboardsService {
   public static async getLeaderboard(id: number): Promise<ScoreSaberLeaderboard> {
     return await CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, `leaderboard:id:${id}`, async () => {
-      const map = await ScoreSaberLeaderboardsRepository.getLeaderboardsWithDifficultiesByIds([id]);
+      const map = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds([id]);
       const leaderboard = map.get(id);
       if (!leaderboard) {
         return await ScoreSaberLeaderboardsService.createLeaderboard(id);
@@ -50,7 +50,7 @@ export class ScoreSaberLeaderboardsService {
         );
 
         if (matchId !== undefined) {
-          const map = await ScoreSaberLeaderboardsRepository.getLeaderboardsWithDifficultiesByIds([matchId]);
+          const map = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds([matchId]);
           const fromDb = map.get(matchId);
           if (fromDb) {
             return fromDb;
@@ -87,11 +87,32 @@ export class ScoreSaberLeaderboardsService {
   public static async getLeaderboardsWithDifficultiesByIds(
     ids: number[]
   ): Promise<Map<number, ScoreSaberLeaderboard>> {
-    return ScoreSaberLeaderboardsRepository.getLeaderboardsWithDifficultiesByIds(ids);
-  }
+    const uniqueIds = [...new Set(ids)];
+    const result = new Map<number, ScoreSaberLeaderboard>();
+    const missingIds: number[] = [];
 
-  public static async leaderboardExists(id: number): Promise<boolean> {
-    return ScoreSaberLeaderboardsRepository.existsById(id);
+    for (const id of uniqueIds) {
+      const leaderboard = await CacheService.get<ScoreSaberLeaderboard>(
+        CacheId.SCORESABER_LEADERBOARDS,
+        `leaderboard:id:${id}`
+      );
+      if (leaderboard !== undefined) {
+        result.set(id, leaderboard);
+      } else {
+        missingIds.push(id);
+      }
+    }
+
+    if (missingIds.length > 0) {
+      const dbLeaderboards =
+        await ScoreSaberLeaderboardsRepository.getLeaderboardsWithDifficultiesByIds(missingIds);
+      for (const [id, leaderboard] of dbLeaderboards) {
+        result.set(id, leaderboard);
+        await CacheService.insert(CacheId.SCORESABER_LEADERBOARDS, `leaderboard:id:${id}`, leaderboard);
+      }
+    }
+
+    return result;
   }
 
   public static async createLeaderboard(
@@ -168,12 +189,7 @@ export class ScoreSaberLeaderboardsService {
 
   public static async saveLeaderboard(id: number, leaderboard: ScoreSaberLeaderboard) {
     const cachedSongArt = await ScoreSaberLeaderboardsService.cacheLeaderboardSongArt(leaderboard);
-
-    await ScoreSaberLeaderboardsRepository.insertLeaderboardRow(id, leaderboard, cachedSongArt);
-  }
-
-  public static async upsertLeaderboardsFromRankingApi(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
-    return ScoreSaberLeaderboardsRepository.upsertLeaderboardsFromRankingApi(leaderboards);
+    await ScoreSaberLeaderboardsRepository.insert(id, leaderboard, cachedSongArt);
   }
 
   public static async lookupLeaderboards(
@@ -190,10 +206,6 @@ export class ScoreSaberLeaderboardsService {
     return ScoreSaberLeaderboardsRepository.lookupLeaderboards(page, options);
   }
 
-  public static async searchLeaderboardIds(search: string, limit: number = 50): Promise<number[]> {
-    return ScoreSaberLeaderboardsRepository.searchLeaderboardIds(search, limit);
-  }
-
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
     return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, "leaderboard:ranked-leaderboards", async () => {
       return ScoreSaberLeaderboardsRepository.selectRankedJoined();
@@ -205,7 +217,7 @@ export class ScoreSaberLeaderboardsService {
       CacheId.SCORESABER_LEADERBOARDS,
       "leaderboard:qualified-leaderboards",
       async () => {
-      return ScoreSaberLeaderboardsRepository.selectQualifiedJoined();
+        return ScoreSaberLeaderboardsRepository.selectQualifiedJoined();
       }
     );
   }
@@ -221,17 +233,12 @@ export class ScoreSaberLeaderboardsService {
     });
   }
 
-  public static async getTotalLeaderboardsCount(): Promise<number> {
-    return ScoreSaberLeaderboardsRepository.getApproximateRowCount();
-  }
-
   public static async cacheLeaderboardSongArt(leaderboard: ScoreSaberLeaderboard): Promise<boolean> {
-    const hashNorm = leaderboard.songHash.trim().toLowerCase();
     const objectKey = `${leaderboard.songHash}.png`;
 
     const exists = await StorageService.fileExists(StorageBucket.LeaderboardSongArt, objectKey);
     if (exists) {
-      await ScoreSaberLeaderboardsRepository.setCachedSongArtTrueWhereHashLowerMatches(hashNorm, true);
+      await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, { cachedSongArt: true });
       return true;
     }
 
@@ -243,8 +250,7 @@ export class ScoreSaberLeaderboardsService {
     );
     if (request) {
       await StorageService.saveFile(StorageBucket.LeaderboardSongArt, objectKey, Buffer.from(request));
-
-      await ScoreSaberLeaderboardsRepository.setCachedSongArtTrueWhereHashLowerMatches(hashNorm, false);
+      await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, { cachedSongArt: true });
 
       Logger.info(`Cached song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`);
       return true;

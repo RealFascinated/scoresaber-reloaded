@@ -22,7 +22,7 @@ export class PlayerHistoryRepository {
     return row;
   }
 
-  public static async saveHistoryEntry(
+  public static async upsertByPlayerAndDate(
     playerId: string,
     date: Date,
     existingEntry: PlayerHistoryRow | undefined,
@@ -58,7 +58,7 @@ export class PlayerHistoryRepository {
       .orderBy(desc(playerHistoryTable.date));
   }
 
-  public static async upsertRankOnConflict(playerId: string, date: Date, rank: number): Promise<void> {
+  public static async upsertRank(playerId: string, date: Date, rank: number): Promise<void> {
     await db
       .insert(playerHistoryTable)
       .values({ playerId, date, rank })
@@ -68,7 +68,7 @@ export class PlayerHistoryRepository {
       });
   }
 
-  public static async upsertIncrementDailyCounter(
+  public static async incrementDailyCounter(
     playerId: string,
     date: Date,
     counterKey: DailyScoreCounterKey

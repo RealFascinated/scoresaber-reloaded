@@ -48,16 +48,6 @@ export class PlayerMedalsService {
   }
 
   /**
-   * Gets the amount of medals a player has.
-   *
-   * @param playerId the id of the player
-   * @returns the medal count
-   */
-  public static async getPlayerMedals(playerId: string): Promise<number> {
-    return ScoreSaberAccountsRepository.getMedalsForPlayerId(playerId);
-  }
-
-  /**
    * Gets the player medal ranking for a page.
    *
    * @param page the page number
@@ -120,23 +110,4 @@ export class PlayerMedalsService {
     } as PlayerMedalRankingsResponse;
   }
 
-  /**
-   * Gets a player's global medal rank.
-   *
-   * @param playerId the id of the player
-   * @returns the rank, or null if the player has no medals
-   */
-  public static async getPlayerMedalRank(playerId: string): Promise<number | null> {
-    return ScoreSaberAccountsRepository.getPlayerGlobalMedalRank(playerId);
-  }
-
-  /**
-   * Gets a player's country medal rank.
-   *
-   * @param playerId the id of the player
-   * @returns the rank, or null if the player has no medals
-   */
-  public static async getPlayerCountryMedalRank(playerId: string): Promise<number | null> {
-    return ScoreSaberAccountsRepository.getPlayerCountryMedalRank(playerId);
-  }
 }

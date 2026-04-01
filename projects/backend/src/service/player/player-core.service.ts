@@ -20,7 +20,6 @@ import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService from "../infra/cache.service";
 import StorageService from "../infra/storage.service";
-import { PlayerScoresService } from "./player-scores.service";
 
 export const accountCreationLock: Record<string, Promise<ScoreSaberAccount | undefined>> = {};
 
@@ -142,7 +141,7 @@ export class PlayerCoreService {
 
           try {
             Logger.info(`Creating player "${id}"...`);
-            const newAccount = await ScoreSaberAccountsRepository.insertAccount({
+            const newAccount = await ScoreSaberAccountsRepository.insert({
               id: id,
               name: token.name,
               country: token.country ?? null,
@@ -170,7 +169,7 @@ export class PlayerCoreService {
             });
 
             // If the player has less scores tracked than the total play count, add them to the refresh queue
-            const trackedScores = await PlayerScoresService.getPlayerScoresCount(id);
+            const trackedScores = await ScoreSaberScoresRepository.countByPlayerId(id);
             if (trackedScores < token.scoreStats.totalPlayCount) {
               const seedQueue = QueueManager.getQueue(
                 QueueId.PlayerScoreRefreshQueue

@@ -10,7 +10,7 @@ import {
 } from "../db/schema";
 
 export class BeatSaverRepository {
-  public static async saveMapToken(map: BeatSaverMapToken): Promise<void> {
+  public static async upsertMap(map: BeatSaverMapToken): Promise<void> {
     map.versions.forEach(version => {
       version.hash = version.hash.toLowerCase();
     });

@@ -37,6 +37,7 @@ import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberMedalScoresTable, scoreSaberScoresTable } from "../../db/schema";
+import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberMedalScoresRepository } from "../../repositories/scoresaber-medal-scores.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import BeatLeaderService from "../beatleader/beatleader.service";
@@ -96,7 +97,7 @@ export class PlayerScoresService {
 
     const startTime = performance.now();
     const playerId = playerToken.id;
-    const playerScoresCount = await PlayerScoresService.getPlayerScoresCount(playerId);
+    const playerScoresCount = await ScoreSaberScoresRepository.countByPlayerId(playerId);
 
     // The player has the correct number of scores
     if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
@@ -263,7 +264,7 @@ export class PlayerScoresService {
    * @param playerId the player's id
    */
   public static async getPlayerScoreChart(playerId: string): Promise<PlayerScoresChartResponse> {
-    const rows = await ScoreSaberScoresRepository.selectChartRowsWithLeaderboardForPlayer(playerId);
+    const rows = await ScoreSaberScoresRepository.selectChartRowsByPlayer(playerId);
 
     if (!rows.length) {
       return { data: [] };
@@ -305,16 +306,6 @@ export class PlayerScoresService {
       ),
     ]);
     return { score, leaderboard, beatSaver };
-  }
-
-  /**
-   * Gets the number of scores for a player.
-   *
-   * @param playerId the player's id
-   * @returns the number of scores
-   */
-  public static async getPlayerScoresCount(playerId: string): Promise<number> {
-    return ScoreSaberScoresRepository.countByPlayerId(playerId);
   }
 
   /**
@@ -419,7 +410,7 @@ export class PlayerScoresService {
     query: PlayerScoresQuery,
     config: ScoreTableConfig<TRow, TScore>
   ): Promise<Page<PlayerScore<TScore>>> {
-    const leaderboardIds = await ScoreSaberLeaderboardsService.searchLeaderboardIds(query.search ?? "");
+    const leaderboardIds = await ScoreSaberLeaderboardsRepository.searchLeaderboardIds(query.search ?? "");
     if (leaderboardIds == null) {
       return Pagination.empty<PlayerScore<TScore>>();
     }
@@ -614,12 +605,4 @@ export class PlayerScoresService {
     });
   }
 
-  /**
-   * Gets the total number of scores.
-   *
-   * @returns the approximate total number of scores
-   */
-  public static async getTotalScoresCount(): Promise<number> {
-    return ScoreSaberScoresRepository.getApproximateTotalRowCount();
-  }
 }

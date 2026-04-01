@@ -73,7 +73,7 @@ export class TopScoresService {
       return false;
     }
 
-    const top50 = await ScoreSaberScoresRepository.selectTop50PpDescending();
+    const top50 = await ScoreSaberScoresRepository.selectTopPp();
 
     if (!top50.length) {
       return false;
