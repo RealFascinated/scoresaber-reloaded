@@ -157,7 +157,6 @@ export default class BeatLeaderService {
         .select()
         .from(beatLeaderScoresTable)
         .where(eq(beatLeaderScoresTable.id, scoreId))
-        .orderBy(desc(beatLeaderScoresTable.timestamp))
         .limit(1);
       if (!beatLeaderScore) {
         return undefined;
@@ -256,7 +255,7 @@ export default class BeatLeaderService {
       };
     }
 
-    const previous = await this.getPreviousBeatLeaderScore(
+    const previousScoreId = await this.getPreviousBeatLeaderScoreId(
       current.playerId,
       current.songHash,
       current.leaderboardId,
@@ -265,7 +264,7 @@ export default class BeatLeaderService {
 
     const [currentStats, previousStats] = await Promise.all([
       this.getScoreStats(current.scoreId),
-      previous ? this.getScoreStats(previous.scoreId) : undefined,
+      previousScoreId ? this.getScoreStats(previousScoreId) : undefined,
     ]);
     if (!currentStats) {
       throw new NotFoundError(`Score stats not found for score ${scoreId}`);
@@ -286,14 +285,14 @@ export default class BeatLeaderService {
    * @param timestamp the timestamp to get the previous BeatLeader score for
    * @returns the BeatLeader score, or undefined if none
    */
-  public static async getPreviousBeatLeaderScore(
+  public static async getPreviousBeatLeaderScoreId(
     playerId: string,
     songHash: string,
     leaderboardId: string,
     timestamp: Date
-  ): Promise<BeatLeaderScore | undefined> {
+  ): Promise<number | undefined> {
     const beatLeaderScore = await db
-      .select()
+      .select({ id: beatLeaderScoresTable.id })
       .from(beatLeaderScoresTable)
       .where(
         and(
@@ -308,7 +307,7 @@ export default class BeatLeaderService {
     if (beatLeaderScore.length === 0) {
       return undefined;
     }
-    return beatLeaderScoreRowToType(beatLeaderScore[0]);
+    return beatLeaderScore[0].id;
   }
 
   /**
@@ -388,32 +387,32 @@ export default class BeatLeaderService {
     const scoreImprovement =
       rawScoreImprovement && rawScoreImprovement.score > 0
         ? {
-            score: rawScoreImprovement.score,
-            pauses: rawScoreImprovement.pauses,
-            misses: {
-              misses: getMisses(rawScoreImprovement),
-              missedNotes: rawScoreImprovement.missedNotes,
-              bombCuts: rawScoreImprovement.bombCuts,
-              badCuts: rawScoreImprovement.badCuts,
-              wallsHit: rawScoreImprovement.wallsHit,
-            },
-            handAccuracy: {
-              left: rawScoreImprovement.accLeft,
-              right: rawScoreImprovement.accRight,
-            },
-          }
+          score: rawScoreImprovement.score,
+          pauses: rawScoreImprovement.pauses,
+          misses: {
+            misses: getMisses(rawScoreImprovement),
+            missedNotes: rawScoreImprovement.missedNotes,
+            bombCuts: rawScoreImprovement.bombCuts,
+            badCuts: rawScoreImprovement.badCuts,
+            wallsHit: rawScoreImprovement.wallsHit,
+          },
+          handAccuracy: {
+            left: rawScoreImprovement.accLeft,
+            right: rawScoreImprovement.accRight,
+          },
+        }
         : {
-            score: 0,
-            pauses: 0,
-            misses: {
-              misses: 0,
-              missedNotes: 0,
-              bombCuts: 0,
-              wallsHit: 0,
-              badCuts: 0,
-            },
-            handAccuracy: { left: 0, right: 0 },
-          };
+          score: 0,
+          pauses: 0,
+          misses: {
+            misses: 0,
+            missedNotes: 0,
+            bombCuts: 0,
+            wallsHit: 0,
+            badCuts: 0,
+          },
+          handAccuracy: { left: 0, right: 0 },
+        };
 
     return {
       playerId: scoreToken.playerId,
