@@ -13,8 +13,8 @@ export function scoreSaberAccountRowToType(row: ScoreSaberAccountRow): ScoreSabe
     name: row.name,
     avatar: row.avatar,
     country: row.country,
-    peakRank: row.peakRank
-      ? { rank: row.peakRank, timestamp: row.peakRankTimestamp?.toISOString() }
+    peakRank: row.peakRank && row.peakRankTimestamp
+      ? { rank: row.peakRank, timestamp: new Date(row.peakRankTimestamp) }
       : undefined,
     seededScores: row.seededScores,
     seededBeatLeaderScores: row.seededBeatLeaderScores,
