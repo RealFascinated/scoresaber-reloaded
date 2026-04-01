@@ -78,7 +78,7 @@ export class ScoreCoreService {
     await PlayerCoreService.updatePlayer(playerId, playerUpdates);
 
     // Handle score for medal updates
-    if (leaderboard.ranked && score.rank <= 10) {
+    if (newScore && leaderboard.ranked && score.rank <= 10) {
       await ScoreSaberMedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
     }
 
