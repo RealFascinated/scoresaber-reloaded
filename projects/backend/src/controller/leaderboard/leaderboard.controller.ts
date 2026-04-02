@@ -59,15 +59,15 @@ export default function leaderboardController(app: Elysia) {
         "/by-id/:leaderboardId",
         async ({ params: { leaderboardId } }) => {
           const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
-          return {
-            leaderboard: leaderboard,
-            beatsaver: await BeatSaverService.getMap(
+          const [beatsaver, starChangeHistory] = await Promise.all([
+            BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic
             ),
-            starChangeHistory: await LeaderboardRankedSyncService.fetchStarChangeHistory(leaderboard),
-          } as LeaderboardResponse;
+            LeaderboardRankedSyncService.fetchStarChangeHistory(leaderboard),
+          ]);
+          return { leaderboard, beatsaver, starChangeHistory } as LeaderboardResponse;
         },
         {
           tags: ["Leaderboard"],
@@ -87,15 +87,15 @@ export default function leaderboardController(app: Elysia) {
             difficulty,
             characteristic
           );
-          return {
-            leaderboard: leaderboard,
-            beatsaver: await BeatSaverService.getMap(
+          const [beatsaver, starChangeHistory] = await Promise.all([
+            BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic
             ),
-            starChangeHistory: await LeaderboardRankedSyncService.fetchStarChangeHistory(leaderboard),
-          } as LeaderboardResponse;
+            LeaderboardRankedSyncService.fetchStarChangeHistory(leaderboard),
+          ]);
+          return { leaderboard, beatsaver, starChangeHistory } as LeaderboardResponse;
         },
         {
           tags: ["Leaderboard"],
