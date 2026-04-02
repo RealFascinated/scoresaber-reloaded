@@ -12,12 +12,10 @@ export const env = createEnv({
 
     ENABLE_QUEUES: z.boolean(),
 
-    MINIO_ENDPOINT: z.string(),
-    MINIO_USE_SSL: z.boolean(),
-    MINIO_PORT: z.number(),
-    MINIO_ACCESS_KEY: z.string(),
-    MINIO_SECRET_KEY: z.string(),
-    MINIO_REGION: z.string(),
+    S3_ENDPOINT: z.string(),
+    S3_ACCESS_KEY: z.string(),
+    S3_SECRET_KEY: z.string(),
+    S3_REGION: z.string(),
 
     PROMETHEUS_AUTH_TOKEN: z.string(),
 
@@ -82,12 +80,10 @@ export const env = createEnv({
     DISCORD_CHANNEL_BEATSAVER_LOGS: process.env.DISCORD_CHANNEL_BEATSAVER_LOGS,
 
     // Minio
-    MINIO_ENDPOINT: process.env.MINIO_ENDPOINT,
-    MINIO_USE_SSL: Boolean(process.env.MINIO_USE_SSL),
-    MINIO_PORT: Number(process.env.MINIO_PORT),
-    MINIO_ACCESS_KEY: process.env.MINIO_ACCESS_KEY,
-    MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY,
-    MINIO_REGION: process.env.MINIO_REGION,
+    S3_ENDPOINT: process.env.S3_ENDPOINT,
+    S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
+    S3_SECRET_KEY: process.env.S3_SECRET_KEY,
+    S3_REGION: process.env.S3_REGION,
 
     // Prometheus
     PROMETHEUS_AUTH_TOKEN: process.env.PROMETHEUS_AUTH_TOKEN,
