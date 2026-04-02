@@ -3,6 +3,7 @@ import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { Elysia } from "elysia";
 import { z } from "zod";
+import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import BeatSaverService from "../../service/external/beatsaver.service";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
@@ -13,7 +14,7 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/search",
         async ({ query: { page, ranked, qualified, category, minStar, maxStar, sort, query } }) => {
-          return await ScoreSaberLeaderboardsService.lookupLeaderboards(page, {
+          return await ScoreSaberLeaderboardsRepository.lookupLeaderboards(page, {
             query,
             ranked,
             qualified,

@@ -1,9 +1,7 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import { StarFilter } from "@ssr/common/maps/types";
 import { StorageBucket } from "@ssr/common/minio-buckets";
-import type { Page } from "@ssr/common/pagination";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
@@ -234,20 +232,6 @@ export class ScoreSaberLeaderboardsService {
   public static async saveLeaderboard(id: number, leaderboard: ScoreSaberLeaderboard) {
     const cachedSongArt = await ScoreSaberLeaderboardsService.cacheLeaderboardSongArt(leaderboard);
     await ScoreSaberLeaderboardsRepository.insert(id, leaderboard, cachedSongArt);
-  }
-
-  public static async lookupLeaderboards(
-    page: number,
-    options?: {
-      ranked?: boolean;
-      qualified?: boolean;
-      category?: number;
-      stars?: StarFilter;
-      sort?: number;
-      query?: string;
-    }
-  ): Promise<Page<ScoreSaberLeaderboard>> {
-    return ScoreSaberLeaderboardsRepository.lookupLeaderboards(page, options);
   }
 
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
