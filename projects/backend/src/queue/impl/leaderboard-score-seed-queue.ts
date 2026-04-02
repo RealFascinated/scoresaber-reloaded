@@ -24,16 +24,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
   protected async processItem(item: QueueItem<number>): Promise<void> {
     const leaderboardId = Number(item.id);
-
     const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
-    const totalTrackedScores = await ScoreSaberScoresRepository.countByLeaderboardId(leaderboardId);
-
-    const firstPage = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, 1);
-    if (firstPage && totalTrackedScores >= firstPage.metadata.total) {
-      // Optional: log skip when leaderboard already has all scores tracked
-      await this.markLeaderboardSeeded(leaderboardId);
-      return;
-    }
 
     let consecutiveFailures = 0;
     let newScoresTracked = 0;
@@ -41,10 +32,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     let page = 1;
 
     while (scrape) {
-      const response =
-        page === 1 && firstPage
-          ? firstPage
-          : await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page);
+      const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page);
       if (!response) {
         LeaderboardScoreSeedQueue.logger.warn(
           `Failed to fetch scores for leaderboard "${leaderboardId}" on page ${page}`
