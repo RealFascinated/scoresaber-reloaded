@@ -77,14 +77,6 @@ export class ScoreSaberAccountsRepository {
       .groupBy(scoreSaberAccountsTable.hmd);
   }
 
-  public static async countWithPpGreaterThan(pp: number): Promise<number> {
-    const [row] = await db
-      .select({ c: count() })
-      .from(scoreSaberAccountsTable)
-      .where(gt(scoreSaberAccountsTable.pp, pp));
-    return row?.c ?? 0;
-  }
-
   public static async selectIdsNeedingBeatLeaderSeed(limit?: number): Promise<{ id: string }[]> {
     const q = db
       .select({ id: scoreSaberAccountsTable.id })
@@ -218,9 +210,9 @@ export class ScoreSaberAccountsRepository {
       )
       SELECT id, rank::int AS rank FROM ranked
       WHERE id IN (${sql.join(
-        playerIds.map(id => sql`${id}`),
-        sql`, `
-      )})
+      playerIds.map(id => sql`${id}`),
+      sql`, `
+    )})
     `);
 
     const rows = (result as unknown as { rows: { id: string; rank: number }[] }).rows ?? [];

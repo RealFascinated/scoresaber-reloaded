@@ -84,16 +84,13 @@ export default class ScoreSaberPlayerService {
         return basePlayer;
       }
 
-      const [plusOnePp, hmdBreakdown, medalsRank, statisticHistory, rankWithInactives] = await Promise.all([
+      const [plusOnePp, hmdBreakdown, medalsRank, statisticHistory] = await Promise.all([
         account ? PlayerRankedService.getPlayerPlusOnePp(id) : 0,
         account && player !== undefined
           ? PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages)
           : undefined,
         account ? ScoreSaberAccountsRepository.getPlayerGlobalMedalRank(id) : undefined,
         PlayerHistoryService.getPlayerStatisticHistories(player, 30),
-        account
-          ? (async () => (await ScoreSaberAccountsRepository.countWithPpGreaterThan(player.pp)) + 1)()
-          : 0,
       ]);
 
       return {
@@ -125,7 +122,6 @@ export default class ScoreSaberPlayerService {
           (player.rank /
             (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1) || 1) *
           100,
-        rankWithInactives,
         scoreStats: account?.scoreStats ?? undefined,
       } as ScoreSaberPlayer;
     });

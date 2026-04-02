@@ -67,11 +67,6 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    * The player's rank percentile (top 0.1%)
    */
   rankPercentile: number;
-
-  /**
-   * The player's rank with inactive players included.
-   */
-  rankWithInactives: number;
 }
 
 export interface ScoreSaberPlayerBase extends Player {
