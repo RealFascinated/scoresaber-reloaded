@@ -30,24 +30,34 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     let newScoresTracked = 0;
     let scrape = true;
     let page = 1;
+    let lastSeenTotalPages: number | undefined;
 
     while (scrape) {
       const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page);
       if (!response) {
-        LeaderboardScoreSeedQueue.logger.warn(
-          `Failed to fetch scores for leaderboard "${leaderboardId}" on page ${page}`
-        );
         consecutiveFailures++;
         if (consecutiveFailures >= 2) {
+          if (lastSeenTotalPages !== undefined && page < lastSeenTotalPages) {
+            const pagesLeft = lastSeenTotalPages - page + 1;
+            LeaderboardScoreSeedQueue.logger.warn(
+              `Tried to get page ${page} for leaderboard "${leaderboardId}" and failed, ${pagesLeft} pages left, continuing`
+            );
+            consecutiveFailures = 0;
+            continue;
+          }
           LeaderboardScoreSeedQueue.logger.warn(
-            `Aborting leaderboard "${leaderboardId}" after 2 consecutive page failures`
+            `Aborting leaderboard "${leaderboardId}" after 2 consecutive page failures (page ${page}${lastSeenTotalPages !== undefined ? ` of ${lastSeenTotalPages}` : ""})`
           );
           break;
         }
+        LeaderboardScoreSeedQueue.logger.warn(
+          `Tried to get page ${page} for leaderboard "${leaderboardId}" and failed`
+        );
         continue;
       }
 
       const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      lastSeenTotalPages = totalPages;
       consecutiveFailures = 0;
 
       if (page % 10 === 0 || page === 1 || page === totalPages) {
