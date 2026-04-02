@@ -40,7 +40,7 @@ export default class PlaylistService {
       playlistTitle: `ScoreSaber Ranked (${getPlaylistTitleDate(new Date())})`,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
       customData: {
-        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-ranked-maps`,
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-ranked-maps.bplist`,
       },
       songs: leaderboards.map(leaderboard => ({
         songName: leaderboard.songName,
@@ -66,7 +66,7 @@ export default class PlaylistService {
       playlistTitle: `ScoreSaber Qualified (${getPlaylistTitleDate(new Date())})`,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
       customData: {
-        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-qualified-maps`,
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-qualified-maps.bplist`,
       },
       songs: leaderboards.map(leaderboard => ({
         songName: leaderboard.songName,
@@ -92,7 +92,7 @@ export default class PlaylistService {
       playlistTitle: `ScoreSaber Ranking Queue (${getPlaylistTitleDate(new Date())})`,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
       customData: {
-        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-ranking-queue-maps`,
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-ranking-queue-maps.bplist`,
       },
       songs: leaderboards.map(leaderboard => ({
         songName: leaderboard.songName,
