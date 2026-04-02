@@ -10,6 +10,7 @@ import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance
 export enum CacheId {
   BEATSAVER_MAP_BY_HASH = "beatsaver_map_by_hash",
   SCORESABER_PLAYER = "scoresaber_player",
+  SCORESABER_PLAYER_EXISTS = "scoresaber_player_exists",
   SCORESABER_API_RESPONSE = "scoresaber_api_response",
   SCORESABER_LEADERBOARDS = "scoresaber_leaderboards",
   BEATLEADER_SCORE = "beatleader_score",
@@ -31,6 +32,10 @@ export default class CacheService {
     // Memory caches
     [CacheId.SCORESABER_PLAYER]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
+      mode: "MEMORY",
+    },
+    [CacheId.SCORESABER_PLAYER_EXISTS]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 6),
       mode: "MEMORY",
     },
     [CacheId.SCORESABER_API_RESPONSE]: {
