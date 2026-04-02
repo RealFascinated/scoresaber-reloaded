@@ -12,7 +12,7 @@ import { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import type { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
-import { formatDateMinimal } from "@ssr/common/utils/time-utils";
+import { formatDate } from "@ssr/common/utils/time-utils";
 import { eq, gt, gte, isNotNull, lte } from "drizzle-orm";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
@@ -21,30 +21,26 @@ import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
 
-export type SnipeType = "top" | "recent";
-export type PlaylistId =
-  | "scoresaber-ranked-maps"
-  | "scoresaber-qualified-maps"
-  | "scoresaber-ranking-queue-maps"
-  | "scoresaber-custom-ranked-maps";
-
-export const PLAYLIST_NAMES: Record<PlaylistId, string> = {
-  "scoresaber-ranked-maps": "Ranked Maps",
-  "scoresaber-qualified-maps": "Qualified Maps",
-  "scoresaber-ranking-queue-maps": "Ranking Queue Maps",
-  "scoresaber-custom-ranked-maps": "", // unused
-};
+function getPlaylistTitleDate(date: Date): string {
+  return formatDate(date, "MMM D, YYYY");
+}
 
 export default class PlaylistService {
-  private static readonly logger: ScopedLogger = Logger.withTopic("Playlist");
+  private static readonly logger: ScopedLogger = Logger.withTopic("Playlists");
+
+  /**
+   * Gets the ranked maps playlist
+   *
+   * @returns the ranked maps playlist
+   */
   public static async getRankedMapsPlaylist(): Promise<Playlist> {
     const leaderboards = await ScoreSaberLeaderboardsService.getRankedLeaderboards();
 
     return {
-      playlistTitle: "Ranked Maps",
+      playlistTitle: `ScoreSaber Ranked (${getPlaylistTitleDate(new Date())})`,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
       customData: {
-        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/ranked-maps`,
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-ranked-maps`,
       },
       songs: leaderboards.map(leaderboard => ({
         songName: leaderboard.songName,
@@ -58,14 +54,19 @@ export default class PlaylistService {
     };
   }
 
+  /**
+   * Gets the qualified maps playlist
+   *
+   * @returns the qualified maps playlist
+   */
   public static async getQualifiedMapsPlaylist(): Promise<Playlist> {
     const leaderboards = await ScoreSaberLeaderboardsService.getQualifiedLeaderboards();
 
     return {
-      playlistTitle: "Qualified Maps",
+      playlistTitle: `ScoreSaber Qualified (${getPlaylistTitleDate(new Date())})`,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
       customData: {
-        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/qualified-maps`,
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-qualified-maps`,
       },
       songs: leaderboards.map(leaderboard => ({
         songName: leaderboard.songName,
@@ -79,14 +80,19 @@ export default class PlaylistService {
     };
   }
 
+  /**
+   * Gets the ranking queue maps playlist
+   *
+   * @returns the ranking queue maps playlist
+   */
   public static async getRankingQueueMapsPlaylist(): Promise<Playlist> {
     const leaderboards = await ScoreSaberLeaderboardsService.getRankingQueueLeaderboards();
 
     return {
-      playlistTitle: "Ranking Queue Maps",
+      playlistTitle: `ScoreSaber Ranking Queue (${getPlaylistTitleDate(new Date())})`,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
       customData: {
-        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/ranking-queue-maps`,
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-ranking-queue-maps`,
       },
       songs: leaderboards.map(leaderboard => ({
         songName: leaderboard.songName,
@@ -113,7 +119,7 @@ export default class PlaylistService {
       parsedConfig.stars.max
     );
 
-    const title = `Custom Ranked Maps (${formatDateMinimal(new Date())})`;
+    const title = `Custom Ranked (${getPlaylistTitleDate(new Date())})`;
 
     return {
       playlistTitle: title,
@@ -172,7 +178,7 @@ export default class PlaylistService {
       PlaylistService.sortPlaylistScoreRows(filtered, settings.sort, settings.sortDirection);
 
       return {
-        playlistTitle: `Self Playlist / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
+        playlistTitle: `Self Playlist (${getPlaylistTitleDate(new Date())})  / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
           syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/self?user=${user}&settings=${settingsBase64}`,
@@ -301,7 +307,7 @@ export default class PlaylistService {
       }
 
       return {
-        playlistTitle: `${truncateText(player.name ?? "", 16)} / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
+        playlistTitle: `${truncateText(player.name ?? "", 16)} (${getPlaylistTitleDate(new Date())}) / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
           syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/snipe?user=${user}&toSnipe=${toSnipe}&settings=${settingsBase64}`,

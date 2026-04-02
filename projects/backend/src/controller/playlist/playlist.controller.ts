@@ -6,7 +6,7 @@ export default function playlistController(app: Elysia) {
   return app.group("/playlist", app =>
     app
       .get(
-        "/ranked-maps",
+        "/scoresaber-ranked-maps",
         async () => {
           return await PlaylistService.getRankedMapsPlaylist();
         },
@@ -18,7 +18,7 @@ export default function playlistController(app: Elysia) {
         }
       )
       .get(
-        "/qualified-maps",
+        "/scoresaber-qualified-maps",
         async () => {
           return await PlaylistService.getQualifiedMapsPlaylist();
         },
@@ -30,7 +30,7 @@ export default function playlistController(app: Elysia) {
         }
       )
       .get(
-        "/ranking-queue-maps",
+        "/scoresaber-ranking-queue-maps",
         async () => {
           return await PlaylistService.getRankingQueueMapsPlaylist();
         },
