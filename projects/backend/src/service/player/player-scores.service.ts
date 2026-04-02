@@ -1,5 +1,4 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
@@ -127,7 +126,6 @@ export class PlayerScoresService {
         page: page,
         limit: 100,
         sort: "recent",
-        priority: CooldownPriority.BACKGROUND,
       });
     }
 
@@ -149,11 +147,11 @@ export class PlayerScoresService {
       currentPage: number,
       scoresPage: ScoreSaberPlayerScoresPageToken
     ): Promise<boolean> {
-      for (const scoreToken of scoresPage.playerScores) {
+      await Promise.all(scoresPage.playerScores.map(async scoreToken => {
         const { score, leaderboard } = parseScoreToken(scoreToken);
         if (!score || !leaderboard) {
           result.totalScores++;
-          continue;
+          return;
         }
         const trackingResult = await ScoreCoreService.trackScoreSaberScore(
           score,
@@ -165,7 +163,7 @@ export class PlayerScoresService {
           result.missingScores++;
           result.totalScores++;
         }
-      }
+      }));
 
       if (result.totalScores >= scoresPage.metadata.total) {
         return false;
