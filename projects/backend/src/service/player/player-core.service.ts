@@ -231,7 +231,10 @@ export class PlayerCoreService {
    * @returns whether the player exists
    */
   public static async playerExists(id: string, throwIfNotFound: boolean = false): Promise<boolean> {
-    const cachedExists = await CacheService.get<boolean>(CacheId.SCORESABER_PLAYER_EXISTS, playerExistsCacheKey(id));
+    const cachedExists = await CacheService.get<boolean>(
+      CacheId.SCORESABER_PLAYER_EXISTS,
+      playerExistsCacheKey(id)
+    );
     if (cachedExists !== undefined) {
       return cachedExists;
     }

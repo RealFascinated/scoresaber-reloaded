@@ -23,6 +23,10 @@ export function leaderboardByHashCacheKey(
   return `leaderboard:hash:${normalizeSongHash(hash)}:${difficulty}:${characteristic}`;
 }
 
+export function leaderboardStarChangeCacheKey(id: number): string {
+  return `leaderboard:star-change:${id}`;
+}
+
 // ScoreSaber
 export function playerCacheKey(id: string, type: DetailType): string {
   return `scoresaber:player:${id}:${type}`;

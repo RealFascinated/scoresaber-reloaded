@@ -5,7 +5,6 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import BeatSaverService from "../../service/external/beatsaver.service";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
-import { LeaderboardRankedSyncService } from "../../service/leaderboard/leaderboard-ranked-sync.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 
 export default function leaderboardController(app: Elysia) {
@@ -65,7 +64,7 @@ export default function leaderboardController(app: Elysia) {
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic
             ),
-            LeaderboardRankedSyncService.fetchStarChangeHistory(leaderboard),
+            ScoreSaberLeaderboardsService.fetchStarChangeHistory(leaderboard),
           ]);
           return { leaderboard, beatsaver, starChangeHistory } as LeaderboardResponse;
         },
@@ -93,7 +92,7 @@ export default function leaderboardController(app: Elysia) {
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic
             ),
-            LeaderboardRankedSyncService.fetchStarChangeHistory(leaderboard),
+            ScoreSaberLeaderboardsService.fetchStarChangeHistory(leaderboard),
           ]);
           return { leaderboard, beatsaver, starChangeHistory } as LeaderboardResponse;
         },

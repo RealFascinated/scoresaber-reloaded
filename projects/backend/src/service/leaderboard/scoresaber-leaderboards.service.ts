@@ -4,6 +4,7 @@ import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { StarFilter } from "@ssr/common/maps/types";
 import { StorageBucket } from "@ssr/common/minio-buckets";
 import type { Page } from "@ssr/common/pagination";
+import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
@@ -16,6 +17,7 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import {
   leaderboardByHashCacheKey,
   leaderboardByIdCacheKey,
+  leaderboardStarChangeCacheKey,
   normalizeSongHash,
   qualifiedLeaderboardsCacheKey,
   rankedLeaderboardsCacheKey,
@@ -23,6 +25,7 @@ import {
 } from "../../common/cache-keys";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
+import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
@@ -152,6 +155,30 @@ export class ScoreSaberLeaderboardsService {
       `Created leaderboard "${id}" in ${formatDuration(performance.now() - before)}`
     );
     return leaderboard;
+  }
+
+  /**
+   * Fetches the star change history for a given leaderboard
+   */
+  public static async fetchStarChangeHistory(
+    leaderboard: ScoreSaberLeaderboard
+  ): Promise<LeaderboardStarChange[]> {
+    return CacheService.fetch(
+      CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE,
+      leaderboardStarChangeCacheKey(leaderboard.id),
+      async () => {
+        const rows =
+          await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
+            leaderboard.id
+          );
+
+        return rows.map(starChange => ({
+          previousStars: starChange.previousStars,
+          newStars: starChange.newStars,
+          timestamp: starChange.timestamp,
+        }));
+      }
+    );
   }
 
   public static async fetchLeaderboardsFromAPI(

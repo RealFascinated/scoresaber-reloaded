@@ -1,6 +1,5 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
@@ -298,22 +297,5 @@ export class LeaderboardRankedSyncService {
           .setColor("#00ff00")
       );
     }
-  }
-
-  /**
-   * Fetches the star change history for a given leaderboard
-   */
-  public static async fetchStarChangeHistory(
-    leaderboard: ScoreSaberLeaderboard
-  ): Promise<LeaderboardStarChange[]> {
-    const rows = await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
-      leaderboard.id
-    );
-
-    return rows.map(starChange => ({
-      previousStars: starChange.previousStars,
-      newStars: starChange.newStars,
-      timestamp: starChange.timestamp,
-    }));
   }
 }

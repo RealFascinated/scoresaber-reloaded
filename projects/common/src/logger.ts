@@ -28,16 +28,11 @@ export type ScopedLogger = ReturnType<typeof Logger.withTopic>;
 export default class Logger {
   public static withTopic(topic: string) {
     return {
-      log: (level: LogLevel, message: string, ...args: unknown[]) =>
-        Logger.emit(level, topic, message, args),
-      debug: (message: string, ...args: unknown[]) =>
-        Logger.emit("debug", topic, message, args),
-      info: (message: string, ...args: unknown[]) =>
-        Logger.emit("info", topic, message, args),
-      warn: (message: string, ...args: unknown[]) =>
-        Logger.emit("warn", topic, message, args),
-      error: (message: string, ...args: unknown[]) =>
-        Logger.emit("error", topic, message, args),
+      log: (level: LogLevel, message: string, ...args: unknown[]) => Logger.emit(level, topic, message, args),
+      debug: (message: string, ...args: unknown[]) => Logger.emit("debug", topic, message, args),
+      info: (message: string, ...args: unknown[]) => Logger.emit("info", topic, message, args),
+      warn: (message: string, ...args: unknown[]) => Logger.emit("warn", topic, message, args),
+      error: (message: string, ...args: unknown[]) => Logger.emit("error", topic, message, args),
     };
   }
 
@@ -61,12 +56,7 @@ export default class Logger {
     Logger.emit("error", undefined, message, args);
   }
 
-  private static emit(
-    level: LogLevel,
-    topic: string | undefined,
-    message: string,
-    args: unknown[]
-  ) {
+  private static emit(level: LogLevel, topic: string | undefined, message: string, args: unknown[]) {
     if (LEVEL_RANK[level] < LEVEL_RANK[CONFIGURED_LEVEL]) {
       return;
     }
