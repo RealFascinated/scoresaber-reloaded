@@ -38,11 +38,11 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         consecutiveFailures++;
         if (consecutiveFailures >= 2) {
           if (lastSeenTotalPages !== undefined && page < lastSeenTotalPages) {
-            const pagesLeft = lastSeenTotalPages - page + 1;
             LeaderboardScoreSeedQueue.logger.warn(
-              `Tried to get page ${page} for leaderboard "${leaderboardId}" and failed, ${pagesLeft} pages left, continuing`
+              `Failed to fetch page ${page} for leaderboard "${leaderboardId}" after 2 attempts; skipping this page and continuing (leaderboard may be incompletely seeded)`
             );
             consecutiveFailures = 0;
+            page++;
             continue;
           }
           LeaderboardScoreSeedQueue.logger.warn(
