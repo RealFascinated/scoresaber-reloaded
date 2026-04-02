@@ -59,7 +59,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       await Promise.all(
         response.scores.map(async rawScore => {
           const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
-          await PlayerCoreService.createIfMissing(score.playerId);
+          PlayerCoreService.createIfMissing(score.playerId); // no need to await this
 
           if (!(await ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId))) {
             await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false);
