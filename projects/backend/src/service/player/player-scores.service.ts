@@ -174,6 +174,7 @@ export class PlayerScoresService {
 
     let currentPage = 1;
     let hasMoreScores = true;
+    let pagesFetched = 0;
     while (hasMoreScores) {
       const scoresPage = await getScoresPage(currentPage);
       if (!scoresPage) {
@@ -181,6 +182,7 @@ export class PlayerScoresService {
         continue;
       }
 
+      pagesFetched++;
       hasMoreScores = await processPage(currentPage, scoresPage);
       if (!hasMoreScores) {
         break;
@@ -193,7 +195,7 @@ export class PlayerScoresService {
     }
 
     result.timeTaken = performance.now() - startTime;
-    result.totalPagesFetched = currentPage - 1;
+    result.totalPagesFetched = pagesFetched;
     PlayerScoresService.logger.info(
       `Fetched missing scores for %s, total pages fetched: %s, total scores: %s, missing scores: %s, in %s`,
       playerId,
