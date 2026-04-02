@@ -4,7 +4,7 @@ import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import type { SQL } from "drizzle-orm";
-import { and, asc, count, desc, eq, gte, inArray, isNotNull, lte, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, lte, max, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
   leaderboardByHashCacheKey,
@@ -353,17 +353,29 @@ export class ScoreSaberLeaderboardsRepository {
   }
 
   public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
-    const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
+    const t = scoreSaberLeaderboardsTable;
+    const idRows = await db
+      .select({ id: max(t.id) })
+      .from(t)
+      .where(eq(t.ranked, true))
+      .groupBy(t.songHash);
 
-    const result = await db
-      .select()
-      .from(mainAlias)
-      .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
-      .where(eq(mainAlias.ranked, true))
-      .orderBy(desc(mainAlias.id));
+    const ids = idRows.map(r => Number(r.id)).sort((a, b) => b - a);
+    const lbMap = await ScoreSaberLeaderboardsRepository.getLeaderboardsWithDifficultiesByIds(ids);
+    return ids.map(id => lbMap.get(id)).filter((lb): lb is ScoreSaberLeaderboard => lb != null);
+  }
 
-    return mergeJoinedLeaderboardRows(result);
+  public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
+    const t = scoreSaberLeaderboardsTable;
+    const idRows = await db
+      .select({ id: max(t.id) })
+      .from(t)
+      .where(eq(t.qualified, true))
+      .groupBy(t.songHash);
+
+    const ids = idRows.map(r => Number(r.id)).sort((a, b) => b - a);
+    const lbMap = await ScoreSaberLeaderboardsRepository.getLeaderboardsWithDifficultiesByIds(ids);
+    return ids.map(id => lbMap.get(id)).filter((lb): lb is ScoreSaberLeaderboard => lb != null);
   }
 
   public static async getRankedLeaderboardsByStarsBetween(
@@ -388,19 +400,6 @@ export class ScoreSaberLeaderboardsRepository {
       .orderBy(asc(mainAlias.stars));
 
     return mergeJoinedLeaderboardRows(rankedJoinRows);
-  }
-
-  public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
-    const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
-
-    const result = await db
-      .select()
-      .from(mainAlias)
-      .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
-      .where(eq(mainAlias.qualified, true));
-
-    return mergeJoinedLeaderboardRows(result);
   }
 
   public static async getApproximateRowCount(): Promise<number> {
