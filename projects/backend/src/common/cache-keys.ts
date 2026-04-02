@@ -28,6 +28,10 @@ export function playerCacheKey(id: string, type: DetailType): string {
   return `scoresaber:player:${id}:${type}`;
 }
 
+export function playerExistsCacheKey(id: string): string {
+  return `scoresaber:player:${id}:exists`;
+}
+
 export function cachedPlayerTokenCacheKey(id: string): string {
   return `scoresaber:cached-player:${id}`;
 }

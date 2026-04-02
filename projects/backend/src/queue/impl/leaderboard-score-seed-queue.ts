@@ -7,6 +7,7 @@ import { scoreSaberLeaderboardsTable } from "../../db/schema";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
+import { PlayerCoreService } from "../../service/player/player-core.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
@@ -73,6 +74,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           if (await ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId)) {
             return;
           }
+          await PlayerCoreService.createIfMissing(score.playerId);
           await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false);
           newScoresTracked++;
         })
