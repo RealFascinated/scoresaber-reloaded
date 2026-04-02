@@ -117,11 +117,11 @@ export default class StorageService {
           { maxKeys: 1 },
           {
             bucket: getS3BucketName(bucket),
-          },
+          }
         );
       } catch (error) {
         StorageService.logger.warn(
-          `S3 bucket not accessible (must exist already): ${getS3BucketName(bucket)} (${error})`,
+          `S3 bucket not accessible (must exist already): ${getS3BucketName(bucket)} (${error})`
         );
       }
     }

@@ -1,43 +1,22 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
-import PlaylistService from "../../service/playlist/playlist.service";
+import PlaylistService, { PlaylistIdsSchema } from "../../service/playlist/playlist.service";
 
 export default function playlistController(app: Elysia) {
   return app.group("/playlist", app =>
     app
       .get(
-        "/scoresaber-ranked-maps.bplist",
-        async () => {
-          return await PlaylistService.getRankedMapsPlaylist();
+        "/:id",
+        async ({ params: { id } }) => {
+          return await PlaylistService.getPlaylist(id);
         },
         {
           tags: ["Playlist"],
+          params: z.object({
+            id: PlaylistIdsSchema,
+          }),
           detail: {
-            description: "Gets the ranked maps playlist",
-          },
-        }
-      )
-      .get(
-        "/scoresaber-qualified-maps.bplist",
-        async () => {
-          return await PlaylistService.getQualifiedMapsPlaylist();
-        },
-        {
-          tags: ["Playlist"],
-          detail: {
-            description: "Gets the qualified maps playlist",
-          },
-        }
-      )
-      .get(
-        "/scoresaber-ranking-queue-maps.bplist",
-        async () => {
-          return await PlaylistService.getRankingQueueMapsPlaylist();
-        },
-        {
-          tags: ["Playlist"],
-          detail: {
-            description: "Gets the ranking queue maps playlist",
+            description: "Gets a playlist by id",
           },
         }
       )

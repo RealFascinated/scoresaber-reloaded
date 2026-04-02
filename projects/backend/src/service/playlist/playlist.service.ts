@@ -14,6 +14,7 @@ import type { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { eq, gt, gte, isNotNull, lte } from "drizzle-orm";
+import { z } from "zod";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
@@ -25,8 +26,44 @@ function getPlaylistTitleDate(date: Date): string {
   return formatDate(date, "MMM D, YYYY");
 }
 
+const BasePlaylistIds = z.enum([
+  "scoresaber-ranked-maps",
+  "scoresaber-qualified-maps",
+  "scoresaber-ranking-queue-maps",
+]);
+
+export const PlaylistIdsSchema = z.union([
+  BasePlaylistIds,
+  z.templateLiteral([BasePlaylistIds, z.literal(".bplist")]),
+  z.templateLiteral([BasePlaylistIds, z.literal(".json")]),
+]);
+
+export type PlaylistId = z.infer<typeof PlaylistIdsSchema>;
+
 export default class PlaylistService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Playlists");
+
+  /**
+   * Gets a playlist by id
+   *
+   * @param id the id of the playlist
+   * @returns the playlist
+   */
+  public static async getPlaylist(id: PlaylistId): Promise<Playlist> {
+    const playlistId = PlaylistIdsSchema.parse(id);
+    const parts = playlistId.split(".");
+    const normalizedPlaylistId = parts[0];
+
+    switch (normalizedPlaylistId) {
+      case "scoresaber-ranked-maps":
+        return await PlaylistService.getRankedMapsPlaylist();
+      case "scoresaber-qualified-maps":
+        return await PlaylistService.getQualifiedMapsPlaylist();
+      case "scoresaber-ranking-queue-maps":
+        return await PlaylistService.getRankingQueueMapsPlaylist();
+    }
+    throw new NotFoundError(`Playlist ${id} not found`);
+  }
 
   /**
    * Gets the ranked maps playlist

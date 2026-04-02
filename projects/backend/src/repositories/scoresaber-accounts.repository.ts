@@ -210,9 +210,9 @@ export class ScoreSaberAccountsRepository {
       )
       SELECT id, rank::int AS rank FROM ranked
       WHERE id IN (${sql.join(
-      playerIds.map(id => sql`${id}`),
-      sql`, `
-    )})
+        playerIds.map(id => sql`${id}`),
+        sql`, `
+      )})
     `);
 
     const rows = (result as unknown as { rows: { id: string; rank: number }[] }).rows ?? [];
