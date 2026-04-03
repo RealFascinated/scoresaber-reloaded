@@ -434,9 +434,7 @@ export class PlayerScoresService {
           case "pp":
             return scoreSaberScoresTable.pp;
           case "acc":
-            return direction === "asc"
-              ? sql`NULLIF(${scoreSaberScoresTable.accuracy}, 0) ASC NULLS LAST`
-              : sql`NULLIF(${scoreSaberScoresTable.accuracy}, 0) DESC NULLS LAST`;
+            return scoreSaberScoresTable.accuracy;
           case "score":
             return scoreSaberScoresTable.score;
           case "misses":
@@ -511,9 +509,7 @@ export class PlayerScoresService {
           case "medals":
             return scoreSaberMedalScoresTable.medals;
           case "acc":
-            return direction === "asc"
-              ? sql`NULLIF(${scoreSaberMedalScoresTable.accuracy}, 0) ASC NULLS LAST`
-              : sql`NULLIF(${scoreSaberMedalScoresTable.accuracy}, 0) DESC NULLS LAST`;
+            return scoreSaberMedalScoresTable.accuracy;
           case "score":
             return scoreSaberMedalScoresTable.score;
           case "misses":
