@@ -120,10 +120,10 @@ export const app = new Elysia()
       timezone: "Europe/London",
       protect: true,
       run: async () => {
-        await LeaderboardRankedSyncNotificationsService.handleRankedBatch(
-          await LeaderboardRankedSyncService.refreshRankedLeaderboards()
-        );
-        await LeaderboardRankedSyncService.refreshQualifiedLeaderboards();
+        //await LeaderboardRankedSyncNotificationsService.handleRankedBatch(
+        //  await LeaderboardRankedSyncService.refreshRankedLeaderboards()
+        //);
+        //await LeaderboardRankedSyncService.refreshQualifiedLeaderboards();
       },
     })
   )
