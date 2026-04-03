@@ -411,15 +411,6 @@ export class ScoreSaberLeaderboardsRepository {
     return mergeJoinedLeaderboardRows(rankedJoinRows);
   }
 
-  public static async getApproximateRowCount(): Promise<number> {
-    const result = await db.execute<{ count: number }>(sql`
-      SELECT GREATEST(0, reltuples)::bigint::integer AS count
-      FROM pg_class
-      WHERE oid = 'scoresaber-leaderboards'::regclass
-    `);
-    return Number(result.rows[0]?.count ?? 0);
-  }
-
   public static async getRankedSnapshots(): Promise<RankedLeaderboardSnapshotRow[]> {
     return db
       .select({
@@ -444,5 +435,14 @@ export class ScoreSaberLeaderboardsRepository {
       })
       .from(scoreSaberLeaderboardsTable)
       .where(eq(scoreSaberLeaderboardsTable.qualified, true));
+  }
+
+  public static async getApproximateRowCount(): Promise<number> {
+    const result = await db.execute<{ count: number }>(sql`
+      SELECT GREATEST(0, reltuples)::bigint::integer AS count
+      FROM pg_class
+      WHERE oid = 'scoresaber-leaderboards'::regclass
+    `);
+    return Number(result.rows[0]?.count ?? 0);
   }
 }
