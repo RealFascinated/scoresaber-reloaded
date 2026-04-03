@@ -60,12 +60,14 @@ const PlayerAccuracyBadgesChart = dynamic(() => import("./impl/player-accuracy-b
   loading: ChartPanelSkeleton,
 });
 
+const SINCE_TRACKED_DAYS = -1;
+
 const DATE_PRESETS = [
   { label: "Last 50 Days", value: 50 },
   { label: "Last 90 Days", value: 90 },
   { label: "Last 180 Days", value: 180 },
   { label: "Last 365 Days", value: 365 },
-  { label: "Since Tracked", value: Infinity },
+  { label: "Since Tracked", value: SINCE_TRACKED_DAYS },
 ] as const;
 
 const DEFAULT_DAYS_AGO = 50;
@@ -201,20 +203,13 @@ function DateRangeSelector({
   onDaysChange: (days: number) => void;
 }) {
   return (
-    <Select
-      value={daysAgo === Infinity ? "Infinity" : daysAgo.toString()}
-      onValueChange={value => onDaysChange(value === "Infinity" ? Infinity : parseInt(value))}
-    >
+    <Select value={daysAgo.toString()} onValueChange={value => onDaysChange(parseInt(value, 10))}>
       <SelectTrigger className="w-[180px] cursor-pointer">
         <SelectValue placeholder="Select time range" />
       </SelectTrigger>
       <SelectContent>
         {DATE_PRESETS.map(preset => (
-          <SelectItem
-            key={preset.value}
-            value={preset.value === Infinity ? "Infinity" : preset.value.toString()}
-            className="cursor-pointer"
-          >
+          <SelectItem key={preset.value} value={preset.value.toString()} className="cursor-pointer">
             {preset.label}
           </SelectItem>
         ))}
@@ -230,11 +225,10 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
   const [selectedViewIndex, setSelectedViewIndex] = useState(0);
   const [daysAgo, setDaysAgo] = useState(DEFAULT_DAYS_AGO);
-  const actualDaysAgo = daysAgo === Infinity ? -1 : daysAgo;
 
   const { data: statisticHistory } = useQuery({
     queryKey: ["player-statistic-history", player.id, daysAgo],
-    queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, actualDaysAgo),
+    queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, daysAgo),
     placeholderData: data => data,
   });
 
@@ -253,7 +247,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
             viewIndex={selectedView.index}
             player={player}
             statisticHistory={statisticHistory}
-            actualDaysAgo={actualDaysAgo}
+            actualDaysAgo={daysAgo}
             historyMode={historyMode}
           />
         </Card>

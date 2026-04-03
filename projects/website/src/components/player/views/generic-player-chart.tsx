@@ -28,7 +28,7 @@ type Props = {
   datasetConfig: DatasetConfig[];
 
   /**
-   * The number of days to show in the chart.
+   * The number of days to show in the chart. Use `-1` for all stored history.
    */
   daysAmount?: number;
 };
@@ -42,6 +42,8 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     Object.entries(statisticHistory).forEach(([dateString, history]) => {
       dataMap.set(dateString, history);
     });
+
+    const allTime = daysAmount === -1;
 
     // Determine the end date (prefer today if data exists, otherwise use latest available)
     const today = getMidnightAlignedDate(new Date());
@@ -58,16 +60,23 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
       endDate = getMidnightAlignedDate(latestDate);
     }
 
-    // Calculate start date
-    const startDate = new Date(endDate);
-    startDate.setDate(startDate.getDate() - daysAmount + 1);
-
-    // Generate all dates and populate data (build arrays immutably)
+    // Generate label dates: sliding window or every day we have data (all-time)
     const labelsResult: Date[] = [];
-    for (let i = 0; i < daysAmount; i++) {
-      const currentDate = new Date(startDate);
-      currentDate.setDate(startDate.getDate() + i);
-      labelsResult.push(currentDate);
+    if (allTime) {
+      const sortedKeys = Array.from(dataMap.keys()).sort(
+        (a, b) => parseDate(a).getTime() - parseDate(b).getTime()
+      );
+      for (const key of sortedKeys) {
+        labelsResult.push(getMidnightAlignedDate(parseDate(key)));
+      }
+    } else {
+      const startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - daysAmount + 1);
+      for (let i = 0; i < daysAmount; i++) {
+        const currentDate = new Date(startDate);
+        currentDate.setDate(startDate.getDate() + i);
+        labelsResult.push(currentDate);
+      }
     }
 
     datasetConfig.forEach(config => {

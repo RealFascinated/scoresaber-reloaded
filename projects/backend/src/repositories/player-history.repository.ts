@@ -43,7 +43,7 @@ export class PlayerHistoryRepository {
     options: { count: number; alignedStart: Date; today: Date }
   ): Promise<PlayerHistoryRow[]> {
     const { count: dayCount, alignedStart, today } = options;
-    return await db
+    const base = db
       .select()
       .from(playerHistoryTable)
       .where(
@@ -56,6 +56,7 @@ export class PlayerHistoryRepository {
           : eq(playerHistoryTable.playerId, playerId)
       )
       .orderBy(desc(playerHistoryTable.date));
+    return await (dayCount > 0 ? base.limit(dayCount) : base);
   }
 
   public static async upsertRank(playerId: string, date: Date, rank: number): Promise<void> {

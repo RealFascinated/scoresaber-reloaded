@@ -1,6 +1,6 @@
 import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
 import { parseDate } from "@ssr/common/utils/time-utils";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "../db";
 import {
   beatSaverMapDifficultiesTable,
@@ -8,6 +8,35 @@ import {
   beatSaverMapVersionsTable,
   beatSaverUploadersTable,
 } from "../db/schema";
+
+const DIFFICULTY_INSERT_CHUNK = 500;
+
+const beatSaverVersionConflictSet = {
+  mapId: sql`excluded."mapId"`,
+  stage: sql`excluded."stage"`,
+  createdAt: sql`excluded."createdAt"`,
+  downloadUrl: sql`excluded."downloadUrl"`,
+  coverUrl: sql`excluded."coverUrl"`,
+  previewUrl: sql`excluded."previewUrl"`,
+} as const;
+
+const beatSaverDifficultyConflictSet = {
+  njs: sql`excluded."njs"`,
+  offset: sql`excluded."offset"`,
+  notes: sql`excluded."notes"`,
+  bombs: sql`excluded."bombs"`,
+  obstacles: sql`excluded."obstacles"`,
+  nps: sql`excluded."nps"`,
+  length: sql`excluded."length"`,
+  events: sql`excluded."events"`,
+  chroma: sql`excluded."chroma"`,
+  mappingExtensions: sql`excluded."mappingExtensions"`,
+  noodleExtensions: sql`excluded."noodleExtensions"`,
+  cinema: sql`excluded."cinema"`,
+  seconds: sql`excluded."seconds"`,
+  maxScore: sql`excluded."maxScore"`,
+  label: sql`excluded."label"`,
+} as const;
 
 export class BeatSaverRepository {
   public static async upsertMap(map: BeatSaverMapToken): Promise<void> {
@@ -91,10 +120,14 @@ export class BeatSaverRepository {
           },
         });
 
-      for (const version of map.versions) {
-        await tx
-          .insert(beatSaverMapVersionsTable)
-          .values({
+      if (map.versions.length === 0) {
+        return;
+      }
+
+      const versionRows = await tx
+        .insert(beatSaverMapVersionsTable)
+        .values(
+          map.versions.map(version => ({
             mapId: map.id,
             hash: version.hash,
             stage: version.state ?? version.stage ?? null,
@@ -102,125 +135,97 @@ export class BeatSaverRepository {
             downloadUrl: version.downloadURL,
             coverUrl: version.coverURL,
             previewUrl: version.previewURL,
-          })
-          .onConflictDoUpdate({
-            target: beatSaverMapVersionsTable.hash,
-            set: {
-              mapId: map.id,
-              stage: version.state ?? version.stage ?? null,
-              createdAt: parseDate(version.createdAt),
-              downloadUrl: version.downloadURL,
-              coverUrl: version.coverURL,
-              previewUrl: version.previewURL,
-            },
-          });
-      }
+          }))
+        )
+        .onConflictDoUpdate({
+          target: beatSaverMapVersionsTable.hash,
+          set: beatSaverVersionConflictSet,
+        })
+        .returning({
+          id: beatSaverMapVersionsTable.id,
+          hash: beatSaverMapVersionsTable.hash,
+        });
 
-      const versionRows = await tx
-        .select()
-        .from(beatSaverMapVersionsTable)
-        .where(eq(beatSaverMapVersionsTable.mapId, map.id));
       const versionIdByHash = new Map(
         versionRows.map(versionRow => [versionRow.hash.toLowerCase(), versionRow.id])
       );
 
+      const difficultyValues: (typeof beatSaverMapDifficultiesTable.$inferInsert)[] = [];
       for (const version of map.versions) {
         const versionId = versionIdByHash.get(version.hash.toLowerCase());
         if (!versionId) {
           continue;
         }
         for (const diff of version.diffs) {
-          await tx
-            .insert(beatSaverMapDifficultiesTable)
-            .values({
-              versionId,
-              characteristic: diff.characteristic,
-              difficulty: diff.difficulty,
-              njs: diff.njs,
-              offset: diff.offset,
-              notes: diff.notes,
-              bombs: diff.bombs,
-              obstacles: diff.obstacles,
-              nps: diff.nps,
-              length: diff.length,
-              events: diff.events,
-              chroma: diff.chroma,
-              mappingExtensions: diff.me,
-              noodleExtensions: diff.ne,
-              cinema: diff.cinema,
-              seconds: diff.seconds,
-              maxScore: diff.maxScore,
-              label: diff.label,
-            })
-            .onConflictDoUpdate({
-              target: [
-                beatSaverMapDifficultiesTable.versionId,
-                beatSaverMapDifficultiesTable.characteristic,
-                beatSaverMapDifficultiesTable.difficulty,
-              ],
-              set: {
-                njs: diff.njs,
-                offset: diff.offset,
-                notes: diff.notes,
-                bombs: diff.bombs,
-                obstacles: diff.obstacles,
-                nps: diff.nps,
-                length: diff.length,
-                events: diff.events,
-                chroma: diff.chroma,
-                mappingExtensions: diff.me,
-                noodleExtensions: diff.ne,
-                cinema: diff.cinema,
-                seconds: diff.seconds,
-                maxScore: diff.maxScore,
-                label: diff.label,
-              },
-            });
+          difficultyValues.push({
+            versionId,
+            characteristic: diff.characteristic,
+            difficulty: diff.difficulty,
+            njs: diff.njs,
+            offset: diff.offset,
+            notes: diff.notes,
+            bombs: diff.bombs,
+            obstacles: diff.obstacles,
+            nps: diff.nps,
+            length: diff.length,
+            events: diff.events,
+            chroma: diff.chroma,
+            mappingExtensions: diff.me,
+            noodleExtensions: diff.ne,
+            cinema: diff.cinema,
+            seconds: diff.seconds,
+            maxScore: diff.maxScore,
+            label: diff.label,
+          });
         }
+      }
+
+      for (let i = 0; i < difficultyValues.length; i += DIFFICULTY_INSERT_CHUNK) {
+        const chunk = difficultyValues.slice(i, i + DIFFICULTY_INSERT_CHUNK);
+        await tx
+          .insert(beatSaverMapDifficultiesTable)
+          .values(chunk)
+          .onConflictDoUpdate({
+            target: [
+              beatSaverMapDifficultiesTable.versionId,
+              beatSaverMapDifficultiesTable.characteristic,
+              beatSaverMapDifficultiesTable.difficulty,
+            ],
+            set: beatSaverDifficultyConflictSet,
+          });
       }
     });
   }
 
   public static async findMapBundleByVersionHash(hash: string) {
     const normalizedHash = hash.toLowerCase();
-    const [matchedVersion] = await db
-      .select()
+    const [row] = await db
+      .select({
+        version: beatSaverMapVersionsTable,
+        map: beatSaverMapsTable,
+        uploader: beatSaverUploadersTable,
+      })
       .from(beatSaverMapVersionsTable)
+      .innerJoin(beatSaverMapsTable, eq(beatSaverMapVersionsTable.mapId, beatSaverMapsTable.id))
+      .leftJoin(beatSaverUploadersTable, eq(beatSaverMapsTable.uploaderId, beatSaverUploadersTable.id))
       .where(eq(beatSaverMapVersionsTable.hash, normalizedHash))
       .limit(1);
-    if (!matchedVersion) {
+
+    if (!row) {
       return undefined;
     }
 
-    const [mapRow] = await db
-      .select()
-      .from(beatSaverMapsTable)
-      .where(eq(beatSaverMapsTable.id, matchedVersion.mapId))
-      .limit(1);
-    if (!mapRow) {
-      return undefined;
-    }
-
-    const uploaderRow =
-      mapRow.uploaderId == null
-        ? null
-        : ((
-            await db
-              .select()
-              .from(beatSaverUploadersTable)
-              .where(eq(beatSaverUploadersTable.id, mapRow.uploaderId))
-              .limit(1)
-          )[0] ?? null);
+    const uploaderRow = row.map.uploaderId == null ? null : row.uploader?.id != null ? row.uploader : null;
 
     const difficulties = await db
       .select()
       .from(beatSaverMapDifficultiesTable)
-      .where(eq(beatSaverMapDifficultiesTable.versionId, matchedVersion.id));
+      .where(eq(beatSaverMapDifficultiesTable.versionId, row.version.id));
 
     return {
-      map: mapRow,
+      map: row.map,
       uploader: uploaderRow,
-      version: matchedVersion,
+      version: row.version,
       difficulties,
     };
   }

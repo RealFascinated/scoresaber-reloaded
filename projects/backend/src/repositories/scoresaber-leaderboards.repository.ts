@@ -127,27 +127,36 @@ export class ScoreSaberLeaderboardsRepository {
     leaderboard: ScoreSaberLeaderboard,
     cachedSongArt: boolean
   ): Promise<void> {
-    await db.insert(scoreSaberLeaderboardsTable).values({
-      id: id,
-      songHash: leaderboard.songHash,
-      songName: leaderboard.songName,
-      songSubName: leaderboard.songSubName,
-      songAuthorName: leaderboard.songAuthorName,
-      levelAuthorName: leaderboard.levelAuthorName,
-      difficulty: leaderboard.difficulty.difficulty,
-      characteristic: leaderboard.difficulty.characteristic,
-      maxScore: leaderboard.maxScore,
-      ranked: leaderboard.ranked,
-      qualified: leaderboard.qualified,
-      stars: leaderboard.stars,
-      rankedDate: leaderboard.rankedDate,
-      qualifiedDate: leaderboard.qualifiedDate,
-      plays: leaderboard.plays,
-      dailyPlays: leaderboard.dailyPlays,
-      seededScores: false,
-      cachedSongArt: cachedSongArt,
-      timestamp: leaderboard.timestamp,
-    });
+    const inserted = await db
+      .insert(scoreSaberLeaderboardsTable)
+      .values({
+        id: id,
+        songHash: leaderboard.songHash,
+        songName: leaderboard.songName,
+        songSubName: leaderboard.songSubName,
+        songAuthorName: leaderboard.songAuthorName,
+        levelAuthorName: leaderboard.levelAuthorName,
+        difficulty: leaderboard.difficulty.difficulty,
+        characteristic: leaderboard.difficulty.characteristic,
+        maxScore: leaderboard.maxScore,
+        ranked: leaderboard.ranked,
+        qualified: leaderboard.qualified,
+        stars: leaderboard.stars,
+        rankedDate: leaderboard.rankedDate,
+        qualifiedDate: leaderboard.qualifiedDate,
+        plays: leaderboard.plays,
+        dailyPlays: leaderboard.dailyPlays,
+        seededScores: false,
+        cachedSongArt: cachedSongArt,
+        timestamp: leaderboard.timestamp,
+      })
+      .onConflictDoNothing({ target: scoreSaberLeaderboardsTable.id })
+      .returning({ id: scoreSaberLeaderboardsTable.id });
+
+    if (inserted.length === 0) {
+      return;
+    }
+
     await ScoreSaberLeaderboardsRepository.invalidateLeaderboardCaches({
       id,
       songHash: leaderboard.songHash,

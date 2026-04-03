@@ -1,4 +1,3 @@
-import * as dotenv from "@dotenvx/dotenvx";
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
 import { openapi } from "@elysiajs/openapi";
@@ -12,7 +11,6 @@ import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { helmet } from "elysia-helmet";
-import fs from "fs";
 import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
@@ -44,14 +42,6 @@ import { WebsocketManager } from "./websocket/websocket-manager";
 const ssrLog = Logger.withTopic("SSR Backend");
 
 ssrLog.info("Starting SSR Backend...");
-
-// Load .env file
-if (fs.existsSync(".env")) {
-  dotenv.config({
-    path: ".env",
-    override: true,
-  });
-}
 
 try {
   await runMigrations();

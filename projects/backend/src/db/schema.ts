@@ -48,7 +48,7 @@ export const scoreSaberAccountsTable = pgTable(
     joinedDate: timestamp().notNull(),
   },
   table => [
-    index("accounts_name_idx").on(table.name),
+    index("accounts_name_trgm_idx").using("gin", sql`${table.name} gin_trgm_ops`),
     index("accounts_medals_idx").on(table.medals.desc()),
     index("accounts_inactive_true_idx")
       .on(table.inactive)
@@ -341,6 +341,12 @@ export const beatLeaderScoresTable = pgTable(
     index("beatleader_scores_saved_replay_true_idx")
       .on(table.savedReplay)
       .where(sql`${table.savedReplay} = true`),
+    index("beatleader_scores_player_map_leaderboard_time_idx").on(
+      table.playerId,
+      table.songHash,
+      table.leaderboardId,
+      sql`${table.timestamp} DESC NULLS LAST`
+    ),
   ]
 );
 

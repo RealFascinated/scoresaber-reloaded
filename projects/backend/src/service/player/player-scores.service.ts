@@ -147,23 +147,25 @@ export class PlayerScoresService {
       currentPage: number,
       scoresPage: ScoreSaberPlayerScoresPageToken
     ): Promise<boolean> {
-      await Promise.all(scoresPage.playerScores.map(async scoreToken => {
-        const { score, leaderboard } = parseScoreToken(scoreToken);
-        if (!score || !leaderboard) {
-          result.totalScores++;
-          return;
-        }
-        const trackingResult = await ScoreCoreService.trackScoreSaberScore(
-          score,
-          undefined,
-          leaderboard,
-          false
-        );
-        if (trackingResult.tracked) {
-          result.missingScores++;
-          result.totalScores++;
-        }
-      }));
+      await Promise.all(
+        scoresPage.playerScores.map(async scoreToken => {
+          const { score, leaderboard } = parseScoreToken(scoreToken);
+          if (!score || !leaderboard) {
+            result.totalScores++;
+            return;
+          }
+          const trackingResult = await ScoreCoreService.trackScoreSaberScore(
+            score,
+            undefined,
+            leaderboard,
+            false
+          );
+          if (trackingResult.tracked) {
+            result.missingScores++;
+            result.totalScores++;
+          }
+        })
+      );
 
       if (result.totalScores >= scoresPage.metadata.total) {
         return false;

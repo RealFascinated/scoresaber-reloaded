@@ -12,6 +12,7 @@ import {
   getDaysAgoDate,
   getMidnightAlignedDate,
   isToday,
+  TimeUnit,
 } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
@@ -231,7 +232,7 @@ export class PlayerHistoryService {
     if (!isTargetToday && !entry && !includeToday) {
       // If no entry found and not today, try to get rank from history
       const playerRankHistory = parseRankHistory(playerToken);
-      const daysAgo = Math.floor((Date.now() - targetDate.getTime()) / (1000 * 60 * 60 * 24));
+      const daysAgo = Math.floor((Date.now() - targetDate.getTime()) / TimeUnit.toMillis(TimeUnit.Day, 1));
 
       if (daysAgo >= 0 && daysAgo < playerRankHistory.length) {
         const rankIndex = playerRankHistory.length - 1 - daysAgo;
@@ -248,9 +249,7 @@ export class PlayerHistoryService {
    * Gets a player's statistic history for a specific date range.
    *
    * @param playerToken the player to get the statistic history for
-   * @param startDate the start date to get the statistic history for
-   * @param endDate the end date to get the statistic history for
-   * @param projection the projection to use
+   * @param count number of calendar days to include through today (inclusive), or `-1` for all stored history
    * @returns the statistic history
    */
   public static async getPlayerStatisticHistories(
@@ -258,8 +257,9 @@ export class PlayerHistoryService {
     count: number
   ): Promise<ScoreSaberPlayerHistoryEntries> {
     const today = getMidnightAlignedDate(new Date());
-    const startDate = getDaysAgoDate(count);
-    const alignedStart = getMidnightAlignedDate(startDate);
+    const allTime = count === -1;
+
+    const alignedStart = allTime ? today : getMidnightAlignedDate(getDaysAgoDate(Math.max(0, count - 1)));
 
     const startTimestamp = alignedStart.getTime();
     const endTimestamp = today.getTime();
@@ -276,13 +276,15 @@ export class PlayerHistoryService {
       history[dateKey] = playerHistoryRowToType(entry);
     }
 
-    const daysDiff = Math.abs(Math.ceil((endTimestamp - startTimestamp) / (1000 * 60 * 60 * 24))) + 1;
-
     // `parseRankHistory()` includes today's rank (playerToken.rank) as the last element.
     // ScoreSaber's `histories` string ends at yesterday, so we start at "yesterday"
     // (length - 2) and derive `daysAgo` from the array index to avoid off-by-one drift.
     const playerRankHistory = parseRankHistory(playerToken);
     const historyLength = playerRankHistory.length;
+    const daysDiff = allTime
+      ? Math.max(1, historyLength)
+      : Math.abs(Math.ceil((endTimestamp - startTimestamp) / TimeUnit.toMillis(TimeUnit.Day, 1))) + 1;
+
     const missingRankUpserts: Array<{ date: Date; rank: number }> = [];
     for (
       let i = historyLength - 2; // yesterday

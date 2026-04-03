@@ -127,7 +127,10 @@ export default function playerController(app: Elysia) {
             playerId: z.string(),
           }),
           query: z.object({
-            count: z.coerce.number().default(50),
+            count: z.preprocess(
+              v => (v === "" || v === undefined ? 50 : Number(v)),
+              z.union([z.literal(-1), z.number().int().min(1)])
+            ),
           }),
           detail: {
             description: "Fetch player statistics history",
