@@ -16,7 +16,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   private static readonly logger: ScopedLogger = Logger.withTopic("Leaderboard Score Seed Queue");
 
   constructor() {
-    super(QueueId.LeaderboardScoreSeedQueue, "lifo");
+    super(QueueId.LeaderboardScoreSeedQueue, "fifo");
 
     setImmediate(() => this.insertLeaderboards());
     setInterval(() => this.insertLeaderboards(), TimeUnit.toMillis(TimeUnit.Second, 10));
