@@ -26,7 +26,7 @@ export function beatSaverRowsToMap({
   uploader,
   version,
   difficulties,
-}: BeatSaverRowsToMapArgs): BeatSaverMap {
+}: BeatSaverRowsToMapArgs): BeatSaverMap | undefined {
   const selectedDifficulty = difficulties.find(
     diff =>
       diff.versionId === version.id &&
@@ -34,9 +34,7 @@ export function beatSaverRowsToMap({
       diff.difficulty === difficulty
   );
   if (!selectedDifficulty) {
-    throw new Error(
-      `No BeatSaver difficulty found for map "${map.id}" (${characteristic} ${difficulty}) in version "${version.hash}"`
-    );
+    return undefined;
   }
 
   return BeatSaverMapSchema.parse(
