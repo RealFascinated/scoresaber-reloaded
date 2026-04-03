@@ -434,7 +434,7 @@ export class PlayerScoresService {
           case "pp":
             return scoreSaberScoresTable.pp;
           case "acc":
-            return scoreSaberScoresTable.accuracy;
+            return sql`${scoreSaberScoresTable.accuracy} > 0`;
           case "score":
             return scoreSaberScoresTable.score;
           case "misses":
@@ -509,7 +509,7 @@ export class PlayerScoresService {
           case "medals":
             return scoreSaberMedalScoresTable.medals;
           case "acc":
-            return scoreSaberMedalScoresTable.accuracy;
+            return sql`${scoreSaberMedalScoresTable.accuracy} > 0`;
           case "score":
             return scoreSaberMedalScoresTable.score;
           case "misses":
