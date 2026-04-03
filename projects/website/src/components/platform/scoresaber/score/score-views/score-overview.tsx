@@ -5,7 +5,6 @@ import StatValue from "@/components/statistic/stat-value";
 import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type ScoreOverviewProps = {
   /**
@@ -35,14 +34,9 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
       <Card className="flex w-full flex-col items-center justify-center gap-3 rounded-xl md:mb-0 md:max-w-[360px]">
         <div className="flex w-full flex-row flex-wrap items-center justify-center gap-2">
           {score.beatLeaderScore && <StatValue value={score.beatLeaderScore.pauses} name="Pauses" />}
-          <StatValue value={`${score.accuracy.toFixed(2)}%`} name="Accuracy" />
           {scoreStats && (
             <StatValue value={scoreStats.current.winTracker.jumpDistance.toFixed(2)} name="JD" />
           )}
-          <StatValue
-            value={formatNumberWithCommas(scoreStats.current.hitTracker.maxCombo)}
-            name="Max Combo"
-          />
           {!score.fullCombo && score.beatLeaderScore && (
             <StatValue
               value={

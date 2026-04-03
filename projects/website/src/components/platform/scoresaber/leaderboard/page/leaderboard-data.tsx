@@ -1,6 +1,5 @@
 "use client";
 
-import Card from "@/components/card";
 import ScoreSaberLeaderboardFilters from "@/components/platform/scoresaber/leaderboard/leaderboard-filters";
 import { LeaderboardInfo } from "@/components/platform/scoresaber/leaderboard/leaderboard-info";
 import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
@@ -30,16 +29,14 @@ export function ScoreSaberLeaderboardData({ leaderboardData }: LeaderboardDataPr
           {/* Main Content Area */}
           <div className="flex w-full flex-col gap-2">
             {/* Leaderboard Scores */}
-            <Card className="relative w-full gap-(--spacing-sm)">
-              <LeaderboardScores leaderboard={leaderboard} />
+            <LeaderboardScores leaderboard={leaderboard} />
 
-              {/* Star Change History */}
-              {starChangeHistory && starChangeHistory.length > 0 && (
-                <div className="pt-2">
-                  <LeaderboardStarChangeHistory key={leaderboard.id} starChangeHistory={starChangeHistory} />
-                </div>
-              )}
-            </Card>
+            {/* Star Change History */}
+            {starChangeHistory && starChangeHistory.length > 0 && (
+              <div className="pt-2">
+                <LeaderboardStarChangeHistory key={leaderboard.id} starChangeHistory={starChangeHistory} />
+              </div>
+            )}
           </div>
 
           {/* Desktop Sidebar */}

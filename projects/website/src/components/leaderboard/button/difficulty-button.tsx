@@ -10,10 +10,7 @@ type DifficultyButtonProps = {
 };
 
 export function DifficultyButton({ leaderboardDifficulty, selectedId }: DifficultyButtonProps) {
-  const { characteristic, difficulty, id } = leaderboardDifficulty;
-  if (characteristic !== "Standard") {
-    return null;
-  }
+  const { difficulty, id } = leaderboardDifficulty;
 
   const isSelected = id === selectedId;
   const difficultyData = getDifficulty(difficulty);
@@ -23,26 +20,23 @@ export function DifficultyButton({ leaderboardDifficulty, selectedId }: Difficul
   return (
     <SimpleLink href={`/leaderboard/${id}`}>
       <style>{`
-    @media (hover: hover) {
-      #${buttonId}.difficulty-button-hover:hover {
-        border-color: ${color} !important;
-        background-color: ${color}00 !important;
-      }
-    }
-  `}</style>
+        #${buttonId}.difficulty-button-hover:hover {
+          filter: brightness(1) !important;
+        }
+      `}</style>
       <Button
         id={buttonId}
         variant="ghost"
         className={cn(
-          "difficulty-button-hover px-(--spacing-lg) py-(--spacing-sm) transition-all duration-200",
+          "difficulty-button-hover rounded-b-none border-none px-(--spacing-lg) py-(--spacing-sm) text-white transition-all duration-200",
           isSelected ? "font-bold" : ""
         )}
         style={{
-          borderColor: isSelected ? color : undefined,
-          backgroundColor: isSelected ? `color-mix(in srgb, ${color} 15%, transparent)` : undefined,
+          backgroundColor: color,
+          filter: isSelected ? "brightness(1)" : "brightness(0.7)",
         }}
       >
-        <span style={{ color }}>{getDifficultyName(difficulty)}</span>
+        <span>{getDifficultyName(difficulty)}</span>
       </Button>
     </SimpleLink>
   );

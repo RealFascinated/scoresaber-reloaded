@@ -61,10 +61,10 @@ export class LeaderboardRankedSyncService {
         updatedLeaderboards.push({
           previousLeaderboard: dbLeaderboard
             ? {
-              ranked: dbLeaderboard.ranked,
-              qualified: dbLeaderboard.qualified,
-              stars: dbLeaderboard.stars ?? 0,
-            }
+                ranked: dbLeaderboard.ranked,
+                qualified: dbLeaderboard.qualified,
+                stars: dbLeaderboard.stars ?? 0,
+              }
             : undefined,
           newLeaderboard: apiLeaderboard,
         });
