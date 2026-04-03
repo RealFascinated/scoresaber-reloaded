@@ -79,18 +79,16 @@ export class ScoreSaberScoresRepository {
   }
 
   public static async upsertScore(row: ScoreSaberScoreUpsertRow): Promise<void> {
-    await db
-      .insert(scoreSaberScoresTable)
-      .values(row)
-      .onConflictDoUpdate({
-        target: scoreSaberScoresTable.scoreId,
-        set: row,
-      })
-      .returning({ scoreId: scoreSaberScoresTable.scoreId });
+    await db.insert(scoreSaberScoresTable).values(row).onConflictDoUpdate({
+      target: scoreSaberScoresTable.scoreId,
+      set: row,
+    });
   }
 
   public static async bulkUpsertScores(rows: ScoreSaberScoreUpsertRow[]): Promise<void> {
-    if (rows.length === 0) return;
+    if (rows.length === 0) {
+      return;
+    }
     await db.insert(scoreSaberScoresTable).values(rows).onConflictDoUpdate({
       target: scoreSaberScoresTable.scoreId,
       set: scoresaberScoresBulkUpsertSet,

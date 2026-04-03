@@ -1,7 +1,12 @@
 import { and, asc, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
 import { db } from "../db";
-import { scoreSaberScoreHistoryTable, scoreSaberScoresTable, type ScoreSaberScoreRow } from "../db/schema";
+import {
+  ScoreSaberScoreHistoryRow,
+  scoreSaberScoreHistoryTable,
+  scoreSaberScoresTable,
+  type ScoreSaberScoreRow,
+} from "../db/schema";
 
 const scoreCols = getTableColumns(scoreSaberScoresTable);
 const histCols = getTableColumns(scoreSaberScoreHistoryTable);
@@ -24,6 +29,13 @@ function playerMapFilters(playerId: string, leaderboardId: number) {
 }
 
 export class ScoreSaberScoreHistoryRepository {
+  /**
+   * Inserts a snapshot of a score into the history table.
+   *
+   * @param previous the previous score to snapshot
+   * @param playerId the player id
+   * @param leaderboardId the leaderboard id
+   */
   public static async insertSnapshot(
     previous: ScoreSaberScoreRow,
     playerId: string,
@@ -59,6 +71,14 @@ export class ScoreSaberScoreHistoryRepository {
       });
   }
 
+  /**
+   * Finds the latest row before a timestamp.
+   *
+   * @param playerId the player id
+   * @param leaderboardId the leaderboard id
+   * @param beforeTimestamp the timestamp to find the latest row before
+   * @returns the latest row before the timestamp
+   */
   public static async findLatestRowBeforeTimestamp(
     playerId: string,
     leaderboardId: number,
@@ -77,15 +97,6 @@ export class ScoreSaberScoreHistoryRepository {
       .orderBy(desc(scoreSaberScoreHistoryTable.timestamp))
       .limit(1);
     return previousScore;
-  }
-
-  public static async getApproximateTotalRowCount(): Promise<number> {
-    const result = await db.execute<{ count: number }>(sql`
-      SELECT GREATEST(0, reltuples)::bigint::integer AS count
-      FROM pg_class
-      WHERE oid = 'scoresaber-score-history'::regclass
-    `);
-    return Number(result.rows[0]?.count ?? 0);
   }
 
   public static async countCombinedScoresForPlayerMap(
@@ -163,15 +174,38 @@ export class ScoreSaberScoreHistoryRepository {
       .where(eq(scoreSaberScoreHistoryTable.leaderboardId, leaderboardId));
   }
 
-  public static async batchUpdatePpByIds(updates: { id: number; newPp: number }[]): Promise<void> {
-    if (updates.length === 0) return;
-    await Promise.all(
-      updates.map(u =>
-        db
-          .update(scoreSaberScoreHistoryTable)
-          .set({ pp: u.newPp })
-          .where(eq(scoreSaberScoreHistoryTable.id, u.id))
-      )
+  /**
+   * Bulk upserts the history scores.
+   *
+   * @param updates the updates to upsert
+   */
+  public static async bulkUpsetHistoryScores(updates: Partial<ScoreSaberScoreHistoryRow>[]): Promise<void> {
+    if (updates.length === 0) {
+      return;
+    }
+
+    const validUpdates = updates.filter(
+      (u): u is Partial<ScoreSaberScoreHistoryRow> & { id: number } => u.id !== undefined
     );
+    if (validUpdates.length === 0) {
+      return;
+    }
+
+    await db.transaction(async tx => {
+      await Promise.all(
+        validUpdates.map(({ id, ...fields }) =>
+          tx.update(scoreSaberScoreHistoryTable).set(fields).where(eq(scoreSaberScoreHistoryTable.id, id))
+        )
+      );
+    });
+  }
+
+  public static async getApproximateTotalRowCount(): Promise<number> {
+    const result = await db.execute<{ count: number }>(sql`
+      SELECT GREATEST(0, reltuples)::bigint::integer AS count
+      FROM pg_class
+      WHERE oid = 'scoresaber-score-history'::regclass
+    `);
+    return Number(result.rows[0]?.count ?? 0);
   }
 }

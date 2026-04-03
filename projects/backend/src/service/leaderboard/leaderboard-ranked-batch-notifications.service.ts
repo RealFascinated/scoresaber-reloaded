@@ -8,17 +8,19 @@ import { DiscordChannels, sendFile, sendMessageToChannel } from "../../bot/bot";
 import { LeaderboardUpdate } from "./leaderboard-ranked-sync.service";
 
 export class LeaderboardRankedSyncNotificationsService {
-  private static readonly logger: ScopedLogger = Logger.withTopic("Ranked Sync Notifications");
+  private static readonly logger: ScopedLogger = Logger.withTopic("Ranked Batch Notifications");
 
   /**
-   * Logs the leaderboard updates to Discord.
+   * Logs the ranked batch to Discord.
    */
-  public static async logLeaderboardUpdates(updates: LeaderboardUpdate[]): Promise<void> {
+  public static async handleRankedBatch(updates: LeaderboardUpdate[]): Promise<void> {
     if (updates.length === 0) {
       return;
     }
 
-    LeaderboardRankedSyncNotificationsService.logger.info(`Logging ${updates.length} leaderboard updates...`);
+    LeaderboardRankedSyncNotificationsService.logger.info(
+      `Handling ranked batch with ${updates.length} updates...`
+    );
 
     const newlyRankedMaps = updates.filter(
       update => update.newLeaderboard.ranked && !update.previousLeaderboard?.ranked
@@ -79,22 +81,16 @@ export class LeaderboardRankedSyncNotificationsService {
       return `nerfed (nerf) ${update.newLeaderboard.fullName} (${difficulty}) mapped by ${update.newLeaderboard.levelAuthorName} from ${formatPreviousStars(update)} to ${update.newLeaderboard.stars} stars\n`;
     });
 
-    const date = formatDate(new Date(), "DD-MM-YYYY");
     const pasteUrl = await uploadPaste(changelog);
     await sendMessageToChannel(
       DiscordChannels.RANKED_BATCH_LOGS,
       `<@&1338261690952978442> New Ranked Batch: ${pasteUrl}`
     );
 
-    const playlistId = `scoresaber-ranked-batch-${date}`;
-
     // Create a playlist of the changes
     const playlist: Playlist = {
-      playlistTitle: `Ranked Batch (${formatDate(new Date(), "Do MMMM, YYYY")})`,
+      playlistTitle: `Ranked Batch (${formatDate(new Date(), "MMM D, YYYY")})`,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
-      customData: {
-        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/ranked-batch`,
-      },
       songs: newlyRankedMaps.map(update => ({
         songName: update.newLeaderboard.songName,
         levelAuthorName: update.newLeaderboard.levelAuthorName,
@@ -106,9 +102,10 @@ export class LeaderboardRankedSyncNotificationsService {
       })),
     };
 
+    const date = formatDate(new Date(), "DD-MM-YYYY");
     await sendFile(
       DiscordChannels.RANKED_BATCH_LOGS,
-      `${playlistId}.bplist`,
+      `scoresaber-ranked-batch-${date}.bplist`,
       JSON.stringify(playlist, null, 2)
     );
   }

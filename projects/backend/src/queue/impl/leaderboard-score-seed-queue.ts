@@ -26,8 +26,10 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     const leaderboardId = Number(item.id);
     const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
 
-    let consecutiveFailures = 0;
     let newScoresTracked = 0;
+    let rankedScoresUpdated = 0;
+
+    let consecutiveFailures = 0;
     let scrape = true;
     let page = 1;
     let lastSeenTotalPages: number | undefined;
@@ -74,6 +76,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           if (!(await ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId))) {
             await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false);
             newScoresTracked++;
+          } else if (score.pp > 0) {
+            await ScoreCoreService.upsertScore(score);
+            rankedScoresUpdated++;
           }
         })
       );
@@ -86,7 +91,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
     await this.markLeaderboardSeeded(leaderboardId);
     LeaderboardScoreSeedQueue.logger.info(
-      `Updated seeded scores status for leaderboard "${leaderboardId}" and tracked ${newScoresTracked} new scores`
+      `Updated seeded scores status for leaderboard "${leaderboardId}" tracked ${newScoresTracked} new scores and updated ${rankedScoresUpdated} ranked scores`
     );
   }
 

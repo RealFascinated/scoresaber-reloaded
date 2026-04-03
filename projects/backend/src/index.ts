@@ -29,7 +29,7 @@ import { QueueManager } from "./queue/queue-manager";
 import CacheService from "./service/infra/cache.service";
 import MetricsService, { prometheusRegistry } from "./service/infra/metrics.service";
 import StorageService from "./service/infra/storage.service";
-import { LeaderboardRankedSyncNotificationsService } from "./service/leaderboard/leaderboard-ranked-sync-notifications.service";
+import { LeaderboardRankedSyncNotificationsService } from "./service/leaderboard/leaderboard-ranked-batch-notifications.service";
 import { LeaderboardRankedSyncService } from "./service/leaderboard/leaderboard-ranked-sync.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
 import { PlayerMedalsService } from "./service/player/player-medals.service";
@@ -39,15 +39,15 @@ import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
 
-const ssrLog = Logger.withTopic("SSR Backend");
+const log = Logger.withTopic("SSR Backend");
 
-ssrLog.info("Starting SSR Backend...");
+log.info("Starting SSR Backend...");
 
 try {
   await runMigrations();
-  ssrLog.info("Database migrations are up to date.");
+  log.info("Database migrations are up to date.");
 } catch (error) {
-  ssrLog.error("Database migration failed:", error);
+  log.error("Database migration failed:", error);
   process.exit(1);
 }
 
@@ -120,7 +120,7 @@ export const app = new Elysia()
       timezone: "Europe/London",
       protect: true,
       run: async () => {
-        await LeaderboardRankedSyncNotificationsService.logLeaderboardUpdates(
+        await LeaderboardRankedSyncNotificationsService.handleRankedBatch(
           await LeaderboardRankedSyncService.refreshRankedLeaderboards()
         );
         await LeaderboardRankedSyncService.refreshQualifiedLeaderboards();
@@ -175,7 +175,7 @@ export const app = new Elysia()
     }
 
     if (status === 500) {
-      ssrLog.error("Internal server error:", error);
+      log.error("Internal server error:", error);
     }
 
     const errorMessage =
@@ -273,14 +273,14 @@ app.onStart(async () => {
     listener.onStart?.();
   });
 
-  ssrLog.info("Listening on port http://localhost:8080");
+  log.info("Listening on port http://localhost:8080");
   await initDiscordBot();
   sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder().setDescription("Backend started!"));
 
   // Log all registered routes
-  ssrLog.info("Registered routes:");
+  log.info("Registered routes:");
   for (const route of app.routes) {
-    ssrLog.info(`${route.method} ${route.path}`);
+    log.info(`${route.method} ${route.path}`);
   }
 
   // Must be registered first
@@ -306,37 +306,37 @@ const gracefulShutdown = async (signal: string) => {
   if (isShuttingDown) return;
   isShuttingDown = true;
 
-  ssrLog.info(`Received ${signal}, starting graceful shutdown...`);
+  log.info(`Received ${signal}, starting graceful shutdown...`);
 
   const forceExit = setTimeout(() => {
-    ssrLog.error("Forced shutdown after timeout");
+    log.error("Forced shutdown after timeout");
     process.exit(1);
   }, 10000);
 
   try {
     await app.stop();
-    ssrLog.info("Server stopped accepting new requests");
+    log.info("Server stopped accepting new requests");
 
     await sendEmbedToChannel(
       DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder().setDescription("Backend shutting down...")
     );
 
-    ssrLog.info("Stopping all services...");
+    log.info("Stopping all services...");
     MetricsService.cleanup();
     for (const listener of EventsManager.getListeners()) {
       try {
         await listener.onStop?.();
       } catch (error) {
-        ssrLog.warn(`Error stopping service ${listener.constructor.name}:`, error);
+        log.warn(`Error stopping service ${listener.constructor.name}:`, error);
       }
     }
 
     clearTimeout(forceExit);
-    ssrLog.info("Shutdown complete");
+    log.info("Shutdown complete");
     process.exit(0);
   } catch (error) {
-    ssrLog.error("Error during shutdown:", error);
+    log.error("Error during shutdown:", error);
     clearTimeout(forceExit);
     process.exit(1);
   }

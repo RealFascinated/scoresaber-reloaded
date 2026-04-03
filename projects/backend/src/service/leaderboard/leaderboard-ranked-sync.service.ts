@@ -8,6 +8,7 @@ import { chunkArray } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { qualifiedLeaderboardsCacheKey, rankedLeaderboardsCacheKey } from "../../common/cache-keys";
+import { ScoreSaberScoreHistoryRow } from "../../db/schema";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
@@ -20,18 +21,8 @@ import CacheService from "../infra/cache.service";
 import { ScoreSaberMedalScoresService } from "../score/scoresaber-medal-scores.service";
 import { ScoreSaberLeaderboardsService } from "./scoresaber-leaderboards.service";
 
-/** Row shape from Postgres for ranked maps we compare during sync. */
-export type RankedLeaderboardSnapshot = {
-  id: number;
-  ranked: boolean;
-  qualified: boolean;
-  stars: number | null;
-  plays: number;
-  dailyPlays: number;
-};
-
 export type LeaderboardUpdate = {
-  previousLeaderboard?: Pick<RankedLeaderboardSnapshot, "ranked" | "qualified" | "stars">;
+  previousLeaderboard?: Pick<ScoreSaberLeaderboard, "ranked" | "qualified" | "stars">;
   newLeaderboard: ScoreSaberLeaderboard;
 };
 
@@ -39,9 +30,9 @@ export class LeaderboardRankedSyncService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Ranked Leaderboard Sync");
 
   /**
-   * Refreshes the ranked leaderboards
+   * Refreshes the ranked leaderboards.
    *
-   * @returns the leaderboards that had an update (eg: unranked -> ranked)
+   * @returns leaderboards whose ranked/qualified/stars status changed.
    */
   public static async refreshRankedLeaderboards(): Promise<LeaderboardUpdate[]> {
     const before = performance.now();
@@ -50,122 +41,8 @@ export class LeaderboardRankedSyncService {
     const { leaderboards } = await ScoreSaberLeaderboardsService.fetchLeaderboardsFromAPI("ranked", true);
     LeaderboardRankedSyncService.logger.info(`Found ${leaderboards.length} ranked leaderboards.`);
 
-    async function reweightHistoryScores(leaderboard: ScoreSaberLeaderboard) {
-      LeaderboardRankedSyncService.logger.info(
-        `Reweighting history scores for leaderboard "${leaderboard.id}"...`
-      );
-
-      const rows = await ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(leaderboard.id);
-
-      const updates = rows
-        .map(row => {
-          const newPp = ScoreSaberCurve.getPp(leaderboard.stars, row.accuracy);
-          return row.pp !== newPp ? { id: row.id, newPp } : null;
-        })
-        .filter((u): u is { id: number; newPp: number } => u !== null);
-
-      if (updates.length > 0) {
-        await ScoreSaberScoreHistoryRepository.batchUpdatePpByIds(updates);
-        LeaderboardRankedSyncService.logger.info(
-          `Reweighted ${updates.length} of ${rows.length} history scores for leaderboard "${leaderboard.id}".`
-        );
-      } else {
-        LeaderboardRankedSyncService.logger.info(
-          `No PP changes needed for ${rows.length} history scores for leaderboard "${leaderboard.id}".`
-        );
-      }
-    }
-
-    async function updateLeaderboardScores(leaderboard: ScoreSaberLeaderboard) {
-      LeaderboardRankedSyncService.logger.info(`Updating scores for leaderboard "${leaderboard.id}"...`);
-      let hasMorePages = true;
-      let page = 1;
-      const scoreOps: ScoreSaberScore[] = [];
-
-      while (hasMorePages) {
-        const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboard.id, page);
-        if (!response) {
-          hasMorePages = false;
-          continue;
-        }
-
-        for (const scoreToken of response.scores) {
-          scoreOps.push(
-            getScoreSaberScoreFromToken(scoreToken, leaderboard, scoreToken.leaderboardPlayerInfo.id)
-          );
-        }
-
-        const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-        if (page % 10 === 0 || page === 1 || page >= totalPages) {
-          LeaderboardRankedSyncService.logger.info(
-            `Queued scores for leaderboard "${leaderboard.id}" on page ${page}/${totalPages}.`
-          );
-        }
-
-        page++;
-        hasMorePages = page < totalPages;
-      }
-
-      if (scoreOps.length === 0) {
-        return;
-      }
-
-      const scoreIds = scoreOps.map(s => s.scoreId);
-      const existingRows = await ScoreSaberScoresRepository.selectSnapshotsByLeaderboardAndScoreIds(
-        leaderboard.id,
-        scoreIds
-      );
-
-      const existingMap = new Map(existingRows.map(r => [r.scoreId, { score: r.score, pp: r.pp }]));
-
-      const toWrite = scoreOps.filter(s => {
-        const ex = existingMap.get(s.scoreId);
-        return !ex || ex.score !== s.score || ex.pp !== s.pp;
-      });
-
-      if (toWrite.length === 0) {
-        LeaderboardRankedSyncService.logger.info(
-          `No score changes needed for leaderboard "${leaderboard.id}" (${scoreOps.length} scores checked).`
-        );
-        return;
-      }
-
-      let upserted = 0;
-      for (const batch of chunkArray(toWrite, 100)) {
-        const rows: ScoreSaberScoreUpsertRow[] = batch.map(score => {
-          const modifiers = score.modifiers.map(m => m.toString());
-          return {
-            scoreId: score.scoreId,
-            playerId: score.playerId,
-            leaderboardId: score.leaderboardId,
-            difficulty: score.difficulty,
-            characteristic: score.characteristic,
-            score: score.score,
-            accuracy: score.accuracy,
-            pp: score.pp,
-            missedNotes: score.missedNotes,
-            badCuts: score.badCuts,
-            maxCombo: score.maxCombo,
-            fullCombo: score.fullCombo,
-            modifiers: modifiers.length > 0 ? modifiers : null,
-            hmd: score.hmd,
-            rightController: score.rightController,
-            leftController: score.leftController,
-            timestamp: score.timestamp,
-          };
-        });
-        await ScoreSaberScoresRepository.bulkUpsertScores(rows);
-        upserted += batch.length;
-      }
-
-      LeaderboardRankedSyncService.logger.info(
-        `Upserted ${upserted} of ${scoreOps.length} scores for leaderboard "${leaderboard.id}" (${scoreOps.length - toWrite.length} skipped).`
-      );
-    }
-
     const dbRankedRows = await ScoreSaberLeaderboardsRepository.getRankedSnapshots();
-
-    const rankedLeaderboards = new Map<number, RankedLeaderboardSnapshot>(dbRankedRows.map(r => [r.id, r]));
+    const rankedLeaderboards = new Map(dbRankedRows.map(r => [r.id, r]));
 
     const leaderboardsToUpsert: ScoreSaberLeaderboard[] = [];
     const updatedLeaderboards: LeaderboardUpdate[] = [];
@@ -180,47 +57,47 @@ export class LeaderboardRankedSyncService {
       }
 
       const dbLeaderboard = rankedLeaderboards.get(apiLeaderboard.id);
-      const leaderboardUpdated =
+      const statusChanged =
         dbLeaderboard?.ranked !== apiLeaderboard.ranked ||
         dbLeaderboard?.qualified !== apiLeaderboard.qualified ||
         dbLeaderboard?.stars !== apiLeaderboard.stars;
 
-      if (
-        !dbLeaderboard ||
-        leaderboardUpdated ||
-        dbLeaderboard.dailyPlays !== apiLeaderboard.dailyPlays ||
-        dbLeaderboard.plays !== apiLeaderboard.plays
-      ) {
+      if (!dbLeaderboard || statusChanged) {
         leaderboardsToUpsert.push(apiLeaderboard);
       }
 
-      if (!leaderboardUpdated) {
-        continue;
-      }
-
-      updatedLeaderboards.push({
-        previousLeaderboard: dbLeaderboard
-          ? { ranked: dbLeaderboard.ranked, qualified: dbLeaderboard.qualified, stars: dbLeaderboard.stars }
-          : undefined,
-        newLeaderboard: apiLeaderboard,
-      });
-
-      if (dbLeaderboard && dbLeaderboard.stars !== apiLeaderboard.stars) {
-        await reweightHistoryScores(apiLeaderboard);
-        await ScoreSaberLeaderboardStarChangeRepository.insertRow({
-          leaderboardId: apiLeaderboard.id,
-          previousStars: dbLeaderboard.stars ?? 0,
-          newStars: apiLeaderboard.stars,
-          timestamp: new Date(),
+      if (statusChanged) {
+        updatedLeaderboards.push({
+          previousLeaderboard: dbLeaderboard
+            ? {
+                ranked: dbLeaderboard.ranked,
+                qualified: dbLeaderboard.qualified,
+                stars: dbLeaderboard.stars ?? 0,
+              }
+            : undefined,
+          newLeaderboard: apiLeaderboard,
         });
-      }
 
-      if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
-        await ScoreSaberMedalScoresService.rescanLeaderboard(apiLeaderboard.id, true);
-        await updateLeaderboardScores(apiLeaderboard);
+        // Stars count has changed
+        if (dbLeaderboard && dbLeaderboard.stars !== apiLeaderboard.stars) {
+          await LeaderboardRankedSyncService.reweightHistoryScores(apiLeaderboard);
+          await ScoreSaberLeaderboardStarChangeRepository.insertRow({
+            leaderboardId: apiLeaderboard.id,
+            previousStars: dbLeaderboard.stars ?? 0,
+            newStars: apiLeaderboard.stars,
+            timestamp: new Date(),
+          });
+        }
+
+        // Leaderboard has been ranked
+        if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
+          await ScoreSaberMedalScoresService.rescanLeaderboard(apiLeaderboard.id, true);
+          await LeaderboardRankedSyncService.updateLeaderboardScores(apiLeaderboard);
+        }
       }
     }
 
+    // There has been ranked leaderboard changes
     if (leaderboardsToUpsert.length > 0) {
       LeaderboardRankedSyncService.logger.info(`Updating ${leaderboardsToUpsert.length} leaderboards...`);
 
@@ -231,25 +108,24 @@ export class LeaderboardRankedSyncService {
 
       await CacheService.invalidate(rankedLeaderboardsCacheKey);
 
+      const duration = formatDuration(performance.now() - before);
       LeaderboardRankedSyncService.logger.info(
-        `Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
+        `Updated ${leaderboardsToUpsert.length} leaderboards in ${duration}`
       );
-
       sendEmbedToChannel(
         DiscordChannels.BACKEND_LOGS,
         new EmbedBuilder()
           .setTitle("Ranked Leaderboards Updated")
-          .setDescription(
-            `Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
-          )
+          .setDescription(`Updated ${leaderboardsToUpsert.length} leaderboards in ${duration}`)
           .setColor("#00ff00")
       );
     }
+
     return updatedLeaderboards;
   }
 
   /**
-   * Refreshes the qualified leaderboards
+   * Refreshes the qualified leaderboards.
    */
   public static async refreshQualifiedLeaderboards() {
     const before = performance.now();
@@ -259,43 +135,144 @@ export class LeaderboardRankedSyncService {
     LeaderboardRankedSyncService.logger.info(`Found ${leaderboards.length} qualified leaderboards.`);
 
     const dbQualifiedRows = await ScoreSaberLeaderboardsRepository.getQualifiedSnapshots();
-
     const dbById = new Map(dbQualifiedRows.map(r => [r.id, r]));
 
-    const leaderboardsToUpsert: ScoreSaberLeaderboard[] = [];
-
-    for (const apiLeaderboard of leaderboards) {
-      const dbLeaderboard = dbById.get(apiLeaderboard.id);
-      const leaderboardUpdated =
-        !dbLeaderboard ||
-        dbLeaderboard.ranked !== apiLeaderboard.ranked ||
-        dbLeaderboard.qualified !== apiLeaderboard.qualified ||
-        dbLeaderboard.stars !== apiLeaderboard.stars;
-
-      if (!leaderboardUpdated) {
-        continue;
-      }
-
-      leaderboardsToUpsert.push(apiLeaderboard);
-    }
+    const leaderboardsToUpsert = leaderboards.filter(apiLeaderboard => {
+      const db = dbById.get(apiLeaderboard.id);
+      return (
+        !db ||
+        db.ranked !== apiLeaderboard.ranked ||
+        db.qualified !== apiLeaderboard.qualified ||
+        db.stars !== apiLeaderboard.stars
+      );
+    });
 
     if (leaderboardsToUpsert.length > 0) {
       LeaderboardRankedSyncService.logger.info(`Updating ${leaderboardsToUpsert.length} leaderboards...`);
       await ScoreSaberLeaderboardsRepository.upsertLeaderboards(leaderboardsToUpsert);
       await CacheService.invalidate(qualifiedLeaderboardsCacheKey);
-      LeaderboardRankedSyncService.logger.info(
-        `Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
-      );
 
+      const duration = formatDuration(performance.now() - before);
+      LeaderboardRankedSyncService.logger.info(
+        `Updated ${leaderboardsToUpsert.length} leaderboards in ${duration}`
+      );
       sendEmbedToChannel(
         DiscordChannels.BACKEND_LOGS,
         new EmbedBuilder()
           .setTitle("Qualified Leaderboards Updated")
-          .setDescription(
-            `Updated ${leaderboardsToUpsert.length} leaderboards in ${formatDuration(performance.now() - before)}`
-          )
+          .setDescription(`Updated ${leaderboardsToUpsert.length} leaderboards in ${duration}`)
           .setColor("#00ff00")
       );
     }
+  }
+
+  /**
+   * Reweights the history scores for a leaderboard.
+   *
+   * @param leaderboard the leaderboard to reweight
+   */
+  private static async reweightHistoryScores(leaderboard: ScoreSaberLeaderboard): Promise<void> {
+    LeaderboardRankedSyncService.logger.info(
+      `Reweighting history scores for leaderboard "${leaderboard.id}"...`
+    );
+
+    const rows = await ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(leaderboard.id);
+    const updates: Partial<ScoreSaberScoreHistoryRow>[] = [];
+
+    for (const row of rows) {
+      const newPp = ScoreSaberCurve.getPp(leaderboard.stars, row.accuracy);
+      if (row.pp !== newPp) {
+        updates.push({ id: row.id, pp: newPp });
+      }
+    }
+
+    if (updates.length > 0) {
+      await ScoreSaberScoreHistoryRepository.bulkUpsetHistoryScores(
+        updates.map(u => ({ id: u.id, pp: u.pp }))
+      );
+      LeaderboardRankedSyncService.logger.info(
+        `Reweighted ${updates.length} of ${rows.length} history scores for leaderboard "${leaderboard.id}".`
+      );
+    }
+  }
+
+  /**
+   * Updates the scores for a leaderboard.
+   *
+   * @param leaderboard the leaderboard to update
+   */
+  private static async updateLeaderboardScores(leaderboard: ScoreSaberLeaderboard): Promise<void> {
+    LeaderboardRankedSyncService.logger.info(`Updating scores for leaderboard "${leaderboard.id}"...`);
+
+    const scoreOps: ScoreSaberScore[] = [];
+    let page = 1;
+
+    while (true) {
+      const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboard.id, page);
+      if (!response) break;
+
+      for (const token of response.scores) {
+        scoreOps.push(getScoreSaberScoreFromToken(token, leaderboard, token.leaderboardPlayerInfo.id));
+      }
+
+      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      if (page >= totalPages) break;
+      page++;
+    }
+
+    if (scoreOps.length === 0) {
+      return;
+    }
+
+    const existingRows = await ScoreSaberScoresRepository.selectSnapshotsByLeaderboardAndScoreIds(
+      leaderboard.id,
+      scoreOps.map(s => s.scoreId)
+    );
+    const existingMap = new Map(existingRows.map(r => [r.scoreId, { score: r.score, pp: r.pp }]));
+
+    const hasChanged = (s: ScoreSaberScore) => {
+      const ex = existingMap.get(s.scoreId);
+      return !ex || ex.score !== s.score || ex.pp !== s.pp;
+    };
+    const toWrite = scoreOps.filter(hasChanged);
+
+    if (toWrite.length === 0) {
+      LeaderboardRankedSyncService.logger.info(
+        `No score changes needed for leaderboard "${leaderboard.id}" (${scoreOps.length} scores checked).`
+      );
+      return;
+    }
+
+    let upserted = 0;
+    for (const batch of chunkArray(toWrite, 100)) {
+      const rows: ScoreSaberScoreUpsertRow[] = batch.map(score => {
+        const modifiers = score.modifiers.map(m => m.toString());
+        return {
+          scoreId: score.scoreId,
+          playerId: score.playerId,
+          leaderboardId: score.leaderboardId,
+          difficulty: score.difficulty,
+          characteristic: score.characteristic,
+          score: score.score,
+          accuracy: score.accuracy,
+          pp: score.pp,
+          missedNotes: score.missedNotes,
+          badCuts: score.badCuts,
+          maxCombo: score.maxCombo,
+          fullCombo: score.fullCombo,
+          modifiers: modifiers.length > 0 ? modifiers : null,
+          hmd: score.hmd,
+          rightController: score.rightController,
+          leftController: score.leftController,
+          timestamp: score.timestamp,
+        };
+      });
+      await ScoreSaberScoresRepository.bulkUpsertScores(rows);
+      upserted += batch.length;
+    }
+
+    LeaderboardRankedSyncService.logger.info(
+      `Upserted ${upserted} of ${scoreOps.length} scores for leaderboard "${leaderboard.id}" (${scoreOps.length - toWrite.length} skipped).`
+    );
   }
 }

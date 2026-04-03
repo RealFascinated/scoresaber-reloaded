@@ -14,12 +14,14 @@ export const playlistSongSchema = z.object({
   ),
 });
 
+export const playlistCustomDataSchema = z.object({
+  syncURL: z.string(),
+});
+
 export const playlistSchema = z.object({
   playlistTitle: z.string(),
   playlistAuthor: z.string(),
-  customData: z.object({
-    syncURL: z.string(),
-  }),
+  customData: playlistCustomDataSchema.optional(),
   songs: z.array(playlistSongSchema),
   image: z.string().optional(),
 });

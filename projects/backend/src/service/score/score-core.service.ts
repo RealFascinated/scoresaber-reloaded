@@ -6,10 +6,7 @@ import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { ScoreSaberAccountRow } from "../../db/schema";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
-import {
-  type ScoreSaberScoreUpsertRow,
-  ScoreSaberScoresRepository,
-} from "../../repositories/scoresaber-scores.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import BeatLeaderService from "../beatleader/beatleader.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
@@ -84,28 +81,7 @@ export class ScoreCoreService {
       await ScoreSaberMedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
     }
 
-    const modifiers = score.modifiers.map(modifier => modifier.toString());
-    const scoreUpsertSet: ScoreSaberScoreUpsertRow = {
-      scoreId: score.scoreId,
-      playerId: playerId,
-      leaderboardId: leaderboard.id,
-      difficulty: score.difficulty,
-      characteristic: score.characteristic,
-      score: score.score,
-      accuracy: score.accuracy,
-      pp: score.pp,
-      missedNotes: score.missedNotes,
-      badCuts: score.badCuts,
-      maxCombo: score.maxCombo,
-      fullCombo: score.fullCombo,
-      modifiers: modifiers.length > 0 ? modifiers : null,
-      hmd: score.hmd,
-      rightController: score.rightController,
-      leftController: score.leftController,
-      timestamp: score.timestamp,
-    };
-
-    await ScoreSaberScoresRepository.upsertScore(scoreUpsertSet);
+    await ScoreCoreService.upsertScore(score);
 
     if (newScore) {
       ScoreCoreService.logger.info(
@@ -120,6 +96,34 @@ export class ScoreCoreService {
       );
     }
     return { score: score, hasPreviousScore: isImprovement, tracked: true };
+  }
+
+  /**
+   * Upserts a ScoreSaber score.
+   *
+   * @param score the score to upsert
+   */
+  public static async upsertScore(score: ScoreSaberScore): Promise<void> {
+    const modifiers = score.modifiers.map(modifier => modifier.toString());
+    await ScoreSaberScoresRepository.upsertScore({
+      scoreId: score.scoreId,
+      playerId: score.playerId,
+      leaderboardId: score.leaderboardId,
+      difficulty: score.difficulty,
+      characteristic: score.characteristic,
+      score: score.score,
+      accuracy: score.accuracy,
+      pp: score.pp,
+      missedNotes: score.missedNotes,
+      badCuts: score.badCuts,
+      maxCombo: score.maxCombo,
+      fullCombo: score.fullCombo,
+      modifiers: modifiers.length > 0 ? modifiers : null,
+      hmd: score.hmd,
+      rightController: score.rightController,
+      leftController: score.leftController,
+      timestamp: score.timestamp,
+    });
   }
 
   /**
