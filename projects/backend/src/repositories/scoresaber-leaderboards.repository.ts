@@ -20,22 +20,6 @@ import CacheService from "../service/infra/cache.service";
 
 const LEADERBOARD_SEARCH_PAGE_SIZE = 20;
 
-export type RankedLeaderboardSnapshotRow = {
-  id: number;
-  stars: number | null;
-  ranked: boolean;
-  qualified: boolean;
-  plays: number;
-  dailyPlays: number;
-};
-
-export type QualifiedLeaderboardSnapshotRow = {
-  id: number;
-  stars: number | null;
-  ranked: boolean;
-  qualified: boolean;
-};
-
 export class ScoreSaberLeaderboardsRepository {
   private static async invalidateLeaderboardCaches(leaderboard: {
     id: number;
@@ -409,32 +393,6 @@ export class ScoreSaberLeaderboardsRepository {
       .orderBy(asc(mainAlias.stars));
 
     return mergeJoinedLeaderboardRows(rankedJoinRows);
-  }
-
-  public static async getRankedSnapshots(): Promise<RankedLeaderboardSnapshotRow[]> {
-    return db
-      .select({
-        id: scoreSaberLeaderboardsTable.id,
-        stars: scoreSaberLeaderboardsTable.stars,
-        ranked: scoreSaberLeaderboardsTable.ranked,
-        qualified: scoreSaberLeaderboardsTable.qualified,
-        plays: scoreSaberLeaderboardsTable.plays,
-        dailyPlays: scoreSaberLeaderboardsTable.dailyPlays,
-      })
-      .from(scoreSaberLeaderboardsTable)
-      .where(eq(scoreSaberLeaderboardsTable.ranked, true));
-  }
-
-  public static async getQualifiedSnapshots(): Promise<QualifiedLeaderboardSnapshotRow[]> {
-    return db
-      .select({
-        id: scoreSaberLeaderboardsTable.id,
-        stars: scoreSaberLeaderboardsTable.stars,
-        ranked: scoreSaberLeaderboardsTable.ranked,
-        qualified: scoreSaberLeaderboardsTable.qualified,
-      })
-      .from(scoreSaberLeaderboardsTable)
-      .where(eq(scoreSaberLeaderboardsTable.qualified, true));
   }
 
   public static async getApproximateRowCount(): Promise<number> {

@@ -1,4 +1,3 @@
-import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -6,11 +5,10 @@ import { chunkArray } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { qualifiedLeaderboardsCacheKey, rankedLeaderboardsCacheKey } from "../../common/cache-keys";
-import { ScoreSaberScoreHistoryRow } from "../../db/schema";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
-import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import CacheService from "../infra/cache.service";
+import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import { ScoreSaberMedalScoresService } from "../score/scoresaber-medal-scores.service";
 import { ScoreSaberLeaderboardsService } from "./scoresaber-leaderboards.service";
 
@@ -34,7 +32,7 @@ export class LeaderboardRankedSyncService {
     const { leaderboards } = await ScoreSaberLeaderboardsService.fetchLeaderboardsFromAPI("ranked", true);
     LeaderboardRankedSyncService.logger.info(`Found ${leaderboards.length} ranked leaderboards.`);
 
-    const dbRankedRows = await ScoreSaberLeaderboardsRepository.getRankedSnapshots();
+    const dbRankedRows = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
     const rankedLeaderboards = new Map(dbRankedRows.map(r => [r.id, r]));
 
     const leaderboardsToUpsert: ScoreSaberLeaderboard[] = [];
@@ -43,7 +41,7 @@ export class LeaderboardRankedSyncService {
     let checked = 0;
     for (const apiLeaderboard of leaderboards) {
       checked++;
-      if (checked % 500 === 0 || checked === 1 || checked === leaderboards.length) {
+      if (checked % 1_000 === 0 || checked === 1 || checked === leaderboards.length) {
         LeaderboardRankedSyncService.logger.info(
           `Checked ${checked} of ${leaderboards.length} leaderboards.`
         );
@@ -73,7 +71,7 @@ export class LeaderboardRankedSyncService {
 
         // Stars count has changed
         if (dbLeaderboard && dbLeaderboard.stars !== apiLeaderboard.stars) {
-          await LeaderboardRankedSyncService.reweightHistoryScores(apiLeaderboard);
+          await PlayerScoreHistoryService.reweightHistoryScoresForLeaderboard(apiLeaderboard);
           await ScoreSaberLeaderboardStarChangeRepository.insertRow({
             leaderboardId: apiLeaderboard.id,
             previousStars: dbLeaderboard.stars ?? 0,
@@ -131,11 +129,11 @@ export class LeaderboardRankedSyncService {
     const { leaderboards } = await ScoreSaberLeaderboardsService.fetchLeaderboardsFromAPI("qualified", true);
     LeaderboardRankedSyncService.logger.info(`Found ${leaderboards.length} qualified leaderboards.`);
 
-    const dbQualifiedRows = await ScoreSaberLeaderboardsRepository.getQualifiedSnapshots();
-    const dbById = new Map(dbQualifiedRows.map(r => [r.id, r]));
+    const dbQualifiedRows = await ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();
+    const qualifiedLeaderboards = new Map(dbQualifiedRows.map(r => [r.id, r]));
 
     const leaderboardsToUpsert = leaderboards.filter(apiLeaderboard => {
-      const db = dbById.get(apiLeaderboard.id);
+      const db = qualifiedLeaderboards.get(apiLeaderboard.id);
       return (
         !db ||
         db.ranked !== apiLeaderboard.ranked ||
@@ -159,36 +157,6 @@ export class LeaderboardRankedSyncService {
           .setTitle("Qualified Leaderboards Updated")
           .setDescription(`Updated ${leaderboardsToUpsert.length} leaderboards in ${duration}`)
           .setColor("#00ff00")
-      );
-    }
-  }
-
-  /**
-   * Reweights the history scores for a leaderboard.
-   *
-   * @param leaderboard the leaderboard to reweight
-   */
-  private static async reweightHistoryScores(leaderboard: ScoreSaberLeaderboard): Promise<void> {
-    LeaderboardRankedSyncService.logger.info(
-      `Reweighting history scores for leaderboard "${leaderboard.id}"...`
-    );
-
-    const rows = await ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(leaderboard.id);
-    const updates: Partial<ScoreSaberScoreHistoryRow>[] = [];
-
-    for (const row of rows) {
-      const newPp = ScoreSaberCurve.getPp(leaderboard.stars, row.accuracy);
-      if (row.pp !== newPp) {
-        updates.push({ id: row.id, pp: newPp });
-      }
-    }
-
-    if (updates.length > 0) {
-      await ScoreSaberScoreHistoryRepository.bulkUpsetHistoryScores(
-        updates.map(u => ({ id: u.id, pp: u.pp }))
-      );
-      LeaderboardRankedSyncService.logger.info(
-        `Reweighted ${updates.length} of ${rows.length} history scores for leaderboard "${leaderboard.id}".`
       );
     }
   }

@@ -1,4 +1,6 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
+import Logger, { ScopedLogger } from "@ssr/common/logger";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
 import { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-history-graph";
@@ -8,12 +10,45 @@ import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { scoreHistoryGraphCacheKey } from "../../common/cache-keys";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
+import { ScoreSaberScoreHistoryRow } from "../../db/schema";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import CacheService, { CacheId } from "../infra/cache.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { ScoreCoreService } from "../score/score-core.service";
 
 export class PlayerScoreHistoryService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Player Score History");
+
+  /**
+   * Reweights the history scores for a leaderboard.
+   *
+   * @param leaderboard the leaderboard to reweight
+   */
+  public static async reweightHistoryScoresForLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<void> {
+    PlayerScoreHistoryService.logger.info(
+      `Reweighting history scores for leaderboard "${leaderboard.id}"...`
+    );
+
+    const rows = await ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(leaderboard.id);
+    const updates: Partial<ScoreSaberScoreHistoryRow>[] = [];
+
+    for (const row of rows) {
+      const newPp = ScoreSaberCurve.getPp(leaderboard.stars, row.accuracy);
+      if (row.pp !== newPp) {
+        updates.push({ id: row.id, pp: newPp });
+      }
+    }
+
+    if (updates.length > 0) {
+      await ScoreSaberScoreHistoryRepository.bulkUpsetHistoryScores(
+        updates.map(u => ({ id: u.id, pp: u.pp }))
+      );
+      PlayerScoreHistoryService.logger.info(
+        `Reweighted ${updates.length} of ${rows.length} history scores for leaderboard "${leaderboard.id}".`
+      );
+    }
+  }
+
   /**
    * Gets the player's score history for a map.
    *
