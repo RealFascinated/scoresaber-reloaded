@@ -3,7 +3,7 @@ import { InternalServerError } from "../error/internal-server-error";
 import request from "../utils/request";
 
 /**
- * BSOR Replay Decoder 
+ * BSOR Replay Decoder
  */
 
 // Internal state tracker to avoid polluting DataView prototype and losing V8 optimizations

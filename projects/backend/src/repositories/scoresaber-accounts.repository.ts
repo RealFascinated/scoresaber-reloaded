@@ -29,7 +29,13 @@ export class ScoreSaberAccountsRepository {
   }
 
   public static async insert(row: ScoreSaberAccountInsert): Promise<ScoreSaberAccountRow[]> {
-    return db.insert(scoreSaberAccountsTable).values(row).returning();
+    return db
+      .insert(scoreSaberAccountsTable)
+      .values(row)
+      .onConflictDoNothing({
+        target: scoreSaberAccountsTable.id,
+      })
+      .returning();
   }
 
   public static async updateAccount(

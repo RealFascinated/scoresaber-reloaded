@@ -245,26 +245,6 @@ export class ScoreSaberScoresRepository {
     return limit != null ? q.limit(limit) : q;
   }
 
-  public static async selectSnapshotsByLeaderboardAndScoreIds(
-    leaderboardId: number,
-    scoreIds: number[]
-  ): Promise<{ scoreId: number; score: number; pp: number }[]> {
-    if (scoreIds.length === 0) return [];
-    return db
-      .select({
-        scoreId: scoreSaberScoresTable.scoreId,
-        score: scoreSaberScoresTable.score,
-        pp: scoreSaberScoresTable.pp,
-      })
-      .from(scoreSaberScoresTable)
-      .where(
-        and(
-          inArray(scoreSaberScoresTable.scoreId, scoreIds),
-          eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
-        )
-      );
-  }
-
   public static async getChartRowsByPlayer(playerId: string): Promise<
     {
       accuracy: number;
