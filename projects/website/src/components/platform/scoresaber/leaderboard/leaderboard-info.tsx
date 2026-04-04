@@ -99,7 +99,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           value={
             <p>
               {formatNumberWithCommas(leaderboardData.plays)}{" "}
-              <span className="text-muted-foreground">({leaderboardData.dailyPlays} in the last 24h)</span>
+              <span className="text-muted-foreground">({leaderboardData.dailyPlays} last 24h)</span>
             </p>
           }
         />
