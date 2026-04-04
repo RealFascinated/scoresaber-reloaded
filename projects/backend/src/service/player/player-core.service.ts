@@ -144,10 +144,12 @@ export class PlayerCoreService {
 
           try {
             PlayerCoreService.logger.info(`Creating player "${id}"...`);
-            const newAccount = await ScoreSaberAccountsRepository.insert({
+
+            const playerInsert: ScoreSaberAccountRow = {
               id: id,
               name: token.name,
-              country: token.country ?? null,
+              country: token.country,
+              avatar: "https://cdn.fascinated.cc/assets/unknown.png",
               peakRank: token.rank,
               peakRankTimestamp: new Date(),
               seededScores: false,
@@ -169,7 +171,9 @@ export class PlayerCoreService {
               },
               trackedSince: new Date(),
               joinedDate: new Date(token.firstSeen),
-            });
+
+            }
+            await ScoreSaberAccountsRepository.insert(playerInsert);
 
             // If the player has less scores tracked than the total play count, add them to the refresh queue
             const trackedScores = await ScoreSaberScoresRepository.countByPlayerId(id);
@@ -191,11 +195,7 @@ export class PlayerCoreService {
             if (isProduction()) {
               await logNewTrackedPlayer(token);
             }
-            const [inserted] = newAccount;
-            if (!inserted) {
-              throw new InternalServerError(`Insert did not return a row for player "${id}"`);
-            }
-            return scoreSaberAccountRowToType(inserted);
+            return scoreSaberAccountRowToType(playerInsert);
           } catch (err) {
             PlayerCoreService.logger.error(`Failed to create player document for "${id}"`, err);
             throw new InternalServerError(`Failed to create player document for "${id}"`);

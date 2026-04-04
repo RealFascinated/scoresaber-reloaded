@@ -28,14 +28,13 @@ export class ScoreSaberAccountsRepository {
     return row;
   }
 
-  public static async insert(row: ScoreSaberAccountInsert): Promise<ScoreSaberAccountRow[]> {
-    return db
+  public static async insert(row: ScoreSaberAccountInsert): Promise<void> {
+    await db
       .insert(scoreSaberAccountsTable)
       .values(row)
       .onConflictDoNothing({
         target: scoreSaberAccountsTable.id,
-      })
-      .returning();
+      });
   }
 
   public static async updateAccount(
@@ -216,9 +215,9 @@ export class ScoreSaberAccountsRepository {
       )
       SELECT id, rank::int AS rank FROM ranked
       WHERE id IN (${sql.join(
-        playerIds.map(id => sql`${id}`),
-        sql`, `
-      )})
+      playerIds.map(id => sql`${id}`),
+      sql`, `
+    )})
     `);
 
     const rows = (result as unknown as { rows: { id: string; rank: number }[] }).rows ?? [];
