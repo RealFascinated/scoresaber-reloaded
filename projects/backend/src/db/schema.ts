@@ -2,7 +2,7 @@ import { HMD } from "@ssr/common/hmds";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
-import { sql } from "drizzle-orm";
+import { isNotNull, sql } from "drizzle-orm";
 import {
   boolean,
   doublePrecision,
@@ -270,6 +270,15 @@ export const scoreSaberLeaderboardsTable = pgTable(
     index("leaderboards_seeded_scores_false_idx")
       .on(table.seededScores)
       .where(sql`${table.seededScores} = false`),
+    index("leaderboards_ranked_true_idx")
+      .on(table.ranked)
+      .where(sql`${table.ranked} = true`),
+    index("leaderboards_qualified_true_idx")
+      .on(table.qualified)
+      .where(sql`${table.qualified} = true`),
+    index("leaderboards_stars_not_null_idx")
+      .on(table.stars)
+      .where(isNotNull(table.stars)),
   ]
 );
 

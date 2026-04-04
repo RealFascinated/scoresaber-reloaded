@@ -92,6 +92,13 @@
       "when": 1775300000000,
       "tag": "0012_accounts_name_trgm_beatleader_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1775290950118,
+      "tag": "0013_add-leaderboard-indexes",
+      "breakpoints": true
     }
   ]
 }
