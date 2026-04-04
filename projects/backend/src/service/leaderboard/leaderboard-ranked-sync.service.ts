@@ -4,10 +4,8 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { qualifiedLeaderboardsCacheKey, rankedLeaderboardsCacheKey } from "../../common/cache-keys";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
-import CacheService from "../infra/cache.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import { ScoreSaberMedalScoresService } from "../score/scoresaber-medal-scores.service";
 import { ScoreSaberLeaderboardsService } from "./scoresaber-leaderboards.service";
@@ -52,6 +50,17 @@ export class LeaderboardRankedSyncService {
         dbLeaderboard?.ranked !== apiLeaderboard.ranked ||
         dbLeaderboard?.qualified !== apiLeaderboard.qualified ||
         dbLeaderboard?.stars !== apiLeaderboard.stars;
+      LeaderboardRankedSyncService.logger.info(`Status changed: ${statusChanged}`);
+      LeaderboardRankedSyncService.logger.info(`DB Leaderboard: ${JSON.stringify({
+        ranked: dbLeaderboard?.ranked,
+        qualified: dbLeaderboard?.qualified,
+        stars: dbLeaderboard?.stars,
+      })}`);
+      LeaderboardRankedSyncService.logger.info(`API Leaderboard: ${JSON.stringify({
+        ranked: apiLeaderboard.ranked,
+        qualified: apiLeaderboard.qualified,
+        stars: apiLeaderboard.stars,
+      })}`);
 
       if (!dbLeaderboard || statusChanged) {
         leaderboardsToUpsert.push(apiLeaderboard);
@@ -61,10 +70,10 @@ export class LeaderboardRankedSyncService {
         updatedLeaderboards.push({
           previousLeaderboard: dbLeaderboard
             ? {
-                ranked: dbLeaderboard.ranked,
-                qualified: dbLeaderboard.qualified,
-                stars: dbLeaderboard.stars ?? 0,
-              }
+              ranked: dbLeaderboard.ranked,
+              qualified: dbLeaderboard.qualified,
+              stars: dbLeaderboard.stars ?? 0,
+            }
             : undefined,
           newLeaderboard: apiLeaderboard,
         });
@@ -92,6 +101,8 @@ export class LeaderboardRankedSyncService {
       }
     }
 
+    LeaderboardRankedSyncService.logger.info(`Found ${updatedLeaderboards.length} leaderboards with changes.`);
+
     // There has been ranked leaderboard changes
     if (leaderboardsToUpsert.length > 0) {
       LeaderboardRankedSyncService.logger.info(`Updating ${leaderboardsToUpsert.length} leaderboards...`);
@@ -100,8 +111,6 @@ export class LeaderboardRankedSyncService {
         await ScoreSaberLeaderboardsRepository.upsertLeaderboards(batch);
         LeaderboardRankedSyncService.logger.info(`Updated batch of ${batch.length} leaderboards!`);
       }
-
-      await CacheService.invalidate(rankedLeaderboardsCacheKey);
 
       const duration = formatDuration(performance.now() - before);
       LeaderboardRankedSyncService.logger.info(
@@ -145,7 +154,6 @@ export class LeaderboardRankedSyncService {
     if (leaderboardsToUpsert.length > 0) {
       LeaderboardRankedSyncService.logger.info(`Updating ${leaderboardsToUpsert.length} leaderboards...`);
       await ScoreSaberLeaderboardsRepository.upsertLeaderboards(leaderboardsToUpsert);
-      await CacheService.invalidate(qualifiedLeaderboardsCacheKey);
 
       const duration = formatDuration(performance.now() - before);
       LeaderboardRankedSyncService.logger.info(

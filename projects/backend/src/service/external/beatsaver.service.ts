@@ -29,7 +29,7 @@ export default class BeatSaverService {
       CacheId.BEATSAVER_MAP_BY_HASH,
       beatSaverMapCacheKey(normalizedHash),
       async () => {
-        let rows = await this.getRowsByHash(normalizedHash);
+        let rows = await BeatSaverRepository.findMapBundleByVersionHash(normalizedHash);
 
         if (!rows) {
           const fetchedToken = await ApiServiceRegistry.getInstance()
@@ -39,7 +39,7 @@ export default class BeatSaverService {
             return undefined;
           }
           await this.saveMap(fetchedToken);
-          rows = await this.getRowsByHash(normalizedHash);
+          rows = await BeatSaverRepository.findMapBundleByVersionHash(normalizedHash);
           if (!rows) {
             const picked = this.pickVersionForLeaderboard(
               fetchedToken,
@@ -48,7 +48,7 @@ export default class BeatSaverService {
               characteristic
             );
             if (picked != null) {
-              rows = await this.getRowsByHash(picked.hash.toLowerCase());
+              rows = await BeatSaverRepository.findMapBundleByVersionHash(picked.hash.toLowerCase());
             }
           }
           if (!rows) {
@@ -112,9 +112,5 @@ export default class BeatSaverService {
     }
 
     return byCreatedDesc[0];
-  }
-
-  private static async getRowsByHash(hash: string) {
-    return BeatSaverRepository.findMapBundleByVersionHash(hash);
   }
 }

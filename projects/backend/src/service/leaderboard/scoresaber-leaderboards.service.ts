@@ -13,12 +13,7 @@ import Request from "@ssr/common/utils/request";
 import { getScoreSaberDifficultyFromDifficulty } from "@ssr/common/utils/scoresaber.util";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import {
-  leaderboardByHashCacheKey,
-  leaderboardByIdCacheKey,
-  leaderboardStarChangeCacheKey,
   normalizeSongHash,
-  qualifiedLeaderboardsCacheKey,
-  rankedLeaderboardsCacheKey,
   rankingQueueLeaderboardsCacheKey,
 } from "../../common/cache-keys";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
@@ -32,101 +27,67 @@ import StorageService from "../infra/storage.service";
 export class ScoreSaberLeaderboardsService {
   private static readonly logger: ScopedLogger = Logger.withTopic("ScoreSaber Leaderboards");
 
+  /**
+   * Gets a leaderboard by its ID.
+   * 
+   * @param id the ID of the leaderboard to get
+   * @returns the leaderboard
+   */
   public static async getLeaderboard(id: number): Promise<ScoreSaberLeaderboard> {
-    return await CacheService.fetch(
-      CacheId.SCORESABER_LEADERBOARDS,
-      leaderboardByIdCacheKey(id),
-      async () => {
-        const map = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds([id]);
-        const leaderboard = map.get(id);
-        if (!leaderboard) {
-          return await ScoreSaberLeaderboardsService.createLeaderboard(id);
-        }
-        return leaderboard;
-      }
-    );
+    const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(id);
+    if (leaderboard !== undefined) {
+      return leaderboard;
+    }
+    return await ScoreSaberLeaderboardsService.createLeaderboard(id);
   }
 
+  /**
+   * Gets a leaderboard by its hash, difficulty, and characteristic.
+   * 
+   * @param hash the hash of the leaderboard to get
+   * @param difficulty the difficulty of the leaderboard to get
+   * @param characteristic the characteristic of the leaderboard to get
+   * @returns the leaderboard
+   */
   public static async getLeaderboardByHash(
     hash: string,
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic
   ): Promise<ScoreSaberLeaderboard> {
     const hashNorm = normalizeSongHash(hash);
-    return await CacheService.fetch(
-      CacheId.SCORESABER_LEADERBOARDS,
-      leaderboardByHashCacheKey(hashNorm, difficulty, characteristic),
-      async () => {
-        const matchId = await ScoreSaberLeaderboardsRepository.findIdBySongHashDifficultyCharacteristic(
-          hashNorm,
-          difficulty,
-          characteristic
-        );
-
-        if (matchId !== undefined) {
-          const map = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds([matchId]);
-          const fromDb = map.get(matchId);
-          if (fromDb) {
-            return fromDb;
-          }
-        }
-
-        const before = performance.now();
-        const leaderboardToken = await ScoreSaberApiService.lookupLeaderboardByHash(
-          hashNorm,
-          getScoreSaberDifficultyFromDifficulty(difficulty),
-          characteristic
-        );
-        if (leaderboardToken == undefined) {
-          throw new NotFoundError(
-            `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
-          );
-        }
-        const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-
-        await ScoreSaberLeaderboardsService.saveLeaderboard(leaderboard.id, leaderboard);
-        (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
-          id: leaderboard.id.toString(),
-          data: leaderboard.id,
-        });
-
-        ScoreSaberLeaderboardsService.logger.info(
-          `Created leaderboard "${leaderboard.id}" in ${formatDuration(performance.now() - before)}`
-        );
-        return leaderboard;
-      }
+    const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardByHash(
+      hashNorm,
+      difficulty,
+      characteristic
     );
-  }
 
-  public static async getLeaderboardsWithDifficultiesByIds(
-    ids: number[]
-  ): Promise<Map<number, ScoreSaberLeaderboard>> {
-    const uniqueIds = [...new Set(ids)];
-    const result = new Map<number, ScoreSaberLeaderboard>();
-    const missingIds: number[] = [];
+    if (leaderboard !== undefined) {
+      return leaderboard;
+    }
 
-    for (const id of uniqueIds) {
-      const leaderboard = await CacheService.get<ScoreSaberLeaderboard>(
-        CacheId.SCORESABER_LEADERBOARDS,
-        leaderboardByIdCacheKey(id)
+    const before = performance.now();
+    const leaderboardToken = await ScoreSaberApiService.lookupLeaderboardByHash(
+      hashNorm,
+      getScoreSaberDifficultyFromDifficulty(difficulty),
+      characteristic
+    );
+    if (leaderboardToken == undefined) {
+      throw new NotFoundError(
+        `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
       );
-      if (leaderboard !== undefined) {
-        result.set(id, leaderboard);
-      } else {
-        missingIds.push(id);
-      }
     }
+    const foundLeaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
 
-    if (missingIds.length > 0) {
-      const dbLeaderboards =
-        await ScoreSaberLeaderboardsRepository.getLeaderboardsWithDifficultiesByIds(missingIds);
-      for (const [id, leaderboard] of dbLeaderboards) {
-        result.set(id, leaderboard);
-        await CacheService.insert(CacheId.SCORESABER_LEADERBOARDS, leaderboardByIdCacheKey(id), leaderboard);
-      }
-    }
+    await ScoreSaberLeaderboardsService.saveLeaderboard(foundLeaderboard.id, foundLeaderboard);
+    (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
+      id: foundLeaderboard.id.toString(),
+      data: foundLeaderboard.id,
+    });
 
-    return result;
+    ScoreSaberLeaderboardsService.logger.info(
+      `Created leaderboard "${foundLeaderboard.id}" in ${formatDuration(performance.now() - before)}`
+    );
+    return foundLeaderboard;
   }
 
   public static async createLeaderboard(
@@ -156,29 +117,33 @@ export class ScoreSaberLeaderboardsService {
   }
 
   /**
-   * Fetches the star change history for a given leaderboard
+   * Fetches the star change history for a given leaderboard.
+   * 
+   * @param leaderboard the leaderboard to fetch the star change history for
+   * @returns the star change history
    */
   public static async fetchStarChangeHistory(
     leaderboard: ScoreSaberLeaderboard
   ): Promise<LeaderboardStarChange[]> {
-    return CacheService.fetch(
-      CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE,
-      leaderboardStarChangeCacheKey(leaderboard.id),
-      async () => {
-        const rows =
-          await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
-            leaderboard.id
-          );
+    const rows =
+      await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
+        leaderboard.id
+      );
 
-        return rows.map(starChange => ({
-          previousStars: starChange.previousStars,
-          newStars: starChange.newStars,
-          timestamp: starChange.timestamp,
-        }));
-      }
-    );
+    return rows.map(starChange => ({
+      previousStars: starChange.previousStars,
+      newStars: starChange.newStars,
+      timestamp: starChange.timestamp,
+    }));
   }
 
+  /**
+   * Fetches leaderboards from the ScoreSaber API.
+   * 
+   * @param status the status of the leaderboards to fetch
+   * @param logProgress whether to log progress
+   * @returns the leaderboards
+   */
   public static async fetchLeaderboardsFromAPI(
     status: "ranked" | "qualified",
     logProgress: boolean = false
@@ -229,25 +194,24 @@ export class ScoreSaberLeaderboardsService {
     return { leaderboards, leaderboardDifficulties };
   }
 
+  /**
+   * Saves a leaderboard to the database and caches the song art.
+   * 
+   * @param id the ID of the leaderboard to save
+   * @param leaderboard the leaderboard to save
+   */
   public static async saveLeaderboard(id: number, leaderboard: ScoreSaberLeaderboard) {
     const cachedSongArt = await ScoreSaberLeaderboardsService.cacheLeaderboardSongArt(leaderboard);
     await ScoreSaberLeaderboardsRepository.insert(id, leaderboard, cachedSongArt);
   }
 
-  public static async getRankedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, rankedLeaderboardsCacheKey, async () => {
-      return ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
-    });
-  }
-
-  public static async getQualifiedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, qualifiedLeaderboardsCacheKey, async () => {
-      return ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();
-    });
-  }
-
+  /**
+   * Fetches the ranking queue leaderboards from the ScoreSaber API.
+   * 
+   * @returns the ranking queue leaderboards
+   */
   public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(CacheId.SCORESABER_LEADERBOARDS, rankingQueueLeaderboardsCacheKey, async () => {
+    return CacheService.fetch(CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS, rankingQueueLeaderboardsCacheKey, async () => {
       const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
       if (!rankingQueueTokens) {
         return [];
@@ -257,6 +221,12 @@ export class ScoreSaberLeaderboardsService {
     });
   }
 
+  /**
+   * Caches the song art for a leaderboard.
+   * 
+   * @param leaderboard the leaderboard to cache the song art for
+   * @returns whether the song art was cached successfully
+   */
   public static async cacheLeaderboardSongArt(leaderboard: ScoreSaberLeaderboard): Promise<boolean> {
     const objectKey = `${leaderboard.songHash}.png`;
 

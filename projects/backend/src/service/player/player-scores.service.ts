@@ -49,18 +49,12 @@ import { PlayerCoreService } from "./player-core.service";
  * Describes how to paginate and enrich a specific score table.
  */
 type ScoreTableConfig<TRow, TScore> = {
-  /** Selects all rows matching the given conditions, ordered and paginated. */
-  fetchRows: (conditions: SQL[], orderBy: SQL, limit: number, offset: number) => Promise<TRow[]>;
-  /** Counts rows matching the given conditions. */
+  buildConditions: (playerIds: string[], leaderboardIds: number[] | null, hmd?: HMD) => SQL[];
   countRows: (conditions: SQL[]) => Promise<number>;
-  /** Builds the WHERE conditions for this query. */
-  buildConditions: (playerIds: string[], sort: string, leaderboardIds: number[] | null, hmd?: HMD) => SQL[];
-  /** Maps a sort field name to a column or SQL expression for `asc()` / `desc()`. */
   resolveOrderColumn: (sort: string) => AnyColumn | SQL;
-  /** Converts a raw DB row + leaderboard into the enriched PlayerScore shape. */
-  enrichRow: (row: TRow, leaderboard: ScoreSaberLeaderboard) => Promise<PlayerScore<TScore> | undefined>;
-  /** Leaderboard ID accessor for a given row. */
+  fetchRows: (conditions: SQL[], orderBy: SQL, limit: number, offset: number) => Promise<TRow[]>;
   getLeaderboardId: (row: TRow) => number;
+  enrichRow: (row: TRow, leaderboard: ScoreSaberLeaderboard) => Promise<PlayerScore<TScore> | undefined>;
 };
 
 export class PlayerScoresService {
@@ -242,7 +236,6 @@ export class PlayerScoresService {
    */
   public static async getScore(scoreId: number): Promise<PlayerScore<ScoreSaberScore>> {
     const scoreRow = await ScoreSaberScoresRepository.findRowByScoreId(scoreId);
-
     if (!scoreRow) {
       throw new NotFoundError("Score not found");
     }
@@ -347,12 +340,6 @@ export class PlayerScoresService {
     return { items, metadata: requested.metadata };
   }
 
-  /**
-   * Shared pagination engine for player score tables.
-   *
-   * Handles count, pagination, sort direction, row fetching, and per-row enrichment,
-   * delegating all table-specific concerns to the provided config.
-   */
   private static async getPaginatedPlayerScores<TRow, TScore>(
     playerId: string,
     page: number,
@@ -361,34 +348,39 @@ export class PlayerScoresService {
     query: PlayerScoresQuery,
     config: ScoreTableConfig<TRow, TScore>
   ): Promise<Page<PlayerScore<TScore>>> {
-    const leaderboardIds = await ScoreSaberLeaderboardsRepository.searchLeaderboardIds(query.search ?? "");
-    if (leaderboardIds == null) {
-      return Pagination.empty<PlayerScore<TScore>>();
-    }
-
     const limit = 8;
     const offset = (page - 1) * limit;
-    const uniquePlayerIds = Array.from(new Set([playerId, ...(query.playerIds || [])]));
-    const conditions = config.buildConditions(uniquePlayerIds, sort, leaderboardIds, query.hmd);
+    const uniquePlayerIds = Array.from(new Set([playerId, ...(query.playerIds ?? [])]));
 
+    // Only search leaderboards if a query is given; null means no filter
+    let leaderboardIds: number[] | null = null;
+    if (query.search?.trim()) {
+      const ids = await ScoreSaberLeaderboardsRepository.searchLeaderboardIds(query.search);
+      if (ids.length === 0) return Pagination.empty<PlayerScore<TScore>>();
+      leaderboardIds = ids;
+    }
+
+    const conditions = config.buildConditions(uniquePlayerIds, leaderboardIds, query.hmd);
     const total = await config.countRows(conditions);
-
     const pagination = new Pagination<PlayerScore<TScore>>().setItemsPerPage(limit).setTotalItems(total);
 
     return pagination.getPage(page, async () => {
       const sortOrder = direction === "asc" ? asc : desc;
-      const orderByColumn = config.resolveOrderColumn(sort);
-      const rows = await config.fetchRows(conditions, sortOrder(orderByColumn), limit, offset);
-
+      const rows = await config.fetchRows(conditions, sortOrder(config.resolveOrderColumn(sort)), limit, offset);
       if (!rows.length) return [];
 
-      const leaderboards = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds(
-        rows.map(config.getLeaderboardId)
+      // Batch-fetch leaderboards for this page only
+      const leaderboardIdSet = [...new Set(rows.map(config.getLeaderboardId))];
+      const leaderboards = await Promise.all(
+        leaderboardIdSet.map(id => ScoreSaberLeaderboardsRepository.getLeaderboardById(id, false))
+      );
+      const leaderboardMap = new Map(
+        leaderboards.flatMap(lb => (lb ? [[lb.id, lb]] : []))
       );
 
       const scores = await Promise.all(
         rows.map(async row => {
-          const leaderboard = leaderboards.get(config.getLeaderboardId(row));
+          const leaderboard = leaderboardMap.get(config.getLeaderboardId(row));
           if (!leaderboard) return undefined;
           return config.enrichRow(row, leaderboard);
         })
@@ -409,7 +401,7 @@ export class PlayerScoresService {
     query: PlayerScoresQuery
   ) {
     return PlayerScoresService.getPaginatedPlayerScores(playerId, page, sort, direction, query, {
-      buildConditions(playerIds, sort, leaderboardIds, hmd) {
+      buildConditions(playerIds, leaderboardIds, hmd) {
         const conditions: SQL[] = [inArray(scoreSaberScoresTable.playerId, playerIds)];
 
         if (sort === "acc") {
@@ -458,7 +450,7 @@ export class PlayerScoresService {
 
       async enrichRow(row, leaderboard) {
         const [enrichedScore, beatSaver] = await Promise.all([
-          ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(row), leaderboard),
+          ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(row), leaderboard), ,
           BeatSaverService.getMap(
             leaderboard.songHash,
             leaderboard.difficulty.difficulty,
@@ -481,7 +473,7 @@ export class PlayerScoresService {
     query: PlayerScoresQuery
   ) {
     return PlayerScoresService.getPaginatedPlayerScores(playerId, page, sort, direction, query, {
-      buildConditions(playerIds, sort, leaderboardIds, hmd) {
+      buildConditions(playerIds, leaderboardIds, hmd) {
         const conditions: SQL[] = [inArray(scoreSaberMedalScoresTable.playerId, playerIds)];
 
         if (sort === "acc") {

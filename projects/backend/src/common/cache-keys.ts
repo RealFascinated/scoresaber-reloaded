@@ -1,31 +1,11 @@
 import { DetailType } from "@ssr/common/detail-type";
-import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
-import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 
 export function normalizeSongHash(hash: string): string {
   return hash.trim().toLowerCase();
 }
 
 // Leaderboard
-export const rankedLeaderboardsCacheKey = "leaderboard:ranked-leaderboards";
-export const qualifiedLeaderboardsCacheKey = "leaderboard:qualified-leaderboards";
 export const rankingQueueLeaderboardsCacheKey = "leaderboard:ranking-queue-maps";
-
-export function leaderboardByIdCacheKey(id: number): string {
-  return `leaderboard:id:${id}`;
-}
-
-export function leaderboardByHashCacheKey(
-  hash: string,
-  difficulty: MapDifficulty,
-  characteristic: MapCharacteristic
-): string {
-  return `leaderboard:hash:${normalizeSongHash(hash)}:${difficulty}:${characteristic}`;
-}
-
-export function leaderboardStarChangeCacheKey(id: number): string {
-  return `leaderboard:star-change:${id}`;
-}
 
 // ScoreSaber
 export function playerCacheKey(id: string, type: DetailType): string {

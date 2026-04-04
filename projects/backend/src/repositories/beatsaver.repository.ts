@@ -199,34 +199,26 @@ export class BeatSaverRepository {
 
   public static async findMapBundleByVersionHash(hash: string) {
     const normalizedHash = hash.toLowerCase();
-    const [row] = await db
+
+    const rows = await db
       .select({
         version: beatSaverMapVersionsTable,
         map: beatSaverMapsTable,
         uploader: beatSaverUploadersTable,
+        difficulty: beatSaverMapDifficultiesTable,
       })
       .from(beatSaverMapVersionsTable)
       .innerJoin(beatSaverMapsTable, eq(beatSaverMapVersionsTable.mapId, beatSaverMapsTable.id))
       .leftJoin(beatSaverUploadersTable, eq(beatSaverMapsTable.uploaderId, beatSaverUploadersTable.id))
-      .where(eq(beatSaverMapVersionsTable.hash, normalizedHash))
-      .limit(1);
+      .leftJoin(beatSaverMapDifficultiesTable, eq(beatSaverMapDifficultiesTable.versionId, beatSaverMapVersionsTable.id))
+      .where(eq(beatSaverMapVersionsTable.hash, normalizedHash));
 
-    if (!row) {
-      return undefined;
-    }
+    if (rows.length === 0) return undefined;
 
-    const uploaderRow = row.map.uploaderId == null ? null : row.uploader?.id != null ? row.uploader : null;
+    const { version, map, uploader } = rows[0];
+    const uploaderRow = map.uploaderId == null ? null : uploader?.id != null ? uploader : null;
+    const difficulties = rows.map(r => r.difficulty).filter(d => d != null);
 
-    const difficulties = await db
-      .select()
-      .from(beatSaverMapDifficultiesTable)
-      .where(eq(beatSaverMapDifficultiesTable.versionId, row.version.id));
-
-    return {
-      map: row.map,
-      uploader: uploaderRow,
-      version: row.version,
-      difficulties,
-    };
+    return { map, uploader: uploaderRow, version, difficulties };
   }
 }

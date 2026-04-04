@@ -12,8 +12,8 @@ export enum CacheId {
   SCORESABER_PLAYER = "scoresaber_player",
   SCORESABER_PLAYER_EXISTS = "scoresaber_player_exists",
   SCORESABER_API_RESPONSE = "scoresaber_api_response",
-  SCORESABER_LEADERBOARDS = "scoresaber_leaderboards",
   SCORESABER_LEADERBOARD_STAR_CHANGE = "scoresaber_leaderboard_star_change",
+  SCORESABER_RANKING_QUEUE_LEADERBOARDS = "scoresaber_ranking_queue_leaderboards",
   BEATLEADER_SCORE = "beatleader_score",
   SCORESABER_SCORE_HISTORY_GRAPH = "scoresaber_score_history_graph",
 }
@@ -43,12 +43,12 @@ export default class CacheService {
       ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
       mode: "MEMORY",
     },
-    [CacheId.SCORESABER_LEADERBOARDS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
-      mode: "MEMORY",
-    },
     [CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      mode: "MEMORY",
+    },
+    [CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
       mode: "MEMORY",
     },
 
