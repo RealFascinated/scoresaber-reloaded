@@ -37,8 +37,7 @@ export function beatSaverRowsToMap({
     return undefined;
   }
 
-  const before = performance.now();
-  const beatSaverMap = BeatSaverMapSchema.parse(
+  return BeatSaverMapSchema.parse(
     {
       id: map.id,
       bsr: map.id,
@@ -88,7 +87,4 @@ export function beatSaverRowsToMap({
     },
     { reportInput: true }
   );
-  const after = performance.now();
-  console.log(`beatSaverRowsToMap took ${after - before}ms`);
-  return beatSaverMap;
 }
