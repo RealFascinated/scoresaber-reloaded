@@ -50,17 +50,6 @@ export class LeaderboardRankedSyncService {
         dbLeaderboard?.ranked !== apiLeaderboard.ranked ||
         dbLeaderboard?.qualified !== apiLeaderboard.qualified ||
         dbLeaderboard?.stars !== apiLeaderboard.stars;
-      LeaderboardRankedSyncService.logger.info(`Status changed: ${statusChanged}`);
-      LeaderboardRankedSyncService.logger.info(`DB Leaderboard: ${JSON.stringify({
-        ranked: dbLeaderboard?.ranked,
-        qualified: dbLeaderboard?.qualified,
-        stars: dbLeaderboard?.stars,
-      })}`);
-      LeaderboardRankedSyncService.logger.info(`API Leaderboard: ${JSON.stringify({
-        ranked: apiLeaderboard.ranked,
-        qualified: apiLeaderboard.qualified,
-        stars: apiLeaderboard.stars,
-      })}`);
 
       if (!dbLeaderboard || statusChanged) {
         leaderboardsToUpsert.push(apiLeaderboard);
