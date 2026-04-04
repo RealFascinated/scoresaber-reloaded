@@ -4,7 +4,7 @@ import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import type { SQL } from "drizzle-orm";
-import { and, asc, count, desc, eq, gte, isNotNull, lte, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import { leaderboardRowToType, mergeJoinedLeaderboardRows } from "../db/converter/scoresaber-leaderboard";
@@ -152,6 +152,24 @@ export class ScoreSaberLeaderboardsRepository {
       .limit(limit);
 
     return result.map(row => row.id);
+  }
+
+  public static async getLeaderboardsByIds(ids: number[], includeDifficulties: boolean = true): Promise<ScoreSaberLeaderboard[]> {
+    const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
+
+    if (includeDifficulties) {
+      const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
+      const rows = await db
+        .select()
+        .from(mainAlias)
+        .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
+        .where(inArray(mainAlias.id, ids))
+        .orderBy(asc(mainAlias.id), asc(difficultySortSql(difficultiesAlias)));
+      return mergeJoinedLeaderboardRows(rows);
+    }
+
+    const rows = await db.select().from(mainAlias).where(inArray(mainAlias.id, ids));
+    return rows.map(row => leaderboardRowToType(row));
   }
 
   public static getRankedLeaderboards(includeDifficulties = true): Promise<ScoreSaberLeaderboard[]> {

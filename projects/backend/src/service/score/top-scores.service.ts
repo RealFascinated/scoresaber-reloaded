@@ -3,9 +3,9 @@ import { Pagination } from "@ssr/common/pagination";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
+import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import BeatSaverService from "../external/beatsaver.service";
-import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { ScoreCoreService } from "./score-core.service";
 
 export class TopScoresService {
@@ -30,13 +30,15 @@ export class TopScoresService {
         return [];
       }
 
-      const leaderboards = await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds(
-        scoresRows.map(scoreRow => scoreRow.leaderboardId)
+      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(
+        scoresRows.map(scoreRow => scoreRow.leaderboardId),
+        false
       );
+      const leaderboardMap = new Map(leaderboards.map(leaderboard => [leaderboard.id, leaderboard]));
 
       const scores = await Promise.all(
         scoresRows.map(async scoreRow => {
-          const leaderboard = leaderboards.get(scoreRow.leaderboardId);
+          const leaderboard = leaderboardMap.get(scoreRow.leaderboardId);
           if (!leaderboard) return undefined;
 
           const score = scoreSaberScoreRowToType(scoreRow);
