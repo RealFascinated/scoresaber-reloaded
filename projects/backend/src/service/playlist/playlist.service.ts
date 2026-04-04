@@ -71,7 +71,14 @@ export default class PlaylistService {
    * @returns the ranked maps playlist
    */
   public static async getRankedMapsPlaylist(): Promise<Playlist> {
-    const leaderboards = await ScoreSaberLeaderboardsService.getRankedLeaderboards();
+    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
+    const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
+    for (const leaderboard of rankedLeaderboards) {
+      if (!leaderboards.has(leaderboard.songHash)) {
+        leaderboards.set(leaderboard.songHash, leaderboard);
+      }
+      leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
+    }
 
     return {
       playlistTitle: `ScoreSaber Ranked (${getPlaylistTitleDate(new Date())})`,
@@ -79,7 +86,7 @@ export default class PlaylistService {
       customData: {
         syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-ranked-maps.bplist`,
       },
-      songs: leaderboards.map(leaderboard => ({
+      songs: Array.from(leaderboards.values()).map(leaderboard => ({
         songName: leaderboard.songName,
         levelAuthorName: leaderboard.songAuthorName,
         hash: leaderboard.songHash,
@@ -97,7 +104,14 @@ export default class PlaylistService {
    * @returns the qualified maps playlist
    */
   public static async getQualifiedMapsPlaylist(): Promise<Playlist> {
-    const leaderboards = await ScoreSaberLeaderboardsService.getQualifiedLeaderboards();
+    const qualifiedLeaderboards = await ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();
+    const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
+    for (const leaderboard of qualifiedLeaderboards) {
+      if (!leaderboards.has(leaderboard.songHash)) {
+        leaderboards.set(leaderboard.songHash, leaderboard);
+      }
+      leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
+    }
 
     return {
       playlistTitle: `ScoreSaber Qualified (${getPlaylistTitleDate(new Date())})`,
@@ -105,7 +119,7 @@ export default class PlaylistService {
       customData: {
         syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-qualified-maps.bplist`,
       },
-      songs: leaderboards.map(leaderboard => ({
+      songs: Array.from(leaderboards.values()).map(leaderboard => ({
         songName: leaderboard.songName,
         levelAuthorName: leaderboard.songAuthorName,
         hash: leaderboard.songHash,
@@ -432,8 +446,9 @@ export default class PlaylistService {
     const rows = await ScoreSaberScoresRepository.selectScoresJoinedLeaderboardsWhere(conditions);
 
     const leaderboardIds = [...new Set(rows.map(r => r.lbRow.id))];
-    const leaderboardMap =
-      await ScoreSaberLeaderboardsService.getLeaderboardsWithDifficultiesByIds(leaderboardIds);
+    const leaderboards =
+      await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(leaderboardIds, false);
+    const leaderboardMap = new Map(leaderboards.map(lb => [lb.id, lb]));
 
     return rows.map(({ scoreRow, lbRow }) => {
       const leaderboard = leaderboardMap.get(lbRow.id);

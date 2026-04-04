@@ -1,5 +1,7 @@
 import { env } from "@ssr/common/env";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardSchema,
@@ -9,7 +11,11 @@ import { ScoreSaberLeaderboardRow } from "../schema";
 
 export type LeaderboardDifficultyJoinRow = {
   leaderboard: ScoreSaberLeaderboardRow;
-  difficulties?: ScoreSaberLeaderboardRow | null;
+  difficulties?: {
+    id: number;
+    difficulty: MapDifficulty;
+    characteristic: MapCharacteristic;
+  } | null;
 };
 
 export function leaderboardRowToType(
@@ -51,31 +57,4 @@ export function leaderboardRowToType(
     },
     { reportInput: true }
   );
-}
-
-export function mergeJoinedLeaderboardRows(rows: LeaderboardDifficultyJoinRow[]): ScoreSaberLeaderboard[] {
-  const acc = new Map<number, { main: ScoreSaberLeaderboardRow; difficulties: Map<number, ScoreSaberLeaderboardRow> }>();
-  const order: number[] = [];
-
-  for (const { leaderboard, difficulties } of rows) {
-    if (!acc.has(leaderboard.id)) {
-      order.push(leaderboard.id);
-      acc.set(leaderboard.id, { main: leaderboard, difficulties: new Map() });
-    }
-    if (difficulties) {
-      acc.get(leaderboard.id)!.difficulties.set(difficulties.id, difficulties);
-    }
-  }
-
-  return order.map(id => {
-    const { main, difficulties } = acc.get(id)!;
-    const picks = difficulties.size > 0
-      ? [...difficulties.values()].map(row => ({
-        id: row.id,
-        difficulty: row.difficulty,
-        characteristic: row.characteristic,
-      }))
-      : undefined;
-    return leaderboardRowToType(main, picks);
-  });
 }
