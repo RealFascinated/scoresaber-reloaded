@@ -295,7 +295,6 @@ export class ScoreSaberLeaderboardsRepository {
     const offset = (safePage - 1) * LEADERBOARD_SEARCH_PAGE_SIZE;
 
     const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
-    const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
 
     const conditions: SQL[] = [];
     if (options?.ranked === true) conditions.push(eq(mainAlias.ranked, true));
@@ -343,14 +342,13 @@ export class ScoreSaberLeaderboardsRepository {
     const pageRows = await db
       .select()
       .from(mainAlias)
-      .leftJoin(difficultiesAlias, eq(mainAlias.songHash, difficultiesAlias.songHash))
       .where(whereClause)
-      .orderBy(...orderParts, asc(difficultySortSql(difficultiesAlias)))
+      .orderBy(...orderParts)
       .limit(LEADERBOARD_SEARCH_PAGE_SIZE)
       .offset(offset);
 
     return {
-      items: mergeJoinedLeaderboardRows(pageRows),
+      items: pageRows.map(row => leaderboardRowToType(row, [])),
       metadata: {
         totalItems: total,
         totalPages: total === 0 ? 1 : Math.ceil(total / LEADERBOARD_SEARCH_PAGE_SIZE),
