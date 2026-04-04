@@ -12,10 +12,7 @@ import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leade
 import Request from "@ssr/common/utils/request";
 import { getScoreSaberDifficultyFromDifficulty } from "@ssr/common/utils/scoresaber.util";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import {
-  normalizeSongHash,
-  rankingQueueLeaderboardsCacheKey,
-} from "../../common/cache-keys";
+import { normalizeSongHash, rankingQueueLeaderboardsCacheKey } from "../../common/cache-keys";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
@@ -29,7 +26,7 @@ export class ScoreSaberLeaderboardsService {
 
   /**
    * Gets a leaderboard by its ID.
-   * 
+   *
    * @param id the ID of the leaderboard to get
    * @returns the leaderboard
    */
@@ -43,7 +40,7 @@ export class ScoreSaberLeaderboardsService {
 
   /**
    * Gets a leaderboard by its hash, difficulty, and characteristic.
-   * 
+   *
    * @param hash the hash of the leaderboard to get
    * @param difficulty the difficulty of the leaderboard to get
    * @param characteristic the characteristic of the leaderboard to get
@@ -118,17 +115,16 @@ export class ScoreSaberLeaderboardsService {
 
   /**
    * Fetches the star change history for a given leaderboard.
-   * 
+   *
    * @param leaderboard the leaderboard to fetch the star change history for
    * @returns the star change history
    */
   public static async fetchStarChangeHistory(
     leaderboard: ScoreSaberLeaderboard
   ): Promise<LeaderboardStarChange[]> {
-    const rows =
-      await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
-        leaderboard.id
-      );
+    const rows = await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
+      leaderboard.id
+    );
 
     return rows.map(starChange => ({
       previousStars: starChange.previousStars,
@@ -139,7 +135,7 @@ export class ScoreSaberLeaderboardsService {
 
   /**
    * Fetches leaderboards from the ScoreSaber API.
-   * 
+   *
    * @param status the status of the leaderboards to fetch
    * @param logProgress whether to log progress
    * @returns the leaderboards
@@ -196,7 +192,7 @@ export class ScoreSaberLeaderboardsService {
 
   /**
    * Saves a leaderboard to the database and caches the song art.
-   * 
+   *
    * @param id the ID of the leaderboard to save
    * @param leaderboard the leaderboard to save
    */
@@ -207,23 +203,27 @@ export class ScoreSaberLeaderboardsService {
 
   /**
    * Fetches the ranking queue leaderboards from the ScoreSaber API.
-   * 
+   *
    * @returns the ranking queue leaderboards
    */
   public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
-    return CacheService.fetch(CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS, rankingQueueLeaderboardsCacheKey, async () => {
-      const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
-      if (!rankingQueueTokens) {
-        return [];
-      }
+    return CacheService.fetch(
+      CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS,
+      rankingQueueLeaderboardsCacheKey,
+      async () => {
+        const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
+        if (!rankingQueueTokens) {
+          return [];
+        }
 
-      return rankingQueueTokens.all.map(token => getScoreSaberLeaderboardFromToken(token.leaderboardInfo));
-    });
+        return rankingQueueTokens.all.map(token => getScoreSaberLeaderboardFromToken(token.leaderboardInfo));
+      }
+    );
   }
 
   /**
    * Caches the song art for a leaderboard.
-   * 
+   *
    * @param leaderboard the leaderboard to cache the song art for
    * @returns whether the song art was cached successfully
    */

@@ -70,7 +70,8 @@ function buildDifficultyJoin(
 
   const joinConditions: SQL[] = [eq(mainAlias.songHash, difficultiesAlias.songHash)];
   if (filters?.ranked !== undefined) joinConditions.push(eq(difficultiesAlias.ranked, filters.ranked));
-  if (filters?.qualified !== undefined) joinConditions.push(eq(difficultiesAlias.qualified, filters.qualified));
+  if (filters?.qualified !== undefined)
+    joinConditions.push(eq(difficultiesAlias.qualified, filters.qualified));
 
   return {
     difficultiesAlias,
@@ -105,14 +106,19 @@ export class ScoreSaberLeaderboardsRepository {
     const conditions: SQL[] = [];
     if (ranked !== undefined) conditions.push(eq(scoreSaberLeaderboardsTable.ranked, ranked));
     if (qualified !== undefined) conditions.push(eq(scoreSaberLeaderboardsTable.qualified, qualified));
-    if (minStars !== undefined || maxStars !== undefined) conditions.push(isNotNull(scoreSaberLeaderboardsTable.stars));
+    if (minStars !== undefined || maxStars !== undefined)
+      conditions.push(isNotNull(scoreSaberLeaderboardsTable.stars));
     if (minStars !== undefined) conditions.push(gte(scoreSaberLeaderboardsTable.stars, minStars));
     if (maxStars !== undefined) conditions.push(lte(scoreSaberLeaderboardsTable.stars, maxStars));
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
     const finalOrderBy = orderBy?.length ? orderBy : [asc(scoreSaberLeaderboardsTable.id)];
 
-    const rows = await db.select().from(scoreSaberLeaderboardsTable).where(where).orderBy(...finalOrderBy);
+    const rows = await db
+      .select()
+      .from(scoreSaberLeaderboardsTable)
+      .where(where)
+      .orderBy(...finalOrderBy);
     return rows.map(row => leaderboardRowToType(row));
   }
 
@@ -221,10 +227,9 @@ export class ScoreSaberLeaderboardsRepository {
     minStars: number,
     maxStars: number
   ): Promise<ScoreSaberLeaderboard[]> {
-    return ScoreSaberLeaderboardsRepository.fetchLeaderboards(
-      { ranked: true, minStars, maxStars },
-      [asc(scoreSaberLeaderboardsTable.stars)]
-    );
+    return ScoreSaberLeaderboardsRepository.fetchLeaderboards({ ranked: true, minStars, maxStars }, [
+      asc(scoreSaberLeaderboardsTable.stars),
+    ]);
   }
 
   public static async insert(
@@ -258,7 +263,10 @@ export class ScoreSaberLeaderboardsRepository {
       .onConflictDoNothing({ target: scoreSaberLeaderboardsTable.id });
   }
 
-  public static async updateLeaderboardById(id: number, partial: Partial<ScoreSaberLeaderboardRow>): Promise<void> {
+  public static async updateLeaderboardById(
+    id: number,
+    partial: Partial<ScoreSaberLeaderboardRow>
+  ): Promise<void> {
     await db.update(scoreSaberLeaderboardsTable).set(partial).where(eq(scoreSaberLeaderboardsTable.id, id));
   }
 
@@ -357,11 +365,15 @@ export class ScoreSaberLeaderboardsRepository {
 
       switch (category) {
         case MapCategory.ScoresSet:
-          return ascending ? [asc(scoreSaberLeaderboardsTable.plays), idTie] : [desc(scoreSaberLeaderboardsTable.plays), idTie];
+          return ascending
+            ? [asc(scoreSaberLeaderboardsTable.plays), idTie]
+            : [desc(scoreSaberLeaderboardsTable.plays), idTie];
         case MapCategory.StarDifficulty:
           return ascending ? [asc(starsCol), idTie] : [desc(starsCol), idTie];
         case MapCategory.Author:
-          return ascending ? [asc(scoreSaberLeaderboardsTable.levelAuthorName), idTie] : [desc(scoreSaberLeaderboardsTable.levelAuthorName), idTie];
+          return ascending
+            ? [asc(scoreSaberLeaderboardsTable.levelAuthorName), idTie]
+            : [desc(scoreSaberLeaderboardsTable.levelAuthorName), idTie];
         case MapCategory.DateRanked:
         default:
           return ascending
@@ -370,10 +382,19 @@ export class ScoreSaberLeaderboardsRepository {
       }
     })();
 
-    const [countRow] = await db.select({ total: count() }).from(scoreSaberLeaderboardsTable).where(whereClause);
+    const [countRow] = await db
+      .select({ total: count() })
+      .from(scoreSaberLeaderboardsTable)
+      .where(whereClause);
     const total = Number(countRow?.total ?? 0);
 
-    const rows = await db.select().from(scoreSaberLeaderboardsTable).where(whereClause).orderBy(...orderParts).limit(LEADERBOARD_SEARCH_PAGE_SIZE).offset(offset);
+    const rows = await db
+      .select()
+      .from(scoreSaberLeaderboardsTable)
+      .where(whereClause)
+      .orderBy(...orderParts)
+      .limit(LEADERBOARD_SEARCH_PAGE_SIZE)
+      .offset(offset);
 
     return {
       items: rows.map(row => leaderboardRowToType(row)),

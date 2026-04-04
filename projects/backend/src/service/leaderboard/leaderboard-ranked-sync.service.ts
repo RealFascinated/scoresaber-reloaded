@@ -59,10 +59,10 @@ export class LeaderboardRankedSyncService {
         updatedLeaderboards.push({
           previousLeaderboard: dbLeaderboard
             ? {
-              ranked: dbLeaderboard.ranked,
-              qualified: dbLeaderboard.qualified,
-              stars: dbLeaderboard.stars ?? 0,
-            }
+                ranked: dbLeaderboard.ranked,
+                qualified: dbLeaderboard.qualified,
+                stars: dbLeaderboard.stars ?? 0,
+              }
             : undefined,
           newLeaderboard: apiLeaderboard,
         });
@@ -90,7 +90,9 @@ export class LeaderboardRankedSyncService {
       }
     }
 
-    LeaderboardRankedSyncService.logger.info(`Found ${updatedLeaderboards.length} leaderboards with changes.`);
+    LeaderboardRankedSyncService.logger.info(
+      `Found ${updatedLeaderboards.length} leaderboards with changes.`
+    );
 
     // There has been ranked leaderboard changes
     if (leaderboardsToUpsert.length > 0) {

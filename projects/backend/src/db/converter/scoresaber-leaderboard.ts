@@ -28,7 +28,11 @@ export function leaderboardRowToType(
     characteristic: row.characteristic,
   };
 
-  const status: ScoreSaberLeaderboardStatus = row.ranked ? "Ranked" : row.qualified ? "Qualified" : "Unranked";
+  const status: ScoreSaberLeaderboardStatus = row.ranked
+    ? "Ranked"
+    : row.qualified
+      ? "Qualified"
+      : "Unranked";
 
   return ScoreSaberLeaderboardSchema.parse(
     {

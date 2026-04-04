@@ -366,7 +366,12 @@ export class PlayerScoresService {
 
     return pagination.getPage(page, async () => {
       const sortOrder = direction === "asc" ? asc : desc;
-      const rows = await config.fetchRows(conditions, sortOrder(config.resolveOrderColumn(sort)), limit, offset);
+      const rows = await config.fetchRows(
+        conditions,
+        sortOrder(config.resolveOrderColumn(sort)),
+        limit,
+        offset
+      );
       if (!rows.length) return [];
 
       // Batch-fetch leaderboards for this page only
@@ -374,9 +379,7 @@ export class PlayerScoresService {
       const leaderboards = await Promise.all(
         leaderboardIdSet.map(id => ScoreSaberLeaderboardsRepository.getLeaderboardById(id, false))
       );
-      const leaderboardMap = new Map(
-        leaderboards.flatMap(lb => (lb ? [[lb.id, lb]] : []))
-      );
+      const leaderboardMap = new Map(leaderboards.flatMap(lb => (lb ? [[lb.id, lb]] : [])));
 
       const scores = await Promise.all(
         rows.map(async row => {
@@ -450,7 +453,8 @@ export class PlayerScoresService {
 
       async enrichRow(row, leaderboard) {
         const [enrichedScore, beatSaver] = await Promise.all([
-          ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(row), leaderboard), ,
+          ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(row), leaderboard),
+          ,
           BeatSaverService.getMap(
             leaderboard.songHash,
             leaderboard.difficulty.difficulty,

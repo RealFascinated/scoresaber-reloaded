@@ -1,3 +1,5 @@
+"use client";
+
 import { Colors } from "@/common/colors";
 import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";

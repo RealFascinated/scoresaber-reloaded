@@ -3,27 +3,14 @@ import { InternalServerError } from "../error/internal-server-error";
 import request from "../utils/request";
 
 /**
- * BSOR Replay Decoder
- *
- * This class provides functionality to decode BSOR (Beat Saber Open Replay) files.
- *
- * Usage examples:
- *
- * // Decode from a File object (browser)
- * const fileInput = document.getElementById('file-input') as HTMLInputElement;
- * const file = fileInput.files[0];
- * const replay = await ReplayDecoder.decodeReplay(file);
- *
- * // Decode from a URL
- * const replay = await ReplayDecoder.decodeReplay('https://example.com/replay.bsor');
- *
- * // Access replay data
- * console.log('Player:', replay.info.playerName);
- * console.log('Song:', replay.info.songName);
- * console.log('Score:', replay.info.score);
- * console.log('Frames count:', replay.frames.length);
- * console.log('Notes count:', replay.notes.length);
+ * BSOR Replay Decoder 
  */
+
+// Internal state tracker to avoid polluting DataView prototype and losing V8 optimizations
+interface DecodeState {
+  view: DataView;
+  ptr: number;
+}
 
 export interface ReplayInfo {
   version: string;
@@ -203,37 +190,30 @@ export class ReplayDecoder {
   private static readonly MAGIC = 0x442d3d69;
   private static readonly VERSION = 1;
   private static readonly TRICKS_MAGIC = 1630166513;
+  private static readonly UTF8_DECODER = new TextDecoder("utf-8");
 
-  /**
-   * Downloads and decodes a BSOR file from a URL
-   */
   public static async decodeReplay(url: string): Promise<Replay> {
-    // Check if the URL is actually a BeatLeader score ID (numeric)
+    let targetUrl = url;
+
     if (!Number.isNaN(Number(url))) {
       const scoreId = Number(url);
       const beatleaderScore = await request.get<BeatLeaderScoreToken>(
-        `https://proxy.fascinated.cc/https://api.beatleader.com/score/${scoreId}`,
-        {
-          returns: "json",
-          throwOnError: true,
-        }
+        `https://api.beatleader.com/score/${scoreId}`,
+        { returns: "json", throwOnError: true }
       );
-      // Decode the replay from the beatleader score's replay url
-      return ReplayDecoder.decodeReplay(beatleaderScore!.replay);
+      if (!beatleaderScore?.replay) throw new InternalServerError("No replay found for score");
+      targetUrl = beatleaderScore.replay;
     }
 
-    const filename = url.split("?")[0];
-    const extension = filename.split(".").pop();
-
-    if (extension !== "bsor") {
+    const filename = targetUrl.split("?")[0];
+    if (!filename.endsWith(".bsor")) {
       throw new InternalServerError("Invalid file format. Expected .bsor file.");
     }
 
-    const processedUrl = url
-      .replace("https://cdn.discordapp.com/attachments/", "https://discord.beatleader.pro/")
-      .replace("https://api.beatleader.com", "https://api.beatleader.com")
-      .replace("https://api.beatleader.xyz", "https://api.beatleader.xyz")
-      .replace("https://api.beatleader.net", "https://api.beatleader.net");
+    const processedUrl = targetUrl.replace(
+      "https://cdn.discordapp.com/attachments/",
+      "https://discord.beatleader.pro/"
+    );
 
     try {
       const data = await request.get(processedUrl, {
@@ -241,490 +221,347 @@ export class ReplayDecoder {
         throwOnError: true,
       });
 
-      if (!data) {
-        throw new InternalServerError("No data received from server");
-      }
-
+      if (!data) throw new InternalServerError("No data received");
       return this.decode(data as ArrayBuffer);
     } catch (error) {
       throw new InternalServerError(
-        `Failed to download replay: ${error instanceof Error ? error.message : "Network error"}`
+        `Failed to download: ${error instanceof Error ? error.message : "Network error"}`
       );
     }
   }
 
-  /**
-   * Main decoding function for BSOR replay data
-   */
   private static decode(arrayBuffer: ArrayBuffer): Replay {
-    const dataView = new DataView(arrayBuffer);
-    (dataView as any).pointer = 0;
+    const before = performance.now();
+    const state: DecodeState = {
+      view: new DataView(arrayBuffer),
+      ptr: 0,
+    };
 
-    const magic = this.DecodeInt(dataView);
-    const version = this.DecodeUint8(dataView);
+    const magic = this.ReadInt(state);
+    const version = this.ReadUint8(state);
 
     if (version !== this.VERSION || magic !== this.MAGIC) {
-      throw new InternalServerError("Failed to decode replay: Invalid magic or version");
+      throw new InternalServerError("Failed to decode: Invalid magic or version");
     }
 
-    const replay: Partial<Replay> = {};
+    const replay = {} as Replay;
 
-    for (let a = 0; a <= StructType.customData && (dataView as any).pointer < dataView.byteLength; a++) {
-      const type = this.DecodeUint8(dataView);
+    while (state.ptr < state.view.byteLength) {
+      const type = this.ReadUint8(state);
       switch (type) {
         case StructType.info:
-          replay.info = this.DecodeInfo(dataView);
+          replay.info = this.DecodeInfo(state);
           break;
         case StructType.frames:
-          replay.frames = this.DecodeFrames(dataView);
+          replay.frames = this.DecodeFrames(state);
           break;
         case StructType.notes:
-          replay.notes = this.DecodeNotes(dataView);
+          replay.notes = this.DecodeNotes(state);
           break;
         case StructType.walls:
-          replay.walls = this.DecodeWalls(dataView);
+          replay.walls = this.DecodeWalls(state);
           break;
         case StructType.heights:
-          replay.heights = this.DecodeHeight(dataView);
+          replay.heights = this.DecodeHeight(state);
           break;
         case StructType.pauses:
-          replay.pauses = this.DecodePauses(dataView);
+          replay.pauses = this.DecodePauses(state);
           break;
         case StructType.offset:
-          replay.offset = this.DecodeOffsets(dataView);
+          replay.offset = this.DecodeOffsets(state);
           break;
         case StructType.customData:
-          replay.customData = this.DecodeCustomData(dataView);
-          this.ParseKnownCustomData(replay as Replay);
+          replay.customData = this.DecodeCustomData(state);
+          this.ParseKnownCustomData(replay);
           break;
       }
     }
 
-    return replay as Replay;
+    console.log(`decode took ${performance.now() - before}ms`);
+    return replay;
   }
 
-  private static DecodeInfo(dataView: DataView): ReplayInfo {
+  private static DecodeInfo(state: DecodeState): ReplayInfo {
     return {
-      version: this.DecodeString(dataView),
-      gameVersion: this.DecodeString(dataView),
-      timestamp: this.DecodeString(dataView),
-      playerID: this.DecodeString(dataView),
-      playerName: this.DecodeName(dataView),
-      platform: this.DecodeString(dataView),
-      trackingSystem: this.DecodeString(dataView),
-      hmd: this.DecodeString(dataView),
-      controller: this.DecodeString(dataView),
-      hash: this.DecodeString(dataView),
-      songName: this.DecodeString(dataView),
-      mapper: this.DecodeString(dataView),
-      difficulty: this.DecodeString(dataView),
-      score: this.DecodeInt(dataView),
-      mode: this.DecodeString(dataView),
-      environment: this.DecodeString(dataView),
-      modifiers: this.DecodeString(dataView),
-      jumpDistance: this.DecodeFloat(dataView),
-      leftHanded: this.DecodeBool(dataView),
-      height: this.DecodeFloat(dataView),
-      startTime: this.DecodeFloat(dataView),
-      failTime: this.DecodeFloat(dataView),
-      speed: this.DecodeFloat(dataView),
+      version: this.ReadString(state),
+      gameVersion: this.ReadString(state),
+      timestamp: this.ReadString(state),
+      playerID: this.ReadString(state),
+      playerName: this.DecodeName(state),
+      platform: this.ReadString(state),
+      trackingSystem: this.ReadString(state),
+      hmd: this.ReadString(state),
+      controller: this.ReadString(state),
+      hash: this.ReadString(state),
+      songName: this.ReadString(state),
+      mapper: this.ReadString(state),
+      difficulty: this.ReadString(state),
+      score: this.ReadInt(state),
+      mode: this.ReadString(state),
+      environment: this.ReadString(state),
+      modifiers: this.ReadString(state),
+      jumpDistance: this.ReadFloat(state),
+      leftHanded: this.ReadBool(state),
+      height: this.ReadFloat(state),
+      startTime: this.ReadFloat(state),
+      failTime: this.ReadFloat(state),
+      speed: this.ReadFloat(state),
     };
   }
 
-  private static DecodeFrames(dataView: DataView): ReplayFrame[] {
-    const length = this.DecodeInt(dataView);
+  private static DecodeFrames(state: DecodeState): ReplayFrame[] {
+    const length = this.ReadInt(state);
     const result: ReplayFrame[] = [];
-
     for (let i = 0; i < length; i++) {
-      const frame = this.DecodeFrame(dataView);
+      const frame = {
+        time: this.ReadFloat(state),
+        fps: this.ReadInt(state),
+        head: this.DecodeEuler(state),
+        left: this.DecodeEuler(state),
+        right: this.DecodeEuler(state),
+      };
       if (frame.time !== 0 && (result.length === 0 || frame.time !== result[result.length - 1].time)) {
         result.push(frame);
       }
     }
-
     return result;
   }
 
-  private static DecodeFrame(dataView: DataView): ReplayFrame {
+  private static DecodeNotes(state: DecodeState): ReplayNote[] {
+    const length = this.ReadInt(state);
+    const result: ReplayNote[] = new Array(length);
+    for (let i = 0; i < length; i++) {
+      const note: ReplayNote = {
+        noteID: this.ReadInt(state),
+        eventTime: this.ReadFloat(state),
+        spawnTime: this.ReadFloat(state),
+        eventType: this.ReadInt(state),
+      };
+      if (note.eventType === NoteEventType.good || note.eventType === NoteEventType.bad) {
+        note.noteCutInfo = this.DecodeCutInfo(state);
+      }
+      result[i] = note;
+    }
+    return result;
+  }
+
+  private static DecodeWalls(state: DecodeState): ReplayWall[] {
+    const length = this.ReadInt(state);
+    const result: ReplayWall[] = new Array(length);
+    for (let i = 0; i < length; i++) {
+      result[i] = {
+        wallID: this.ReadInt(state),
+        energy: this.ReadFloat(state),
+        time: this.ReadFloat(state),
+        spawnTime: this.ReadFloat(state),
+      };
+    }
+    return result;
+  }
+
+  private static DecodeHeight(state: DecodeState): ReplayHeight[] {
+    const length = this.ReadInt(state);
+    const result: ReplayHeight[] = new Array(length);
+    for (let i = 0; i < length; i++) {
+      result[i] = { height: this.ReadFloat(state), time: this.ReadFloat(state) };
+    }
+    return result;
+  }
+
+  private static DecodePauses(state: DecodeState): ReplayPause[] {
+    const length = this.ReadInt(state);
+    const result: ReplayPause[] = new Array(length);
+    for (let i = 0; i < length; i++) {
+      result[i] = { duration: this.ReadLong(state), time: this.ReadFloat(state) };
+    }
+    return result;
+  }
+
+  private static DecodeOffsets(state: DecodeState): ReplayOffset {
     return {
-      time: this.DecodeFloat(dataView),
-      fps: this.DecodeInt(dataView),
-      head: this.DecodeEuler(dataView),
-      left: this.DecodeEuler(dataView),
-      right: this.DecodeEuler(dataView),
+      leftSaberPos: this.DecodeVector3(state),
+      leftSaberRot: this.DecodeQuaternion(state),
+      rightSaberPos: this.DecodeVector3(state),
+      rightSaberRot: this.DecodeQuaternion(state),
     };
   }
 
-  private static DecodeNotes(dataView: DataView): ReplayNote[] {
-    const length = this.DecodeInt(dataView);
-    const result: ReplayNote[] = [];
-
-    for (let i = 0; i < length; i++) {
-      result.push(this.DecodeNote(dataView));
-    }
-
-    return result;
-  }
-
-  private static DecodeWalls(dataView: DataView): ReplayWall[] {
-    const length = this.DecodeInt(dataView);
-    const result: ReplayWall[] = [];
-
-    for (let i = 0; i < length; i++) {
-      result.push({
-        wallID: this.DecodeInt(dataView),
-        energy: this.DecodeFloat(dataView),
-        time: this.DecodeFloat(dataView),
-        spawnTime: this.DecodeFloat(dataView),
-      });
-    }
-
-    return result;
-  }
-
-  private static DecodeHeight(dataView: DataView): ReplayHeight[] {
-    const length = this.DecodeInt(dataView);
-    const result: ReplayHeight[] = [];
-
-    for (let i = 0; i < length; i++) {
-      result.push({
-        height: this.DecodeFloat(dataView),
-        time: this.DecodeFloat(dataView),
-      });
-    }
-
-    return result;
-  }
-
-  private static DecodePauses(dataView: DataView): ReplayPause[] {
-    const length = this.DecodeInt(dataView);
-    const result: ReplayPause[] = [];
-
-    for (let i = 0; i < length; i++) {
-      result.push({
-        duration: this.DecodeLong(dataView),
-        time: this.DecodeFloat(dataView),
-      });
-    }
-
-    return result;
-  }
-
-  private static DecodeOffsets(dataView: DataView): ReplayOffset {
-    return {
-      leftSaberPos: this.DecodeVector3(dataView),
-      leftSaberRot: this.DecodeQuaternion(dataView),
-      rightSaberPos: this.DecodeVector3(dataView),
-      rightSaberRot: this.DecodeQuaternion(dataView),
-    };
-  }
-
-  private static DecodeCustomData(dataView: DataView): Record<string, Int8Array> {
+  private static DecodeCustomData(state: DecodeState): Record<string, Int8Array> {
     const result: Record<string, Int8Array> = {};
-    const length = this.DecodeInt(dataView);
-
+    const length = this.ReadInt(state);
     for (let i = 0; i < length; i++) {
-      const key = this.DecodeString(dataView);
-      const customDataLength = this.DecodeInt(dataView);
-      const value = new Int8Array(
-        dataView.buffer.slice((dataView as any).pointer, customDataLength + (dataView as any).pointer)
-      );
-      result[key] = value;
-      (dataView as any).pointer += customDataLength;
+      const key = this.ReadString(state);
+      const dataLen = this.ReadInt(state);
+      result[key] = new Int8Array(state.view.buffer, state.ptr, dataLen);
+      state.ptr += dataLen;
     }
-
     return result;
   }
 
   private static ParseKnownCustomData(replay: Replay): void {
     replay.parsedCustomData = {};
+    if (!replay.customData) return;
 
-    if (replay.customData) {
-      if (replay.customData["HeartBeatQuest"]) {
-        const result = this.DecodeHeartBeatQuest(replay.customData["HeartBeatQuest"]);
-        if (result) {
-          replay.parsedCustomData["HeartBeatQuest"] = result;
+    if (replay.customData["HeartBeatQuest"]) {
+      const hbState: DecodeState = {
+        view: new DataView(
+          replay.customData["HeartBeatQuest"].buffer,
+          replay.customData["HeartBeatQuest"].byteOffset
+        ),
+        ptr: 0,
+      };
+      const version = this.ReadInt(hbState);
+      if (version === 1) {
+        const len = this.ReadInt(hbState);
+        const frames = new Array(len);
+        for (let i = 0; i < len; i++)
+          frames[i] = { time: this.ReadFloat(hbState), heartrate: this.ReadInt(hbState) };
+        replay.parsedCustomData["HeartBeatQuest"] = { frames, device: this.ReadString(hbState) };
+      }
+    }
+
+    if (replay.customData["reesabers:tricks-replay"]) {
+      const trState: DecodeState = {
+        view: new DataView(
+          replay.customData["reesabers:tricks-replay"].buffer,
+          replay.customData["reesabers:tricks-replay"].byteOffset
+        ),
+        ptr: 0,
+      };
+      const magic = this.ReadInt(trState);
+      if (magic === this.TRICKS_MAGIC) {
+        const tr = {
+          version: this.ReadInt(trState),
+          left: this.DecodeHandReplay(trState),
+          right: this.DecodeHandReplay(trState),
+        };
+        replay.parsedCustomData["reesabers:tricks-replay"] = tr;
+        this.AddTricksToReplay(replay, tr);
+      }
+    }
+  }
+
+  private static DecodeHandReplay(state: DecodeState): HandReplay {
+    const count = this.ReadInt(state);
+    const segments: TrickSegment[] = new Array(count);
+    for (let i = 0; i < count; i++) {
+      const fCount = this.ReadInt(state);
+      const frames = new Array(fCount);
+      for (let j = 0; j < fCount; j++) {
+        frames[j] = {
+          songTime: this.ReadFloat(state),
+          posX: this.ReadFloat(state),
+          posY: this.ReadFloat(state),
+          posZ: this.ReadFloat(state),
+          rotX: this.ReadFloat(state),
+          rotY: this.ReadFloat(state),
+          rotZ: this.ReadFloat(state),
+          rotW: this.ReadFloat(state),
+        };
+      }
+      segments[i] = { framesCount: fCount, framesArray: frames };
+    }
+    return { segmentsCount: count, segmentsArray: segments };
+  }
+
+  private static AddTricksToReplay(replay: Replay, tricks: TricksReplay): void {
+    if (!replay.frames?.length) return;
+    const processHand = (hand: HandReplay, side: "left" | "right") => {
+      let fIdx = 0;
+      for (const seg of hand.segmentsArray) {
+        for (const tFrame of seg.framesArray) {
+          while (fIdx < replay.frames.length - 1 && replay.frames[fIdx + 1].time <= tFrame.songTime) fIdx++;
+          const f = replay.frames[fIdx][side];
+          f.trickPosition = { x: tFrame.posX, y: tFrame.posY, z: tFrame.posZ };
+          f.trickRotation = { x: tFrame.rotX, y: tFrame.rotY, z: tFrame.rotZ, w: tFrame.rotW };
         }
       }
-
-      if (replay.customData["reesabers:tricks-replay"]) {
-        const result = this.DecodeTricksReplay(replay.customData["reesabers:tricks-replay"]);
-        if (result) {
-          replay.parsedCustomData["reesabers:tricks-replay"] = result;
-          this.AddTricksToReplay(replay, result);
-        }
-      }
-    }
+    };
+    if (tricks.left) processHand(tricks.left, "left");
+    if (tricks.right) processHand(tricks.right, "right");
   }
 
-  private static DecodeHeartBeatQuest(data: Int8Array): HeartBeatQuestData | null {
-    const dataView = new DataView(data.buffer);
-    (dataView as any).pointer = 0;
-
-    const version = this.DecodeInt(dataView);
-    if (version !== 1) return null;
-
-    const length = this.DecodeInt(dataView);
-    const frames: Array<{ time: number; heartrate: number }> = [];
-
-    for (let i = 0; i < length; i++) {
-      frames.push({
-        time: this.DecodeFloat(dataView),
-        heartrate: this.DecodeInt(dataView),
-      });
-    }
-
+  private static DecodeCutInfo(state: DecodeState): NoteCutInfo {
     return {
-      frames,
-      device: this.DecodeString(dataView),
+      speedOK: this.ReadBool(state),
+      directionOK: this.ReadBool(state),
+      saberTypeOK: this.ReadBool(state),
+      wasCutTooSoon: this.ReadBool(state),
+      saberSpeed: this.ReadFloat(state),
+      saberDir: this.DecodeVector3(state),
+      saberType: this.ReadInt(state),
+      timeDeviation: this.ReadFloat(state),
+      cutDirDeviation: this.ReadFloat(state),
+      cutPoint: this.DecodeVector3(state),
+      cutNormal: this.DecodeVector3(state),
+      cutDistanceToCenter: this.ReadFloat(state),
+      cutAngle: this.ReadFloat(state),
+      beforeCutRating: this.ReadFloat(state),
+      afterCutRating: this.ReadFloat(state),
     };
   }
 
-  private static DecodeTricksReplay(data: Int8Array): TricksReplay | null {
-    const dataView = new DataView(data.buffer);
-    (dataView as any).pointer = 0;
+  private static DecodeEuler(state: DecodeState): Euler {
+    return { position: this.DecodeVector3(state), rotation: this.DecodeQuaternion(state) };
+  }
 
-    const magic = this.DecodeInt(dataView);
-    if (magic !== this.TRICKS_MAGIC) return null;
+  private static DecodeVector3(state: DecodeState): Vector3 {
+    return { x: this.ReadFloat(state), y: this.ReadFloat(state), z: this.ReadFloat(state) };
+  }
 
-    const version = this.DecodeInt(dataView);
-
+  private static DecodeQuaternion(state: DecodeState): Quaternion {
     return {
-      version,
-      left: this.DecodeHandReplay(dataView),
-      right: this.DecodeHandReplay(dataView),
+      x: this.ReadFloat(state),
+      y: this.ReadFloat(state),
+      z: this.ReadFloat(state),
+      w: this.ReadFloat(state),
     };
   }
 
-  private static AddTricksToReplay(replay: Replay, tricksReplay: TricksReplay): void {
-    if (!replay.frames || !replay.frames.length) return;
-
-    if (tricksReplay.left) {
-      let frameIndex = 0;
-      for (const segment of tricksReplay.left.segmentsArray) {
-        for (const trickFrame of segment.framesArray) {
-          while (
-            frameIndex < replay.frames.length - 1 &&
-            replay.frames[frameIndex + 1].time <= trickFrame.songTime
-          ) {
-            frameIndex++;
-          }
-
-          if (frameIndex < replay.frames.length) {
-            this.AddPoseToFrame(replay.frames[frameIndex].left, trickFrame);
-          }
-        }
-      }
-    }
-
-    if (tricksReplay.right) {
-      let frameIndex = 0;
-      for (const segment of tricksReplay.right.segmentsArray) {
-        for (const trickFrame of segment.framesArray) {
-          while (
-            frameIndex < replay.frames.length - 1 &&
-            replay.frames[frameIndex + 1].time <= trickFrame.songTime
-          ) {
-            frameIndex++;
-          }
-
-          if (frameIndex < replay.frames.length) {
-            this.AddPoseToFrame(replay.frames[frameIndex].right, trickFrame);
-          }
-        }
-      }
-    }
-  }
-
-  private static AddPoseToFrame(framePose: Euler, trickPose: TrickFrame): void {
-    framePose.trickPosition = {
-      x: trickPose.posX,
-      y: trickPose.posY,
-      z: trickPose.posZ,
-    };
-
-    framePose.trickRotation = {
-      x: trickPose.rotX,
-      y: trickPose.rotY,
-      z: trickPose.rotZ,
-      w: trickPose.rotW,
-    };
-  }
-
-  private static DecodeNote(dataView: DataView): ReplayNote {
-    const result: ReplayNote = {
-      noteID: this.DecodeInt(dataView),
-      eventTime: this.DecodeFloat(dataView),
-      spawnTime: this.DecodeFloat(dataView),
-      eventType: this.DecodeInt(dataView),
-    };
-
-    if (result.eventType === NoteEventType.good || result.eventType === NoteEventType.bad) {
-      result.noteCutInfo = this.DecodeCutInfo(dataView);
-    }
-
-    return result;
-  }
-
-  private static DecodeCutInfo(dataView: DataView): NoteCutInfo {
-    return {
-      speedOK: this.DecodeBool(dataView),
-      directionOK: this.DecodeBool(dataView),
-      saberTypeOK: this.DecodeBool(dataView),
-      wasCutTooSoon: this.DecodeBool(dataView),
-      saberSpeed: this.DecodeFloat(dataView),
-      saberDir: this.DecodeVector3(dataView),
-      saberType: this.DecodeInt(dataView),
-      timeDeviation: this.DecodeFloat(dataView),
-      cutDirDeviation: this.DecodeFloat(dataView),
-      cutPoint: this.DecodeVector3(dataView),
-      cutNormal: this.DecodeVector3(dataView),
-      cutDistanceToCenter: this.DecodeFloat(dataView),
-      cutAngle: this.DecodeFloat(dataView),
-      beforeCutRating: this.DecodeFloat(dataView),
-      afterCutRating: this.DecodeFloat(dataView),
-    };
-  }
-
-  private static DecodeEuler(dataView: DataView): Euler {
-    return {
-      position: this.DecodeVector3(dataView),
-      rotation: this.DecodeQuaternion(dataView),
-    };
-  }
-
-  private static DecodeVector3(dataView: DataView): Vector3 {
-    return {
-      x: this.DecodeFloat(dataView),
-      y: this.DecodeFloat(dataView),
-      z: this.DecodeFloat(dataView),
-    };
-  }
-
-  private static DecodeQuaternion(dataView: DataView): Quaternion {
-    return {
-      x: this.DecodeFloat(dataView),
-      y: this.DecodeFloat(dataView),
-      z: this.DecodeFloat(dataView),
-      w: this.DecodeFloat(dataView),
-    };
-  }
-
-  private static DecodeHandReplay(dataView: DataView): HandReplay {
-    const segmentsCount = this.DecodeInt(dataView);
-    const segmentsArray: TrickSegment[] = [];
-
-    for (let i = 0; i < segmentsCount; i++) {
-      segmentsArray.push(this.DecodeSegment(dataView));
-    }
-
-    return { segmentsCount, segmentsArray };
-  }
-
-  private static DecodeSegment(dataView: DataView): TrickSegment {
-    const framesCount = this.DecodeInt(dataView);
-    const framesArray: TrickFrame[] = [];
-
-    for (let i = 0; i < framesCount; i++) {
-      framesArray.push(this.DecodeTrickFrame(dataView));
-    }
-
-    return { framesCount, framesArray };
-  }
-
-  private static DecodeTrickFrame(dataView: DataView): TrickFrame {
-    return {
-      songTime: this.DecodeFloat(dataView),
-      posX: this.DecodeFloat(dataView),
-      posY: this.DecodeFloat(dataView),
-      posZ: this.DecodeFloat(dataView),
-      rotX: this.DecodeFloat(dataView),
-      rotY: this.DecodeFloat(dataView),
-      rotZ: this.DecodeFloat(dataView),
-      rotW: this.DecodeFloat(dataView),
-    };
-  }
-
-  // Primitive decoding methods
-  private static DecodeLong(dataView: DataView): bigint {
-    const result = dataView.getBigInt64((dataView as any).pointer, true);
-    (dataView as any).pointer += 8;
-    return result;
-  }
-
-  private static DecodeInt(dataView: DataView): number {
-    const result = dataView.getInt32((dataView as any).pointer, true);
-    (dataView as any).pointer += 4;
-    return result;
-  }
-
-  private static DecodeUint8(dataView: DataView): number {
-    const result = dataView.getUint8((dataView as any).pointer);
-    (dataView as any).pointer++;
-    return result;
-  }
-
-  private static DecodeString(dataView: DataView): string {
-    const pointer = (dataView as any).pointer as number;
-
-    if (!Number.isFinite(pointer) || pointer < 0 || pointer + 4 > dataView.byteLength) {
-      throw new InternalServerError("Failed to decode replay: Invalid string pointer");
-    }
-
-    const length = dataView.getInt32(pointer, true);
-    if (length < 0 || length > 300) {
-      throw new InternalServerError("Failed to decode replay: Invalid string length");
-    }
-
-    const start = pointer + 4;
-    const end = start + length;
-
-    if (end > dataView.byteLength) {
-      throw new InternalServerError("Failed to decode replay: String exceeds buffer bounds");
-    }
-
-    const enc = new TextDecoder("utf-8");
-    const string = enc.decode(new Int8Array(dataView.buffer.slice(start, end)));
-    (dataView as any).pointer = end;
-    return string;
-  }
-
-  private static DecodeName(dataView: DataView): string {
-    const length = dataView.getInt32((dataView as any).pointer, true);
-    const enc = new TextDecoder("utf-8");
-    let lengthOffset = 0;
-
-    if (length > 0) {
-      while (
-        dataView.getInt32(length + (dataView as any).pointer + 4 + lengthOffset, true) !== 6 &&
-        dataView.getInt32(length + (dataView as any).pointer + 4 + lengthOffset, true) !== 5 &&
-        dataView.getInt32(length + (dataView as any).pointer + 4 + lengthOffset, true) !== 8
-      ) {
-        lengthOffset++;
-      }
-    }
-
-    const string = enc.decode(
-      new Int8Array(
-        dataView.buffer.slice(
-          (dataView as any).pointer + 4,
-          length + (dataView as any).pointer + 4 + lengthOffset
-        )
-      )
+  private static ReadString(state: DecodeState): string {
+    const len = state.view.getInt32(state.ptr, true);
+    state.ptr += 4;
+    if (len <= 0 || len > 1000) return "";
+    const str = this.UTF8_DECODER.decode(
+      new Uint8Array(state.view.buffer, state.view.byteOffset + state.ptr, len)
     );
-    (dataView as any).pointer += length + 4 + lengthOffset;
-    return string;
+    state.ptr += len;
+    return str;
   }
 
-  private static DecodeFloat(dataView: DataView): number {
-    const result = dataView.getFloat32((dataView as any).pointer, true);
-    (dataView as any).pointer += 4;
-    return result;
+  private static DecodeName(state: DecodeState): string {
+    const len = state.view.getInt32(state.ptr, true);
+    let offset = 0;
+    if (len > 0) {
+      // Logic for skipping garbage in player names
+      while (state.ptr + 4 + len + offset + 4 <= state.view.byteLength) {
+        const next = state.view.getInt32(state.ptr + 4 + len + offset, true);
+        if (next === 6 || next === 5 || next === 8) break;
+        offset++;
+      }
+    }
+    const str = this.UTF8_DECODER.decode(
+      new Uint8Array(state.view.buffer, state.view.byteOffset + state.ptr + 4, len + offset)
+    );
+    state.ptr += 4 + len + offset;
+    return str;
   }
 
-  private static DecodeBool(dataView: DataView): boolean {
-    const result = dataView.getUint8((dataView as any).pointer) !== 0;
-    (dataView as any).pointer++;
-    return result;
-  }
+  private static ReadInt = (s: DecodeState) => {
+    const v = s.view.getInt32(s.ptr, true);
+    s.ptr += 4;
+    return v;
+  };
+  private static ReadUint8 = (s: DecodeState) => s.view.getUint8(s.ptr++);
+  private static ReadFloat = (s: DecodeState) => {
+    const v = s.view.getFloat32(s.ptr, true);
+    s.ptr += 4;
+    return v;
+  };
+  private static ReadBool = (s: DecodeState) => s.view.getUint8(s.ptr++) !== 0;
+  private static ReadLong = (s: DecodeState) => {
+    const v = s.view.getBigInt64(s.ptr, true);
+    s.ptr += 8;
+    return v;
+  };
 }

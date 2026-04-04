@@ -33,16 +33,16 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
   const difficulties: ScoreSaberLeaderboardDifficulty[] =
     token.difficulties != null
       ? token.difficulties.map(difficulty => {
-        const characteristic = difficulty.gameMode.replace("Solo", "");
-        return {
-          id: difficulty.leaderboardId,
-          difficulty: getDifficultyFromScoreSaberDifficulty(difficulty.difficulty),
-          characteristic:
-            characteristic == "" || characteristic == undefined
-              ? "Standard"
-              : (characteristic as MapCharacteristic),
-        };
-      })
+          const characteristic = difficulty.gameMode.replace("Solo", "");
+          return {
+            id: difficulty.leaderboardId,
+            difficulty: getDifficultyFromScoreSaberDifficulty(difficulty.difficulty),
+            characteristic:
+              characteristic == "" || characteristic == undefined
+                ? "Standard"
+                : (characteristic as MapCharacteristic),
+          };
+        })
       : [difficulty];
 
   let status: ScoreSaberLeaderboardStatus = "Unranked";
@@ -95,13 +95,13 @@ export function getScoreSaberScoreFromToken(
     token.modifiers == undefined || token.modifiers === ""
       ? []
       : token.modifiers.split(",").map(mod => {
-        mod = mod.toUpperCase();
-        const modifier = Modifier[mod as keyof typeof Modifier];
-        if (modifier === undefined) {
-          throw new Error(`Unknown modifier: ${mod}`);
-        }
-        return modifier;
-      });
+          mod = mod.toUpperCase();
+          const modifier = Modifier[mod as keyof typeof Modifier];
+          if (modifier === undefined) {
+            throw new Error(`Unknown modifier: ${mod}`);
+          }
+          return modifier;
+        });
 
   return ScoreSaberScoreSchema.parse(
     {
@@ -111,9 +111,7 @@ export function getScoreSaberScoreFromToken(
       difficulty: leaderboard.difficulty.difficulty,
       characteristic: leaderboard.difficulty.characteristic ?? "Standard",
       score: token.baseScore,
-      accuracy: leaderboard.maxScore
-        ? (token.baseScore / leaderboard.maxScore) * 100
-        : -1,
+      accuracy: leaderboard.maxScore ? (token.baseScore / leaderboard.maxScore) * 100 : -1,
       pp: token.pp,
       weight: token.weight,
       rank: token.rank,

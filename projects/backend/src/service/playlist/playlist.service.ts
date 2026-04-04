@@ -446,8 +446,7 @@ export default class PlaylistService {
     const rows = await ScoreSaberScoresRepository.selectScoresJoinedLeaderboardsWhere(conditions);
 
     const leaderboardIds = [...new Set(rows.map(r => r.lbRow.id))];
-    const leaderboards =
-      await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(leaderboardIds, false);
+    const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(leaderboardIds, false);
     const leaderboardMap = new Map(leaderboards.map(lb => [lb.id, lb]));
 
     return rows.map(({ scoreRow, lbRow }) => {

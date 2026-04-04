@@ -210,7 +210,10 @@ export class BeatSaverRepository {
       .from(beatSaverMapVersionsTable)
       .innerJoin(beatSaverMapsTable, eq(beatSaverMapVersionsTable.mapId, beatSaverMapsTable.id))
       .leftJoin(beatSaverUploadersTable, eq(beatSaverMapsTable.uploaderId, beatSaverUploadersTable.id))
-      .leftJoin(beatSaverMapDifficultiesTable, eq(beatSaverMapDifficultiesTable.versionId, beatSaverMapVersionsTable.id))
+      .leftJoin(
+        beatSaverMapDifficultiesTable,
+        eq(beatSaverMapDifficultiesTable.versionId, beatSaverMapVersionsTable.id)
+      )
       .where(eq(beatSaverMapVersionsTable.hash, normalizedHash));
 
     if (rows.length === 0) return undefined;

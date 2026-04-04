@@ -276,9 +276,7 @@ export const scoreSaberLeaderboardsTable = pgTable(
     index("leaderboards_qualified_true_idx")
       .on(table.qualified)
       .where(sql`${table.qualified} = true`),
-    index("leaderboards_stars_not_null_idx")
-      .on(table.stars)
-      .where(isNotNull(table.stars)),
+    index("leaderboards_stars_not_null_idx").on(table.stars).where(isNotNull(table.stars)),
   ]
 );
 
