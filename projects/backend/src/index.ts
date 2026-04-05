@@ -36,6 +36,7 @@ import { PlayerMedalsService } from "./service/medals/player-medals.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
+import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
 
 const log = Logger.withTopic("SSR Backend");
@@ -140,8 +141,8 @@ export const app = new Elysia()
   .use(
     cron({
       name: "nightly-global-medal-refresh",
-      pattern: "*/1 * * * *",
-      // pattern: "0 3 * * *",
+      // pattern: "*/1 * * * *",
+      pattern: "0 23 * * *", // Every day at 23:00
       timezone: "Europe/London",
       protect: true,
       run: async () => {
@@ -306,7 +307,7 @@ app.onStart(async () => {
   }
 
   // Must be registered first
-  //new ScoreWebsockets();
+  new ScoreWebsockets();
   new BeatSaverWebsocket();
   new StorageService();
 
