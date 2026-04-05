@@ -4,12 +4,9 @@ import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { Pagination, type Page } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import type {
-  AccSaberScoreOrder,
-  AccSaberScoreSort,
-  AccSaberScoreType,
-} from "@ssr/common/schemas/accsaber/tokens/query/query";
+import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
 import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
+import { SortDirection } from "@ssr/common/schemas/score/query/sort/sort-direction";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -39,7 +36,7 @@ import AccSaberScoreComponent from "./score/accsaber-score";
 
 const DEFAULT_SORT: AccSaberScoreSort = "date";
 const DEFAULT_TYPE: AccSaberScoreType = "overall";
-const DEFAULT_ORDER: AccSaberScoreOrder = "desc";
+const DEFAULT_DIRECTION: SortDirection = "desc";
 const DEFAULT_PAGE = 1;
 
 const scoreSort = [
@@ -73,9 +70,9 @@ export default function AccSaberPlayerScores({ player }: Props) {
     AccSaberScoreType,
     (value: AccSaberScoreType | null) => void,
   ];
-  const [order, setOrder] = useQueryState("order", parseAsString.withDefault(DEFAULT_ORDER)) as [
-    AccSaberScoreOrder,
-    (value: AccSaberScoreOrder | null) => void,
+  const [direction, setOrder] = useQueryState("direction", parseAsString.withDefault(DEFAULT_DIRECTION)) as [
+    SortDirection,
+    (value: SortDirection | null) => void,
   ];
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(DEFAULT_PAGE));
 
@@ -92,9 +89,9 @@ export default function AccSaberPlayerScores({ player }: Props) {
     isLoading,
     isRefetching,
   } = useQuery<Page<AccSaberScore>>({
-    queryKey: ["playerScores:accsaber", player.id, page, type, sort, order],
+    queryKey: ["playerScores:accsaber", player.id, page, type, sort, direction],
     queryFn: async () =>
-      (await ssrApi.fetchAccSaberPlayerScores(player.id, page, sort, order, type)) ??
+      (await ssrApi.fetchAccSaberPlayerScores(player.id, page, sort, direction, type)) ??
       Pagination.empty<AccSaberScore>(),
     placeholderData: prev => prev,
   });
@@ -104,18 +101,18 @@ export default function AccSaberPlayerScores({ player }: Props) {
   }, [isLoading, isRefetching, scores, setIsLoading]);
 
   const handleSortChange = useCallback(
-    async (newSort: AccSaberScoreSort, defaultOrder: AccSaberScoreOrder) => {
+    async (newSort: AccSaberScoreSort, defaultOrder: SortDirection) => {
       if (newSort !== sort) {
         setSort(newSort);
         setOrder(defaultOrder);
         setPage(1);
         animateLeft();
       } else {
-        setOrder(order === "desc" ? "asc" : "desc");
+        setOrder(direction === "desc" ? "asc" : "desc");
         animateLeft();
       }
     },
-    [sort, order, animateLeft, setSort, setOrder, setPage]
+    [sort, direction, animateLeft, setSort, setOrder, setPage]
   );
 
   const handleTypeChange = useCallback(
@@ -147,12 +144,12 @@ export default function AccSaberPlayerScores({ player }: Props) {
       params.set("platform", "accsaber");
       if (sort !== "date") params.set("sort", sort);
       if (type !== "overall") params.set("type", type);
-      if (order !== "desc") params.set("order", order);
+      if (direction !== "desc") params.set("order", direction);
       if (pageNum !== 1) params.set("page", String(pageNum));
       const queryString = params.toString();
       return `/player/${player.id}${queryString ? `?${queryString}` : ""}`;
     },
-    [player.id, sort, type, order]
+    [player.id, sort, type, direction]
   );
 
   return (
@@ -161,7 +158,7 @@ export default function AccSaberPlayerScores({ player }: Props) {
         {/* Control Panel */}
         <ControlPanel>
           {/* Type Selection - Top Row */}
-          <ControlRow>
+          <ControlRow className="mb-3">
             <TabGroup>
               {scoreTypes.map(typeOption => (
                 <Tab
@@ -177,7 +174,7 @@ export default function AccSaberPlayerScores({ player }: Props) {
           </ControlRow>
 
           {/* Sort Options - Middle Row */}
-          <ControlRow className="mb-0!">
+          <ControlRow>
             <ButtonGroup>
               {scoreSort.map(sortOption => (
                 <ControlButton
@@ -186,17 +183,17 @@ export default function AccSaberPlayerScores({ player }: Props) {
                   onClick={() =>
                     handleSortChange(
                       sortOption.value as AccSaberScoreSort,
-                      (sortOption.defaultOrder ?? "desc") as AccSaberScoreOrder
+                      (sortOption.defaultOrder ?? "desc") as SortDirection
                     )
                   }
                 >
                   {sortOption.value === sort ? (
                     isLoading || isRefetching ? (
-                      <Spinner size="sm" className="h-3.5 w-3.5" />
-                    ) : order === "desc" ? (
-                      <ArrowDown className="h-3.5 w-3.5" />
+                      <Spinner size="sm" className="size-4" />
+                    ) : direction === "desc" ? (
+                      <ArrowDown className="size-4" />
                     ) : (
-                      <ArrowUp className="h-3.5 w-3.5" />
+                      <ArrowUp className="size-4" />
                     )
                   ) : (
                     sortOption.icon

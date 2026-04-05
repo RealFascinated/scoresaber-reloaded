@@ -9,7 +9,7 @@ export function ControlPanel({ children, className }: { children: ReactNode; cla
 }
 
 export function ControlRow({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={cn("mb-3 flex justify-center", className)}>{children}</div>;
+  return <div className={cn("flex justify-center", className)}>{children}</div>;
 }
 
 export function TabGroup({ children, className }: { children: ReactNode; className?: string }) {

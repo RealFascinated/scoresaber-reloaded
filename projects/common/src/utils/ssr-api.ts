@@ -4,11 +4,7 @@ import { env } from "../env";
 import { StarFilter } from "../maps/types";
 import type { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
-import type {
-  AccSaberScoreOrder,
-  AccSaberScoreSort,
-  AccSaberScoreType,
-} from "../schemas/accsaber/tokens/query/query";
+import type { AccSaberScoreSort, AccSaberScoreType } from "../schemas/accsaber/tokens/query/query";
 import { AccSaberScore } from "../schemas/accsaber/tokens/score/score";
 import { BeatSaverMap } from "../schemas/beatsaver/map/map";
 import { MapCharacteristic } from "../schemas/map/map-characteristic";
@@ -247,12 +243,12 @@ class SSRApi {
     id: string,
     page: number,
     sort: AccSaberScoreSort,
-    order: AccSaberScoreOrder,
+    direction: SortDirection,
     type: AccSaberScoreType
   ) {
     return await this.request<Page<AccSaberScore>>(`/scores/player/accsaber/${id}/${page}`, {
       sort,
-      order,
+      direction,
       type,
     });
   }

@@ -8,37 +8,29 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { MapCharacteristic, MapCharacteristicBase } from "@ssr/common/schemas/map/map-characteristic";
+import { FilterItem } from "@ssr/common/filter-item";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
+import { countryFilter } from "@ssr/common/utils/country.util";
 import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
 import { useEffect } from "react";
 import Card from "../../../card";
 import { CharacteristicButton } from "../../../leaderboard/button/characteristic-button";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
 import SimplePagination from "../../../simple-pagination";
+import Combobox from "../../../ui/combo-box";
+import CountryFlag from "../../../ui/country-flag";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
 
 function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;
 }
 
-const CHARACTERISTICS: MapCharacteristicBase[] = [
-  "Standard",
-  "OneSaber",
-  "NoArrows",
-  "Lawless",
-  "90Degree",
-  "360Degree",
-  "Lightshow",
-  "Legacy",
-  "MissingCharacteristic",
-];
-
 export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreSaberLeaderboard }) {
   const isMobile = useIsMobile();
   const database = useDatabase();
-  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
+  const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
   const filter = useLeaderboardFilter();
 
   const [mode, setMode] = useQueryState(
@@ -52,7 +44,7 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
     isError,
     isLoading,
     isRefetching,
-  } = useLeaderboardScores(leaderboard.id, mainPlayerId ?? "", page, mode, filter.country ?? undefined);
+  } = useLeaderboardScores(leaderboard.id, mainPlayer?.id ?? "", page, mode, filter.country ?? undefined);
 
   useEffect(() => {
     setPage(1);
@@ -101,8 +93,37 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
       </div>
 
       <Card className="relative w-full gap-(--spacing-md) rounded-t-none">
-        <div className={"flex flex-col flex-wrap items-center justify-center gap-4 sm:flex-row"}>
-          <ScoreModeSwitcher initialMode={mode} onModeChange={setMode} />
+        <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:items-center">
+          {/* Equal flex-1 gutters keep ScoreModeSwitcher on the true horizontal center (sm+). */}
+          <div className="hidden min-w-0 sm:block sm:flex-1" aria-hidden />
+          <div className="flex shrink-0 justify-center">
+            <ScoreModeSwitcher initialMode={mode} onModeChange={setMode} />
+          </div>
+          <div className="flex w-full min-w-0 justify-center sm:flex-1 sm:justify-end">
+            {/* Country Filter */}
+            <Combobox<string | undefined>
+              className="w-full max-w-72"
+              clearable
+              items={countryFilter
+                .map(({ key, friendlyName }: FilterItem) => ({
+                  value: key,
+                  name: friendlyName,
+                  icon: <CountryFlag code={key} size={14} />,
+                }))
+                // The top country is the country of the claimed player
+                .sort((country: { value: string }) => {
+                  if (country.value === mainPlayer?.country) {
+                    return -1;
+                  }
+                  return 1;
+                })}
+              value={filter.country}
+              onValueChange={newCountry => {
+                filter.setCountry(newCountry);
+              }}
+              placeholder="All countries"
+            />
+          </div>
         </div>
 
         {isLoading && !scores ? (

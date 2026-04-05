@@ -4,11 +4,7 @@ import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
-import type {
-  AccSaberScoreOrder,
-  AccSaberScoreSort,
-  AccSaberScoreType,
-} from "@ssr/common/schemas/accsaber/tokens/query/query";
+import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
 import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { PlayerScoresChartResponse } from "@ssr/common/schemas/response/player/scores-chart";
@@ -314,12 +310,12 @@ export class PlayerScoresService {
     playerId: string,
     pageNumber: number,
     sort: AccSaberScoreSort,
-    order: AccSaberScoreOrder,
+    direction: SortDirection,
     type: AccSaberScoreType
   ): Promise<Page<AccSaberScore>> {
     const requested = await ApiServiceRegistry.getInstance()
       .getAccSaberService()
-      .getPlayerScores(playerId, pageNumber, { sort, order, type });
+      .getPlayerScores(playerId, pageNumber, { sort, direction, type });
 
     const items: AccSaberScore[] = await Promise.all(
       requested.items.map(async row => {

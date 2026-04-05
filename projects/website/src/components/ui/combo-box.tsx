@@ -11,7 +11,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, X } from "lucide-react";
 import { ReactElement, ReactNode, useId, useState } from "react";
 
 /**
@@ -44,6 +44,11 @@ type ComboboxProps<T> = {
    * The class name of this combobox.
    */
   className?: string;
+
+  /**
+   * When true, show a button to clear the current value (calls onValueChange with undefined).
+   */
+  clearable?: boolean;
 };
 
 export type ComboboxItem<T> = {
@@ -79,6 +84,7 @@ const Combobox = <T,>({
   value: controlledValue,
   onValueChange,
   className,
+  clearable = false,
 }: ComboboxProps<T>): ReactElement<any> => {
   const [open, setOpen] = useState<boolean>(false);
   const [internalValue, setInternalValue] = useState<T | undefined>(() => controlledValue);
@@ -94,65 +100,91 @@ const Combobox = <T,>({
     }
   };
 
+  const selectedItem = value != null ? items.find(item => item.value === value) : undefined;
+  const triggerLabel =
+    selectedItem != null
+      ? (selectedItem.displayName ??
+        (typeof selectedItem.name === "string" ? selectedItem.name : String(selectedItem.value)))
+      : (placeholder ?? "None");
+  const showClear = Boolean(clearable && value != null && onValueChange);
+
   return (
-    <div className={cn("flex flex-col gap-(--spacing-md)", className)}>
-      {/* Popover */}
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            className="h-10 justify-between gap-(--spacing-lg) px-(--spacing-sm)"
-            variant="outline"
-            size="lg"
-            role="combobox"
-            aria-expanded={open}
-            aria-controls={listId}
-          >
-            <span className="truncate">
-              {value
-                ? items.find(item => item.value === value)?.displayName ||
-                  items.find(item => item.value === value)?.name
-                : placeholder || "None"}
-            </span>
-            <ChevronsUpDown className="ml-2 size-5 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-fit p-0">
-          <Command>
-            <CommandInput placeholder={placeholder} />
-            <CommandList id={listId}>
-              <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup>
-                {items.map((item, index) => {
-                  const searchValue =
-                    typeof item.displayName === "string"
-                      ? item.displayName
-                      : typeof item.name === "string"
-                        ? item.name
-                        : String(item.value);
-                  return (
-                    <CommandItem
-                      key={
-                        String(item.value) + (typeof item.name === "string" ? `-${item.name}` : `-${index}`)
-                      }
-                      value={searchValue}
-                      onSelect={() => {
-                        setOpen(false);
-                        handleValueChange(item.value === value ? undefined : item.value);
-                      }}
-                      className={cn("flex items-center justify-between", item.className)}
-                    >
-                      <div className="flex min-w-0 flex-1 items-center gap-(--spacing-sm)">
-                        {item.icon}
-                        {typeof item.name === "string" ? <span>{item.name}</span> : item.name}
-                      </div>
-                    </CommandItem>
-                  );
-                })}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+    <div className={cn("flex w-full min-w-0 items-stretch gap-1.5", className)}>
+      <div className="min-w-0 flex-1">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              className={cn(
+                "border-border/70 bg-muted/40 hover:bg-muted/55 h-10 w-full min-w-0 justify-between gap-2 rounded-lg px-3 font-normal shadow-none hover:shadow-xs",
+                "data-[state=open]:border-primary/40 data-[state=open]:bg-muted/50"
+              )}
+              variant="outline"
+              size="lg"
+              role="combobox"
+              aria-expanded={open}
+              aria-controls={listId}
+            >
+              <span className="flex min-w-0 flex-1 items-center gap-2 truncate text-left">
+                {selectedItem?.icon ? (
+                  <span className="text-muted-foreground flex shrink-0 items-center">
+                    {selectedItem.icon}
+                  </span>
+                ) : null}
+                <span className="truncate">{triggerLabel}</span>
+              </span>
+              <ChevronsUpDown className="text-muted-foreground size-4 shrink-0 opacity-70" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-fit p-0">
+            <Command>
+              <CommandInput placeholder={placeholder} />
+              <CommandList id={listId}>
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup>
+                  {items.map((item, index) => {
+                    const searchValue =
+                      typeof item.displayName === "string"
+                        ? item.displayName
+                        : typeof item.name === "string"
+                          ? item.name
+                          : String(item.value);
+                    return (
+                      <CommandItem
+                        key={
+                          String(item.value) + (typeof item.name === "string" ? `-${item.name}` : `-${index}`)
+                        }
+                        value={searchValue}
+                        onSelect={() => {
+                          setOpen(false);
+                          handleValueChange(item.value === value ? undefined : item.value);
+                        }}
+                        className={cn("flex items-center justify-between", item.className)}
+                      >
+                        <div className="flex min-w-0 flex-1 items-center gap-(--spacing-sm)">
+                          {item.icon}
+                          {typeof item.name === "string" ? <span>{item.name}</span> : item.name}
+                        </div>
+                      </CommandItem>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
+      {showClear ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="border-border/70 bg-muted/40 hover:bg-muted/55 size-10 shrink-0 shadow-none"
+          aria-label="Clear selection"
+          onClick={() => handleValueChange(undefined)}
+        >
+          <X className="size-4" />
+        </Button>
+      ) : null}
     </div>
   );
 };

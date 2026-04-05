@@ -1,5 +1,4 @@
 import {
-  accSaberScoreOrderSchema,
   accSaberScoreSortSchema,
   accSaberScoreTypeSchema,
 } from "@ssr/common/schemas/accsaber/tokens/query/query";
@@ -58,8 +57,8 @@ export default function scoresController(app: Elysia) {
       )
       .get(
         "/player/accsaber/:playerId/:page",
-        async ({ params: { playerId, page }, query: { sort, order, type } }) => {
-          return await PlayerScoresService.getPlayerAccSaberScores(playerId, page, sort, order, type);
+        async ({ params: { playerId, page }, query: { sort, direction, type } }) => {
+          return await PlayerScoresService.getPlayerAccSaberScores(playerId, page, sort, direction, type);
         },
         {
           tags: ["Scores"],
@@ -69,7 +68,7 @@ export default function scoresController(app: Elysia) {
           }),
           query: z.object({
             sort: accSaberScoreSortSchema.default("date"),
-            order: accSaberScoreOrderSchema.default("desc"),
+            direction: SortDirectionSchema.default("desc"),
             type: accSaberScoreTypeSchema.default("overall"),
           }),
           detail: {

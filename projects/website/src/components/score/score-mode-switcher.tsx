@@ -1,11 +1,10 @@
 "use client";
 
-import { cn } from "@/common/utils";
-import { Button } from "@/components/ui/button";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { PersonIcon } from "@radix-ui/react-icons";
 import { TrendingUpIcon } from "lucide-react";
 import { ReactElement, useState } from "react";
+import { ControlRow, Tab, TabGroup } from "../ui/control-panel";
 
 export type ScoreModeType = {
   name: string;
@@ -54,27 +53,49 @@ export default function ScoreModeSwitcher({ initialMode, onModeChange }: ScoreMo
   const [selectedMode, setSelectedMode] = useState<ScoreModeEnum>(initialMode ?? ScoreModeEnum.Global);
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-(--spacing-sm)">
-      {scoreModes.map(mode => (
-        <Button
-          key={mode.name}
-          variant={selectedMode === mode.id ? "default" : "ghost"}
-          className={cn(
-            "flex items-center gap-2 px-(--spacing-lg) py-(--spacing-sm) transition-all duration-200",
-            mode.hoverColor,
-            selectedMode === mode.id ? `${mode.color} font-bold` : "hover:bg-accent/80"
-          )}
-          onClick={() => {
-            setSelectedMode(mode.id);
-            if (onModeChange) {
-              onModeChange(mode.id);
-            }
-          }}
-        >
-          <span>{mode.icon}</span>
-          <span>{mode.name}</span>
-        </Button>
-      ))}
-    </div>
+    <ControlRow>
+      <TabGroup>
+        {scoreModes.map(mode => (
+          <Tab
+            key={mode.id}
+            isActive={mode.id === selectedMode}
+            onClick={() => {
+              setSelectedMode(mode.id);
+              if (onModeChange) {
+                onModeChange(mode.id);
+              }
+            }}
+          >
+            {mode.icon}
+            {mode.name}
+          </Tab>
+        ))}
+      </TabGroup>
+    </ControlRow>
   );
+
+  // return (
+  //   <div className="flex flex-wrap items-center justify-center gap-(--spacing-sm)">
+  //     {scoreModes.map(mode => (
+  //       <Button
+  //         key={mode.name}
+  //         variant={selectedMode === mode.id ? "default" : "ghost"}
+  //         className={cn(
+  //           "flex items-center gap-2 px-(--spacing-lg) py-(--spacing-sm) transition-all duration-200",
+  //           mode.hoverColor,
+  //           selectedMode === mode.id ? `${mode.color} font-bold` : "hover:bg-accent/80"
+  //         )}
+  //         onClick={() => {
+  //           setSelectedMode(mode.id);
+  //           if (onModeChange) {
+  //             onModeChange(mode.id);
+  //           }
+  //         }}
+  //       >
+  //         <span>{mode.icon}</span>
+  //         <span>{mode.name}</span>
+  //       </Button>
+  //     ))}
+  //   </div>
+  // );
 }

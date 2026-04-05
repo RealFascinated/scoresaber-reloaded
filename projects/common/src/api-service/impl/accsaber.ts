@@ -2,12 +2,9 @@ import { Cooldown } from "../../cooldown";
 import Logger from "../../logger";
 import type { Page } from "../../pagination";
 import { Pagination } from "../../pagination";
-import {
-  type AccSaberScoreOrder,
-  type AccSaberScoreSort,
-  type AccSaberScoreType,
-} from "../../schemas/accsaber/tokens/query/query";
+import { type AccSaberScoreSort, type AccSaberScoreType } from "../../schemas/accsaber/tokens/query/query";
 import { type AccSaberScore } from "../../schemas/accsaber/tokens/score/score";
+import { SortDirection } from "../../schemas/score/query/sort/sort-direction";
 import { accSaberDifficultyToMapDifficulty } from "../../utils/accsaber-difficulty";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
@@ -50,15 +47,15 @@ export class AccSaberService extends ApiService {
     page: number = 1,
     options: {
       sort?: AccSaberScoreSort;
-      order?: AccSaberScoreOrder;
+      direction?: SortDirection;
       type?: AccSaberScoreType;
     } = {}
   ): Promise<Page<AccSaberScore>> {
-    const { sort = "date", order = "desc", type = "overall" } = options;
+    const { sort = "date", direction = "desc", type = "overall" } = options;
     if (page < 1) page = 1;
 
     // Automatically generate sort options based on consistent naming pattern
-    const generateSortOption = (sort: AccSaberScoreSort, order: AccSaberScoreOrder): string => {
+    const generateSortOption = (sort: AccSaberScoreSort, direction: SortDirection): string => {
       const sortMapping: Record<AccSaberScoreSort, string> = {
         date: "TIME_SET",
         acc: "ACCURACY",
@@ -66,9 +63,7 @@ export class AccSaberService extends ApiService {
         complexity: "COMPLEXITY",
         ranking: "RANKING",
       };
-      const base = sortMapping[sort];
-      const direction = order.toUpperCase();
-      return `${base}_${direction}`;
+      return `${sortMapping[sort]}_${direction.toUpperCase()}`;
     };
 
     const query = `
@@ -141,7 +136,7 @@ export class AccSaberService extends ApiService {
         ...(type !== "overall" ? { category: type } : {}),
         count: SCORES_PER_PAGE,
         offset: SCORES_PER_PAGE * (page - 1),
-        order: [generateSortOption(sort, order)],
+        order: [generateSortOption(sort, direction)],
       });
 
       if (!result?.data?.accSaberScores?.nodes?.length) {

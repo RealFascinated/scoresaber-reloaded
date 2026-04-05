@@ -20,6 +20,8 @@ const characteristicIcons: Partial<Record<MapCharacteristic & string, string>> =
   "90Degree": "/assets/characteristics/90degree.svg",
   "360Degree": "/assets/characteristics/360degree.svg",
   Lightshow: "/assets/characteristics/lightshow.svg",
+  Generated90Degree: "/assets/characteristics/generated90degree.svg",
+  Generated360Degree: "/assets/characteristics/generated360degree.svg",
 };
 
 export function CharacteristicButton({
@@ -54,7 +56,7 @@ export function CharacteristicButton({
           {icon ? (
             <Image src={icon} alt={characteristic} width={20} height={20} />
           ) : (
-            <span>{fallbackIcon}</span>
+            <span className="h-4 w-4">{fallbackIcon}</span>
           )}
         </Button>
       </SimpleLink>

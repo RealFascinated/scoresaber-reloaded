@@ -267,7 +267,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
     <ScoresCard>
       <div className="flex w-full flex-col gap-2">
         <ControlPanel>
-          <ControlRow>
+          <ControlRow className="mb-3">
             <ButtonGroup>
               {SORT_OPTIONS.map(sortOption => (
                 <ControlButton
@@ -277,11 +277,11 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
                 >
                   {sortOption.value === sort ? (
                     isLoading || isRefetching ? (
-                      <Spinner size="sm" className="h-3.5 w-3.5" />
+                      <Spinner size="sm" className="size-4" />
                     ) : direction === "desc" ? (
-                      <ArrowDown className="h-3.5 w-3.5" />
+                      <ArrowDown className="size-4" />
                     ) : (
-                      <ArrowUp className="h-3.5 w-3.5" />
+                      <ArrowUp className="size-4" />
                     )
                   ) : (
                     sortOption.icon
@@ -292,7 +292,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
             </ButtonGroup>
           </ControlRow>
 
-          <ControlRow className="mb-0!">
+          <ControlRow>
             <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
               <div className="relative w-full sm:w-auto">
                 <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
