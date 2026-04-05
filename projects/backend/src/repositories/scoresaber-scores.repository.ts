@@ -396,58 +396,6 @@ export class ScoreSaberScoresRepository {
   }
 
   /**
-   * Single-pass medal recompute (no per-leaderboard batching). Prefer {@link recomputeRowMedalsForLeaderboard}
-   * for steady-state; keep this for manual repair / bot commands.
-   *
-   * Avoids `UPDATE scores SET medals = 0` without a filter (full-table rewrite on tens of millions of rows).
-   * Ranked maps: one windowed UPDATE assigns MEDAL_COUNTS for every score on a ranked leaderboard.
-   * Unranked maps: only rows with stale `medals <> 0` are cleared.
-   *
-   * For throughput, tune the DB session or server (e.g. `max_parallel_workers_per_gather`, `work_mem`) for
-   * large `ROW_NUMBER` + `UPDATE … FROM` plans.
-   */
-  public static async recomputeRowMedalsForRankedLeaderboards(): Promise<void> {
-    await db.transaction(async tx => {
-      await tx.execute(sql`
-        UPDATE "scoresaber-scores" AS s
-        SET medals = 0
-        FROM "scoresaber-leaderboards" AS l
-        WHERE s."leaderboardId" = l.id
-          AND l.ranked = false
-          AND s.medals <> 0
-      `);
-      await tx.execute(sql`
-        WITH ranked AS (
-          SELECT
-            s."scoreId",
-            ROW_NUMBER() OVER (
-              PARTITION BY s."leaderboardId"
-              ORDER BY s.score DESC, s."scoreId" DESC
-            )::int AS rn
-          FROM "scoresaber-scores" s
-          INNER JOIN "scoresaber-leaderboards" l ON l.id = s."leaderboardId" AND l.ranked = true
-        )
-        UPDATE "scoresaber-scores" AS t
-        SET medals = CASE ranked.rn
-          WHEN 1 THEN 10
-          WHEN 2 THEN 8
-          WHEN 3 THEN 6
-          WHEN 4 THEN 5
-          WHEN 5 THEN 4
-          WHEN 6 THEN 3
-          WHEN 7 THEN 2
-          WHEN 8 THEN 1
-          WHEN 9 THEN 1
-          WHEN 10 THEN 1
-          ELSE 0
-        END
-        FROM ranked
-        WHERE t."scoreId" = ranked."scoreId"
-      `);
-    });
-  }
-
-  /**
    * Display rank on medal score listings: order by medals, timestamp, scoreId within each leaderboard.
    */
   public static async getMedalTableScoreRanksForScores(
@@ -474,16 +422,16 @@ export class ScoreSaberScoresRepository {
           ) AS rank
         FROM "scoresaber-scores"
         WHERE "leaderboardId" IN (${sql.join(
-          leaderboardIds.map(id => sql`${id}`),
-          sql`, `
-        )})
+      leaderboardIds.map(id => sql`${id}`),
+      sql`, `
+    )})
           AND medals > 0
       )
       SELECT "scoreId", rank FROM ranked
       WHERE "scoreId" IN (${sql.join(
-        scoreIds.map(id => sql`${id}`),
-        sql`, `
-      )})
+      scoreIds.map(id => sql`${id}`),
+      sql`, `
+    )})
     `);
 
     const rows = (result as unknown as { rows: { scoreId: number; rank: number }[] }).rows ?? [];

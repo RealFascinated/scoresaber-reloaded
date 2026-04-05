@@ -4,6 +4,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerMedalRankingsResponse } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 
 export class PlayerMedalsService {
@@ -26,7 +27,14 @@ export class PlayerMedalsService {
    * `SUM(scores.medals)`, and refreshes materialized medal ranks.
    */
   public static async recomputeMedalsFromScoresAndRefreshAccounts(): Promise<void> {
-    await ScoreSaberScoresRepository.recomputeRowMedalsForRankedLeaderboards();
+    const rankedLeaderboardIds = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
+    for (const leaderboard of rankedLeaderboardIds) {
+      const before = performance.now();
+      await ScoreSaberScoresRepository.recomputeRowMedalsForLeaderboard(leaderboard.id);
+      PlayerMedalsService.logger.info(
+        `Refreshed leaderboard medals for ${leaderboard.id} in ${formatDuration(performance.now() - before)}`
+      );
+    }
     await ScoreSaberAccountsRepository.syncGlobalMedalTotalsFromScoresTable();
     await ScoreSaberAccountsRepository.refreshMaterializedMedalRanks();
   }

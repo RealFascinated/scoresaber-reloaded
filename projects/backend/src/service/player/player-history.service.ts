@@ -89,10 +89,10 @@ export class PlayerHistoryService {
 
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
-          (async () => {
-            await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
-            redisClient.del(cachedPlayerTokenCacheKey(foundPlayer.id));
-          })(),
+        (async () => {
+          await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
+          redisClient.del(cachedPlayerTokenCacheKey(foundPlayer.id));
+        })(),
       ]);
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
@@ -138,9 +138,9 @@ export class PlayerHistoryService {
     );
     PlayerHistoryService.logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-        `Successfully processed: ${successCount} players\n` +
-        `Failed to process: ${errorCount} players\n` +
-        `Total inactive players: ${inactivePlayers}`
+      `Successfully processed: ${successCount} players\n` +
+      `Failed to process: ${errorCount} players\n` +
+      `Total inactive players: ${inactivePlayers}`
     );
   }
 
@@ -383,10 +383,9 @@ export class PlayerHistoryService {
     account: ScoreSaberAccount,
     existingEntry?: PlayerHistoryRow
   ): Promise<ScoreSaberPlayerHistory> {
-    const [accuracies, plusOnePp, medals] = await Promise.all([
+    const [accuracies, plusOnePp] = await Promise.all([
       ScoreSaberScoresRepository.getAverageAccuracies(playerToken.id),
       PlayerRankedService.getPlayerPlusOnePp(playerToken.id),
-      ScoreSaberAccountsRepository.getMedalsForPlayerId(playerToken.id),
     ]);
 
     return {
@@ -412,7 +411,7 @@ export class PlayerHistoryService {
       ssPlays: account.scoreStats?.ssPlays ?? 0,
       sspPlays: account.scoreStats?.sspPlays ?? 0,
       godPlays: account.scoreStats?.godPlays ?? 0,
-      medals: medals,
+      medals: account.medals ?? 0,
     };
   }
 
