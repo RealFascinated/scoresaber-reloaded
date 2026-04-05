@@ -26,6 +26,8 @@ export function scoreSaberAccountRowToType(row: ScoreSaberAccountRow): ScoreSabe
     hmd: row.hmd,
     pp: row.pp,
     medals: row.medals,
+    medalsRank: row.medalsRank,
+    medalsCountryRank: row.medalsCountryRank,
     scoreStats: row.scoreStats,
     trackedSince: row.trackedSince?.toISOString(),
     joinedDate: row.joinedDate?.toISOString(),
