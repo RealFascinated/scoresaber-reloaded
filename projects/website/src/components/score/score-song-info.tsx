@@ -44,9 +44,10 @@ export default function ScoreSongInfo({
   return (
     <div className="flex w-full items-center gap-3">
       <div
-        className="relative flex justify-center"
+        className="relative flex justify-center overflow-hidden rounded-md"
         style={{
           height: imageSize,
+          width: imageSize,
         }}
       >
         <Image
@@ -54,13 +55,13 @@ export default function ScoreSongInfo({
           width={imageSize}
           height={imageSize}
           alt={`${song.name}'s Artwork`}
-          className="rounded-md"
+          className="h-full w-full object-cover"
           style={{
             minWidth: `${imageSize}px`,
           }}
         />
         <div
-          className="absolute right-0 bottom-0 flex h-[18px] w-full cursor-default items-center justify-center rounded-xs text-[0.70rem]"
+          className="absolute right-0 bottom-0 flex h-[18px] w-full cursor-default items-center justify-center text-[0.70rem]"
           style={{
             backgroundColor: `color-mix(in srgb, ${diff.color} 95%, transparent)`,
           }}
@@ -68,7 +69,7 @@ export default function ScoreSongInfo({
           {metric != undefined && metric.value > 0 ? (
             <div className="flex items-center justify-center gap-1">
               <p>{metric.value.toFixed(2)}</p>
-              {MetricIcon && <MetricIcon className="h-[14px] w-[14px]" />}
+              {MetricIcon && <MetricIcon className="size-[12px]" />}
             </div>
           ) : (
             <p>{getDifficultyName(diff)}</p>
