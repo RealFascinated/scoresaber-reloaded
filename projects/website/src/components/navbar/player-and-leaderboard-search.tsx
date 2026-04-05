@@ -81,7 +81,7 @@ export default function PlayerAndLeaderboardSearch() {
   return (
     <>
       <div
-        className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-center rounded-xl border px-2 backdrop-blur-xs transition-all duration-200 select-none sm:min-w-16 xl:w-64 xl:justify-start xl:px-(--spacing-sm)"
+        className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-center rounded-xl border px-2 backdrop-blur-xs transition-all duration-200 select-none sm:min-w-16 xl:w-48 xl:justify-start xl:px-(--spacing-sm)"
         onClick={openSearch}
       >
         <UserSearch className="text-muted-foreground size-5" />
