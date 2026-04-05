@@ -26,6 +26,7 @@ import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { QueueManager } from "./queue/queue-manager";
+import { ScoreSaberMedalsRepository } from "./repositories/scoresaber-medals.repository";
 import CacheService from "./service/infra/cache.service";
 import MetricsService, { prometheusRegistry } from "./service/infra/metrics.service";
 import StorageService from "./service/infra/storage.service";
@@ -35,7 +36,6 @@ import { PlayerMedalsService } from "./service/medals/player-medals.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
-import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
 
 const log = Logger.withTopic("SSR Backend");
@@ -133,14 +133,15 @@ export const app = new Elysia()
       timezone: "Europe/London",
       protect: true,
       run: async () => {
-        await PlayerMedalsService.refreshMaterializedMedalRanksOnly();
+        await ScoreSaberMedalsRepository.refreshMaterializedMedalRanks();
       },
     })
   )
   .use(
     cron({
       name: "nightly-global-medal-refresh",
-      pattern: "0 3 * * *",
+      pattern: "*/1 * * * *",
+      // pattern: "0 3 * * *",
       timezone: "Europe/London",
       protect: true,
       run: async () => {
@@ -305,7 +306,7 @@ app.onStart(async () => {
   }
 
   // Must be registered first
-  new ScoreWebsockets();
+  //new ScoreWebsockets();
   new BeatSaverWebsocket();
   new StorageService();
 

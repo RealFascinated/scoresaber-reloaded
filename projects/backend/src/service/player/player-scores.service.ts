@@ -35,6 +35,7 @@ import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberScoresTable } from "../../db/schema";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
+import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import BeatLeaderService from "../beatleader/beatleader.service";
 import BeatSaverService from "../external/beatsaver.service";
@@ -536,7 +537,7 @@ export class PlayerScoresService {
 
       async enrichRow(row, leaderboard) {
         const [rankByScoreId] = await Promise.all([
-          ScoreSaberScoresRepository.getMedalTableScoreRanksForScores([
+          ScoreSaberMedalsRepository.getMedalTableScoreRanksForScores([
             { scoreId: row.scoreId, leaderboardId: row.leaderboardId },
           ]),
         ]);

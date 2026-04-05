@@ -13,6 +13,7 @@ import { cachedPlayerTokenCacheKey, playerCacheKey } from "../../common/cache-ke
 import { redisClient } from "../../common/redis";
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
@@ -65,7 +66,7 @@ export default class ScoreSaberPlayerService {
         for (const leaderboardId of leaderboardIds) {
           await PlayerMedalsService.refreshLeaderboardMedals(leaderboardId);
         }
-        await ScoreSaberAccountsRepository.syncMedalTotalsForPlayerIds([id]);
+        await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds([id]);
       }
 
       const basePlayer = {

@@ -142,6 +142,9 @@ export const scoreSaberScoresTable = pgTable(
       table.score.desc(),
       table.scoreId.desc()
     ),
+    index("scores_leaderboard_medals_nonzero_idx")
+      .on(table.leaderboardId)
+      .where(sql`${table.medals} <> 0`),
   ]
 );
 
