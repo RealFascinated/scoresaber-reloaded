@@ -88,7 +88,7 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
             ))}
         </div>
 
-        <div className="flex flex-row gap-(--spacing-md)">
+        <div className="flex flex-row">
           {characteristicLeaderboards.map(leaderboardDifficulty => (
             <CharacteristicButton
               key={leaderboardDifficulty.id}
