@@ -8,7 +8,7 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { MapCharacteristicBase } from "@ssr/common/schemas/map/map-characteristic";
+import { MapCharacteristic, MapCharacteristicBase } from "@ssr/common/schemas/map/map-characteristic";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
@@ -66,13 +66,12 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
     difficulty => difficulty.characteristic === leaderboard.difficulty.characteristic
   )!.characteristic;
 
-  const characteristics = [
-    ...new Set(
-      leaderboard.difficulties
-        .filter(difficulty => CHARACTERISTICS.includes(difficulty.characteristic as MapCharacteristicBase))
-        .map(difficulty => difficulty.characteristic)
-    ),
-  ];
+  const seenCharacteristics = new Set<MapCharacteristic>();
+  const characteristicLeaderboards = leaderboard.difficulties.filter(difficulty => {
+    if (seenCharacteristics.has(difficulty.characteristic)) return false;
+    seenCharacteristics.add(difficulty.characteristic);
+    return true;
+  });
 
   return (
     <div>
@@ -90,12 +89,12 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
         </div>
 
         <div className="flex flex-row gap-(--spacing-md)">
-          {characteristics.map(characteristic => (
+          {characteristicLeaderboards.map(leaderboardDifficulty => (
             <CharacteristicButton
-              key={characteristic}
-              leaderboardId={leaderboard.id}
+              key={leaderboardDifficulty.id}
+              leaderboardId={leaderboardDifficulty.id}
               selectedCharacteristic={currentCharacteristic}
-              characteristic={characteristic}
+              characteristic={leaderboardDifficulty.characteristic}
             />
           ))}
         </div>
