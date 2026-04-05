@@ -149,11 +149,7 @@ export class PlayerScoresService {
             result.totalScores++;
             return;
           }
-          const trackingResult = await ScoreCoreService.trackScoreSaberScore(
-            score,
-            leaderboard,
-            false
-          );
+          const trackingResult = await ScoreCoreService.trackScoreSaberScore(score, leaderboard, false);
           if (trackingResult.tracked) {
             result.missingScores++;
             result.totalScores++;

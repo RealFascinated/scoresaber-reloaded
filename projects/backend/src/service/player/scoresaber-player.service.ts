@@ -123,7 +123,10 @@ export default class ScoreSaberPlayerService {
         rankPages: {
           global: getPageFromRank(player.rank, 50),
           country: getPageFromRank(player.countryRank, 50),
-          medals: account?.medalsRank && account.medalsRank > 0 ? getPageFromRank(account.medalsRank, 50) : undefined,
+          medals:
+            account?.medalsRank && account.medalsRank > 0
+              ? getPageFromRank(account.medalsRank, 50)
+              : undefined,
         },
         rankPercentile:
           (player.rank /
