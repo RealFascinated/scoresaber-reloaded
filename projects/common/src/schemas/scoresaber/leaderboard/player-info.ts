@@ -6,13 +6,8 @@ export const ScoreSaberLeaderboardPlayerInfoSchema = z
     name: z.string().optional(),
     country: z.string().optional(),
     profilePicture: z.string().optional(),
-    avatar: z.string().optional(),
-  })
-  .transform(({ id, name, country, profilePicture, avatar }) => ({
-    id,
-    name,
-    country,
-    avatar: avatar ?? profilePicture,
-  }));
+    role: z.string().optional(),
+    avatar: z.string(),
+  });
 
 export type ScoreSaberLeaderboardPlayerInfo = z.infer<typeof ScoreSaberLeaderboardPlayerInfoSchema>;

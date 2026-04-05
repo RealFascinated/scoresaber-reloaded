@@ -6,7 +6,7 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
+import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -120,7 +120,7 @@ function PlayerMiniRanking({
                 {/* Player */}
                 <div className="flex w-full items-center gap-2">
                   <Avatar
-                    src={getScoreSaberAvatar(playerRanking)}
+                    src={playerRanking.avatar}
                     size={26}
                     alt={`${playerRanking.name}'s Profile Picture`}
                   />

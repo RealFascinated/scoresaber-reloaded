@@ -3,7 +3,6 @@ import { PlayerAvatar } from "@/components/ranking/player-avatar";
 import { getHMDInfo } from "@ssr/common/hmds";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
-import { getScoreSaberAvatar } from "@ssr/common/utils/scoresaber.util";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { CalendarDays } from "lucide-react";
 import Card from "../../../card";
@@ -44,7 +43,7 @@ export default function ScoreDetails({ score: playerScore }: { score: PlayerScor
       <div className="bg-accent-deep/90 border-border flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="flex min-w-0 flex-1 items-start gap-3">
           <PlayerAvatar
-            profilePicture={getScoreSaberAvatar(playerInfo)}
+            profilePicture={playerInfo.avatar}
             name={playerInfo.name ?? ""}
             className="size-14 shrink-0"
           />
