@@ -1,5 +1,3 @@
-import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
-import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { normalizeModifiers } from "@ssr/common/score/modifier";
@@ -19,8 +17,8 @@ export function scoreSaberMedalScoreRowToType(row: ScoreSaberMedalScoreRow): Sco
     playerId: row.playerId,
     leaderboardId: row.leaderboardId,
     scoreId: row.scoreId,
-    difficulty: MapDifficultySchema.parse(row.difficulty, { reportInput: true }),
-    characteristic: MapCharacteristicSchema.parse(row.characteristic, { reportInput: true }),
+    difficulty: row.difficulty,
+    characteristic: row.characteristic,
     score: row.score,
     accuracy: row.accuracy,
     medals: row.medals,
@@ -48,8 +46,8 @@ export function scoreSaberScoreToMedalScore(score: ScoreSaberScore): ScoreSaberM
     playerId: score.playerId,
     leaderboardId: score.leaderboardId,
     scoreId: score.scoreId,
-    difficulty: MapDifficultySchema.parse(String(score.difficulty), { reportInput: true }),
-    characteristic: MapCharacteristicSchema.parse(String(score.characteristic), { reportInput: true }),
+    difficulty: score.difficulty,
+    characteristic: score.characteristic,
     score: score.score,
     accuracy: score.accuracy,
     medals: 0,
