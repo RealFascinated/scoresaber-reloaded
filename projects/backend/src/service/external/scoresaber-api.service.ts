@@ -153,18 +153,11 @@ export class ScoreSaberApiService {
     if (results === undefined || results.players.length === 0) {
       return undefined;
     }
-    const normalized = {
-      ...results,
-      players: results.players.map(token => ({
-        ...token,
-        avatar: token.profilePicture,
-      })),
-    };
-    normalized.players.sort((a, b) => a.rank - b.rank);
+    results.players.sort((a, b) => a.rank - b.rank);
     ScoreSaberApiService.log(
-      `Found ${normalized.players.length} players in ${formatDuration(performance.now() - before)}`
+      `Found ${results.players.length} players in ${formatDuration(performance.now() - before)}`
     );
-    return normalized;
+    return results;
   }
 
   /**
