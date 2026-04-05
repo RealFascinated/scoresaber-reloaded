@@ -3,7 +3,6 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
@@ -171,40 +170,5 @@ export default class ScoreSaberPlayerService {
 
     await redisClient.set(cacheKey, stringify(player), "EX", CACHED_PLAYER_EXPIRY);
     return player;
-  }
-
-  /**
-   * Update a cached ScoreSaber player token.
-   *
-   * @param id the player's id
-   * @param player the player token to update
-   */
-  public static async updateCachedPlayer(
-    id: string,
-    player: ScoreSaberLeaderboardPlayerInfo | ScoreSaberPlayerToken
-  ) {
-    const cachedPlayer = await redisClient.get(cachedPlayerTokenCacheKey(player.id));
-
-    try {
-      if (cachedPlayer && player.name && player.profilePicture && player.country) {
-        const cachedPlayerData = parse(cachedPlayer) as ScoreSaberPlayerToken;
-
-        cachedPlayerData.name = player.name;
-        cachedPlayerData.profilePicture = player.profilePicture;
-        cachedPlayerData.country = player.country;
-
-        await redisClient.set(
-          cachedPlayerTokenCacheKey(id),
-          stringify(cachedPlayerData),
-          "EX",
-          CACHED_PLAYER_EXPIRY
-        );
-      }
-    } catch {
-      ScoreSaberPlayerService.logger.warn(
-        `Failed to update cached player data for ${id}, removing from cache`
-      );
-      await redisClient.del(cachedPlayerTokenCacheKey(id));
-    }
   }
 }

@@ -5,7 +5,6 @@ export const ScoreSaberLeaderboardPlayerInfoSchema = z
     id: z.string(),
     name: z.string().optional(),
     country: z.string().optional(),
-    profilePicture: z.string().optional(),
     role: z.string().optional(),
     avatar: z.string(),
   });

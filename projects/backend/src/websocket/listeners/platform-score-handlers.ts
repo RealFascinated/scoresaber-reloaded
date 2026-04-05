@@ -17,7 +17,6 @@ import BeatLeaderService from "../../service/beatleader/beatleader.service";
 import MetricsService, { MetricType } from "../../service/infra/metrics.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
-import ScoreSaberPlayerService from "../../service/player/scoresaber-player.service";
 import { TopScoresService } from "../../service/score/top-scores.service";
 
 const scoreSaberWsLog = Logger.withTopic("ScoreSaber WebSocket");
@@ -180,9 +179,6 @@ export class ScoreWebsockets implements EventListener {
         Promise.all([
           // Update the player's name last
           player.name ? PlayerCoreService.updatePlayer(player.id, { name: player.name }) : undefined,
-
-          // Update cached player in Redis
-          ScoreSaberPlayerService.updateCachedPlayer(player.id, score.playerInfo!),
         ]);
       }
 
