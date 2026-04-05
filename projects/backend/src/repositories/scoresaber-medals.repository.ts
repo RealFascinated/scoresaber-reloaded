@@ -1,38 +1,41 @@
+import { MEDAL_COUNTS, MEDAL_RANKS } from "@ssr/common/medal";
 import { and, asc, count, desc, eq, gt, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../db";
 import { scoreSaberAccountsTable, scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../db/schema";
 
-/** Keeps each bulk UPDATE … FROM (VALUES …) under typical Postgres parameter limits (2 params per row). */
 const MEDALS_BULK_UPDATE_CHUNK = 2000;
 
-type SqlExecutor = { execute: (query: ReturnType<typeof sql>) => Promise<unknown> };
+function sqlMedalPointsCase(rnColumnIdentifier: string) {
+  const whens = MEDAL_RANKS.map(rank =>
+    sql`WHEN ${rank}::int THEN ${MEDAL_COUNTS[rank]}::int`
+  );
+  return sql`CASE ${sql.raw(rnColumnIdentifier)} ${sql.join(whens, sql` `)} ELSE 0 END`;
+}
+
+function distinctPlayerIds(result: unknown): string[] {
+  const rows = (result as { rows?: { playerId: string }[] }).rows ?? [];
+  return [...new Set(rows.map(r => r.playerId))];
+}
 
 export class ScoreSaberMedalsRepository {
-  /**
-   * Same medal assignment as {@link recomputeRowMedalsForLeaderboard} for a **ranked** map only: one round
-   * trip, no transaction, no `leaderboards` lookup. Use when callers already know the map is ranked (e.g.
-   * {@link ScoreSaberLeaderboardsRepository.getRankedLeaderboards}).
-   */
-  public static async recomputeRowMedalsForRankedLeaderboardOnly(leaderboardId: number): Promise<string[]> {
-    const updated = await db.execute(
-      ScoreSaberMedalsRepository.rankedLeaderboardMedalUpdateSql(leaderboardId)
-    );
-    return ScoreSaberMedalsRepository.playerIdsFromExecuteResult(updated);
+  public static async updateMedalsOnRankedLeaderboard(leaderboardId: number): Promise<void> {
+    await db.execute(ScoreSaberMedalsRepository.rankedLeaderboardMedalsUpdateSql(leaderboardId, false));
   }
 
-  private static rankedLeaderboardMedalUpdateSql(leaderboardId: number) {
+  private static rankedLeaderboardMedalsUpdateSql(leaderboardId: number, returnPlayerIds: boolean) {
     return sql`
-        WITH top10 AS (
+        WITH top10_rows AS MATERIALIZED (
+          SELECT s."scoreId", s.score
+          FROM "scoresaber-scores" s
+          WHERE s."leaderboardId" = ${leaderboardId}
+          ORDER BY s.score DESC NULLS LAST, s."scoreId" DESC NULLS LAST
+          LIMIT 10
+        ),
+        top10 AS (
           SELECT
-            x."scoreId",
-            ROW_NUMBER() OVER (ORDER BY x.score DESC, x."scoreId" DESC)::int AS rn
-          FROM (
-            SELECT s."scoreId", s.score
-            FROM "scoresaber-scores" s
-            WHERE s."leaderboardId" = ${leaderboardId}
-            ORDER BY s.score DESC, s."scoreId" DESC
-            LIMIT 10
-          ) AS x
+            r."scoreId",
+            ROW_NUMBER() OVER (ORDER BY r.score DESC NULLS LAST, r."scoreId" DESC NULLS LAST)::int AS rn
+          FROM top10_rows AS r
         ),
         stale AS (
           SELECT s."scoreId"
@@ -43,19 +46,7 @@ export class ScoreSaberMedalsRepository {
         medal_map AS (
           SELECT
             t10."scoreId",
-            CASE t10.rn
-              WHEN 1 THEN 10
-              WHEN 2 THEN 8
-              WHEN 3 THEN 6
-              WHEN 4 THEN 5
-              WHEN 5 THEN 4
-              WHEN 6 THEN 3
-              WHEN 7 THEN 2
-              WHEN 8 THEN 1
-              WHEN 9 THEN 1
-              WHEN 10 THEN 1
-              ELSE 0
-            END AS medal
+            ${sqlMedalPointsCase("t10.rn")} AS medal
           FROM top10 AS t10
           UNION ALL
           SELECT st."scoreId", 0 AS medal
@@ -66,28 +57,11 @@ export class ScoreSaberMedalsRepository {
         SET medals = mm.medal
         FROM medal_map AS mm
         WHERE u."scoreId" = mm."scoreId"
-        RETURNING u."playerId" AS "playerId"
+        ${returnPlayerIds ? sql`RETURNING u."playerId" AS "playerId"` : sql``}
       `;
   }
 
-  private static async executeRankedMedalUpdate(
-    executor: SqlExecutor,
-    leaderboardId: number
-  ): Promise<string[]> {
-    const updated = await executor.execute(
-      ScoreSaberMedalsRepository.rankedLeaderboardMedalUpdateSql(leaderboardId)
-    );
-    return ScoreSaberMedalsRepository.playerIdsFromExecuteResult(updated);
-  }
-
-  /**
-   * Recomputes `medals` for one leaderboard with bounded work per map.
-   * The final `UPDATE` touches only the new top 10 plus any rows that had medals and dropped out (see
-   * `medal_map`). Finding those “stale” rows uses partial index `scores_leaderboard_medals_nonzero_idx`
-   * (`leaderboardId` where `medals <> 0`); without it Postgres would scan every score on the map (~300k+)
-   * just to locate ~10 medal rows.
-   */
-  public static async recomputeRowMedalsForLeaderboard(leaderboardId: number): Promise<string[]> {
+  public static async updateMedalsOnLeaderboard(leaderboardId: number): Promise<string[]> {
     return db.transaction(async tx => {
       const [lb] = await tx
         .select({ ranked: scoreSaberLeaderboardsTable.ranked })
@@ -105,21 +79,52 @@ export class ScoreSaberMedalsRepository {
             AND s.medals <> 0
           RETURNING s."playerId" AS "playerId"
         `);
-        return ScoreSaberMedalsRepository.playerIdsFromExecuteResult(cleared);
+        return distinctPlayerIds(cleared);
       }
 
-      return ScoreSaberMedalsRepository.executeRankedMedalUpdate(tx, leaderboardId);
+      const updated = await tx.execute(
+        ScoreSaberMedalsRepository.rankedLeaderboardMedalsUpdateSql(leaderboardId, true)
+      );
+      return distinctPlayerIds(updated);
     });
   }
 
-  private static playerIdsFromExecuteResult(result: unknown): string[] {
-    const rows = (result as { rows?: { playerId: string }[] }).rows ?? [];
-    return [...new Set(rows.map(r => r.playerId))];
+  public static async recomputeAllMedalsGlobalWindow(): Promise<void> {
+    await db.transaction(async tx => {
+      await tx.execute(sql`
+        UPDATE "scoresaber-scores" AS s
+        SET medals = 0
+        FROM "scoresaber-leaderboards" AS l
+        WHERE s."leaderboardId" = l.id
+          AND l.ranked = false
+          AND s.medals <> 0
+      `);
+      await tx.execute(sql`
+        WITH ranked AS (
+          SELECT
+            s."scoreId",
+            ROW_NUMBER() OVER (
+              PARTITION BY s."leaderboardId"
+              ORDER BY s.score DESC NULLS LAST, s."scoreId" DESC NULLS LAST
+            )::int AS rn
+          FROM "scoresaber-scores" s
+          INNER JOIN "scoresaber-leaderboards" l ON l.id = s."leaderboardId" AND l.ranked = true
+        ),
+        computed AS (
+          SELECT
+            ranked."scoreId",
+            ${sqlMedalPointsCase("ranked.rn")} AS medal
+          FROM ranked
+        )
+        UPDATE "scoresaber-scores" AS t
+        SET medals = c.medal
+        FROM computed AS c
+        WHERE t."scoreId" = c."scoreId"
+          AND t.medals IS DISTINCT FROM c.medal
+      `);
+    });
   }
 
-  /**
-   * Display rank on medal score listings: order by medals, timestamp, scoreId within each leaderboard.
-   */
   public static async getMedalTableScoreRanksForScores(
     targets: { scoreId: number; leaderboardId: number }[]
   ): Promise<Map<number, number>> {
@@ -144,16 +149,16 @@ export class ScoreSaberMedalsRepository {
           ) AS rank
         FROM "scoresaber-scores"
         WHERE "leaderboardId" IN (${sql.join(
-          leaderboardIds.map(id => sql`${id}`),
-          sql`, `
-        )})
+      leaderboardIds.map(id => sql`${id}`),
+      sql`, `
+    )})
           AND medals > 0
       )
       SELECT "scoreId", rank FROM ranked
       WHERE "scoreId" IN (${sql.join(
-        scoreIds.map(id => sql`${id}`),
-        sql`, `
-      )})
+      scoreIds.map(id => sql`${id}`),
+      sql`, `
+    )})
     `);
 
     const rows = (result as unknown as { rows: { scoreId: number; rank: number }[] }).rows ?? [];
@@ -170,9 +175,6 @@ export class ScoreSaberMedalsRepository {
       .where(inArray(scoreSaberAccountsTable.id, ids));
   }
 
-  /**
-   * Sets every account's `medals` from `SUM(scores.medals)` (single bulk pass + rank refresh caller).
-   */
   public static async syncGlobalMedalTotalsFromScoresTable(): Promise<void> {
     await db.transaction(async tx => {
       await tx
@@ -224,10 +226,6 @@ export class ScoreSaberMedalsRepository {
     });
   }
 
-  /**
-   * Sets `accounts.medals` to each player's global `SUM(scores.medals)` for the given ids only.
-   * Players with no score rows or only zero-medal rows get `0`.
-   */
   public static async syncMedalTotalsForPlayerIds(playerIds: string[]): Promise<void> {
     const unique = [...new Set(playerIds)];
     if (unique.length === 0) {
@@ -255,31 +253,23 @@ export class ScoreSaberMedalsRepository {
     await ScoreSaberMedalsRepository.setMedalsForPlayerIds(totalsByPlayer, unique);
   }
 
-  /**
-   * Recomputes materialized global and per-country medal ranks from current `medals` and `country`.
-   * Rows not in the medals pool (`medals <= 0` or missing/empty `country`) get rank `0`.
-   */
   public static async refreshMaterializedMedalRanks(): Promise<void> {
     await db.transaction(async tx => {
       await tx.execute(sql`
         UPDATE "scoresaber-accounts"
         SET "medalsRank" = 0, "medalsCountryRank" = 0
+        WHERE "medalsRank" != 0 OR "medalsCountryRank" != 0
       `);
       await tx.execute(sql`
         UPDATE "scoresaber-accounts" AS a
-        SET "medalsRank" = r.rank
+        SET
+          "medalsRank" = r.global_rank,
+          "medalsCountryRank" = r.country_rank
         FROM (
-          SELECT id, ROW_NUMBER() OVER (ORDER BY medals DESC, id ASC)::int AS rank
-          FROM "scoresaber-accounts"
-          WHERE medals > 0 AND country IS NOT NULL AND country != ''
-        ) AS r
-        WHERE a.id = r.id
-      `);
-      await tx.execute(sql`
-        UPDATE "scoresaber-accounts" AS a
-        SET "medalsCountryRank" = r.rank
-        FROM (
-          SELECT id, ROW_NUMBER() OVER (PARTITION BY country ORDER BY medals DESC, id ASC)::int AS rank
+          SELECT
+            id,
+            ROW_NUMBER() OVER (ORDER BY medals DESC, id ASC)::int AS global_rank,
+            ROW_NUMBER() OVER (PARTITION BY country ORDER BY medals DESC, id ASC)::int AS country_rank
           FROM "scoresaber-accounts"
           WHERE medals > 0 AND country IS NOT NULL AND country != ''
         ) AS r

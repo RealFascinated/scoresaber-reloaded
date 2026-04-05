@@ -120,6 +120,13 @@
       "when": 1775600000000,
       "tag": "0016_scores_leaderboard_medals_nonzero_idx",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1775700000000,
+      "tag": "0017_scores_player_medals_positive_idx",
+      "breakpoints": true
     }
   ]
 }

@@ -7,18 +7,19 @@ import { chunkArray } from "@ssr/common/utils/utils";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
 
-/** Concurrent ranked-only medal recomputes during full repair (stay below db pool size). */
 const RANKED_MEDAL_RECOMPUTE_CONCURRENCY = 8;
 
 export class PlayerMedalsService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player Medals");
 
   /**
-   * Recomputes `scores.medals` for one leaderboard and refreshes affected accounts' global medal totals.
+   * Recomputes score medals for a leaderboard and syncs medal totals for affected players.
+   *
+   * @param leaderboardId the leaderboard id
    */
   public static async refreshLeaderboardMedals(leaderboardId: number): Promise<void> {
     const before = performance.now();
-    const playerIds = await ScoreSaberMedalsRepository.recomputeRowMedalsForLeaderboard(leaderboardId);
+    const playerIds = await ScoreSaberMedalsRepository.updateMedalsOnLeaderboard(leaderboardId);
     await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds(playerIds);
     PlayerMedalsService.logger.info(
       `Refreshed leaderboard medals for ${leaderboardId} in ${formatDuration(performance.now() - before)}`
@@ -26,8 +27,8 @@ export class PlayerMedalsService {
   }
 
   /**
-   * Recomputes per-score medals from ranked leaderboards, syncs account totals from
-   * `SUM(scores.medals)`, and refreshes materialized medal ranks.
+   * Recomputes score medals for every ranked leaderboard, then syncs all account medal totals from scores
+   * and refreshes materialized medal rank columns.
    */
   public static async recomputeMedalsFromScoresAndRefreshAccounts(): Promise<void> {
     PlayerMedalsService.logger.info("Recomputing medals from scores and refreshing accounts…");
@@ -39,7 +40,7 @@ export class PlayerMedalsService {
 
     for (const batch of chunkArray(ids, RANKED_MEDAL_RECOMPUTE_CONCURRENCY)) {
       await Promise.all(
-        batch.map(id => ScoreSaberMedalsRepository.recomputeRowMedalsForRankedLeaderboardOnly(id))
+        batch.map(id => ScoreSaberMedalsRepository.updateMedalsOnRankedLeaderboard(id))
       );
       done += batch.length;
       const logEvery = 200;
@@ -54,12 +55,22 @@ export class PlayerMedalsService {
       `Finished per-leaderboard medal recompute (${total} maps) in ${formatDuration(performance.now() - tLoop)}`
     );
 
+    const tSync = performance.now();
     await ScoreSaberMedalsRepository.syncGlobalMedalTotalsFromScoresTable();
+    PlayerMedalsService.logger.info(
+      `Synced global medal totals from scores in ${formatDuration(performance.now() - tSync)}`
+    );
+
+    const tRanks = performance.now();
     await ScoreSaberMedalsRepository.refreshMaterializedMedalRanks();
+    PlayerMedalsService.logger.info(
+      `Refreshed materialized medal ranks in ${formatDuration(performance.now() - tRanks)}`
+    );
   }
 
   /**
-   * Re-syncs every account's `medals` from `SUM(scores.medals)` and refreshes materialized ranks (no row recompute).
+   * Syncs every account medal total from scores and refreshes materialized medal rank columns (does not
+   * recompute per-score medals).
    */
   public static async resyncAccountMedalTotalsAndRefreshRanks(): Promise<void> {
     PlayerMedalsService.logger.info("Syncing global medal totals from scores…");
@@ -72,11 +83,11 @@ export class PlayerMedalsService {
   }
 
   /**
-   * Gets the player medal ranking for a page.
+   * Returns a page of the medal leaderboard.
    *
    * @param page the page number
    * @param country optional country filter
-   * @returns the players
+   * @returns players and pagination metadata
    */
   public static async getPlayerMedalRanking(
     page: number,
