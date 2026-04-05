@@ -36,7 +36,6 @@ export class TrackScoreListener implements EventListener {
 
     const { score: trackedScore, hasPreviousScore } = await ScoreCoreService.trackScoreSaberScore(
       score,
-      beatLeaderScore,
       leaderboard,
       true
     );

@@ -5,36 +5,23 @@ import { scoreSaberAccountsTable, scoreSaberLeaderboardsTable, scoreSaberScoresT
 /** Keeps each bulk UPDATE … FROM (VALUES …) under typical Postgres parameter limits (2 params per row). */
 const MEDALS_BULK_UPDATE_CHUNK = 2000;
 
+type SqlExecutor = { execute: (query: ReturnType<typeof sql>) => Promise<unknown> };
+
 export class ScoreSaberMedalsRepository {
   /**
-   * Recomputes `medals` for one ranked leaderboard with bounded work per map.
-   * The final `UPDATE` touches only the new top 10 plus any rows that had medals and dropped out (see
-   * `medal_map`). Finding those “stale” rows uses partial index `scores_leaderboard_medals_nonzero_idx`
-   * (`leaderboardId` where `medals <> 0`); without it Postgres would scan every score on the map (~300k+)
-   * just to locate ~10 medal rows.
+   * Same medal assignment as {@link recomputeRowMedalsForLeaderboard} for a **ranked** map only: one round
+   * trip, no transaction, no `leaderboards` lookup. Use when callers already know the map is ranked (e.g.
+   * {@link ScoreSaberLeaderboardsRepository.getRankedLeaderboards}).
    */
-  public static async recomputeRowMedalsForLeaderboard(leaderboardId: number): Promise<string[]> {
-    return db.transaction(async tx => {
-      const [lb] = await tx
-        .select({ ranked: scoreSaberLeaderboardsTable.ranked })
-        .from(scoreSaberLeaderboardsTable)
-        .where(eq(scoreSaberLeaderboardsTable.id, leaderboardId))
-        .limit(1);
+  public static async recomputeRowMedalsForRankedLeaderboardOnly(leaderboardId: number): Promise<string[]> {
+    const updated = await db.execute(
+      ScoreSaberMedalsRepository.rankedLeaderboardMedalUpdateSql(leaderboardId)
+    );
+    return ScoreSaberMedalsRepository.playerIdsFromExecuteResult(updated);
+  }
 
-      const isRanked = lb?.ranked === true;
-
-      if (!isRanked) {
-        const cleared = await tx.execute(sql`
-          UPDATE "scoresaber-scores" AS s
-          SET medals = 0
-          WHERE s."leaderboardId" = ${leaderboardId}
-            AND s.medals <> 0
-          RETURNING s."playerId" AS "playerId"
-        `);
-        return ScoreSaberMedalsRepository.playerIdsFromExecuteResult(cleared);
-      }
-
-      const updated = await tx.execute(sql`
+  private static rankedLeaderboardMedalUpdateSql(leaderboardId: number) {
+    return sql`
         WITH top10 AS (
           SELECT
             x."scoreId",
@@ -80,8 +67,48 @@ export class ScoreSaberMedalsRepository {
         FROM medal_map AS mm
         WHERE u."scoreId" = mm."scoreId"
         RETURNING u."playerId" AS "playerId"
-      `);
-      return ScoreSaberMedalsRepository.playerIdsFromExecuteResult(updated);
+      `;
+  }
+
+  private static async executeRankedMedalUpdate(
+    executor: SqlExecutor,
+    leaderboardId: number
+  ): Promise<string[]> {
+    const updated = await executor.execute(
+      ScoreSaberMedalsRepository.rankedLeaderboardMedalUpdateSql(leaderboardId)
+    );
+    return ScoreSaberMedalsRepository.playerIdsFromExecuteResult(updated);
+  }
+
+  /**
+   * Recomputes `medals` for one leaderboard with bounded work per map.
+   * The final `UPDATE` touches only the new top 10 plus any rows that had medals and dropped out (see
+   * `medal_map`). Finding those “stale” rows uses partial index `scores_leaderboard_medals_nonzero_idx`
+   * (`leaderboardId` where `medals <> 0`); without it Postgres would scan every score on the map (~300k+)
+   * just to locate ~10 medal rows.
+   */
+  public static async recomputeRowMedalsForLeaderboard(leaderboardId: number): Promise<string[]> {
+    return db.transaction(async tx => {
+      const [lb] = await tx
+        .select({ ranked: scoreSaberLeaderboardsTable.ranked })
+        .from(scoreSaberLeaderboardsTable)
+        .where(eq(scoreSaberLeaderboardsTable.id, leaderboardId))
+        .limit(1);
+
+      const isRanked = lb?.ranked === true;
+
+      if (!isRanked) {
+        const cleared = await tx.execute(sql`
+          UPDATE "scoresaber-scores" AS s
+          SET medals = 0
+          WHERE s."leaderboardId" = ${leaderboardId}
+            AND s.medals <> 0
+          RETURNING s."playerId" AS "playerId"
+        `);
+        return ScoreSaberMedalsRepository.playerIdsFromExecuteResult(cleared);
+      }
+
+      return ScoreSaberMedalsRepository.executeRankedMedalUpdate(tx, leaderboardId);
     });
   }
 

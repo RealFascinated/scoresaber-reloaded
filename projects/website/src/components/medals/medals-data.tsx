@@ -55,7 +55,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   const firstColumnWidth = getRankingColumnWidth(
     rankingData?.items ?? [],
     player => (player as ScoreSaberPlayer).medals,
-    player => (player as ScoreSaberPlayer).countryMedalsRank
+    player => (player as ScoreSaberPlayer).medalsCountryRank
   );
 
   return (
@@ -105,7 +105,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                       <PlayerRanking
                         player={player}
                         getRank={player => (player as ScoreSaberPlayer).medalsRank}
-                        getCountryRank={player => (player as ScoreSaberPlayer).countryMedalsRank}
+                        getCountryRank={player => (player as ScoreSaberPlayer).medalsCountryRank}
                         firstColumnWidth={firstColumnWidth}
                         showAccountInactive={false}
                         renderWorth={() => (

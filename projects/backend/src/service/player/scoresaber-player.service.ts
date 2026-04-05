@@ -12,7 +12,6 @@ import { parse, stringify } from "devalue";
 import { cachedPlayerTokenCacheKey, playerCacheKey } from "../../common/cache-keys";
 import { redisClient } from "../../common/redis";
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
-import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
@@ -78,6 +77,8 @@ export default class ScoreSaberPlayerService {
         countryRank: player.countryRank,
         pp: player.pp,
         medals: account?.medals ?? 0,
+        medalsRank: account?.medalsRank ?? 0,
+        medalsCountryRank: account?.medalsCountryRank ?? 0,
         hmd: account?.hmd ?? undefined,
         role: player.role ?? undefined,
         permissions: player.permissions,
@@ -91,17 +92,13 @@ export default class ScoreSaberPlayerService {
         return basePlayer;
       }
 
-      const [accountRow, plusOnePp, hmdBreakdown, statisticHistory] = await Promise.all([
-        account != null ? ScoreSaberAccountsRepository.findRowById(id) : Promise.resolve(undefined),
+      const [plusOnePp, hmdBreakdown, statisticHistory] = await Promise.all([
         account ? PlayerRankedService.getPlayerPlusOnePp(id) : 0,
         account && player !== undefined
           ? PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages)
           : undefined,
         PlayerHistoryService.getPlayerStatisticHistories(player, 30),
       ]);
-
-      const medalsRank = accountRow?.medalsRank ?? 0;
-      const countryMedalsRank = accountRow?.medalsCountryRank ?? 0;
 
       return {
         ...basePlayer,
@@ -123,12 +120,10 @@ export default class ScoreSaberPlayerService {
         peakRank: account?.peakRank,
         statistics: player.scoreStats,
         hmdBreakdown: hmdBreakdown,
-        medalsRank,
-        countryMedalsRank,
         rankPages: {
           global: getPageFromRank(player.rank, 50),
           country: getPageFromRank(player.countryRank, 50),
-          medals: medalsRank > 0 ? getPageFromRank(medalsRank, 50) : undefined,
+          medals: account?.medalsRank && account.medalsRank > 0 ? getPageFromRank(account.medalsRank, 50) : undefined,
         },
         rankPercentile:
           (player.rank /

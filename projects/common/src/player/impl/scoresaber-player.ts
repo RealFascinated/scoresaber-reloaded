@@ -55,7 +55,7 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   /**
    * The player's country medal rank.
    */
-  countryMedalsRank: number;
+  medalsCountryRank: number;
 
   /**
    * The player's hmd breakdown.

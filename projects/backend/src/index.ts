@@ -36,7 +36,6 @@ import { PlayerMedalsService } from "./service/medals/player-medals.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
-import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
 
 const log = Logger.withTopic("SSR Backend");
@@ -44,8 +43,9 @@ const log = Logger.withTopic("SSR Backend");
 log.info("Starting SSR Backend...");
 
 try {
+  log.info("Running database migrations...");
   await runMigrations();
-  log.info("Database migrations are up to date.");
+  log.info("Completed database migrations.");
 } catch (error) {
   log.error("Database migration failed:", error);
   process.exit(1);
@@ -141,8 +141,8 @@ export const app = new Elysia()
   .use(
     cron({
       name: "nightly-global-medal-refresh",
-      // pattern: "*/1 * * * *",
-      pattern: "0 23 * * *", // Every day at 23:00
+      pattern: "*/1 * * * *",
+      // pattern: "0 23 * * *", // Every day at 23:00
       timezone: "Europe/London",
       protect: true,
       run: async () => {
@@ -307,7 +307,7 @@ app.onStart(async () => {
   }
 
   // Must be registered first
-  new ScoreWebsockets();
+  //new ScoreWebsockets();
   new BeatSaverWebsocket();
   new StorageService();
 

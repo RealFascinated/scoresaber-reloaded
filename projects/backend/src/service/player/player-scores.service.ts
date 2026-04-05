@@ -151,10 +151,8 @@ export class PlayerScoresService {
           }
           const trackingResult = await ScoreCoreService.trackScoreSaberScore(
             score,
-            undefined,
             leaderboard,
-            false,
-            { skipLeaderboardMedalRefresh: true }
+            false
           );
           if (trackingResult.tracked) {
             result.missingScores++;

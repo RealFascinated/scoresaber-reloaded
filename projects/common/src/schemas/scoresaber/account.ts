@@ -20,6 +20,8 @@ export const ScoreSaberAccountSchema = z.object({
   hmd: z.string().nullable(),
   pp: z.number(),
   medals: z.number(),
+  medalsRank: z.number(),
+  medalsCountryRank: z.number(),
   scoreStats: ScoreSaberPlayerScoreStatsSchema,
   trackedSince: z.coerce.date(),
   joinedDate: z.coerce.date(),

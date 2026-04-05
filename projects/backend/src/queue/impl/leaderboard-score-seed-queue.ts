@@ -75,9 +75,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           PlayerCoreService.createIfMissing(score.playerId); // no need to await this
 
           if (!(await ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId))) {
-            await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false, {
-              skipLeaderboardMedalRefresh: true,
-            });
+            await ScoreCoreService.trackScoreSaberScore(score, leaderboard, false);
             newScoresTracked++;
           } else if (score.pp > 0) {
             await ScoreCoreService.upsertScore(score);

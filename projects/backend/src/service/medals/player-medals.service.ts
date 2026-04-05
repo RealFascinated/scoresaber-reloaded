@@ -3,8 +3,12 @@ import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerMedalRankingsResponse } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { chunkArray } from "@ssr/common/utils/utils";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
+
+/** Concurrent ranked-only medal recomputes during full repair (stay below db pool size). */
+const RANKED_MEDAL_RECOMPUTE_CONCURRENCY = 8;
 
 export class PlayerMedalsService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player Medals");
@@ -28,14 +32,28 @@ export class PlayerMedalsService {
   public static async recomputeMedalsFromScoresAndRefreshAccounts(): Promise<void> {
     PlayerMedalsService.logger.info("Recomputing medals from scores and refreshing accounts…");
     const rankedLeaderboardIds = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
-    for (const leaderboard of rankedLeaderboardIds) {
-      const before = performance.now();
-      PlayerMedalsService.logger.info(`Recomputing medals for leaderboard ${leaderboard.id}…`);
-      await ScoreSaberMedalsRepository.recomputeRowMedalsForLeaderboard(leaderboard.id);
-      PlayerMedalsService.logger.info(
-        `Refreshed leaderboard medals for ${leaderboard.id} in ${formatDuration(performance.now() - before)}`
+    const ids = rankedLeaderboardIds.map(l => l.id);
+    const total = ids.length;
+    const tLoop = performance.now();
+    let done = 0;
+
+    for (const batch of chunkArray(ids, RANKED_MEDAL_RECOMPUTE_CONCURRENCY)) {
+      await Promise.all(
+        batch.map(id => ScoreSaberMedalsRepository.recomputeRowMedalsForRankedLeaderboardOnly(id))
       );
+      done += batch.length;
+      const logEvery = 200;
+      if (done % logEvery === 0 || done === total) {
+        PlayerMedalsService.logger.info(
+          `Medal recompute progress: ${done}/${total} ranked leaderboards in ${formatDuration(performance.now() - tLoop)}`
+        );
+      }
     }
+
+    PlayerMedalsService.logger.info(
+      `Finished per-leaderboard medal recompute (${total} maps) in ${formatDuration(performance.now() - tLoop)}`
+    );
+
     await ScoreSaberMedalsRepository.syncGlobalMedalTotalsFromScoresTable();
     await ScoreSaberMedalsRepository.refreshMaterializedMedalRanks();
   }
@@ -103,7 +121,7 @@ export class PlayerMedalsService {
           );
           const ranks = rankById.get(id);
           playerData.medalsRank = country ? (ranks?.medalsCountryRank ?? 0) : (ranks?.medalsRank ?? 0);
-          playerData.countryMedalsRank = ranks?.medalsCountryRank ?? 0;
+          playerData.medalsCountryRank = ranks?.medalsCountryRank ?? 0;
           return playerData;
         })
       );

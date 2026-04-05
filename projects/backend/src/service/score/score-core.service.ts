@@ -1,5 +1,4 @@
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -12,10 +11,6 @@ import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderb
 import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
-
-export type TrackScoreSaberScoreOptions = {
-  skipLeaderboardMedalRefresh?: boolean;
-};
 
 type InsertScoreDataOptions = {
   insertBeatLeaderScore?: boolean;
@@ -31,17 +26,13 @@ export class ScoreCoreService {
    *
    * @param score the score to track
    * @param leaderboard the leaderboard for the score
-   * @param player the player for the score
    * @param newScore whether the score was just set
-   * @param log whether to log the score
    * @returns whether the score was tracked
    */
   public static async trackScoreSaberScore(
     score: ScoreSaberScore,
-    beatLeaderScore: BeatLeaderScore | undefined,
     leaderboard: ScoreSaberLeaderboard,
-    newScore: boolean = false,
-    options?: TrackScoreSaberScoreOptions
+    newScore: boolean = false
   ): Promise<{
     score: ScoreSaberScore | undefined;
     hasPreviousScore: boolean;
@@ -83,7 +74,7 @@ export class ScoreCoreService {
 
     await ScoreCoreService.upsertScore(score);
 
-    if (!options?.skipLeaderboardMedalRefresh && leaderboard.ranked) {
+    if (newScore && leaderboard.ranked && score.rank <= 10) {
       await PlayerMedalsService.refreshLeaderboardMedals(leaderboard.id);
     }
 
