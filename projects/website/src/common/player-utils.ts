@@ -1,6 +1,3 @@
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-
 /**
  * Calculates the width of the first column in the ranking table.
  *
@@ -9,10 +6,10 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
  * @param countryRank the function to get the country rank of a player
  * @returns the width of the first column
  */
-export function getRankingColumnWidth(
-  players: (ScoreSaberPlayer | ScoreSaberPlayerToken)[],
-  rank: (player: ScoreSaberPlayer | ScoreSaberPlayerToken) => number,
-  countryRank: (player: ScoreSaberPlayer | ScoreSaberPlayerToken) => number
+export function getRankingColumnWidth<T>(
+  players: T[],
+  rank: (player: T) => number,
+  countryRank: (player: T) => number
 ) {
   const maxRank = players?.reduce((max, p) => Math.max(max, rank(p) ?? 0), 0) ?? 0;
   const maxCountryRank = players?.reduce((max, p) => Math.max(max, countryRank(p) ?? 0), 0) ?? 0;

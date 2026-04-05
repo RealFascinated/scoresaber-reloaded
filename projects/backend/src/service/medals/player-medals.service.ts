@@ -1,12 +1,13 @@
 import { Pagination } from "@ssr/common/pagination";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
-import { PlayerMedalRankingsResponse } from "@ssr/common/schemas/response/ranking/medal-rankings";
+import {
+  MedalRankingPlayer,
+  PlayerMedalRankingsResponse,
+} from "@ssr/common/schemas/response/ranking/medal-rankings";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
-import ScoreSaberPlayerService from "../player/scoresaber-player.service";
 
 const RANKED_MEDAL_RECOMPUTE_CONCURRENCY = 8;
 
@@ -95,30 +96,36 @@ export class PlayerMedalsService {
     ]);
 
     if (totalPlayers === 0) {
-      return { ...Pagination.empty<ScoreSaberPlayer>(), countryMetadata: {} } as PlayerMedalRankingsResponse;
+      return {
+        ...Pagination.empty<MedalRankingPlayer>(),
+        countryMetadata: {},
+      } as PlayerMedalRankingsResponse;
     }
 
-    const pagination = new Pagination<ScoreSaberPlayer>()
+    const pagination = new Pagination<MedalRankingPlayer>()
       .setItemsPerPage(itemsPerPage)
       .setTotalItems(totalPlayers);
 
     const pageData = await pagination.getPage(page, async fetchRange => {
-      const players = await ScoreSaberMedalsRepository.selectMedalRankingPage(
+      const rows = await ScoreSaberMedalsRepository.selectMedalRankingPage(
         country,
         fetchRange.start,
         fetchRange.end - fetchRange.start
       );
 
-      if (!players.length) return [];
+      if (!rows.length) return [];
 
-      return Promise.all(
-        players.map(async ({ id }) => {
-          const playerData = await ScoreSaberPlayerService.getPlayer(
-            id,
-            "basic",
-            await ScoreSaberPlayerService.getCachedPlayer(id)
-          );
-          return playerData;
+      return rows.map(
+        (row): MedalRankingPlayer => ({
+          id: row.id,
+          name: row.name,
+          avatar: row.avatar,
+          country: row.country,
+          medals: row.medals,
+          medalsRank: row.medalsRank,
+          medalsCountryRank: row.medalsCountryRank,
+          trackedSince: row.trackedSince,
+          joinedDate: row.joinedDate,
         })
       );
     });
@@ -128,6 +135,6 @@ export class PlayerMedalsService {
       countryMetadata: Object.fromEntries(
         countryMetadataRows.filter(r => r.country).map(r => [r.country!, r.count])
       ),
-    } as PlayerMedalRankingsResponse;
+    };
   }
 }

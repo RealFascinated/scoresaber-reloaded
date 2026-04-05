@@ -1,6 +1,6 @@
 import { MEDAL_COUNTS, MEDAL_RANKS } from "@ssr/common/medal";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import { and, asc, count, desc, eq, gt, inArray, isNotNull, ne, sql } from "drizzle-orm";
+import { and, asc, count, desc, gt, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../db";
 import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../db/schema";
 
@@ -126,16 +126,16 @@ export class ScoreSaberMedalsRepository {
           ) AS rank
         FROM "scoresaber-scores"
         WHERE "leaderboardId" IN (${sql.join(
-      leaderboardIds.map(id => sql`${id}`),
-      sql`, `
-    )})
+          leaderboardIds.map(id => sql`${id}`),
+          sql`, `
+        )})
           AND medals > 0
       )
       SELECT "scoreId", rank FROM ranked
       WHERE "scoreId" IN (${sql.join(
-      scoreIds.map(id => sql`${id}`),
-      sql`, `
-    )})
+        scoreIds.map(id => sql`${id}`),
+        sql`, `
+      )})
     `);
 
     const rows = (result as unknown as { rows: { scoreId: number; rank: number }[] }).rows ?? [];
@@ -171,14 +171,6 @@ export class ScoreSaberMedalsRepository {
         WHERE a.id = sub."playerId"
       `);
     });
-  }
-
-  public static async getMedalsForPlayerId(playerId: string): Promise<number> {
-    const [row] = await db
-      .select({ medals: scoreSaberAccountsTable.medals })
-      .from(scoreSaberAccountsTable)
-      .where(eq(scoreSaberAccountsTable.id, playerId));
-    return row?.medals ?? 0;
   }
 
   public static async syncMedalTotalsForPlayerIds(playerIds: string[]): Promise<void> {
@@ -238,20 +230,6 @@ export class ScoreSaberMedalsRepository {
     });
   }
 
-  public static async selectMedalRanksByIds(
-    ids: string[]
-  ): Promise<{ id: string; medalsRank: number; medalsCountryRank: number }[]> {
-    if (ids.length === 0) return [];
-    return db
-      .select({
-        id: scoreSaberAccountsTable.id,
-        medalsRank: scoreSaberAccountsTable.medalsRank,
-        medalsCountryRank: scoreSaberAccountsTable.medalsCountryRank,
-      })
-      .from(scoreSaberAccountsTable)
-      .where(inArray(scoreSaberAccountsTable.id, ids));
-  }
-
   private static medalRankingBaseWhere(country?: string) {
     return sql`
       medals > 0
@@ -281,18 +259,10 @@ export class ScoreSaberMedalsRepository {
       .orderBy(desc(count()));
   }
 
-  public static async selectMedalRankingPage(
-    country: string | undefined,
-    offset: number,
-    limit: number
-  ): Promise<{ id: string; medals: number; country: string | null }[]> {
+  public static async selectMedalRankingPage(country: string | undefined, offset: number, limit: number) {
     const baseWhere = ScoreSaberMedalsRepository.medalRankingBaseWhere(country);
     return db
-      .select({
-        id: scoreSaberAccountsTable.id,
-        medals: scoreSaberAccountsTable.medals,
-        country: scoreSaberAccountsTable.country,
-      })
+      .select()
       .from(scoreSaberAccountsTable)
       .where(baseWhere)
       .orderBy(desc(scoreSaberAccountsTable.medals), asc(scoreSaberAccountsTable.id))

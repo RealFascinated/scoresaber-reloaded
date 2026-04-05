@@ -20,13 +20,12 @@ import { LinkIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
-import { PlayerRanking } from "../player/player-ranking";
+import { ScoreSaberPlayerRanking } from "../player/player-ranking";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 import Combobox from "../ui/combo-box";
 import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
 import { Input } from "../ui/input";
-import { PlayerPpDisplay } from "./player-pp-display";
 
 type RankingDataProps = {
   initialPage: number;
@@ -143,19 +142,11 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 {rankingData.items.map(player => (
                   <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
                     <div className="grow">
-                      <PlayerRanking
+                      <ScoreSaberPlayerRanking
                         player={player}
-                        getRank={player => player.rank}
-                        getCountryRank={player => player.countryRank}
                         firstColumnWidth={firstColumnWidth}
-                        renderWorth={() => (
-                          <PlayerPpDisplay
-                            pp={player.pp}
-                            mainPlayer={mainPlayer}
-                            className="ml-auto min-w-[70px]"
-                            relativePerformancePoints={showRelativePPDifference}
-                          />
-                        )}
+                        mainPlayer={mainPlayer}
+                        relativePerformancePoints={showRelativePPDifference}
                       />
                     </div>
 

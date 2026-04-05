@@ -3,6 +3,7 @@
 import { cn } from "@/common/utils";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { MedalRankingPlayer } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { UserMinus, UserPlus } from "lucide-react";
@@ -19,7 +20,7 @@ export default function FriendAction({
   /**
    * The ID of the players profile to claim.
    */
-  player: ScoreSaberPlayer | ScoreSaberPlayerToken;
+  player: ScoreSaberPlayer | ScoreSaberPlayerToken | MedalRankingPlayer;
 
   /**
    * Whether to show the icon only.

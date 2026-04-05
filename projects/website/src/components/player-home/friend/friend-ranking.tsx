@@ -1,8 +1,7 @@
 "use client";
 
 import { getRankingColumnWidth } from "@/common/player-utils";
-import { PlayerRanking } from "@/components/player/player-ranking";
-import { PlayerPpDisplay } from "@/components/ranking/player-pp-display";
+import { ScoreSaberPlayerRanking } from "@/components/player/player-ranking";
 import SimplePagination from "@/components/simple-pagination";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
@@ -69,19 +68,11 @@ export function FriendRanking() {
         <div className="flex flex-col gap-(--spacing-lg)">
           <div className="flex flex-col gap-2">
             {friendsPage.items.map(player => (
-              <PlayerRanking
+              <ScoreSaberPlayerRanking
                 key={player.id}
                 player={player}
-                getRank={player => player.rank}
-                getCountryRank={player => player.countryRank}
                 firstColumnWidth={firstColumnWidth}
-                renderWorth={() => (
-                  <PlayerPpDisplay
-                    pp={player.pp}
-                    className="ml-auto min-w-[70px]"
-                    relativePerformancePoints={false}
-                  />
-                )}
+                relativePerformancePoints={false}
               />
             ))}
           </div>

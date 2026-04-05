@@ -23,7 +23,7 @@ export const scoreSaberAccountsTable = pgTable(
     id: varchar({ length: 32 }).primaryKey(),
     name: text().notNull(),
     country: varchar({ length: 32 }),
-    avatar: text().default("https://cdn.fascinated.cc/assets/unknown.png"),
+    avatar: text().notNull().default("https://cdn.fascinated.cc/assets/unknown.png"),
 
     // Peak rank
     peakRank: integer(),

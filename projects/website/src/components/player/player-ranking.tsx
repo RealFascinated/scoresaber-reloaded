@@ -2,29 +2,74 @@
 
 import { getRankBgColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
+import { PlayerPpDisplay } from "@/components/ranking/player-pp-display";
 import SimpleLink from "@/components/simple-link";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { getScoreSaberAvatar, getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
+import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { PlayerAvatar } from "../ranking/player-avatar";
 import CountryFlag from "../ui/country-flag";
 
-export function PlayerRanking({
+/** Row types supported by {@link PlayerRanking}: display fields used by the layout. */
+export type PlayerRankingRow = {
+  id: string;
+  name: string;
+  country?: string | null;
+  role?: string | null;
+  avatar: string;
+} & Partial<{ inactive: boolean }>;
+
+export function ScoreSaberPlayerRanking<T extends ScoreSaberPlayer>({
+  player,
+  firstColumnWidth,
+  getRank = p => p.rank,
+  getCountryRank = p => p.countryRank,
+  mainPlayer,
+  relativePerformancePoints,
+  showAccountInactive = true,
+}: {
+  player: T;
+  firstColumnWidth: number;
+  getRank?: (player: T) => number;
+  getCountryRank?: (player: T) => number;
+  mainPlayer?: ScoreSaberPlayer;
+  relativePerformancePoints: boolean;
+  showAccountInactive?: boolean;
+}) {
+  return (
+    <PlayerRanking<T>
+      player={player}
+      getRank={getRank}
+      getCountryRank={getCountryRank}
+      firstColumnWidth={firstColumnWidth}
+      showAccountInactive={showAccountInactive}
+      worth={
+        <PlayerPpDisplay
+          pp={player.pp}
+          mainPlayer={mainPlayer}
+          className="ml-auto min-w-[70px]"
+          relativePerformancePoints={relativePerformancePoints}
+        />
+      }
+    />
+  );
+}
+
+export function PlayerRanking<T extends PlayerRankingRow>({
   player,
   getRank,
   getCountryRank,
   firstColumnWidth,
-  renderWorth,
+  worth,
   showAccountInactive = true,
 }: {
-  player: ScoreSaberPlayerToken | ScoreSaberPlayer;
-  getRank: (player: ScoreSaberPlayerToken | ScoreSaberPlayer) => number;
-  getCountryRank: (player: ScoreSaberPlayerToken | ScoreSaberPlayer) => number;
+  player: T;
+  getRank: (player: T) => number;
+  getCountryRank: (player: T) => number;
   firstColumnWidth: number;
-  renderWorth: () => React.ReactNode;
+  worth: React.ReactNode;
   showAccountInactive?: boolean;
 }) {
   const database = useDatabase();
@@ -32,6 +77,8 @@ export function PlayerRanking({
 
   const rank = getRank(player);
   const countryRank = getCountryRank(player);
+  const country = player.country ?? "";
+  const inactive = Boolean(player.inactive);
 
   return (
     <SimpleLink href={`/player/${player.id}`}>
@@ -46,7 +93,7 @@ export function PlayerRanking({
         <div
           className={cn(
             "grid grid-cols-[0.55fr_0.9fr] items-center gap-3",
-            player.inactive && showAccountInactive ? "flex" : ""
+            inactive && showAccountInactive ? "flex" : ""
           )}
           style={{
             width: `${firstColumnWidth}px`,
@@ -55,19 +102,19 @@ export function PlayerRanking({
           <PlayerRanks
             rank={rank}
             countryRank={countryRank}
-            country={player.country}
-            inactive={player.inactive && showAccountInactive}
+            country={country}
+            inactive={inactive && showAccountInactive}
           />
         </div>
 
         {/* Avatar and Name */}
         <div className="flex items-center gap-2">
-          <PlayerAvatar profilePicture={getScoreSaberAvatar(player)} name={player.name} />
+          <PlayerAvatar profilePicture={player.avatar} name={player.name} />
           <PlayerNameDisplay player={player} />
         </div>
 
         {/* Worth */}
-        {renderWorth()}
+        {worth}
       </div>
 
       {/* Mobile Layout */}
@@ -84,8 +131,8 @@ export function PlayerRanking({
               <PlayerRanks
                 rank={rank}
                 countryRank={countryRank}
-                country={player.country}
-                inactive={player.inactive && showAccountInactive}
+                country={country}
+                inactive={inactive && showAccountInactive}
               />
             </div>
           </div>
@@ -93,7 +140,7 @@ export function PlayerRanking({
           {/* Bottom row: Avatar, Name, PP, and Action Button */}
           <div className="flex items-center gap-2">
             <PlayerAvatar
-              profilePicture={getScoreSaberAvatar(player)}
+              profilePicture={player.avatar}
               name={player.name}
               className="flex min-w-[28px] items-center"
             />
@@ -102,7 +149,7 @@ export function PlayerRanking({
               className="flex max-w-[140px] min-w-[90px] flex-1 items-center overflow-hidden"
             />
             {/* Worth */}
-            {renderWorth()}
+            {worth}
           </div>
         </div>
       </div>
@@ -139,19 +186,21 @@ function CountryRankDisplay({ country, countryRank }: { country: string; country
   );
 }
 
-function PlayerNameDisplay({
+function PlayerNameDisplay<T extends PlayerRankingRow>({
   player,
   className,
 }: {
-  player: ScoreSaberPlayerToken | ScoreSaberPlayer;
+  player: T;
   className?: string;
 }) {
+  const roles = getScoreSaberRoles(player);
+
   return (
     <div className={cn("flex min-w-0 flex-1 justify-start", className)}>
       <span
         className="truncate text-sm font-medium text-white"
         style={{
-          color: getScoreSaberRoles(player)[0]?.color,
+          color: roles[0]?.color,
         }}
       >
         {player.name}

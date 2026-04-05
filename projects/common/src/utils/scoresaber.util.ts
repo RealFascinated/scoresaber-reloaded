@@ -1,9 +1,7 @@
 import { HMD } from "../hmds";
 import { ScoreSaberCurve } from "../leaderboard-curve/scoresaber-curve";
-import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
-import { ScoreSaberLeaderboardPlayerInfo } from "../schemas/scoresaber/leaderboard/player-info";
 
 export type ScoreSaberRole = {
   /**
@@ -100,9 +98,7 @@ export const ScoreSaberHMDs: Record<number, HMD> = {
  * @param player the player
  * @returns the role
  */
-export function getScoreSaberRoles(
-  player: ScoreSaberLeaderboardPlayerInfo | ScoreSaberPlayer
-): ScoreSaberRole[] {
+export function getScoreSaberRoles(player: { role?: string | null }): ScoreSaberRole[] {
   const toReturn: ScoreSaberRole[] = [];
   if ("role" in player) {
     const rawRoles = player.role?.split(", ") || [player.role];
@@ -165,25 +161,6 @@ export function getScoreSaberDifficultyFromDifficulty(difficulty: MapDifficulty)
     default:
       throw new Error(`Unknown difficulty: ${difficulty}`);
   }
-}
-
-/**
- * Gets the avatar for a player.
- *
- * @param player the player
- * @returns the avatar
- */
-export function getScoreSaberAvatar(player: ScoreSaberLeaderboardPlayerInfo | ScoreSaberPlayer): string {
-  const fallbackAvatar = `https://cdn.scoresaber.com/avatars/${player.id}.jpg`;
-
-  if ("profilePicture" in player) {
-    return player.profilePicture ?? fallbackAvatar;
-  }
-  if ("avatar" in player) {
-    return player.avatar ?? fallbackAvatar;
-  }
-
-  return fallbackAvatar;
 }
 
 /**

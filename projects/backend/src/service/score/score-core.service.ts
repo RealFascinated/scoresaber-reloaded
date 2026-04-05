@@ -212,7 +212,7 @@ export class ScoreCoreService {
       score.playerInfo = {
         id: playerInfo.id,
         name: playerInfo.name,
-        profilePicture: playerInfo.avatar,
+        avatar: playerInfo.avatar,
         country: playerInfo.country,
       };
     }

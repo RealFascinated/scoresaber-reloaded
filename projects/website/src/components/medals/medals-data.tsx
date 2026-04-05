@@ -9,20 +9,19 @@ import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { countryFilter } from "@ssr/common/utils/country.util";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { pluralize } from "@ssr/common/utils/string.util";
 import { useQuery } from "@tanstack/react-query";
-import { LinkIcon, Medal } from "lucide-react";
+import { LinkIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
-import { PlayerRanking } from "../player/player-ranking";
 import { Button } from "../ui/button";
 import Combobox from "../ui/combo-box";
 import CountryFlag from "../ui/country-flag";
 import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
 import MedalsInfo from "./medals-info";
+import { MedalsRanking } from "./medals-ranking";
 
 type RankingDataProps = {
   initialPage: number;
@@ -102,19 +101,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 {rankingData.items.map(player => (
                   <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
                     <div className="grow">
-                      <PlayerRanking
-                        player={player}
-                        getRank={player => (player as ScoreSaberPlayer).medalsRank}
-                        getCountryRank={player => (player as ScoreSaberPlayer).medalsCountryRank}
-                        firstColumnWidth={firstColumnWidth}
-                        showAccountInactive={false}
-                        renderWorth={() => (
-                          <div className="ml-auto flex min-w-[70px] flex-row items-center justify-end gap-2">
-                            <Medal className="size-4" />
-                            <p className="text-pp font-semibold">{formatNumberWithCommas(player.medals)}</p>
-                          </div>
-                        )}
-                      />
+                      <MedalsRanking player={player} firstColumnWidth={firstColumnWidth} />
                     </div>
 
                     <div className="flex h-full w-full items-center justify-center">

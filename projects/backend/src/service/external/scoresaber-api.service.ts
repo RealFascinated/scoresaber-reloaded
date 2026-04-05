@@ -13,6 +13,7 @@ import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/
 import { ScoreSaberPlayerSearchToken } from "@ssr/common/types/token/scoresaber/player-search";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
+import { normalizeScoreSaberPlayerToken } from "@ssr/common/utils/scoresaber.util";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import { scoreSaberApiResponseCacheKey } from "../../common/cache-keys";
@@ -153,11 +154,15 @@ export class ScoreSaberApiService {
     if (results === undefined || results.players.length === 0) {
       return undefined;
     }
-    results.players.sort((a: ScoreSaberPlayerToken, b: ScoreSaberPlayerToken) => a.rank - b.rank);
+    const normalized = {
+      ...results,
+      players: results.players.map(p => normalizeScoreSaberPlayerToken(p)),
+    };
+    normalized.players.sort((a: ScoreSaberPlayerToken, b: ScoreSaberPlayerToken) => a.rank - b.rank);
     ScoreSaberApiService.log(
-      `Found ${results.players.length} players in ${formatDuration(performance.now() - before)}`
+      `Found ${normalized.players.length} players in ${formatDuration(performance.now() - before)}`
     );
-    return results;
+    return normalized;
   }
 
   /**
