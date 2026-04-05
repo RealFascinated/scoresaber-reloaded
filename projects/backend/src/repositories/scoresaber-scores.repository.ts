@@ -38,8 +38,7 @@ export class ScoreSaberScoresRepository {
     const [row] = await db
       .select()
       .from(scoreSaberScoresTable)
-      .where(eq(scoreSaberScoresTable.scoreId, scoreId))
-      .limit(1);
+      .where(eq(scoreSaberScoresTable.scoreId, scoreId));
     return row;
   }
 
@@ -47,8 +46,7 @@ export class ScoreSaberScoresRepository {
     const rows = await db
       .select({ scoreId: scoreSaberScoresTable.scoreId })
       .from(scoreSaberScoresTable)
-      .where(eq(scoreSaberScoresTable.scoreId, scoreId))
-      .limit(1);
+      .where(eq(scoreSaberScoresTable.scoreId, scoreId));
     return rows.length > 0;
   }
 
@@ -56,8 +54,7 @@ export class ScoreSaberScoresRepository {
     const rows = await db
       .select({ exists: sql`1` })
       .from(scoreSaberScoresTable)
-      .where(and(eq(scoreSaberScoresTable.scoreId, scoreId), eq(scoreSaberScoresTable.score, scoreValue)))
-      .limit(1);
+      .where(and(eq(scoreSaberScoresTable.scoreId, scoreId), eq(scoreSaberScoresTable.score, scoreValue)));
     return rows.length > 0;
   }
 

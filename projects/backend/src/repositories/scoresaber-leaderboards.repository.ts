@@ -154,8 +154,7 @@ export class ScoreSaberLeaderboardsRepository {
     const rows = await db
       .select({ exists: sql`1` })
       .from(scoreSaberLeaderboardsTable)
-      .where(eq(scoreSaberLeaderboardsTable.id, id))
-      .limit(1);
+      .where(eq(scoreSaberLeaderboardsTable.id, id));
     return rows.length > 0;
   }
 
@@ -176,7 +175,7 @@ export class ScoreSaberLeaderboardsRepository {
       return mergeJoinedRows(rows)[0];
     }
 
-    const rows = await db.select().from(mainAlias).where(eq(mainAlias.id, id)).limit(1);
+    const rows = await db.select().from(mainAlias).where(eq(mainAlias.id, id));
     return rows[0] ? leaderboardRowToType(rows[0]) : undefined;
   }
 

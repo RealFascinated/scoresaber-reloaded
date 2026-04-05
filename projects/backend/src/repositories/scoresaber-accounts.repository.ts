@@ -23,8 +23,7 @@ export class ScoreSaberAccountsRepository {
     const [row] = await db
       .select()
       .from(scoreSaberAccountsTable)
-      .where(eq(scoreSaberAccountsTable.id, id))
-      .limit(1);
+      .where(eq(scoreSaberAccountsTable.id, id));
     return row;
   }
 
@@ -166,8 +165,7 @@ export class ScoreSaberAccountsRepository {
     const [row] = await db
       .select({ medals: scoreSaberAccountsTable.medals })
       .from(scoreSaberAccountsTable)
-      .where(eq(scoreSaberAccountsTable.id, playerId))
-      .limit(1);
+      .where(eq(scoreSaberAccountsTable.id, playerId));
     return row?.medals ?? 0;
   }
 

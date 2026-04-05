@@ -1,6 +1,6 @@
 import type { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import type { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
-import { and, count, desc, eq, inArray, lt } from "drizzle-orm";
+import { and, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import { db } from "../db";
 import { beatLeaderScoresTable, type BeatLeaderScoreRow } from "../db/schema";
 
@@ -11,8 +11,7 @@ export class BeatLeaderScoresRepository {
     const [row] = await db
       .select()
       .from(beatLeaderScoresTable)
-      .where(eq(beatLeaderScoresTable.id, scoreId))
-      .limit(1);
+      .where(eq(beatLeaderScoresTable.id, scoreId));
     return row;
   }
 
@@ -50,10 +49,9 @@ export class BeatLeaderScoresRepository {
 
   public static async rowExistsById(scoreId: number): Promise<boolean> {
     const rows = await db
-      .select({ id: beatLeaderScoresTable.id })
+      .select({ exists: sql`1` })
       .from(beatLeaderScoresTable)
-      .where(eq(beatLeaderScoresTable.id, scoreId))
-      .limit(1);
+      .where(eq(beatLeaderScoresTable.id, scoreId));
     return rows.length > 0;
   }
 

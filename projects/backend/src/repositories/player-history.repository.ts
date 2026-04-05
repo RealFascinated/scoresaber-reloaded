@@ -17,8 +17,7 @@ export class PlayerHistoryRepository {
     const [row] = await db
       .select()
       .from(playerHistoryTable)
-      .where(and(eq(playerHistoryTable.playerId, playerId), eq(playerHistoryTable.date, date)))
-      .limit(1);
+      .where(and(eq(playerHistoryTable.playerId, playerId), eq(playerHistoryTable.date, date)));
     return row;
   }
 
