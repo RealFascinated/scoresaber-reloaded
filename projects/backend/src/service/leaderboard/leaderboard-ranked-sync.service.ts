@@ -112,9 +112,13 @@ export class LeaderboardRankedSyncService {
       );
     }
 
-    const medalRefreshIds = [...new Set(updatedLeaderboards.map(u => u.newLeaderboard.id))];
-    for (const id of medalRefreshIds) {
-      await PlayerMedalsService.refreshLeaderboardMedals(id);
+    const medalRefreshSeen = new Set<number>();
+    for (const leaderboard of updatedLeaderboards) {
+      if (!leaderboard.newLeaderboard.ranked || medalRefreshSeen.has(leaderboard.newLeaderboard.id)) {
+        continue;
+      }
+      medalRefreshSeen.add(leaderboard.newLeaderboard.id);
+      await PlayerMedalsService.refreshLeaderboardMedals(leaderboard.newLeaderboard);
     }
 
     return updatedLeaderboards;

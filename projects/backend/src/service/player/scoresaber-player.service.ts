@@ -12,6 +12,7 @@ import { parse, stringify } from "devalue";
 import { cachedPlayerTokenCacheKey, playerCacheKey } from "../../common/cache-keys";
 import { redisClient } from "../../common/redis";
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
+import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
@@ -62,8 +63,11 @@ export default class ScoreSaberPlayerService {
       if (player.banned) {
         const leaderboardIds = await ScoreSaberScoresRepository.selectDistinctLeaderboardIdsByPlayerId(id);
         await ScoreSaberScoresRepository.deleteAllByPlayerId(id);
-        for (const leaderboardId of leaderboardIds) {
-          await PlayerMedalsService.refreshLeaderboardMedals(leaderboardId);
+        if (leaderboardIds.length > 0) {
+          const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(leaderboardIds);
+          for (const leaderboard of leaderboards) {
+            await PlayerMedalsService.refreshLeaderboardMedals(leaderboard);
+          }
         }
         await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds([id]);
       }

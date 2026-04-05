@@ -1,8 +1,10 @@
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
+import type { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { ScoreSaberAccountRow } from "../../db/schema";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
@@ -27,12 +29,14 @@ export class ScoreCoreService {
    * @param score the score to track
    * @param leaderboard the leaderboard for the score
    * @param newScore whether the score was just set
+   * @param beatLeaderScore optional BeatLeader replay link for Discord medal notifications
    * @returns whether the score was tracked
    */
   public static async trackScoreSaberScore(
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
-    newScore: boolean = false
+    newScore: boolean = false,
+    beatLeaderScore?: BeatLeaderScore
   ): Promise<{
     score: ScoreSaberScore | undefined;
     hasPreviousScore: boolean;
@@ -75,7 +79,10 @@ export class ScoreCoreService {
     await ScoreCoreService.upsertScore(score);
 
     if (newScore && leaderboard.ranked && score.rank <= 10) {
-      await PlayerMedalsService.refreshLeaderboardMedals(leaderboard.id);
+      const medalChanges = await PlayerMedalsService.refreshLeaderboardMedals(leaderboard);
+      if (medalChanges.size > 0) {
+        await sendMedalScoreNotification(score, leaderboard, beatLeaderScore, medalChanges);
+      }
     }
 
     if (newScore) {

@@ -90,9 +90,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       page++;
     }
 
-    if (leaderboard?.ranked) {
-      await PlayerMedalsService.refreshLeaderboardMedals(leaderboardId);
-    }
+    await PlayerMedalsService.refreshLeaderboardMedals(leaderboard);
 
     await this.markLeaderboardSeeded(leaderboardId);
     LeaderboardScoreSeedQueue.logger.info(

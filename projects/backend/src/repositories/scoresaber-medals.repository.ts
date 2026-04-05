@@ -1,14 +1,13 @@
 import { MEDAL_COUNTS, MEDAL_RANKS } from "@ssr/common/medal";
+import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { and, asc, count, desc, eq, gt, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../db";
-import { scoreSaberAccountsTable, scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../db/schema";
+import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../db/schema";
 
 const MEDALS_BULK_UPDATE_CHUNK = 2000;
 
 function sqlMedalPointsCase(rnColumnIdentifier: string) {
-  const whens = MEDAL_RANKS.map(rank =>
-    sql`WHEN ${rank}::int THEN ${MEDAL_COUNTS[rank]}::int`
-  );
+  const whens = MEDAL_RANKS.map(rank => sql`WHEN ${rank}::int THEN ${MEDAL_COUNTS[rank]}::int`);
   return sql`CASE ${sql.raw(rnColumnIdentifier)} ${sql.join(whens, sql` `)} ELSE 0 END`;
 }
 
@@ -18,8 +17,11 @@ function distinctPlayerIds(result: unknown): string[] {
 }
 
 export class ScoreSaberMedalsRepository {
-  public static async updateMedalsOnRankedLeaderboard(leaderboardId: number): Promise<void> {
-    await db.execute(ScoreSaberMedalsRepository.rankedLeaderboardMedalsUpdateSql(leaderboardId, false));
+  public static async updateMedalsOnRankedLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<void> {
+    if (!leaderboard.ranked) {
+      return;
+    }
+    await db.execute(ScoreSaberMedalsRepository.rankedLeaderboardMedalsUpdateSql(leaderboard.id, false));
   }
 
   private static rankedLeaderboardMedalsUpdateSql(leaderboardId: number, returnPlayerIds: boolean) {
@@ -61,68 +63,45 @@ export class ScoreSaberMedalsRepository {
       `;
   }
 
-  public static async updateMedalsOnLeaderboard(leaderboardId: number): Promise<string[]> {
+  public static async updateMedalsOnLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<string[]> {
+    if (!leaderboard.ranked) {
+      return [];
+    }
+
     return db.transaction(async tx => {
-      const [lb] = await tx
-        .select({ ranked: scoreSaberLeaderboardsTable.ranked })
-        .from(scoreSaberLeaderboardsTable)
-        .where(eq(scoreSaberLeaderboardsTable.id, leaderboardId))
-        .limit(1);
-
-      const isRanked = lb?.ranked === true;
-
-      if (!isRanked) {
-        const cleared = await tx.execute(sql`
-          UPDATE "scoresaber-scores" AS s
-          SET medals = 0
-          WHERE s."leaderboardId" = ${leaderboardId}
-            AND s.medals <> 0
-          RETURNING s."playerId" AS "playerId"
-        `);
-        return distinctPlayerIds(cleared);
-      }
-
       const updated = await tx.execute(
-        ScoreSaberMedalsRepository.rankedLeaderboardMedalsUpdateSql(leaderboardId, true)
+        ScoreSaberMedalsRepository.rankedLeaderboardMedalsUpdateSql(leaderboard.id, true)
       );
       return distinctPlayerIds(updated);
     });
   }
 
-  public static async recomputeAllMedalsGlobalWindow(): Promise<void> {
-    await db.transaction(async tx => {
-      await tx.execute(sql`
-        UPDATE "scoresaber-scores" AS s
-        SET medals = 0
-        FROM "scoresaber-leaderboards" AS l
-        WHERE s."leaderboardId" = l.id
-          AND l.ranked = false
+  public static async selectPlayerIdsAffectedByMedalUpdate(
+    leaderboard: ScoreSaberLeaderboard
+  ): Promise<string[]> {
+    if (!leaderboard.ranked) {
+      return [];
+    }
+
+    const result = await db.execute(sql`
+      WITH top10 AS (
+        SELECT s."playerId"
+        FROM "scoresaber-scores" s
+        WHERE s."leaderboardId" = ${leaderboard.id}
+        ORDER BY s.score DESC NULLS LAST, s."scoreId" DESC NULLS LAST
+        LIMIT 10
+      )
+      SELECT DISTINCT u."playerId" AS "playerId"
+      FROM (
+        SELECT "playerId" FROM top10
+        UNION
+        SELECT s."playerId"
+        FROM "scoresaber-scores" s
+        WHERE s."leaderboardId" = ${leaderboard.id}
           AND s.medals <> 0
-      `);
-      await tx.execute(sql`
-        WITH ranked AS (
-          SELECT
-            s."scoreId",
-            ROW_NUMBER() OVER (
-              PARTITION BY s."leaderboardId"
-              ORDER BY s.score DESC NULLS LAST, s."scoreId" DESC NULLS LAST
-            )::int AS rn
-          FROM "scoresaber-scores" s
-          INNER JOIN "scoresaber-leaderboards" l ON l.id = s."leaderboardId" AND l.ranked = true
-        ),
-        computed AS (
-          SELECT
-            ranked."scoreId",
-            ${sqlMedalPointsCase("ranked.rn")} AS medal
-          FROM ranked
-        )
-        UPDATE "scoresaber-scores" AS t
-        SET medals = c.medal
-        FROM computed AS c
-        WHERE t."scoreId" = c."scoreId"
-          AND t.medals IS DISTINCT FROM c.medal
-      `);
-    });
+      ) AS u
+    `);
+    return distinctPlayerIds(result);
   }
 
   public static async getMedalTableScoreRanksForScores(
@@ -149,16 +128,16 @@ export class ScoreSaberMedalsRepository {
           ) AS rank
         FROM "scoresaber-scores"
         WHERE "leaderboardId" IN (${sql.join(
-      leaderboardIds.map(id => sql`${id}`),
-      sql`, `
-    )})
+          leaderboardIds.map(id => sql`${id}`),
+          sql`, `
+        )})
           AND medals > 0
       )
       SELECT "scoreId", rank FROM ranked
       WHERE "scoreId" IN (${sql.join(
-      scoreIds.map(id => sql`${id}`),
-      sql`, `
-    )})
+        scoreIds.map(id => sql`${id}`),
+        sql`, `
+      )})
     `);
 
     const rows = (result as unknown as { rows: { scoreId: number; rank: number }[] }).rows ?? [];

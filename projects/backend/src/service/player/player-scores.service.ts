@@ -90,7 +90,7 @@ export class PlayerScoresService {
 
     const startTime = performance.now();
     const playerId = playerToken.id;
-    const rankedLeaderboardsToRefresh = new Set<number>();
+    const rankedLeaderboardsToRefresh = new Map<number, ScoreSaberLeaderboard>();
     const playerScoresCount = await ScoreSaberScoresRepository.countByPlayerId(playerId);
 
     // The player has the correct number of scores
@@ -154,7 +154,7 @@ export class PlayerScoresService {
             result.missingScores++;
             result.totalScores++;
             if (leaderboard.ranked) {
-              rankedLeaderboardsToRefresh.add(leaderboard.id);
+              rankedLeaderboardsToRefresh.set(leaderboard.id, leaderboard);
             }
           }
         })
@@ -185,8 +185,8 @@ export class PlayerScoresService {
       currentPage++;
     }
 
-    for (const leaderboardId of rankedLeaderboardsToRefresh) {
-      await PlayerMedalsService.refreshLeaderboardMedals(leaderboardId);
+    for (const leaderboard of rankedLeaderboardsToRefresh.values()) {
+      await PlayerMedalsService.refreshLeaderboardMedals(leaderboard);
     }
 
     if (!account.seededScores) {
