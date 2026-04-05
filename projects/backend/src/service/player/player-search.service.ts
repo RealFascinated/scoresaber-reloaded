@@ -1,7 +1,6 @@
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import ScoreSaberPlayerService from "./scoresaber-player.service";
@@ -70,9 +69,9 @@ export class PlayerSearchService {
     const { country, search } = options ?? {};
     if (search && search.length < 3) {
       return {
-        ...Pagination.empty<ScoreSaberPlayerToken>(),
+        ...Pagination.empty<ScoreSaberPlayer>(),
         countryMetadata: {},
-      } as PlayerRankingsResponse;
+      };
     }
 
     /**
@@ -101,8 +100,19 @@ export class PlayerSearchService {
       getPlayerCountryCounts(),
     ]);
 
+    const tokens = foundPlayers?.players ?? [];
+    const items = await Promise.all(
+      tokens.map(token =>
+        ScoreSaberPlayerService.getPlayer(
+          token.id,
+          "basic",
+          token,
+        ),
+      ),
+    );
+
     return {
-      items: foundPlayers?.players ?? [],
+      items,
       metadata: {
         totalPages: Math.ceil(
           (foundPlayers?.metadata.total ?? 0) / (foundPlayers?.metadata.itemsPerPage ?? 0)
@@ -112,6 +122,6 @@ export class PlayerSearchService {
         itemsPerPage: foundPlayers?.metadata.itemsPerPage ?? 0,
       },
       countryMetadata: countryCounts,
-    } as PlayerRankingsResponse;
+    };
   }
 }
