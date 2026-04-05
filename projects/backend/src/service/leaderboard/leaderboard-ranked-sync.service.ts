@@ -6,6 +6,7 @@ import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
+import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import { ScoreSaberLeaderboardsService } from "./scoresaber-leaderboards.service";
 
@@ -77,7 +78,6 @@ export class LeaderboardRankedSyncService {
           });
         }
 
-        // Leaderboard has been ranked — medal counts on scores are updated by the periodic medal job.
         if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
           await ScoreSaberLeaderboardsRepository.updateLeaderboardById(apiLeaderboard.id, {
             seededScores: false,
@@ -110,6 +110,11 @@ export class LeaderboardRankedSyncService {
           .setDescription(`Updated ${leaderboardsToUpsert.length} leaderboards in ${duration}`)
           .setColor("#00ff00")
       );
+    }
+
+    const medalRefreshIds = [...new Set(updatedLeaderboards.map(u => u.newLeaderboard.id))];
+    for (const id of medalRefreshIds) {
+      await PlayerMedalsService.refreshLeaderboardMedals(id);
     }
 
     return updatedLeaderboards;

@@ -302,12 +302,120 @@ export class ScoreSaberScoresRepository {
   }
 
   /**
-   * Zeros all per-score medals, then assigns MEDAL_COUNTS by rank 1–10 on each **ranked** leaderboard
-   * (`score` DESC, `scoreId` DESC), matching legacy medal-table semantics.
+   * Recomputes `medals` for one ranked leaderboard without scanning the whole score set.
+   * Only rows that can change are updated: the current top 10 by `score` / `scoreId`, plus any row on this
+   * map that still has a non-zero `medals` value but is no longer in the top 10 (typically at most ~20 rows).
+   * Returns distinct `playerId`s whose score rows were updated so callers can sync account totals for
+   * those players only (not everyone who has ever played the map).
+   * Full-table repair uses {@link recomputeRowMedalsForRankedLeaderboards}.
+   */
+  public static async recomputeRowMedalsForLeaderboard(leaderboardId: number): Promise<string[]> {
+    return db.transaction(async tx => {
+      const [lb] = await tx
+        .select({ ranked: scoreSaberLeaderboardsTable.ranked })
+        .from(scoreSaberLeaderboardsTable)
+        .where(eq(scoreSaberLeaderboardsTable.id, leaderboardId))
+        .limit(1);
+
+      const isRanked = lb?.ranked === true;
+
+      if (!isRanked) {
+        const cleared = await tx.execute(sql`
+          UPDATE "scoresaber-scores" AS s
+          SET medals = 0
+          WHERE s."leaderboardId" = ${leaderboardId}
+            AND s.medals <> 0
+          RETURNING s."playerId" AS "playerId"
+        `);
+        return ScoreSaberScoresRepository.playerIdsFromExecuteResult(cleared);
+      }
+
+      const updated = await tx.execute(sql`
+        WITH top10 AS (
+          SELECT
+            x."scoreId",
+            ROW_NUMBER() OVER (ORDER BY x.score DESC, x."scoreId" DESC)::int AS rn
+          FROM (
+            SELECT s."scoreId", s.score
+            FROM "scoresaber-scores" s
+            WHERE s."leaderboardId" = ${leaderboardId}
+            ORDER BY s.score DESC, s."scoreId" DESC
+            LIMIT 10
+          ) AS x
+        ),
+        stale AS (
+          SELECT s."scoreId"
+          FROM "scoresaber-scores" s
+          WHERE s."leaderboardId" = ${leaderboardId}
+            AND s.medals <> 0
+        ),
+        medal_map AS (
+          SELECT
+            t10."scoreId",
+            CASE t10.rn
+              WHEN 1 THEN 10
+              WHEN 2 THEN 8
+              WHEN 3 THEN 6
+              WHEN 4 THEN 5
+              WHEN 5 THEN 4
+              WHEN 6 THEN 3
+              WHEN 7 THEN 2
+              WHEN 8 THEN 1
+              WHEN 9 THEN 1
+              WHEN 10 THEN 1
+              ELSE 0
+            END AS medal
+          FROM top10 AS t10
+          UNION ALL
+          SELECT st."scoreId", 0 AS medal
+          FROM stale AS st
+          WHERE NOT EXISTS (SELECT 1 FROM top10 AS t WHERE t."scoreId" = st."scoreId")
+        )
+        UPDATE "scoresaber-scores" AS u
+        SET medals = mm.medal
+        FROM medal_map AS mm
+        WHERE u."scoreId" = mm."scoreId"
+        RETURNING u."playerId" AS "playerId"
+      `);
+      return ScoreSaberScoresRepository.playerIdsFromExecuteResult(updated);
+    });
+  }
+
+  private static playerIdsFromExecuteResult(result: unknown): string[] {
+    const rows = (result as { rows?: { playerId: string }[] }).rows ?? [];
+    return [...new Set(rows.map(r => r.playerId))];
+  }
+
+  public static async selectDistinctLeaderboardIdsByPlayerId(playerId: string): Promise<number[]> {
+    const rows = await db
+      .select({ leaderboardId: scoreSaberScoresTable.leaderboardId })
+      .from(scoreSaberScoresTable)
+      .where(eq(scoreSaberScoresTable.playerId, playerId))
+      .groupBy(scoreSaberScoresTable.leaderboardId);
+    return rows.map(r => r.leaderboardId);
+  }
+
+  /**
+   * Single-pass medal recompute (no per-leaderboard batching). Prefer {@link recomputeRowMedalsForLeaderboard}
+   * for steady-state; keep this for manual repair / bot commands.
+   *
+   * Avoids `UPDATE scores SET medals = 0` without a filter (full-table rewrite on tens of millions of rows).
+   * Ranked maps: one windowed UPDATE assigns MEDAL_COUNTS for every score on a ranked leaderboard.
+   * Unranked maps: only rows with stale `medals <> 0` are cleared.
+   *
+   * For throughput, tune the DB session or server (e.g. `max_parallel_workers_per_gather`, `work_mem`) for
+   * large `ROW_NUMBER` + `UPDATE … FROM` plans.
    */
   public static async recomputeRowMedalsForRankedLeaderboards(): Promise<void> {
     await db.transaction(async tx => {
-      await tx.execute(sql`UPDATE "scoresaber-scores" SET medals = 0`);
+      await tx.execute(sql`
+        UPDATE "scoresaber-scores" AS s
+        SET medals = 0
+        FROM "scoresaber-leaderboards" AS l
+        WHERE s."leaderboardId" = l.id
+          AND l.ranked = false
+          AND s.medals <> 0
+      `);
       await tx.execute(sql`
         WITH ranked AS (
           SELECT

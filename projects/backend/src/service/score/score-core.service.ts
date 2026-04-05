@@ -9,8 +9,13 @@ import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import BeatLeaderService from "../beatleader/beatleader.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
+import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
+
+export type TrackScoreSaberScoreOptions = {
+  skipLeaderboardMedalRefresh?: boolean;
+};
 
 type InsertScoreDataOptions = {
   insertBeatLeaderScore?: boolean;
@@ -35,7 +40,8 @@ export class ScoreCoreService {
     score: ScoreSaberScore,
     beatLeaderScore: BeatLeaderScore | undefined,
     leaderboard: ScoreSaberLeaderboard,
-    newScore: boolean = false
+    newScore: boolean = false,
+    options?: TrackScoreSaberScoreOptions
   ): Promise<{
     score: ScoreSaberScore | undefined;
     hasPreviousScore: boolean;
@@ -76,6 +82,10 @@ export class ScoreCoreService {
     await PlayerCoreService.updatePlayer(playerId, playerUpdates);
 
     await ScoreCoreService.upsertScore(score);
+
+    if (!options?.skipLeaderboardMedalRefresh && leaderboard.ranked) {
+      await PlayerMedalsService.refreshLeaderboardMedals(leaderboard.id);
+    }
 
     if (newScore) {
       ScoreCoreService.logger.info(

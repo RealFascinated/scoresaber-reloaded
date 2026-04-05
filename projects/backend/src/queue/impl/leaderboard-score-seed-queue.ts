@@ -7,6 +7,7 @@ import { scoreSaberLeaderboardsTable } from "../../db/schema";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
+import { PlayerMedalsService } from "../../service/medals/player-medals.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
 import { Queue, QueueItem } from "../queue";
@@ -74,7 +75,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
           PlayerCoreService.createIfMissing(score.playerId); // no need to await this
 
           if (!(await ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId))) {
-            await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false);
+            await ScoreCoreService.trackScoreSaberScore(score, undefined, leaderboard, false, {
+              skipLeaderboardMedalRefresh: true,
+            });
             newScoresTracked++;
           } else if (score.pp > 0) {
             await ScoreCoreService.upsertScore(score);
@@ -87,6 +90,10 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         scrape = false;
       }
       page++;
+    }
+
+    if (leaderboard?.ranked) {
+      await PlayerMedalsService.refreshLeaderboardMedals(leaderboardId);
     }
 
     await this.markLeaderboardSeeded(leaderboardId);

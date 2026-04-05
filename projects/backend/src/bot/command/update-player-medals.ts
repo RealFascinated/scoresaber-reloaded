@@ -15,7 +15,7 @@ class ForceRefreshPlayerScores {
     });
 
     try {
-      await PlayerMedalsService.updatePlayerGlobalMedalCounts();
+      await PlayerMedalsService.resyncAccountMedalTotalsAndRefreshRanks();
     } catch (error) {
       await interaction.editReply({
         content: error instanceof Error ? error.message : "An unknown error occurred",

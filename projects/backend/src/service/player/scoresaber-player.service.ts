@@ -17,6 +17,7 @@ import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 import MetricsService, { MetricType } from "../infra/metrics.service";
+import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerHistoryService } from "./player-history.service";
 import { PlayerHmdService } from "./player-hmd.service";
@@ -59,7 +60,12 @@ export default class ScoreSaberPlayerService {
 
       // delete players scores if banned so they don't fuck up top scores
       if (player.banned) {
+        const leaderboardIds = await ScoreSaberScoresRepository.selectDistinctLeaderboardIdsByPlayerId(id);
         await ScoreSaberScoresRepository.deleteAllByPlayerId(id);
+        for (const leaderboardId of leaderboardIds) {
+          await PlayerMedalsService.refreshLeaderboardMedals(leaderboardId);
+        }
+        await ScoreSaberAccountsRepository.syncMedalTotalsForPlayerIds([id]);
       }
 
       const basePlayer = {

@@ -40,6 +40,7 @@ import BeatLeaderService from "../beatleader/beatleader.service";
 import BeatSaverService from "../external/beatsaver.service";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
+import { PlayerMedalsService } from "../medals/player-medals.service";
 import { ScoreCoreService } from "../score/score-core.service";
 import { PlayerCoreService } from "./player-core.service";
 
@@ -88,6 +89,7 @@ export class PlayerScoresService {
 
     const startTime = performance.now();
     const playerId = playerToken.id;
+    const rankedLeaderboardsToRefresh = new Set<number>();
     const playerScoresCount = await ScoreSaberScoresRepository.countByPlayerId(playerId);
 
     // The player has the correct number of scores
@@ -150,11 +152,15 @@ export class PlayerScoresService {
             score,
             undefined,
             leaderboard,
-            false
+            false,
+            { skipLeaderboardMedalRefresh: true }
           );
           if (trackingResult.tracked) {
             result.missingScores++;
             result.totalScores++;
+            if (leaderboard.ranked) {
+              rankedLeaderboardsToRefresh.add(leaderboard.id);
+            }
           }
         })
       );
@@ -182,6 +188,10 @@ export class PlayerScoresService {
         break;
       }
       currentPage++;
+    }
+
+    for (const leaderboardId of rankedLeaderboardsToRefresh) {
+      await PlayerMedalsService.refreshLeaderboardMedals(leaderboardId);
     }
 
     if (!account.seededScores) {

@@ -14,7 +14,7 @@ import {
   sql,
 } from "drizzle-orm";
 import { db } from "../db";
-import { scoreSaberAccountsTable, type ScoreSaberAccountRow } from "../db/schema";
+import { scoreSaberAccountsTable, scoreSaberScoresTable, type ScoreSaberAccountRow } from "../db/schema";
 
 /** Keeps each bulk UPDATE … FROM (VALUES …) under typical Postgres parameter limits (2 params per row). */
 const MEDALS_BULK_UPDATE_CHUNK = 2000;
@@ -158,6 +158,7 @@ export class ScoreSaberAccountsRepository {
         FROM (
           SELECT "playerId", SUM(medals)::int AS total
           FROM "scoresaber-scores"
+          WHERE medals > 0
           GROUP BY "playerId"
         ) AS sub
         WHERE a.id = sub."playerId"
@@ -193,6 +194,37 @@ export class ScoreSaberAccountsRepository {
         `);
       }
     });
+  }
+
+  /**
+   * Sets `accounts.medals` to each player's global `SUM(scores.medals)` for the given ids only.
+   * Players with no score rows or only zero-medal rows get `0`.
+   */
+  public static async syncMedalTotalsForPlayerIds(playerIds: string[]): Promise<void> {
+    const unique = [...new Set(playerIds)];
+    if (unique.length === 0) {
+      return;
+    }
+
+    const totalsByPlayer = new Map<string, number>(unique.map(id => [id, 0]));
+
+    for (let i = 0; i < unique.length; i += MEDALS_BULK_UPDATE_CHUNK) {
+      const chunk = unique.slice(i, i + MEDALS_BULK_UPDATE_CHUNK);
+      const rows = await db
+        .select({
+          playerId: scoreSaberScoresTable.playerId,
+          total: sql<number>`coalesce(sum(${scoreSaberScoresTable.medals}), 0)::int`,
+        })
+        .from(scoreSaberScoresTable)
+        .where(inArray(scoreSaberScoresTable.playerId, chunk))
+        .groupBy(scoreSaberScoresTable.playerId);
+
+      for (const row of rows) {
+        totalsByPlayer.set(row.playerId, Number(row.total));
+      }
+    }
+
+    await ScoreSaberAccountsRepository.setMedalsForPlayerIds(totalsByPlayer, unique);
   }
 
   /**

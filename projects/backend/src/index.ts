@@ -129,11 +129,35 @@ export const app = new Elysia()
   .use(
     cron({
       name: "refresh-medal-scores",
-      pattern: "*/1 * * * *", // Every 10 minutes
+      pattern: "*/10 * * * *", // Every 10 minutes
       timezone: "Europe/London",
       protect: true,
       run: async () => {
-        await PlayerMedalsService.updatePlayerGlobalMedalCounts();
+        await PlayerMedalsService.refreshMaterializedMedalRanksOnly();
+      },
+    })
+  )
+  .use(
+    cron({
+      name: "nightly-global-medal-refresh",
+      pattern: "0 3 * * *",
+      timezone: "Europe/London",
+      protect: true,
+      run: async () => {
+        const before = Date.now();
+        await sendEmbedToChannel(
+          DiscordChannels.BACKEND_LOGS,
+          new EmbedBuilder()
+            .setTitle("Nightly global medal refresh")
+            .setDescription("Starting full recompute of score medals and account sync…")
+        );
+        await PlayerMedalsService.recomputeMedalsFromScoresAndRefreshAccounts();
+        await sendEmbedToChannel(
+          DiscordChannels.BACKEND_LOGS,
+          new EmbedBuilder()
+            .setTitle("Nightly global medal refresh")
+            .setDescription(`Finished in ${formatDuration(Date.now() - before)}.`)
+        );
       },
     })
   )
