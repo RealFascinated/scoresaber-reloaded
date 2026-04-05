@@ -4,8 +4,6 @@ import { and, asc, count, desc, eq, gt, inArray, isNotNull, ne, sql } from "driz
 import { db } from "../db";
 import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../db/schema";
 
-const MEDALS_BULK_UPDATE_CHUNK = 2000;
-
 function sqlMedalPointsCase(rnColumnIdentifier: string) {
   const whens = MEDAL_RANKS.map(rank => sql`WHEN ${rank}::int THEN ${MEDAL_COUNTS[rank]}::int`);
   return sql`CASE ${sql.raw(rnColumnIdentifier)} ${sql.join(whens, sql` `)} ELSE 0 END`;
@@ -128,16 +126,16 @@ export class ScoreSaberMedalsRepository {
           ) AS rank
         FROM "scoresaber-scores"
         WHERE "leaderboardId" IN (${sql.join(
-          leaderboardIds.map(id => sql`${id}`),
-          sql`, `
-        )})
+      leaderboardIds.map(id => sql`${id}`),
+      sql`, `
+    )})
           AND medals > 0
       )
       SELECT "scoreId", rank FROM ranked
       WHERE "scoreId" IN (${sql.join(
-        scoreIds.map(id => sql`${id}`),
-        sql`, `
-      )})
+      scoreIds.map(id => sql`${id}`),
+      sql`, `
+    )})
     `);
 
     const rows = (result as unknown as { rows: { scoreId: number; rank: number }[] }).rows ?? [];
@@ -183,28 +181,6 @@ export class ScoreSaberMedalsRepository {
     return row?.medals ?? 0;
   }
 
-  public static async setMedalsForPlayerIds(
-    totalsByPlayer: Map<string, number>,
-    playerIds: string[]
-  ): Promise<void> {
-    if (playerIds.length === 0) {
-      return;
-    }
-
-    await db.transaction(async tx => {
-      for (let i = 0; i < playerIds.length; i += MEDALS_BULK_UPDATE_CHUNK) {
-        const chunk = playerIds.slice(i, i + MEDALS_BULK_UPDATE_CHUNK);
-        const valueRows = chunk.map(pid => sql`(${pid}::varchar(32), ${totalsByPlayer.get(pid) ?? 0}::int)`);
-        await tx.execute(sql`
-          UPDATE "scoresaber-accounts" AS a
-          SET medals = v.medals
-          FROM (VALUES ${sql.join(valueRows, sql`, `)}) AS v(id, medals)
-          WHERE a.id = v.id
-        `);
-      }
-    });
-  }
-
   public static async syncMedalTotalsForPlayerIds(playerIds: string[]): Promise<void> {
     const unique = [...new Set(playerIds)];
     if (unique.length === 0) {
@@ -213,23 +189,28 @@ export class ScoreSaberMedalsRepository {
 
     const totalsByPlayer = new Map<string, number>(unique.map(id => [id, 0]));
 
-    for (let i = 0; i < unique.length; i += MEDALS_BULK_UPDATE_CHUNK) {
-      const chunk = unique.slice(i, i + MEDALS_BULK_UPDATE_CHUNK);
-      const rows = await db
-        .select({
-          playerId: scoreSaberScoresTable.playerId,
-          total: sql<number>`coalesce(sum(${scoreSaberScoresTable.medals}), 0)::int`,
-        })
-        .from(scoreSaberScoresTable)
-        .where(inArray(scoreSaberScoresTable.playerId, chunk))
-        .groupBy(scoreSaberScoresTable.playerId);
+    const rows = await db
+      .select({
+        playerId: scoreSaberScoresTable.playerId,
+        total: sql<number>`coalesce(sum(${scoreSaberScoresTable.medals}), 0)::int`,
+      })
+      .from(scoreSaberScoresTable)
+      .where(inArray(scoreSaberScoresTable.playerId, unique))
+      .groupBy(scoreSaberScoresTable.playerId);
 
-      for (const row of rows) {
-        totalsByPlayer.set(row.playerId, Number(row.total));
-      }
+    for (const row of rows) {
+      totalsByPlayer.set(row.playerId, Number(row.total));
     }
 
-    await ScoreSaberMedalsRepository.setMedalsForPlayerIds(totalsByPlayer, unique);
+    const valueRows = unique.map(pid => sql`(${pid}::varchar(32), ${totalsByPlayer.get(pid) ?? 0}::int)`);
+    await db.transaction(async tx => {
+      await tx.execute(sql`
+        UPDATE "scoresaber-accounts" AS a
+        SET medals = v.medals
+        FROM (VALUES ${sql.join(valueRows, sql`, `)}) AS v(id, medals)
+        WHERE a.id = v.id
+      `);
+    });
   }
 
   public static async refreshMaterializedMedalRanks(): Promise<void> {
@@ -280,7 +261,7 @@ export class ScoreSaberMedalsRepository {
     `;
   }
 
-  public static async countMedalRankingEligible(country?: string): Promise<number> {
+  public static async countMedalRankingPlayers(country?: string): Promise<number> {
     const baseWhere = ScoreSaberMedalsRepository.medalRankingBaseWhere(country);
     const [row] = await db.select({ totalPlayers: count() }).from(scoreSaberAccountsTable).where(baseWhere);
     return row?.totalPlayers ?? 0;

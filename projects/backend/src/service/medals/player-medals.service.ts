@@ -90,7 +90,7 @@ export class PlayerMedalsService {
     const itemsPerPage = 50;
 
     const [totalPlayers, countryMetadataRows] = await Promise.all([
-      ScoreSaberMedalsRepository.countMedalRankingEligible(country),
+      ScoreSaberMedalsRepository.countMedalRankingPlayers(country),
       ScoreSaberMedalsRepository.selectMedalRankingCountryMetadata(country),
     ]);
 
@@ -111,10 +111,6 @@ export class PlayerMedalsService {
 
       if (!players.length) return [];
 
-      const playerIds = players.map(p => p.id);
-      const rankRows = await ScoreSaberMedalsRepository.selectMedalRanksByIds(playerIds);
-      const rankById = new Map(rankRows.map(r => [r.id, r]));
-
       return Promise.all(
         players.map(async ({ id }) => {
           const playerData = await ScoreSaberPlayerService.getPlayer(
@@ -122,9 +118,6 @@ export class PlayerMedalsService {
             "basic",
             await ScoreSaberPlayerService.getCachedPlayer(id)
           );
-          const ranks = rankById.get(id);
-          playerData.medalsRank = country ? (ranks?.medalsCountryRank ?? 0) : (ranks?.medalsRank ?? 0);
-          playerData.medalsCountryRank = ranks?.medalsCountryRank ?? 0;
           return playerData;
         })
       );
