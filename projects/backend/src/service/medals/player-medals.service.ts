@@ -4,49 +4,36 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerMedalRankingsResponse } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
-import { ScoreSaberMedalScoresRepository } from "../../repositories/scoresaber-medal-scores.repository";
-import ScoreSaberPlayerService from "./scoresaber-player.service";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import ScoreSaberPlayerService from "../player/scoresaber-player.service";
 
 export class PlayerMedalsService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player Medals");
 
   /**
-   * Updates the global medal count for all players.
+   * Recomputes per-score medals from ranked leaderboards, syncs account totals from
+   * `SUM(scores.medals)`, and refreshes materialized medal ranks.
    */
-  public static async updatePlayerGlobalMedalCounts(): Promise<void> {
-    const before = performance.now();
+  public static async recomputeMedalsFromScoresAndRefreshAccounts(): Promise<void> {
+    const t0 = performance.now();
+    await ScoreSaberScoresRepository.recomputeRowMedalsForRankedLeaderboards();
+    const recomputeMs = performance.now() - t0;
 
-    const medalCountRows = await ScoreSaberMedalScoresRepository.sumMedalsGroupedByPlayerId();
-    const playerMedalCounts = new Map(medalCountRows.map(row => [row.playerId, row.totalMedals]));
-
-    await ScoreSaberAccountsRepository.syncGlobalMedalTotalsFromMap(playerMedalCounts);
+    const t1 = performance.now();
+    await ScoreSaberAccountsRepository.syncGlobalMedalTotalsFromScoresTable();
+    await ScoreSaberAccountsRepository.refreshMaterializedMedalRanks();
+    const accountsMs = performance.now() - t1;
 
     PlayerMedalsService.logger.info(
-      `Updated ${playerMedalCounts.size} player medal counts in ${formatDuration(performance.now() - before)}`
+      `Medal job: recompute scores.medals in ${formatDuration(recomputeMs)}; accounts + ranks in ${formatDuration(accountsMs)} (total ${formatDuration(performance.now() - t0)})`
     );
   }
 
   /**
-   * Updates the medal count for a list of players.
-   *
-   * @param playerIds the ids of the players
-   * @returns a map of player id to medal count
+   * Updates the global medal count for all players (scheduled job entry point).
    */
-  public static async updatePlayerMedalCounts(...playerIds: string[]): Promise<Record<string, number>> {
-    const before = performance.now();
-
-    if (playerIds.length === 0) return {};
-
-    const medalCounts = await ScoreSaberMedalScoresRepository.sumMedalsGroupedByPlayerIdIn(playerIds);
-    const totalsByPlayer = new Map(medalCounts.map(({ playerId, totalMedals }) => [playerId, totalMedals]));
-
-    await ScoreSaberAccountsRepository.setMedalsForPlayerIds(totalsByPlayer, playerIds);
-
-    PlayerMedalsService.logger.info(
-      `Updated ${playerIds.length} player medal counts in ${formatDuration(performance.now() - before)}`
-    );
-
-    return Object.fromEntries(playerIds.map(id => [id, totalsByPlayer.get(id) ?? 0]));
+  public static async updatePlayerGlobalMedalCounts(): Promise<void> {
+    await PlayerMedalsService.recomputeMedalsFromScoresAndRefreshAccounts();
   }
 
   /**
@@ -85,10 +72,8 @@ export class PlayerMedalsService {
       if (!players.length) return [];
 
       const playerIds = players.map(p => p.id);
-      const [globalRankMap, countryRankMap] = await Promise.all([
-        ScoreSaberAccountsRepository.getMedalRanksForIds(playerIds, { country }),
-        ScoreSaberAccountsRepository.getMedalRanksForIds(playerIds, { partitionByCountry: true }),
-      ]);
+      const rankRows = await ScoreSaberAccountsRepository.selectMedalRanksByIds(playerIds);
+      const rankById = new Map(rankRows.map(r => [r.id, r]));
 
       return Promise.all(
         players.map(async ({ id }) => {
@@ -97,8 +82,9 @@ export class PlayerMedalsService {
             "basic",
             await ScoreSaberPlayerService.getCachedPlayer(id)
           );
-          playerData.medalsRank = globalRankMap.get(id) ?? 0;
-          playerData.countryMedalsRank = countryRankMap.get(id) ?? 0;
+          const ranks = rankById.get(id);
+          playerData.medalsRank = country ? (ranks?.medalsCountryRank ?? 0) : (ranks?.medalsRank ?? 0);
+          playerData.countryMedalsRank = ranks?.medalsCountryRank ?? 0;
           return playerData;
         })
       );

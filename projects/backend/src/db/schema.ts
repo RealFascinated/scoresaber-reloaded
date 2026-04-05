@@ -41,6 +41,8 @@ export const scoreSaberAccountsTable = pgTable(
     hmd: varchar({ length: 32 }).$type<HMD>().notNull().default("Unknown"),
     pp: doublePrecision().notNull().default(0),
     medals: integer().notNull().default(0),
+    medalsRank: integer().notNull().default(0),
+    medalsCountryRank: integer().notNull().default(0),
 
     scoreStats: jsonb().$type<ScoreSaberPlayerScoreStats>().notNull(),
 
@@ -118,6 +120,7 @@ export const scoreSaberScoresTable = pgTable(
     score: integer().notNull(),
     accuracy: doublePrecision().notNull(),
     pp: doublePrecision().notNull().default(0),
+    medals: integer().notNull().default(0),
     missedNotes: integer().notNull(),
     badCuts: integer().notNull(),
     maxCombo: integer().notNull(),
@@ -134,6 +137,11 @@ export const scoreSaberScoresTable = pgTable(
   table => [
     index("scores_player_leaderboard_idx").on(table.playerId, table.leaderboardId),
     index("scores_leaderboard_id_idx").on(table.leaderboardId),
+    index("scores_leaderboard_score_scoreid_desc_idx").on(
+      table.leaderboardId,
+      table.score.desc(),
+      table.scoreId.desc()
+    ),
   ]
 );
 
@@ -154,6 +162,7 @@ export const scoreSaberScoreHistoryTable = pgTable(
     score: integer().notNull(),
     accuracy: doublePrecision().notNull(),
     pp: doublePrecision().notNull().default(0),
+    medals: integer().notNull().default(0),
     missedNotes: integer().notNull(),
     badCuts: integer().notNull(),
     maxCombo: integer().notNull(),
@@ -178,44 +187,6 @@ export const scoreSaberScoreHistoryTable = pgTable(
       table.leaderboardId,
       table.playerId,
       table.score
-    ),
-  ]
-);
-
-export const scoreSaberMedalScoresTable = pgTable(
-  "scoresaber-medal-scores",
-  {
-    // Identifiers
-    scoreId: integer().primaryKey(),
-    playerId: varchar({ length: 32 }).notNull(),
-    leaderboardId: integer().notNull(),
-
-    // Leaderboard information
-    difficulty: varchar({ length: 64 }).$type<MapDifficulty>().notNull(),
-    characteristic: text().$type<MapCharacteristic>().notNull(),
-
-    // Score information
-    score: integer().notNull(),
-    accuracy: doublePrecision().notNull(),
-    medals: integer().notNull(),
-    missedNotes: integer().notNull(),
-    badCuts: integer().notNull(),
-    maxCombo: integer().notNull(),
-    fullCombo: boolean().notNull(),
-    modifiers: varchar({ length: 32 }).array(),
-
-    // Headset information
-    hmd: varchar({ length: 32 }).$type<HMD>().notNull().default("Unknown"),
-    rightController: varchar({ length: 32 }),
-    leftController: varchar({ length: 32 }),
-
-    timestamp: timestamp().notNull(),
-  },
-  table => [
-    index("medal_scores_leaderboard_score_idx").on(
-      table.leaderboardId,
-      table.score.desc(),
-      table.scoreId.desc()
     ),
   ]
 );
@@ -468,7 +439,8 @@ export type ScoreSaberAccountRow = typeof scoreSaberAccountsTable.$inferSelect;
 export type PlayerHistoryRow = typeof playerHistoryTable.$inferSelect;
 export type ScoreSaberScoreRow = typeof scoreSaberScoresTable.$inferSelect;
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
-export type ScoreSaberMedalScoreRow = typeof scoreSaberMedalScoresTable.$inferSelect;
+/** @deprecated Use {@link ScoreSaberScoreRow}; medal listings read from `scoresaber-scores`. */
+export type ScoreSaberMedalScoreRow = ScoreSaberScoreRow;
 export type ScoreSaberLeaderboardRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
 export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;
 export type BeatLeaderScoreRow = typeof beatLeaderScoresTable.$inferSelect;

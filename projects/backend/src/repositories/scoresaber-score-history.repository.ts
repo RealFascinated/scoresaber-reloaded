@@ -52,6 +52,7 @@ export class ScoreSaberScoreHistoryRepository {
         score: previous.score,
         accuracy: previous.accuracy,
         pp: previous.pp,
+        medals: previous.medals,
         missedNotes: previous.missedNotes,
         badCuts: previous.badCuts,
         maxCombo: previous.maxCombo,

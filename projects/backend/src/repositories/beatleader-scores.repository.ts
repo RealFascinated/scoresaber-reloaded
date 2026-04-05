@@ -8,10 +8,7 @@ export type BeatLeaderScoreInsert = typeof beatLeaderScoresTable.$inferInsert;
 
 export class BeatLeaderScoresRepository {
   public static async findRowById(scoreId: number): Promise<BeatLeaderScoreRow | undefined> {
-    const [row] = await db
-      .select()
-      .from(beatLeaderScoresTable)
-      .where(eq(beatLeaderScoresTable.id, scoreId));
+    const [row] = await db.select().from(beatLeaderScoresTable).where(eq(beatLeaderScoresTable.id, scoreId));
     return row;
   }
 

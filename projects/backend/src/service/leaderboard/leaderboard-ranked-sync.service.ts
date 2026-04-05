@@ -7,7 +7,6 @@ import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
-import { ScoreSaberMedalScoresService } from "../score/scoresaber-medal-scores.service";
 import { ScoreSaberLeaderboardsService } from "./scoresaber-leaderboards.service";
 
 export type LeaderboardUpdate = {
@@ -78,11 +77,8 @@ export class LeaderboardRankedSyncService {
           });
         }
 
-        // Leaderboard has been ranked
+        // Leaderboard has been ranked — medal counts on scores are updated by the periodic medal job.
         if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
-          await ScoreSaberMedalScoresService.rescanLeaderboard(apiLeaderboard.id, true);
-
-          // Let the seeded scores queue handle the updating of the scores
           await ScoreSaberLeaderboardsRepository.updateLeaderboardById(apiLeaderboard.id, {
             seededScores: false,
           });

@@ -23,7 +23,11 @@ export const scoresaberScoresBulkUpsertSet = {
   rightController: sql`excluded."rightController"`,
   leftController: sql`excluded."leftController"`,
   timestamp: sql`excluded."timestamp"`,
+  /** Preserved until the periodic medal recompute job runs. */
+  medals: sql`"scoresaber-scores".medals`,
 } as const;
+
+const scoresaberScoresUpsertOnConflictSet = scoresaberScoresBulkUpsertSet;
 
 export class ScoreSaberScoresRepository {
   public static async deleteAllByPlayerId(playerId: string): Promise<void> {
@@ -78,7 +82,7 @@ export class ScoreSaberScoresRepository {
   public static async upsertScore(row: ScoreSaberScoreUpsertRow): Promise<void> {
     await db.insert(scoreSaberScoresTable).values(row).onConflictDoUpdate({
       target: scoreSaberScoresTable.scoreId,
-      set: row,
+      set: scoresaberScoresUpsertOnConflictSet,
     });
   }
 
@@ -295,5 +299,86 @@ export class ScoreSaberScoresRepository {
       WHERE oid = 'scoresaber-scores'::regclass
     `);
     return Number(result.rows[0]?.count ?? 0);
+  }
+
+  /**
+   * Zeros all per-score medals, then assigns MEDAL_COUNTS by rank 1–10 on each **ranked** leaderboard
+   * (`score` DESC, `scoreId` DESC), matching legacy medal-table semantics.
+   */
+  public static async recomputeRowMedalsForRankedLeaderboards(): Promise<void> {
+    await db.transaction(async tx => {
+      await tx.execute(sql`UPDATE "scoresaber-scores" SET medals = 0`);
+      await tx.execute(sql`
+        WITH ranked AS (
+          SELECT
+            s."scoreId",
+            ROW_NUMBER() OVER (
+              PARTITION BY s."leaderboardId"
+              ORDER BY s.score DESC, s."scoreId" DESC
+            )::int AS rn
+          FROM "scoresaber-scores" s
+          INNER JOIN "scoresaber-leaderboards" l ON l.id = s."leaderboardId" AND l.ranked = true
+        )
+        UPDATE "scoresaber-scores" AS t
+        SET medals = CASE ranked.rn
+          WHEN 1 THEN 10
+          WHEN 2 THEN 8
+          WHEN 3 THEN 6
+          WHEN 4 THEN 5
+          WHEN 5 THEN 4
+          WHEN 6 THEN 3
+          WHEN 7 THEN 2
+          WHEN 8 THEN 1
+          WHEN 9 THEN 1
+          WHEN 10 THEN 1
+          ELSE 0
+        END
+        FROM ranked
+        WHERE t."scoreId" = ranked."scoreId"
+      `);
+    });
+  }
+
+  /**
+   * Display rank on medal score listings: order by medals, timestamp, scoreId within each leaderboard.
+   */
+  public static async getMedalTableScoreRanksForScores(
+    targets: { scoreId: number; leaderboardId: number }[]
+  ): Promise<Map<number, number>> {
+    if (targets.length === 0) {
+      return new Map();
+    }
+    const leaderboardIds = [...new Set(targets.map(t => t.leaderboardId))];
+    const scoreIds = targets.map(t => t.scoreId);
+
+    const result = await db.execute(sql`
+      WITH ranked AS (
+        SELECT
+          "scoreId",
+          cast(
+            row_number() over (
+              partition by "leaderboardId"
+              order by
+                medals desc,
+                timestamp desc,
+                "scoreId" desc
+            ) as integer
+          ) AS rank
+        FROM "scoresaber-scores"
+        WHERE "leaderboardId" IN (${sql.join(
+          leaderboardIds.map(id => sql`${id}`),
+          sql`, `
+        )})
+          AND medals > 0
+      )
+      SELECT "scoreId", rank FROM ranked
+      WHERE "scoreId" IN (${sql.join(
+        scoreIds.map(id => sql`${id}`),
+        sql`, `
+      )})
+    `);
+
+    const rows = (result as unknown as { rows: { scoreId: number; rank: number }[] }).rows ?? [];
+    return new Map(rows.map(r => [Number(r.scoreId), Number(r.rank)]));
   }
 }

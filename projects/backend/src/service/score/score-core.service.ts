@@ -11,7 +11,6 @@ import BeatLeaderService from "../beatleader/beatleader.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
-import { ScoreSaberMedalScoresService } from "./scoresaber-medal-scores.service";
 
 type InsertScoreDataOptions = {
   insertBeatLeaderScore?: boolean;
@@ -76,11 +75,6 @@ export class ScoreCoreService {
     }
     await PlayerCoreService.updatePlayer(playerId, playerUpdates);
 
-    // Handle score for medal updates
-    if (newScore && leaderboard.ranked && score.rank <= 10) {
-      await ScoreSaberMedalScoresService.handleIncomingMedalsScoreUpdate(score, beatLeaderScore);
-    }
-
     await ScoreCoreService.upsertScore(score);
 
     if (newScore) {
@@ -114,6 +108,7 @@ export class ScoreCoreService {
       score: score.score,
       accuracy: score.accuracy,
       pp: score.pp,
+      medals: 0,
       missedNotes: score.missedNotes,
       badCuts: score.badCuts,
       maxCombo: score.maxCombo,

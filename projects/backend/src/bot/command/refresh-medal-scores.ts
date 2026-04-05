@@ -1,7 +1,7 @@
 import { IsGuildUser } from "@discordx/utilities";
 import { CommandInteraction } from "discord.js";
 import { Discord, Guard, Slash } from "discordx";
-import { ScoreSaberMedalScoresService } from "../../service/score/scoresaber-medal-scores.service";
+import { PlayerMedalsService } from "../../service/medals/player-medals.service";
 import { OwnerOnly } from "../lib/guards";
 
 @Discord()
@@ -9,16 +9,19 @@ import { OwnerOnly } from "../lib/guards";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class RefreshMedalScores {
   @Slash({
-    description: "Resets the medal scores cache and recalculates all medal counts (very slow)",
+    description: "Recomputes score medals from ranked leaderboards and refreshes account totals/ranks",
     name: "refresh-medal-scores",
   })
   async refreshMedalScores(interaction: CommandInteraction) {
     await interaction.reply({
-      content: "Refreshing medal scores...",
+      content: "Recomputing medals from main scores…",
     });
 
     try {
-      await ScoreSaberMedalScoresService.rescanMedalScores();
+      await PlayerMedalsService.recomputeMedalsFromScoresAndRefreshAccounts();
+      await interaction.editReply({
+        content: "Medal recompute finished.",
+      });
     } catch (error) {
       await interaction.editReply({
         content: error instanceof Error ? error.message : "An unknown error occurred",

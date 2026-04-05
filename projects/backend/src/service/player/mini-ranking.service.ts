@@ -4,7 +4,7 @@ import { MiniRankingResponse } from "@ssr/common/schemas/response/player/around-
 import { miniRankingCacheKey } from "../../common/cache-keys";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
-import { PlayerMedalsService } from "./player-medals.service";
+import { PlayerMedalsService } from "../medals/player-medals.service";
 import ScoreSaberPlayerService from "./scoresaber-player.service";
 
 type MiniRankingType = "global" | "country" | "medals";

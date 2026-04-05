@@ -160,6 +160,8 @@ export class PlayerCoreService {
               banned: token.banned,
               pp: token.pp,
               medals: 0,
+              medalsRank: 0,
+              medalsCountryRank: 0,
               hmd: "Unknown" as HMD,
               scoreStats: {
                 aPlays: 0,
@@ -171,8 +173,7 @@ export class PlayerCoreService {
               },
               trackedSince: new Date(),
               joinedDate: new Date(token.firstSeen),
-
-            }
+            };
             await ScoreSaberAccountsRepository.insert(playerInsert);
 
             // If the player has less scores tracked than the total play count, add them to the refresh queue

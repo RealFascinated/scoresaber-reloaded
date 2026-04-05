@@ -31,10 +31,9 @@ import MetricsService, { prometheusRegistry } from "./service/infra/metrics.serv
 import StorageService from "./service/infra/storage.service";
 import { LeaderboardRankedSyncNotificationsService } from "./service/leaderboard/leaderboard-ranked-batch-notifications.service";
 import { LeaderboardRankedSyncService } from "./service/leaderboard/leaderboard-ranked-sync.service";
+import { PlayerMedalsService } from "./service/medals/player-medals.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
-import { PlayerMedalsService } from "./service/player/player-medals.service";
 import PlaylistService from "./service/playlist/playlist.service";
-import { ScoreSaberMedalScoresService } from "./service/score/scoresaber-medal-scores.service";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
@@ -130,13 +129,11 @@ export const app = new Elysia()
   .use(
     cron({
       name: "refresh-medal-scores",
-      // pattern: "*/1 * * * *", // Every minute
-      pattern: "0 20 * * *", // Every day at 20:00
+      pattern: "*/1 * * * *", // Every 10 minutes
       timezone: "Europe/London",
       protect: true,
       run: async () => {
-        await ScoreSaberMedalScoresService.rescanMedalScores(); // Refresh medal scores
-        await PlayerMedalsService.updatePlayerGlobalMedalCounts(); // Update player global medal counts and ranks
+        await PlayerMedalsService.updatePlayerGlobalMedalCounts();
       },
     })
   )
