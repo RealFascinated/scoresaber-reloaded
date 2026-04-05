@@ -13,6 +13,7 @@ import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { countryFilter } from "@ssr/common/utils/country.util";
+import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
 import { useEffect } from "react";
 import Card from "../../../card";
@@ -65,6 +66,8 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
     return true;
   });
 
+  const difficultyColor = getDifficulty(leaderboard.difficulty.difficulty).color;
+
   return (
     <div>
       <div className="flex justify-between gap-(--spacing-md)">
@@ -84,15 +87,19 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
           {characteristicLeaderboards.map(leaderboardDifficulty => (
             <CharacteristicButton
               key={leaderboardDifficulty.id}
-              leaderboardId={leaderboardDifficulty.id}
-              selectedCharacteristic={currentCharacteristic}
-              characteristic={leaderboardDifficulty.characteristic}
+              leaderboardDifficulty={leaderboardDifficulty}
+              selectedLeaderboardDifficulty={leaderboard.difficulty}
             />
           ))}
         </div>
       </div>
 
-      <Card className="relative w-full gap-(--spacing-md) rounded-t-none">
+      <Card
+        className="relative w-full gap-(--spacing-md) rounded-t-none border-2"
+        style={{
+          borderColor: difficultyColor,
+        }}
+      >
         <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:items-center">
           {/* Equal flex-1 gutters keep ScoreModeSwitcher on the true horizontal center (sm+). */}
           <div className="hidden min-w-0 sm:block sm:flex-1" aria-hidden />

@@ -33,7 +33,7 @@ export function DifficultyButton({ leaderboardDifficulty, selectedId }: Difficul
         )}
         style={{
           backgroundColor: color,
-          filter: isSelected ? "brightness(1)" : "brightness(0.7)",
+          filter: isSelected ? "brightness(1)" : "brightness(0.5)",
         }}
       >
         <span>{getDifficultyName(difficulty)}</span>

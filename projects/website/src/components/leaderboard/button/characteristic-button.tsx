@@ -1,14 +1,15 @@
 import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
+import { getDifficulty } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
 import SimpleLink from "../../simple-link";
 import SimpleTooltip from "../../simple-tooltip";
 
 type CharacteristicButtonProps = {
-  characteristic: MapCharacteristic;
-  leaderboardId: number;
-  selectedCharacteristic: MapCharacteristic;
+  leaderboardDifficulty: ScoreSaberLeaderboardDifficulty;
+  selectedLeaderboardDifficulty: ScoreSaberLeaderboardDifficulty;
 };
 
 const fallbackIcon = "�";
@@ -25,17 +26,19 @@ const characteristicIcons: Partial<Record<MapCharacteristic & string, string>> =
 };
 
 export function CharacteristicButton({
-  characteristic,
-  leaderboardId,
-  selectedCharacteristic,
+  leaderboardDifficulty,
+  selectedLeaderboardDifficulty,
 }: CharacteristicButtonProps) {
-  const isSelected = characteristic === selectedCharacteristic;
-  const buttonId = `characteristic-btn-${characteristic}`;
-  const icon = characteristicIcons[characteristic];
+  const isSelected = leaderboardDifficulty.characteristic === selectedLeaderboardDifficulty.characteristic;
+  const buttonId = `characteristic-btn-${leaderboardDifficulty.id}`;
+  const icon = characteristicIcons[leaderboardDifficulty.characteristic];
+  const color = getDifficulty(
+    isSelected ? selectedLeaderboardDifficulty.difficulty : leaderboardDifficulty.difficulty
+  ).color;
 
   return (
-    <SimpleTooltip display={characteristic}>
-      <SimpleLink href={`/leaderboard/${leaderboardId}`}>
+    <SimpleTooltip display={leaderboardDifficulty.characteristic}>
+      <SimpleLink href={`/leaderboard/${leaderboardDifficulty.id}`}>
         <style>{`
         #${buttonId}.characteristic-button-hover:hover {
           filter: brightness(1) !important;
@@ -49,12 +52,12 @@ export function CharacteristicButton({
             isSelected ? "font-bold" : ""
           )}
           style={{
-            backgroundColor: isSelected ? "var(--primary)" : "var(--secondary)",
-            filter: isSelected ? "brightness(1)" : "brightness(0.7)",
+            backgroundColor: color,
+            filter: isSelected ? "brightness(1)" : "brightness(0.5)",
           }}
         >
           {icon ? (
-            <Image src={icon} alt={characteristic} width={20} height={20} />
+            <Image src={icon} alt={leaderboardDifficulty.characteristic} width={20} height={20} />
           ) : (
             <span className="h-4 w-4">{fallbackIcon}</span>
           )}
