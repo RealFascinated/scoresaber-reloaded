@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, ilike, isNotNull, ne, notInArray, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, ilike, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../db";
 import { scoreSaberAccountsTable, type ScoreSaberAccountRow } from "../db/schema";
 
@@ -83,10 +83,11 @@ export class ScoreSaberAccountsRepository {
   }
 
   public static async markInactiveWhereIdNotIn(activeIds: string[]): Promise<{ rowCount: number | null }> {
+    // `notInArray` is NOT IN ($1..$N); tens of thousands of ids exceed driver/protocol limits.
     const inactiveUpdate = await db
       .update(scoreSaberAccountsTable)
       .set({ inactive: true })
-      .where(activeIds.length > 0 ? notInArray(scoreSaberAccountsTable.id, activeIds) : sql`true`);
+      .where(sql`NOT (${scoreSaberAccountsTable.id} = ANY(${sql.param(activeIds)}))`);
     return { rowCount: inactiveUpdate.rowCount ?? null };
   }
 
