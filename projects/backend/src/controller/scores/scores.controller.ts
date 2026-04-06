@@ -179,13 +179,14 @@ export default function scoresController(app: Elysia) {
       )
       .get(
         "/top/:page",
-        async ({ params: { page } }) => {
-          return await TopScoresService.getTopScores(page);
+        async ({ params: { page, limit } }) => {
+          return await TopScoresService.getTopScores(page, limit);
         },
         {
           tags: ["Scores"],
           params: z.object({
             page: z.coerce.number().default(1),
+            limit: z.coerce.number().min(1).max(50).default(25),
           }),
           detail: {
             description: "Fetch top scores",
