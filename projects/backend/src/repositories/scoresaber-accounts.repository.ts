@@ -67,8 +67,7 @@ export class ScoreSaberAccountsRepository {
       .from(scoreSaberAccountsTable)
       .where(
         and(
-          eq(scoreSaberAccountsTable.seededBeatLeaderScores, false),
-          eq(scoreSaberAccountsTable.banned, false)
+          eq(scoreSaberAccountsTable.seededBeatLeaderScores, false)
         )
       );
     return limit != null ? q.limit(limit) : q;
@@ -78,7 +77,7 @@ export class ScoreSaberAccountsRepository {
     const q = db
       .select({ id: scoreSaberAccountsTable.id })
       .from(scoreSaberAccountsTable)
-      .where(and(eq(scoreSaberAccountsTable.seededScores, false), eq(scoreSaberAccountsTable.banned, false)));
+      .where(and(eq(scoreSaberAccountsTable.seededScores, false)));
     return limit != null ? q.limit(limit) : q;
   }
 
