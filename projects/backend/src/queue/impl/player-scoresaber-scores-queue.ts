@@ -15,7 +15,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player ScoreSaber Scores Queue");
 
   constructor() {
-    super(QueueId.PlayerScoreRefreshQueue, "fifo", 10);
+    super(QueueId.PlayerScoreRefreshQueue, "fifo", 1);
 
     setImmediate(() => this.addPlayersToQueue());
     setInterval(() => this.addPlayersToQueue(), TimeUnit.toMillis(TimeUnit.Minute, 1));
