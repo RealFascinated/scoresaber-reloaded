@@ -12,7 +12,7 @@ export const base = z.enum([
   "MissingCharacteristic",
 ]);
 
-export const MapCharacteristicSchema = z
+const mapCharacteristicShape = z
   .union([
     base,
 
@@ -42,4 +42,9 @@ export const MapCharacteristicSchema = z
   .default("Standard");
 
 export type MapCharacteristicBase = z.infer<typeof base>;
-export type MapCharacteristic = z.infer<typeof MapCharacteristicSchema>;
+export type MapCharacteristic = z.infer<typeof mapCharacteristicShape>;
+
+export const MapCharacteristicSchema = z
+  .string()
+  .default("Standard")
+  .transform((s): MapCharacteristic => s as MapCharacteristic);
