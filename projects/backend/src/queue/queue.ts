@@ -30,18 +30,24 @@ export abstract class Queue<T> {
   public queueMode: QueueMode = "lifo";
 
   /**
-   * The lock for the queue
+   * Max concurrent workers processing items from this queue
    */
-  private lock = false;
+  public readonly concurrency: number;
+
+  /**
+   * Number of in-flight item processors
+   */
+  private activeWorkers = 0;
 
   /**
    * Whether the queue is stopped
    */
   private isStopped = false;
 
-  constructor(id: QueueId, queueMode: QueueMode = "lifo") {
+  constructor(id: QueueId, queueMode: QueueMode = "lifo", concurrency: number = 1) {
     this.id = id;
     this.queueMode = queueMode;
+    this.concurrency = Math.max(1, Math.floor(concurrency));
   }
 
   public static setProcessObserver(observer: ((event: QueueProcessEvent) => void) | undefined): void {
@@ -82,32 +88,30 @@ export abstract class Queue<T> {
    * Processes the queue
    */
   public async processQueue() {
-    if (!env.ENABLE_QUEUES) {
+    if (!env.ENABLE_QUEUES || this.isStopped) {
       return;
     }
 
-    // Don't process the queue if it's locked or stopped
-    if (this.lock || this.isStopped) {
-      return;
-    }
-
-    this.lock = true;
-    try {
-      // Get the next item from the queue using proper Redis commands
+    while (this.activeWorkers < this.concurrency && !this.isStopped) {
       const rawItem =
         this.queueMode === "fifo"
           ? await redisClient.rpop(`queue::${this.id}`)
           : await redisClient.lpop(`queue::${this.id}`);
 
       if (!rawItem) {
-        // No items in the queue, stop processing
-        return;
+        break;
       }
 
+      this.activeWorkers++;
+      void this.runOneItem(rawItem);
+    }
+  }
+
+  private async runOneItem(rawItem: string): Promise<void> {
+    try {
       const item = parse(rawItem) as T;
       if (!item) {
         queueLogger.info(`Invalid queue item found in the queue ${this.id}: ${rawItem}`);
-        this.processQueue(); // Keep going
         return;
       }
 
@@ -126,11 +130,9 @@ export abstract class Queue<T> {
     } catch (error) {
       queueLogger.error(`Error processing queue ${this.id}:`, error);
     } finally {
-      this.lock = false;
-      // If there are more items in the queue and we're not stopped, process the next one
-      const queueSize = await this.getSize();
-      if (queueSize > 0 && !this.isStopped) {
-        this.processQueue();
+      this.activeWorkers--;
+      if (!this.isStopped) {
+        void this.processQueue();
       }
     }
   }

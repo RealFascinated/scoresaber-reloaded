@@ -19,14 +19,15 @@ export class TopScoresService {
     page: number = 1,
     limit: number = 25
   ): Promise<Page<PlayerScore<ScoreSaberScore>>> {
-    const offset = (page - 1) * limit;
-
     const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
       .setItemsPerPage(limit)
       .setTotalItems(Math.min(50_000, await ScoreSaberScoresRepository.countTotal())); // allow up to 50,000 scores to be displayed
 
-    return pagination.getPage(page, async items => {
-      const scoresRows = await ScoreSaberScoresRepository.getTopScores(limit, offset);
+    return pagination.getPage(page, async fetchItems => {
+      const scoresRows = await ScoreSaberScoresRepository.getTopScores(
+        fetchItems.end - fetchItems.start,
+        fetchItems.start
+      );
 
       if (!scoresRows.length) {
         return [];
