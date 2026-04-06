@@ -77,7 +77,7 @@ export class PlayerHistoryService {
     }
     PlayerHistoryService.logger.info(`Found ${players.length} active players from ScoreSaber API`);
 
-    await processInBatches(players, 25, async player => {
+    await processInBatches(players, 10, async player => {
       const foundPlayer = await PlayerCoreService.getOrCreateAccount(player.id, player);
 
       const [, trackedScores] = await Promise.all([
@@ -108,6 +108,10 @@ export class PlayerHistoryService {
       }
 
       successCount++;
+
+      if (successCount % 1000 === 0) {
+        PlayerHistoryService.logger.info(`Tracked ${successCount}/${players.length} players...`);
+      }
     });
 
     const playerIds = new Set(players.map(player => player.id));
@@ -158,8 +162,6 @@ export class PlayerHistoryService {
     trackTime: Date,
     playerToken: ScoreSaberPlayerToken
   ): Promise<void> {
-    const before = performance.now();
-
     // Don't track inactive players
     if (!playerToken || playerToken.inactive) {
       return;
@@ -183,10 +185,6 @@ export class PlayerHistoryService {
     );
 
     await PlayerHistoryRepository.upsertByPlayerAndDate(player.id, date, existingEntry, updatedHistory);
-
-    PlayerHistoryService.logger.info(
-      `Tracked player "${player.id}" in ${(performance.now() - before).toFixed(0)}ms`
-    );
   }
 
   /**
