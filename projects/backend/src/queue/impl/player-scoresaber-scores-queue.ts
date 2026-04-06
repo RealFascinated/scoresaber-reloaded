@@ -77,7 +77,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       if ((await this.getSize()) !== 0) {
         return;
       }
-      const players = await ScoreSaberAccountsRepository.selectIdsNeedingScoreSeed(500);
+      const players = await ScoreSaberAccountsRepository.selectIdsNeedingScoreSeed(5000);
       const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {
         FetchMissingScoresQueue.logger.info("No players to seed scores for");
