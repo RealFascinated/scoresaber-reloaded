@@ -140,13 +140,8 @@ export class ScoreSaberScoresRepository {
     return db
       .select(getTableColumns(scoreSaberScoresTable))
       .from(scoreSaberScoresTable)
-      .innerJoin(
-        scoreSaberAccountsTable,
-        eq(scoreSaberScoresTable.playerId, scoreSaberAccountsTable.id)
-      )
-      .where(
-        and(gt(scoreSaberScoresTable.pp, 0), eq(scoreSaberAccountsTable.banned, false))
-      )
+      .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoresTable.playerId, scoreSaberAccountsTable.id))
+      .where(and(gt(scoreSaberScoresTable.pp, 0), eq(scoreSaberAccountsTable.banned, false)))
       .orderBy(desc(scoreSaberScoresTable.pp))
       .limit(limit)
       .offset(offset);

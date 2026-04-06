@@ -4,8 +4,8 @@ import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.s
 import NumberMetric from "../../number-metric";
 
 export default class ProcessCpuMetric extends NumberMetric {
-  private readonly startedAt = Date.now();
-  private readonly startedUsage = process.cpuUsage();
+  private lastCpuUsage = process.cpuUsage();
+  private lastAt = Date.now();
   private readonly cpuCores = Math.max(1, (os.availableParallelism?.() ?? os.cpus().length) || 1);
 
   constructor() {
@@ -13,17 +13,21 @@ export default class ProcessCpuMetric extends NumberMetric {
 
     const cpuPercentGauge = new Gauge({
       name: "process_cpu_percent",
-      help: "Process CPU usage percentage since process start",
+      help: "Process CPU usage percentage since the previous metric collection",
       registers: [prometheusRegistry],
       collect: () => {
-        const elapsedMs = Date.now() - this.startedAt;
+        const now = Date.now();
+        const elapsedMs = now - this.lastAt;
         if (elapsedMs <= 0) {
-          cpuPercentGauge.set(0);
+          cpuPercentGauge.set(this.value);
           return;
         }
 
-        const usage = process.cpuUsage(this.startedUsage);
-        const usedCpuMs = (usage.user + usage.system) / 1000;
+        const delta = process.cpuUsage(this.lastCpuUsage);
+        this.lastCpuUsage = process.cpuUsage();
+        this.lastAt = now;
+
+        const usedCpuMs = (delta.user + delta.system) / 1000;
         const percent = ((usedCpuMs / elapsedMs) * 100) / this.cpuCores;
         cpuPercentGauge.set(percent);
         this.value = percent;
