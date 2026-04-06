@@ -79,7 +79,7 @@ export async function initDiscordBot() {
         status: "online",
         activities: [
           {
-            name: `${formatNumberWithCommas(await ScoreSaberScoresRepository.getApproximateTotalRowCount())} Scores!`,
+            name: `${formatNumberWithCommas(await ScoreSaberScoresRepository.countTotal())} Scores!`,
             type: ActivityType.Watching,
             url: "https://ssr.fascinated.cc",
           },

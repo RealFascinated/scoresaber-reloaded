@@ -2,10 +2,10 @@ import { AppStatisticsResponse } from "@ssr/common/schemas/response/ssr/app-stat
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
 import { BeatLeaderScoresRepository } from "../../repositories/beatleader-scores.repository";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import MetricsService, { MetricType } from "../infra/metrics.service";
-import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 
 export class AppService {
   /**
@@ -20,12 +20,12 @@ export class AppService {
       activePlayers,
       leaderboardCount,
     ] = await Promise.all([
-      ScoreSaberScoresRepository.getApproximateTotalRowCount(),
-      ScoreSaberScoreHistoryRepository.getApproximateTotalRowCount(),
+      ScoreSaberScoresRepository.countTotal(),
+      ScoreSaberScoreHistoryRepository.countTotal(),
       BeatLeaderScoresRepository.countSavedReplays(),
       ScoreSaberAccountsRepository.countInactive(),
       MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 0,
-      ScoreSaberLeaderboardsService.getTotalLeaderboardsCount(),
+      ScoreSaberLeaderboardsRepository.countTotal(),
     ]);
 
     return {

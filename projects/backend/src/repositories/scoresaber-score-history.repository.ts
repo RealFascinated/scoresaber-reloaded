@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import {
@@ -201,12 +201,10 @@ export class ScoreSaberScoreHistoryRepository {
     });
   }
 
-  public static async getApproximateTotalRowCount(): Promise<number> {
-    const result = await db.execute<{ count: number }>(sql`
-      SELECT GREATEST(0, reltuples)::bigint::integer AS count
-      FROM pg_class
-      WHERE oid = 'scoresaber-score-history'::regclass
-    `);
-    return Number(result.rows[0]?.count ?? 0);
+  public static async countTotal(): Promise<number> {
+    const [row] = await db
+      .select({ count: count() })
+      .from(scoreSaberScoreHistoryTable);
+    return row?.count ?? 0;
   }
 }

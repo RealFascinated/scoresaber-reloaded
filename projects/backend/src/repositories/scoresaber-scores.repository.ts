@@ -294,15 +294,6 @@ export class ScoreSaberScoresRepository {
       .where(and(...conditions));
   }
 
-  public static async getApproximateTotalRowCount(): Promise<number> {
-    const result = await db.execute<{ count: number }>(sql`
-      SELECT GREATEST(0, reltuples)::bigint::integer AS count
-      FROM pg_class
-      WHERE oid = 'scoresaber-scores'::regclass
-    `);
-    return Number(result.rows[0]?.count ?? 0);
-  }
-
   public static async selectDistinctLeaderboardIdsByPlayerId(playerId: string): Promise<number[]> {
     const rows = await db
       .select({ leaderboardId: scoreSaberScoresTable.leaderboardId })
@@ -310,5 +301,12 @@ export class ScoreSaberScoresRepository {
       .where(eq(scoreSaberScoresTable.playerId, playerId))
       .groupBy(scoreSaberScoresTable.leaderboardId);
     return rows.map(r => r.leaderboardId);
+  }
+
+  public static async countTotal(): Promise<number> {
+    const [row] = await db
+      .select({ count: count() })
+      .from(scoreSaberScoresTable);
+    return row?.count ?? 0;
   }
 }

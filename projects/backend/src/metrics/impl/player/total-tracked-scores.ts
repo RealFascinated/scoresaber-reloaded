@@ -13,7 +13,7 @@ export default class TotalTrackedScoresMetric extends NumberMetric {
       help: "Total number of tracked scores",
       registers: [prometheusRegistry],
       collect: async () => {
-        const total = await ScoreSaberScoresRepository.getApproximateTotalRowCount();
+        const total = await ScoreSaberScoresRepository.countTotal();
         totalScoresGauge.set(total);
       },
     });
@@ -23,7 +23,7 @@ export default class TotalTrackedScoresMetric extends NumberMetric {
       help: "Total number of tracked previous scores",
       registers: [prometheusRegistry],
       collect: async () => {
-        const totalPrevious = await ScoreSaberScoreHistoryRepository.getApproximateTotalRowCount();
+        const totalPrevious = await ScoreSaberScoreHistoryRepository.countTotal();
         totalPreviousScoresGauge.set(totalPrevious);
       },
     });

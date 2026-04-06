@@ -406,12 +406,10 @@ export class ScoreSaberLeaderboardsRepository {
     };
   }
 
-  public static async getApproximateRowCount(): Promise<number> {
-    const result = await db.execute<{ count: number }>(sql`
-      SELECT GREATEST(0, reltuples)::bigint::integer AS count
-      FROM pg_class
-      WHERE oid = 'scoresaber-leaderboards'::regclass
-    `);
-    return Number(result.rows[0]?.count ?? 0);
+  public static async countTotal(): Promise<number> {
+    const [row] = await db
+      .select({ count: count() })
+      .from(scoreSaberLeaderboardsTable);
+    return row?.count ?? 0;
   }
 }
