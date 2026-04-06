@@ -11,13 +11,9 @@ import { parse, stringify } from "devalue";
 import { cachedPlayerTokenCacheKey, playerCacheKey } from "../../common/cache-keys";
 import { redisClient } from "../../common/redis";
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
-import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
-import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
-import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 import MetricsService, { MetricType } from "../infra/metrics.service";
-import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerHistoryService } from "./player-history.service";
 import { PlayerHmdService } from "./player-hmd.service";
@@ -57,19 +53,6 @@ export default class ScoreSaberPlayerService {
 
     return CacheService.fetch(CacheId.SCORESABER_PLAYER, playerCacheKey(id, type), async () => {
       const account = await PlayerCoreService.getOrCreateAccount(id, player).catch(() => undefined);
-
-      // delete players scores if banned so they don't fuck up top scores
-      if (player.banned) {
-        const leaderboardIds = await ScoreSaberScoresRepository.selectDistinctLeaderboardIdsByPlayerId(id);
-        await ScoreSaberScoresRepository.deleteAllByPlayerId(id);
-        if (leaderboardIds.length > 0) {
-          const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(leaderboardIds);
-          for (const leaderboard of leaderboards) {
-            await PlayerMedalsService.refreshLeaderboardMedals(leaderboard);
-          }
-        }
-        await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds([id]);
-      }
 
       const basePlayer = {
         id: player.id,

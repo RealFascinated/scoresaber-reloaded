@@ -1,8 +1,13 @@
 import { HMD } from "@ssr/common/hmds";
 import type { AnyColumn, SQL } from "drizzle-orm";
-import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, gt, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "../db";
-import { scoreSaberLeaderboardsTable, scoreSaberScoresTable, type ScoreSaberScoreRow } from "../db/schema";
+import {
+  scoreSaberAccountsTable,
+  scoreSaberLeaderboardsTable,
+  scoreSaberScoresTable,
+  type ScoreSaberScoreRow,
+} from "../db/schema";
 
 export type ScoreSaberScoreUpsertRow = typeof scoreSaberScoresTable.$inferInsert;
 
@@ -30,10 +35,6 @@ export const scoresaberScoresBulkUpsertSet = {
 const scoresaberScoresUpsertOnConflictSet = scoresaberScoresBulkUpsertSet;
 
 export class ScoreSaberScoresRepository {
-  public static async deleteAllByPlayerId(playerId: string): Promise<void> {
-    await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.playerId, playerId));
-  }
-
   public static async deleteByScoreId(scoreId: number): Promise<void> {
     await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.scoreId, scoreId));
   }
@@ -137,9 +138,15 @@ export class ScoreSaberScoresRepository {
 
   public static async getTopScores(limit: number, offset: number): Promise<ScoreSaberScoreRow[]> {
     return db
-      .select()
+      .select(getTableColumns(scoreSaberScoresTable))
       .from(scoreSaberScoresTable)
-      .where(gt(scoreSaberScoresTable.pp, 0))
+      .innerJoin(
+        scoreSaberAccountsTable,
+        eq(scoreSaberScoresTable.playerId, scoreSaberAccountsTable.id)
+      )
+      .where(
+        and(gt(scoreSaberScoresTable.pp, 0), eq(scoreSaberAccountsTable.banned, false))
+      )
       .orderBy(desc(scoreSaberScoresTable.pp))
       .limit(limit)
       .offset(offset);
