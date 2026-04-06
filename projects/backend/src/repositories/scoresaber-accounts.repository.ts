@@ -65,11 +65,7 @@ export class ScoreSaberAccountsRepository {
     const q = db
       .select({ id: scoreSaberAccountsTable.id })
       .from(scoreSaberAccountsTable)
-      .where(
-        and(
-          eq(scoreSaberAccountsTable.seededBeatLeaderScores, false)
-        )
-      );
+      .where(and(eq(scoreSaberAccountsTable.seededBeatLeaderScores, false)));
     return limit != null ? q.limit(limit) : q;
   }
 

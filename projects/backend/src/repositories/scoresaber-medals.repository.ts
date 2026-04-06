@@ -1,6 +1,6 @@
 import { MEDAL_COUNTS, MEDAL_RANKS } from "@ssr/common/medal";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import { and, asc, count, desc, gt, inArray, isNotNull, ne, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../db";
 import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../db/schema";
 
@@ -27,6 +27,7 @@ export class ScoreSaberMedalsRepository {
         WITH top10_rows AS MATERIALIZED (
           SELECT s."scoreId", s.score
           FROM "scoresaber-scores" s
+          INNER JOIN "scoresaber-accounts" a ON a.id = s."playerId" AND a.banned = false
           WHERE s."leaderboardId" = ${leaderboardId}
           ORDER BY s.score DESC NULLS LAST, s."scoreId" DESC NULLS LAST
           LIMIT 10
@@ -85,6 +86,7 @@ export class ScoreSaberMedalsRepository {
       WITH top10 AS (
         SELECT s."playerId"
         FROM "scoresaber-scores" s
+        INNER JOIN "scoresaber-accounts" a ON a.id = s."playerId" AND a.banned = false
         WHERE s."leaderboardId" = ${leaderboard.id}
         ORDER BY s.score DESC NULLS LAST, s."scoreId" DESC NULLS LAST
         LIMIT 10
@@ -114,22 +116,23 @@ export class ScoreSaberMedalsRepository {
     const result = await db.execute(sql`
       WITH ranked AS (
         SELECT
-          "scoreId",
+          s."scoreId",
           cast(
             row_number() over (
-              partition by "leaderboardId"
+              partition by s."leaderboardId"
               order by
-                medals desc,
-                timestamp desc,
-                "scoreId" desc
+                s.medals desc,
+                s.timestamp desc,
+                s."scoreId" desc
             ) as integer
           ) AS rank
-        FROM "scoresaber-scores"
-        WHERE "leaderboardId" IN (${sql.join(
+        FROM "scoresaber-scores" s
+        INNER JOIN "scoresaber-accounts" a ON a.id = s."playerId" AND a.banned = false
+        WHERE s."leaderboardId" IN (${sql.join(
           leaderboardIds.map(id => sql`${id}`),
           sql`, `
         )})
-          AND medals > 0
+          AND s.medals > 0
       )
       SELECT "scoreId", rank FROM ranked
       WHERE "scoreId" IN (${sql.join(
@@ -163,10 +166,11 @@ export class ScoreSaberMedalsRepository {
         UPDATE "scoresaber-accounts" AS a
         SET medals = sub.total
         FROM (
-          SELECT "playerId", SUM(medals)::int AS total
-          FROM "scoresaber-scores"
-          WHERE medals > 0
-          GROUP BY "playerId"
+          SELECT s."playerId", SUM(s.medals)::int AS total
+          FROM "scoresaber-scores" s
+          INNER JOIN "scoresaber-accounts" acc ON acc.id = s."playerId" AND acc.banned = false
+          WHERE s.medals > 0
+          GROUP BY s."playerId"
         ) AS sub
         WHERE a.id = sub."playerId"
       `);
@@ -187,7 +191,8 @@ export class ScoreSaberMedalsRepository {
         total: sql<number>`coalesce(sum(${scoreSaberScoresTable.medals}), 0)::int`,
       })
       .from(scoreSaberScoresTable)
-      .where(inArray(scoreSaberScoresTable.playerId, unique))
+      .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoresTable.playerId, scoreSaberAccountsTable.id))
+      .where(and(inArray(scoreSaberScoresTable.playerId, unique), eq(scoreSaberAccountsTable.banned, false)))
       .groupBy(scoreSaberScoresTable.playerId);
 
     for (const row of rows) {
@@ -223,7 +228,7 @@ export class ScoreSaberMedalsRepository {
             ROW_NUMBER() OVER (ORDER BY medals DESC, id ASC)::int AS global_rank,
             ROW_NUMBER() OVER (PARTITION BY country ORDER BY medals DESC, id ASC)::int AS country_rank
           FROM "scoresaber-accounts"
-          WHERE medals > 0 AND country IS NOT NULL AND country != ''
+          WHERE medals > 0 AND country IS NOT NULL AND country != '' AND banned = false
         ) AS r
         WHERE a.id = r.id
       `);
@@ -231,12 +236,20 @@ export class ScoreSaberMedalsRepository {
   }
 
   private static medalRankingBaseWhere(country?: string) {
-    return sql`
-      medals > 0
-      AND country IS NOT NULL
-      AND country != ''
-      ${country ? sql`AND country = ${country}` : sql``}
-    `;
+    return country
+      ? and(
+          gt(scoreSaberAccountsTable.medals, 0),
+          isNotNull(scoreSaberAccountsTable.country),
+          ne(scoreSaberAccountsTable.country, ""),
+          eq(scoreSaberAccountsTable.banned, false),
+          eq(scoreSaberAccountsTable.country, country)
+        )
+      : and(
+          gt(scoreSaberAccountsTable.medals, 0),
+          isNotNull(scoreSaberAccountsTable.country),
+          ne(scoreSaberAccountsTable.country, ""),
+          eq(scoreSaberAccountsTable.banned, false)
+        );
   }
 
   public static async countMedalRankingPlayers(country?: string): Promise<number> {
