@@ -267,7 +267,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
     <ScoresCard>
       <div className="flex w-full flex-col gap-2">
         <ControlPanel>
-          <ControlRow className="mb-3">
+          <ControlRow className="mb-2">
             <ButtonGroup>
               {SORT_OPTIONS.map(sortOption => (
                 <ControlButton

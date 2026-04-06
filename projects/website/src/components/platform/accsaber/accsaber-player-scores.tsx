@@ -158,7 +158,7 @@ export default function AccSaberPlayerScores({ player }: Props) {
         {/* Control Panel */}
         <ControlPanel>
           {/* Type Selection - Top Row */}
-          <ControlRow className="mb-3">
+          <ControlRow className="mb-2">
             <TabGroup>
               {scoreTypes.map(typeOption => (
                 <Tab

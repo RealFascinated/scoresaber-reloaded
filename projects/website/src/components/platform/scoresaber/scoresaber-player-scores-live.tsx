@@ -201,8 +201,27 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
     <ScoresCard>
       <div className="flex w-full flex-col gap-2">
         <ControlPanel>
+          <ControlRow className="mb-2">
+            <ButtonGroup>
+              {SORT_OPTIONS.map(sortOption => (
+                <ControlButton
+                  key={sortOption.value}
+                  isActive={sortOption.value === sort}
+                  onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
+                >
+                  {sortOption.value === sort && (isLoading || isRefetching) ? (
+                    <Spinner size="sm" className="size-4" />
+                  ) : (
+                    sortOption.icon
+                  )}
+                  {sortOption.name}
+                </ControlButton>
+              ))}
+            </ButtonGroup>
+          </ControlRow>
+
           <ControlRow>
-            <div className="flex w-full flex-col-reverse items-center gap-2">
+            <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
               <div className="relative w-full sm:w-auto">
                 <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
                 <Input
@@ -218,25 +237,6 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
                     onClick={() => handleSearchChange("")}
                   />
                 )}
-              </div>
-
-              <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row sm:gap-4">
-                <ButtonGroup>
-                  {SORT_OPTIONS.map(sortOption => (
-                    <ControlButton
-                      key={sortOption.value}
-                      isActive={sortOption.value === sort}
-                      onClick={() => handleSortChange(sortOption.value as ScoreSaberScoreSort)}
-                    >
-                      {sortOption.value === sort && (isLoading || isRefetching) ? (
-                        <Spinner size="sm" className="h-3.5 w-3.5" />
-                      ) : (
-                        sortOption.icon
-                      )}
-                      {sortOption.name}
-                    </ControlButton>
-                  ))}
-                </ButtonGroup>
               </div>
             </div>
           </ControlRow>
