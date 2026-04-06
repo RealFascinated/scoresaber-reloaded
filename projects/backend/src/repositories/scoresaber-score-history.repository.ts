@@ -202,9 +202,7 @@ export class ScoreSaberScoreHistoryRepository {
   }
 
   public static async countTotal(): Promise<number> {
-    const [row] = await db
-      .select({ count: count() })
-      .from(scoreSaberScoreHistoryTable);
+    const [row] = await db.select({ count: count() }).from(scoreSaberScoreHistoryTable);
     return row?.count ?? 0;
   }
 }

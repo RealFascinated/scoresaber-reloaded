@@ -118,8 +118,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         .select({ id: scoreSaberLeaderboardsTable.id })
         .from(scoreSaberLeaderboardsTable)
         .where(eq(scoreSaberLeaderboardsTable.seededScores, false))
-        .orderBy(asc(scoreSaberLeaderboardsTable.plays))
-        .limit(5000);
+        .orderBy(asc(scoreSaberLeaderboardsTable.plays));
 
       const leaderboardIds = leaderboards.map(l => l.id);
       if (leaderboardIds.length === 0) {

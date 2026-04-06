@@ -407,9 +407,7 @@ export class ScoreSaberLeaderboardsRepository {
   }
 
   public static async countTotal(): Promise<number> {
-    const [row] = await db
-      .select({ count: count() })
-      .from(scoreSaberLeaderboardsTable);
+    const [row] = await db.select({ count: count() }).from(scoreSaberLeaderboardsTable);
     return row?.count ?? 0;
   }
 }

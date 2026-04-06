@@ -35,7 +35,7 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
       return;
     }
     try {
-      const players = await ScoreSaberAccountsRepository.selectIdsNeedingBeatLeaderSeed(5000);
+      const players = await ScoreSaberAccountsRepository.selectIdsNeedingBeatLeaderSeed();
       const playerIds = players.map(p => p.id);
       if (playerIds.length === 0) {
         PlayerBeatLeaderScoreSeedQueue.logger.info("No players to seed BeatLeader scores for");
