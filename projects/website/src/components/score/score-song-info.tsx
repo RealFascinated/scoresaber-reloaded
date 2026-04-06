@@ -2,6 +2,7 @@ import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
+import { truncateText } from "@ssr/common/string-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
 import LeaderboardSongName from "./leaderboard-song-name";
@@ -44,7 +45,7 @@ export default function ScoreSongInfo({
   return (
     <div className="flex w-full items-center gap-3">
       <div
-        className="relative flex justify-center overflow-hidden rounded-md"
+        className="relative flex shrink-0 justify-center overflow-hidden rounded-md"
         style={{
           height: imageSize,
           width: imageSize,
@@ -56,9 +57,6 @@ export default function ScoreSongInfo({
           height={imageSize}
           alt={`${song.name}'s Artwork`}
           className="h-full w-full object-cover"
-          style={{
-            minWidth: `${imageSize}px`,
-          }}
         />
         <div
           className="absolute right-0 bottom-0 flex h-[18px] w-full cursor-default items-center justify-center text-[0.70rem]"
@@ -76,7 +74,7 @@ export default function ScoreSongInfo({
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-1">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex flex-col gap-1">
           <LeaderboardSongName
             leaderboardName={song.name}
@@ -87,7 +85,7 @@ export default function ScoreSongInfo({
           {/* Author Info */}
           <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
             <p className="line-clamp-2 text-gray-400">
-              {song.authorName}{" "}
+              {truncateText(song.authorName, 32)}{" "}
               <span className="text-song-mapper">
                 <FallbackLink
                   href={mappersProfile}

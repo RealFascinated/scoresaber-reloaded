@@ -373,9 +373,7 @@ export const beatSaverMapsTable = pgTable(
     lastPublishedAt: timestamp(),
     tags: text().array(),
   },
-  table => [
-    index("beatsaver_maps_uploader_id_idx").on(table.uploaderId),
-  ]
+  table => [index("beatsaver_maps_uploader_id_idx").on(table.uploaderId)]
 );
 
 export const beatSaverMapVersionsTable = pgTable(
