@@ -24,7 +24,11 @@ type CustomRankedPlaylist = z.infer<typeof customRankedPlaylistSchema>;
 
 const STAR_STEP = 1;
 
-export default function CustomPlaylistCreator() {
+type CustomPlaylistCreatorProps = {
+  trigger: React.ReactNode;
+};
+
+export default function CustomPlaylistCreator({ trigger }: CustomPlaylistCreatorProps) {
   const [downloading, setDownloading] = useState(false);
 
   const form = useForm<CustomRankedPlaylist>({
@@ -61,12 +65,7 @@ export default function CustomPlaylistCreator() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
-          <Star className="hidden h-4 w-4 md:block" />
-          Custom Playlist
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="overflow-hidden p-0 sm:max-w-2xl">
         <DialogTitle className="sr-only">Custom Playlist</DialogTitle>
         <DialogDescription className="sr-only">

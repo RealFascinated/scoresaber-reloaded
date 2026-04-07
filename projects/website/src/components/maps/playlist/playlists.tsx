@@ -1,8 +1,9 @@
 import Card from "@/components/card";
 import PlaylistDownloadButton from "@/components/maps/playlist/playlist-download-button";
 import { env } from "@ssr/common/env";
-import { CheckCircleIcon, ClockIcon, CrownIcon, FlameIcon } from "lucide-react";
+import { CheckCircleIcon, ClockIcon, CrownIcon, FlameIcon, Star } from "lucide-react";
 import { ElementType } from "react";
+import { Button } from "../../ui/button";
 import CustomPlaylistCreator from "./custom-playlist-creator";
 
 type Playlist = {
@@ -50,10 +51,10 @@ export default function Playlists() {
     <Card className="h-fit gap-4">
       <div className="flex flex-col gap-1">
         <h3 className="text-foreground text-lg font-semibold">Playlists</h3>
-        <p className="text-muted-foreground text-sm">Easily download maps from ScoreSaber.</p>
+        <p className="text-muted-foreground text-sm">Download ScoreSaber map playlists in one click.</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-1 gap-2 2xl:grid-cols-2">
         {playlists.map(playlist => (
           <PlaylistDownloadButton
             key={playlist.id}
@@ -62,7 +63,14 @@ export default function Playlists() {
             icon={playlist.icon}
           />
         ))}
-        <CustomPlaylistCreator />
+        <CustomPlaylistCreator
+          trigger={
+            <Button className="flex items-center gap-2">
+              <Star size={16} className="hidden shrink-0 md:block" aria-hidden />
+              Custom Playlist
+            </Button>
+          }
+        />
       </div>
     </Card>
   );

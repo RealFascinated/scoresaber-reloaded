@@ -20,9 +20,9 @@ export default function PlaylistDownloadButton({
         onClick={() => {
           downloadFile(url, `${name}.bplist`);
         }}
-        className="flex items-center gap-2"
+        className="flex w-full items-center gap-2"
       >
-        <Icon className="hidden h-4 w-4 md:block" />
+        <Icon className="hidden size-4 md:block" />
         {name}
       </Button>
     </SimpleLink>
