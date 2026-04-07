@@ -41,7 +41,7 @@ const difficulties: Difficulty[] = [
     id: "expertplus",
     mapDifficulty: "ExpertPlus",
     displayName: "Expert+",
-    shortName: "Ex+",
+    shortName: "E+",
     color: "var(--expertPlus)",
     scoresaberDiffId: 9,
   },
