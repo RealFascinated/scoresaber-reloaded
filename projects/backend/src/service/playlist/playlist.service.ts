@@ -167,6 +167,13 @@ export default class PlaylistService {
    */
   public static async getTopTrendingMapsPlaylist(): Promise<Playlist> {
     const trendingLeaderboards = await ScoreSaberLeaderboardsRepository.getTopTrendingLeaderboards(100);
+    const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
+    for (const leaderboard of trendingLeaderboards) {
+      if (!leaderboards.has(leaderboard.songHash)) {
+        leaderboards.set(leaderboard.songHash, leaderboard);
+      }
+      leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
+    }
 
     return {
       playlistTitle: `ScoreSaber Trending (${getPlaylistTitleDate(new Date())})`,
@@ -174,7 +181,7 @@ export default class PlaylistService {
       customData: {
         syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-trending.bplist`,
       },
-      songs: trendingLeaderboards.map(leaderboard => ({
+      songs: Array.from(leaderboards.values()).map(leaderboard => ({
         songName: leaderboard.songName,
         levelAuthorName: leaderboard.songAuthorName,
         hash: leaderboard.songHash,
