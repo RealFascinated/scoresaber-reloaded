@@ -35,10 +35,8 @@ export default function Leaderboards() {
       ssrApi.searchLeaderboards(page, {
         category: filterDebounced.category,
         sort: filterDebounced.sort,
-        stars: {
-          min: filterDebounced.starMin,
-          max: filterDebounced.starMax,
-        },
+        minStars: filterDebounced.starMin,
+        maxStars: filterDebounced.starMax,
         ranked: filterDebounced.ranked,
         qualified: filterDebounced.qualified,
         query: filterDebounced.search.length > 3 ? filterDebounced.search : undefined,
