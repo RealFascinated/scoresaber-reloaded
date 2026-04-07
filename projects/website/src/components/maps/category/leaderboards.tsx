@@ -102,6 +102,7 @@ export default function Leaderboards() {
                               }}
                               imageSize={42}
                               clickableSongName={false}
+                              shortDiffNames
                             />
                           </SimpleLink>
                         </td>

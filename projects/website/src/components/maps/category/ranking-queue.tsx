@@ -58,6 +58,7 @@ export default function RankingQueue() {
                           }}
                           imageSize={42}
                           clickableSongName={false}
+                          shortDiffNames
                         />
                       </SimpleLink>
                     </td>

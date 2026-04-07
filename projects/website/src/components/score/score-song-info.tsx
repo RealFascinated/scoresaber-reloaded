@@ -25,6 +25,7 @@ interface ScoreSongInfoProps {
   clickableSongName?: boolean;
   leaderboardId?: number;
   imageSize?: number;
+  shortDiffNames?: boolean;
 }
 
 export default function ScoreSongInfo({
@@ -34,6 +35,7 @@ export default function ScoreSongInfo({
   beatSaverMap,
   clickableSongName = true,
   leaderboardId,
+  shortDiffNames = false,
   imageSize = 64,
 }: ScoreSongInfoProps) {
   const mappersProfile =
@@ -72,7 +74,7 @@ export default function ScoreSongInfo({
               {MetricIcon && <MetricIcon className="size-[12px]" />}
             </div>
           ) : (
-            <p>{diff.shortName}</p>
+            <p>{shortDiffNames ? diff.shortName : (diff.displayName ?? diff.mapDifficulty)}</p>
           )}
         </div>
       </div>
