@@ -9,8 +9,6 @@ COPY package.json bun.lock ./
 COPY projects/common/package.json ./projects/common/
 COPY projects/backend/package.json ./projects/backend/
 COPY projects/website/package.json ./projects/website/
-# Required so the workspace layout matches bun.lock (migration is a workspace package even when not built here)
-COPY projects/migration/package.json ./projects/migration/
 
 # Install only production dependencies for the specific packages
 RUN bun install --frozen-lockfile --production --filter '@ssr/common' --filter 'backend'

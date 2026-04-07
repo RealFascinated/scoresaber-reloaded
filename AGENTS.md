@@ -5,7 +5,7 @@ This file is the working agreement for humans + AI agents contributing to this r
 ## Repo layout
 
 - **Root**: Bun workspaces, shared formatting via `.prettierrc.json`.
-- **`projects/backend/`**: Bun runtime backend (TypeScript, ESM, decorators enabled).
+- **`projects/backend/`**: Bun runtime backend (TypeScript, ESM, decorators enabled). PostgreSQL via **Drizzle ORM**; schema and migrations live under `src/db/` and `drizzle/` (see **Database** below).
 - **`projects/common/`**: Shared TS package `@ssr/common` (builds to `dist/`).
 - **`projects/website/`**: Next.js app (React 19, Next 16, Tailwind).
 
@@ -27,7 +27,7 @@ This file is the working agreement for humans + AI agents contributing to this r
 ## TypeScript style guide (all projects)
 
 - **Strict TS**: Don’t weaken types to “get it to compile”. Prefer narrowing, proper return types, and typed helpers.
-- **Avoid `any`**: Allowed in `website` lint config, but still prefer `unknown` + refinement, or a real type.
+- **No `any` or `unknown`**: Do not use `any`. Do not use `unknown` in place of a real type—use concrete types (interfaces, unions, generics, branded types, or schema-inferred types) everywhere values need to be described.
 - **Error handling**:
   - Throw `Error` (or project-specific error types) with actionable messages.
   - Don’t swallow exceptions silently.
@@ -60,6 +60,31 @@ if (bla) {
 - **Async**:
   - Avoid sequential awaits inside loops when concurrency is safe; prefer batching with `Promise.all`.
   - Always consider timeouts/retries for external calls.
+
+## Database (Drizzle + PostgreSQL)
+
+The backend uses **Drizzle ORM** against **PostgreSQL**. The schema is TypeScript; SQL migrations are versioned in git.
+
+| What | Where |
+| --- | --- |
+| Drizzle config | `projects/backend/drizzle.config.ts` (`schema`, `out`, `dialect: postgresql`) |
+| Schema (source of truth) | `projects/backend/src/db/schema.ts` (and related `src/db/` code) |
+| Generated SQL + journal | `projects/backend/drizzle/*.sql`, `projects/backend/drizzle/meta/` |
+| Apply migrations in code | `projects/backend/src/db/run-migrations.ts` (used at startup / deploy as applicable) |
+
+**If you change the schema** (`schema.ts` or table definitions), **including indexes**:
+
+- **Tables / columns / indexes** are all defined in `schema.ts` (e.g. `pgTable` plus `index()` / `uniqueIndex()`, partial indexes with `.where()`, or `using("gin", …)` for trigram/GiST—follow existing patterns in that file). Treat new or changed indexes like any other DDL: they belong in generated SQL under `drizzle/`, not as one-off changes on a live DB only.
+
+1. **Generate a migration** (from `projects/backend`):
+   - `bunx drizzle-kit generate`
+   - Produces new numbered `.sql` files under `drizzle/` and updates `drizzle/meta/` (including `_journal.json`). **Commit these files together with your schema change** so everyone and CI share the same DDL history.
+
+2. **Apply migrations** to a database (after `DATABASE_URL` is set, e.g. via `.env`):
+   - From `projects/backend`: `bun run db:migrate`
+   - This runs `scripts/db-migrate.ts`, which calls the same migrator as the app but prints full errors. **Prefer this over `bunx drizzle-kit migrate` here** — the Drizzle migrate TUI can hide failure details (see comment in `db-migrate.ts`).
+
+**Types:** There is no separate “generate types” step like some ORMs. Types come from Drizzle’s schema definitions and helpers such as `InferSelectModel` / `InferInsertModel` on your tables. Keep `schema.ts` accurate and types follow.
 
 ## Common package (`projects/common/`) guidelines
 
