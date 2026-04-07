@@ -9,6 +9,7 @@ import { Medal, MusicIcon, Settings, TrendingUpIcon, TrophyIcon } from "lucide-r
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
+import { useIsMobile } from "../../contexts/viewport-context";
 import NavbarButton from "./navbar-button";
 import ProfileButton from "./profile-button";
 
@@ -16,7 +17,7 @@ type Link = {
   name: string;
   icon: ReactElement<any>;
   href?: string;
-  className?: string;
+  hideOnMobile?: boolean;
   side: "left" | "right";
 };
 
@@ -55,6 +56,7 @@ const links: Link[] = [
     name: "Overlay",
     icon: <CubeIcon className="size-5" />,
     href: "/overlay/builder",
+    hideOnMobile: true,
     side: "right",
   },
   {
@@ -77,8 +79,10 @@ const links: Link[] = [
 ];
 
 export default function Navbar() {
-  const leftLinks = links.filter(link => link.side === "left");
-  const rightLinks = links.filter(link => link.side === "right");
+  const isMobile = useIsMobile();
+
+  const leftLinks = links.filter(link => link.side === "left" && !(isMobile && link.hideOnMobile));
+  const rightLinks = links.filter(link => link.side === "right" && !(isMobile && link.hideOnMobile));
 
   return (
     <nav
@@ -124,17 +128,17 @@ export default function Navbar() {
   );
 }
 
-function NavButton({ name, icon, href, className }: Link) {
+function NavButton({ name, icon, href }: Link) {
   const pathname = usePathname();
 
   if (href == null) {
-    return <div className={cn(className)}>{icon}</div>;
+    return <div>{icon}</div>;
   }
 
   const isActive = pathname != null && (pathname === href || (href !== "/" && pathname.startsWith(href)));
 
   return (
-    <NavbarButton href={href} isActive={isActive} className={className}>
+    <NavbarButton href={href} isActive={isActive}>
       {icon}
       <span className="hidden 2xl:flex">{name}</span>
     </NavbarButton>
