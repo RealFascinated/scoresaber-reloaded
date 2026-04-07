@@ -29,7 +29,7 @@ export default function RankingQueue() {
           <table className="table w-full min-w-[760px] table-auto border-spacing-0 text-left text-sm">
             <thead>
               <tr className="border-border bg-muted/30 border-b">
-                <th className="text-foreground/90 px-2 py-2.5 font-semibold">Leaderboard</th>
+                <th className="text-foreground/90 px-3 py-2.5 font-semibold">Leaderboard</th>
                 <th className="text-foreground/90 px-2 py-2.5 text-center font-semibold">Difficulties</th>
                 <th className="text-foreground/90 min-w-[130px] px-3 py-2.5 text-center font-semibold">
                   Daily Plays

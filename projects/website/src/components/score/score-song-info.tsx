@@ -2,7 +2,6 @@ import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
-import { truncateText } from "@ssr/common/string-utils";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
 import LeaderboardSongName from "./leaderboard-song-name";
@@ -26,6 +25,7 @@ interface ScoreSongInfoProps {
   leaderboardId?: number;
   imageSize?: number;
   shortDiffNames?: boolean;
+  className?: string;
 }
 
 export default function ScoreSongInfo({
@@ -37,6 +37,7 @@ export default function ScoreSongInfo({
   leaderboardId,
   shortDiffNames = false,
   imageSize = 64,
+  className,
 }: ScoreSongInfoProps) {
   const mappersProfile =
     beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap.author.id}` : undefined;
@@ -84,12 +85,13 @@ export default function ScoreSongInfo({
             leaderboardName={song.name}
             leaderboardId={leaderboardId}
             clickableSongName={clickableSongName}
+            className={className}
           />
 
           {/* Author Info */}
-          <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
-            <p className="line-clamp-1 text-gray-400">
-              {truncateText(song.authorName, 32)}
+          <div className="flex flex-row items-end gap-1.5 text-[12.5px] leading-none">
+            <p className={cn("line-clamp-2 text-gray-400", className)}>
+              {song.authorName}
               <span className="px-1 text-gray-500">|</span>
               <span className="text-song-mapper">
                 <FallbackLink

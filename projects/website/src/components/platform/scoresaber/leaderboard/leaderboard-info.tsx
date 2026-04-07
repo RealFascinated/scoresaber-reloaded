@@ -33,7 +33,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
       {/* Header Section */}
       <div className="flex items-start justify-between gap-4">
         {/* Song Info */}
-        <div className="flex h-full flex-col justify-center gap-3">
+        <div className="flex h-full min-w-0 flex-1 flex-col justify-center gap-3">
           {/* Star Count / Difficulty */}
           <div
             className="flex w-fit items-center gap-1 rounded-md p-1.5 py-1"
@@ -51,13 +51,13 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             )}
           </div>
 
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             {/* Song Name */}
             <FallbackLink
               href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
-              className="hover:text-primary/80 transition-all"
+              className="hover:text-primary/80 w-full! max-w-full min-w-0 transition-all"
             >
-              <h3 className="text-song-name line-clamp-2 text-lg leading-tight font-semibold">
+              <h3 className="text-song-name line-clamp-2 text-lg leading-tight font-semibold wrap-break-word">
                 {leaderboardData.fullName}
               </h3>
             </FallbackLink>
@@ -70,7 +70,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         <Image
           src={leaderboardData.songArt}
           alt={`${leaderboardData.songName} Cover Image`}
-          className="rounded-lg object-cover"
+          className="shrink-0 rounded-lg object-cover"
           width={96}
           height={96}
         />

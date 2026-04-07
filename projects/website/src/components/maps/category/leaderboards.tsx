@@ -70,7 +70,7 @@ export default function Leaderboards() {
               <table className="table w-full min-w-[760px] table-auto border-spacing-0 text-left text-sm">
                 <thead>
                   <tr className="border-border bg-muted/30 border-b">
-                    <th className="text-foreground/90 px-2 py-2.5 font-semibold">Leaderboard</th>
+                    <th className="text-foreground/90 px-3 py-2.5 font-semibold">Leaderboard</th>
                     <th className="text-foreground/90 px-2 py-2.5 text-center font-semibold">Stars</th>
                     <th className="text-foreground/90 min-w-[130px] px-2 py-2.5 text-center font-semibold">
                       Daily Plays
@@ -104,6 +104,7 @@ export default function Leaderboards() {
                               imageSize={42}
                               clickableSongName={false}
                               shortDiffNames
+                              className="line-clamp-1"
                             />
                           </SimpleLink>
                         </td>
