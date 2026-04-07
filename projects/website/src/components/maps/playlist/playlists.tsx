@@ -66,7 +66,7 @@ export default function Playlists() {
         <CustomPlaylistCreator
           trigger={
             <Button className="flex items-center gap-2">
-              <Star size={16} className="hidden shrink-0 md:block" aria-hidden />
+              <Star size={16} className="shrink-0" aria-hidden />
               Custom Playlist
             </Button>
           }

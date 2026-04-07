@@ -22,7 +22,7 @@ export default function PlaylistDownloadButton({
         }}
         className="flex w-full items-center gap-2"
       >
-        <Icon className="hidden size-4 md:block" />
+        <Icon className="size-4" />
         {name}
       </Button>
     </SimpleLink>
