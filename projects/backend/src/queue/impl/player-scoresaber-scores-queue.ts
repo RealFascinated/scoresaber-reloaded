@@ -18,7 +18,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
     super(QueueId.PlayerScoreRefreshQueue, "fifo", 1);
 
     setImmediate(() => this.addPlayersToQueue());
-    setInterval(() => this.addPlayersToQueue(), TimeUnit.toMillis(TimeUnit.Minute, 1));
+    setInterval(() => this.addPlayersToQueue(), TimeUnit.toMillis(TimeUnit.Minute, 10));
   }
 
   protected async processItem(item: QueueItem<string>): Promise<void> {

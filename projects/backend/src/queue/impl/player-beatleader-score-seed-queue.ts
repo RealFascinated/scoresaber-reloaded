@@ -13,7 +13,7 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
     super(QueueId.PlayerBeatLeaderScoreSeedQueue, "fifo");
 
     setImmediate(() => this.insertPlayers());
-    setInterval(() => this.insertPlayers(), TimeUnit.toMillis(TimeUnit.Second, 10));
+    setInterval(() => this.insertPlayers(), TimeUnit.toMillis(TimeUnit.Minute, 10));
   }
 
   protected async processItem(item: QueueItem<string>): Promise<void> {
