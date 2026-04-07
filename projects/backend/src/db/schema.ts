@@ -254,6 +254,9 @@ export const scoreSaberLeaderboardsTable = pgTable(
     index("leaderboards_qualified_true_idx")
       .on(table.qualified)
       .where(sql`${table.qualified} = true`),
+    index("leaderboards_ranked_date_desc_idx").on(table.rankedDate.desc()),
+    index("leaderboards_plays_desc_idx").on(table.plays.desc()),
+    index("leaderboards_author_idx").on(table.levelAuthorName),
     index("leaderboards_stars_not_null_idx").on(table.stars).where(isNotNull(table.stars)),
     index("leaderboards_trending_score_desc_idx").on(table.trendingScore.desc()),
   ]
