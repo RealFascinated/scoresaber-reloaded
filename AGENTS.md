@@ -91,6 +91,7 @@ The backend uses **Drizzle ORM** against **PostgreSQL**. The schema is TypeScrip
 - **Public API discipline**:
   - Treat `@ssr/common` exports as stable APIs: avoid breaking changes unless you update all consumers.
   - Prefer small, well-typed utilities over “kitchen sink” modules.
+- **Zod schemas**: **All** Zod schemas belong under `projects/common/src/schemas/` (organized by domain like the rest of the tree). Backend and website import from `@ssr/common`; do not define duplicate or ad-hoc Zod schemas outside `projects/common/src/schemas/`.
 - **Build**:
   - `bun run build` emits `dist/` (types + JS). Don’t import from `dist/` in source; import from the package path.
 

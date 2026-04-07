@@ -15,6 +15,13 @@ type AfterHandleHookContext = {
   set: { status?: number | string };
 };
 
+/** Prometheus scrape endpoint — exclude from HTTP request / latency / status metrics. */
+const METRICS_PATH = "/metrics";
+
+function isMetricsRequest(request: Request): boolean {
+  return new URL(request.url).pathname === METRICS_PATH;
+}
+
 export const createHttpMetricsHooks = () => {
   const requestStartTimes = new Map<Request, bigint>();
 
@@ -76,11 +83,18 @@ export const createHttpMetricsHooks = () => {
 
   return {
     onRequest: async ({ request }: RequestHookContext): Promise<void> => {
+      if (isMetricsRequest(request)) {
+        return;
+      }
       requestStartTimes.set(request, process.hrtime.bigint());
       const requestsMetric = await getTotalRequestsMetric();
       requestsMetric?.increment();
     },
     onAfterHandle: async ({ request, route, response, set }: AfterHandleHookContext): Promise<void> => {
+      if (isMetricsRequest(request)) {
+        requestStartTimes.delete(request);
+        return;
+      }
       if (!route) {
         requestStartTimes.delete(request);
         return;

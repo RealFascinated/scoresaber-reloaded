@@ -172,7 +172,7 @@ export default function BackgroundCover() {
         fill
         className={cn(
           "object-cover",
-          cover.type === "rotating-images" && "transition-opacity duration-[1000ms] ease-in-out",
+          cover.type === "rotating-images" && "transition-opacity duration-1000 ease-in-out",
           cover.type === "rotating-images" && (isTransitioning ? "opacity-10" : "opacity-100")
         )}
         style={{
