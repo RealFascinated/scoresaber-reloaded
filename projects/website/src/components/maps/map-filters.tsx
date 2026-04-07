@@ -13,8 +13,8 @@ import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { Input } from "../ui/input";
 
 const categoryOptions: Record<ScoreSaberLeaderboardSearchCategory, string> = {
-  date_ranked: "Date Ranked",
   trending: "Trending",
+  date_ranked: "Date Ranked",
   plays: "Scores Set",
   star_difficulty: "Star Difficulty",
   author: "Author",
