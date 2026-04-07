@@ -81,13 +81,12 @@ export default class MiniRankingService {
         )
       );
 
-      // Combine all players - getPlayerMedalRanking already returns ScoreSaberPlayer objects
       const allPlayers = pageResponses
         .filter((response): response is NonNullable<typeof response> => response !== undefined)
         .flatMap(response => response.items);
 
       return this.processPlayersAndBuildResult(
-        allPlayers.map(playerData => Promise.resolve(playerData)),
+        allPlayers.map(playerData => ScoreSaberPlayerService.getPlayer(playerData.id, "basic")),
         player,
         type,
         getRank

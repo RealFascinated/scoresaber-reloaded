@@ -78,5 +78,6 @@ sketch
 .vercel
 next-env.d.ts
 .idea
+.elysia-openapi/
 *~
 secret.yaml

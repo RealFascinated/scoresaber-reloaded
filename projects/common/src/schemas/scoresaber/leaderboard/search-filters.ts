@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-export const ScoreSaberLeaderboardSearchSortSchema = z
-  .enum([
-    "asc",
-    "desc"
-  ]);
+export const ScoreSaberLeaderboardSearchSortSchema = z.enum(["asc", "desc"]);
 
 export const ScoreSaberLeaderboardSearchCategorySchema = z.enum([
   "date_ranked",

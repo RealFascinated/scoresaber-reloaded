@@ -1,6 +1,6 @@
+import { playlistSchema } from "@ssr/common/schemas/ssr/playlist/playlist";
 import { Elysia } from "elysia";
 import { z } from "zod";
-import { playlistSchema } from "@ssr/common/schemas/ssr/playlist/playlist";
 import PlaylistService, { PlaylistIdsSchema } from "../../service/playlist/playlist.service";
 
 export default function playlistController(app: Elysia) {

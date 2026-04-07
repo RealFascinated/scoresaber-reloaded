@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { PaginationMetadataSchema } from "../../pagination";
 import { BeatSaverMapSchema } from "../../beatsaver/map/map";
+import { PaginationMetadataSchema } from "../../pagination";
 import { ScoreSaberLeaderboardSchema } from "../../scoresaber/leaderboard/leaderboard";
 import { ScoreSaberMedalScoreSchema } from "../../scoresaber/score/medal-score";
 import { ScoreSaberScoreSchema } from "../../scoresaber/score/score";

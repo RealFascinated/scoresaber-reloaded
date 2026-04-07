@@ -1,7 +1,7 @@
-import { Elysia } from "elysia";
-import { z } from "zod";
 import { PlayerRankingsResponseSchema } from "@ssr/common/schemas/response/player/player-rankings";
 import { PlayerMedalRankingsResponseSchema } from "@ssr/common/schemas/response/ranking/medal-rankings";
+import { Elysia } from "elysia";
+import { z } from "zod";
 import { PlayerMedalsService } from "../../service/medals/player-medals.service";
 import { PlayerSearchService } from "../../service/player/player-search.service";
 

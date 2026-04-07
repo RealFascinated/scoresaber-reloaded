@@ -448,12 +448,8 @@
           "name": "beatsaver-map-difficulties_versionId_beatsaver-map-versions_id_fk",
           "tableFrom": "beatsaver-map-difficulties",
           "tableTo": "beatsaver-map-versions",
-          "columnsFrom": [
-            "versionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["versionId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -560,12 +556,8 @@
           "name": "beatsaver-map-versions_mapId_beatsaver-maps_id_fk",
           "tableFrom": "beatsaver-map-versions",
           "tableTo": "beatsaver-maps",
-          "columnsFrom": [
-            "mapId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["mapId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -705,12 +697,8 @@
           "name": "beatsaver-maps_uploaderId_beatsaver-uploaders_id_fk",
           "tableFrom": "beatsaver-maps",
           "tableTo": "beatsaver-uploaders",
-          "columnsFrom": [
-            "uploaderId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["uploaderId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

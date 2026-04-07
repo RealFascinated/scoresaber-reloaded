@@ -1,7 +1,7 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { BeatSaverMapSchema } from "@ssr/common/schemas/beatsaver/map/map";
 import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
-import { BeatSaverMapSchema } from "@ssr/common/schemas/beatsaver/map/map";
 import { Elysia } from "elysia";
 import { z } from "zod";
 import BeatSaverService from "../../service/external/beatsaver.service";

@@ -66,32 +66,6 @@ export const app = new Elysia()
     })
   )
   .use(
-    openapi({
-      path: "/swagger",
-      documentation: {
-        info: {
-          title: "SSR Backend",
-          description: "The API for ScoreSaber Reloaded!",
-          version: await getAppVersion(),
-        },
-        servers: [
-          {
-            url: env.NEXT_PUBLIC_API_URL,
-            description: isProduction() ? "Production" : "Development",
-          },
-        ],
-      },
-      scalar: {
-        defaultOpenAllTags: true,
-        expandAllModelSections: true,
-        expandAllResponses: true,
-      },
-      mapJsonSchema: {
-        zod: z.toJSONSchema,
-      },
-    })
-  )
-  .use(
     cron({
       name: "player-statistics-tracker-cron",
       // pattern: "*/1 * * * *", // Every 1 minute
@@ -294,7 +268,33 @@ export const app = new Elysia()
   .use(PlaylistController)
   .use(BeatSaverController)
   .use(BeatLeaderController)
-  .use(PlayerRankingController);
+  .use(PlayerRankingController)
+  .use(
+    openapi({
+      path: "/swagger",
+      documentation: {
+        info: {
+          title: "SSR Backend",
+          description: "The API for ScoreSaber Reloaded!",
+          version: await getAppVersion(),
+        },
+        servers: [
+          {
+            url: env.NEXT_PUBLIC_API_URL,
+            description: isProduction() ? "Production" : "Development",
+          },
+        ],
+      },
+      scalar: {
+        defaultOpenAllTags: true,
+        expandAllModelSections: true,
+        expandAllResponses: true,
+      },
+      mapJsonSchema: {
+        zod: z.toJSONSchema,
+      },
+    })
+  )
 
 new WebsocketManager();
 

@@ -26,7 +26,7 @@ import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/
 import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-difficulty";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { type AnyColumn, SQL, asc, desc, eq, gt, gte, inArray, isNotNull, sql } from "drizzle-orm";
+import { SQL, asc, desc, eq, gt, gte, inArray, isNotNull, sql, type AnyColumn } from "drizzle-orm";
 import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberScoresTable } from "../../db/schema";

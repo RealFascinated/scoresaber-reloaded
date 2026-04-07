@@ -3,14 +3,13 @@ import { DetailType } from "../detail-type";
 import { env } from "../env";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import type { AccSaberScoreSort, AccSaberScoreType } from "../schemas/accsaber/tokens/query/query";
-import { AccSaberScore } from "../schemas/accsaber/tokens/score/score";
 import { BeatSaverMap } from "../schemas/beatsaver/map/map";
 import { MapCharacteristic } from "../schemas/map/map-characteristic";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
 import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard";
-import { LeaderboardsPageResponse } from "../schemas/response/leaderboard/leaderboards-page";
 import LeaderboardScoresResponse from "../schemas/response/leaderboard/leaderboard-scores";
+import { LeaderboardsPageResponse } from "../schemas/response/leaderboard/leaderboards-page";
 import { PlaysByHmdResponse } from "../schemas/response/leaderboard/plays-by-hmd";
 import { MiniRankingResponse } from "../schemas/response/player/around-player";
 import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
@@ -30,7 +29,6 @@ import type { PlayerScoresQuery } from "../schemas/score/query/player-scores-que
 import { ScoreSaberMedalScoreSortField } from "../schemas/score/query/sort/scoresaber-medal-scores-sort";
 import type { ScoreSaberScoreSortField } from "../schemas/score/query/sort/scoresaber-scores-sort";
 import type { SortDirection } from "../schemas/score/query/sort/sort-direction";
-import type { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardSearchFilters } from "../schemas/scoresaber/leaderboard/search-filters";
 import { ScoreSaberPlayerHistoryEntries } from "../schemas/scoresaber/player/history";
 import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
@@ -421,10 +419,7 @@ class SSRApi {
    * @param options the options
    * @returns the leaderboards
    */
-  async searchLeaderboards(
-    page: number,
-    options?: ScoreSaberLeaderboardSearchFilters
-  ) {
+  async searchLeaderboards(page: number, options?: ScoreSaberLeaderboardSearchFilters) {
     return await this.request<LeaderboardsPageResponse>(`/leaderboard/search`, {
       page: page.toString(),
       ...(options?.ranked ? { ranked: options.ranked.toString() } : {}),
@@ -432,9 +427,9 @@ class SSRApi {
       ...(options?.category ? { category: options.category.toString() } : {}),
       ...(options?.stars
         ? {
-          minStar: (options.stars.min ?? 0).toString(),
-          maxStar: (options.stars.max ?? 0).toString(),
-        }
+            minStar: (options.stars.min ?? 0).toString(),
+            maxStar: (options.stars.max ?? 0).toString(),
+          }
         : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.query ? { query: options.query } : {}),

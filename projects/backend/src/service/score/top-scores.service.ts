@@ -1,6 +1,6 @@
 import { Pagination } from "@ssr/common/pagination";
-import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import type { TopScoresPageResponse } from "@ssr/common/schemas/response/score/top-scores";
+import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
@@ -15,10 +15,7 @@ export class TopScoresService {
    * @param page the page number
    * @returns the top scores with pagination metadata
    */
-  public static async getTopScores(
-    page: number = 1,
-    limit: number = 25
-  ): Promise<TopScoresPageResponse> {
+  public static async getTopScores(page: number = 1, limit: number = 25): Promise<TopScoresPageResponse> {
     const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
       .setItemsPerPage(limit)
       .setTotalItems(Math.min(50_000, await ScoreSaberScoresRepository.countTotal())); // allow up to 50,000 scores to be displayed

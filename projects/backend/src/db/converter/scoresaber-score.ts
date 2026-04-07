@@ -30,6 +30,7 @@ export function scoreSaberScoreRowToType(
     modifiers: normalizeModifiers(row.modifiers ?? []),
     playerInfo: {
       id: row.playerId,
+      avatar: "https://cdn.fascinated.cc/assets/unknown.png",
     },
     hmd: row.hmd ?? null,
     rightController: row.rightController ?? null,
