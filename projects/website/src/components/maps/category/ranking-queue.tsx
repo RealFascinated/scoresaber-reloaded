@@ -71,7 +71,7 @@ export default function RankingQueue() {
 
                     {/* Daily Plays */}
                     <td className="px-3 py-1.5 text-center text-xs text-gray-400">
-                      <SimpleTooltip display="The total number of daily plays on this leaderboard">
+                      <SimpleTooltip display="The total number of plays on this leaderboard set in the last 24 hours">
                         <p className="inline-flex items-center justify-center gap-1">
                           <PlayIcon className="h-3 w-3" />
                           {formatNumberWithCommas(leaderboard.dailyPlays)}
