@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { StorageBucket } from "@ssr/common/minio-buckets";
@@ -24,6 +23,7 @@ import {
 } from "../../repositories/beatleader-scores.repository";
 import CacheService, { CacheId } from "../infra/cache.service";
 import StorageService from "../infra/storage.service";
+import { BeatLeaderApiService } from "../external/beatleader-api.service";
 import { PlayerCoreService } from "../player/player-core.service";
 
 export default class BeatLeaderService {
@@ -176,9 +176,7 @@ export default class BeatLeaderService {
    * @returns the score stats, or undefined if nothing was found
    */
   public static async saveScoreStats(scoreId: number) {
-    const scoreStats = await ApiServiceRegistry.getInstance()
-      .getBeatLeaderService()
-      .lookupScoreStats(scoreId);
+    const scoreStats = await BeatLeaderApiService.lookupScoreStats(scoreId);
     if (scoreStats == undefined) {
       return undefined;
     }

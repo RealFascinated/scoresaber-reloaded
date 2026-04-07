@@ -130,13 +130,6 @@ export class ScoreSaberApiService {
     return data?.data as T;
   }
 
-  public static getAverageLatencyMs(): number {
-    if (ScoreSaberApiService.totalRequests <= 0) {
-      return 0;
-    }
-    return ScoreSaberApiService.totalRequestLatencyMs / ScoreSaberApiService.totalRequests;
-  }
-
   /**
    * Gets the players that match the query.
    *
@@ -222,7 +215,7 @@ export class ScoreSaberApiService {
     ScoreSaberApiService.log(`Looking up players on page "${page}" for country "${country}"...`);
     const response = await ScoreSaberApiService.fetch<ScoreSaberPlayersPageToken>(
       LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT.replace(":page", page.toString()).replace(":country", country) +
-        (search ? `&search=${search}` : "")
+      (search ? `&search=${search}` : "")
     );
     if (response === undefined) {
       return undefined;
@@ -388,9 +381,9 @@ export class ScoreSaberApiService {
           ...(options?.category ? { category: options.category.toString() } : {}),
           ...(options?.stars
             ? {
-                minStar: (options.stars.min ?? 0).toString(),
-                maxStar: (options.stars.max ?? 0).toString(),
-              }
+              minStar: (options.stars.min ?? 0).toString(),
+              maxStar: (options.stars.max ?? 0).toString(),
+            }
             : {}),
           ...(options?.sort ? { sort: options.sort.toString() } : {}),
           ...(options?.search ? { search: options.search } : {}),
@@ -512,4 +505,12 @@ export class ScoreSaberApiService {
   private static log(message: string): void {
     scoreSaberApiLog.debug(message);
   }
+
+  public static getAverageLatencyMs(): number {
+    if (ScoreSaberApiService.totalRequests <= 0) {
+      return 0;
+    }
+    return ScoreSaberApiService.totalRequestLatencyMs / ScoreSaberApiService.totalRequests;
+  }
 }
+

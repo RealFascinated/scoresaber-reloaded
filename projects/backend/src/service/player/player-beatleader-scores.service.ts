@@ -1,4 +1,3 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import type { BeatLeaderPlayerScoresPageToken } from "@ssr/common/schemas/beatleader/tokens/score/page";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
@@ -7,6 +6,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { BeatLeaderScoresRepository } from "../../repositories/beatleader-scores.repository";
 import BeatLeaderService from "../beatleader/beatleader.service";
+import { BeatLeaderApiService } from "../external/beatleader-api.service";
 import { PlayerCoreService } from "./player-core.service";
 
 type SeedMode = "backfill" | "requested";
@@ -50,7 +50,6 @@ export class PlayerBeatLeaderScoresService {
       return empty();
     }
     const startTime = performance.now();
-    const beatLeaderApi = ApiServiceRegistry.getInstance().getBeatLeaderService();
 
     const result = {
       totalPagesFetched: 0,
@@ -66,7 +65,7 @@ export class PlayerBeatLeaderScoresService {
      * @returns the scores page
      */
     async function getScoresPage(page: number): Promise<BeatLeaderPlayerScoresPageToken | undefined> {
-      const scoresPage = await beatLeaderApi.lookupPlayerScores(playerId, page, {
+      const scoresPage = await BeatLeaderApiService.lookupPlayerScores(playerId, page, {
         count: 100,
         sortBy: "date",
         order: "desc",

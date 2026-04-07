@@ -1,5 +1,5 @@
-import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { Gauge } from "prom-client";
+import { BeatLeaderApiService } from "../../../service/external/beatleader-api.service";
 import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
 import NumberMetric from "../../number-metric";
 
@@ -12,7 +12,7 @@ export default class BeatLeaderPlayersMetric extends NumberMetric {
       help: "Total number of BeatLeader players",
       registers: [prometheusRegistry],
       collect: async () => {
-        const total = await ApiServiceRegistry.getInstance().getBeatLeaderService().lookupPlayersTotal();
+        const total = await BeatLeaderApiService.lookupPlayersTotal();
         if (typeof total === "number" && Number.isFinite(total)) {
           this.value = total;
         }

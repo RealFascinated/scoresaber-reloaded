@@ -1,5 +1,6 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { Gauge } from "prom-client";
+import { BeatLeaderApiService } from "../../../service/external/beatleader-api.service";
 import { ScoreSaberApiService } from "../../../service/external/scoresaber-api.service";
 import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
 import NumberMetric from "../../number-metric";
@@ -21,7 +22,9 @@ export class ApiServicesMetric extends NumberMetric {
           callsGauge.set({ service: name }, serviceCalls);
         }
         totalCalls += ScoreSaberApiService.totalRequests;
+        totalCalls += BeatLeaderApiService.totalRequests;
         callsGauge.set({ service: "scoresaber" }, ScoreSaberApiService.totalRequests);
+        callsGauge.set({ service: "beatleader" }, BeatLeaderApiService.totalRequests);
         this.value = totalCalls;
       },
     });
@@ -36,6 +39,7 @@ export class ApiServicesMetric extends NumberMetric {
           failuresGauge.set({ service: name }, service.getFailedCallCount());
         }
         failuresGauge.set({ service: "scoresaber" }, ScoreSaberApiService.failedRequests);
+        failuresGauge.set({ service: "beatleader" }, BeatLeaderApiService.failedRequests);
       },
     });
 
@@ -49,6 +53,7 @@ export class ApiServicesMetric extends NumberMetric {
           averageLatencyGauge.set({ service: name }, service.getAverageLatencyMs());
         }
         averageLatencyGauge.set({ service: "scoresaber" }, ScoreSaberApiService.getAverageLatencyMs());
+        averageLatencyGauge.set({ service: "beatleader" }, BeatLeaderApiService.getAverageLatencyMs());
       },
     });
   }

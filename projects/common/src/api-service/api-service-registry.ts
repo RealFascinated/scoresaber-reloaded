@@ -1,10 +1,8 @@
 import ApiService from "./api-service";
 import { AccSaberService } from "./impl/accsaber";
-import { BeatLeaderService } from "./impl/beatleader";
 import { BeatSaverService } from "./impl/beatsaver";
 
 export enum ApiServiceName {
-  BEAT_LEADER = "beatleader",
   BEAT_SAVER = "beatsaver",
   ACCSABER = "accsaber",
 }
@@ -14,7 +12,6 @@ export default class ApiServiceRegistry {
   private static services: Map<ApiServiceName, ApiService> = new Map();
 
   public constructor() {
-    this.registerService(new BeatLeaderService());
     this.registerService(new BeatSaverService());
     this.registerService(new AccSaberService());
   }
@@ -43,10 +40,6 @@ export default class ApiServiceRegistry {
    */
   public getAllServices(): Map<ApiServiceName, ApiService> {
     return ApiServiceRegistry.services;
-  }
-
-  public getBeatLeaderService(): BeatLeaderService {
-    return ApiServiceRegistry.services.get(ApiServiceName.BEAT_LEADER) as BeatLeaderService;
   }
 
   public getBeatSaverService(): BeatSaverService {
