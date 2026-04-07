@@ -14,11 +14,11 @@ export default function LeaderboardSongName({
       href={`/leaderboard/${leaderboardId}`}
       className="group w-fit cursor-pointer text-left transition-all"
     >
-      <p className="text-song-name group-hover:text-song-name/80 line-clamp-2 w-fit font-semibold transition-all">
+      <p className="text-song-name group-hover:text-song-name/80 line-clamp-1 w-fit font-semibold transition-all">
         {leaderboardName}
       </p>
     </SimpleLink>
   ) : (
-    <p className="text-song-name line-clamp-2 w-fit font-semibold">{leaderboardName}</p>
+    <p className="text-song-name line-clamp-1 w-fit font-semibold">{leaderboardName}</p>
   );
 }

@@ -88,7 +88,7 @@ export default function ScoreSongInfo({
 
           {/* Author Info */}
           <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
-            <p className="line-clamp-2 text-gray-400">
+            <p className="line-clamp-1 text-gray-400">
               {truncateText(song.authorName, 32)}
               <span className="px-1 text-gray-500">|</span>
               <span className="text-song-mapper">
