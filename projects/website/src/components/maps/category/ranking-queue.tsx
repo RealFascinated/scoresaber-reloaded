@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { timeAgo } from "@ssr/common/utils/time-utils";
+import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
@@ -24,38 +24,55 @@ export default function RankingQueue() {
       <Card className="flex flex-col gap-(--spacing-lg)">
         <h3 className="text-lg font-semibold">{name}</h3>
 
-        <div className="flex flex-col gap-(--spacing-sm)">
-          {requests.map(rankingRequest => {
-            const leaderboard = getScoreSaberLeaderboardFromToken(rankingRequest.leaderboardInfo);
-            return (
-              <div key={leaderboard.id}>
-                <SimpleLink
-                  href={`/leaderboard/${leaderboard.id}`}
-                  className="bg-accent-deep hover:bg-accent-deep/50 grid items-center gap-2 rounded-md p-1.5 transition-all lg:grid-cols-[1fr_0.22fr]"
-                >
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <ScoreSongInfo
-                      song={{
-                        name: leaderboard.fullName,
-                        authorName: leaderboard.songAuthorName,
-                        art: leaderboard.songArt,
-                      }}
-                      level={{
-                        authorName: leaderboard.levelAuthorName,
-                        difficulty: leaderboard.difficulty.difficulty,
-                      }}
-                      imageSize={58}
-                      clickableSongName={false}
-                    />
-                  </div>
-                  <div className="flex flex-row-reverse items-center justify-between text-sm lg:flex-col lg:justify-end lg:gap-1">
-                    <p>{rankingRequest.difficultyCount} Difficulties</p>
-                    <p className="text-gray-400">{timeAgo(new Date(rankingRequest.created_at))}</p>
-                  </div>
-                </SimpleLink>
-              </div>
-            );
-          })}
+        <div className="border-border bg-background/50 relative overflow-x-auto rounded-lg border">
+          <table className="table w-full min-w-[760px] table-auto border-spacing-0 text-left text-sm">
+            <thead>
+              <tr className="border-border bg-muted/30 border-b">
+                <th className="text-foreground/90 px-3 py-2.5 font-semibold">Leaderboard</th>
+                <th className="text-foreground/90 px-3 py-2.5 text-center font-semibold">Difficulties</th>
+                <th className="text-foreground/90 min-w-[130px] px-3 py-2.5 text-center font-semibold">
+                  Created
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {requests.map(rankingRequest => {
+                const leaderboard = getScoreSaberLeaderboardFromToken(rankingRequest.leaderboardInfo);
+                const createdAt = new Date(rankingRequest.created_at);
+                return (
+                  <tr
+                    key={leaderboard.id}
+                    className="border-border/60 hover:bg-accent/40 border-b transition-colors last:border-b-0"
+                  >
+                    <td className="px-3 py-1.5">
+                      <SimpleLink href={`/leaderboard/${leaderboard.id}`} className="block">
+                        <ScoreSongInfo
+                          song={{
+                            name: leaderboard.fullName,
+                            authorName: leaderboard.songAuthorName,
+                            art: leaderboard.songArt,
+                          }}
+                          level={{
+                            authorName: leaderboard.levelAuthorName,
+                            difficulty: leaderboard.difficulty.difficulty,
+                          }}
+                          imageSize={42}
+                          clickableSongName={false}
+                        />
+                      </SimpleLink>
+                    </td>
+                    <td className="px-3 py-1.5 text-center text-xs">{rankingRequest.difficultyCount}</td>
+                    <td
+                      className="px-3 py-1.5 text-center text-xs text-gray-400"
+                      title={formatDate(createdAt)}
+                    >
+                      {timeAgo(createdAt)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </Card>
     );

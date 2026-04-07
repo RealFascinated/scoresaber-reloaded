@@ -3,7 +3,7 @@ import FallbackLink from "@/components/fallback-link";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { truncateText } from "@ssr/common/string-utils";
-import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import { getDifficulty } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
 import LeaderboardSongName from "./leaderboard-song-name";
 
@@ -70,7 +70,7 @@ export default function ScoreSongInfo({
               {MetricIcon && <MetricIcon className="size-[12px]" />}
             </div>
           ) : (
-            <p>{getDifficultyName(diff)}</p>
+            <p>{diff.shortName}</p>
           )}
         </div>
       </div>
