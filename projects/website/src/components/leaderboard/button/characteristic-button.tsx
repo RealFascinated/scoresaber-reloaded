@@ -1,5 +1,6 @@
 import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
+import { QuestionMarkCircledIcon } from "@radix-ui/react-icons";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
@@ -12,7 +13,6 @@ type CharacteristicButtonProps = {
   selectedLeaderboardDifficulty: ScoreSaberLeaderboardDifficulty;
 };
 
-const fallbackIcon = "�";
 const characteristicIcons: Partial<Record<MapCharacteristic & string, string>> = {
   Standard: "/assets/characteristics/standard.svg",
   OneSaber: "/assets/characteristics/onesaber.svg",
@@ -59,7 +59,7 @@ export function CharacteristicButton({
           {icon ? (
             <Image src={icon} alt={leaderboardDifficulty.characteristic} width={20} height={20} />
           ) : (
-            <span className="h-4 w-4">{fallbackIcon}</span>
+            <QuestionMarkCircledIcon className="size-[20px]" />
           )}
         </Button>
       </SimpleLink>
