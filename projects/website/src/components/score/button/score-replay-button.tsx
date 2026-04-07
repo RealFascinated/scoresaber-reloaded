@@ -8,7 +8,7 @@ import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 
 type ScoreReplayButtonProps = {
-  score: BeatLeaderScore;
+  score: BeatLeaderScore | undefined;
   size?: number;
 };
 
