@@ -4,6 +4,7 @@ import {
 } from "@ssr/common/schemas/accsaber/tokens/query/query";
 import { AccSaberScoresPageResponseSchema } from "@ssr/common/schemas/response/score/accsaber-scores-page";
 import {
+  MedalPlayerScoresPageResponseSchema,
   PlayerScoreSchema,
   PlayerScoresPageResponseSchema,
 } from "@ssr/common/schemas/response/score/player-scores";
@@ -127,7 +128,7 @@ export default function scoresController(app: Elysia) {
             page: z.coerce.number().default(1),
           }),
           query: PlayerScoresQuerySchema,
-          response: PlayerScoresPageResponseSchema,
+          response: MedalPlayerScoresPageResponseSchema,
           detail: {
             description: "Fetch player medal scores",
           },
