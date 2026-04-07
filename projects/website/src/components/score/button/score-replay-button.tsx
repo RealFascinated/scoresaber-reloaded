@@ -7,7 +7,12 @@ import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
 
-export function ScoreReplayButton({ score }: { score: BeatLeaderScore | undefined }) {
+type ScoreReplayButtonProps = {
+  score: BeatLeaderScore;
+  size?: number;
+};
+
+export function ScoreReplayButton({ score, size = 28 }: ScoreReplayButtonProps) {
   const database = useDatabase();
   const viewer = useStableLiveQuery(async () => database.getReplayViewer());
 
@@ -19,6 +24,7 @@ export function ScoreReplayButton({ score }: { score: BeatLeaderScore | undefine
     <ScoreButton
       href={viewer.generateUrl(score.scoreId, getBeatLeaderReplayRedirectUrl(score))}
       tooltip={<p>Click to view the score replay!</p>}
+      size={size}
     >
       <BeatSaberPepeLogo />
     </ScoreButton>
