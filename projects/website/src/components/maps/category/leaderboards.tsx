@@ -125,7 +125,7 @@ export default function Leaderboards() {
 
                         {/* Daily Plays */}
                         <td className="px-3 py-1.5 text-center text-xs text-gray-400">
-                          <SimpleTooltip display="The total number of plays on this leaderboard set in the last 24 hours">
+                          <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
                             <p className="inline-flex items-center justify-center gap-1">
                               <PlayIcon className="h-3 w-3" />
                               {formatNumberWithCommas(leaderboard.dailyPlays)}
@@ -135,7 +135,7 @@ export default function Leaderboards() {
 
                         {/* Plays */}
                         <td className="px-3 py-1.5 text-center text-xs text-gray-400">
-                          <SimpleTooltip display="The total number of plays on this leaderboard">
+                          <SimpleTooltip display="Total plays on this leaderboard">
                             <p className="inline-flex items-center justify-center gap-1">
                               <PlayIcon className="h-3 w-3" />
                               {formatNumberWithCommas(leaderboard.plays)}
@@ -147,13 +147,7 @@ export default function Leaderboards() {
                         <td className="px-3 py-1.5 text-center text-xs">
                           {leaderboard.timestamp && (
                             <SimpleTooltip
-                              display={
-                                <p>
-                                  {leaderboard.status == "Unranked" ? "Created" : leaderboard.status}{" "}
-                                  {timeAgo(leaderboard.timestamp)} (
-                                  {formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")})
-                                </p>
-                              }
+                              display={<p>{formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}</p>}
                             >
                               <p className="text-gray-400">{timeAgo(leaderboard.timestamp)}</p>
                             </SimpleTooltip>
