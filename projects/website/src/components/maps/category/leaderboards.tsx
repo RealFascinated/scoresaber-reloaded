@@ -145,13 +145,11 @@ export default function Leaderboards() {
 
                         {/* Created */}
                         <td className="px-3 py-1.5 text-center text-xs">
-                          {leaderboard.timestamp && (
-                            <SimpleTooltip
-                              display={<p>{formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}</p>}
-                            >
-                              <p className="text-gray-400">{timeAgo(leaderboard.timestamp)}</p>
-                            </SimpleTooltip>
-                          )}
+                          <SimpleTooltip
+                            display={<p>{formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}</p>}
+                          >
+                            <p className="text-gray-400">{timeAgo(leaderboard.timestamp)}</p>
+                          </SimpleTooltip>
                         </td>
                       </tr>
                     );

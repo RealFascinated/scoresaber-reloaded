@@ -90,11 +90,12 @@ export default function RankingQueue() {
                     </td>
 
                     {/* Created */}
-                    <td
-                      className="px-3 py-1.5 text-center text-xs text-gray-400"
-                      title={formatDate(leaderboard.timestamp)}
-                    >
-                      {timeAgo(leaderboard.timestamp)}
+                    <td className="px-3 py-1.5 text-center text-xs">
+                      <SimpleTooltip
+                        display={<p>{formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}</p>}
+                      >
+                        <p className="text-gray-400">{timeAgo(leaderboard.timestamp)}</p>
+                      </SimpleTooltip>
                     </td>
                   </tr>
                 );
