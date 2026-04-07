@@ -5,9 +5,25 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { FilterField, FilterSection } from "@/components/ui/filter-section";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapCategory, MapSort } from "@ssr/common/maps/types";
+import {
+  ScoreSaberLeaderboardSearchCategory,
+  ScoreSaberLeaderboardSearchSort,
+} from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { Input } from "../ui/input";
+
+const categoryOptions: Record<ScoreSaberLeaderboardSearchCategory, string> = {
+  date_ranked: "Date Ranked",
+  trending: "Trending",
+  plays: "Scores Set",
+  star_difficulty: "Star Difficulty",
+  author: "Author",
+};
+
+const sortOptions: Record<ScoreSaberLeaderboardSearchSort, string> = {
+  desc: "Descending",
+  asc: "Ascending",
+};
 
 export default function MapFilters() {
   const filter = useMapFilter();
@@ -73,7 +89,7 @@ export default function MapFilters() {
           value={filter.category !== undefined ? String(filter.category) : undefined}
           onValueChange={newCategory => {
             if (newCategory) {
-              filter.setCategory(Number(newCategory));
+              filter.setCategory(newCategory as ScoreSaberLeaderboardSearchCategory);
             }
           }}
         >
@@ -81,10 +97,11 @@ export default function MapFilters() {
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={String(MapCategory.DateRanked)}>Date Ranked</SelectItem>
-            <SelectItem value={String(MapCategory.ScoresSet)}>Scores Set</SelectItem>
-            <SelectItem value={String(MapCategory.StarDifficulty)}>Star Difficulty</SelectItem>
-            <SelectItem value={String(MapCategory.Author)}>Author</SelectItem>
+            {Object.entries(categoryOptions).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </FilterField>
@@ -95,7 +112,7 @@ export default function MapFilters() {
           value={String(filter.sort)}
           onValueChange={newSort => {
             if (newSort) {
-              filter.setSort(Number(newSort));
+              filter.setSort(newSort as ScoreSaberLeaderboardSearchSort);
             }
           }}
         >
@@ -103,8 +120,11 @@ export default function MapFilters() {
             <SelectValue placeholder="Select sort" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={String(MapSort.Ascending)}>Ascending</SelectItem>
-            <SelectItem value={String(MapSort.Descending)}>Descending</SelectItem>
+            {Object.entries(sortOptions).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </FilterField>

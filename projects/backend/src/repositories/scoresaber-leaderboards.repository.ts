@@ -1,8 +1,8 @@
-import { MapCategory, MapSort, StarFilter } from "@ssr/common/maps/types";
 import type { Page } from "@ssr/common/pagination";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import type { ScoreSaberLeaderboardSearchFilters } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
 import type { SQL } from "drizzle-orm";
 import { and, asc, count, desc, eq, gte, inArray, isNotNull, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -325,33 +325,26 @@ export class ScoreSaberLeaderboardsRepository {
 
   public static async lookupLeaderboards(
     page: number,
-    options?: {
-      ranked?: boolean;
-      qualified?: boolean;
-      category?: number;
-      stars?: StarFilter;
-      sort?: number;
-      query?: string;
-    }
+    filters?: ScoreSaberLeaderboardSearchFilters
   ): Promise<Page<ScoreSaberLeaderboard>> {
     const safePage = Math.max(1, page);
     const offset = (safePage - 1) * LEADERBOARD_SEARCH_PAGE_SIZE;
 
     const conditions: SQL[] = [];
-    if (options?.ranked === true) conditions.push(eq(scoreSaberLeaderboardsTable.ranked, true));
-    if (options?.qualified === true) conditions.push(eq(scoreSaberLeaderboardsTable.qualified, true));
-    if (options?.stars) {
-      conditions.push(gte(sql`coalesce(${scoreSaberLeaderboardsTable.stars}, 0)`, options.stars.min ?? 0));
-      conditions.push(lte(sql`coalesce(${scoreSaberLeaderboardsTable.stars}, 0)`, options.stars.max ?? 0));
+    if (filters?.ranked === true) conditions.push(eq(scoreSaberLeaderboardsTable.ranked, true));
+    if (filters?.qualified === true) conditions.push(eq(scoreSaberLeaderboardsTable.qualified, true));
+    if (filters?.stars) {
+      conditions.push(gte(sql`coalesce(${scoreSaberLeaderboardsTable.stars}, 0)`, filters.stars.min ?? 0));
+      conditions.push(lte(sql`coalesce(${scoreSaberLeaderboardsTable.stars}, 0)`, filters.stars.max ?? 0));
     }
 
-    const searchTrimmed = options?.query?.trim() ?? "";
+    const searchTrimmed = filters?.query?.trim() ?? "";
     const useFts = searchTrimmed.length >= 3;
     if (useFts) conditions.push(aliasFtsMatch(scoreSaberLeaderboardsTable, searchTrimmed));
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-    const category = options?.category ?? MapCategory.DateRanked;
-    const ascending = (options?.sort ?? MapSort.Descending) === MapSort.Ascending;
+    const category = filters?.category ?? "date_ranked";
+    const ascending = (filters?.sort ?? "desc") === "asc";
     const idTie = ascending ? asc(scoreSaberLeaderboardsTable.id) : desc(scoreSaberLeaderboardsTable.id);
 
     const orderParts = (() => {
@@ -363,17 +356,24 @@ export class ScoreSaberLeaderboardsRepository {
       const dateFallback = sql`coalesce(${scoreSaberLeaderboardsTable.qualifiedDate}, ${scoreSaberLeaderboardsTable.timestamp})`;
 
       switch (category) {
-        case MapCategory.ScoresSet:
+        case "plays":
           return ascending
             ? [asc(scoreSaberLeaderboardsTable.plays), idTie]
             : [desc(scoreSaberLeaderboardsTable.plays), idTie];
-        case MapCategory.StarDifficulty:
+        case "star_difficulty":
           return ascending ? [asc(starsCol), idTie] : [desc(starsCol), idTie];
-        case MapCategory.Author:
+        case "author":
           return ascending
             ? [asc(scoreSaberLeaderboardsTable.levelAuthorName), idTie]
             : [desc(scoreSaberLeaderboardsTable.levelAuthorName), idTie];
-        case MapCategory.DateRanked:
+        case "date_ranked":
+          return ascending
+            ? [asc(scoreSaberLeaderboardsTable.rankedDate), idTie]
+            : [desc(scoreSaberLeaderboardsTable.rankedDate), idTie];
+        case "trending":
+          return ascending
+            ? [asc(scoreSaberLeaderboardsTable.trendingScore), idTie]
+            : [desc(scoreSaberLeaderboardsTable.trendingScore), idTie];
         default:
           return ascending
             ? [sql`${scoreSaberLeaderboardsTable.rankedDate} ASC NULLS LAST`, asc(dateFallback), idTie]

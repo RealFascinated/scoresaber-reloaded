@@ -1,6 +1,7 @@
 import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
+import { ScoreSaberLeaderboardSearchFiltersSchema } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
 import { Elysia } from "elysia";
 import { z } from "zod";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
@@ -13,30 +14,15 @@ export default function leaderboardController(app: Elysia) {
     app
       .get(
         "/search",
-        async ({ query: { page, ranked, qualified, category, minStar, maxStar, sort, query } }) => {
+        async ({ query: { page, ...filters } }) => {
           return await ScoreSaberLeaderboardsRepository.lookupLeaderboards(page, {
-            query,
-            ranked,
-            qualified,
-            category,
-            stars: {
-              min: minStar,
-              max: maxStar,
-            },
-            sort,
+            ...filters,
           });
         },
         {
           tags: ["Leaderboard"],
-          query: z.object({
+          query: ScoreSaberLeaderboardSearchFiltersSchema.extend({
             page: z.coerce.number().default(1),
-            ranked: z.coerce.boolean().optional(),
-            qualified: z.coerce.boolean().optional(),
-            category: z.coerce.number().optional(),
-            minStar: z.coerce.number().optional(),
-            maxStar: z.coerce.number().optional(),
-            sort: z.coerce.number().optional(),
-            query: z.coerce.string().optional(),
           }),
           detail: {
             description: "Search ScoreSaber leaderboards",
