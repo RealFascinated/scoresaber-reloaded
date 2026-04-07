@@ -70,7 +70,7 @@ export default function ScoreSaberScoreDisplay({
         >
           <ScoreSaberScoreInfo score={score} leaderboard={leaderboard} />
 
-          <div className="flex min-w-0 items-center overflow-hidden">
+          <div className="flex min-w-0 items-center">
             <ScoreSongInfo
               song={{
                 name: leaderboard.fullName,

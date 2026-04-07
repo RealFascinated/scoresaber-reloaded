@@ -43,23 +43,25 @@ export default function ScoreSongInfo({
   const MetricIcon = metric?.icon;
 
   return (
-    <div className="flex w-full items-center gap-3">
+    <div className="flex w-full items-center gap-4">
       <div
-        className="relative flex shrink-0 justify-center overflow-hidden rounded-md"
+        className="relative flex shrink-0 justify-center"
         style={{
           height: imageSize,
           width: imageSize,
         }}
       >
-        <Image
-          src={song.art}
-          width={imageSize}
-          height={imageSize}
-          alt={`${song.name}'s Artwork`}
-          className="h-full w-full object-cover"
-        />
+        <div className="h-full w-full overflow-hidden rounded-md">
+          <Image
+            src={song.art}
+            width={imageSize}
+            height={imageSize}
+            alt={`${song.name}'s Artwork`}
+            className="h-full w-full object-cover"
+          />
+        </div>
         <div
-          className="absolute right-0 bottom-0 flex h-[18px] w-full cursor-default items-center justify-center text-[0.70rem]"
+          className="absolute -right-2 bottom-1 inline-flex h-4.5 w-fit cursor-default items-center justify-end rounded-sm px-1 text-right text-[0.65rem] font-semibold shadow-sm"
           style={{
             backgroundColor: `color-mix(in srgb, ${diff.color} 95%, transparent)`,
           }}
@@ -85,7 +87,8 @@ export default function ScoreSongInfo({
           {/* Author Info */}
           <div className="flex flex-row items-end gap-1.5 text-sm leading-none">
             <p className="line-clamp-2 text-gray-400">
-              {truncateText(song.authorName, 32)}{" "}
+              {truncateText(song.authorName, 32)}
+              <span className="px-1 text-gray-500">|</span>
               <span className="text-song-mapper">
                 <FallbackLink
                   href={mappersProfile}

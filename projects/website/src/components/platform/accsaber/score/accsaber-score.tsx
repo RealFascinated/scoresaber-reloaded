@@ -23,7 +23,7 @@ export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
         }
       >
         <AccSaberRankTime score={score} />
-        <div className="flex min-w-0 items-center overflow-hidden">
+        <div className="flex min-w-0 items-center">
           <ScoreSongInfo
             song={{
               name: score.leaderboard.song.name,

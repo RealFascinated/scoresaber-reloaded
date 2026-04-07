@@ -15,7 +15,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import { ChartBarIcon } from "lucide-react";
+import { ChartBarIcon, PlayIcon } from "lucide-react";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 export default function Leaderboards() {
@@ -117,9 +117,12 @@ export default function Leaderboards() {
                             )}
                           </div>
                         </td>
-                        <td className="px-3 py-1.5 text-center text-xs">
+                        <td className="px-3 py-1.5 text-center text-xs text-gray-400">
                           <SimpleTooltip display="The total number of plays on this leaderboard">
-                            <p>{formatNumberWithCommas(leaderboard.plays)}</p>
+                            <p className="inline-flex items-center justify-center gap-1">
+                              <PlayIcon className="h-3 w-3" />
+                              {formatNumberWithCommas(leaderboard.plays)}
+                            </p>
                           </SimpleTooltip>
                         </td>
                         <td className="px-3 py-1.5 text-center text-xs">
