@@ -1,7 +1,6 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
-import { StarFilter } from "@ssr/common/maps/types";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/schemas/response/scoresaber/ranking-requests";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
@@ -223,7 +222,7 @@ export class ScoreSaberApiService {
     ScoreSaberApiService.log(`Looking up players on page "${page}" for country "${country}"...`);
     const response = await ScoreSaberApiService.fetch<ScoreSaberPlayersPageToken>(
       LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT.replace(":page", page.toString()).replace(":country", country) +
-        (search ? `&search=${search}` : "")
+      (search ? `&search=${search}` : "")
     );
     if (response === undefined) {
       return undefined;
@@ -366,7 +365,10 @@ export class ScoreSaberApiService {
       qualified?: boolean;
       verified?: boolean;
       category?: number;
-      stars?: StarFilter;
+      stars?: {
+        min?: number;
+        max?: number;
+      };
       sort?: number;
       priority?: CooldownPriority;
       search?: string;
@@ -386,9 +388,9 @@ export class ScoreSaberApiService {
           ...(options?.category ? { category: options.category.toString() } : {}),
           ...(options?.stars
             ? {
-                minStar: (options.stars.min ?? 0).toString(),
-                maxStar: (options.stars.max ?? 0).toString(),
-              }
+              minStar: (options.stars.min ?? 0).toString(),
+              maxStar: (options.stars.max ?? 0).toString(),
+            }
             : {}),
           ...(options?.sort ? { sort: options.sort.toString() } : {}),
           ...(options?.search ? { search: options.search } : {}),

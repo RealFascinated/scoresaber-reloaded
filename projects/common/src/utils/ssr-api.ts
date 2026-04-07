@@ -1,7 +1,6 @@
 import { parse } from "devalue";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
-import { StarFilter } from "../maps/types";
 import type { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import type { AccSaberScoreSort, AccSaberScoreType } from "../schemas/accsaber/tokens/query/query";
@@ -29,6 +28,7 @@ import { ScoreSaberMedalScoreSortField } from "../schemas/score/query/sort/score
 import type { ScoreSaberScoreSortField } from "../schemas/score/query/sort/scoresaber-scores-sort";
 import type { SortDirection } from "../schemas/score/query/sort/sort-direction";
 import type { ScoreSaberLeaderboard } from "../schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberLeaderboardSearchFilters } from "../schemas/scoresaber/leaderboard/search-filters";
 import { ScoreSaberPlayerHistoryEntries } from "../schemas/scoresaber/player/history";
 import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 import { PlayerScore } from "../score/player-score";
@@ -420,27 +420,18 @@ class SSRApi {
    */
   async searchLeaderboards(
     page: number,
-    options?: {
-      ranked?: boolean;
-      qualified?: boolean;
-      verified?: boolean;
-      category?: number;
-      stars?: StarFilter;
-      sort?: number;
-      query?: string;
-    }
+    options?: ScoreSaberLeaderboardSearchFilters
   ) {
     return await this.request<Page<ScoreSaberLeaderboard>>(`/leaderboard/search`, {
       page: page.toString(),
       ...(options?.ranked ? { ranked: options.ranked.toString() } : {}),
       ...(options?.qualified ? { qualified: options.qualified.toString() } : {}),
-      ...(options?.verified ? { verified: options.verified.toString() } : {}),
       ...(options?.category ? { category: options.category.toString() } : {}),
       ...(options?.stars
         ? {
-            minStar: (options.stars.min ?? 0).toString(),
-            maxStar: (options.stars.max ?? 0).toString(),
-          }
+          minStar: (options.stars.min ?? 0).toString(),
+          maxStar: (options.stars.max ?? 0).toString(),
+        }
         : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.query ? { query: options.query } : {}),

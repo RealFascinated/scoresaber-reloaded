@@ -41,7 +41,6 @@ export default function Leaderboards() {
         },
         ranked: filterDebounced.ranked,
         qualified: filterDebounced.qualified,
-        verified: filterDebounced.verified,
         query: filterDebounced.search.length > 3 ? filterDebounced.search : undefined,
       }),
     placeholderData: data => data,
