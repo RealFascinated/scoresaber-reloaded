@@ -28,6 +28,16 @@ function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;
 }
 
+const SHOWN_CHARACTERISTICS: MapCharacteristic[] = [
+  "Standard",
+  "OneSaber",
+  "NoArrows",
+  "Lawless",
+  "90Degree",
+  "360Degree",
+  "Lightshow",
+];
+
 export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreSaberLeaderboard }) {
   const isMobile = useIsMobile();
   const database = useDatabase();
@@ -61,7 +71,12 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
 
   const seenCharacteristics = new Set<MapCharacteristic>();
   const characteristicLeaderboards = leaderboard.difficulties.filter(difficulty => {
-    if (seenCharacteristics.has(difficulty.characteristic)) return false;
+    if (
+      seenCharacteristics.has(difficulty.characteristic) ||
+      !SHOWN_CHARACTERISTICS.includes(difficulty.characteristic)
+    ) {
+      return false;
+    }
     seenCharacteristics.add(difficulty.characteristic);
     return true;
   });
