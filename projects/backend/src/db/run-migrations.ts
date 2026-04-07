@@ -1,3 +1,4 @@
+import Logger from "@ssr/common/logger";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { existsSync } from "node:fs";
 import path from "node:path";
@@ -16,5 +17,8 @@ function resolveMigrationsFolder(): string {
 }
 
 export async function runMigrations(): Promise<void> {
-  await migrate(db, { migrationsFolder: resolveMigrationsFolder() });
+  await migrate(db, { migrationsFolder: resolveMigrationsFolder() }).catch(error => {
+    Logger.error("Database migration failed:", error);
+    throw error;
+  });
 }
