@@ -22,9 +22,9 @@ export const ScoreSaberLeaderboardSearchStarsSchema = z.object({
 export const ScoreSaberLeaderboardSearchFiltersSchema = z.object({
   ranked: z.coerce.boolean().optional(),
   qualified: z.coerce.boolean().optional(),
-  category: ScoreSaberLeaderboardSearchCategorySchema.optional(),
+  category: ScoreSaberLeaderboardSearchCategorySchema.default("trending").optional(),
   stars: ScoreSaberLeaderboardSearchStarsSchema.optional(),
-  sort: ScoreSaberLeaderboardSearchSortSchema.optional().default("desc"),
+  sort: ScoreSaberLeaderboardSearchSortSchema.default("desc").optional(),
   query: z.string().optional(),
 });
 
