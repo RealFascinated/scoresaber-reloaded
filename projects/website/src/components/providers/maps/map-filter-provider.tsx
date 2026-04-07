@@ -10,7 +10,7 @@ import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { parseAsBoolean, parseAsFloat, parseAsString, parseAsStringLiteral, useQueryState } from "nuqs";
 import { createContext, ReactNode, useContext } from "react";
 
-const defaultCategory: ScoreSaberLeaderboardSearchCategory = "date_ranked";
+const defaultCategory: ScoreSaberLeaderboardSearchCategory = "trending";
 const defaultSort: ScoreSaberLeaderboardSearchSort = "desc";
 
 type FilterContextProps = {
