@@ -1,6 +1,6 @@
+import { type MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { type MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { Prop } from "@typegoose/typegoose";
-import { type MapDifficulty } from "../../score/map-difficulty";
-import { type MapCharacteristic } from "../../types/map-characteristic";
 
 export default class LeaderboardDifficulty {
   /**

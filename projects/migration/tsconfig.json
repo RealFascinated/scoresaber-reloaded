@@ -13,8 +13,8 @@
     "isolatedModules": true,
     "sourceMap": true,
     "declarationMap": true,
-    "baseUrl": "./",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

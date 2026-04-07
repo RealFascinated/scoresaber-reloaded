@@ -1,5 +1,5 @@
-import { BeatLeaderScoreToken } from "src/schemas/beatleader/tokens/score/score";
 import { InternalServerError } from "../error/internal-server-error";
+import { BeatLeaderScoreToken } from "../schemas/beatleader/tokens/score/score";
 import request from "../utils/request";
 
 /**

@@ -3,6 +3,7 @@
     "module": "ESNext",
     "target": "ES2022",
     "outDir": "./dist",
+    "rootDir": "./src",
     "declaration": true,
     "moduleResolution": "bundler",
     "skipLibCheck": true,
@@ -14,8 +15,8 @@
     "incremental": true,
     "sourceMap": true,
     "declarationMap": true,
-    "baseUrl": "./"
+    "types": ["node"]
   },
-  "include": ["src/", "src/schemas/beatleader/score"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
