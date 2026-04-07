@@ -134,6 +134,13 @@
       "when": 1775800000000,
       "tag": "0018_drop-unused-beatsaver-indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1775564218740,
+      "tag": "0019_add_score_events_table",
+      "breakpoints": true
     }
   ]
 }
