@@ -358,22 +358,24 @@ export class ScoreSaberLeaderboardsRepository {
       switch (category) {
         case "plays":
           return ascending
-            ? [asc(scoreSaberLeaderboardsTable.plays), idTie]
-            : [desc(scoreSaberLeaderboardsTable.plays), idTie];
+            ? [sql`${scoreSaberLeaderboardsTable.plays} ASC NULLS LAST`, idTie]
+            : [sql`${scoreSaberLeaderboardsTable.plays} DESC NULLS LAST`, idTie];
         case "star_difficulty":
-          return ascending ? [asc(starsCol), idTie] : [desc(starsCol), idTie];
+          return ascending
+            ? [sql`${starsCol} ASC NULLS LAST`, idTie]
+            : [sql`${starsCol} DESC NULLS LAST`, idTie];
         case "author":
           return ascending
-            ? [asc(scoreSaberLeaderboardsTable.levelAuthorName), idTie]
-            : [desc(scoreSaberLeaderboardsTable.levelAuthorName), idTie];
+            ? [sql`${scoreSaberLeaderboardsTable.levelAuthorName} ASC NULLS LAST`, idTie]
+            : [sql`${scoreSaberLeaderboardsTable.levelAuthorName} DESC NULLS LAST`, idTie];
         case "date_ranked":
           return ascending
-            ? [asc(scoreSaberLeaderboardsTable.rankedDate), idTie]
-            : [desc(scoreSaberLeaderboardsTable.rankedDate), idTie];
+            ? [sql`${scoreSaberLeaderboardsTable.rankedDate} ASC NULLS LAST`, idTie]
+            : [sql`${scoreSaberLeaderboardsTable.rankedDate} DESC NULLS LAST`, idTie];
         case "trending":
           return ascending
-            ? [asc(scoreSaberLeaderboardsTable.trendingScore), idTie]
-            : [desc(scoreSaberLeaderboardsTable.trendingScore), idTie];
+            ? [sql`${scoreSaberLeaderboardsTable.trendingScore} ASC NULLS LAST`, idTie]
+            : [sql`${scoreSaberLeaderboardsTable.trendingScore} DESC NULLS LAST`, idTie];
         default:
           return ascending
             ? [sql`${scoreSaberLeaderboardsTable.rankedDate} ASC NULLS LAST`, asc(dateFallback), idTie]

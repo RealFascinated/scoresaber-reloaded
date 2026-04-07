@@ -15,13 +15,13 @@ export const ScoreSaberLeaderboardSearchCategorySchema = z.enum([
 ]);
 
 export const ScoreSaberLeaderboardSearchStarsSchema = z.object({
-  min: z.number().optional(),
-  max: z.number().optional(),
+  min: z.coerce.number().optional(),
+  max: z.coerce.number().optional(),
 });
 
 export const ScoreSaberLeaderboardSearchFiltersSchema = z.object({
-  ranked: z.boolean().optional(),
-  qualified: z.boolean().optional(),
+  ranked: z.coerce.boolean().optional(),
+  qualified: z.coerce.boolean().optional(),
   category: ScoreSaberLeaderboardSearchCategorySchema.optional(),
   stars: ScoreSaberLeaderboardSearchStarsSchema.optional(),
   sort: ScoreSaberLeaderboardSearchSortSchema.optional().default("desc"),
