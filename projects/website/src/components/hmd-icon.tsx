@@ -8,7 +8,7 @@ export default function HMDIcon({ hmd }: { hmd: HMDInfo }) {
       alt={`${hmd.logo} Logo`}
       width={24}
       height={24}
-      className="h-5 w-5 rounded-full"
+      className="h-5 w-5 shrink-0 rounded-full"
       style={{
         filter: hmd.filters,
       }}
