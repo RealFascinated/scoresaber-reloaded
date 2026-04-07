@@ -6,7 +6,7 @@ export const customRankedPlaylistSchema = z.object({
     min: z.number().min(0),
     max: z.number().max(SHARED_CONSTS.maxStars),
   }),
-  sort: z.enum(["stars", "dateRanked"]),
+  sort: z.enum(["stars", "dateRanked", "plays", "dailyPlays"]),
 });
 
 export type CustomRankedPlaylist = z.infer<typeof customRankedPlaylistSchema>;

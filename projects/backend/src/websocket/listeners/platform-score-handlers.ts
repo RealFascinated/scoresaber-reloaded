@@ -192,7 +192,7 @@ export class ScoreWebsockets implements EventListener {
       if (!(await ScoreSaberLeaderboardsRepository.existsById(leaderboard.id))) {
         await ScoreSaberLeaderboardsService.createLeaderboard(leaderboard.id, leaderboardToken);
       } else {
-        await ScoreSaberLeaderboardsRepository.updateLeaderboardById(leaderboard.id, {
+        await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, {
           plays: leaderboard.plays,
           maxScore: leaderboard.maxScore,
         });

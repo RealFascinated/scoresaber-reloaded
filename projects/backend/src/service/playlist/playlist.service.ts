@@ -3,10 +3,11 @@ import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import { parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
+import { CustomRankedPlaylist, parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import type { SelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-settings-schema";
 import { parseSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { ScoreSaberLeaderboardSearchCategory } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
@@ -140,7 +141,14 @@ export default class PlaylistService {
    * @returns the ranking queue maps playlist
    */
   public static async getRankingQueueMapsPlaylist(): Promise<Playlist> {
-    const leaderboards = await ScoreSaberLeaderboardsService.getRankingQueueLeaderboards();
+    const rankingQueueLeaderboards = await ScoreSaberLeaderboardsService.getRankingQueueLeaderboards();
+    const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
+    for (const leaderboard of rankingQueueLeaderboards.all) {
+      if (!leaderboards.has(leaderboard.songHash)) {
+        leaderboards.set(leaderboard.songHash, leaderboard);
+      }
+      leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
+    }
 
     return {
       playlistTitle: `ScoreSaber Ranking Queue (${getPlaylistTitleDate(new Date())})`,
@@ -148,7 +156,7 @@ export default class PlaylistService {
       customData: {
         syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-ranking-queue-maps.bplist`,
       },
-      songs: leaderboards.map(leaderboard => ({
+      songs: Array.from(leaderboards.values()).map(leaderboard => ({
         songName: leaderboard.songName,
         levelAuthorName: leaderboard.songAuthorName,
         hash: leaderboard.songHash,
@@ -161,12 +169,12 @@ export default class PlaylistService {
   }
 
   /**
-   * Gets the top 100 trending maps playlist.
+   * Gets the top trending leaderboards playlist.
    *
-   * @returns the top trending maps playlist
+   * @returns the top trending leaderboards playlist
    */
   public static async getTopTrendingMapsPlaylist(): Promise<Playlist> {
-    const trendingLeaderboards = await ScoreSaberLeaderboardsRepository.getTopTrendingLeaderboards(100);
+    const trendingLeaderboards = await ScoreSaberLeaderboardsRepository.getTopTrendingLeaderboards(150);
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of trendingLeaderboards) {
       if (!leaderboards.has(leaderboard.songHash)) {
@@ -201,10 +209,17 @@ export default class PlaylistService {
    */
   public static async createCustomRankedPlaylist(settingsBase64?: string): Promise<Playlist> {
     const parsedConfig = parseCustomRankedPlaylistSettings(settingsBase64);
-    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboardsByStarsBetween(
-      parsedConfig.stars.min,
-      parsedConfig.stars.max
-    );
+    const sort: Record<CustomRankedPlaylist["sort"], ScoreSaberLeaderboardSearchCategory> = {
+      stars: "star_difficulty",
+      dateRanked: "date_ranked",
+      plays: "plays",
+      dailyPlays: "daily_plays",
+    };
+    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards({
+      ranked: true,
+      stars: { min: parsedConfig.stars.min, max: parsedConfig.stars.max },
+      category: sort[parsedConfig.sort] ?? "date_ranked",
+    });
 
     const title = `Custom Ranked (${getPlaylistTitleDate(new Date())})`;
 

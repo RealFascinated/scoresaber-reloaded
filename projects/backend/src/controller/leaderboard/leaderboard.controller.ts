@@ -5,7 +5,6 @@ import { LeaderboardsPageResponseSchema } from "@ssr/common/schemas/response/lea
 import { ScoreSaberLeaderboardSearchFiltersSchema } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
 import { Elysia } from "elysia";
 import { z } from "zod";
-import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import BeatSaverService from "../../service/external/beatsaver.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 
@@ -15,7 +14,7 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/search",
         async ({ query: { page, ...filters } }) => {
-          return await ScoreSaberLeaderboardsRepository.lookupLeaderboards(page, {
+          return await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(page, {
             ...filters,
           });
         },

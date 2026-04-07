@@ -3,7 +3,10 @@ import { DetailType } from "@ssr/common/detail-type";
 import Logger from "@ssr/common/logger";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/schemas/response/scoresaber/ranking-requests";
+import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
+import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
+import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/leaderboard-scores-page";
@@ -500,6 +503,63 @@ export class ScoreSaberApiService {
       REFRESH_PLAYER_ENDPOINT.replace(":id", id)
     );
     return result;
+  }
+
+  /**
+   * Gets all leaderboards from the ScoreSaber API.
+   *
+   * @param status the status of the leaderboards to fetch
+   * @param logProgress whether to log progress
+   * @returns the leaderboards
+   */
+  public static async getAllLeaderboards(
+    status: "ranked" | "qualified",
+    logProgress: boolean = false
+  ): Promise<{
+    leaderboards: ScoreSaberLeaderboard[];
+    leaderboardDifficulties: Map<string, ScoreSaberLeaderboardDifficulty[]>;
+  }> {
+    const leaderboards: ScoreSaberLeaderboard[] = [];
+    const leaderboardDifficulties: Map<string, ScoreSaberLeaderboardDifficulty[]> = new Map();
+
+    let hasMorePages = true;
+    let page = 1;
+
+    while (hasMorePages) {
+      const response = await ScoreSaberApiService.lookupLeaderboards(page, {
+        [status]: true,
+        priority: CooldownPriority.LOW,
+      });
+      if (!response) {
+        hasMorePages = false;
+        continue;
+      }
+
+      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      for (const token of response.leaderboards) {
+        const leaderboard = getScoreSaberLeaderboardFromToken(token);
+        leaderboards.push(leaderboard);
+
+        const difficulties = leaderboardDifficulties.get(leaderboard.songHash) ?? [];
+        difficulties.push({
+          id: leaderboard.id,
+          difficulty: leaderboard.difficulty.difficulty,
+          characteristic: leaderboard.difficulty.characteristic,
+        });
+        leaderboardDifficulties.set(leaderboard.songHash, difficulties);
+      }
+
+      if (logProgress && (page % 10 === 0 || page === 1 || page >= totalPages)) {
+        scoreSaberApiLog.info(
+          `Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`
+        );
+      }
+
+      page++;
+      hasMorePages = page < totalPages;
+    }
+
+    return { leaderboards, leaderboardDifficulties };
   }
 
   private static log(message: string): void {

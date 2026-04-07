@@ -6,9 +6,9 @@ import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
+import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
-import { ScoreSaberLeaderboardsService } from "./scoresaber-leaderboards.service";
 
 export type LeaderboardUpdate = {
   previousLeaderboard?: Pick<ScoreSaberLeaderboard, "ranked" | "qualified" | "stars">;
@@ -27,7 +27,7 @@ export class LeaderboardRankedSyncService {
     const before = performance.now();
 
     LeaderboardRankedSyncService.logger.info(`Refreshing ranked leaderboards...`);
-    const { leaderboards } = await ScoreSaberLeaderboardsService.fetchLeaderboardsFromAPI("ranked", true);
+    const { leaderboards } = await ScoreSaberApiService.getAllLeaderboards("ranked", true);
     LeaderboardRankedSyncService.logger.info(`Found ${leaderboards.length} ranked leaderboards.`);
 
     const dbRankedRows = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
@@ -59,10 +59,10 @@ export class LeaderboardRankedSyncService {
         updatedLeaderboards.push({
           previousLeaderboard: dbLeaderboard
             ? {
-                ranked: dbLeaderboard.ranked,
-                qualified: dbLeaderboard.qualified,
-                stars: dbLeaderboard.stars ?? 0,
-              }
+              ranked: dbLeaderboard.ranked,
+              qualified: dbLeaderboard.qualified,
+              stars: dbLeaderboard.stars ?? 0,
+            }
             : undefined,
           newLeaderboard: apiLeaderboard,
         });
@@ -79,7 +79,7 @@ export class LeaderboardRankedSyncService {
         }
 
         if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
-          await ScoreSaberLeaderboardsRepository.updateLeaderboardById(apiLeaderboard.id, {
+          await ScoreSaberLeaderboardsRepository.updateLeaderboard(apiLeaderboard.id, {
             seededScores: false,
           });
         }
@@ -131,7 +131,7 @@ export class LeaderboardRankedSyncService {
     const before = performance.now();
 
     LeaderboardRankedSyncService.logger.info(`Refreshing qualified leaderboards...`);
-    const { leaderboards } = await ScoreSaberLeaderboardsService.fetchLeaderboardsFromAPI("qualified", true);
+    const { leaderboards } = await ScoreSaberApiService.getAllLeaderboards("qualified", true);
     LeaderboardRankedSyncService.logger.info(`Found ${leaderboards.length} qualified leaderboards.`);
 
     const dbQualifiedRows = await ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();

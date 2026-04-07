@@ -1,24 +1,33 @@
-import { CooldownPriority } from "@ssr/common/cooldown";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { StorageBucket } from "@ssr/common/minio-buckets";
+import { Pagination } from "@ssr/common/pagination";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
+import type { LeaderboardsPageResponse } from "@ssr/common/schemas/response/leaderboard/leaderboards-page";
 import { RankingQueueLeaderboard, RankingQueueLeaderboardsResponse } from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
-import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import type { ScoreSaberLeaderboardSearchFilters } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
 import Request from "@ssr/common/utils/request";
 import { getScoreSaberDifficultyFromDifficulty } from "@ssr/common/utils/scoresaber.util";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { count } from "drizzle-orm";
 import { normalizeSongHash, rankingQueueLeaderboardsCacheKey } from "../../common/cache-keys";
+import { db } from "../../db";
+import { leaderboardRowToType } from "../../db/converter/scoresaber-leaderboard";
+import { scoreSaberLeaderboardsTable } from "../../db/schema";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
-import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
+import {
+  LEADERBOARD_SEARCH_PAGE_SIZE,
+  ScoreSaberLeaderboardsRepository,
+  buildLeaderboardQuery,
+} from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 import StorageService from "../infra/storage.service";
@@ -89,6 +98,42 @@ export class ScoreSaberLeaderboardsService {
     return foundLeaderboard;
   }
 
+  /**
+   * Gets a paginated list of leaderboards.
+   *
+   * @param page the page to get
+   * @param filters the filters to apply
+   * @returns the paginated list of leaderboards
+   */
+  public static async getLeaderboardsPaginated(
+    page: number,
+    filters?: ScoreSaberLeaderboardSearchFilters
+  ): Promise<LeaderboardsPageResponse> {
+    const { whereClause, orderParts } = buildLeaderboardQuery(filters);
+
+    const [countRow] = await db
+      .select({ total: count() })
+      .from(scoreSaberLeaderboardsTable)
+      .where(whereClause);
+    const total = Number(countRow?.total ?? 0);
+
+    const pagination = new Pagination<ScoreSaberLeaderboard>()
+      .setItemsPerPage(LEADERBOARD_SEARCH_PAGE_SIZE)
+      .setTotalItems(total);
+
+    return await pagination.getPage(page, async (fetchItems) => {
+      const rows = await db
+        .select()
+        .from(scoreSaberLeaderboardsTable)
+        .where(whereClause)
+        .orderBy(...orderParts)
+        .limit(fetchItems.end - fetchItems.start)
+        .offset(fetchItems.start);
+
+      return rows.map(row => leaderboardRowToType(row));
+    });
+  }
+
   public static async createLeaderboard(
     id: number,
     token?: ScoreSaberLeaderboardToken,
@@ -133,63 +178,6 @@ export class ScoreSaberLeaderboardsService {
       newStars: starChange.newStars,
       timestamp: starChange.timestamp,
     }));
-  }
-
-  /**
-   * Fetches leaderboards from the ScoreSaber API.
-   *
-   * @param status the status of the leaderboards to fetch
-   * @param logProgress whether to log progress
-   * @returns the leaderboards
-   */
-  public static async fetchLeaderboardsFromAPI(
-    status: "ranked" | "qualified",
-    logProgress: boolean = false
-  ): Promise<{
-    leaderboards: ScoreSaberLeaderboard[];
-    leaderboardDifficulties: Map<string, ScoreSaberLeaderboardDifficulty[]>;
-  }> {
-    const leaderboards: ScoreSaberLeaderboard[] = [];
-    const leaderboardDifficulties: Map<string, ScoreSaberLeaderboardDifficulty[]> = new Map();
-
-    let hasMorePages = true;
-    let page = 1;
-
-    while (hasMorePages) {
-      const response = await ScoreSaberApiService.lookupLeaderboards(page, {
-        [status]: true,
-        priority: CooldownPriority.LOW,
-      });
-      if (!response) {
-        hasMorePages = false;
-        continue;
-      }
-
-      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      for (const token of response.leaderboards) {
-        const leaderboard = getScoreSaberLeaderboardFromToken(token);
-        leaderboards.push(leaderboard);
-
-        const difficulties = leaderboardDifficulties.get(leaderboard.songHash) ?? [];
-        difficulties.push({
-          id: leaderboard.id,
-          difficulty: leaderboard.difficulty.difficulty,
-          characteristic: leaderboard.difficulty.characteristic,
-        });
-        leaderboardDifficulties.set(leaderboard.songHash, difficulties);
-      }
-
-      if (logProgress && (page % 10 === 0 || page === 1 || page >= totalPages)) {
-        ScoreSaberLeaderboardsService.logger.info(
-          `Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`
-        );
-      }
-
-      page++;
-      hasMorePages = page < totalPages;
-    }
-
-    return { leaderboards, leaderboardDifficulties };
   }
 
   /**
@@ -250,7 +238,7 @@ export class ScoreSaberLeaderboardsService {
 
     const exists = await StorageService.fileExists(StorageBucket.LeaderboardSongArt, objectKey);
     if (exists) {
-      await ScoreSaberLeaderboardsRepository.updateLeaderboardById(leaderboard.id, {
+      await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, {
         cachedSongArt: true,
       });
       return true;
@@ -264,7 +252,7 @@ export class ScoreSaberLeaderboardsService {
     );
     if (request) {
       await StorageService.saveFile(StorageBucket.LeaderboardSongArt, objectKey, Buffer.from(request));
-      await ScoreSaberLeaderboardsRepository.updateLeaderboardById(leaderboard.id, {
+      await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, {
         cachedSongArt: true,
       });
 
