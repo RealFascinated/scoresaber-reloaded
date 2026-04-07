@@ -201,7 +201,9 @@ export class ReplayDecoder {
         `https://api.beatleader.com/score/${scoreId}`,
         { returns: "json", throwOnError: true }
       );
-      if (!beatleaderScore?.replay) throw new InternalServerError("No replay found for score");
+      if (!beatleaderScore?.replay) {
+        throw new InternalServerError("No replay found for score");
+      }
       targetUrl = beatleaderScore.replay;
     }
 
@@ -221,7 +223,9 @@ export class ReplayDecoder {
         throwOnError: true,
       });
 
-      if (!data) throw new InternalServerError("No data received");
+      if (!data) {
+        throw new InternalServerError("No data received");
+      }
       return this.decode(data as ArrayBuffer);
     } catch (error) {
       throw new InternalServerError(
@@ -400,7 +404,9 @@ export class ReplayDecoder {
 
   private static ParseKnownCustomData(replay: Replay): void {
     replay.parsedCustomData = {};
-    if (!replay.customData) return;
+    if (!replay.customData) {
+      return;
+    }
 
     if (replay.customData["HeartBeatQuest"]) {
       const hbState: DecodeState = {
@@ -414,8 +420,9 @@ export class ReplayDecoder {
       if (version === 1) {
         const len = this.ReadInt(hbState);
         const frames = new Array(len);
-        for (let i = 0; i < len; i++)
+        for (let i = 0; i < len; i++) {
           frames[i] = { time: this.ReadFloat(hbState), heartrate: this.ReadInt(hbState) };
+        }
         replay.parsedCustomData["HeartBeatQuest"] = { frames, device: this.ReadString(hbState) };
       }
     }
@@ -465,20 +472,28 @@ export class ReplayDecoder {
   }
 
   private static AddTricksToReplay(replay: Replay, tricks: TricksReplay): void {
-    if (!replay.frames?.length) return;
+    if (!replay.frames?.length) {
+      return;
+    }
     const processHand = (hand: HandReplay, side: "left" | "right") => {
       let fIdx = 0;
       for (const seg of hand.segmentsArray) {
         for (const tFrame of seg.framesArray) {
-          while (fIdx < replay.frames.length - 1 && replay.frames[fIdx + 1].time <= tFrame.songTime) fIdx++;
+          while (fIdx < replay.frames.length - 1 && replay.frames[fIdx + 1].time <= tFrame.songTime) {
+            fIdx++;
+          }
           const f = replay.frames[fIdx][side];
           f.trickPosition = { x: tFrame.posX, y: tFrame.posY, z: tFrame.posZ };
           f.trickRotation = { x: tFrame.rotX, y: tFrame.rotY, z: tFrame.rotZ, w: tFrame.rotW };
         }
       }
     };
-    if (tricks.left) processHand(tricks.left, "left");
-    if (tricks.right) processHand(tricks.right, "right");
+    if (tricks.left) {
+      processHand(tricks.left, "left");
+    }
+    if (tricks.right) {
+      processHand(tricks.right, "right");
+    }
   }
 
   private static DecodeCutInfo(state: DecodeState): NoteCutInfo {
@@ -521,7 +536,9 @@ export class ReplayDecoder {
   private static ReadString(state: DecodeState): string {
     const len = state.view.getInt32(state.ptr, true);
     state.ptr += 4;
-    if (len <= 0 || len > 1000) return "";
+    if (len <= 0 || len > 1000) {
+      return "";
+    }
     const str = this.UTF8_DECODER.decode(
       new Uint8Array(state.view.buffer, state.view.byteOffset + state.ptr, len)
     );
@@ -536,7 +553,9 @@ export class ReplayDecoder {
       // Logic for skipping garbage in player names
       while (state.ptr + 4 + len + offset + 4 <= state.view.byteLength) {
         const next = state.view.getInt32(state.ptr + 4 + len + offset, true);
-        if (next === 6 || next === 5 || next === 8) break;
+        if (next === 6 || next === 5 || next === 8) {
+          break;
+        }
         offset++;
       }
     }

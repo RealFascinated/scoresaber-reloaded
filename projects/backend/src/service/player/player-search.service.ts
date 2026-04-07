@@ -46,8 +46,12 @@ export class PlayerSearchService {
         )
       )
     ).sort((a, b) => {
-      if (a.inactive && !b.inactive) return 1; // Inactive players should be at the bottom
-      if (!a.inactive && b.inactive) return -1; // Active players should be at the top
+      if (a.inactive && !b.inactive) {
+        return 1;
+      } // Inactive players should be at the bottom
+      if (!a.inactive && b.inactive) {
+        return -1;
+      } // Active players should be at the top
       return a.rank - b.rank; // Sort by rank ascending
     });
   }

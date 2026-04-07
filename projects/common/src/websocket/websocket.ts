@@ -41,8 +41,12 @@ type Websocket = {
 } & WebsocketCallbacks;
 
 function formatCloseReason(reason: unknown): string {
-  if (typeof reason === "string") return reason;
-  if (Buffer.isBuffer(reason)) return reason.toString("utf8");
+  if (typeof reason === "string") {
+    return reason;
+  }
+  if (Buffer.isBuffer(reason)) {
+    return reason.toString("utf8");
+  }
   return "";
 }
 
@@ -158,7 +162,9 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
 
     websocket.onmessage = messageEvent => {
       clearHeartbeatTimeout();
-      if (typeof messageEvent.data !== "string") return;
+      if (typeof messageEvent.data !== "string") {
+        return;
+      }
 
       try {
         const command = JSON.parse(messageEvent.data);

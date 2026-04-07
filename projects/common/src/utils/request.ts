@@ -24,7 +24,9 @@ class Request {
   }
 
   private static buildUrl(baseUrl: string, searchParams?: Record<string, unknown>): string {
-    if (!searchParams) return baseUrl;
+    if (!searchParams) {
+      return baseUrl;
+    }
 
     const params = new URLSearchParams(
       Object.entries(searchParams).map(([key, value]) => [key, String(value)])

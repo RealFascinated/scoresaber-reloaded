@@ -29,7 +29,7 @@ import type { PlayerScoresQuery } from "../schemas/score/query/player-scores-que
 import { ScoreSaberMedalScoreSortField } from "../schemas/score/query/sort/scoresaber-medal-scores-sort";
 import type { ScoreSaberScoreSortField } from "../schemas/score/query/sort/scoresaber-scores-sort";
 import type { SortDirection } from "../schemas/score/query/sort/sort-direction";
-import { ScoreSaberLeaderboardSearchFilters } from "../schemas/scoresaber/leaderboard/search-filters";
+import { ScoreSaberLeaderboardQueryFilters } from "../schemas/scoresaber/leaderboard/query-filters";
 import { ScoreSaberPlayerHistoryEntries } from "../schemas/scoresaber/player/history";
 import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 import { PlayerScore } from "../score/player-score";
@@ -272,8 +272,12 @@ class SSRApi {
     filters: PlayerScoresQuery
   ) {
     const queryParams: Record<string, string> = {};
-    if (filters.search) queryParams.search = filters.search;
-    if (filters.hmd) queryParams.hmd = filters.hmd;
+    if (filters.search) {
+      queryParams.search = filters.search;
+    }
+    if (filters.hmd) {
+      queryParams.hmd = filters.hmd;
+    }
     if (filters.playerIds && filters.playerIds.length > 0) {
       queryParams.playerIds = filters.playerIds.join(",");
     }
@@ -301,8 +305,12 @@ class SSRApi {
     filters: PlayerScoresQuery
   ) {
     const queryParams: Record<string, string> = {};
-    if (filters.search) queryParams.search = filters.search;
-    if (filters.hmd) queryParams.hmd = filters.hmd;
+    if (filters.search) {
+      queryParams.search = filters.search;
+    }
+    if (filters.hmd) {
+      queryParams.hmd = filters.hmd;
+    }
     if (filters.playerIds && filters.playerIds.length > 0) {
       queryParams.playerIds = filters.playerIds.join(",");
     }
@@ -419,18 +427,14 @@ class SSRApi {
    * @param options the options
    * @returns the leaderboards
    */
-  async searchLeaderboards(page: number, options?: ScoreSaberLeaderboardSearchFilters) {
+  async searchLeaderboards(page: number, options?: ScoreSaberLeaderboardQueryFilters) {
     return await this.request<LeaderboardsPageResponse>(`/leaderboard/search`, {
       page: page.toString(),
       ...(options?.ranked ? { ranked: options.ranked.toString() } : {}),
       ...(options?.qualified ? { qualified: options.qualified.toString() } : {}),
       ...(options?.category ? { category: options.category.toString() } : {}),
-      ...(options?.stars
-        ? {
-          minStar: (options.stars.min ?? 0).toString(),
-          maxStar: (options.stars.max ?? 0).toString(),
-        }
-        : {}),
+      ...(options?.minStars ? { minStars: options.minStars.toString() } : {}),
+      ...(options?.maxStars ? { maxStars: options.maxStars.toString() } : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.query ? { query: options.query } : {}),
     });

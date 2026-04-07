@@ -3,11 +3,14 @@ import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import { CustomRankedPlaylist, parseCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
+import {
+  CustomRankedPlaylist,
+  parseCustomRankedPlaylistSettings,
+} from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import type { SelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-settings-schema";
 import { parseSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import { ScoreSaberLeaderboardSearchCategory } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
+import { ScoreSaberLeaderboardQueryCategory } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
@@ -209,7 +212,7 @@ export default class PlaylistService {
    */
   public static async createCustomRankedPlaylist(settingsBase64?: string): Promise<Playlist> {
     const parsedConfig = parseCustomRankedPlaylistSettings(settingsBase64);
-    const sort: Record<CustomRankedPlaylist["sort"], ScoreSaberLeaderboardSearchCategory> = {
+    const sort: Record<CustomRankedPlaylist["sort"], ScoreSaberLeaderboardQueryCategory> = {
       stars: "star_difficulty",
       dateRanked: "date_ranked",
       plays: "plays",
@@ -217,7 +220,8 @@ export default class PlaylistService {
     };
     const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards({
       ranked: true,
-      stars: { min: parsedConfig.stars.min, max: parsedConfig.stars.max },
+      minStars: parsedConfig.stars.min,
+      maxStars: parsedConfig.stars.max,
       category: sort[parsedConfig.sort] ?? "date_ranked",
     });
 

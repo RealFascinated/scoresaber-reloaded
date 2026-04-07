@@ -34,6 +34,15 @@ This file is the working agreement for humans + AI agents contributing to this r
 - **Naming**:
   - `camelCase` for variables/functions, `PascalCase` for types/classes/components.
   - File names: follow the surrounding folder convention (this repo commonly uses kebab-case in TS/TSX filenames).
+- **Braces for control flow**: Use a block for `if` / loop bodies (and similar). Do not put the body on the same line as the condition without braces.
+
+```ts
+if (bla) bad(); // do not do
+
+if (bla) {
+  good(); // do this
+}
+```
 
 ## Imports
 

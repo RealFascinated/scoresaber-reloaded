@@ -1,27 +1,27 @@
 "use client";
 
 import {
-  ScoreSaberLeaderboardSearchCategory,
-  ScoreSaberLeaderboardSearchCategorySchema,
-  ScoreSaberLeaderboardSearchSort,
-  ScoreSaberLeaderboardSearchSortSchema,
-} from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
+  ScoreSaberLeaderboardQueryCategory,
+  ScoreSaberLeaderboardQueryCategorySchema,
+  ScoreSaberLeaderboardQuerySort,
+  ScoreSaberLeaderboardQuerySortSchema,
+} from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { parseAsBoolean, parseAsFloat, parseAsString, parseAsStringLiteral, useQueryState } from "nuqs";
 import { createContext, ReactNode, useContext } from "react";
 
-const defaultCategory: ScoreSaberLeaderboardSearchCategory = "trending";
-const defaultSort: ScoreSaberLeaderboardSearchSort = "desc";
+const defaultCategory: ScoreSaberLeaderboardQueryCategory = "trending";
+const defaultSort: ScoreSaberLeaderboardQuerySort = "desc";
 
 type FilterContextProps = {
-  category: ScoreSaberLeaderboardSearchCategory;
-  sort: ScoreSaberLeaderboardSearchSort;
+  category: ScoreSaberLeaderboardQueryCategory;
+  sort: ScoreSaberLeaderboardQuerySort;
   starMin: number;
   starMax: number;
   search: string;
   setSearch: (search: string) => void;
-  setCategory: (category: ScoreSaberLeaderboardSearchCategory) => void;
-  setSort: (sort: ScoreSaberLeaderboardSearchSort) => void;
+  setCategory: (category: ScoreSaberLeaderboardQueryCategory) => void;
+  setSort: (sort: ScoreSaberLeaderboardQuerySort) => void;
   setStarMin: (starMin: number) => void;
   setStarMax: (starMax: number) => void;
 
@@ -36,13 +36,13 @@ type FilterContextProps = {
 const MapFilterContext = createContext<FilterContextProps | undefined>(undefined);
 
 export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
-  const [category, setCategory] = useQueryState<ScoreSaberLeaderboardSearchCategory>(
+  const [category, setCategory] = useQueryState<ScoreSaberLeaderboardQueryCategory>(
     "category",
-    parseAsStringLiteral(ScoreSaberLeaderboardSearchCategorySchema.options).withDefault(defaultCategory)
+    parseAsStringLiteral(ScoreSaberLeaderboardQueryCategorySchema.options).withDefault(defaultCategory)
   );
-  const [sort, setSort] = useQueryState<ScoreSaberLeaderboardSearchSort>(
+  const [sort, setSort] = useQueryState<ScoreSaberLeaderboardQuerySort>(
     "sort",
-    parseAsStringLiteral(ScoreSaberLeaderboardSearchSortSchema.options).withDefault(defaultSort)
+    parseAsStringLiteral(ScoreSaberLeaderboardQuerySortSchema.options).withDefault(defaultSort)
   );
   const [starMin, setStarMin] = useQueryState("starMin", parseAsFloat.withDefault(0));
   const [starMax, setStarMax] = useQueryState("starMax", parseAsFloat.withDefault(SHARED_CONSTS.maxStars));

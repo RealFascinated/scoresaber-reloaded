@@ -65,7 +65,9 @@ const GenericChart = ({ config, labels }: Props) => {
           transformedData = dataset.data as ({ x: number; y: number } | null)[];
         } else {
           transformedData = (dataset.data as (number | null)[]).map((y, index) => {
-            if (y === null) return null;
+            if (y === null) {
+              return null;
+            }
             return { x: labels[index] as number, y };
           });
         }
@@ -121,12 +123,18 @@ const GenericChart = ({ config, labels }: Props) => {
               minRotation: 45,
               // First arg is tick.value (category index); second is position in ticks array — use value for labels[].
               callback: (labelIndex: number) => {
-                if (typeof labels[labelIndex] === "string") return labels[labelIndex];
-                if (typeof labels[labelIndex] === "number") return labels[labelIndex].toString();
+                if (typeof labels[labelIndex] === "string") {
+                  return labels[labelIndex];
+                }
+                if (typeof labels[labelIndex] === "number") {
+                  return labels[labelIndex].toString();
+                }
 
                 const date =
                   labels[labelIndex] instanceof Date ? labels[labelIndex] : parseDate(labels[labelIndex]);
-                if (!date) return "";
+                if (!date) {
+                  return "";
+                }
                 const daysAgo = getDaysAgo(date);
                 const currentYear = new Date().getUTCFullYear();
                 const dateYear = date.getUTCFullYear();
@@ -137,8 +145,12 @@ const GenericChart = ({ config, labels }: Props) => {
                     : formatDate(date, "DD MMMM YYYY");
                 }
 
-                if (daysAgo === 0) return "Now";
-                if (daysAgo === 1) return "Yesterday";
+                if (daysAgo === 0) {
+                  return "Now";
+                }
+                if (daysAgo === 1) {
+                  return "Yesterday";
+                }
                 return `${daysAgo}d ago`;
               },
             },
@@ -180,11 +192,19 @@ const GenericChart = ({ config, labels }: Props) => {
     }
 
     return labels.map(value => {
-      if (typeof value === "string") return value;
-      if (typeof value === "number") return value.toString();
+      if (typeof value === "string") {
+        return value;
+      }
+      if (typeof value === "number") {
+        return value.toString();
+      }
       const formattedDate = formatChartDate(value);
-      if (formattedDate === formatDateMinimal(getDaysAgoDate(0))) return "Now";
-      if (formattedDate === formatDateMinimal(getDaysAgoDate(1))) return "Yesterday";
+      if (formattedDate === formatDateMinimal(getDaysAgoDate(0))) {
+        return "Now";
+      }
+      if (formattedDate === formatDateMinimal(getDaysAgoDate(1))) {
+        return "Yesterday";
+      }
       return formattedDate;
     });
   }, [labels, isXAxisLinear, isNumericLabels]);
@@ -225,16 +245,26 @@ const GenericChart = ({ config, labels }: Props) => {
         },
         point: {
           radius: (ctx: any) => {
-            if (labels.length > 90) return 0;
+            if (labels.length > 90) {
+              return 0;
+            }
             const dataset = ctx.chart?.data?.datasets?.[ctx.datasetIndex];
-            if (!dataset) return 3;
+            if (!dataset) {
+              return 3;
+            }
             return dataset.type === "point" ? dataset.pointRadius || 3 : 3;
           },
           hoverRadius: (ctx: any) => {
-            if (labels.length > 365) return 0;
-            if (labels.length > 90) return 2;
+            if (labels.length > 365) {
+              return 0;
+            }
+            if (labels.length > 90) {
+              return 2;
+            }
             const dataset = ctx.chart?.data?.datasets?.[ctx.datasetIndex];
-            if (!dataset) return 4;
+            if (!dataset) {
+              return 4;
+            }
             return dataset.type === "point" ? (dataset.pointRadius || 3) + 2 : 4;
           },
         },
@@ -268,18 +298,26 @@ const GenericChart = ({ config, labels }: Props) => {
               }
 
               const value = labels[context[0].dataIndex];
-              if (typeof value === "string") return value;
+              if (typeof value === "string") {
+                return value;
+              }
               if (typeof value === "number") {
                 return axes.x?.valueFormatter?.(value) ?? value.toString();
               }
 
               const date = value instanceof Date ? value : parseDate(value);
-              if (!date) return "";
+              if (!date) {
+                return "";
+              }
               const differenceInDays = getDaysAgo(date);
               const formattedDate = formatDate(date, "dddd, DD MMM, YYYY");
 
-              if (differenceInDays === 0) return `${formattedDate} (Now)`;
-              if (differenceInDays === 1) return `${formattedDate} (Yesterday)`;
+              if (differenceInDays === 0) {
+                return `${formattedDate} (Now)`;
+              }
+              if (differenceInDays === 1) {
+                return `${formattedDate} (Yesterday)`;
+              }
 
               const maxUnits = differenceInDays <= 30 ? 1 : differenceInDays < 395 ? 2 : 3;
               return `${formattedDate} (${timeAgo(date, maxUnits)})`;

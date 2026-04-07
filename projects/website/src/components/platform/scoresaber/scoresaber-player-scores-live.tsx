@@ -133,9 +133,15 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
   const buildUrl = useCallback(
     (pageNum: number) => {
       const params = new URLSearchParams();
-      if (sort !== DEFAULT_SORT) params.set("sort", sort);
-      if (pageNum !== 1) params.set("page", String(pageNum));
-      if (debouncedSearchTerm && debouncedSearchTerm.length >= 3) params.set("search", debouncedSearchTerm);
+      if (sort !== DEFAULT_SORT) {
+        params.set("sort", sort);
+      }
+      if (pageNum !== 1) {
+        params.set("page", String(pageNum));
+      }
+      if (debouncedSearchTerm && debouncedSearchTerm.length >= 3) {
+        params.set("search", debouncedSearchTerm);
+      }
       const queryString = params.toString();
       return `/player/${player.id}${queryString ? `?${queryString}` : ""}`;
     },
@@ -151,7 +157,9 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
       );
     }
 
-    if (!scores) return null;
+    if (!scores) {
+      return null;
+    }
 
     return (
       <>

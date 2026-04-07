@@ -53,7 +53,9 @@ export class BeatLeaderScoresRepository {
   }
 
   public static async findExistingIds(scoreIds: number[]): Promise<Set<number>> {
-    if (scoreIds.length === 0) return new Set();
+    if (scoreIds.length === 0) {
+      return new Set();
+    }
     const unique = Array.from(new Set(scoreIds));
     const rows = await db
       .select({ id: beatLeaderScoresTable.id })

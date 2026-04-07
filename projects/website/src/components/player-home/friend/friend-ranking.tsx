@@ -22,13 +22,19 @@ export function FriendRanking() {
   const [friendsPage, setFriendsPage] = useState<Page<ScoreSaberPlayer>>();
 
   const getFriendsPage = useCallback(async () => {
-    if (!friends) return;
+    if (!friends) {
+      return;
+    }
 
     const pagination = new Pagination<ScoreSaberPlayer>();
     pagination.setItems(
       friends.toSorted((a, b) => {
-        if (a.inactive && !b.inactive) return 1;
-        if (!a.inactive && b.inactive) return -1;
+        if (a.inactive && !b.inactive) {
+          return 1;
+        }
+        if (!a.inactive && b.inactive) {
+          return -1;
+        }
         return b.pp - a.pp;
       })
     );

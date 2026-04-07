@@ -367,7 +367,9 @@ export class PlayerHistoryService {
 
     for (let i = historyLength - 1; i >= 0; i--) {
       const rank = playerRankHistory[i];
-      if (rank === INACTIVE_RANK || rank === 0) continue;
+      if (rank === INACTIVE_RANK || rank === 0) {
+        continue;
+      }
 
       // last element is "today" => 0d ago, then 1d ago, etc.
       const daysAgo = historyLength - 1 - i;

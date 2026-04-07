@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { env } from "../env";
 import { formatNumberWithCommas, formatPp } from "./number-utils";
 

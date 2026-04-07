@@ -141,7 +141,9 @@ export class Cooldown {
   getRemainingTime(priority: CooldownPriority = CooldownPriority.NORMAL): number {
     if (priority === CooldownPriority.BACKGROUND) {
       this.refreshBackgroundBursts();
-      if (this.backgroundBursts > 0) return 0;
+      if (this.backgroundBursts > 0) {
+        return 0;
+      }
 
       const timeSinceUse = Date.now() - this.lastUsed;
       const remaining = this.backgroundCooldownMs! - timeSinceUse;
@@ -149,7 +151,9 @@ export class Cooldown {
     }
 
     this.refreshBursts();
-    if (this.remainingBursts > 0) return 0;
+    if (this.remainingBursts > 0) {
+      return 0;
+    }
 
     const timeSinceUse = Date.now() - this.lastUsed;
     const remaining = this.cooldownMs - timeSinceUse;

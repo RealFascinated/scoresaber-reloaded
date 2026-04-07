@@ -375,12 +375,19 @@ export class PlayerCoreService {
 
     for (const playerScore of scores) {
       const accuracy = playerScore.accuracy;
-      if (accuracy >= 98) scoreStats.godPlays++;
-      else if (accuracy >= 95) scoreStats.sspPlays++;
-      else if (accuracy >= 90) scoreStats.ssPlays++;
-      else if (accuracy >= 85) scoreStats.spPlays++;
-      else if (accuracy >= 80) scoreStats.sPlays++;
-      else if (accuracy >= 70) scoreStats.aPlays++;
+      if (accuracy >= 98) {
+        scoreStats.godPlays++;
+      } else if (accuracy >= 95) {
+        scoreStats.sspPlays++;
+      } else if (accuracy >= 90) {
+        scoreStats.ssPlays++;
+      } else if (accuracy >= 85) {
+        scoreStats.spPlays++;
+      } else if (accuracy >= 80) {
+        scoreStats.sPlays++;
+      } else if (accuracy >= 70) {
+        scoreStats.aPlays++;
+      }
     }
     return scoreStats;
   }

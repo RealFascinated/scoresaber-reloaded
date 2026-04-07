@@ -86,7 +86,9 @@ export default function SelfPlaylistCreator() {
 
   const handleSubmit = useCallback(
     async (data: SelfPlaylistSettings) => {
-      if (!playerId) return;
+      if (!playerId) {
+        return;
+      }
       setDownloading(true);
       try {
         const encoded = encodeSelfPlaylistSettings(data);

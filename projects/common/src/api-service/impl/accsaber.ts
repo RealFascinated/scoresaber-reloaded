@@ -52,7 +52,9 @@ export class AccSaberService extends ApiService {
     } = {}
   ): Promise<AccSaberScoresPageResponse> {
     const { sort = "date", direction = "desc", type = "overall" } = options;
-    if (page < 1) page = 1;
+    if (page < 1) {
+      page = 1;
+    }
 
     // Automatically generate sort options based on consistent naming pattern
     const generateSortOption = (sort: AccSaberScoreSort, direction: SortDirection): string => {

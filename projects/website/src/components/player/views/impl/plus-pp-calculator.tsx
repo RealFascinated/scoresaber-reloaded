@@ -105,8 +105,12 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
    * When gain is negative the slider value itself is shown instead.
    */
   const targetRawPp = useMemo((): number | null => {
-    if (sortedPps.length === 0) return null;
-    if (isNegativeGain) return rawPpFromPlay;
+    if (sortedPps.length === 0) {
+      return null;
+    }
+    if (isNegativeGain) {
+      return rawPpFromPlay;
+    }
 
     // Round to 1 dp to match the displayed label, but fall back to the
     // unrounded value if rounding would collapse a tiny gain to zero.

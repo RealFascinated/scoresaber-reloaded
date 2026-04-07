@@ -294,7 +294,7 @@ export const app = new Elysia()
         zod: z.toJSONSchema,
       },
     })
-  )
+  );
 
 new WebsocketManager();
 
@@ -340,7 +340,9 @@ app.listen({
 let isShuttingDown = false;
 
 const gracefulShutdown = async (signal: string) => {
-  if (isShuttingDown) return;
+  if (isShuttingDown) {
+    return;
+  }
   isShuttingDown = true;
 
   log.info(`Received ${signal}, starting graceful shutdown...`);

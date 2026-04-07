@@ -6,13 +6,13 @@ import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { FilterField, FilterSection } from "@/components/ui/filter-section";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  ScoreSaberLeaderboardSearchCategory,
-  ScoreSaberLeaderboardSearchSort,
-} from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
+  ScoreSaberLeaderboardQueryCategory,
+  ScoreSaberLeaderboardQuerySort,
+} from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { Input } from "../ui/input";
 
-const categoryOptions: Record<ScoreSaberLeaderboardSearchCategory, string> = {
+const categoryOptions: Record<ScoreSaberLeaderboardQueryCategory, string> = {
   trending: "Trending",
   date_ranked: "Date Ranked",
   plays: "Plays",
@@ -20,7 +20,7 @@ const categoryOptions: Record<ScoreSaberLeaderboardSearchCategory, string> = {
   star_difficulty: "Star Difficulty",
 };
 
-const sortOptions: Record<ScoreSaberLeaderboardSearchSort, string> = {
+const sortOptions: Record<ScoreSaberLeaderboardQuerySort, string> = {
   desc: "Descending",
   asc: "Ascending",
 };
@@ -89,7 +89,7 @@ export default function MapFilters() {
           value={filter.category !== undefined ? String(filter.category) : undefined}
           onValueChange={newCategory => {
             if (newCategory) {
-              filter.setCategory(newCategory as ScoreSaberLeaderboardSearchCategory);
+              filter.setCategory(newCategory as ScoreSaberLeaderboardQueryCategory);
             }
           }}
         >
@@ -112,7 +112,7 @@ export default function MapFilters() {
           value={String(filter.sort)}
           onValueChange={newSort => {
             if (newSort) {
-              filter.setSort(newSort as ScoreSaberLeaderboardSearchSort);
+              filter.setSort(newSort as ScoreSaberLeaderboardQuerySort);
             }
           }}
         >

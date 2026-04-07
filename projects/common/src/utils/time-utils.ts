@@ -102,7 +102,9 @@ export function timeAgo(input: Date, maxUnits: number = 2) {
       remainingSeconds -= count * seconds;
     }
     // Stop after two units have been added
-    if (result.length === maxUnits) break;
+    if (result.length === maxUnits) {
+      break;
+    }
   }
 
   // Return formatted result with at most two units
@@ -142,7 +144,9 @@ export function formatChartDate(date: Date) {
 }
 
 function getOrdinalSuffix(day: number): string {
-  if (day > 3 && day < 21) return "th";
+  if (day > 3 && day < 21) {
+    return "th";
+  }
   switch (day % 10) {
     case 1:
       return "st";
@@ -271,7 +275,9 @@ export function formatTime(seconds: number): string {
  * @returns The formatted duration
  */
 export function formatDuration(ms: number, long: boolean = false): string {
-  if (ms < 0) ms = -ms;
+  if (ms < 0) {
+    ms = -ms;
+  }
 
   const duration = dayjs.duration(ms);
   const units = [

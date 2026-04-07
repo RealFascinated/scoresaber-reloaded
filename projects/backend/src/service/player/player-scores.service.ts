@@ -355,7 +355,9 @@ export class PlayerScoresService {
     let leaderboardIds: number[] | null = null;
     if (query.search?.trim()) {
       const ids = await ScoreSaberLeaderboardsRepository.searchLeaderboardIds(query.search);
-      if (ids.length === 0) return Pagination.empty<PlayerScore<TScore>>();
+      if (ids.length === 0) {
+        return Pagination.empty<PlayerScore<TScore>>();
+      }
       leaderboardIds = ids;
     }
 
@@ -371,7 +373,9 @@ export class PlayerScoresService {
         limit,
         offset
       );
-      if (!rows.length) return [];
+      if (!rows.length) {
+        return [];
+      }
 
       // Batch-fetch leaderboards for this page only
       const leaderboardIdSet = [...new Set(rows.map(config.getLeaderboardId))];
@@ -383,7 +387,9 @@ export class PlayerScoresService {
       const scores = await Promise.all(
         rows.map(async row => {
           const leaderboard = leaderboardMap.get(config.getLeaderboardId(row));
-          if (!leaderboard) return undefined;
+          if (!leaderboard) {
+            return undefined;
+          }
           return config.enrichRow(row, leaderboard);
         })
       );

@@ -1,7 +1,10 @@
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import type { ScoreSaberLeaderboardSearchCategory, ScoreSaberLeaderboardSearchFilters } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
+import type {
+  ScoreSaberLeaderboardQueryCategory,
+  ScoreSaberLeaderboardQueryFilters,
+} from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import type { SQL } from "drizzle-orm";
 import { and, asc, count, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -10,7 +13,6 @@ import { leaderboardRowToType } from "../db/converter/scoresaber-leaderboard";
 import { ScoreSaberLeaderboardRow, scoreSaberLeaderboardsTable } from "../db/schema";
 
 export const LEADERBOARD_SEARCH_PAGE_SIZE = 20;
-
 
 type LeaderboardAlias = ReturnType<typeof alias<typeof scoreSaberLeaderboardsTable, string>>;
 
@@ -62,9 +64,12 @@ function buildDifficultyJoin(
   const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
 
   const joinConditions: SQL[] = [eq(mainAlias.songHash, difficultiesAlias.songHash)];
-  if (filters?.ranked !== undefined) joinConditions.push(eq(difficultiesAlias.ranked, filters.ranked));
-  if (filters?.qualified !== undefined)
+  if (filters?.ranked !== undefined) {
+    joinConditions.push(eq(difficultiesAlias.ranked, filters.ranked));
+  }
+  if (filters?.qualified !== undefined) {
     joinConditions.push(eq(difficultiesAlias.qualified, filters.qualified));
+  }
 
   return {
     difficultiesAlias,
@@ -93,7 +98,7 @@ export function aliasTsRankExpr(tableAlias: LeaderboardAlias, search: string): S
  * Table sort for leaderboard search / playlists: one primary column (+ optional date fallback) and id tie-break.
  */
 export function leaderboardSearchCategoryOrderBy(
-  category: ScoreSaberLeaderboardSearchCategory,
+  category: ScoreSaberLeaderboardQueryCategory,
   ascending: boolean
 ): SQL[] {
   const idTie = ascending ? asc(scoreSaberLeaderboardsTable.id) : desc(scoreSaberLeaderboardsTable.id);
@@ -109,9 +114,7 @@ export function leaderboardSearchCategoryOrderBy(
         ? [sql`${scoreSaberLeaderboardsTable.dailyPlays} ASC NULLS LAST`, idTie]
         : [sql`${scoreSaberLeaderboardsTable.dailyPlays} DESC NULLS LAST`, idTie];
     case "star_difficulty":
-      return ascending
-        ? [sql`${starsCol} ASC NULLS LAST`, idTie]
-        : [sql`${starsCol} DESC NULLS LAST`, idTie];
+      return ascending ? [sql`${starsCol} ASC NULLS LAST`, idTie] : [sql`${starsCol} DESC NULLS LAST`, idTie];
     case "date_ranked":
       return ascending
         ? [sql`${scoreSaberLeaderboardsTable.rankedDate} ASC NULLS LAST`, idTie]
@@ -129,20 +132,29 @@ export function leaderboardSearchCategoryOrderBy(
  * @param filters the filters to apply
  * @returns the WHERE and ORDER BY clauses for a leaderboard query
  */
-export function buildLeaderboardQuery(
-  filters?: ScoreSaberLeaderboardSearchFilters
-): { whereClause: SQL | undefined; orderParts: SQL[] } {
+export function buildLeaderboardQuery(filters?: ScoreSaberLeaderboardQueryFilters): {
+  whereClause: SQL | undefined;
+  orderParts: SQL[];
+} {
   const conditions: SQL[] = [];
-  if (filters?.ranked === true) conditions.push(eq(scoreSaberLeaderboardsTable.ranked, true));
-  if (filters?.qualified === true) conditions.push(eq(scoreSaberLeaderboardsTable.qualified, true));
-  if (filters?.stars) {
-    conditions.push(gte(sql`coalesce(${scoreSaberLeaderboardsTable.stars}, 0)`, filters.stars.min ?? 0));
-    conditions.push(lte(sql`coalesce(${scoreSaberLeaderboardsTable.stars}, 0)`, filters.stars.max ?? 0));
+  if (filters?.ranked === true) {
+    conditions.push(eq(scoreSaberLeaderboardsTable.ranked, true));
+  }
+  if (filters?.qualified === true) {
+    conditions.push(eq(scoreSaberLeaderboardsTable.qualified, true));
+  }
+  if (filters?.minStars) {
+    conditions.push(gte(sql`coalesce(${scoreSaberLeaderboardsTable.stars}, 0)`, filters.minStars));
+  }
+  if (filters?.maxStars) {
+    conditions.push(lte(sql`coalesce(${scoreSaberLeaderboardsTable.stars}, 0)`, filters.maxStars));
   }
 
   const searchTrimmed = filters?.query?.trim() ?? "";
   const useFts = searchTrimmed.length >= 3;
-  if (useFts) conditions.push(aliasFtsMatch(scoreSaberLeaderboardsTable, searchTrimmed));
+  if (useFts) {
+    conditions.push(aliasFtsMatch(scoreSaberLeaderboardsTable, searchTrimmed));
+  }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
   const category = filters?.category ?? "date_ranked";
@@ -164,7 +176,9 @@ export class ScoreSaberLeaderboardsRepository {
   /**
    * All matching leaderboards (no limit) using the same filter/sort semantics as paginated search.
    */
-  public static async getLeaderboards(filters?: ScoreSaberLeaderboardSearchFilters): Promise<ScoreSaberLeaderboard[]> {
+  public static async getLeaderboards(
+    filters?: ScoreSaberLeaderboardQueryFilters
+  ): Promise<ScoreSaberLeaderboard[]> {
     const { whereClause, orderParts } = buildLeaderboardQuery(filters);
     const rows = await db
       .select()
@@ -232,7 +246,9 @@ export class ScoreSaberLeaderboardsRepository {
   }
 
   public static async searchLeaderboardIds(search: string, limit: number = 50): Promise<number[]> {
-    if (search.length < 3) return [];
+    if (search.length < 3) {
+      return [];
+    }
 
     const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
     const result = await db
@@ -323,7 +339,9 @@ export class ScoreSaberLeaderboardsRepository {
   }
 
   public static async upsertLeaderboards(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
-    if (leaderboards.length === 0) return;
+    if (leaderboards.length === 0) {
+      return;
+    }
 
     const rows: ScoreSaberLeaderboardRow[] = leaderboards.map(lb => ({
       id: lb.id,

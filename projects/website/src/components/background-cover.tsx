@@ -82,8 +82,12 @@ export const BACKGROUND_COVERS: BackgroundCover[] = [
 const ALL_IMAGES = BACKGROUND_COVERS.filter(cover => cover.type === "image").map(cover => cover.value);
 
 const getRandomIndex = (excludeIndex?: number): number => {
-  if (ALL_IMAGES.length === 0) return 0;
-  if (ALL_IMAGES.length === 1) return 0;
+  if (ALL_IMAGES.length === 0) {
+    return 0;
+  }
+  if (ALL_IMAGES.length === 1) {
+    return 0;
+  }
 
   let newIndex: number;
   do {
@@ -121,7 +125,9 @@ export default function BackgroundCover() {
 
   // Handle image rotation interval
   useEffect(() => {
-    if (cover?.type !== "rotating-images") return;
+    if (cover?.type !== "rotating-images") {
+      return;
+    }
 
     const interval = setInterval(() => {
       setIsTransitioning(true);

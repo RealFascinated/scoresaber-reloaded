@@ -6,9 +6,12 @@ import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboa
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import type { LeaderboardsPageResponse } from "@ssr/common/schemas/response/leaderboard/leaderboards-page";
-import { RankingQueueLeaderboard, RankingQueueLeaderboardsResponse } from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
+import {
+  RankingQueueLeaderboard,
+  RankingQueueLeaderboardsResponse,
+} from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import type { ScoreSaberLeaderboardSearchFilters } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
+import type { ScoreSaberLeaderboardQueryFilters } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
@@ -107,7 +110,7 @@ export class ScoreSaberLeaderboardsService {
    */
   public static async getLeaderboardsPaginated(
     page: number,
-    filters?: ScoreSaberLeaderboardSearchFilters
+    filters?: ScoreSaberLeaderboardQueryFilters
   ): Promise<LeaderboardsPageResponse> {
     const { whereClause, orderParts } = buildLeaderboardQuery(filters);
 
@@ -121,7 +124,7 @@ export class ScoreSaberLeaderboardsService {
       .setItemsPerPage(LEADERBOARD_SEARCH_PAGE_SIZE)
       .setTotalItems(total);
 
-    return await pagination.getPage(page, async (fetchItems) => {
+    return await pagination.getPage(page, async fetchItems => {
       const rows = await db
         .select()
         .from(scoreSaberLeaderboardsTable)
@@ -134,6 +137,14 @@ export class ScoreSaberLeaderboardsService {
     });
   }
 
+  /**
+   * Creates a leaderboard.
+   *
+   * @param id the ID of the leaderboard to create
+   * @param token the token of the leaderboard to create
+   * @param options the options to create the leaderboard
+   * @returns the created leaderboard
+   */
   public static async createLeaderboard(
     id: number,
     token?: ScoreSaberLeaderboardToken,

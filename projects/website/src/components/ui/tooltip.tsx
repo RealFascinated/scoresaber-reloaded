@@ -79,7 +79,9 @@ export const Tooltip = React.memo(function Tooltip({
 
   // Add click outside handler
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -120,11 +122,15 @@ export const Tooltip = React.memo(function Tooltip({
   }, [isMobile, isOpen]);
 
   const updatePosition = useCallback(() => {
-    if (!isOpen || !triggerRef.current || !tooltipRef.current) return;
+    if (!isOpen || !triggerRef.current || !tooltipRef.current) {
+      return;
+    }
 
     const trigger = triggerRef.current;
     const tooltip = tooltipRef.current;
-    if (!trigger || !tooltip) return;
+    if (!trigger || !tooltip) {
+      return;
+    }
 
     const triggerRect = trigger.getBoundingClientRect();
     const tooltipRect = tooltip.getBoundingClientRect();

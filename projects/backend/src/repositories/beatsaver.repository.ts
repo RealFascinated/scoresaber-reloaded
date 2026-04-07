@@ -216,7 +216,9 @@ export class BeatSaverRepository {
       )
       .where(eq(beatSaverMapVersionsTable.hash, normalizedHash));
 
-    if (rows.length === 0) return undefined;
+    if (rows.length === 0) {
+      return undefined;
+    }
 
     const { version, map, uploader } = rows[0];
     const uploaderRow = map.uploaderId == null ? null : uploader?.id != null ? uploader : null;

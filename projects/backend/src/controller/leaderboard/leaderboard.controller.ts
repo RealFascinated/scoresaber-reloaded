@@ -2,7 +2,7 @@ import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteris
 import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { LeaderboardsPageResponseSchema } from "@ssr/common/schemas/response/leaderboard/leaderboards-page";
-import { ScoreSaberLeaderboardSearchFiltersSchema } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
+import { ScoreSaberLeaderboardSearchFiltersSchema } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import { Elysia } from "elysia";
 import { z } from "zod";
 import BeatSaverService from "../../service/external/beatsaver.service";

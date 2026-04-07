@@ -40,9 +40,13 @@ export function useSettingsForm<T extends FieldValues>(
   const hasSyncedRef = useRef(false);
 
   useEffect(() => {
-    if (!settingsReady || !settings) return;
+    if (!settingsReady || !settings) {
+      return;
+    }
 
-    if (hasSyncedRef.current) return;
+    if (hasSyncedRef.current) {
+      return;
+    }
     hasSyncedRef.current = true;
 
     const currentValues = form.getValues();
@@ -51,7 +55,9 @@ export function useSettingsForm<T extends FieldValues>(
     // Collect all values that need updating
     for (const [key, value] of Object.entries(settings) as [Path<T>, T[Path<T>]][]) {
       // Skip excluded fields
-      if (excludeFromSync.includes(key)) continue;
+      if (excludeFromSync.includes(key)) {
+        continue;
+      }
 
       if (currentValues[key] !== value) {
         updates[key] = value;

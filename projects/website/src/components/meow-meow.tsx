@@ -109,7 +109,9 @@ export default function MeowMeow() {
   const nekoSpeed = 10;
 
   const setSprite = useCallback((name: SpriteName, frame: number) => {
-    if (!nekoElRef.current) return;
+    if (!nekoElRef.current) {
+      return;
+    }
     const sprite = spriteSets[name][frame % spriteSets[name].length];
     nekoElRef.current.style.backgroundPosition = `${sprite[0] * 32}px ${sprite[1] * 32}px`;
   }, []);
@@ -170,7 +172,9 @@ export default function MeowMeow() {
   }, [setSprite, resetIdleAnimation]);
 
   const frame = useCallback(() => {
-    if (!nekoElRef.current) return;
+    if (!nekoElRef.current) {
+      return;
+    }
 
     const state = stateRef.current;
     state.frameCount = state.frameCount + 1;

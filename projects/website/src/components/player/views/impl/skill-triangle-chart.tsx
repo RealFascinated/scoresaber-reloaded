@@ -37,7 +37,9 @@ const monthFormatter = new Intl.DateTimeFormat("en-GB", {
 
 function computeSkillMetrics(scores: { stars: number; accuracy: number; pp: number }[]): SkillMetrics | null {
   const ranked = scores.filter(s => s.stars > 0 && s.pp > 0 && s.accuracy > 0);
-  if (ranked.length === 0) return null;
+  if (ranked.length === 0) {
+    return null;
+  }
 
   const sorted = ranked.toSorted((a, b) => b.pp - a.pp);
   const topN = sorted.slice(0, 100);
@@ -66,10 +68,14 @@ function computeSkillMetrics(scores: { stars: number; accuracy: number; pp: numb
 function buildTimeline(
   scores: { stars: number; accuracy: number; pp: number; timestamp: Date }[]
 ): TimelineEntry[] {
-  if (scores.length === 0) return [];
+  if (scores.length === 0) {
+    return [];
+  }
 
   const ranked = scores.filter(s => s.stars > 0 && s.pp > 0 && s.accuracy > 0);
-  if (ranked.length === 0) return [];
+  if (ranked.length === 0) {
+    return [];
+  }
 
   const sorted = ranked.toSorted((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
@@ -238,7 +244,9 @@ function TimelineSlider({
   selectedIndex: number;
   onSelect: (index: number) => void;
 }) {
-  if (timeline.length <= 1) return null;
+  if (timeline.length <= 1) {
+    return null;
+  }
 
   return (
     <div className="flex w-full max-w-full min-w-0 flex-col gap-3 md:max-w-[250px] md:gap-2">
@@ -287,7 +295,9 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
   });
 
   const timeline = useMemo(() => {
-    if (!chartData || chartData.length === 0) return [];
+    if (!chartData || chartData.length === 0) {
+      return [];
+    }
     return buildTimeline(chartData);
   }, [chartData]);
 

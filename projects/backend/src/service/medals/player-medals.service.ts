@@ -113,7 +113,9 @@ export class PlayerMedalsService {
         fetchRange.end - fetchRange.start
       );
 
-      if (!rows.length) return [];
+      if (!rows.length) {
+        return [];
+      }
 
       return rows.map(
         (row): MedalRankingPlayer => ({

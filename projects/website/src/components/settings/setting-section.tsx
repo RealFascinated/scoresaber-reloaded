@@ -111,7 +111,9 @@ function renderSelectField<TFormValues extends FieldValues, TName extends Path<T
   value,
   onChange,
 }: RenderFieldProps<TFormValues, TName>) {
-  if (field.type !== "select") return null;
+  if (field.type !== "select") {
+    return null;
+  }
 
   const name = String(field.name);
 
@@ -137,7 +139,9 @@ function renderSliderField<TFormValues extends FieldValues, TName extends Path<T
   value,
   onChange,
 }: RenderFieldProps<TFormValues, TName>) {
-  if (field.type !== "slider") return null;
+  if (field.type !== "slider") {
+    return null;
+  }
 
   const labelFormatter = field.labelFormatter ?? ((val: number | undefined) => `${val}%`);
 

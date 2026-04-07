@@ -21,9 +21,9 @@ import {
   type BeatLeaderScoreInsert,
   BeatLeaderScoresRepository,
 } from "../../repositories/beatleader-scores.repository";
+import { BeatLeaderApiService } from "../external/beatleader-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 import StorageService from "../infra/storage.service";
-import { BeatLeaderApiService } from "../external/beatleader-api.service";
 import { PlayerCoreService } from "../player/player-core.service";
 
 export default class BeatLeaderService {

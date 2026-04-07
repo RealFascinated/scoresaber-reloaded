@@ -138,7 +138,9 @@ export default class MiniRankingService {
       .sort((a, b) => {
         const rankA = getRank(a, type);
         const rankB = getRank(b, type);
-        if (rankA == undefined || rankB == undefined) return 0;
+        if (rankA == undefined || rankB == undefined) {
+          return 0;
+        }
         return rankA - rankB;
       });
 

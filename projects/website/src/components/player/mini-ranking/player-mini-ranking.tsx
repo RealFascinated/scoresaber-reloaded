@@ -79,7 +79,9 @@ function PlayerMiniRanking({
   const icon = variant.icon(player);
 
   const playerRankWidth = (() => {
-    if (players.length === 0) return 0;
+    if (players.length === 0) {
+      return 0;
+    }
     const maxRank = Math.max(...players.map(p => (type === "Global" ? p.rank : p.countryRank) ?? 0));
     const digits = maxRank > 0 ? Math.floor(Math.log10(maxRank)) + 1 : 0;
     const commas = Math.floor((digits - 1) / 3);

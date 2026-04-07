@@ -39,7 +39,9 @@ export class TopScoresService {
       const scores = await Promise.all(
         scoresRows.map(async scoreRow => {
           const leaderboard = leaderboardMap.get(scoreRow.leaderboardId);
-          if (!leaderboard) return undefined;
+          if (!leaderboard) {
+            return undefined;
+          }
 
           const score = scoreSaberScoreRowToType(scoreRow);
 

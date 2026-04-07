@@ -41,7 +41,9 @@ export function useBackgroundCover(onChange: (value: string | number | boolean) 
   }, [debouncedCustomValue, isInitialized, selectedOption, customBackgroundCover, onChange, database]);
 
   const handleSelectChange = async (value: string) => {
-    if (!isInitialized || value === selectedOption) return;
+    if (!isInitialized || value === selectedOption) {
+      return;
+    }
 
     setSelectedOption(value);
 

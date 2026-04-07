@@ -29,7 +29,7 @@ export class BeatLeaderApiService {
     options = {
       useProxy: true,
       ...options,
-    }
+    };
     const startedAt = performance.now();
     BeatLeaderApiService.totalRequests++;
 
@@ -39,9 +39,12 @@ export class BeatLeaderApiService {
     const baseUrl = options?.useProxy ? "https://p.fascinated.cc/" : "";
     let response: Response | undefined;
     try {
-      response = await fetch(`${baseUrl}${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`, {
-        signal: controller.signal,
-      });
+      response = await fetch(
+        `${baseUrl}${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`,
+        {
+          signal: controller.signal,
+        }
+      );
     } catch {
       BeatLeaderApiService.failedRequests++;
       return undefined;
@@ -100,7 +103,9 @@ export class BeatLeaderApiService {
       return undefined;
     }
 
-    BeatLeaderApiService.log(`Found BeatLeader players total in ${formatDuration(performance.now() - before)}`);
+    BeatLeaderApiService.log(
+      `Found BeatLeader players total in ${formatDuration(performance.now() - before)}`
+    );
     return parsed.data.metadata.total;
   }
 

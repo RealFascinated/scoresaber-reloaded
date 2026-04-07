@@ -8,7 +8,9 @@ export class MetricsRepository {
   }
 
   public static async upsertMany(rows: { id: string; value: unknown }[]): Promise<void> {
-    if (rows.length === 0) return;
+    if (rows.length === 0) {
+      return;
+    }
     await db
       .insert(metricsTable)
       .values(rows)

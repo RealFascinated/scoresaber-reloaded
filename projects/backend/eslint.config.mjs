@@ -33,6 +33,8 @@ export default defineConfig([
       sourceType: "module",
     },
 
-    rules: {},
+    rules: {
+      curly: ["error", "all"],
+    },
   },
 ]);

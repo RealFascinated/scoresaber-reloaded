@@ -194,10 +194,18 @@ export default function ScoreSaberPlayerMedalScores({ player }: { player: ScoreS
   const buildUrl = useCallback(
     (pageNum: number) => {
       const params = new URLSearchParams();
-      if (sort !== DEFAULT_SORT) params.set("sort", sort);
-      if (direction !== DEFAULT_SORT_DIRECTION) params.set("direction", direction);
-      if (pageNum !== 1) params.set("page", String(pageNum));
-      if (debouncedSearchTerm && debouncedSearchTerm.length >= 3) params.set("search", debouncedSearchTerm);
+      if (sort !== DEFAULT_SORT) {
+        params.set("sort", sort);
+      }
+      if (direction !== DEFAULT_SORT_DIRECTION) {
+        params.set("direction", direction);
+      }
+      if (pageNum !== 1) {
+        params.set("page", String(pageNum));
+      }
+      if (debouncedSearchTerm && debouncedSearchTerm.length >= 3) {
+        params.set("search", debouncedSearchTerm);
+      }
 
       const queryString = params.toString();
       return `/player/${player.id}/scoresaber?${queryString}`;
@@ -214,7 +222,9 @@ export default function ScoreSaberPlayerMedalScores({ player }: { player: ScoreS
       );
     }
 
-    if (!scores) return null;
+    if (!scores) {
+      return null;
+    }
 
     return (
       <>

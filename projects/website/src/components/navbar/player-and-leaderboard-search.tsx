@@ -45,8 +45,12 @@ export default function PlayerAndLeaderboardSearch() {
         leaderboards:
           leaderboardResults?.items?.toSorted((a, b) => {
             const getStatusPriority = (leaderboard: ScoreSaberLeaderboard) => {
-              if (leaderboard.ranked) return 2;
-              if (leaderboard.qualified) return 1;
+              if (leaderboard.ranked) {
+                return 2;
+              }
+              if (leaderboard.qualified) {
+                return 1;
+              }
               return 0;
             };
 

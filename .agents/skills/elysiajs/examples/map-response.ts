@@ -2,7 +2,9 @@ import { Elysia } from "elysia";
 
 const prettyJson = new Elysia()
   .mapResponse(({ response }) => {
-    if (response instanceof Object) return new Response(JSON.stringify(response, null, 4));
+    if (response instanceof Object) {
+      return new Response(JSON.stringify(response, null, 4));
+    }
   })
   .as("scoped");
 

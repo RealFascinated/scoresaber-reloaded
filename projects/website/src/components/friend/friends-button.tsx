@@ -55,8 +55,12 @@ export default function FriendsButton() {
             {friends
               .sort((a, b) => {
                 // Sort inactive friends to the bottom
-                if (a.inactive && !b.inactive) return 1;
-                if (!a.inactive && b.inactive) return -1;
+                if (a.inactive && !b.inactive) {
+                  return 1;
+                }
+                if (!a.inactive && b.inactive) {
+                  return -1;
+                }
 
                 // Sort by rank
                 return a.rank - b.rank;

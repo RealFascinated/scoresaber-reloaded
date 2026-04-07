@@ -109,7 +109,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
 
   const handleSubmit = useCallback(
     async (data: SnipeSettings) => {
-      if (!playerId) return;
+      if (!playerId) {
+        return;
+      }
       setDownloading(true);
       try {
         const encoded = encodeSnipePlaylistSettings(data);

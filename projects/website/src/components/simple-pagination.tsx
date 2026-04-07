@@ -247,7 +247,9 @@ export default function SimplePagination({
   );
 
   const renderPageNumbers = useCallback(() => {
-    if (mobilePagination) return [];
+    if (mobilePagination) {
+      return [];
+    }
 
     const maxPagesToShow = page > 999 ? 3 : 5;
     const pageNumbers = [];

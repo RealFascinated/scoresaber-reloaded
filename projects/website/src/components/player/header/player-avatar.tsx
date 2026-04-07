@@ -18,7 +18,9 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
-    if (isRefreshing) return;
+    if (isRefreshing) {
+      return;
+    }
 
     setIsRefreshing(true);
     try {

@@ -75,7 +75,9 @@ export default function Settings() {
           value={selectedCategory.slug}
           onValueChange={value => {
             const category = categories.find(c => c.slug === value);
-            if (category) setCategory(category);
+            if (category) {
+              setCategory(category);
+            }
           }}
         >
           <SelectTrigger className="w-full" aria-label="Settings category">

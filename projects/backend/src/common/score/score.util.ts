@@ -137,10 +137,16 @@ export async function sendMedalScoreNotification(
     const changeA = a[1].after - a[1].before;
     const changeB = b[1].after - b[1].before;
     // Positive changes come first
-    if (changeA > 0 && changeB < 0) return -1;
-    if (changeA < 0 && changeB > 0) return 1;
+    if (changeA > 0 && changeB < 0) {
+      return -1;
+    }
+    if (changeA < 0 && changeB > 0) {
+      return 1;
+    }
     // Both positive: sort descending (most gained first)
-    if (changeA > 0 && changeB > 0) return changeB - changeA;
+    if (changeA > 0 && changeB > 0) {
+      return changeB - changeA;
+    }
     // Both negative: sort ascending (most lost first, since -10 < -5)
     return changeA - changeB;
   });

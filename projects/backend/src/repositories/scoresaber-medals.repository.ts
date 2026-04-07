@@ -148,7 +148,9 @@ export class ScoreSaberMedalsRepository {
   public static async selectIdAndMedalsByIds(
     ids: string[]
   ): Promise<{ id: string; medals: number | null }[]> {
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {
+      return [];
+    }
     return db
       .select({ id: scoreSaberAccountsTable.id, medals: scoreSaberAccountsTable.medals })
       .from(scoreSaberAccountsTable)
