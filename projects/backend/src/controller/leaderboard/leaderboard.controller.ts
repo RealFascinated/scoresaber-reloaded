@@ -7,7 +7,6 @@ import { Elysia } from "elysia";
 import { z } from "zod";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import BeatSaverService from "../../service/external/beatsaver.service";
-import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 
 export default function leaderboardController(app: Elysia) {
@@ -34,7 +33,7 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/ranking-queue",
         async () => {
-          return await ScoreSaberApiService.lookupRankingRequests();
+          return await ScoreSaberLeaderboardsService.getRankingQueueLeaderboards();
         },
         {
           tags: ["Leaderboard"],
