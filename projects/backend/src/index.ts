@@ -167,11 +167,12 @@ export const app = new Elysia()
   )
   .use(
     cron({
-      name: "update-leaderboard-daily-plays",
+      name: "leaderboard-updates",
       pattern: "0 * * * *", // Every 1 hour
       timezone: "Europe/London",
       protect: true,
       run: async () => {
+        await ScoreEventService.updateTrendingLeaderboards();
         await ScoreEventService.updateLeaderboardDailyPlays();
       },
     })

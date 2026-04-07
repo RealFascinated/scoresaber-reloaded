@@ -1,0 +1,2 @@
+ALTER TABLE "scoresaber-leaderboards" ADD COLUMN "trendingScore" double precision DEFAULT 0 NOT NULL;--> statement-breakpoint
+CREATE INDEX "leaderboards_trending_score_desc_idx" ON "scoresaber-leaderboards" USING btree ("trendingScore" DESC NULLS LAST);

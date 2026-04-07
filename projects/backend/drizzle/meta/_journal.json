@@ -148,6 +148,13 @@
       "when": 1775800000002,
       "tag": "0020_create-score-event-references",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1775800000003,
+      "tag": "0021_add_trending_score_to_leaderboards",
+      "breakpoints": true
     }
   ]
 }

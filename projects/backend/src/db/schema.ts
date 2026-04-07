@@ -230,6 +230,7 @@ export const scoreSaberLeaderboardsTable = pgTable(
     // Misc
     seededScores: boolean().notNull(),
     cachedSongArt: boolean().notNull(),
+    trendingScore: doublePrecision().notNull().default(0),
 
     timestamp: timestamp().notNull(),
   },
@@ -254,6 +255,7 @@ export const scoreSaberLeaderboardsTable = pgTable(
       .on(table.qualified)
       .where(sql`${table.qualified} = true`),
     index("leaderboards_stars_not_null_idx").on(table.stars).where(isNotNull(table.stars)),
+    index("leaderboards_trending_score_desc_idx").on(table.trendingScore.desc()),
   ]
 );
 
