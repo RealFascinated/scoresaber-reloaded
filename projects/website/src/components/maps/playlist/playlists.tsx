@@ -1,7 +1,7 @@
 import Card from "@/components/card";
 import PlaylistDownloadButton from "@/components/maps/playlist/playlist-download-button";
 import { env } from "@ssr/common/env";
-import { CheckCircleIcon, ClockIcon, CrownIcon } from "lucide-react";
+import { CheckCircleIcon, ClockIcon, CrownIcon, FlameIcon } from "lucide-react";
 import { ElementType } from "react";
 import CustomPlaylistCreator from "./custom-playlist-creator";
 
@@ -37,6 +37,11 @@ const playlists: Playlist[] = [
     name: "Ranking Queue",
     id: "scoresaber-ranking-queue-maps",
     icon: ClockIcon,
+  },
+  {
+    name: "Trending",
+    id: "scoresaber-trending",
+    icon: FlameIcon,
   },
 ];
 

@@ -5,14 +5,14 @@ import { HomeIcon, SearchIcon } from "lucide-react";
 
 export default function NotFoundPage() {
   return (
-    <div className="from-background via-background to-accent-deep/20 min-h-screen w-full bg-gradient-to-br">
-      <div className="from-primary/10 absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] via-transparent to-transparent" />
+    <div className="from-background via-background to-accent-deep/20 min-h-screen w-full bg-linear-to-br">
+      <div className="from-primary/10 absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] via-transparent to-transparent" />
 
       <div className="relative flex min-h-screen w-full flex-col items-center justify-center px-4 text-center">
         {/* 404 Content */}
         <div className="z-10 flex flex-col items-center gap-8">
           {/* 404 Number */}
-          <div className="from-primary to-accent-secondary animate-gradient-slow bg-linear-to-r bg-[length:200%_200%] bg-clip-text text-8xl font-bold text-transparent sm:text-9xl lg:text-[12rem]">
+          <div className="from-primary to-accent-secondary animate-gradient-slow bg-linear-to-r bg-size-[200%_200%] bg-clip-text text-8xl font-bold text-transparent sm:text-9xl lg:text-[12rem]">
             404
           </div>
 

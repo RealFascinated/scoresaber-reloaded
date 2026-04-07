@@ -30,6 +30,7 @@ const BasePlaylistIds = z.enum([
   "scoresaber-ranked-maps",
   "scoresaber-qualified-maps",
   "scoresaber-ranking-queue-maps",
+  "scoresaber-trending",
 ]);
 
 export const PlaylistIdsSchema = z.union([
@@ -61,6 +62,8 @@ export default class PlaylistService {
         return await PlaylistService.getQualifiedMapsPlaylist();
       case "scoresaber-ranking-queue-maps":
         return await PlaylistService.getRankingQueueMapsPlaylist();
+      case "scoresaber-trending":
+        return await PlaylistService.getTopTrendingMapsPlaylist();
     }
     throw new NotFoundError(`Playlist ${id} not found`);
   }
@@ -146,6 +149,32 @@ export default class PlaylistService {
         syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-ranking-queue-maps.bplist`,
       },
       songs: leaderboards.map(leaderboard => ({
+        songName: leaderboard.songName,
+        levelAuthorName: leaderboard.songAuthorName,
+        hash: leaderboard.songHash,
+        difficulties: leaderboard.difficulties.map(difficulty => ({
+          difficulty: difficulty.difficulty,
+          characteristic: difficulty.characteristic,
+        })),
+      })),
+    };
+  }
+
+  /**
+   * Gets the top 100 trending maps playlist.
+   *
+   * @returns the top trending maps playlist
+   */
+  public static async getTopTrendingMapsPlaylist(): Promise<Playlist> {
+    const trendingLeaderboards = await ScoreSaberLeaderboardsRepository.getTopTrendingLeaderboards(100);
+
+    return {
+      playlistTitle: `ScoreSaber Trending (${getPlaylistTitleDate(new Date())})`,
+      playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
+      customData: {
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-trending.bplist`,
+      },
+      songs: trendingLeaderboards.map(leaderboard => ({
         songName: leaderboard.songName,
         levelAuthorName: leaderboard.songAuthorName,
         hash: leaderboard.songHash,

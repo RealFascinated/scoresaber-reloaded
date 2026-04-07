@@ -222,6 +222,20 @@ export class ScoreSaberLeaderboardsRepository {
     return ScoreSaberLeaderboardsRepository.fetchLeaderboards({ qualified: true });
   }
 
+  public static async getTopTrendingLeaderboards(limit: number = 100): Promise<ScoreSaberLeaderboard[]> {
+    const rows = await db
+      .select()
+      .from(scoreSaberLeaderboardsTable)
+      .orderBy(
+        sql`${scoreSaberLeaderboardsTable.trendingScore} DESC NULLS LAST`,
+        sql`${scoreSaberLeaderboardsTable.rankedDate} DESC NULLS LAST`,
+        desc(scoreSaberLeaderboardsTable.id)
+      )
+      .limit(limit);
+
+    return rows.map(row => leaderboardRowToType(row));
+  }
+
   public static getRankedLeaderboardsByStarsBetween(
     minStars: number,
     maxStars: number
