@@ -3,7 +3,7 @@ import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { sql } from "drizzle-orm";
 import { db } from "../../db";
-import { scoreSaberLeaderboardsTable, scoreSaberScoreEventTable } from "../../db/schema";
+import { scoreSaberScoreEventTable } from "../../db/schema";
 
 export class ScoreEventService {
   /**
@@ -31,29 +31,29 @@ export class ScoreEventService {
     await db.execute(sql`
       WITH agg AS (
         SELECT
-          events.${scoreSaberScoreEventTable.leaderboardId} AS leaderboard_id,
-          count(DISTINCT events.${scoreSaberScoreEventTable.playerId})::int AS unique_players_7d,
+          events."leaderboardId" AS leaderboard_id,
+          count(DISTINCT events."playerId")::int AS unique_players_7d,
           count(*)::int AS plays_7d
-        FROM ${scoreSaberScoreEventTable} AS events
-        WHERE events.${scoreSaberScoreEventTable.timestamp} >= ${oneWeekAgo}
-        GROUP BY events.${scoreSaberScoreEventTable.leaderboardId}
+        FROM "scoresaber-score-events" AS events
+        WHERE events."timestamp" >= ${oneWeekAgo}
+        GROUP BY events."leaderboardId"
       )
-      UPDATE ${scoreSaberLeaderboardsTable} AS leaderboards
-      SET ${scoreSaberLeaderboardsTable.trendingScore} =
+      UPDATE "scoresaber-leaderboards" AS leaderboards
+      SET "trendingScore" =
         (agg.unique_players_7d * 1000 + agg.plays_7d)::double precision
       FROM agg
-      WHERE leaderboards.${scoreSaberLeaderboardsTable.id} = agg.leaderboard_id
+      WHERE leaderboards."id" = agg.leaderboard_id
     `);
 
     await db.execute(sql`
-      UPDATE ${scoreSaberLeaderboardsTable} AS leaderboards
-      SET ${scoreSaberLeaderboardsTable.trendingScore} = 0
-      WHERE leaderboards.${scoreSaberLeaderboardsTable.trendingScore} <> 0
+      UPDATE "scoresaber-leaderboards" AS leaderboards
+      SET "trendingScore" = 0
+      WHERE leaderboards."trendingScore" <> 0
         AND NOT EXISTS (
           SELECT 1
-          FROM ${scoreSaberScoreEventTable} AS events
-          WHERE events.${scoreSaberScoreEventTable.leaderboardId} = leaderboards.${scoreSaberLeaderboardsTable.id}
-            AND events.${scoreSaberScoreEventTable.timestamp} >= ${oneWeekAgo}
+          FROM "scoresaber-score-events" AS events
+          WHERE events."leaderboardId" = leaderboards."id"
+            AND events."timestamp" >= ${oneWeekAgo}
         )
     `);
 
@@ -70,27 +70,27 @@ export class ScoreEventService {
     await db.execute(sql`
       WITH agg AS (
         SELECT
-          events.${scoreSaberScoreEventTable.leaderboardId} AS leaderboard_id,
+          events."leaderboardId" AS leaderboard_id,
           count(*)::int AS plays_24h
-        FROM ${scoreSaberScoreEventTable} AS events
-        WHERE events.${scoreSaberScoreEventTable.timestamp} >= ${oneDayAgo}
-        GROUP BY events.${scoreSaberScoreEventTable.leaderboardId}
+        FROM "scoresaber-score-events" AS events
+        WHERE events."timestamp" >= ${oneDayAgo}
+        GROUP BY events."leaderboardId"
       )
-      UPDATE ${scoreSaberLeaderboardsTable} AS leaderboards
-      SET ${scoreSaberLeaderboardsTable.dailyPlays} = agg.plays_24h
+      UPDATE "scoresaber-leaderboards" AS leaderboards
+      SET "dailyPlays" = agg.plays_24h
       FROM agg
-      WHERE leaderboards.${scoreSaberLeaderboardsTable.id} = agg.leaderboard_id
+      WHERE leaderboards."id" = agg.leaderboard_id
     `);
 
     await db.execute(sql`
-      UPDATE ${scoreSaberLeaderboardsTable} AS leaderboards
-      SET ${scoreSaberLeaderboardsTable.dailyPlays} = 0
-      WHERE leaderboards.${scoreSaberLeaderboardsTable.dailyPlays} <> 0
+      UPDATE "scoresaber-leaderboards" AS leaderboards
+      SET "dailyPlays" = 0
+      WHERE leaderboards."dailyPlays" <> 0
         AND NOT EXISTS (
           SELECT 1
-          FROM ${scoreSaberScoreEventTable} AS events
-          WHERE events.${scoreSaberScoreEventTable.leaderboardId} = leaderboards.${scoreSaberLeaderboardsTable.id}
-            AND events.${scoreSaberScoreEventTable.timestamp} >= ${oneDayAgo}
+          FROM "scoresaber-score-events" AS events
+          WHERE events."leaderboardId" = leaderboards."id"
+            AND events."timestamp" >= ${oneDayAgo}
         )
     `);
 

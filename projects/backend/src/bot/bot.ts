@@ -18,6 +18,7 @@ import "./command/fetch-missing-player-scores";
 import "./command/force-track-player-statistics";
 import "./command/refresh-medal-scores";
 import "./command/refresh-ranked-leaderboards";
+import "./command/refresh-trending-maps";
 import "./command/update-player-medals";
 
 const discordBotLog = Logger.withTopic("Discord Bot");
