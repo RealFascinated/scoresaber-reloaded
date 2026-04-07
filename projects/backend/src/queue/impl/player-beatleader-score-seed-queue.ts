@@ -25,6 +25,7 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
       return;
     }
 
+    PlayerBeatLeaderScoreSeedQueue.logger.info(`Fetching BeatLeader scores for player "${playerId}"`);
     await PlayerBeatLeaderScoresService.fetchMissingBeatLeaderScores(account, {
       mode: "backfill",
     });
