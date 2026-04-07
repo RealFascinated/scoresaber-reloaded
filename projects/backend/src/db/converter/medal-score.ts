@@ -1,10 +1,10 @@
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { normalizeModifiers } from "@ssr/common/score/modifier";
-import { ScoreSaberMedalScoreRow } from "../schema";
+import { ScoreSaberScoreRow } from "../schema";
 
 /**
- * Converts a ScoreSaberMedalScoreRow to a ScoreSaberMedalScore.
+ * Converts a ScoreSaberScoreRow to a ScoreSaberMedalScore.
  *
  * Rank is not stored on the row; callers should set it when context is known
  * (e.g. from leaderboard placement).
@@ -12,7 +12,7 @@ import { ScoreSaberMedalScoreRow } from "../schema";
  * @param row the row to convert
  * @returns the converted ScoreSaberMedalScore
  */
-export function scoreSaberMedalScoreRowToType(row: ScoreSaberMedalScoreRow): ScoreSaberMedalScore {
+export function scoreSaberMedalScoreRowToType(row: ScoreSaberScoreRow): ScoreSaberMedalScore {
   return {
     playerId: row.playerId,
     leaderboardId: row.leaderboardId,

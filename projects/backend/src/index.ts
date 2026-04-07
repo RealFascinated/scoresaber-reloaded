@@ -35,6 +35,7 @@ import { LeaderboardRankedSyncService } from "./service/leaderboard/leaderboard-
 import { PlayerMedalsService } from "./service/medals/player-medals.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
 import PlaylistService from "./service/playlist/playlist.service";
+import { ScoreEventService } from "./service/score-event/score-event.service";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
@@ -161,6 +162,17 @@ export const app = new Elysia()
             .setTitle("Nightly global medal refresh")
             .setDescription(`Finished in ${formatDuration(Date.now() - before)}.`)
         );
+      },
+    })
+  )
+  .use(
+    cron({
+      name: "update-leaderboard-daily-plays",
+      pattern: "0 * * * *", // Every 1 hour
+      timezone: "Europe/London",
+      protect: true,
+      run: async () => {
+        await ScoreEventService.updateLeaderboardDailyPlays();
       },
     })
   )

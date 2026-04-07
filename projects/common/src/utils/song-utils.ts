@@ -135,7 +135,9 @@ export function getDifficulty(diff: Difficulty | MapDifficulty) {
     d => d.id === (typeof diff === "string" ? diff.toLowerCase() : diff.mapDifficulty.toLowerCase())
   );
   if (!difficulty) {
-    throw new Error(`Unknown difficulty: ${typeof diff === "string" ? diff : diff.mapDifficulty.toLowerCase()}`);
+    throw new Error(
+      `Unknown difficulty: ${typeof diff === "string" ? diff : diff.mapDifficulty.toLowerCase()}`
+    );
   }
   return difficulty;
 }

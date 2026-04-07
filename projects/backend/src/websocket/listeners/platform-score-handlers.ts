@@ -17,6 +17,7 @@ import BeatLeaderService from "../../service/beatleader/beatleader.service";
 import MetricsService, { MetricType } from "../../service/infra/metrics.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
+import { ScoreEventService } from "../../service/score-event/score-event.service";
 import { TopScoresService } from "../../service/score/top-scores.service";
 
 const scoreSaberWsLog = Logger.withTopic("ScoreSaber WebSocket");
@@ -188,7 +189,6 @@ export class ScoreWebsockets implements EventListener {
       } else {
         await ScoreSaberLeaderboardsRepository.updateLeaderboardById(leaderboard.id, {
           plays: leaderboard.plays,
-          dailyPlays: leaderboard.dailyPlays,
           maxScore: leaderboard.maxScore,
         });
       }
@@ -196,6 +196,9 @@ export class ScoreWebsockets implements EventListener {
       // Track unique daily players in Redis
       const metric = MetricsService.getMetric<UniqueDailyPlayersMetric>(MetricType.UNIQUE_DAILY_PLAYERS);
       metric?.addPlayer(player.id);
+
+      // Insert a score event
+      await ScoreEventService.insertScoreEvent(score);
 
       // Save the score stats
       if (beatLeaderScore) {

@@ -437,12 +437,26 @@ export const metricsTable = pgTable("metrics", {
   updatedAt: timestamp().notNull().defaultNow(),
 });
 
+export const scoreSaberScoreEventTable = pgTable(
+  "scoresaber-score-events",
+  {
+    // Identifiers
+    id: serial().primaryKey(),
+    playerId: varchar({ length: 32 }).notNull(),
+    leaderboardId: integer().notNull(),
+
+    timestamp: timestamp().notNull(),
+  },
+  table => [
+    index("score_events_leaderboard_timestamp_idx").on(table.leaderboardId, table.timestamp),
+    index("score_events_timestamp_idx").on(table.timestamp),
+  ]
+);
+
 export type ScoreSaberAccountRow = typeof scoreSaberAccountsTable.$inferSelect;
 export type PlayerHistoryRow = typeof playerHistoryTable.$inferSelect;
 export type ScoreSaberScoreRow = typeof scoreSaberScoresTable.$inferSelect;
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
-/** @deprecated Use {@link ScoreSaberScoreRow}; medal listings read from `scoresaber-scores`. */
-export type ScoreSaberMedalScoreRow = ScoreSaberScoreRow;
 export type ScoreSaberLeaderboardRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
 export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;
 export type BeatLeaderScoreRow = typeof beatLeaderScoresTable.$inferSelect;
