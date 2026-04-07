@@ -10,8 +10,8 @@ COPY projects/common/package.json ./projects/common/
 COPY projects/backend/package.json ./projects/backend/
 COPY projects/website/package.json ./projects/website/
 
-# Install only production dependencies for the specific packages
-RUN bun install --frozen-lockfile --production --filter '@ssr/common' --filter 'backend'
+# Install production dependencies
+RUN bun install --frozen-lockfile --production
 
 # Copy source code after dependencies are installed
 COPY projects/common ./projects/common
@@ -30,15 +30,15 @@ COPY --from=depends /app/node_modules ./node_modules
 
 # Build the common library
 COPY --from=depends /app/projects/common ./projects/common
-RUN bun --filter '@ssr/common' build
+RUN cd projects/common && bun run build
 
 COPY --from=depends /app/projects/backend ./projects/backend
 
 # Lint before starting
-RUN bun run --filter 'backend' lint
+RUN cd projects/backend && bun run lint
 
 # Build the backend
-RUN bun run --filter 'backend' build
+RUN cd projects/backend && bun run build
 
 # Final stage - minimal runtime image
 FROM base AS final

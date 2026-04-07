@@ -18,18 +18,21 @@ COPY projects/common/package.json ./projects/common/
 COPY projects/website/package.json ./projects/website/
 COPY projects/backend/package.json ./projects/backend/
 
-# Install dependencies for the specific packages (including dev dependencies for build)
-RUN bun install --frozen-lockfile --filter '@ssr/common' --filter 'website'
+# Install dependencies (including dev dependencies for build)
+RUN bun install --frozen-lockfile
 
 # Copy source code after dependencies are installed
 COPY projects/common ./projects/common
 COPY projects/website ./projects/website
 
 # Build the common library
-RUN bun --filter '@ssr/common' build
+RUN cd projects/common && bun run build
+
+# Lint website before build
+RUN cd projects/website && bun run lint
 
 # Build the website
-RUN bun run --filter website build
+RUN cd projects/website && bun run build
 
 # Run the app
 FROM node:alpine3.22 AS runner

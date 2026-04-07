@@ -275,7 +275,7 @@ export default function SimplePagination({
           1
         </PageButton>
       );
-      if (startPage > 2)
+      if (startPage > 2) {
         pageNumbers.push(
           <PageSelector
             key="ellipsis-start"
@@ -284,6 +284,7 @@ export default function SimplePagination({
             isLoading={false}
           />
         );
+      }
     }
 
     for (let i = startPage; i <= endPage; i++) {
@@ -304,7 +305,7 @@ export default function SimplePagination({
     }
 
     if (endPage < totalPages) {
-      if (endPage < totalPages - 1)
+      if (endPage < totalPages - 1) {
         pageNumbers.push(
           <PageSelector
             key="ellipsis-end"
@@ -313,6 +314,7 @@ export default function SimplePagination({
             isLoading={false}
           />
         );
+      }
       pageNumbers.push(
         <PageButton
           key="end"
