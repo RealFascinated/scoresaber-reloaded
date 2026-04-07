@@ -9,12 +9,17 @@ export type Difficulty = {
   /**
    * The name of the difficulty
    */
-  name: MapDifficulty;
+  mapDifficulty: MapDifficulty;
 
   /**
-   * The alternative name of the difficulty
+   * The display name of the difficulty
    */
-  alternativeName?: string;
+  displayName?: string;
+
+  /**
+   * The short name of the difficulty
+   */
+  shortName: string;
 
   /**
    * The color of the difficulty
@@ -24,20 +29,21 @@ export type Difficulty = {
   /**
    * The difficulty id of the difficulty
    */
-  diffId: number;
+  scoresaberDiffId: number;
 };
 
 const difficulties: Difficulty[] = [
-  { id: "easy", name: "Easy", color: "var(--easy)", diffId: 1 },
-  { id: "normal", name: "Normal", color: "var(--normal)", diffId: 3 },
-  { id: "hard", name: "Hard", color: "var(--hard)", diffId: 5 },
-  { id: "expert", name: "Expert", color: "var(--expert)", diffId: 7 },
+  { id: "easy", mapDifficulty: "Easy", shortName: "E", color: "var(--easy)", scoresaberDiffId: 1 },
+  { id: "normal", mapDifficulty: "Normal", shortName: "N", color: "var(--normal)", scoresaberDiffId: 3 },
+  { id: "hard", mapDifficulty: "Hard", shortName: "H", color: "var(--hard)", scoresaberDiffId: 5 },
+  { id: "expert", mapDifficulty: "Expert", shortName: "Ex", color: "var(--expert)", scoresaberDiffId: 7 },
   {
     id: "expertplus",
-    name: "ExpertPlus",
-    alternativeName: "Expert+",
+    mapDifficulty: "ExpertPlus",
+    displayName: "Expert+",
+    shortName: "Ex+",
     color: "var(--expertPlus)",
-    diffId: 9,
+    scoresaberDiffId: 9,
   },
 ];
 
@@ -115,7 +121,7 @@ export function getScoreBadgeFromName(name: string): ScoreBadge {
  */
 export function getDifficultyName(diff: Difficulty | MapDifficulty) {
   const difficulty = getDifficulty(diff);
-  return difficulty.alternativeName ?? difficulty.name;
+  return difficulty.displayName ?? difficulty.mapDifficulty;
 }
 
 /**
@@ -126,10 +132,10 @@ export function getDifficultyName(diff: Difficulty | MapDifficulty) {
  */
 export function getDifficulty(diff: Difficulty | MapDifficulty) {
   const difficulty = difficulties.find(
-    d => d.id === (typeof diff === "string" ? diff.toLowerCase() : diff.name.toLowerCase())
+    d => d.id === (typeof diff === "string" ? diff.toLowerCase() : diff.mapDifficulty.toLowerCase())
   );
   if (!difficulty) {
-    throw new Error(`Unknown difficulty: ${typeof diff === "string" ? diff : diff.name.toLowerCase()}`);
+    throw new Error(`Unknown difficulty: ${typeof diff === "string" ? diff : diff.mapDifficulty.toLowerCase()}`);
   }
   return difficulty;
 }

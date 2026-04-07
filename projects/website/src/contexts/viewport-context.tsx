@@ -32,6 +32,11 @@ function getMaxWidthMatches(px: number): boolean {
 /**
  * True when the viewport width is at or below the given Tailwind breakpoint (same as the former width <= Breakpoint[k] check).
  * Uses matchMedia so we only re-render when crossing the boundary, not on every resize pixel.
+ *
+ * Default breakpoint is md (768px).
+ *
+ * @param breakpoint the breakpoint to check
+ * @returns true if the viewport width is at or below the given breakpoint
  */
 export function useIsMobile(breakpoint: BreakpointKey = "md"): boolean {
   const maxPx = Breakpoint[breakpoint];

@@ -1,7 +1,8 @@
 import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
-import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import { getDifficulty } from "@ssr/common/utils/song-utils";
+import { useIsMobile } from "../../../contexts/viewport-context";
 import SimpleLink from "../../simple-link";
 
 type DifficultyButtonProps = {
@@ -10,11 +11,16 @@ type DifficultyButtonProps = {
 };
 
 export function DifficultyButton({ leaderboardDifficulty, selectedId }: DifficultyButtonProps) {
+  const isMobile = useIsMobile();
+
   const { difficulty, id } = leaderboardDifficulty;
 
   const isSelected = id === selectedId;
   const difficultyData = getDifficulty(difficulty);
   const color = difficultyData.color;
+  const name = isMobile
+    ? difficultyData.shortName
+    : (difficultyData.displayName ?? difficultyData.mapDifficulty);
 
   const buttonId = `difficulty-btn-${id}`;
   return (
@@ -36,7 +42,7 @@ export function DifficultyButton({ leaderboardDifficulty, selectedId }: Difficul
           filter: isSelected ? "brightness(1)" : "brightness(0.5)",
         }}
       >
-        <span>{getDifficultyName(difficulty)}</span>
+        <span>{name}</span>
       </Button>
     </SimpleLink>
   );
