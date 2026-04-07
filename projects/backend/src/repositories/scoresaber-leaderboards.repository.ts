@@ -272,7 +272,6 @@ export class ScoreSaberLeaderboardsRepository {
   public static async upsertLeaderboards(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
     if (leaderboards.length === 0) return;
 
-    const t = scoreSaberLeaderboardsTable;
     const rows: ScoreSaberLeaderboardRow[] = leaderboards.map(lb => ({
       id: lb.id,
       songHash: lb.songHash,
@@ -292,14 +291,15 @@ export class ScoreSaberLeaderboardsRepository {
       dailyPlays: lb.dailyPlays,
       seededScores: false,
       cachedSongArt: false,
+      trendingScore: 0,
       timestamp: lb.timestamp,
     }));
 
     await db
-      .insert(t)
+      .insert(scoreSaberLeaderboardsTable)
       .values(rows)
       .onConflictDoUpdate({
-        target: t.id,
+        target: scoreSaberLeaderboardsTable.id,
         set: {
           songHash: sql`excluded."songHash"`,
           songName: sql`excluded."songName"`,
@@ -317,8 +317,8 @@ export class ScoreSaberLeaderboardsRepository {
           plays: sql`excluded."plays"`,
           dailyPlays: sql`excluded."dailyPlays"`,
           timestamp: sql`excluded."timestamp"`,
-          seededScores: sql`${t.seededScores}`,
-          cachedSongArt: sql`${t.cachedSongArt}`,
+          seededScores: sql`${scoreSaberLeaderboardsTable.seededScores}`,
+          cachedSongArt: sql`${scoreSaberLeaderboardsTable.cachedSongArt}`,
         },
       });
   }

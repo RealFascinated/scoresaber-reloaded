@@ -104,6 +104,11 @@ export class ScoreWebsockets implements EventListener {
 
     connectBeatLeaderWebsocket({
       onScore: async beatLeaderScore => {
+        // a reallyyyyyyyyyyyyyyy jank fix because ell 🥹🥹😢
+        if (beatLeaderScore.playerId == "335393") {
+          beatLeaderScore.playerId = "76561198979484227";
+        }
+
         try {
           const beatLeaderSeenScoresMetric = MetricsService.getMetric<BeatLeaderSeenScoresMetric>(
             MetricType.BEATLEADER_SEEN_SCORES
