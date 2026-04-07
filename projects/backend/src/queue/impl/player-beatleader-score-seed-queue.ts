@@ -10,7 +10,7 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player BeatLeader Score Seed Queue");
 
   constructor() {
-    super(QueueId.PlayerBeatLeaderScoreSeedQueue, "fifo");
+    super(QueueId.PlayerBeatLeaderScoreSeedQueue, "fifo", 4);
 
     setImmediate(() => this.insertPlayers());
     setInterval(() => this.insertPlayers(), TimeUnit.toMillis(TimeUnit.Minute, 10));
