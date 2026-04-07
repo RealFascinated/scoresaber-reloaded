@@ -1,0 +1,1 @@
+DROP INDEX "leaderboards_author_idx";

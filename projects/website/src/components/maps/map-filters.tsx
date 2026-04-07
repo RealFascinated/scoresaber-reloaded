@@ -15,9 +15,9 @@ import { Input } from "../ui/input";
 const categoryOptions: Record<ScoreSaberLeaderboardSearchCategory, string> = {
   trending: "Trending",
   date_ranked: "Date Ranked",
-  plays: "Scores Set",
+  plays: "Plays",
+  daily_plays: "Daily Plays",
   star_difficulty: "Star Difficulty",
-  author: "Author",
 };
 
 const sortOptions: Record<ScoreSaberLeaderboardSearchSort, string> = {

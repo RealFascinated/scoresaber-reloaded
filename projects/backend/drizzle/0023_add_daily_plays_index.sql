@@ -1,0 +1,1 @@
+CREATE INDEX "leaderboards_daily_plays_desc_idx" ON "scoresaber-leaderboards" USING btree ("dailyPlays" DESC NULLS LAST);

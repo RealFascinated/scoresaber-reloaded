@@ -5,8 +5,8 @@ export const ScoreSaberLeaderboardSearchSortSchema = z.enum(["asc", "desc"]);
 export const ScoreSaberLeaderboardSearchCategorySchema = z.enum([
   "date_ranked",
   "star_difficulty",
-  "author",
   "plays",
+  "daily_plays",
   "trending",
 ]);
 

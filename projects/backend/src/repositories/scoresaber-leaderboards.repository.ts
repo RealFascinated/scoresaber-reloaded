@@ -374,14 +374,14 @@ export class ScoreSaberLeaderboardsRepository {
           return ascending
             ? [sql`${scoreSaberLeaderboardsTable.plays} ASC NULLS LAST`, idTie]
             : [sql`${scoreSaberLeaderboardsTable.plays} DESC NULLS LAST`, idTie];
+        case "daily_plays":
+          return ascending
+            ? [sql`${scoreSaberLeaderboardsTable.dailyPlays} ASC NULLS LAST`, idTie]
+            : [sql`${scoreSaberLeaderboardsTable.dailyPlays} DESC NULLS LAST`, idTie];
         case "star_difficulty":
           return ascending
             ? [sql`${starsCol} ASC NULLS LAST`, idTie]
             : [sql`${starsCol} DESC NULLS LAST`, idTie];
-        case "author":
-          return ascending
-            ? [sql`${scoreSaberLeaderboardsTable.levelAuthorName} ASC NULLS LAST`, idTie]
-            : [sql`${scoreSaberLeaderboardsTable.levelAuthorName} DESC NULLS LAST`, idTie];
         case "date_ranked":
           return ascending
             ? [sql`${scoreSaberLeaderboardsTable.rankedDate} ASC NULLS LAST`, idTie]
