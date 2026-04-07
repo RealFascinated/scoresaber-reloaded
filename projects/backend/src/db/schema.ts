@@ -442,8 +442,12 @@ export const scoreSaberScoreEventTable = pgTable(
   {
     // Identifiers
     id: serial().primaryKey(),
-    playerId: varchar({ length: 32 }).notNull(),
-    leaderboardId: integer().notNull(),
+    playerId: varchar({ length: 32 })
+      .notNull()
+      .references(() => scoreSaberAccountsTable.id, { onDelete: "no action" }),
+    leaderboardId: integer()
+      .notNull()
+      .references(() => scoreSaberLeaderboardsTable.id, { onDelete: "no action" }),
 
     timestamp: timestamp().notNull(),
   },

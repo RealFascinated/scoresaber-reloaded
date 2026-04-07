@@ -1,0 +1,2 @@
+ALTER TABLE "scoresaber-score-events" ADD CONSTRAINT "scoresaber-score-events_playerId_scoresaber-accounts_id_fk" FOREIGN KEY ("playerId") REFERENCES "public"."scoresaber-accounts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "scoresaber-score-events" ADD CONSTRAINT "scoresaber-score-events_leaderboardId_scoresaber-leaderboards_id_fk" FOREIGN KEY ("leaderboardId") REFERENCES "public"."scoresaber-leaderboards"("id") ON DELETE no action ON UPDATE no action;
