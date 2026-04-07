@@ -56,12 +56,6 @@ COPY --from=runner /app/projects/common ./projects/common
 COPY --from=runner /app/projects/backend/package.json ./projects/backend/
 COPY --from=runner /app/projects/backend/ssr-backend ./projects/backend/ssr-backend
 
-# Install TypeScript for fromTypes (needs TypeScript compiler API at runtime)
-RUN bun install typescript --global
-
-# Copy for Types used in OpenAPI schema (fromTypes reads TypeScript source files)
-COPY --from=runner /app/projects/backend/src ./projects/backend/src
-COPY --from=runner /app/projects/backend/tsconfig.json ./projects/backend/
 
 # SQL migrations for startup `runMigrations()` (resolved via process.cwd()/drizzle; WORKDIR is projects/backend)
 COPY --from=runner /app/projects/backend/drizzle ./projects/backend/drizzle
