@@ -106,7 +106,7 @@ export function timeAgo(input: Date, maxUnits: number = 2) {
   }
 
   // Return formatted result with at most two units
-  return result.join(", ") + " ago";
+  return result.join(" ") + " ago";
 }
 
 /**
