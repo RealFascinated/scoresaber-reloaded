@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const ScoreHistoryGraphSchema = z
+export const ScoreHistoryGraphSchema = z
   .object({
     timestamp: z.date(),
     accuracy: z.number(),

@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
+import { playlistSchema } from "@ssr/common/schemas/ssr/playlist/playlist";
 import PlaylistService, { PlaylistIdsSchema } from "../../service/playlist/playlist.service";
 
 export default function playlistController(app: Elysia) {
@@ -15,6 +16,7 @@ export default function playlistController(app: Elysia) {
           params: z.object({
             id: PlaylistIdsSchema,
           }),
+          response: playlistSchema,
           detail: {
             description: "Gets a playlist by id",
           },
@@ -30,6 +32,7 @@ export default function playlistController(app: Elysia) {
           query: z.object({
             config: z.string(),
           }),
+          response: playlistSchema,
           detail: {
             description: "Create a custom ranked playlist",
           },
@@ -47,6 +50,7 @@ export default function playlistController(app: Elysia) {
             toSnipe: z.string(),
             settings: z.string().optional(),
           }),
+          response: playlistSchema,
           detail: {
             description: "Create a snipe playlist",
           },
@@ -63,6 +67,7 @@ export default function playlistController(app: Elysia) {
             user: z.string(),
             settings: z.string().optional(),
           }),
+          response: playlistSchema,
           detail: {
             description: "Create a self playlist",
           },

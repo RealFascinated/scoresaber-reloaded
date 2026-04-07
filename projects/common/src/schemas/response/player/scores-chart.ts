@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const PlayerScoreChartDataPointSchema = z.object({
+export const PlayerScoreChartDataPointSchema = z.object({
   accuracy: z.number(),
   stars: z.number(),
   pp: z.number(),
@@ -9,7 +9,7 @@ const PlayerScoreChartDataPointSchema = z.object({
   leaderboardName: z.string(),
   leaderboardDifficulty: z.string(),
 });
-const PlayerScoresChartResponseSchema = z.object({
+export const PlayerScoresChartResponseSchema = z.object({
   data: z.array(PlayerScoreChartDataPointSchema),
 });
 

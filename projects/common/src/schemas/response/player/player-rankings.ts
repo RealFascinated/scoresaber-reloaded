@@ -1,6 +1,11 @@
-import type { Page } from "../../../pagination";
+import { z } from "zod";
 import ScoreSaberPlayer from "../../../player/impl/scoresaber-player";
+import { PaginationMetadataSchema } from "../../pagination";
 
-export type PlayerRankingsResponse = Page<ScoreSaberPlayer> & {
-  countryMetadata: Record<string, number>;
-};
+export const PlayerRankingsResponseSchema = z.object({
+  items: z.array(z.custom<ScoreSaberPlayer>()),
+  metadata: PaginationMetadataSchema,
+  countryMetadata: z.record(z.string(), z.number()),
+});
+
+export type PlayerRankingsResponse = z.infer<typeof PlayerRankingsResponseSchema>;

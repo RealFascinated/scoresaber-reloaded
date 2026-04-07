@@ -1,6 +1,7 @@
 import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
+import { LeaderboardsPageResponseSchema } from "@ssr/common/schemas/response/leaderboard/leaderboards-page";
 import { ScoreSaberLeaderboardSearchFiltersSchema } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
 import { Elysia } from "elysia";
 import { z } from "zod";
@@ -24,6 +25,7 @@ export default function leaderboardController(app: Elysia) {
           query: ScoreSaberLeaderboardSearchFiltersSchema.extend({
             page: z.coerce.number().default(1),
           }),
+          response: LeaderboardsPageResponseSchema,
           detail: {
             description: "Search ScoreSaber leaderboards",
           },

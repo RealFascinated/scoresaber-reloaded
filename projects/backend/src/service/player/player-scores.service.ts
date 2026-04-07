@@ -2,12 +2,12 @@ import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import type { Page } from "@ssr/common/pagination";
-import { Pagination } from "@ssr/common/pagination";
+import { Pagination, type Page } from "@ssr/common/pagination";
 import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
 import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { PlayerScoresChartResponse } from "@ssr/common/schemas/response/player/scores-chart";
+import type { AccSaberScoresPageResponse } from "@ssr/common/schemas/response/score/accsaber-scores-page";
 import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
 import { PlayerScoresQuery } from "@ssr/common/schemas/score/query/player-scores-query";
 import { ScoreSaberMedalScoreSortField } from "@ssr/common/schemas/score/query/sort/scoresaber-medal-scores-sort";
@@ -312,7 +312,7 @@ export class PlayerScoresService {
     sort: AccSaberScoreSort,
     direction: SortDirection,
     type: AccSaberScoreType
-  ): Promise<Page<AccSaberScore>> {
+  ): Promise<AccSaberScoresPageResponse> {
     const requested = await ApiServiceRegistry.getInstance()
       .getAccSaberService()
       .getPlayerScores(playerId, pageNumber, { sort, direction, type });

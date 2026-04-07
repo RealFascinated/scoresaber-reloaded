@@ -1,5 +1,5 @@
 import { NotFoundError } from "./error/not-found-error";
-import { Metadata } from "./types/metadata";
+import type { PaginationMetadata } from "./schemas/pagination";
 
 type FetchItemsFunction<T> = (fetchItems: FetchItems) => Promise<T[]>;
 type FetchItemsWithCursorFunction<T, TQuery = unknown> = (cursorInfo: CursorInfo<TQuery>) => Promise<T[]>;
@@ -200,5 +200,5 @@ export type Cursor = {
 
 export type Page<T> = {
   items: T[];
-  readonly metadata: Metadata;
+  readonly metadata: PaginationMetadata;
 };

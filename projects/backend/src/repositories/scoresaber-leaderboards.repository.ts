@@ -1,6 +1,6 @@
-import type { Page } from "@ssr/common/pagination";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
+import type { LeaderboardsPageResponse } from "@ssr/common/schemas/response/leaderboard/leaderboards-page";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import type { ScoreSaberLeaderboardSearchFilters } from "@ssr/common/schemas/scoresaber/leaderboard/search-filters";
 import type { SQL } from "drizzle-orm";
@@ -340,7 +340,7 @@ export class ScoreSaberLeaderboardsRepository {
   public static async lookupLeaderboards(
     page: number,
     filters?: ScoreSaberLeaderboardSearchFilters
-  ): Promise<Page<ScoreSaberLeaderboard>> {
+  ): Promise<LeaderboardsPageResponse> {
     const safePage = Math.max(1, page);
     const offset = (safePage - 1) * LEADERBOARD_SEARCH_PAGE_SIZE;
 

@@ -1,6 +1,7 @@
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { Pagination, type Page } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
+import type { ScoreSaberScoresPageResponse } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -17,7 +18,7 @@ export const useLeaderboardScores = (
   const friendIds = useStableLiveQuery(() => database.getFriendIds());
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
 
-  return useQuery<Page<ScoreSaberScore> | undefined>({
+  return useQuery<ScoreSaberScoresPageResponse | undefined>({
     queryKey: [
       "leaderboardScores",
       leaderboardId,

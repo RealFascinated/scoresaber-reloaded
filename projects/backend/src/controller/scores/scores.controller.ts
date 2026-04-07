@@ -2,6 +2,14 @@ import {
   accSaberScoreSortSchema,
   accSaberScoreTypeSchema,
 } from "@ssr/common/schemas/accsaber/tokens/query/query";
+import { AccSaberScoresPageResponseSchema } from "@ssr/common/schemas/response/score/accsaber-scores-page";
+import {
+  PlayerScoreSchema,
+  PlayerScoresPageResponseSchema,
+} from "@ssr/common/schemas/response/score/player-scores";
+import { ScoreHistoryGraphSchema } from "@ssr/common/schemas/response/score/score-history-graph";
+import { ScoreSaberScoresPageResponseSchema } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
+import { TopScoresPageResponseSchema } from "@ssr/common/schemas/response/score/top-scores";
 import { PlayerScoresQuerySchema } from "@ssr/common/schemas/score/query/player-scores-query";
 import { ScoreSaberMedalScoreSortFieldSchema } from "@ssr/common/schemas/score/query/sort/scoresaber-medal-scores-sort";
 import { ScoreSaberScoreSortFieldSchema } from "@ssr/common/schemas/score/query/sort/scoresaber-scores-sort";
@@ -29,6 +37,7 @@ export default function scoresController(app: Elysia) {
           params: z.object({
             scoreId: z.coerce.number(),
           }),
+          response: PlayerScoreSchema,
 
           detail: {
             description: "Fetch a score",
@@ -50,6 +59,7 @@ export default function scoresController(app: Elysia) {
           query: z.object({
             search: z.string().optional(),
           }),
+          response: PlayerScoresPageResponseSchema,
           detail: {
             description: "Fetch player scores from ScoreSaber",
           },
@@ -71,6 +81,7 @@ export default function scoresController(app: Elysia) {
             direction: SortDirectionSchema.default("desc"),
             type: accSaberScoreTypeSchema.default("overall"),
           }),
+          response: AccSaberScoresPageResponseSchema,
           detail: {
             description: "Fetch AccSaber player scores with optional BeatLeader replay URLs",
           },
@@ -90,6 +101,7 @@ export default function scoresController(app: Elysia) {
             page: z.coerce.number().default(1),
           }),
           query: PlayerScoresQuerySchema,
+          response: PlayerScoresPageResponseSchema,
           detail: {
             description: "Fetch player scores",
           },
@@ -115,6 +127,7 @@ export default function scoresController(app: Elysia) {
             page: z.coerce.number().default(1),
           }),
           query: PlayerScoresQuerySchema,
+          response: PlayerScoresPageResponseSchema,
           detail: {
             description: "Fetch player medal scores",
           },
@@ -131,6 +144,7 @@ export default function scoresController(app: Elysia) {
             playerId: z.string(),
             leaderboardId: z.coerce.number(),
           }),
+          response: ScoreHistoryGraphSchema,
           detail: {
             description: "Fetch player score history graph",
           },
@@ -172,6 +186,7 @@ export default function scoresController(app: Elysia) {
               .min(1)
               .max(SHARED_CONSTS.maxFriends + 1),
           }),
+          response: ScoreSaberScoresPageResponseSchema,
           detail: {
             description: "Fetch friends' scores for a leaderboard",
           },
@@ -188,6 +203,7 @@ export default function scoresController(app: Elysia) {
             page: z.coerce.number().default(1),
             limit: z.coerce.number().min(1).max(50).default(25),
           }),
+          response: TopScoresPageResponseSchema,
           detail: {
             description: "Fetch top scores",
           },

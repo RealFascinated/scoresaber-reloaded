@@ -2,10 +2,11 @@
 
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
-import { Pagination, type Page } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
 import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
+import type { AccSaberScoresPageResponse } from "@ssr/common/schemas/response/score/accsaber-scores-page";
 import { SortDirection } from "@ssr/common/schemas/score/query/sort/sort-direction";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -88,7 +89,7 @@ export default function AccSaberPlayerScores({ player }: Props) {
     isError,
     isLoading,
     isRefetching,
-  } = useQuery<Page<AccSaberScore>>({
+  } = useQuery<AccSaberScoresPageResponse>({
     queryKey: ["playerScores:accsaber", player.id, page, type, sort, direction],
     queryFn: async () =>
       (await ssrApi.fetchAccSaberPlayerScores(player.id, page, sort, direction, type)) ??

@@ -1,7 +1,6 @@
 import { parse } from "devalue";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
-import type { Page } from "../pagination";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import type { AccSaberScoreSort, AccSaberScoreType } from "../schemas/accsaber/tokens/query/query";
 import { AccSaberScore } from "../schemas/accsaber/tokens/score/score";
@@ -10,6 +9,7 @@ import { MapCharacteristic } from "../schemas/map/map-characteristic";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
 import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard";
+import { LeaderboardsPageResponse } from "../schemas/response/leaderboard/leaderboards-page";
 import LeaderboardScoresResponse from "../schemas/response/leaderboard/leaderboard-scores";
 import { PlaysByHmdResponse } from "../schemas/response/leaderboard/plays-by-hmd";
 import { MiniRankingResponse } from "../schemas/response/player/around-player";
@@ -19,8 +19,11 @@ import { PlayerSearchResponse } from "../schemas/response/player/player-search";
 import { PpGainResponse } from "../schemas/response/player/pp-boundary";
 import { PlayerScoresChartResponse } from "../schemas/response/player/scores-chart";
 import { PlayerMedalRankingsResponse } from "../schemas/response/ranking/medal-rankings";
+import { AccSaberScoresPageResponse } from "../schemas/response/score/accsaber-scores-page";
 import { PlayerScoresPageResponse } from "../schemas/response/score/player-scores";
 import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph";
+import { ScoreSaberScoresPageResponse } from "../schemas/response/score/scoresaber-scores-page";
+import { TopScoresPageResponse } from "../schemas/response/score/top-scores";
 import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
 import type { PlayerScoresQuery } from "../schemas/score/query/player-scores-query";
@@ -149,7 +152,7 @@ class SSRApi {
    * @param page the page
    */
   async getFriendLeaderboardScores(friendIds: string[], leaderboardId: string, page: number) {
-    return await this.request<Page<ScoreSaberScore>>(
+    return await this.request<ScoreSaberScoresPageResponse>(
       `/scores/friend/leaderboard/${leaderboardId}/${page}`,
       undefined,
       {
@@ -189,7 +192,7 @@ class SSRApi {
    * @param page the page
    */
   async fetchPlayerScoreSaberScoresHistory(playerId: string, leaderboardId: string, page: number) {
-    return await this.request<Page<ScoreSaberScore>>(
+    return await this.request<ScoreSaberScoresPageResponse>(
       `/player/score-history/${playerId}/${leaderboardId}/${page}`
     );
   }
@@ -246,7 +249,7 @@ class SSRApi {
     direction: SortDirection,
     type: AccSaberScoreType
   ) {
-    return await this.request<Page<AccSaberScore>>(`/scores/player/accsaber/${id}/${page}`, {
+    return await this.request<AccSaberScoresPageResponse>(`/scores/player/accsaber/${id}/${page}`, {
       sort,
       direction,
       type,
@@ -422,7 +425,7 @@ class SSRApi {
     page: number,
     options?: ScoreSaberLeaderboardSearchFilters
   ) {
-    return await this.request<Page<ScoreSaberLeaderboard>>(`/leaderboard/search`, {
+    return await this.request<LeaderboardsPageResponse>(`/leaderboard/search`, {
       page: page.toString(),
       ...(options?.ranked ? { ranked: options.ranked.toString() } : {}),
       ...(options?.qualified ? { qualified: options.qualified.toString() } : {}),
@@ -454,7 +457,7 @@ class SSRApi {
    * @returns the top scores
    */
   async fetchTopScores(page: number) {
-    return await this.request<Page<PlayerScore<ScoreSaberScore>>>(`/scores/top/${page}`);
+    return await this.request<TopScoresPageResponse>(`/scores/top/${page}`);
   }
 }
 

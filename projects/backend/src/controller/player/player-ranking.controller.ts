@@ -1,5 +1,7 @@
 import { Elysia } from "elysia";
 import { z } from "zod";
+import { PlayerRankingsResponseSchema } from "@ssr/common/schemas/response/player/player-rankings";
+import { PlayerMedalRankingsResponseSchema } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { PlayerMedalsService } from "../../service/medals/player-medals.service";
 import { PlayerSearchService } from "../../service/player/player-search.service";
 
@@ -23,6 +25,7 @@ export default function playerRankingController(app: Elysia) {
             country: z.string().default("").optional(),
             search: z.string().default("").optional(),
           }),
+          response: PlayerRankingsResponseSchema,
           detail: {
             description: "Fetch player ranking",
           },
@@ -41,6 +44,7 @@ export default function playerRankingController(app: Elysia) {
           query: z.object({
             country: z.string().optional(),
           }),
+          response: PlayerMedalRankingsResponseSchema,
           detail: {
             description: "Fetch medal ranking",
           },

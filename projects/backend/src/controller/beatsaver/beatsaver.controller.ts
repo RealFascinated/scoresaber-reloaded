@@ -1,6 +1,7 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
+import { BeatSaverMapSchema } from "@ssr/common/schemas/beatsaver/map/map";
 import { Elysia } from "elysia";
 import { z } from "zod";
 import BeatSaverService from "../../service/external/beatsaver.service";
@@ -23,6 +24,7 @@ export default function beatsaverController(app: Elysia) {
           difficulty: MapDifficultySchema,
           characteristic: MapCharacteristicSchema,
         }),
+        response: BeatSaverMapSchema,
         detail: {
           description: "Fetch BeatSaver map details",
         },

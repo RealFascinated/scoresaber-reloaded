@@ -1,8 +1,8 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger, { ScopedLogger } from "@ssr/common/logger";
-import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
+import type { ScoreSaberScoresPageResponse } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-history-graph";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
@@ -60,7 +60,7 @@ export class PlayerScoreHistoryService {
     playerId: string,
     leaderboardId: number,
     page: number
-  ): Promise<Page<ScoreSaberScore>> {
+  ): Promise<ScoreSaberScoresPageResponse> {
     const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
     if (!leaderboard) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);

@@ -1,9 +1,9 @@
 import { Cooldown } from "../../cooldown";
 import Logger from "../../logger";
-import type { Page } from "../../pagination";
 import { Pagination } from "../../pagination";
 import { type AccSaberScoreSort, type AccSaberScoreType } from "../../schemas/accsaber/tokens/query/query";
 import { type AccSaberScore } from "../../schemas/accsaber/tokens/score/score";
+import type { AccSaberScoresPageResponse } from "../../schemas/response/score/accsaber-scores-page";
 import { SortDirection } from "../../schemas/score/query/sort/sort-direction";
 import { accSaberDifficultyToMapDifficulty } from "../../utils/accsaber-difficulty";
 import ApiService from "../api-service";
@@ -50,7 +50,7 @@ export class AccSaberService extends ApiService {
       direction?: SortDirection;
       type?: AccSaberScoreType;
     } = {}
-  ): Promise<Page<AccSaberScore>> {
+  ): Promise<AccSaberScoresPageResponse> {
     const { sort = "date", direction = "desc", type = "overall" } = options;
     if (page < 1) page = 1;
 

@@ -1,5 +1,9 @@
 import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { PlayerPpsResponseSchema } from "@ssr/common/schemas/response/player/player-pps";
+import { PlayerRefreshResponseSchema } from "@ssr/common/schemas/response/player/player-refresh";
+import { PlayerScoresChartResponseSchema } from "@ssr/common/schemas/response/player/scores-chart";
+import { ScoreSaberScoresPageResponseSchema } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import { Elysia } from "elysia";
 import { z } from "zod";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
@@ -43,6 +47,7 @@ export default function playerController(app: Elysia) {
           params: z.object({
             playerId: z.string(),
           }),
+          response: PlayerScoresChartResponseSchema,
           detail: {
             description: "Fetch player score chart data",
           },
@@ -58,6 +63,7 @@ export default function playerController(app: Elysia) {
           params: z.object({
             playerId: z.string(),
           }),
+          response: PlayerPpsResponseSchema,
           detail: {
             description: "Fetch player PP values",
           },
@@ -73,6 +79,7 @@ export default function playerController(app: Elysia) {
           params: z.object({
             playerId: z.string(),
           }),
+          response: PlayerRefreshResponseSchema,
           detail: {
             description: "Refresh player data from ScoreSaber",
           },
@@ -149,6 +156,7 @@ export default function playerController(app: Elysia) {
             leaderboardId: z.coerce.number(),
             page: z.coerce.number(),
           }),
+          response: ScoreSaberScoresPageResponseSchema,
           detail: {
             description: "Fetch player score history for a leaderboard",
           },

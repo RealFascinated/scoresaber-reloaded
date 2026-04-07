@@ -1,6 +1,7 @@
 import Logger from "@ssr/common/logger";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
+import { isProduction } from "@ssr/common/utils/utils";
 import { sql } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberScoreEventTable } from "../../db/schema";
@@ -12,6 +13,10 @@ export class ScoreEventService {
    * @param score the score to insert the event for.
    */
   public static async insertScoreEvent(score: ScoreSaberScore): Promise<void> {
+    if (!isProduction()) {
+      return;
+    }
+
     await db.insert(scoreSaberScoreEventTable).values({
       playerId: score.playerId,
       leaderboardId: score.leaderboardId,
