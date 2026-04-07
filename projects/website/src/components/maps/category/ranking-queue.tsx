@@ -4,8 +4,7 @@ import ScoreSongInfo from "@/components/score/score-song-info";
 import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
+import { RankingQueueLeaderboard } from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
@@ -21,7 +20,7 @@ export default function RankingQueue() {
   });
   const [showOpenRankUnrank, setShowOpenRankUnrank] = useState(false);
 
-  const renderRequests = (name: string, requests: RankingRequestToken[]) => {
+  const renderRequests = (name: string, requests: RankingQueueLeaderboard[]) => {
     return (
       <Card className="flex flex-col gap-(--spacing-lg)">
         <h3 className="text-lg font-semibold">{name}</h3>
@@ -42,9 +41,7 @@ export default function RankingQueue() {
               </tr>
             </thead>
             <tbody>
-              {requests.map(rankingRequest => {
-                const leaderboard = getScoreSaberLeaderboardFromToken(rankingRequest.leaderboardInfo);
-                const createdAt = new Date(rankingRequest.created_at);
+              {requests.map(leaderboard => {
                 return (
                   <tr
                     key={leaderboard.id}
@@ -70,7 +67,7 @@ export default function RankingQueue() {
                       </SimpleLink>
                     </td>
                     {/* Difficulties */}
-                    <td className="px-3 py-1.5 text-center text-xs">{rankingRequest.difficultyCount}</td>
+                    <td className="px-3 py-1.5 text-center text-xs">{leaderboard.difficultyCount}</td>
 
                     {/* Daily Plays */}
                     <td className="px-3 py-1.5 text-center text-xs text-gray-400">
@@ -95,9 +92,9 @@ export default function RankingQueue() {
                     {/* Created */}
                     <td
                       className="px-3 py-1.5 text-center text-xs text-gray-400"
-                      title={formatDate(createdAt)}
+                      title={formatDate(leaderboard.timestamp)}
                     >
-                      {timeAgo(createdAt)}
+                      {timeAgo(leaderboard.timestamp)}
                     </td>
                   </tr>
                 );
@@ -121,7 +118,7 @@ export default function RankingQueue() {
 
   return (
     <div className="flex flex-col gap-(--spacing-lg)">
-      {renderRequests("Next in Queue", rankingRequests?.nextInQueue || [])}
+      {renderRequests("Next in Queue", rankingRequests?.nextInQueue ?? [])}
 
       <Button
         variant="secondary"
@@ -135,7 +132,7 @@ export default function RankingQueue() {
       </Button>
 
       {showOpenRankUnrank &&
-        renderRequests("Open rank/unrank requests", rankingRequests?.openRankUnrank || [])}
+        renderRequests("Open rank/unrank requests", rankingRequests?.openRankUnrank ?? [])}
     </div>
   );
 }

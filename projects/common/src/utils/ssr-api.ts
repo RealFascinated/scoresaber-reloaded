@@ -11,6 +11,7 @@ import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard
 import LeaderboardScoresResponse from "../schemas/response/leaderboard/leaderboard-scores";
 import { LeaderboardsPageResponse } from "../schemas/response/leaderboard/leaderboards-page";
 import { PlaysByHmdResponse } from "../schemas/response/leaderboard/plays-by-hmd";
+import { RankingQueueLeaderboardsResponse } from "../schemas/response/leaderboard/ranking-queue-leaderboards";
 import { MiniRankingResponse } from "../schemas/response/player/around-player";
 import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
 import { PlayerRankingsResponse } from "../schemas/response/player/player-rankings";
@@ -23,7 +24,6 @@ import { PlayerScoresPageResponse } from "../schemas/response/score/player-score
 import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph";
 import { ScoreSaberScoresPageResponse } from "../schemas/response/score/scoresaber-scores-page";
 import { TopScoresPageResponse } from "../schemas/response/score/top-scores";
-import ScoreSaberRankingRequestsResponse from "../schemas/response/scoresaber/ranking-requests";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
 import type { PlayerScoresQuery } from "../schemas/score/query/player-scores-query";
 import { ScoreSaberMedalScoreSortField } from "../schemas/score/query/sort/scoresaber-medal-scores-sort";
@@ -427,9 +427,9 @@ class SSRApi {
       ...(options?.category ? { category: options.category.toString() } : {}),
       ...(options?.stars
         ? {
-            minStar: (options.stars.min ?? 0).toString(),
-            maxStar: (options.stars.max ?? 0).toString(),
-          }
+          minStar: (options.stars.min ?? 0).toString(),
+          maxStar: (options.stars.max ?? 0).toString(),
+        }
         : {}),
       ...(options?.sort ? { sort: options.sort.toString() } : {}),
       ...(options?.query ? { query: options.query } : {}),
@@ -442,7 +442,7 @@ class SSRApi {
    * @returns the ranking queue
    */
   async fetchRankingQueue() {
-    return await this.request<ScoreSaberRankingRequestsResponse>(`/leaderboard/ranking-queue`);
+    return await this.request<RankingQueueLeaderboardsResponse>(`/leaderboard/ranking-queue`);
   }
 
   /**

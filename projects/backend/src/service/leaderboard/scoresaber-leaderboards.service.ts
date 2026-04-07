@@ -5,10 +5,12 @@ import { StorageBucket } from "@ssr/common/minio-buckets";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
+import { RankingQueueLeaderboard, RankingQueueLeaderboardsResponse } from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
+import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
 import Request from "@ssr/common/utils/request";
 import { getScoreSaberDifficultyFromDifficulty } from "@ssr/common/utils/scoresaber.util";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -206,17 +208,33 @@ export class ScoreSaberLeaderboardsService {
    *
    * @returns the ranking queue leaderboards
    */
-  public static async getRankingQueueLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
+  public static async getRankingQueueLeaderboards(): Promise<RankingQueueLeaderboardsResponse> {
     return CacheService.fetch(
       CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS,
       rankingQueueLeaderboardsCacheKey,
       async () => {
         const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
         if (!rankingQueueTokens) {
-          return [];
+          return {
+            nextInQueue: [],
+            openRankUnrank: [],
+            all: [],
+          };
         }
 
-        return rankingQueueTokens.all.map(token => getScoreSaberLeaderboardFromToken(token.leaderboardInfo));
+        function parseLeaderboard(token: RankingRequestToken): RankingQueueLeaderboard {
+          const leaderboard = getScoreSaberLeaderboardFromToken(token.leaderboardInfo);
+          return {
+            ...leaderboard,
+            difficultyCount: token.difficultyCount,
+          };
+        }
+
+        return {
+          nextInQueue: rankingQueueTokens.nextInQueue.map(parseLeaderboard),
+          openRankUnrank: rankingQueueTokens.openRankUnrank.map(parseLeaderboard),
+          all: rankingQueueTokens.all.map(parseLeaderboard),
+        };
       }
     );
   }
