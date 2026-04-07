@@ -65,11 +65,11 @@ if (bla) {
 
 The backend uses **Drizzle ORM** against **PostgreSQL**. The schema is TypeScript; SQL migrations are versioned in git.
 
-| What | Where |
-| --- | --- |
-| Drizzle config | `projects/backend/drizzle.config.ts` (`schema`, `out`, `dialect: postgresql`) |
-| Schema (source of truth) | `projects/backend/src/db/schema.ts` (and related `src/db/` code) |
-| Generated SQL + journal | `projects/backend/drizzle/*.sql`, `projects/backend/drizzle/meta/` |
+| What                     | Where                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| Drizzle config           | `projects/backend/drizzle.config.ts` (`schema`, `out`, `dialect: postgresql`)        |
+| Schema (source of truth) | `projects/backend/src/db/schema.ts` (and related `src/db/` code)                     |
+| Generated SQL + journal  | `projects/backend/drizzle/*.sql`, `projects/backend/drizzle/meta/`                   |
 | Apply migrations in code | `projects/backend/src/db/run-migrations.ts` (used at startup / deploy as applicable) |
 
 **If you change the schema** (`schema.ts` or table definitions), **including indexes**:

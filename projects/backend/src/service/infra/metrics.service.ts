@@ -11,6 +11,7 @@ import RedisHealthMetric from "../../metrics/impl/backend/redis-health";
 import ResponseTimeHistogramMetric from "../../metrics/impl/backend/response-time";
 import TotalRequestsMetric from "../../metrics/impl/backend/total-requests";
 import ProcessUptimeMetric from "../../metrics/impl/backend/uptime";
+import LeaderboardCountMetric from "../../metrics/impl/database/leaderboard-count";
 import PostgresDbSizeMetric from "../../metrics/impl/database/postgres-db-size";
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
 import ActivePlayerHmdStatisticMetric from "../../metrics/impl/player/active-player-hmd-statistic";
@@ -64,6 +65,7 @@ export enum MetricType {
 
   // Database metrics
   POSTGRES_DB_SIZE = "postgres_db_size",
+  LEADERBOARD_COUNT = "leaderboard_count",
 }
 
 export default class MetricsService {
@@ -110,6 +112,7 @@ export default class MetricsService {
 
     // Database metrics
     this.registerMetric(new PostgresDbSizeMetric());
+    this.registerMetric(new LeaderboardCountMetric());
 
     void MetricsService.loadPersistedValues();
     MetricsService.startPersistenceLoop();

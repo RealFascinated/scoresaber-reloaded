@@ -4,6 +4,8 @@ export type MetricOptions = {
   /**
    * When false, this metric is excluded from PostgreSQL load/save in MetricsService.
    * Use for ephemeral snapshots, Prometheus-native metrics, or values always recomputed from source.
+   * 
+   * @default true - enabled by default
    */
   persist?: boolean;
 };
