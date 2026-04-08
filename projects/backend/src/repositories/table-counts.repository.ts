@@ -10,24 +10,40 @@ export type TableCountsRow = {
   refreshedAt: Date;
 };
 
+type RawTableCountsRow = {
+  id: string;
+  scoresaberScores: string;
+  scoresaberScoreHistory: string;
+  scoresaberAccounts: string;
+  scoresaberLeaderboards: string;
+  refreshedAt: Date;
+};
+
 export class TableCountsRepository {
   public static async getCounts(): Promise<TableCountsRow> {
-    const result = await db.execute<TableCountsRow>(sql`
+    const result = await db.execute<RawTableCountsRow>(sql`
       SELECT
-        "id",
-        "scoresaberScores"::bigint::int AS "scoresaberScores",
-        "scoresaberScoreHistory"::bigint::int AS "scoresaberScoreHistory",
-        "scoresaberAccounts"::bigint::int AS "scoresaberAccounts",
-        "scoresaberLeaderboards"::bigint::int AS "scoresaberLeaderboards",
+        "id"::text AS "id",
+        "scoresaberScores"::text AS "scoresaberScores",
+        "scoresaberScoreHistory"::text AS "scoresaberScoreHistory",
+        "scoresaberAccounts"::text AS "scoresaberAccounts",
+        "scoresaberLeaderboards"::text AS "scoresaberLeaderboards",
         "refreshedAt"
       FROM "ssr_table_counts"
       WHERE "id" = 1
     `);
-    const counts = result[0] as TableCountsRow | undefined;
-    if (!counts) {
+    const rawCounts = result[0] as RawTableCountsRow | undefined;
+    if (!rawCounts) {
       throw new Error('Materialized counts row missing from "ssr_table_counts"');
     }
-    return counts;
+    return {
+      id: Number.parseInt(rawCounts.id, 10),
+      scoresaberScores: Number.parseInt(rawCounts.scoresaberScores, 10),
+      scoresaberScoreHistory: Number.parseInt(rawCounts.scoresaberScoreHistory, 10),
+      scoresaberAccounts: Number.parseInt(rawCounts.scoresaberAccounts, 10),
+      scoresaberLeaderboards: Number.parseInt(rawCounts.scoresaberLeaderboards, 10),
+      refreshedAt: rawCounts.refreshedAt,
+    };
   }
 
   public static async refreshConcurrently(): Promise<void> {
