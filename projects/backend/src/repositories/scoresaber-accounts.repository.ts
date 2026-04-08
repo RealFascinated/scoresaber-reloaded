@@ -1,6 +1,7 @@
 import { and, asc, count, desc, eq, gte, ilike, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../db";
 import { scoreSaberAccountsTable, type ScoreSaberAccountRow } from "../db/schema";
+import { TableCountsRepository } from "./table-counts.repository";
 
 export type ScoreSaberAccountInsert = typeof scoreSaberAccountsTable.$inferInsert;
 
@@ -86,6 +87,10 @@ export class ScoreSaberAccountsRepository {
   }
 
   public static async countTotal(): Promise<number> {
+    const counts = await TableCountsRepository.getCounts();
+    if (counts) {
+      return counts.scoresaberAccounts;
+    }
     const [row] = await db.select({ c: count() }).from(scoreSaberAccountsTable);
     return row?.c ?? 0;
   }

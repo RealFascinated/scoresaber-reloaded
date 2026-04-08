@@ -11,6 +11,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import { leaderboardRowToType } from "../db/converter/scoresaber-leaderboard";
 import { ScoreSaberLeaderboardRow, scoreSaberLeaderboardsTable } from "../db/schema";
+import { TableCountsRepository } from "./table-counts.repository";
 
 export const LEADERBOARD_SEARCH_PAGE_SIZE = 20;
 
@@ -395,6 +396,10 @@ export class ScoreSaberLeaderboardsRepository {
   }
 
   public static async countTotal(): Promise<number> {
+    const counts = await TableCountsRepository.getCounts();
+    if (counts) {
+      return counts.scoresaberLeaderboards;
+    }
     const [row] = await db.select({ count: count() }).from(scoreSaberLeaderboardsTable);
     return row?.count ?? 0;
   }

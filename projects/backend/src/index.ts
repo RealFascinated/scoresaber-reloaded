@@ -39,6 +39,7 @@ import { ScoreEventService } from "./service/score-event/score-event.service";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
+import { TableCountsRepository } from "./repositories/table-counts.repository";
 
 const log = Logger.withTopic("SSR Backend");
 
@@ -148,6 +149,17 @@ export const app = new Elysia()
       run: async () => {
         await ScoreEventService.updateTrendingLeaderboards();
         await ScoreEventService.updateLeaderboardDailyPlays();
+      },
+    })
+  )
+  .use(
+    cron({
+      name: "refresh-table-counts",
+      pattern: "*/5 * * * *", // Every 5 minutes
+      timezone: "Europe/London",
+      protect: true,
+      run: async () => {
+        await TableCountsRepository.refreshConcurrently();
       },
     })
   )

@@ -53,6 +53,9 @@ export const scoreSaberAccountsTable = pgTable(
     index("accounts_name_trgm_idx").using("gin", sql`${table.name} gin_trgm_ops`),
     index("accounts_medals_idx").on(table.medals.desc()),
     index("accounts_active_hmd_idx").on(table.hmd).where(sql`${table.inactive} = false`),
+    index("accounts_active_country_idx")
+      .on(table.country)
+      .where(sql`${table.inactive} = false AND ${table.country} IS NOT NULL AND ${table.country} <> ''`),
     index("accounts_joined_date_idx").on(table.joinedDate),
     index("accounts_seeded_bl_false_idx")
       .on(table.id)
@@ -142,6 +145,7 @@ export const scoreSaberScoresTable = pgTable(
   },
   table => [
     index("scores_player_leaderboard_idx").on(table.playerId, table.leaderboardId),
+    index("scores_player_pp_desc_idx").on(table.playerId, table.pp.desc(), table.scoreId.desc()),
     index("scores_leaderboard_id_idx").on(table.leaderboardId),
     index("scores_leaderboard_score_scoreid_desc_idx").on(
       table.leaderboardId,
@@ -464,6 +468,11 @@ export const scoreSaberScoreEventTable = pgTable(
   },
   table => [
     index("score_events_leaderboard_timestamp_idx").on(table.leaderboardId, table.timestamp),
+    index("score_events_timestamp_leaderboard_player_idx").on(
+      table.timestamp,
+      table.leaderboardId,
+      table.playerId
+    ),
     index("score_events_timestamp_idx").on(table.timestamp),
   ]
 );

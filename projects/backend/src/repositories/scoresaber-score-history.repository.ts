@@ -7,6 +7,7 @@ import {
   scoreSaberScoresTable,
   type ScoreSaberScoreRow,
 } from "../db/schema";
+import { TableCountsRepository } from "./table-counts.repository";
 
 const scoreCols = getTableColumns(scoreSaberScoresTable);
 const histCols = getTableColumns(scoreSaberScoreHistoryTable);
@@ -202,6 +203,10 @@ export class ScoreSaberScoreHistoryRepository {
   }
 
   public static async countTotal(): Promise<number> {
+    const counts = await TableCountsRepository.getCounts();
+    if (counts) {
+      return counts.scoresaberScoreHistory;
+    }
     const [row] = await db.select({ count: count() }).from(scoreSaberScoreHistoryTable);
     return row?.count ?? 0;
   }
