@@ -2,6 +2,7 @@ import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
+import { StarIcon } from "lucide-react";
 import { useIsMobile } from "../../../contexts/viewport-context";
 import SimpleLink from "../../simple-link";
 
@@ -34,7 +35,7 @@ export function DifficultyButton({ leaderboardDifficulty, selectedId }: Difficul
         id={buttonId}
         variant="ghost"
         className={cn(
-          "difficulty-button-hover rounded-b-none border-none px-(--spacing-lg) py-(--spacing-sm) text-white transition-all duration-200",
+          "difficulty-button-hover flex h-10 flex-col items-center justify-center rounded-b-none border-none px-(--spacing-md) py-(--spacing-sm) text-xs text-white transition-all duration-200",
           isSelected ? "font-bold" : ""
         )}
         style={{
@@ -43,6 +44,12 @@ export function DifficultyButton({ leaderboardDifficulty, selectedId }: Difficul
         }}
       >
         <span>{name}</span>
+        {leaderboardDifficulty.stars > 0 && (
+          <div className="flex items-center gap-1 text-xs">
+            {leaderboardDifficulty.stars.toFixed(isMobile ? 1 : 2)}{" "}
+            {!isMobile && <StarIcon className="size-3" />}
+          </div>
+        )}
       </Button>
     </SimpleLink>
   );

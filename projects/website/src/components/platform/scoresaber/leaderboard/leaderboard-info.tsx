@@ -1,18 +1,14 @@
+"use client";
+
 import Card from "@/components/card";
-import EmbedLinks from "@/components/embed-links";
 import FallbackLink from "@/components/fallback-link";
 import LeaderboardButtons from "@/components/platform/scoresaber/leaderboard/leaderboard-buttons";
-import SimpleTooltip from "@/components/simple-tooltip";
-import { Separator } from "@/components/ui/separator";
-import { StarFilledIcon } from "@radix-ui/react-icons";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import { formatDate } from "@ssr/common/utils/time-utils";
-import Image from "next/image";
-import { useState } from "react";
-import { LeaderboardStatus } from "./leaderboard-status";
+import NextImage from "next/image";
+import type { CSSProperties } from "react";
 
 type LeaderboardInfoProps = {
   leaderboard: LeaderboardResponse;
@@ -21,166 +17,87 @@ type LeaderboardInfoProps = {
 export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   const { leaderboard: leaderboardData, beatsaver: beatSaverMap } = leaderboard;
 
-  const descriptionMaxSize = 300;
-  const description = beatSaverMap?.description || "";
-  const showExpandButton = description.length > descriptionMaxSize;
-  const [expanded, setExpanded] = useState(false);
+  const accentColor = getDifficulty(leaderboardData.difficulty.difficulty).color;
 
-  const difficulty = getDifficulty(leaderboardData.difficulty.difficulty);
+  /** One soft wash only — low mix so difficulty color doesn’t dominate the whole card. */
+  const cardSurfaceStyle: CSSProperties = {
+    backgroundColor: "var(--card)",
+    backgroundImage: `linear-gradient(
+      to bottom,
+      color-mix(in srgb, ${accentColor} 16%, var(--card)) 0%,
+      var(--card) 38%,
+      var(--card) 100%
+    )`,
+  };
 
   return (
-    <Card className="flex h-fit w-full flex-col gap-4">
-      {/* Header Section */}
-      <div className="flex items-start justify-between gap-4">
-        {/* Song Info */}
-        <div className="flex h-full min-w-0 flex-1 flex-col justify-center gap-3">
-          {/* Star Count / Difficulty */}
-          <div
-            className="flex w-fit items-center gap-1 rounded-md p-1.5 py-1"
-            style={{ backgroundColor: difficulty.color }}
-          >
-            {leaderboard.leaderboard.ranked ? (
-              <>
-                <StarFilledIcon className="size-[15px] text-white" />
-                <p className="text-xs font-semibold text-white">{leaderboardData.stars.toFixed(2)}</p>
-              </>
-            ) : (
-              <p className="text-xs font-semibold text-white">
-                {getDifficultyName(leaderboardData.difficulty.difficulty)}
-              </p>
-            )}
-          </div>
-
-          <div className="flex min-w-0 flex-col gap-1">
-            {/* Song Name */}
-            <FallbackLink
-              href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap?.bsr}` : undefined}
-              className="hover:text-primary/80 w-full! max-w-full min-w-0 transition-all"
-            >
-              <h3 className="text-song-name line-clamp-2 text-lg leading-tight font-semibold wrap-break-word">
-                {leaderboardData.fullName}
-              </h3>
-            </FallbackLink>
-
-            <span className="text-muted-foreground text-sm">{leaderboardData.songAuthorName}</span>
-          </div>
-        </div>
-
-        {/* Song Art */}
-        <Image
+    <Card className="h-fit w-full flex-col items-center gap-8 overflow-hidden p-6" style={cardSurfaceStyle}>
+      <div className="flex flex-col items-center gap-3 text-center">
+        <NextImage
           src={leaderboardData.songArt}
           alt={`${leaderboardData.songName} Cover Image`}
-          className="shrink-0 rounded-lg object-cover"
-          width={96}
-          height={96}
+          className="border-border/80 rounded-xl border object-cover shadow-md"
+          width={128}
+          height={128}
         />
-      </div>
 
-      <Separator />
-
-      {/* Leaderboard Info */}
-      <div className="flex flex-col gap-3">
-        {/* Mapped by */}
-        <LeaderboardInfoItem
-          label="Mapped by"
-          value={
+        <div className="flex max-w-[900px] min-w-0 flex-col items-center gap-1">
+          <FallbackLink
+            href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap.bsr}` : undefined}
+            className="hover:text-primary/80 text-song-name w-fit max-w-full min-w-0 transition-all"
+          >
+            <h3 className="line-clamp-2 text-2xl leading-tight font-bold wrap-break-word">
+              {leaderboardData.fullName}
+            </h3>
+          </FallbackLink>
+          <p className="text-muted-foreground text-sm">{leaderboardData.songAuthorName}</p>
+          <p className="text-muted-foreground text-sm">
+            Mapped by{" "}
             <FallbackLink
               href={getBeatSaverMapperProfileUrl(beatSaverMap)}
-              className="hover:text-primary/80 transition-all"
+              className="text-foreground hover:text-primary/80 transition-all"
             >
               {leaderboardData.levelAuthorName}
             </FallbackLink>
-          }
-        />
-
-        {/* Plays */}
-        <LeaderboardInfoItem
-          label="Plays"
-          value={
-            <p>
-              {formatNumberWithCommas(leaderboardData.plays)}{" "}
-              <span className="text-muted-foreground">({leaderboardData.dailyPlays} last 24h)</span>
-            </p>
-          }
-        />
-
-        {/* Ranked Date */}
-        {leaderboard.leaderboard.rankedDate && (
-          <LeaderboardInfoItem
-            label="Ranked"
-            value={
-              <SimpleTooltip
-                display={formatDate(leaderboard.leaderboard.rankedDate, "Do MMMM, YYYY HH:mm a")}
-              >
-                {formatDate(
-                  leaderboard.leaderboard.rankedDate
-                    ? leaderboard.leaderboard.rankedDate
-                    : leaderboard.leaderboard.timestamp,
-                  "Do MMMM, YYYY"
-                )}
-              </SimpleTooltip>
-            }
-          />
-        )}
-
-        {/* Created Date */}
-        {leaderboard.leaderboard.timestamp && (
-          <LeaderboardInfoItem
-            label="Created"
-            value={
-              <SimpleTooltip display={formatDate(leaderboard.leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}>
-                {formatDate(leaderboard.leaderboard.timestamp, "Do MMMM, YYYY")}
-              </SimpleTooltip>
-            }
-          />
-        )}
-
-        {/* Status */}
-        <LeaderboardInfoItem
-          label="Status"
-          value={<LeaderboardStatus leaderboard={leaderboard.leaderboard} />}
-        />
+          </p>
+        </div>
       </div>
 
-      <Separator />
-
-      {/* Map Description */}
-      {beatSaverMap && description && (
-        <div className="bg-muted/30 w-full rounded-lg p-3 break-all">
-          {(showExpandButton && !expanded ? description.slice(0, descriptionMaxSize) + "..." : description)
-            .split("\n")
-            .map((line, index) => {
-              return (
-                <p key={`line-${index}-${line.slice(0, 30)}`} className="text-sm">
-                  <EmbedLinks text={line} />
-                </p>
-              );
-            })}
-
-          {showExpandButton && (
-            <button
-              className="text-muted-foreground hover:text-foreground mt-2 text-center text-xs transition-all"
-              onClick={() => setExpanded(!expanded)}
-            >
-              {expanded ? "Show Less" : "Show More"}
-            </button>
+      <div className="flex w-full max-w-3xl flex-wrap justify-between gap-x-4 gap-y-6 px-1 sm:gap-x-8">
+        <LeaderboardStatColumn label={leaderboard.leaderboard.ranked ? "Stars" : "Difficulty"}>
+          {leaderboard.leaderboard.ranked ? (
+            <span className="tabular-nums">{leaderboardData.stars.toFixed(2)}</span>
+          ) : (
+            <span className="max-w-[140px] truncate text-sm sm:text-base">
+              {getDifficultyName(leaderboardData.difficulty.difficulty)}
+            </span>
           )}
-        </div>
-      )}
+        </LeaderboardStatColumn>
+        <LeaderboardStatColumn label="Status">
+          <span className="uppercase">{leaderboard.leaderboard.status}</span>
+        </LeaderboardStatColumn>
+        <LeaderboardStatColumn label="Plays">
+          {formatNumberWithCommas(leaderboardData.plays)}
+        </LeaderboardStatColumn>
+        <LeaderboardStatColumn label="Plays 24h">
+          {formatNumberWithCommas(leaderboardData.dailyPlays)}
+        </LeaderboardStatColumn>
+      </div>
 
-      {/* Action Buttons */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex justify-center">
         <LeaderboardButtons leaderboard={leaderboardData} beatSaverMap={beatSaverMap} />
       </div>
     </Card>
   );
 }
 
-function LeaderboardInfoItem({ label, value }: { label: string; value: React.ReactNode }) {
+function LeaderboardStatColumn({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex min-h-6 flex-wrap items-center gap-2">
-      <p className="text-muted-foreground min-w-[100px] shrink-0 text-sm">{label}:</p>
-      <div className="text-foreground max-w-full min-w-0 text-sm *:wrap-break-word">{value}</div>
+    <div className="flex min-w-0 flex-1 basis-[45%] flex-col items-center gap-1 text-center sm:basis-0">
+      <p className="text-muted-foreground text-[10px] font-medium tracking-wide uppercase">{label}</p>
+      <div className="text-foreground text-base leading-tight font-semibold tabular-nums sm:text-lg">
+        {children}
+      </div>
     </div>
   );
 }

@@ -48,7 +48,7 @@ export function CharacteristicButton({
           id={buttonId}
           variant="ghost"
           className={cn(
-            "difficulty-button-hover rounded-b-none border-none px-(--spacing-lg) py-(--spacing-sm) text-white transition-all duration-200",
+            "difficulty-button-hover flex h-10 flex-col items-center justify-center rounded-b-none border-none px-(--spacing-md) py-(--spacing-sm) text-xs text-white transition-all duration-200",
             isSelected ? "font-bold" : ""
           )}
           style={{

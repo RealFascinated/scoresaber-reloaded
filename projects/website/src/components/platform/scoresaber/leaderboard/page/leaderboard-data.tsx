@@ -18,15 +18,13 @@ export function ScoreSaberLeaderboardData({ leaderboardData }: LeaderboardDataPr
 
   return (
     <LeaderboardFilterProvider>
-      <div className="flex w-full flex-col-reverse gap-2 xl:flex-row xl:gap-2">
+      <div className="mx-auto flex w-full max-w-[1000px] flex-col gap-2">
+        <LeaderboardInfo leaderboard={leaderboardData} />
         <div className="flex w-full flex-col gap-2">
           <LeaderboardScores leaderboard={leaderboard} />
           {starChangeHistory && starChangeHistory.length > 0 && (
             <LeaderboardStarChangeHistory key={leaderboard.id} starChangeHistory={starChangeHistory} />
           )}
-        </div>
-        <div className="w-full xl:w-[550px]">
-          <LeaderboardInfo leaderboard={leaderboardData} />
         </div>
       </div>
     </LeaderboardFilterProvider>
