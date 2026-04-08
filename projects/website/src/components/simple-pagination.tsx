@@ -3,99 +3,14 @@
 import { cn } from "@/common/utils";
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, MoreHorizontal } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import React, { useCallback } from "react";
+import { useIsMobile } from "../contexts/viewport-context";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
-type PageSelectorProps = {
-  totalPages: number;
-  onPageSelect: (page: number) => void;
-  isLoading: boolean;
-};
-
-const PageSelector = React.memo(({ totalPages, onPageSelect, isLoading }: PageSelectorProps) => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState("");
-  const [error, setError] = React.useState("");
-
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      const trimmedValue = inputValue.trim();
-      if (!trimmedValue) {
-        setError("Please enter a page number");
-        return;
-      }
-      const pageNum = Number(trimmedValue);
-      if (!Number.isInteger(pageNum) || isNaN(pageNum) || pageNum < 1 || pageNum > totalPages) {
-        setError(`Please enter a number between 1 and ${formatNumberWithCommas(totalPages)}`);
-        return;
-      }
-      setError("");
-      onPageSelect(pageNum);
-      setIsOpen(false);
-      setInputValue("");
-    },
-    [inputValue, totalPages, onPageSelect]
-  );
-
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-    setError("");
-  }, []);
-
-  return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild disabled={isLoading}>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Select page"
-          disabled={isLoading}
-          className="transition-opacity duration-200"
-        >
-          <MoreHorizontal className="size-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64" align="center">
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4">
-            <div className="flex flex-col gap-1.5 text-center">
-              <h4 className="leading-none font-medium">Go to Page</h4>
-              <p className="text-muted-foreground text-sm">Max: {formatNumberWithCommas(totalPages)}</p>
-            </div>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={inputValue}
-                  onChange={handleInputChange}
-                  placeholder={`1-${formatNumberWithCommas(totalPages)}`}
-                  className={cn("w-full", error && "border-destructive")}
-                  aria-invalid={Boolean(error)}
-                  aria-describedby={error ? "page-error" : undefined}
-                />
-                <Button type="submit" size="icon" className="shrink-0">
-                  <ChevronRight className="size-4" />
-                </Button>
-              </div>
-              {error && (
-                <p id="page-error" className="text-destructive text-center text-xs">
-                  {error}
-                </p>
-              )}
-            </div>
-          </div>
-        </form>
-      </PopoverContent>
-    </Popover>
-  );
-});
-PageSelector.displayName = "PageSelector";
+function formatPageLabel(page: number, useCommaSeparators: boolean): string {
+  return useCommaSeparators ? formatNumberWithCommas(page) : String(page);
+}
 
 type PageButtonProps = {
   page: number;
@@ -128,7 +43,7 @@ const PageButton = React.memo(
         variant={isActive ? "primary" : "ghost"}
         size="sm"
         className={cn(
-          "relative h-9 min-w-10 px-3 transition-all duration-200",
+          "relative h-9 min-w-10 shrink-0 px-3 transition-all duration-200",
           "whitespace-nowrap",
           isButtonLoading && "cursor-not-allowed opacity-50",
           isCurrentPage && "cursor-not-allowed",
@@ -163,26 +78,36 @@ type NavigationButtonProps = {
   children: React.ReactNode;
   generatePageUrl?: (page: number) => string;
   onClick: (page: number, event: React.MouseEvent) => void;
+  ariaLabel?: string;
 };
 
 const NavigationButton = React.memo(
-  ({ page: buttonPage, disabled, isLoading, children, generatePageUrl, onClick }: NavigationButtonProps) => (
+  ({
+    page: buttonPage,
+    disabled,
+    isLoading,
+    children,
+    generatePageUrl,
+    onClick,
+    ariaLabel,
+  }: NavigationButtonProps) => (
     <Button
       asChild
       variant="ghost"
       size="icon"
       disabled={disabled || isLoading}
       className={cn(
-        "transition-all duration-200",
+        "shrink-0 transition-all duration-200",
         disabled && "cursor-not-allowed opacity-50",
         !disabled && !isLoading && "hover:shadow-xs"
       )}
       aria-label={
-        buttonPage === 1
+        ariaLabel ??
+        (buttonPage === 1
           ? "Go to first page"
           : buttonPage > 0
             ? `Go to page ${buttonPage}`
-            : "Go to previous page"
+            : "Go to previous page")
       }
     >
       <a
@@ -198,28 +123,24 @@ const NavigationButton = React.memo(
 NavigationButton.displayName = "NavigationButton";
 
 export type SimplePaginationProps = {
-  mobilePagination?: boolean;
   page: number;
   totalItems: number;
   itemsPerPage: number;
   loadingPage?: number;
-  statsBelow?: boolean;
-  showStats?: boolean;
   onPageChange: (page: number) => void;
   generatePageUrl?: (page: number) => string;
 };
 
 export default function SimplePagination({
-  mobilePagination,
   page,
   totalItems,
   itemsPerPage,
-  statsBelow,
-  showStats = true,
   loadingPage,
   onPageChange,
   generatePageUrl,
 }: SimplePaginationProps) {
+  const isMobile = useIsMobile();
+
   page = page == 0 ? 1 : page;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
@@ -247,47 +168,13 @@ export default function SimplePagination({
   );
 
   const renderPageNumbers = useCallback(() => {
-    if (mobilePagination) {
-      return [];
-    }
+    const delta = 2;
+    const left = Math.max(1, page - delta);
+    const right = Math.min(totalPages, page + delta);
 
-    const maxPagesToShow = page > 999 ? 3 : 5;
-    const pageNumbers = [];
+    const pageNumbers: React.ReactNode[] = [];
 
-    let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
-    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-    if (totalPages > maxPagesToShow && endPage - startPage + 1 < maxPagesToShow) {
-      startPage = endPage - maxPagesToShow + 1;
-    }
-
-    if (startPage > 1) {
-      pageNumbers.push(
-        <PageButton
-          key="start"
-          page={1}
-          currentPage={page}
-          isLoading={loadingState.isLoading}
-          onClick={handleLinkClick}
-          generatePageUrl={generatePageUrl}
-          loadingPage={loadingState.loadingPage}
-        >
-          1
-        </PageButton>
-      );
-      if (startPage > 2) {
-        pageNumbers.push(
-          <PageSelector
-            key="ellipsis-start"
-            totalPages={totalPages}
-            onPageSelect={handlePageChange}
-            isLoading={false}
-          />
-        );
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
+    for (let i = left; i <= right; i++) {
       pageNumbers.push(
         <PageButton
           key={`page-${i}`}
@@ -299,86 +186,38 @@ export default function SimplePagination({
           generatePageUrl={generatePageUrl}
           loadingPage={loadingState.loadingPage}
         >
-          {formatNumberWithCommas(i)}
-        </PageButton>
-      );
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
-        pageNumbers.push(
-          <PageSelector
-            key="ellipsis-end"
-            totalPages={totalPages}
-            onPageSelect={handlePageChange}
-            isLoading={false}
-          />
-        );
-      }
-      pageNumbers.push(
-        <PageButton
-          key="end"
-          page={totalPages}
-          currentPage={page}
-          isLoading={loadingState.isLoading}
-          onClick={handleLinkClick}
-          generatePageUrl={generatePageUrl}
-          loadingPage={loadingState.loadingPage}
-        >
-          {formatNumberWithCommas(totalPages)}
+          {formatPageLabel(i, true)}
         </PageButton>
       );
     }
 
     return pageNumbers;
-  }, [mobilePagination, page, totalPages, loadingState, handleLinkClick, generatePageUrl, handlePageChange]);
+  }, [page, totalPages, loadingState, handleLinkClick, generatePageUrl]);
 
-  // Calculate page numbers before render to ensure consistent timing
-  const pageNumbers = renderPageNumbers();
+  // Calculate page numbers before render to ensure consistent timing (desktop only)
+  const pageNumbers = isMobile ? null : renderPageNumbers();
 
   return (
-    <div
-      className={cn(
-        "relative flex w-full items-center justify-between lg:justify-center",
-        statsBelow && "flex-col-reverse gap-2"
-      )}
-    >
-      {/* Pagination Info */}
-      {showStats && (
-        <div
-          className={cn(
-            "text-muted-foreground text-sm transition-opacity duration-200 select-none",
-            !statsBelow && "left-0 lg:absolute"
-          )}
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          <p>
-            <span className="text-foreground font-medium">
-              {formatNumberWithCommas(Math.min((page - 1) * itemsPerPage + 1, totalItems))}
-            </span>{" "}
-            to{" "}
-            <span className="text-foreground font-medium">
-              {formatNumberWithCommas(Math.min(page * itemsPerPage, totalItems))}
-            </span>{" "}
-            of <span className="text-foreground font-medium">{formatNumberWithCommas(totalItems)}</span>
-          </p>
-        </div>
-      )}
-
-      {/* Pagination Buttons */}
-      <nav className="flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination navigation">
-        {mobilePagination && (
-          <NavigationButton
-            page={1}
-            disabled={page === 1}
-            isLoading={loadingState.isLoading}
-            onClick={handleLinkClick}
-            generatePageUrl={generatePageUrl}
-          >
-            <ChevronsLeft className="h-4 w-4" />
-          </NavigationButton>
+    <div className="flex w-full justify-center">
+      <nav
+        className={cn(
+          "flex max-w-full min-w-0 flex-nowrap items-center justify-center",
+          isMobile
+            ? "w-full gap-2"
+            : "gap-1.5 overflow-x-auto overflow-y-hidden overscroll-x-contain [-webkit-overflow-scrolling:touch]"
         )}
+        aria-label="Pagination navigation"
+      >
+        <NavigationButton
+          page={1}
+          disabled={page === 1}
+          isLoading={loadingState.isLoading}
+          onClick={handleLinkClick}
+          generatePageUrl={generatePageUrl}
+          ariaLabel="Go to first page"
+        >
+          <ChevronsLeft className="h-4 w-4" />
+        </NavigationButton>
         <NavigationButton
           page={page - 1}
           disabled={page === 1}
@@ -388,7 +227,19 @@ export default function SimplePagination({
         >
           <ChevronLeft className="h-4 w-4" />
         </NavigationButton>
-        {pageNumbers}
+        {isMobile ? (
+          <div
+            className="text-muted-foreground flex min-w-0 flex-1 items-center justify-center gap-x-1 px-0.5 text-sm tabular-nums leading-none"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span className="text-foreground font-medium">{formatPageLabel(page, false)}</span>
+            <span className="text-muted-foreground">of</span>
+            <span className="text-foreground font-medium">{formatPageLabel(totalPages, false)}</span>
+          </div>
+        ) : (
+          pageNumbers
+        )}
         <NavigationButton
           page={page + 1}
           disabled={page === totalPages}
@@ -398,17 +249,16 @@ export default function SimplePagination({
         >
           <ChevronRight className="h-4 w-4" />
         </NavigationButton>
-        {mobilePagination && (
-          <NavigationButton
-            page={totalPages}
-            disabled={page === totalPages}
-            isLoading={loadingState.isLoading}
-            onClick={handleLinkClick}
-            generatePageUrl={generatePageUrl}
-          >
-            <ChevronsRight className="h-4 w-4" />
-          </NavigationButton>
-        )}
+        <NavigationButton
+          page={totalPages}
+          disabled={page === totalPages}
+          isLoading={loadingState.isLoading}
+          onClick={handleLinkClick}
+          generatePageUrl={generatePageUrl}
+          ariaLabel="Go to last page"
+        >
+          <ChevronsRight className="h-4 w-4" />
+        </NavigationButton>
       </nav>
     </div>
   );

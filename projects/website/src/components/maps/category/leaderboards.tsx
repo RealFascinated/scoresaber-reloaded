@@ -8,7 +8,6 @@ import SimplePagination from "@/components/simple-pagination";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useIsMobile } from "@/contexts/viewport-context";
 import { StarFilledIcon } from "@radix-ui/react-icons";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -19,8 +18,6 @@ import { ChartBarIcon, PlayIcon } from "lucide-react";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 export default function Leaderboards() {
-  const isMobile = useIsMobile();
-
   const filter = useMapFilter();
   const filterDebounced = useDebounce(filter, 100);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
@@ -162,13 +159,11 @@ export default function Leaderboards() {
 
         {leaderboardResponse && (
           <SimplePagination
-            mobilePagination={isMobile}
             page={page}
             totalItems={leaderboardResponse.metadata.totalItems}
             itemsPerPage={leaderboardResponse.metadata.itemsPerPage}
             loadingPage={isLoading || isRefetching ? page : undefined}
             onPageChange={newPage => setPage(newPage)}
-            statsBelow={!isMobile}
           />
         )}
       </div>
