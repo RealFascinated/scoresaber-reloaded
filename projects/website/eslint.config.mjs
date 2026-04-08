@@ -4,8 +4,6 @@ export default [
   ...next,
   {
     rules: {
-      // Base rule does not understand TypeScript (type-only names, etc.); use TS-aware rule.
-      "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {

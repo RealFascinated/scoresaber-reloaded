@@ -17,6 +17,11 @@
     "lint:website": "cd projects/website && bun run lint",
     "lint:common": "cd projects/common && bun run lint",
     "lint:all": "bun run lint:backend && bun run lint:website && bun run lint:common",
+    "update": "bun run update:all",
+    "update:backend": "cd projects/backend && bun update",
+    "update:website": "cd projects/website && bun update",
+    "update:common": "cd projects/common && bun update",
+    "update:all": "bun run update:backend && bun run update:website && bun run update:common",
     "count-lines": "find projects -type f -not -path '*/dist/*' -not -path '*/.next/*' -not -path '*/node_modules/*' -name '*.ts' -o -name '*.tsx' | xargs wc -l"
   },
   "author": "fascinated7",
