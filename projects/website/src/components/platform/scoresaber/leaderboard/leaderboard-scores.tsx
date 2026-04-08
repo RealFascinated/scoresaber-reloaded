@@ -14,7 +14,6 @@ import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
-import { useEffect } from "react";
 import Card from "../../../card";
 import { CharacteristicButton } from "../../../leaderboard/button/characteristic-button";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
@@ -54,10 +53,6 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
     isLoading,
     isRefetching,
   } = useLeaderboardScores(leaderboard.id, mainPlayer?.id ?? "", page, mode, filter.country ?? undefined);
-
-  useEffect(() => {
-    setPage(1);
-  }, [filter.country]);
 
   const isFriends = mode === ScoreModeEnum.Friends;
   const noScores =
@@ -140,6 +135,7 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
               value={filter.country}
               onValueChange={newCountry => {
                 filter.setCountry(newCountry);
+                setPage(1);
               }}
               placeholder="All countries"
             />
