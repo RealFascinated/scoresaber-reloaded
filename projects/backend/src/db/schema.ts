@@ -241,7 +241,7 @@ export const scoreSaberLeaderboardsTable = pgTable(
     // Ranking information
     ranked: boolean().notNull(),
     qualified: boolean().notNull(),
-    stars: doublePrecision(),
+    stars: doublePrecision().notNull().default(0),
     rankedDate: timestamp(),
     qualifiedDate: timestamp(),
 

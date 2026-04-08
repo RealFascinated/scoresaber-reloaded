@@ -19,6 +19,7 @@ type LeaderboardAlias = ReturnType<typeof alias<typeof scoreSaberLeaderboardsTab
 
 type DifficultyRow = {
   id: number;
+  stars: number;
   difficulty: ScoreSaberLeaderboardRow["difficulty"];
   characteristic: ScoreSaberLeaderboardRow["characteristic"];
 };
@@ -78,6 +79,7 @@ function buildDifficultyJoin(
       leaderboard: mainAlias,
       difficulties: {
         id: difficultiesAlias.id,
+        stars: difficultiesAlias.stars,
         difficulty: difficultiesAlias.difficulty,
         characteristic: difficultiesAlias.characteristic,
       },

@@ -218,6 +218,13 @@
       "when": 1775800000012,
       "tag": "0030_add_streak_index",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1775665637381,
+      "tag": "0031_make_stars_not_nullable",
+      "breakpoints": true
     }
   ]
 }

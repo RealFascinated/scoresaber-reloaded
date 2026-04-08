@@ -4,6 +4,7 @@ import { MapDifficultySchema } from "../../map/map-difficulty";
 
 export const ScoreSaberLeaderboardDifficultySchema = z.object({
   id: z.number(),
+  stars: z.number(),
   difficulty: MapDifficultySchema,
   characteristic: MapCharacteristicSchema,
 });

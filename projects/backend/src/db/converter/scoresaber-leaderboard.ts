@@ -13,6 +13,7 @@ export type LeaderboardDifficultyJoinRow = {
   leaderboard: ScoreSaberLeaderboardRow;
   difficulties?: {
     id: number;
+    stars: number;
     difficulty: MapDifficulty;
     characteristic: MapCharacteristic;
   } | null;
@@ -24,6 +25,7 @@ export function leaderboardRowToType(
 ): ScoreSaberLeaderboard {
   const difficulty = {
     id: row.id,
+    stars: row.stars,
     difficulty: row.difficulty,
     characteristic: row.characteristic,
   };
