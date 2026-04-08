@@ -96,24 +96,6 @@ const playerStats: Stat[] = [
     },
   },
   {
-    name: "Current Streak",
-    create: (player: ScoreSaberPlayer) => {
-      return {
-        tooltip: <p>Consecutive days with at least one play</p>,
-        value: <>{formatNumberWithCommas(player.currentStreak)} days</>,
-      };
-    },
-  },
-  {
-    name: "Longest Streak",
-    create: (player: ScoreSaberPlayer) => {
-      return {
-        tooltip: <p>Best consecutive-day play streak recorded</p>,
-        value: <>{formatNumberWithCommas(player.longestStreak)} days</>,
-      };
-    },
-  },
-  {
     name: "Headset",
     create: (player: ScoreSaberPlayer) => {
       if (player.hmd === undefined) {

@@ -9,6 +9,7 @@ import PlayerActions from "./player-actions";
 import PlayerAvatar from "./player-avatar";
 import PlayerOverview from "./player-overview";
 import PlayerStats from "./player-stats";
+import PlayerStreak from "./player-streak";
 
 type PlayerHeaderProps = {
   /**
@@ -21,7 +22,12 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
   return (
     <Card className="flex flex-col gap-6">
       <div className="relative flex flex-col items-center gap-6 text-center select-none lg:flex-row lg:items-start lg:text-start">
-        <PlayerAvatar player={player} />
+        <div className="flex flex-col items-center gap-2">
+          <PlayerAvatar player={player} />
+          <div className="hidden lg:flex">
+            <PlayerStreak player={player} />
+          </div>
+        </div>
         <div className="flex w-full flex-col items-center justify-center gap-3 lg:items-start lg:justify-start">
           <div className="flex w-full flex-col">
             <div className="flex items-center justify-center gap-3 lg:justify-start">
@@ -54,6 +60,9 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
           </div>
 
           <PlayerStats player={player} />
+          <div className="flex lg:hidden">
+            <PlayerStreak player={player} />
+          </div>
 
           <div className="absolute top-0 right-0 flex flex-col gap-2 lg:flex-row">
             <AddFriend player={player} />
@@ -63,7 +72,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
       </div>
 
       {/* Player Footer */}
-      <div className="border-border/50 flex flex-col-reverse items-center gap-4 border-t pt-4 md:flex-row md:justify-between">
+      <div className="border-border/50 flex flex-col-reverse items-center gap-4 border-t pt-6 md:flex-row md:justify-between md:pt-4">
         <PlayerActions player={player} />
         <PlayerAccBadges scoreStats={player.scoreStats} />
       </div>
