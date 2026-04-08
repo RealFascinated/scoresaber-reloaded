@@ -28,6 +28,8 @@ export function scoreSaberAccountRowToType(row: ScoreSaberAccountRow): ScoreSabe
     medals: row.medals,
     medalsRank: row.medalsRank,
     medalsCountryRank: row.medalsCountryRank,
+    currentStreak: row.currentStreak,
+    longestStreak: row.longestStreak,
     scoreStats: row.scoreStats,
     trackedSince: row.trackedSince?.toISOString(),
     joinedDate: row.joinedDate?.toISOString(),
