@@ -24,6 +24,7 @@
         "@elysiajs/cors": "^1.4.1",
         "@elysiajs/cron": "^1.4.1",
         "@elysiajs/openapi": "^1.4.14",
+        "@elysiajs/server-timing": "^1.4.0",
         "@eslint/eslintrc": "^3.3.5",
         "@eslint/js": "^10.0.1",
         "@ssr/common": "workspace:common",
@@ -209,6 +210,8 @@
     "@elysiajs/cron": ["@elysiajs/cron@1.4.1", "", { "dependencies": { "croner": "^6.0.3" }, "peerDependencies": { "elysia": ">= 1.4.0" } }, "sha512-Y+jqXtMJ+m17QzNWlWc09ugd1Fn1Wh7lqE+y9qSW8eiQZEqsRADXWmbLuXRSRaSC5dkfOyRSiwNCp6n8L/yuqA=="],
 
     "@elysiajs/openapi": ["@elysiajs/openapi@1.4.14", "", { "peerDependencies": { "elysia": ">= 1.4.0" } }, "sha512-kWmJWdvP8/LwHwAJXSpz6xFfYUoyUyEPRimEYABuDU1rOnS27Da1u9T2jyU7frOopxKWV/wDfDxMP8z2xdCPJw=="],
+
+    "@elysiajs/server-timing": ["@elysiajs/server-timing@1.4.0", "", { "peerDependencies": { "elysia": ">= 1.4.0" } }, "sha512-vDFdHyi8Q43vgA5MaTQMA9v4/bgKrtqPrpVqVuHlMCRQgfOpvYGXPj3okSttyendG5r2bRHfyPG11lTWWIrzrQ=="],
 
     "@emnapi/runtime": ["@emnapi/runtime@1.7.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-PVtJr5CmLwYAU9PZDMITZoR5iAOShYREoR45EyyLrbntV50mdePTgUn4AmOw90Ifcj+x2kRjdzr1HP3RrNiHGA=="],
 

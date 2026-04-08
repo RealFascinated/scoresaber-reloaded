@@ -1,6 +1,7 @@
 import cors from "@elysiajs/cors";
 import { cron } from "@elysiajs/cron";
 import { openapi } from "@elysiajs/openapi";
+import { serverTiming } from "@elysiajs/server-timing";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -66,6 +67,7 @@ export const app = new Elysia()
       mode: "combined",
     })
   )
+  .use(serverTiming())
   .use(
     cron({
       name: "player-statistics-tracker-cron",

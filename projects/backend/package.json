@@ -20,6 +20,7 @@
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/cron": "^1.4.1",
     "@elysiajs/openapi": "^1.4.14",
+    "@elysiajs/server-timing": "^1.4.0",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
     "@ssr/common": "workspace:common",
