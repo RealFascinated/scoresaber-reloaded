@@ -1,0 +1,2 @@
+CREATE INDEX "score_events_timestamp_brin_idx" ON "scoresaber-score-events" USING brin ("timestamp");--> statement-breakpoint
+CREATE INDEX "scores_pp_desc_player_partial_idx" ON "scoresaber-scores" USING btree ("pp" DESC NULLS LAST,"playerId") WHERE "scoresaber-scores"."pp" > 0;

@@ -197,6 +197,13 @@
       "when": 1775800000009,
       "tag": "0027_table_counts_materialized_view",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1775800000010,
+      "tag": "0028_add_brin_and_pp_indexes",
+      "breakpoints": true
     }
   ]
 }
