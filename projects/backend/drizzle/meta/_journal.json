@@ -176,6 +176,13 @@
       "when": 1775800000006,
       "tag": "0024_remove_author_index",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1775800000007,
+      "tag": "0025_yummy_black_tarantula",
+      "breakpoints": true
     }
   ]
 }
