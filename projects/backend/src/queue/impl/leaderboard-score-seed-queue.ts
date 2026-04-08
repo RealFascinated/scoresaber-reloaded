@@ -63,11 +63,11 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       lastSeenTotalPages = totalPages;
       consecutiveFailures = 0;
 
-      // if (page % 10 === 0 || page === 1 || page === totalPages) {
-      //   LeaderboardScoreSeedQueue.logger.info(
-      //     `Fetching scores for leaderboard "${leaderboardId}" on page ${page}/${totalPages}`
-      //   );
-      // }
+      if (page % 100 === 0 || page === 1 || page === totalPages) {
+        LeaderboardScoreSeedQueue.logger.info(
+          `Fetching scores for leaderboard "${leaderboardId}" on page ${page}/${totalPages}`
+        );
+      }
 
       await Promise.all(
         response.scores.map(async rawScore => {
