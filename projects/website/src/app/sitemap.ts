@@ -3,7 +3,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { MetadataRoute } from "next";
 
 const WEBSITE_URL = env.NEXT_PUBLIC_WEBSITE_URL;
-const SITEMAP_PAGE_LIMIT = 15;
+const SITEMAP_PAGE_LIMIT = 10;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
