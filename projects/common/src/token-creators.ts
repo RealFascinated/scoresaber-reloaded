@@ -24,26 +24,13 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
   const characteristic = token.difficulty.gameMode.replace("Solo", "");
   const difficulty: ScoreSaberLeaderboardDifficulty = {
     id: token.difficulty.leaderboardId,
+    stars: token.stars,
     difficulty: getDifficultyFromScoreSaberDifficulty(token.difficulty.difficulty),
     characteristic:
       characteristic == "" || characteristic == undefined
         ? "Standard"
         : (characteristic as MapCharacteristic),
   };
-  const difficulties: ScoreSaberLeaderboardDifficulty[] =
-    token.difficulties != null
-      ? token.difficulties.map(difficulty => {
-          const characteristic = difficulty.gameMode.replace("Solo", "");
-          return {
-            id: difficulty.leaderboardId,
-            difficulty: getDifficultyFromScoreSaberDifficulty(difficulty.difficulty),
-            characteristic:
-              characteristic == "" || characteristic == undefined
-                ? "Standard"
-                : (characteristic as MapCharacteristic),
-          };
-        })
-      : [difficulty];
 
   let status: ScoreSaberLeaderboardStatus = "Unranked";
   if (token.qualified) {
@@ -63,7 +50,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
       levelAuthorName: token.levelAuthorName,
       songArt: `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${token.songHash}.png`,
       difficulty: difficulty,
-      difficulties: difficulties,
+      difficulties: [],
       maxScore: token.maxScore,
       ranked: token.ranked,
       timestamp: parseDate(token.createdDate),
@@ -95,13 +82,13 @@ export function getScoreSaberScoreFromToken(
     token.modifiers == undefined || token.modifiers === ""
       ? []
       : token.modifiers.split(",").map(mod => {
-          mod = mod.toUpperCase();
-          const modifier = Modifier[mod as keyof typeof Modifier];
-          if (modifier === undefined) {
-            throw new Error(`Unknown modifier: ${mod}`);
-          }
-          return modifier;
-        });
+        mod = mod.toUpperCase();
+        const modifier = Modifier[mod as keyof typeof Modifier];
+        if (modifier === undefined) {
+          throw new Error(`Unknown modifier: ${mod}`);
+        }
+        return modifier;
+      });
 
   return ScoreSaberScoreSchema.parse(
     {
