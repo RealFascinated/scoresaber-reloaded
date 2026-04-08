@@ -24,10 +24,10 @@ export class PlayerPlayedStreakService {
       return;
     }
 
-    const currentStreak = player.currentStreak;
+    const previousStreak = player.currentStreak;
     player.currentStreak++;
-    if (currentStreak > player.longestStreak) {
-      player.longestStreak = currentStreak;
+    if (player.currentStreak > player.longestStreak) {
+      player.longestStreak = player.currentStreak;
     }
     player.lastPlayedDate = today;
     await ScoreSaberAccountsRepository.updateAccount(player.id, {
@@ -35,7 +35,9 @@ export class PlayerPlayedStreakService {
       longestStreak: player.longestStreak,
       lastPlayedDate: today,
     });
-    PlayerPlayedStreakService.logger.info(`Player ${player.id} streak updated to ${currentStreak} -> ${player.longestStreak}`);
+    PlayerPlayedStreakService.logger.info(
+      `Player ${player.id} streak updated: current ${previousStreak} -> ${player.currentStreak}, longest ${player.longestStreak}`
+    );
   }
 
   /**
