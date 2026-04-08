@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import {

@@ -6,7 +6,7 @@ import type {
   ScoreSaberLeaderboardQueryFilters,
 } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import type { SQL } from "drizzle-orm";
-import { and, asc, count, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import { leaderboardRowToType } from "../db/converter/scoresaber-leaderboard";
