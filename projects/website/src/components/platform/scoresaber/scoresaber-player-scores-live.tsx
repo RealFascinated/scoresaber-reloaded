@@ -5,7 +5,6 @@ import { Spinner } from "@/components/spinner";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/contexts/page-transition-context";
-import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { Pagination } from "@ssr/common/pagination";
@@ -39,7 +38,6 @@ interface ScoreSaberPlayerScoresLiveProps {
 }
 
 export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerScoresLiveProps) {
-  const isMobile = useIsMobile();
   const database = useDatabase();
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
@@ -193,7 +191,6 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
         </PageTransition>
 
         <SimplePagination
-          mobilePagination={isMobile}
           page={page}
           totalItems={scores.metadata.totalItems}
           itemsPerPage={scores.metadata.itemsPerPage}

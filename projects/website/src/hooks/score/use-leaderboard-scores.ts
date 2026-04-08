@@ -52,13 +52,6 @@ export const useLeaderboardScores = (
             );
 
             if (response) {
-              const friends = await database.getFriends();
-
-              response.items = response.items.map(score => ({
-                ...score,
-                // playerInfo: friends.find(f => f.id === score.playerId) || mainPlayer || undefined,
-              }));
-
               return response;
             }
           }

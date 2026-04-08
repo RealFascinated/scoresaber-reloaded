@@ -6,7 +6,6 @@ import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
-import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -33,7 +32,6 @@ type RankingDataProps = {
 };
 
 export default function RankingData({ initialPage, initialCountry }: RankingDataProps) {
-  const isMobile = useIsMobile();
   const navigation = usePageNavigation();
   const database = useDatabase();
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());

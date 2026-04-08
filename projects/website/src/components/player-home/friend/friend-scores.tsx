@@ -1,7 +1,6 @@
 "use client";
 
 import PlayerScoreHeader from "@/components/score/player-score-header";
-import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -13,7 +12,6 @@ import SimplePagination from "../../simple-pagination";
 import { Spinner } from "../../spinner";
 
 export function FriendScores() {
-  const isMobile = useIsMobile();
   const database = useDatabase();
   const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
   const friendIds = useStableLiveQuery(async () => database.getFriendIds(true));
@@ -78,7 +76,6 @@ export function FriendScores() {
           </div>
 
           <SimplePagination
-            mobilePagination={isMobile}
             page={page}
             totalItems={scoreData.metadata.totalItems}
             itemsPerPage={scoreData.metadata.itemsPerPage}

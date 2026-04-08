@@ -197,7 +197,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                     <Controller
                       name="rankedStatus"
                       control={form.control}
-                      render={({ field, fieldState }) => (
+                      render={({ field }) => (
                         <FormItem className="flex flex-col gap-2">
                           <FormLabel className="text-sm font-normal">Score Type</FormLabel>
                           <FormControl>
@@ -229,7 +229,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                       <Controller
                         name="starRange"
                         control={form.control}
-                        render={({ field, fieldState }) => {
+                        render={({ field }) => {
                           const val = field.value ?? { min: 0, max: SHARED_CONSTS.maxStars };
                           return (
                             <FormItem className="flex flex-col gap-2">
@@ -257,7 +257,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                     <Controller
                       name="accuracyRange"
                       control={form.control}
-                      render={({ field, fieldState }) => {
+                      render={({ field }) => {
                         const val = field.value ?? { min: 0, max: 100 };
                         return (
                           <FormItem className="flex flex-col gap-2">

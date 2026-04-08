@@ -3,7 +3,6 @@
 import { getRankingColumnWidth } from "@/common/player-utils";
 import { ScoreSaberPlayerRanking } from "@/components/player/player-ranking";
 import SimplePagination from "@/components/simple-pagination";
-import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import type { Page } from "@ssr/common/pagination";
@@ -14,7 +13,6 @@ import Card from "../../card";
 import { Spinner } from "../../spinner";
 
 export function FriendRanking() {
-  const isMobile = useIsMobile();
   const database = useDatabase();
   const friends = useStableLiveQuery(() => database.getFriends(true));
 
@@ -84,7 +82,6 @@ export function FriendRanking() {
           </div>
 
           <SimplePagination
-            mobilePagination={isMobile}
             page={page}
             totalItems={friendsPage.metadata.totalItems}
             itemsPerPage={friendsPage.metadata.itemsPerPage}

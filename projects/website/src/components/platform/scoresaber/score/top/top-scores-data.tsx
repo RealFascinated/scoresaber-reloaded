@@ -4,15 +4,12 @@ import Card from "@/components/card";
 import PlayerScoreHeader from "@/components/score/player-score-header";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
-import { useIsMobile } from "@/contexts/viewport-context";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { parseAsInteger, useQueryState } from "nuqs";
 import ScoreSaberScoreDisplay from "../scoresaber-score";
 
 export function TopScoresData() {
-  const isMobile = useIsMobile();
-
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
   const {
@@ -72,7 +69,6 @@ export function TopScoresData() {
             itemsPerPage={scores.metadata.itemsPerPage}
             loadingPage={isLoading || isRefetching ? page : undefined}
             onPageChange={setPage}
-            mobilePagination={isMobile}
           />
         </div>
       )}

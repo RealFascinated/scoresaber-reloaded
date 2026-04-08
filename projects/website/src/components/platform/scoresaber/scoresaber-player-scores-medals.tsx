@@ -6,7 +6,6 @@ import { Spinner } from "@/components/spinner";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/contexts/page-transition-context";
-import { useIsMobile } from "@/contexts/viewport-context";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -89,7 +88,6 @@ const SORT_OPTIONS: SortOption[] = [
 ];
 
 export default function ScoreSaberPlayerMedalScores({ player }: { player: ScoreSaberPlayer }) {
-  const isMobile = useIsMobile();
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
   // Sorting
@@ -261,7 +259,6 @@ export default function ScoreSaberPlayerMedalScores({ player }: { player: ScoreS
         </PageTransition>
 
         <SimplePagination
-          mobilePagination={isMobile}
           page={page}
           totalItems={scores.metadata.totalItems}
           itemsPerPage={scores.metadata.itemsPerPage}

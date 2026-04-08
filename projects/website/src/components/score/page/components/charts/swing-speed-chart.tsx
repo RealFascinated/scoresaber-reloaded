@@ -16,7 +16,7 @@ type Props = {
   replayLengthSeconds: number;
 };
 
-export default function SwingSpeedChart({ swingSpeed, replayLengthSeconds }: Props) {
+export default function SwingSpeedChart({ swingSpeed }: Props) {
   const { chartData, labels } = useMemo(() => {
     if (!swingSpeed || swingSpeed.leftSwingSpeed.length === 0 || swingSpeed.rightSwingSpeed.length === 0) {
       return { chartData: { datasets: [] }, labels: [] };

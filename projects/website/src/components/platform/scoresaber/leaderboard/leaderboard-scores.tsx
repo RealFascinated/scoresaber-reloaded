@@ -4,7 +4,6 @@ import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderb
 import ScoreModeSwitcher, { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -39,7 +38,6 @@ const SHOWN_CHARACTERISTICS: MapCharacteristic[] = [
 ];
 
 export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreSaberLeaderboard }) {
-  const isMobile = useIsMobile();
   const database = useDatabase();
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
   const filter = useLeaderboardFilter();
@@ -203,7 +201,6 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
 
             {scores && scores.items.length > 0 && (
               <SimplePagination
-                mobilePagination={isMobile}
                 page={page}
                 totalItems={scores.metadata.totalItems}
                 itemsPerPage={scores.metadata.itemsPerPage}

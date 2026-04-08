@@ -4,7 +4,6 @@ import { getRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
-import { useIsMobile } from "@/contexts/viewport-context";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { countryFilter } from "@ssr/common/utils/country.util";
@@ -28,7 +27,6 @@ type RankingDataProps = {
 };
 
 export default function RankingData({ initialPage, initialCountry }: RankingDataProps) {
-  const isMobile = useIsMobile();
   const navigation = usePageNavigation();
 
   const [currentPage, setCurrentPage] = useState(initialPage);
@@ -86,14 +84,12 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
           {rankingData && (
             <div className="flex flex-col gap-4">
               <SimplePagination
-                mobilePagination={isMobile}
                 page={currentPage}
                 totalItems={rankingData.metadata.totalItems}
                 itemsPerPage={rankingData.metadata.itemsPerPage}
                 loadingPage={isLoading || isRefetching ? currentPage : undefined}
                 generatePageUrl={page => buildPageUrl(currentCountry, page)}
                 onPageChange={setCurrentPage}
-                showStats={false}
               />
 
               <div className="flex flex-col gap-2">
@@ -111,7 +107,6 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               </div>
 
               <SimplePagination
-                mobilePagination={isMobile}
                 page={currentPage}
                 totalItems={rankingData.metadata.totalItems}
                 itemsPerPage={rankingData.metadata.itemsPerPage}

@@ -1,7 +1,6 @@
 "use client";
 
 import { Spinner } from "@/components/spinner";
-import { useIsMobile } from "@/contexts/viewport-context";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
@@ -59,7 +58,6 @@ type Props = {
 };
 
 export default function AccSaberPlayerScores({ player }: Props) {
-  const isMobile = useIsMobile();
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
   // Query params
@@ -242,7 +240,6 @@ export default function AccSaberPlayerScores({ player }: Props) {
             </PageTransition>
 
             <SimplePagination
-              mobilePagination={isMobile}
               page={page}
               totalItems={scores.metadata.totalItems}
               itemsPerPage={scores.metadata.itemsPerPage}

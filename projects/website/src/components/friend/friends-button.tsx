@@ -65,7 +65,7 @@ export default function FriendsButton() {
                 // Sort by rank
                 return a.rank - b.rank;
               })
-              .map((friend, index) => (
+              .map(friend => (
                 <Friend player={friend} key={friend.id} onClick={() => setOpen(false)} />
               ))}
           </div>

@@ -58,7 +58,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
     placeholderData: prev => prev,
   });
 
-  const { data: comparisonData, isLoading: isComparisonLoading } = useQuery({
+  const { data: comparisonData } = useQuery({
     queryKey: ["player-maps-graph-comparison", comparisonPlayers.map(p => p.id)],
     queryFn: async () => {
       const results = await Promise.all(

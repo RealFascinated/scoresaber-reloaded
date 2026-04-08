@@ -6,7 +6,7 @@ import NumberMetric from "../../number-metric";
 export default class LeaderboardCountMetric extends NumberMetric {
   constructor() {
     super(MetricType.LEADERBOARD_COUNT, 0, {
-      persist: false
+      persist: false,
     });
 
     const gauge = new Gauge({

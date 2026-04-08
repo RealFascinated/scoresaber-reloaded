@@ -4,7 +4,6 @@ import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderb
 import ScoreModeSwitcher, { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -29,7 +28,6 @@ export default function LeaderboardScoresDropdown({
   highlightedPlayerId?: string;
   historyPlayerId?: string;
 }) {
-  const isMobile = useIsMobile();
   const database = useDatabase();
   const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
   const filter = useLeaderboardFilter();
@@ -128,7 +126,6 @@ export default function LeaderboardScoresDropdown({
 
           {scores && scores.items.length > 0 && (
             <SimplePagination
-              mobilePagination={isMobile}
               page={page}
               totalItems={scores.metadata.totalItems}
               itemsPerPage={scores.metadata.itemsPerPage}

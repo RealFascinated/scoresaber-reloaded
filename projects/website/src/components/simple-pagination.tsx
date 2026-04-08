@@ -43,10 +43,12 @@ const PageButton = React.memo(
         variant={isActive ? "primary" : "ghost"}
         size="sm"
         className={cn(
-          "relative h-9 min-w-10 shrink-0 px-3 transition-all duration-200",
-          "whitespace-nowrap",
+          "relative h-9 min-w-10 shrink-0 px-3 whitespace-nowrap",
+          // Avoid animating background/border: primary↔ghost cross-fade interpolates through near-white in some engines.
+          "transition-[transform,opacity,box-shadow]! duration-200 ease-out",
+          "motion-safe:active:scale-[0.97]",
           isButtonLoading && "cursor-not-allowed opacity-50",
-          isCurrentPage && "cursor-not-allowed",
+          isCurrentPage && "cursor-not-allowed shadow-xs",
           !isActive && !isButtonLoading && "hover:shadow-xs"
         )}
         aria-current={isCurrentPage ? "page" : undefined}
@@ -58,10 +60,18 @@ const PageButton = React.memo(
           aria-label={`Go to page ${buttonPage}`}
           className="flex items-center justify-center"
         >
-          <span className={cn(isButtonLoading && "blur-[2px]")}>{children}</span>
+          <span
+            className={cn(
+              // Blur must not animate: filter interpolation reads as a flash on nearby controls (e.g. prev chevron).
+              "transition-opacity duration-200 ease-out",
+              isButtonLoading && "opacity-80 blur-[2px]"
+            )}
+          >
+            {children}
+          </span>
           {isButtonLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <ArrowPathIcon className="h-4 w-4 animate-spin" />
+              <ArrowPathIcon className="h-4 w-4 animate-spin motion-reduce:animate-none" />
             </div>
           )}
         </a>
@@ -79,6 +89,8 @@ type NavigationButtonProps = {
   generatePageUrl?: (page: number) => string;
   onClick: (page: number, event: React.MouseEvent) => void;
   ariaLabel?: string;
+  /** Nudge chevrons on hover to hint prev/next direction */
+  chevronMotion?: "left" | "right";
 };
 
 const NavigationButton = React.memo(
@@ -90,6 +102,7 @@ const NavigationButton = React.memo(
     generatePageUrl,
     onClick,
     ariaLabel,
+    chevronMotion,
   }: NavigationButtonProps) => (
     <Button
       asChild
@@ -97,7 +110,10 @@ const NavigationButton = React.memo(
       size="icon"
       disabled={disabled || isLoading}
       className={cn(
-        "shrink-0 transition-all duration-200",
+        "group shrink-0",
+        // Same as PageButton: don't animate colors (avoids flash when disabled/loading toggles ghost styles).
+        "transition-[transform,box-shadow]! duration-200 ease-out",
+        "motion-safe:active:scale-[0.96]",
         disabled && "cursor-not-allowed opacity-50",
         !disabled && !isLoading && "hover:shadow-xs"
       )}
@@ -114,8 +130,19 @@ const NavigationButton = React.memo(
         href={generatePageUrl ? generatePageUrl(buttonPage) : "#"}
         onClick={e => onClick(buttonPage, e)}
         aria-disabled={disabled || isLoading}
+        className="flex items-center justify-center"
       >
-        {children}
+        <span
+          className={cn(
+            "inline-flex transition-transform duration-200 ease-out motion-reduce:transition-none",
+            chevronMotion === "left" &&
+              "translate-x-0 motion-safe:group-hover:-translate-x-1 motion-reduce:group-hover:translate-x-0",
+            chevronMotion === "right" &&
+              "translate-x-0 motion-safe:group-hover:translate-x-1 motion-reduce:group-hover:translate-x-0"
+          )}
+        >
+          {children}
+        </span>
       </a>
     </Button>
   )
@@ -204,7 +231,7 @@ export default function SimplePagination({
           "flex max-w-full min-w-0 flex-nowrap items-center justify-center",
           isMobile
             ? "w-full gap-2"
-            : "gap-1.5 overflow-x-auto overflow-y-hidden overscroll-x-contain [-webkit-overflow-scrolling:touch]"
+            : "gap-1.5 overflow-x-auto overflow-y-hidden overscroll-x-contain scroll-smooth [-webkit-overflow-scrolling:touch]"
         )}
         aria-label="Pagination navigation"
       >
@@ -215,6 +242,7 @@ export default function SimplePagination({
           onClick={handleLinkClick}
           generatePageUrl={generatePageUrl}
           ariaLabel="Go to first page"
+          chevronMotion="left"
         >
           <ChevronsLeft className="h-4 w-4" />
         </NavigationButton>
@@ -224,12 +252,13 @@ export default function SimplePagination({
           isLoading={loadingState.isLoading}
           onClick={handleLinkClick}
           generatePageUrl={generatePageUrl}
+          chevronMotion="left"
         >
           <ChevronLeft className="h-4 w-4" />
         </NavigationButton>
         {isMobile ? (
           <div
-            className="text-muted-foreground flex min-w-0 flex-1 items-center justify-center gap-x-1 px-0.5 text-sm tabular-nums leading-none"
+            className="text-muted-foreground flex min-w-0 flex-1 items-center justify-center gap-x-1 px-0.5 text-sm leading-none tabular-nums"
             aria-live="polite"
             aria-atomic="true"
           >
@@ -246,6 +275,7 @@ export default function SimplePagination({
           isLoading={loadingState.isLoading}
           onClick={handleLinkClick}
           generatePageUrl={generatePageUrl}
+          chevronMotion="right"
         >
           <ChevronRight className="h-4 w-4" />
         </NavigationButton>
@@ -256,6 +286,7 @@ export default function SimplePagination({
           onClick={handleLinkClick}
           generatePageUrl={generatePageUrl}
           ariaLabel="Go to last page"
+          chevronMotion="right"
         >
           <ChevronsRight className="h-4 w-4" />
         </NavigationButton>
