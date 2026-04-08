@@ -176,8 +176,8 @@ export class ScoreWebsockets implements EventListener {
     beatLeaderScore?: BeatLeaderScoreToken
   ) {
     if (scoreSaberToken && leaderboardToken && player) {
-      const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
-      const score = getScoreSaberScoreFromToken(scoreSaberToken, leaderboard, player.id);
+      const scoreLeaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+      const score = getScoreSaberScoreFromToken(scoreSaberToken, scoreLeaderboard, player.id);
       const isTop50GlobalScore = await TopScoresService.isTop50GlobalScore(score);
 
       // Create the player, update their name if they are already being tracked
@@ -189,12 +189,12 @@ export class ScoreWebsockets implements EventListener {
       }
 
       // Fetch the leaderboard if it doesn't exist
-      if (!(await ScoreSaberLeaderboardsRepository.existsById(leaderboard.id))) {
-        await ScoreSaberLeaderboardsService.createLeaderboard(leaderboard.id, leaderboardToken);
+      if (!(await ScoreSaberLeaderboardsRepository.existsById(scoreLeaderboard.id))) {
+        await ScoreSaberLeaderboardsService.createLeaderboard(scoreLeaderboard.id, leaderboardToken);
       } else {
-        await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, {
-          plays: leaderboard.plays,
-          maxScore: leaderboard.maxScore,
+        await ScoreSaberLeaderboardsRepository.updateLeaderboard(scoreLeaderboard.id, {
+          plays: scoreLeaderboard.plays + 1, // returned value from the websocket is 1 less than the actual plays
+          maxScore: scoreLeaderboard.maxScore,
         });
       }
 
@@ -217,7 +217,7 @@ export class ScoreWebsockets implements EventListener {
           try {
             await listener.onScoreReceived?.(
               score,
-              leaderboard,
+              scoreLeaderboard,
               score.playerInfo!,
               beatLeaderScore,
               isTop50GlobalScore
