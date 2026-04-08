@@ -1,3 +1,2 @@
 CREATE INDEX "accounts_active_country_idx" ON "scoresaber-accounts" USING btree ("country") WHERE "scoresaber-accounts"."inactive" = false AND "scoresaber-accounts"."country" IS NOT NULL AND "scoresaber-accounts"."country" <> '';--> statement-breakpoint
-CREATE INDEX "score_events_timestamp_leaderboard_player_idx" ON "scoresaber-score-events" USING btree ("timestamp","leaderboardId","playerId");--> statement-breakpoint
 CREATE INDEX "scores_player_pp_desc_idx" ON "scoresaber-scores" USING btree ("playerId","pp" DESC NULLS LAST,"scoreId" DESC NULLS LAST);
