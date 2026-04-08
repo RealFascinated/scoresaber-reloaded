@@ -1,0 +1,1 @@
+DROP INDEX "score_events_timestamp_leaderboard_player_idx";

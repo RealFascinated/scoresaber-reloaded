@@ -204,6 +204,13 @@
       "when": 1775800000010,
       "tag": "0028_add_brin_and_pp_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1775800000011,
+      "tag": "0029_remove_unused_score_events_index",
+      "breakpoints": true
     }
   ]
 }
