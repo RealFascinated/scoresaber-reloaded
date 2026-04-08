@@ -59,7 +59,7 @@ export default class PostgresDbSizeMetric extends NumberMetric {
         }
 
         this.lastCollectedAt = now;
-        const result = await db.execute<TableSizeRow>(sql`
+        const rows = await db.execute<TableSizeRow>(sql`
           SELECT
             tablename AS "tableName",
             pg_total_relation_size(quote_ident(tablename)) AS "totalSizeBytes",
@@ -73,7 +73,7 @@ export default class PostgresDbSizeMetric extends NumberMetric {
         let totalDatabaseSize = 0;
         this.tableSizeGauge.reset();
 
-        for (const row of result.rows) {
+        for (const row of rows) {
           const totalSizeBytes = toSafeNumber(row.totalSizeBytes);
           const dataSizeBytes = toSafeNumber(row.dataSizeBytes);
           const indexSizeBytes = toSafeNumber(row.indexSizeBytes);

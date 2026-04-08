@@ -1,15 +1,14 @@
 import { env } from "@ssr/common/env";
 import "dotenv/config";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { SQL } from "bun";
+import { drizzle } from "drizzle-orm/bun-sql";
 import * as schema from "./schema";
 
-const pool = new Pool({
-  connectionString: env.DATABASE_URL,
-  max: 50, // max connections
-  min: 10, // min connections
-  idleTimeoutMillis: 30000, // close idle connections after 30s
-  connectionTimeoutMillis: 2000,
+const client = new SQL({
+  url: env.DATABASE_URL,
+  max: 50, // max connections in pool
+  idleTimeout: 30, // seconds (close idle connections after 30s)
+  connectionTimeout: 2, // seconds (timeout when establishing new connections)
 });
 
-export const db = drizzle(pool, { schema: { ...schema } });
+export const db = drizzle({ client, schema: { ...schema } });
