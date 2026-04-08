@@ -93,7 +93,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
             </div>
 
             {mainPlayer !== undefined && (
-              <div className="bg-accent/50 flex min-w-fit items-center justify-between gap-(--spacing-lg) rounded-md px-(--spacing-lg) py-(--spacing-sm)">
+              <div className="bg-accent/50 flex min-w-fit items-center justify-between gap-(--spacing-lg) rounded-md px-(--spacing-sm) py-(--spacing-xs)">
                 <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
                   <p className="text-sm">Relative PP</p>
                 </SimpleTooltip>

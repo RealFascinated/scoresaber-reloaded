@@ -195,9 +195,19 @@ export default function SimplePagination({
   );
 
   const renderPageNumbers = useCallback(() => {
-    const delta = 2;
-    const left = Math.max(1, page - delta);
-    const right = Math.min(totalPages, page + delta);
+    const visiblePageCount = 7;
+    const halfVisibleCount = Math.floor(visiblePageCount / 2);
+    let left = Math.max(1, page - halfVisibleCount);
+    let right = Math.min(totalPages, page + halfVisibleCount);
+
+    // Keep a consistent 5-page window when possible by shifting near edges.
+    const currentWindowSize = right - left + 1;
+    if (currentWindowSize < visiblePageCount) {
+      const remainingSlots = visiblePageCount - currentWindowSize;
+      const addToRight = Math.min(remainingSlots, totalPages - right);
+      right += addToRight;
+      left = Math.max(1, left - (remainingSlots - addToRight));
+    }
 
     const pageNumbers: React.ReactNode[] = [];
 

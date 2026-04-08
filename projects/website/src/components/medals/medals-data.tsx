@@ -56,7 +56,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
   return (
     <div className="flex w-full flex-col justify-center gap-2 xl:flex-row xl:gap-2">
-      <div className="flex w-full flex-col gap-2 xl:w-[50%]">
+      <div className="flex w-full flex-col gap-2 xl:w-[750px]">
         <Card>
           <div className="flex items-center gap-(--spacing-sm)">
             <GlobeAmericasIcon className="size-6" />
