@@ -171,6 +171,9 @@ export class PlayerCoreService {
                 sspPlays: 0,
                 godPlays: 0,
               },
+              currentStreak: 0,
+              longestStreak: 0,
+              lastPlayedDate: null,
               trackedSince: new Date(),
               joinedDate: new Date(token.firstSeen),
             };

@@ -67,6 +67,16 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    * The player's rank percentile (top 0.1%)
    */
   rankPercentile: number;
+
+  /**
+   * The player's current streak.
+   */
+  currentStreak: number;
+
+  /**
+   * The player's longest streak.
+   */
+  longestStreak: number;
 }
 
 export interface ScoreSaberPlayerBase extends Player {

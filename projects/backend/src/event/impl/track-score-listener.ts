@@ -13,6 +13,7 @@ import CacheService from "../../service/infra/cache.service";
 import MetricsService, { MetricType } from "../../service/infra/metrics.service";
 import { PlayerHistoryService } from "../../service/player/player-history.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
+import { PlayerPlayedStreakService } from "../../service/streaks/player-streaks.service";
 import { WebsocketManager } from "../../websocket/websocket-manager";
 import { EventListener } from "../event-listener";
 
@@ -43,6 +44,9 @@ export class TrackScoreListener implements EventListener {
     if (trackedScore == undefined) {
       return;
     }
+
+    // Update player streak
+    await PlayerPlayedStreakService.handleScoreSaberScore(score);
 
     // Update player daily score stats
     PlayerHistoryService.updatePlayerDailyScoreStats(score.playerId, leaderboard.stars > 0, hasPreviousScore);

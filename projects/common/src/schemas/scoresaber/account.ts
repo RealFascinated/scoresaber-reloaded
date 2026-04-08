@@ -23,6 +23,8 @@ export const ScoreSaberAccountSchema = z.object({
   medalsRank: z.number(),
   medalsCountryRank: z.number(),
   scoreStats: ScoreSaberPlayerScoreStatsSchema,
+  currentStreak: z.number(),
+  longestStreak: z.number(),
   trackedSince: z.coerce.date(),
   joinedDate: z.coerce.date(),
 });

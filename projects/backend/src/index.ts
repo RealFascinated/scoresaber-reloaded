@@ -28,6 +28,7 @@ import { EventsManager } from "./event/events-manager";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { QueueManager } from "./queue/queue-manager";
 import { ScoreSaberMedalsRepository } from "./repositories/scoresaber-medals.repository";
+import { TableCountsRepository } from "./repositories/table-counts.repository";
 import CacheService from "./service/infra/cache.service";
 import MetricsService, { prometheusRegistry } from "./service/infra/metrics.service";
 import StorageService from "./service/infra/storage.service";
@@ -37,10 +38,10 @@ import { PlayerMedalsService } from "./service/medals/player-medals.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { ScoreEventService } from "./service/score-event/score-event.service";
+import { PlayerPlayedStreakService } from "./service/streaks/player-streaks.service";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
-import { TableCountsRepository } from "./repositories/table-counts.repository";
 
 const log = Logger.withTopic("SSR Backend");
 
@@ -162,6 +163,17 @@ export const app = new Elysia()
       protect: true,
       run: async () => {
         await TableCountsRepository.refreshConcurrently();
+      },
+    })
+  )
+  .use(
+    cron({
+      name: "expire-broken-streaks",
+      pattern: "0 0 * * *", // Every day at 00:00
+      timezone: "Europe/London",
+      protect: true,
+      run: async () => {
+        await PlayerPlayedStreakService.expireBrokenStreaks();
       },
     })
   )

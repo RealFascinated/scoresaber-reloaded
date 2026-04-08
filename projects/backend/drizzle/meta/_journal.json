@@ -204,6 +204,20 @@
       "when": 1775800000010,
       "tag": "0028_add_brin_and_pp_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1775800000011,
+      "tag": "0029_add_streak_colunms",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1775800000012,
+      "tag": "0030_add_streak_index",
+      "breakpoints": true
     }
   ]
 }

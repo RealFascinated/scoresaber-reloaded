@@ -5,6 +5,7 @@ import { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/playe
 import { isNotNull, sql } from "drizzle-orm";
 import {
   boolean,
+  date,
   doublePrecision,
   index,
   integer,
@@ -44,6 +45,11 @@ export const scoreSaberAccountsTable = pgTable(
     medalsRank: integer().notNull().default(0),
     medalsCountryRank: integer().notNull().default(0),
 
+    // Played streak
+    currentStreak: integer().notNull().default(0),
+    longestStreak: integer().notNull().default(0),
+    lastPlayedDate: date({ mode: "string" }),
+
     scoreStats: jsonb().$type<ScoreSaberPlayerScoreStats>().notNull(),
 
     trackedSince: timestamp().notNull(),
@@ -64,6 +70,9 @@ export const scoreSaberAccountsTable = pgTable(
     index("accounts_inactive_true_idx")
       .on(table.inactive)
       .where(sql`${table.inactive} = true`),
+    index("accounts_streak_expiry_date_idx")
+      .on(table.lastPlayedDate)
+      .where(sql`${table.currentStreak} > 0 AND ${table.lastPlayedDate} IS NOT NULL`),
   ]
 );
 

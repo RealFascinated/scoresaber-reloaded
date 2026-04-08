@@ -118,6 +118,8 @@ export default class ScoreSaberPlayerService {
           (player.rank /
             (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1) || 1) *
           100,
+        currentStreak: account?.currentStreak ?? 0,
+        longestStreak: account?.longestStreak ?? 0,
         scoreStats: account?.scoreStats ?? undefined,
       } as ScoreSaberPlayer;
     });

@@ -1,0 +1,1 @@
+CREATE INDEX "accounts_streak_expiry_date_idx" ON "scoresaber-accounts" USING btree ("lastPlayedDate") WHERE "scoresaber-accounts"."currentStreak" > 0 AND "scoresaber-accounts"."lastPlayedDate" IS NOT NULL;
