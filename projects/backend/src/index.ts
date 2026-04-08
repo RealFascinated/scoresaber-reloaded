@@ -74,7 +74,7 @@ export const app = new Elysia()
       name: "player-statistics-tracker-cron",
       // pattern: "*/1 * * * *", // Every 1 minute
       pattern: "59 23 * * *", // Every day at 23:59
-      timezone: "Europe/London",
+      timezone: "UTC",
       protect: true,
       run: async () => {
         const before = Date.now();
@@ -97,7 +97,7 @@ export const app = new Elysia()
       name: "refresh-leaderboards-cron",
       // pattern: "*/1 * * * *", // Every minute
       pattern: "30 */2 * * *", // Every 2 hours at 30 minutes ex: 00:30, 02:30, 04:30, etc
-      timezone: "Europe/London",
+      timezone: "UTC",
       protect: true,
       run: async () => {
         await LeaderboardRankedSyncNotificationsService.handleRankedBatch(
@@ -111,7 +111,7 @@ export const app = new Elysia()
     cron({
       name: "refresh-medal-scores",
       pattern: "*/10 * * * *", // Every 10 minutes
-      timezone: "Europe/London",
+      timezone: "UTC",
       protect: true,
       run: async () => {
         await ScoreSaberMedalsRepository.refreshMaterializedMedalRanks();
@@ -123,7 +123,7 @@ export const app = new Elysia()
       name: "nightly-global-medal-refresh",
       // pattern: "*/1 * * * *", // Every minute
       pattern: "0 22 * * *", // Every day at 22:00
-      timezone: "Europe/London",
+      timezone: "UTC",
       protect: true,
       run: async () => {
         const before = Date.now();
@@ -147,7 +147,7 @@ export const app = new Elysia()
     cron({
       name: "leaderboard-updates",
       pattern: "0 * * * *", // Every 1 hour
-      timezone: "Europe/London",
+      timezone: "UTC",
       protect: true,
       run: async () => {
         await ScoreEventService.updateTrendingLeaderboards();
@@ -159,7 +159,7 @@ export const app = new Elysia()
     cron({
       name: "refresh-table-counts",
       pattern: "*/5 * * * *", // Every 5 minutes
-      timezone: "Europe/London",
+      timezone: "UTC",
       protect: true,
       run: async () => {
         await TableCountsRepository.refreshConcurrently();
@@ -170,7 +170,7 @@ export const app = new Elysia()
     cron({
       name: "expire-broken-streaks",
       pattern: "0 0 * * *", // Every day at 00:00
-      timezone: "Europe/London",
+      timezone: "UTC",
       protect: true,
       run: async () => {
         await PlayerPlayedStreakService.expireBrokenStreaks();
