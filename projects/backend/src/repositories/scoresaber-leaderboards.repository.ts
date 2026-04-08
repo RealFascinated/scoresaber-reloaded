@@ -397,10 +397,6 @@ export class ScoreSaberLeaderboardsRepository {
 
   public static async countTotal(): Promise<number> {
     const counts = await TableCountsRepository.getCounts();
-    if (counts) {
-      return counts.scoresaberLeaderboards;
-    }
-    const [row] = await db.select({ count: count() }).from(scoreSaberLeaderboardsTable);
-    return row?.count ?? 0;
+    return counts.scoresaberLeaderboards;
   }
 }

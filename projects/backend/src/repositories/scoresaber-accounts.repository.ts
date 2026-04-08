@@ -88,11 +88,7 @@ export class ScoreSaberAccountsRepository {
 
   public static async countTotal(): Promise<number> {
     const counts = await TableCountsRepository.getCounts();
-    if (counts) {
-      return counts.scoresaberAccounts;
-    }
-    const [row] = await db.select({ c: count() }).from(scoreSaberAccountsTable);
-    return row?.c ?? 0;
+    return counts.scoresaberAccounts;
   }
 
   public static async countJoinedSince(date: Date): Promise<number> {

@@ -11,7 +11,7 @@ export type TableCountsRow = {
 };
 
 export class TableCountsRepository {
-  public static async getCounts(): Promise<TableCountsRow | undefined> {
+  public static async getCounts(): Promise<TableCountsRow> {
     const result = await db.execute<TableCountsRow>(sql`
       SELECT
         "id",
@@ -23,9 +23,11 @@ export class TableCountsRepository {
       FROM "ssr_table_counts"
       WHERE "id" = 1
     `);
-
-    const rows = (result as { rows?: TableCountsRow[] }).rows ?? [];
-    return rows[0];
+    const counts = result[0] as TableCountsRow | undefined;
+    if (!counts) {
+      throw new Error('Materialized counts row missing from "ssr_table_counts"');
+    }
+    return counts;
   }
 
   public static async refreshConcurrently(): Promise<void> {

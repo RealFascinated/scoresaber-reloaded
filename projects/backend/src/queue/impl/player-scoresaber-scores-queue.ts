@@ -27,6 +27,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
     const playerToken = await ScoreSaberApiService.lookupPlayer(playerId);
     if (!playerToken) {
       FetchMissingScoresQueue.logger.warn(`Player "${playerId}" not found on ScoreSaber`);
+      // todo: delete player from database?
       return;
     }
 

@@ -306,10 +306,6 @@ export class ScoreSaberScoresRepository {
 
   public static async countTotal(): Promise<number> {
     const counts = await TableCountsRepository.getCounts();
-    if (counts) {
-      return counts.scoresaberScores;
-    }
-    const [row] = await db.select({ count: count() }).from(scoreSaberScoresTable);
-    return row?.count ?? 0;
+    return counts.scoresaberScores;
   }
 }
