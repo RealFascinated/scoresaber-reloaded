@@ -18,7 +18,6 @@ import { PlayerStatisticsService } from "../player-statistics/player-statistics.
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerHistoryService } from "./player-history.service";
 import { PlayerHmdService } from "./player-hmd.service";
-import { PlayerRankedService } from "./player-ranked.service";
 
 const CACHED_PLAYER_EXPIRY = TimeUnit.toSeconds(TimeUnit.Month, 3);
 
@@ -54,24 +53,27 @@ export default class ScoreSaberPlayerService {
 
     return CacheService.fetch(CacheId.SCORESABER_PLAYER, playerCacheKey(id, type), async () => {
       const account = await PlayerCoreService.getOrCreateAccount(id, player).catch(() => undefined);
+      if (!account) {
+        throw new NotFoundError(`Player account "${id}" not found`);
+      }
 
       const basePlayer = {
         id: player.id,
         name: player.name,
-        avatar: account?.avatar ?? "https://cdn.fascinated.cc/assets/unknown.png",
+        avatar: account.avatar,
         country: player.country,
         rank: player.rank,
         countryRank: player.countryRank,
         pp: player.pp,
-        medals: account?.medals ?? 0,
-        medalsRank: account?.medalsRank ?? 0,
-        medalsCountryRank: account?.medalsCountryRank ?? 0,
-        hmd: account?.hmd ?? undefined,
-        role: player.role ?? undefined,
+        medals: account.medals,
+        medalsRank: account.medalsRank,
+        medalsCountryRank: account.medalsCountryRank,
+        hmd: account.hmd,
+        role: player.role,
         permissions: player.permissions,
         banned: player.banned,
         inactive: player.inactive,
-        trackedSince: account?.trackedSince ?? new Date(),
+        trackedSince: account.trackedSince,
         joinedDate: new Date(player.firstSeen),
       } as ScoreSaberPlayer;
 
@@ -79,21 +81,21 @@ export default class ScoreSaberPlayerService {
         return basePlayer;
       }
 
-      const statistics = await PlayerStatisticsService.getPlayerStatistics(player, true);
-      const [plusOnePp, hmdBreakdown, history] = await Promise.all([
-        account ? PlayerRankedService.getPlayerPlusOnePp(id) : 0,
+      const statistics = await PlayerStatisticsService.getStatistics(player);
+      const [hmdBreakdown, history] = await Promise.all([
         account && player !== undefined
           ? PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages)
           : undefined,
         PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30),
       ]);
 
+      let rankPercentile = (player.rank / (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1)) * 100;
+      if (isNaN(rankPercentile)) {
+        rankPercentile = 0;
+      }
+
       return {
         ...basePlayer,
-        bio: {
-          lines: player.bio ? player.bio.split("\n") : [],
-          linesStripped: player.bio ? player.bio.replace(/<[^>]+>/g, "").split("\n") : [],
-        },
         badges:
           player.badges?.map(badge => ({
             url: badge.image,
@@ -104,8 +106,8 @@ export default class ScoreSaberPlayerService {
           weekly: getPlayerStatisticChanges(history, 7),
           monthly: getPlayerStatisticChanges(history, 30),
         },
-        plusOnePp: plusOnePp,
-        peakRank: account?.peakRank,
+        plusOnePp: statistics.plusOnePp,
+        peakRank: account.peakRank,
         hmdBreakdown: hmdBreakdown,
         rankPages: {
           global: getPageFromRank(player.rank, 50),
@@ -115,12 +117,9 @@ export default class ScoreSaberPlayerService {
               ? getPageFromRank(account.medalsRank, 50)
               : undefined,
         },
-        rankPercentile:
-          (player.rank /
-            (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1) || 1) *
-          100,
-        currentStreak: account?.currentStreak ?? 0,
-        longestStreak: account?.longestStreak ?? 0,
+        rankPercentile: rankPercentile,
+        currentStreak: account.currentStreak,
+        longestStreak: account.longestStreak,
         statistics: statistics,
       } as ScoreSaberPlayer;
     });

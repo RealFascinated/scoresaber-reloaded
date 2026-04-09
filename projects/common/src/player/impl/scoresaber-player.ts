@@ -76,11 +76,6 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
 
 export interface ScoreSaberPlayerBase extends Player {
   /**
-   * The bio of the player.
-   */
-  bio: ScoreSaberBio;
-
-  /**
    * The amount of pp the player has.
    */
   pp: number;
@@ -110,21 +105,6 @@ export interface ScoreSaberPlayerBase extends Player {
    */
   inactive: boolean;
 }
-
-/**
- * A bio of a player.
- */
-export type ScoreSaberBio = {
-  /**
-   * The lines of the bio including any html tags.
-   */
-  lines: string[];
-
-  /**
-   * The lines of the bio stripped of all html tags.
-   */
-  linesStripped: string[];
-};
 
 /**
  * A badge for a player.

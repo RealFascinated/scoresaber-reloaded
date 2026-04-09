@@ -246,6 +246,13 @@
       "when": 1775800000016,
       "tag": "0034_add_replays_watched",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1775800000017,
+      "tag": "0035_drop_player_statistics",
+      "breakpoints": true
     }
   ]
 }

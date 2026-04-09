@@ -190,7 +190,7 @@ export class PlayerHistoryService {
       date,
       existingEntry,
       PlayerHistoryService.createHistoryEntry(
-        await PlayerStatisticsService.fullUpdate(playerToken),
+        await PlayerStatisticsService.getStatistics(playerToken),
         existingEntry ?? undefined
       )
     );

@@ -13,7 +13,6 @@ import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores
 import BeatLeaderService from "../beatleader/beatleader.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerMedalsService } from "../medals/player-medals.service";
-import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 
@@ -97,15 +96,6 @@ export class ScoreCoreService {
         isImprovement ? ` (improvement)` : "",
         formatDuration(performance.now() - before)
       );
-
-      void PlayerStatisticsService.handleScoreSaberScore(score).catch(error => {
-        ScoreCoreService.logger.error(
-          `Failed to update player statistics for "%s" after tracking score "%s": %s`,
-          score.playerId,
-          score.scoreId,
-          error instanceof Error ? error.message : String(error)
-        );
-      });
     }
     return { score: score, hasPreviousScore: isImprovement, tracked: true };
   }

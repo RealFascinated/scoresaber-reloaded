@@ -1,0 +1,1 @@
+DROP TABLE "scoresaber-player-statistics" CASCADE;

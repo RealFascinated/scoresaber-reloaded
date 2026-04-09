@@ -123,45 +123,6 @@ export const playerHistoryTable = pgTable(
   table => [uniqueIndex("scoresaber_player_history_player_id_date_unique").on(table.playerId, table.date)]
 );
 
-export const playerStatisticsTable = pgTable("scoresaber-player-statistics", {
-  // Identifiers
-  playerId: varchar({ length: 32 }).notNull().primaryKey(),
-
-  // Rank stats
-  rank: integer(),
-  countryRank: integer(),
-
-  // Medals stats
-  medals: integer(),
-
-  // PP stats
-  pp: doublePrecision(),
-  plusOnePp: doublePrecision(),
-
-  // Score stats
-  totalScore: doublePrecision(),
-  totalRankedScore: doublePrecision(),
-  rankedScores: integer(),
-  unrankedScores: integer(),
-  totalRankedScores: integer(),
-  totalUnrankedScores: integer(),
-  totalScores: integer(),
-  replaysWatched: integer(),
-
-  // Accuracy stats
-  averageRankedAccuracy: doublePrecision(),
-  averageUnrankedAccuracy: doublePrecision(),
-  averageAccuracy: doublePrecision(),
-
-  // Ranked play stats
-  aPlays: integer(),
-  sPlays: integer(),
-  spPlays: integer(),
-  ssPlays: integer(),
-  sspPlays: integer(),
-  godPlays: integer(),
-});
-
 export const scoreSaberScoresTable = pgTable(
   "scoresaber-scores",
   {
@@ -527,7 +488,6 @@ export const scoreSaberScoreEventTable = pgTable(
 
 export type ScoreSaberAccountRow = typeof scoreSaberAccountsTable.$inferSelect;
 export type PlayerHistoryRow = typeof playerHistoryTable.$inferSelect;
-export type PlayerStatisticsRow = typeof playerStatisticsTable.$inferSelect;
 export type ScoreSaberScoreRow = typeof scoreSaberScoresTable.$inferSelect;
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
 export type ScoreSaberLeaderboardRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
