@@ -89,7 +89,10 @@ export default class ScoreSaberPlayerService {
         PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30),
       ]);
 
-      let rankPercentile = (player.rank / (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1)) * 100;
+      let rankPercentile =
+        (player.rank /
+          (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1)) *
+        100;
       if (isNaN(rankPercentile)) {
         rankPercentile = 0;
       }

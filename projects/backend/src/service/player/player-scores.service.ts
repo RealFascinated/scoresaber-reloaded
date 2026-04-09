@@ -377,7 +377,9 @@ export class PlayerScoresService {
         return [];
       }
 
-      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(rows.map(config.getLeaderboardId));
+      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(
+        rows.map(config.getLeaderboardId)
+      );
       const leaderboardMap = new Map(leaderboards.map(lb => [lb.id, lb]));
 
       const scores = await Promise.all(
