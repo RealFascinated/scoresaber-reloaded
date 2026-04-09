@@ -184,10 +184,9 @@ export class PlayerHistoryService {
 
     const date = getMidnightAlignedDate(trackTime);
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(player.id, date);
-    const statistics = await PlayerStatisticsService.getPlayerStatistics(playerToken, true);
 
     await PlayerHistoryRepository.upsertByPlayerAndDate(player.id, date, existingEntry, PlayerHistoryService.createHistoryEntry(
-      statistics,
+      await PlayerStatisticsService.fullUpdate(playerToken),
       existingEntry ?? undefined
     ));
   }
@@ -394,8 +393,8 @@ export class PlayerHistoryService {
       averageRankedAccuracy: statistics.averageRankedAccuracy,
       averageUnrankedAccuracy: statistics.averageUnrankedAccuracy,
       averageAccuracy: statistics.averageAccuracy,
-      rankedScores: statistics.rankedScores,
-      unrankedScores: statistics.unrankedScores,
+      rankedScores: existingEntry?.rankedScores ?? 0,
+      unrankedScores: existingEntry?.unrankedScores ?? 0,
       rankedScoresImproved: existingEntry?.rankedScoresImproved ?? 0,
       unrankedScoresImproved: existingEntry?.unrankedScoresImproved ?? 0,
       totalScores: statistics.totalScores,
