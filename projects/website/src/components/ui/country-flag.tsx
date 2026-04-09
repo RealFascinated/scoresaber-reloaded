@@ -19,7 +19,7 @@ export default function CountryFlag({ code, size = 24, className, tooltip, toolt
 
   const unknownSrc = "https://cdn.fascinated.cc/assets/flags/unknown.png";
   const [failedForCode, setFailedForCode] = useState<string | null>(null);
-  const primarySrc = getFlagSrc(code);
+  const primarySrc = code ? getFlagSrc(code) : unknownSrc;
   const flagSrc = failedForCode === code ? unknownSrc : primarySrc;
 
   const handleError = () => {
