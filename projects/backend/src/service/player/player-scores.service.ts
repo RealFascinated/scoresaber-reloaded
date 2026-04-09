@@ -377,12 +377,8 @@ export class PlayerScoresService {
         return [];
       }
 
-      // Batch-fetch leaderboards for this page only
-      const leaderboardIdSet = [...new Set(rows.map(config.getLeaderboardId))];
-      const leaderboards = await Promise.all(
-        leaderboardIdSet.map(id => ScoreSaberLeaderboardsRepository.getLeaderboardById(id, false))
-      );
-      const leaderboardMap = new Map(leaderboards.flatMap(lb => (lb ? [[lb.id, lb]] : [])));
+      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(rows.map(config.getLeaderboardId));
+      const leaderboardMap = new Map(leaderboards.map(lb => [lb.id, lb]));
 
       const scores = await Promise.all(
         rows.map(async row => {

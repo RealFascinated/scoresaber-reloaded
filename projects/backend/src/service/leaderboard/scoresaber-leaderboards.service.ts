@@ -177,7 +177,7 @@ export class ScoreSaberLeaderboardsService {
    * @param leaderboard the leaderboard to fetch the star change history for
    * @returns the star change history
    */
-  public static async fetchStarChangeHistory(
+  public static async getStarChangeHistory(
     leaderboard: ScoreSaberLeaderboard
   ): Promise<LeaderboardStarChange[]> {
     const rows = await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(

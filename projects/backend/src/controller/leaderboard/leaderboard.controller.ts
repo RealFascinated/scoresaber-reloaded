@@ -51,7 +51,7 @@ export default function leaderboardController(app: Elysia) {
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic
             ),
-            ScoreSaberLeaderboardsService.fetchStarChangeHistory(leaderboard),
+            ScoreSaberLeaderboardsService.getStarChangeHistory(leaderboard),
           ]);
           return { leaderboard, beatsaver, starChangeHistory } as LeaderboardResponse;
         },
@@ -79,7 +79,7 @@ export default function leaderboardController(app: Elysia) {
               leaderboard.difficulty.difficulty,
               leaderboard.difficulty.characteristic
             ),
-            ScoreSaberLeaderboardsService.fetchStarChangeHistory(leaderboard),
+            ScoreSaberLeaderboardsService.getStarChangeHistory(leaderboard),
           ]);
           return { leaderboard, beatsaver, starChangeHistory } as LeaderboardResponse;
         },
