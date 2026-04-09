@@ -8,6 +8,7 @@ import { db } from "../../db";
 import { playerStatisticsRowToType } from "../../db/converter/player-statistics";
 import { playerStatisticsTable, scoreSaberAccountsTable, scoreSaberScoresTable } from "../../db/schema";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
+import { PlayerRankedService } from "../player/player-ranked.service";
 
 export class PlayerStatisticsService {
   /**
@@ -127,6 +128,8 @@ export class PlayerStatisticsService {
     }
 
     const scoreStats = await PlayerStatisticsService.getScoreStats(playerId);
+    const plusOne = await PlayerRankedService.getPlayerPlusOnePp(playerId);
+
     const [statistics] = await db
       .insert(playerStatisticsTable)
       .values({
@@ -142,7 +145,7 @@ export class PlayerStatisticsService {
 
         // PP stats
         pp: playerToken.pp,
-        plusOnePp: 0,
+        plusOnePp: plusOne,
 
         // Score stats
         totalScore: scoreStats?.totalScore ?? 0,
@@ -188,6 +191,7 @@ export class PlayerStatisticsService {
    * @returns the updated statistics
    */
   private static async update(playerToken: ScoreSaberPlayerToken) {
+    const plusOne = await PlayerRankedService.getPlayerPlusOnePp(playerToken.id);
     const [statistics] = await db
       .update(playerStatisticsTable)
       .set({
@@ -195,6 +199,7 @@ export class PlayerStatisticsService {
         rank: playerToken.rank,
         countryRank: playerToken.countryRank,
         replaysWatched: playerToken.scoreStats.replaysWatched,
+        plusOnePp: plusOne,
       })
       .where(eq(playerStatisticsTable.playerId, playerToken.id))
       .returning();
