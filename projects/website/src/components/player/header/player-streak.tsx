@@ -41,19 +41,26 @@ export default function PlayerStreak({ player }: PlayerStreakProps) {
         )}
 
         <div className="relative flex items-center justify-between">
-          <span className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">Streak</span>
-          <Flame className="text-orange-300/90 size-3.5" />
+          <span className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
+            Streak
+          </span>
+          <Flame className="size-3.5 text-orange-300/90" />
         </div>
 
         <div className="relative mt-0.5 flex items-end gap-1">
-          <span className="text-base leading-none font-semibold">{formatNumberWithCommas(currentStreak)}</span>
+          <span className="text-base leading-none font-semibold">
+            {formatNumberWithCommas(currentStreak)}
+          </span>
           <span className="text-muted-foreground text-[11px] leading-none">
             {pluralize(currentStreak, "day")}
           </span>
         </div>
 
         <div className="relative mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/8">
-          <div className="h-full rounded-full bg-linear-to-r from-orange-400 to-amber-300" style={{ width: `${progress}%` }} />
+          <div
+            className="h-full rounded-full bg-linear-to-r from-orange-400 to-amber-300"
+            style={{ width: `${progress}%` }}
+          />
         </div>
 
         <div className="text-muted-foreground relative mt-1 text-[10px]">

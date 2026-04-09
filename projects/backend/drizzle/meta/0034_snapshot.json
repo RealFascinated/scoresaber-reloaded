@@ -1,6 +1,6 @@
 {
-  "id": "a4fd627f-bf0b-4b70-ba92-f4d97b4f54fd",
-  "prevId": "d6c9f666-5f61-4c3e-9a16-6546429e92d9",
+  "id": "adb75e8e-4e22-4cc9-93d8-92ba5c84dac7",
+  "prevId": "982806ca-02d4-43c5-b672-910902397d8b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1005,6 +1005,157 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.scoresaber-player-statistics": {
+      "name": "scoresaber-player-statistics",
+      "schema": "",
+      "columns": {
+        "playerId": {
+          "name": "playerId",
+          "type": "varchar(32)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "rank": {
+          "name": "rank",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "countryRank": {
+          "name": "countryRank",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "medals": {
+          "name": "medals",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pp": {
+          "name": "pp",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "plusOnePp": {
+          "name": "plusOnePp",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "totalScore": {
+          "name": "totalScore",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "totalRankedScore": {
+          "name": "totalRankedScore",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rankedScores": {
+          "name": "rankedScores",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "unrankedScores": {
+          "name": "unrankedScores",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "totalRankedScores": {
+          "name": "totalRankedScores",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "totalUnrankedScores": {
+          "name": "totalUnrankedScores",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "totalScores": {
+          "name": "totalScores",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "replaysWatched": {
+          "name": "replaysWatched",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "averageRankedAccuracy": {
+          "name": "averageRankedAccuracy",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "averageUnrankedAccuracy": {
+          "name": "averageUnrankedAccuracy",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "averageAccuracy": {
+          "name": "averageAccuracy",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aPlays": {
+          "name": "aPlays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sPlays": {
+          "name": "sPlays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "spPlays": {
+          "name": "spPlays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ssPlays": {
+          "name": "ssPlays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sspPlays": {
+          "name": "sspPlays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "godPlays": {
+          "name": "godPlays",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.scoresaber-accounts": {
       "name": "scoresaber-accounts",
       "schema": "",
@@ -1136,12 +1287,6 @@
           "type": "date",
           "primaryKey": false,
           "notNull": false
-        },
-        "scoreStats": {
-          "name": "scoreStats",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
         },
         "trackedSince": {
           "name": "trackedSince",
@@ -1278,6 +1423,22 @@
           ],
           "isUnique": false,
           "where": "\"scoresaber-accounts\".\"inactive\" = true",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "accounts_streak_expiry_date_idx": {
+          "name": "accounts_streak_expiry_date_idx",
+          "columns": [
+            {
+              "expression": "lastPlayedDate",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"scoresaber-accounts\".\"currentStreak\" > 0 AND \"scoresaber-accounts\".\"lastPlayedDate\" IS NOT NULL",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -1429,7 +1590,8 @@
           "name": "stars",
           "type": "double precision",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         },
         "rankedDate": {
           "name": "rankedDate",

@@ -1,6 +1,6 @@
 import { HMD } from "../../hmds";
 import { ScoreSaberPeakRank } from "../../schemas/scoresaber/player/peak-rank";
-import type { ScoreSaberPlayerScoreStats } from "../../schemas/scoresaber/player/score-stats";
+import { ScoreSaberPlayerStatistics } from "../../schemas/scoresaber/player/statistics";
 import Player, { StatisticChange } from "../player";
 
 /**
@@ -21,11 +21,6 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    * The best rank seen for this player.
    */
   peakRank?: ScoreSaberPeakRank;
-
-  /**
-   * The player's score stats.
-   */
-  scoreStats: ScoreSaberPlayerScoreStats;
 
   /**
    * The pages for the players positions.
@@ -144,41 +139,6 @@ export type ScoreSaberBadge = {
    * The description of the badge.
    */
   description: string;
-};
-
-/**
- * The statistics for a player.
- */
-export type ScoreSaberPlayerStatistics = {
-  /**
-   * The total amount of score accumulated over all scores.
-   */
-  totalScore: number;
-
-  /**
-   * The total amount of ranked score accumulated over all scores.
-   */
-  totalRankedScore: number;
-
-  /**
-   * The average ranked accuracy for all ranked scores.
-   */
-  averageRankedAccuracy: number;
-
-  /**
-   * The total amount of scores set.
-   */
-  totalPlayCount: number;
-
-  /**
-   * The total amount of ranked score set.
-   */
-  rankedPlayCount: number;
-
-  /**
-   * The amount of times their replays were watched.
-   */
-  replaysWatched: number;
 };
 
 export type ScoreSaberRankPages = {

@@ -74,7 +74,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
       {/* Player Footer */}
       <div className="border-border/50 flex flex-col-reverse items-center gap-4 border-t pt-6 md:flex-row md:justify-between md:pt-4">
         <PlayerActions player={player} />
-        <PlayerAccBadges scoreStats={player.scoreStats} />
+        <PlayerAccBadges statistics={player.statistics} />
       </div>
     </Card>
   );

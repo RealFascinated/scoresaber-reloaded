@@ -30,7 +30,6 @@ export function scoreSaberAccountRowToType(row: ScoreSaberAccountRow): ScoreSabe
     medalsCountryRank: row.medalsCountryRank,
     currentStreak: row.currentStreak,
     longestStreak: row.longestStreak,
-    scoreStats: row.scoreStats,
     trackedSince: row.trackedSince?.toISOString(),
     joinedDate: row.joinedDate?.toISOString(),
   });

@@ -23,7 +23,7 @@ const playerStats: Stat[] = [
     color: () => "bg-statistic",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: <>{formatNumberWithCommas(player.statistics.rankedPlayCount)}</>,
+        value: <>{formatNumberWithCommas(player.statistics.totalRankedScores)}</>,
       };
     },
   },
@@ -49,7 +49,7 @@ const playerStats: Stat[] = [
     name: "Total Play Count",
     create: (player: ScoreSaberPlayer) => {
       return {
-        value: <>{formatNumberWithCommas(player.statistics.totalPlayCount)}</>,
+        value: <>{formatNumberWithCommas(player.statistics.totalScores)}</>,
       };
     },
   },

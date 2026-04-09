@@ -14,6 +14,7 @@ import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 import MetricsService, { MetricType } from "../infra/metrics.service";
+import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerHistoryService } from "./player-history.service";
 import { PlayerHmdService } from "./player-hmd.service";
@@ -78,12 +79,13 @@ export default class ScoreSaberPlayerService {
         return basePlayer;
       }
 
-      const [plusOnePp, hmdBreakdown, statisticHistory] = await Promise.all([
+      const [plusOnePp, hmdBreakdown, history, statistics] = await Promise.all([
         account ? PlayerRankedService.getPlayerPlusOnePp(id) : 0,
         account && player !== undefined
           ? PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages)
           : undefined,
         PlayerHistoryService.getPlayerStatisticHistories(player, 30),
+        PlayerStatisticsService.getPlayerStatistics(player),
       ]);
 
       return {
@@ -98,13 +100,12 @@ export default class ScoreSaberPlayerService {
             description: badge.description,
           })) || [],
         statisticChange: {
-          daily: getPlayerStatisticChanges(statisticHistory, 1),
-          weekly: getPlayerStatisticChanges(statisticHistory, 7),
-          monthly: getPlayerStatisticChanges(statisticHistory, 30),
+          daily: getPlayerStatisticChanges(history, 1),
+          weekly: getPlayerStatisticChanges(history, 7),
+          monthly: getPlayerStatisticChanges(history, 30),
         },
         plusOnePp: plusOnePp,
         peakRank: account?.peakRank,
-        statistics: player.scoreStats,
         hmdBreakdown: hmdBreakdown,
         rankPages: {
           global: getPageFromRank(player.rank, 50),
@@ -120,7 +121,7 @@ export default class ScoreSaberPlayerService {
           100,
         currentStreak: account?.currentStreak ?? 0,
         longestStreak: account?.longestStreak ?? 0,
-        scoreStats: account?.scoreStats ?? undefined,
+        statistics: statistics,
       } as ScoreSaberPlayer;
     });
   }

@@ -18,7 +18,10 @@ export class ScoreSaberAccountsRepository {
   }
 
   public static async existsById(id: string): Promise<boolean> {
-    const rows = await db.select({ exists: sql`1` }).from(scoreSaberAccountsTable).where(eq(scoreSaberAccountsTable.id, id));
+    const rows = await db
+      .select({ exists: sql`1` })
+      .from(scoreSaberAccountsTable)
+      .where(eq(scoreSaberAccountsTable.id, id));
     return rows.length > 0;
   }
 

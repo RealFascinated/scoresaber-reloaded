@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { ScoreSaberPeakRankSchema } from "./player/peak-rank";
-import { ScoreSaberPlayerScoreStatsSchema } from "./player/score-stats";
 
 export const ScoreSaberAccountSchema = z.object({
   id: z.string(),
@@ -22,7 +21,6 @@ export const ScoreSaberAccountSchema = z.object({
   medals: z.number(),
   medalsRank: z.number(),
   medalsCountryRank: z.number(),
-  scoreStats: ScoreSaberPlayerScoreStatsSchema,
   currentStreak: z.number(),
   longestStreak: z.number(),
   trackedSince: z.coerce.date(),

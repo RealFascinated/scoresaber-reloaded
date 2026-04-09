@@ -222,8 +222,29 @@
     {
       "idx": 31,
       "version": "7",
-      "when": 1775665637381,
+      "when": 1775800000013,
       "tag": "0031_make_stars_not_nullable",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1775800000014,
+      "tag": "0032_add_player_statistics_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1775800000015,
+      "tag": "0033_remove_player_scorestats",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1775800000016,
+      "tag": "0034_add_replays_watched",
       "breakpoints": true
     }
   ]

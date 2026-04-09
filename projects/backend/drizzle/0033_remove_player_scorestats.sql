@@ -1,0 +1,1 @@
+ALTER TABLE "scoresaber-accounts" DROP COLUMN "scoreStats";

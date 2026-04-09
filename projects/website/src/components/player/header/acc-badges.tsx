@@ -1,6 +1,7 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import StatValue from "@/components/statistic/stat-value";
 import type { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
+import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getAccDetails, getScoreBadgeFromName } from "@ssr/common/utils/song-utils";
 
@@ -13,7 +14,7 @@ const badges: Record<keyof ScoreSaberPlayerScoreStats, string> = {
   godPlays: "GOD",
 };
 
-export default function PlayerAccBadges({ scoreStats }: { scoreStats: ScoreSaberPlayerScoreStats }) {
+export default function PlayerAccBadges({ statistics }: { statistics: ScoreSaberPlayerStatistics }) {
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
       {Object.entries(badges).map(([name, displayName]) => {
@@ -33,7 +34,7 @@ export default function PlayerAccBadges({ scoreStats }: { scoreStats: ScoreSaber
             <StatValue
               name={badge.name}
               color={badge.color}
-              value={formatNumberWithCommas(scoreStats[name as keyof ScoreSaberPlayerScoreStats] ?? 0)}
+              value={formatNumberWithCommas(statistics[name as keyof ScoreSaberPlayerStatistics] ?? 0)}
               className="h-full"
               size="lg"
             />

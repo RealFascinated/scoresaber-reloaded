@@ -1,5 +1,5 @@
-import type { MetadataRoute } from "next";
 import { env } from "@ssr/common/env";
+import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
   return {

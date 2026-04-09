@@ -1,0 +1,1 @@
+ALTER TABLE "scoresaber-player-statistics" ADD COLUMN "replaysWatched" integer;

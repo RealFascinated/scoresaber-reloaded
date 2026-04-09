@@ -1,7 +1,6 @@
 import { HMD } from "@ssr/common/hmds";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
-import { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
 import { isNotNull, sql } from "drizzle-orm";
 import {
   boolean,
@@ -50,15 +49,15 @@ export const scoreSaberAccountsTable = pgTable(
     longestStreak: integer().notNull().default(0),
     lastPlayedDate: date({ mode: "string" }),
 
-    scoreStats: jsonb().$type<ScoreSaberPlayerScoreStats>().notNull(),
-
     trackedSince: timestamp().notNull(),
     joinedDate: timestamp().notNull(),
   },
   table => [
     index("accounts_name_trgm_idx").using("gin", sql`${table.name} gin_trgm_ops`),
     index("accounts_medals_idx").on(table.medals.desc()),
-    index("accounts_active_hmd_idx").on(table.hmd).where(sql`${table.inactive} = false`),
+    index("accounts_active_hmd_idx")
+      .on(table.hmd)
+      .where(sql`${table.inactive} = false`),
     index("accounts_active_country_idx")
       .on(table.country)
       .where(sql`${table.inactive} = false AND ${table.country} IS NOT NULL AND ${table.country} <> ''`),
@@ -66,7 +65,9 @@ export const scoreSaberAccountsTable = pgTable(
     index("accounts_seeded_bl_false_idx")
       .on(table.id)
       .where(sql`${table.seededBeatLeaderScores} = false`),
-    index("accounts_seeded_scores_false_idx").on(table.id).where(sql`${table.seededScores} = false`),
+    index("accounts_seeded_scores_false_idx")
+      .on(table.id)
+      .where(sql`${table.seededScores} = false`),
     index("accounts_inactive_true_idx")
       .on(table.inactive)
       .where(sql`${table.inactive} = true`),
@@ -121,6 +122,45 @@ export const playerHistoryTable = pgTable(
   },
   table => [uniqueIndex("scoresaber_player_history_player_id_date_unique").on(table.playerId, table.date)]
 );
+
+export const playerStatisticsTable = pgTable("scoresaber-player-statistics", {
+  // Identifiers
+  playerId: varchar({ length: 32 }).notNull().primaryKey(),
+
+  // Rank stats
+  rank: integer(),
+  countryRank: integer(),
+
+  // Medals stats
+  medals: integer(),
+
+  // PP stats
+  pp: doublePrecision(),
+  plusOnePp: doublePrecision(),
+
+  // Score stats
+  totalScore: doublePrecision(),
+  totalRankedScore: doublePrecision(),
+  rankedScores: integer(),
+  unrankedScores: integer(),
+  totalRankedScores: integer(),
+  totalUnrankedScores: integer(),
+  totalScores: integer(),
+  replaysWatched: integer(),
+
+  // Accuracy stats
+  averageRankedAccuracy: doublePrecision(),
+  averageUnrankedAccuracy: doublePrecision(),
+  averageAccuracy: doublePrecision(),
+
+  // Ranked play stats
+  aPlays: integer(),
+  sPlays: integer(),
+  spPlays: integer(),
+  ssPlays: integer(),
+  sspPlays: integer(),
+  godPlays: integer(),
+});
 
 export const scoreSaberScoresTable = pgTable(
   "scoresaber-scores",
@@ -487,6 +527,7 @@ export const scoreSaberScoreEventTable = pgTable(
 
 export type ScoreSaberAccountRow = typeof scoreSaberAccountsTable.$inferSelect;
 export type PlayerHistoryRow = typeof playerHistoryTable.$inferSelect;
+export type PlayerStatisticsRow = typeof playerStatisticsTable.$inferSelect;
 export type ScoreSaberScoreRow = typeof scoreSaberScoresTable.$inferSelect;
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
 export type ScoreSaberLeaderboardRow = typeof scoreSaberLeaderboardsTable.$inferSelect;

@@ -82,13 +82,13 @@ export function getScoreSaberScoreFromToken(
     token.modifiers == undefined || token.modifiers === ""
       ? []
       : token.modifiers.split(",").map(mod => {
-        mod = mod.toUpperCase();
-        const modifier = Modifier[mod as keyof typeof Modifier];
-        if (modifier === undefined) {
-          throw new Error(`Unknown modifier: ${mod}`);
-        }
-        return modifier;
-      });
+          mod = mod.toUpperCase();
+          const modifier = Modifier[mod as keyof typeof Modifier];
+          if (modifier === undefined) {
+            throw new Error(`Unknown modifier: ${mod}`);
+          }
+          return modifier;
+        });
 
   return ScoreSaberScoreSchema.parse(
     {

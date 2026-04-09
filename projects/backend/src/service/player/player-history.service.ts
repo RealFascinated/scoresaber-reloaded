@@ -4,6 +4,7 @@ import {
   ScoreSaberPlayerHistory,
   ScoreSaberPlayerHistoryEntries,
 } from "@ssr/common/schemas/scoresaber/player/history";
+import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
@@ -30,8 +31,8 @@ import {
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
+import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { PlayerCoreService } from "./player-core.service";
-import { PlayerRankedService } from "./player-ranked.service";
 
 const INACTIVE_RANK = 999_999;
 
@@ -90,10 +91,10 @@ export class PlayerHistoryService {
 
         // Update the player's inactive status if it has changed
         foundPlayer.inactive !== player.inactive &&
-          (async () => {
-            await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
-            redisClient.del(cachedPlayerTokenCacheKey(foundPlayer.id));
-          })(),
+        (async () => {
+          await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
+          redisClient.del(cachedPlayerTokenCacheKey(foundPlayer.id));
+        })(),
       ]);
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
@@ -149,9 +150,9 @@ export class PlayerHistoryService {
     );
     PlayerHistoryService.logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-        `Successfully processed: ${successCount} players\n` +
-        `Failed to process: ${errorCount} players\n` +
-        `Total inactive players: ${inactivePlayers}`
+      `Successfully processed: ${successCount} players\n` +
+      `Failed to process: ${errorCount} players\n` +
+      `Total inactive players: ${inactivePlayers}`
     );
   }
 
@@ -182,16 +183,13 @@ export class PlayerHistoryService {
     }
 
     const date = getMidnightAlignedDate(trackTime);
-
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(player.id, date);
+    const statistics = await PlayerStatisticsService.getPlayerStatistics(playerToken, true);
 
-    const updatedHistory = await PlayerHistoryService.createHistoryEntry(
-      playerToken,
-      player,
+    await PlayerHistoryRepository.upsertByPlayerAndDate(player.id, date, existingEntry, PlayerHistoryService.createHistoryEntry(
+      statistics,
       existingEntry ?? undefined
-    );
-
-    await PlayerHistoryRepository.upsertByPlayerAndDate(player.id, date, existingEntry, updatedHistory);
+    ));
   }
 
   /**
@@ -350,8 +348,8 @@ export class PlayerHistoryService {
     const today = getMidnightAlignedDate(new Date());
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(playerToken.id, today);
 
-    const player = await PlayerCoreService.getOrCreateAccount(playerToken.id, playerToken);
-    return await PlayerHistoryService.createHistoryEntry(playerToken, player, existingEntry ?? undefined);
+    const statistics = await PlayerStatisticsService.getPlayerStatistics(playerToken, true);
+    return PlayerHistoryService.createHistoryEntry(statistics, existingEntry ?? undefined);
   }
 
   /**
@@ -385,40 +383,34 @@ export class PlayerHistoryService {
    * @param existingEntry the existing history entry to merge with
    * @returns the created history entry
    */
-  public static async createHistoryEntry(
-    playerToken: ScoreSaberPlayerToken,
-    account: ScoreSaberAccount,
+  public static createHistoryEntry(
+    statistics: ScoreSaberPlayerStatistics,
     existingEntry?: PlayerHistoryRow
-  ): Promise<ScoreSaberPlayerHistory> {
-    const [accuracies, plusOnePp] = await Promise.all([
-      ScoreSaberScoresRepository.getAverageAccuracies(playerToken.id),
-      PlayerRankedService.getPlayerPlusOnePp(playerToken.id),
-    ]);
-
+  ): ScoreSaberPlayerHistory {
     return {
-      pp: playerToken.pp,
-      countryRank: playerToken.countryRank,
-      rank: playerToken.rank,
-      averageRankedAccuracy: playerToken.scoreStats.averageRankedAccuracy,
-      averageUnrankedAccuracy: accuracies.unrankedAccuracy,
-      averageAccuracy: accuracies.averageAccuracy,
-      rankedScores: existingEntry?.rankedScores ?? 0,
-      unrankedScores: existingEntry?.unrankedScores ?? 0,
+      pp: statistics.pp,
+      countryRank: statistics.countryRank,
+      rank: statistics.rank,
+      averageRankedAccuracy: statistics.averageRankedAccuracy,
+      averageUnrankedAccuracy: statistics.averageUnrankedAccuracy,
+      averageAccuracy: statistics.averageAccuracy,
+      rankedScores: statistics.rankedScores,
+      unrankedScores: statistics.unrankedScores,
       rankedScoresImproved: existingEntry?.rankedScoresImproved ?? 0,
       unrankedScoresImproved: existingEntry?.unrankedScoresImproved ?? 0,
-      totalScores: playerToken.scoreStats.totalPlayCount,
-      totalUnrankedScores: playerToken.scoreStats.totalPlayCount - playerToken.scoreStats.rankedPlayCount,
-      totalRankedScores: playerToken.scoreStats.rankedPlayCount,
-      totalScore: playerToken.scoreStats.totalScore,
-      totalRankedScore: playerToken.scoreStats.totalRankedScore,
-      plusOnePp: plusOnePp,
-      aPlays: account.scoreStats?.aPlays ?? 0,
-      sPlays: account.scoreStats?.sPlays ?? 0,
-      spPlays: account.scoreStats?.spPlays ?? 0,
-      ssPlays: account.scoreStats?.ssPlays ?? 0,
-      sspPlays: account.scoreStats?.sspPlays ?? 0,
-      godPlays: account.scoreStats?.godPlays ?? 0,
-      medals: account.medals ?? 0,
+      totalScores: statistics.totalScores,
+      totalUnrankedScores: statistics.totalUnrankedScores,
+      totalRankedScores: statistics.totalRankedScores,
+      totalScore: statistics.totalScore,
+      totalRankedScore: statistics.totalRankedScore,
+      plusOnePp: statistics.plusOnePp,
+      aPlays: statistics.aPlays,
+      sPlays: statistics.sPlays,
+      spPlays: statistics.spPlays,
+      ssPlays: statistics.ssPlays,
+      sspPlays: statistics.sspPlays,
+      godPlays: statistics.godPlays,
+      medals: statistics.medals,
     };
   }
 

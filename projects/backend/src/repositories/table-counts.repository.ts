@@ -50,4 +50,3 @@ export class TableCountsRepository {
     await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY "ssr_table_counts"`);
   }
 }
-

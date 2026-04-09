@@ -13,6 +13,7 @@ import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores
 import BeatLeaderService from "../beatleader/beatleader.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerMedalsService } from "../medals/player-medals.service";
+import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 
@@ -69,9 +70,7 @@ export class ScoreCoreService {
       }
     }
 
-    const playerUpdates: Partial<ScoreSaberAccountRow> = {
-      scoreStats: await PlayerCoreService.getPlayerScoreStats(playerId),
-    };
+    const playerUpdates: Partial<ScoreSaberAccountRow> = {};
     // We only want to update the player's HMD if the score is new
     if (newScore) {
       playerUpdates.hmd = score.hmd;
@@ -98,6 +97,8 @@ export class ScoreCoreService {
         isImprovement ? ` (improvement)` : "",
         formatDuration(performance.now() - before)
       );
+
+      PlayerStatisticsService.handleScoreSaberScore(score);
     }
     return { score: score, hasPreviousScore: isImprovement, tracked: true };
   }
@@ -191,12 +192,15 @@ export class ScoreCoreService {
 
     async function getPlayerInfo() {
       if (options?.insertPlayerInfo) {
-        const [row] = await db.select({
-          id: scoreSaberAccountsTable.id,
-          name: scoreSaberAccountsTable.name,
-          country: scoreSaberAccountsTable.country,
-          avatar: scoreSaberAccountsTable.avatar,
-        }).from(scoreSaberAccountsTable).where(eq(scoreSaberAccountsTable.id, score.playerId));
+        const [row] = await db
+          .select({
+            id: scoreSaberAccountsTable.id,
+            name: scoreSaberAccountsTable.name,
+            country: scoreSaberAccountsTable.country,
+            avatar: scoreSaberAccountsTable.avatar,
+          })
+          .from(scoreSaberAccountsTable)
+          .where(eq(scoreSaberAccountsTable.id, score.playerId));
 
         return row;
       }
