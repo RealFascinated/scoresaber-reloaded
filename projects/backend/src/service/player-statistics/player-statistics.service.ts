@@ -5,7 +5,7 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { and, eq, gte, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { playerStatisticsRowToType } from "../../db/converter/player-statistics";
-import { playerStatisticsTable, scoreSaberAccountsTable, scoreSaberScoresTable } from "../../db/schema";
+import { PlayerStatisticsRow, playerStatisticsTable, scoreSaberAccountsTable, scoreSaberScoresTable } from "../../db/schema";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerRankedService } from "../player/player-ranked.service";
 
@@ -55,6 +55,30 @@ export class PlayerStatisticsService {
         godPlays: scoreStats?.godPlays ?? 0,
       })
       .where(eq(playerStatisticsTable.playerId, score.playerId));
+  }
+
+  /**
+   * Gets the player statistics for a player.
+   *
+   * @param playerId the ID of the player to get the statistics for
+   * @param updatePlayerTokenData whether to update the statistics with the player token data
+   * @returns the player statistics
+   */
+  public static async getPlayerStatistics(
+    playerToken: ScoreSaberPlayerToken,
+    updatePlayerTokenData: boolean = false
+  ): Promise<ScoreSaberPlayerStatistics> {
+    const [statistics] = await db
+      .select()
+      .from(playerStatisticsTable)
+      .where(eq(playerStatisticsTable.playerId, playerToken.id));
+    if (!statistics) {
+      return playerStatisticsRowToType(await PlayerStatisticsService.insert(playerToken));
+    }
+    if (updatePlayerTokenData) {
+      return playerStatisticsRowToType(await PlayerStatisticsService.updateFromPlayerToken(playerToken, statistics));
+    }
+    return playerStatisticsRowToType(statistics);
   }
 
   /**
@@ -189,44 +213,24 @@ export class PlayerStatisticsService {
    * @param playerToken the token of the player to update the statistics for
    * @returns the updated statistics
    */
-  public static async updateFromPlayerToken(playerToken: ScoreSaberPlayerToken) {
+  public static async updateFromPlayerToken(playerToken: ScoreSaberPlayerToken, statisticsRow: PlayerStatisticsRow) {
     const plusOne = await PlayerRankedService.getPlayerPlusOnePp(playerToken.id);
-    const [statistics] = await db
+    const toInsert: PlayerStatisticsRow = {
+      ...statisticsRow,
+      pp: playerToken.pp,
+      plusOnePp: plusOne,
+      rank: playerToken.rank,
+      countryRank: playerToken.countryRank,
+      replaysWatched: playerToken.scoreStats.replaysWatched,
+    }
+
+    // handle async
+    db
       .update(playerStatisticsTable)
-      .set({
-        pp: playerToken.pp,
-        plusOnePp: plusOne,
-
-        rank: playerToken.rank,
-        countryRank: playerToken.countryRank,
-      })
-      .where(eq(playerStatisticsTable.playerId, playerToken.id))
-      .returning();
-    return statistics;
-  }
-
-  /**
-   * Gets the player statistics for a player.
-   *
-   * @param playerId the ID of the player to get the statistics for
-   * @param updatePlayerTokenData whether to update the statistics with the player token data
-   * @returns the player statistics
-   */
-  public static async getPlayerStatistics(
-    playerToken: ScoreSaberPlayerToken,
-    updatePlayerTokenData: boolean = false
-  ): Promise<ScoreSaberPlayerStatistics> {
-    const [statistics] = await db
-      .select()
-      .from(playerStatisticsTable)
+      .set(toInsert)
       .where(eq(playerStatisticsTable.playerId, playerToken.id));
-    if (!statistics) {
-      return playerStatisticsRowToType(await PlayerStatisticsService.insert(playerToken));
-    }
-    if (updatePlayerTokenData) {
-      return playerStatisticsRowToType(await PlayerStatisticsService.updateFromPlayerToken(playerToken));
-    }
-    return playerStatisticsRowToType(statistics);
+
+    return toInsert;
   }
 
   private static async getScoreStats(playerId: string) {
