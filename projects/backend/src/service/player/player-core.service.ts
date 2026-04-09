@@ -10,7 +10,7 @@ import { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/playe
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
-import { playerCacheKey, playerExistsCacheKey } from "../../common/cache-keys";
+import { playerCacheKey } from "../../common/cache-keys";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
 import { type ScoreSaberAccountRow } from "../../db/schema";
@@ -19,7 +19,7 @@ import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
-import CacheService, { CacheId } from "../infra/cache.service";
+import CacheService from "../infra/cache.service";
 import StorageService from "../infra/storage.service";
 
 export const accountCreationLock: Record<string, Promise<ScoreSaberAccount | undefined>> = {};
@@ -235,21 +235,11 @@ export class PlayerCoreService {
    * @returns whether the player exists
    */
   public static async playerExists(id: string, throwIfNotFound: boolean = false): Promise<boolean> {
-    const cachedExists = await CacheService.get<boolean>(
-      CacheId.SCORESABER_PLAYER_EXISTS,
-      playerExistsCacheKey(id)
-    );
-    if (cachedExists !== undefined) {
-      return cachedExists;
-    }
-
-    const exists = await ScoreSaberAccountsRepository.findRowById(id);
+    const exists = await ScoreSaberAccountsRepository.existsById(id);
     if (throwIfNotFound && !exists) {
       throw new NotFoundError(`Player "${id}" not found`);
-    } else if (exists) {
-      await CacheService.insert(CacheId.SCORESABER_PLAYER_EXISTS, playerExistsCacheKey(id), true);
     }
-    return exists !== undefined;
+    return exists;
   }
 
   /**

@@ -4,8 +4,10 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration } from "@ssr/common/utils/time-utils";
+import { eq } from "drizzle-orm";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
-import { ScoreSaberAccountRow } from "../../db/schema";
+import { db } from "../../db";
+import { ScoreSaberAccountRow, scoreSaberAccountsTable } from "../../db/schema";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import BeatLeaderService from "../beatleader/beatleader.service";
@@ -189,7 +191,14 @@ export class ScoreCoreService {
 
     async function getPlayerInfo() {
       if (options?.insertPlayerInfo) {
-        return PlayerCoreService.getAccount(score.playerId);
+        const [row] = await db.select({
+          id: scoreSaberAccountsTable.id,
+          name: scoreSaberAccountsTable.name,
+          country: scoreSaberAccountsTable.country,
+          avatar: scoreSaberAccountsTable.avatar,
+        }).from(scoreSaberAccountsTable).where(eq(scoreSaberAccountsTable.id, score.playerId));
+
+        return row;
       }
       return undefined;
     }
@@ -213,7 +222,7 @@ export class ScoreCoreService {
         id: playerInfo.id,
         name: playerInfo.name,
         avatar: playerInfo.avatar,
-        country: playerInfo.country,
+        country: playerInfo.country ?? undefined,
       };
     }
 

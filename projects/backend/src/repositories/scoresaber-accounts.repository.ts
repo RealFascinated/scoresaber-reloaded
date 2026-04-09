@@ -17,6 +17,11 @@ export class ScoreSaberAccountsRepository {
     });
   }
 
+  public static async existsById(id: string): Promise<boolean> {
+    const rows = await db.select({ exists: sql`1` }).from(scoreSaberAccountsTable).where(eq(scoreSaberAccountsTable.id, id));
+    return rows.length > 0;
+  }
+
   public static async updateAccount(
     id: string,
     patch: Partial<Omit<ScoreSaberAccountRow, "id">>
