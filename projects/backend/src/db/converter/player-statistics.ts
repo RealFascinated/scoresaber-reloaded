@@ -1,7 +1,6 @@
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import { PlayerStatisticsRow } from "../schema";
 
-
 /**
  * Converts a PlayerStatisticsRow to a ScoreSaberPlayerStatistics.
  *

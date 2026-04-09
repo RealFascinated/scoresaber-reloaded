@@ -185,10 +185,15 @@ export class PlayerHistoryService {
     const date = getMidnightAlignedDate(trackTime);
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(player.id, date);
 
-    await PlayerHistoryRepository.upsertByPlayerAndDate(player.id, date, existingEntry, PlayerHistoryService.createHistoryEntry(
-      await PlayerStatisticsService.fullUpdate(playerToken),
-      existingEntry ?? undefined
-    ));
+    await PlayerHistoryRepository.upsertByPlayerAndDate(
+      player.id,
+      date,
+      existingEntry,
+      PlayerHistoryService.createHistoryEntry(
+        await PlayerStatisticsService.fullUpdate(playerToken),
+        existingEntry ?? undefined
+      )
+    );
   }
 
   /**

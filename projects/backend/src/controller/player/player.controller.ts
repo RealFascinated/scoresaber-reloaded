@@ -7,6 +7,7 @@ import { ScoreSaberScoresPageResponseSchema } from "@ssr/common/schemas/response
 import { Elysia } from "elysia";
 import { z } from "zod";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
+import { PlayerStatisticsService } from "../../service/player-statistics/player-statistics.service";
 import MiniRankingService from "../../service/player/mini-ranking.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerHistoryService } from "../../service/player/player-history.service";
@@ -126,7 +127,8 @@ export default function playerController(app: Elysia) {
           if (!player) {
             throw new NotFoundError(`Player "${playerId}" not found`);
           }
-          return await PlayerHistoryService.getPlayerStatisticHistories(player, count);
+          const statistics = await PlayerStatisticsService.getPlayerStatistics(player, true);
+          return await PlayerHistoryService.getPlayerStatisticHistories(player, statistics, count);
         },
         {
           tags: ["Player"],

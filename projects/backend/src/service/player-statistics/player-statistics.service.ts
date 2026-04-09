@@ -5,7 +5,12 @@ import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player
 import { and, eq, gte, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { playerStatisticsRowToType } from "../../db/converter/player-statistics";
-import { PlayerStatisticsRow, playerStatisticsTable, scoreSaberAccountsTable, scoreSaberScoresTable } from "../../db/schema";
+import {
+  PlayerStatisticsRow,
+  playerStatisticsTable,
+  scoreSaberAccountsTable,
+  scoreSaberScoresTable,
+} from "../../db/schema";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerRankedService } from "../player/player-ranked.service";
 
@@ -76,7 +81,9 @@ export class PlayerStatisticsService {
       return playerStatisticsRowToType(await PlayerStatisticsService.insert(playerToken));
     }
     if (updatePlayerTokenData) {
-      return playerStatisticsRowToType(await PlayerStatisticsService.updateFromPlayerToken(playerToken, statistics));
+      return playerStatisticsRowToType(
+        await PlayerStatisticsService.updateFromPlayerToken(playerToken, statistics)
+      );
     }
     return playerStatisticsRowToType(statistics);
   }
@@ -213,7 +220,10 @@ export class PlayerStatisticsService {
    * @param playerToken the token of the player to update the statistics for
    * @returns the updated statistics
    */
-  public static async updateFromPlayerToken(playerToken: ScoreSaberPlayerToken, statisticsRow: PlayerStatisticsRow) {
+  public static async updateFromPlayerToken(
+    playerToken: ScoreSaberPlayerToken,
+    statisticsRow: PlayerStatisticsRow
+  ) {
     const plusOne = await PlayerRankedService.getPlayerPlusOnePp(playerToken.id);
     const toInsert: PlayerStatisticsRow = {
       ...statisticsRow,
@@ -222,13 +232,10 @@ export class PlayerStatisticsService {
       rank: playerToken.rank,
       countryRank: playerToken.countryRank,
       replaysWatched: playerToken.scoreStats.replaysWatched,
-    }
+    };
 
     // handle async
-    db
-      .update(playerStatisticsTable)
-      .set(toInsert)
-      .where(eq(playerStatisticsTable.playerId, playerToken.id));
+    db.update(playerStatisticsTable).set(toInsert).where(eq(playerStatisticsTable.playerId, playerToken.id));
 
     return toInsert;
   }
