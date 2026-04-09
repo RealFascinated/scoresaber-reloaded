@@ -32,7 +32,7 @@ export class TableCountsRepository {
       FROM "ssr_table_counts"
       WHERE "id" = 1
     `);
-    const rawCounts = result[0] as RawTableCountsRow | undefined;
+    const rawCounts = result.rows[0];
     if (!rawCounts) {
       throw new Error('Materialized counts row missing from "ssr_table_counts"');
     }
