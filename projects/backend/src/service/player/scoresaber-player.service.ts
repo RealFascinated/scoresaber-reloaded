@@ -79,13 +79,13 @@ export default class ScoreSaberPlayerService {
         return basePlayer;
       }
 
-      const [plusOnePp, hmdBreakdown, history, statistics] = await Promise.all([
+      const statistics = await PlayerStatisticsService.getPlayerStatistics(player);
+      const [plusOnePp, hmdBreakdown, history] = await Promise.all([
         account ? PlayerRankedService.getPlayerPlusOnePp(id) : 0,
         account && player !== undefined
           ? PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages)
           : undefined,
-        PlayerHistoryService.getPlayerStatisticHistories(player, 30),
-        PlayerStatisticsService.getPlayerStatistics(player),
+        PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30),
       ]);
 
       return {

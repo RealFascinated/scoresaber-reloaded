@@ -196,6 +196,7 @@ export class PlayerHistoryService {
    *
    * @param playerToken the player to get the statistic history for
    * @param date the date to get the statistic history for
+   * @param statistics the statistics to use
    * @param projection the projection to use
    * @param includeToday whether to include today's data even if the target date is not today
    * @returns the statistic history
@@ -203,6 +204,7 @@ export class PlayerHistoryService {
   public static async getPlayerStatisticHistory(
     playerToken: ScoreSaberPlayerToken,
     date: Date,
+    statistics: ScoreSaberPlayerStatistics,
     includeToday?: boolean
   ): Promise<ScoreSaberPlayerHistoryEntries> {
     const targetDate = getMidnightAlignedDate(date);
@@ -221,7 +223,7 @@ export class PlayerHistoryService {
     if (isTargetToday || includeToday) {
       const today = getMidnightAlignedDate(new Date());
       const todayKey = formatDateMinimal(today);
-      const todayData = await PlayerHistoryService.getTodayPlayerStatistic(playerToken);
+      const todayData = await PlayerHistoryService.getTodayPlayerStatistic(playerToken, statistics);
       if (todayData) {
         if (isTargetToday) {
           history[dateKey] = todayData;
@@ -256,6 +258,7 @@ export class PlayerHistoryService {
    */
   public static async getPlayerStatisticHistories(
     playerToken: ScoreSaberPlayerToken,
+    statistics: ScoreSaberPlayerStatistics,
     count: number
   ): Promise<ScoreSaberPlayerHistoryEntries> {
     const today = getMidnightAlignedDate(new Date());
@@ -323,7 +326,7 @@ export class PlayerHistoryService {
       );
     }
 
-    const todayData = await PlayerHistoryService.getTodayPlayerStatistic(playerToken);
+    const todayData = await PlayerHistoryService.getTodayPlayerStatistic(playerToken, statistics);
     if (todayData) {
       history[formatDateMinimal(today)] = todayData;
     }
@@ -342,12 +345,11 @@ export class PlayerHistoryService {
    * Gets today's player statistics, either from database or generates fresh data.
    */
   public static async getTodayPlayerStatistic(
-    playerToken: ScoreSaberPlayerToken
+    playerToken: ScoreSaberPlayerToken,
+    statistics: ScoreSaberPlayerStatistics
   ): Promise<ScoreSaberPlayerHistory | undefined> {
     const today = getMidnightAlignedDate(new Date());
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(playerToken.id, today);
-
-    const statistics = await PlayerStatisticsService.getPlayerStatistics(playerToken, true);
     return PlayerHistoryService.createHistoryEntry(statistics, existingEntry ?? undefined);
   }
 
