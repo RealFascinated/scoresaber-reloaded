@@ -1,112 +1,75 @@
 "use client";
 
-import { cn } from "@/common/utils";
-import SimpleTooltip from "@/components/simple-tooltip";
-import { StarIcon } from "@heroicons/react/24/solid";
+import { buildChartConfig } from "@/common/chart/build-chart-config";
+import { Colors } from "@/common/colors";
+import GenericChart from "@/components/api/chart/generic-chart";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
-import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
-import { ArrowRightIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { useState } from "react";
-
-function LeaderboardStarChangeHistoryButton({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) {
-  return (
-    <button
-      className="border-border bg-background/95 text-foreground hover:bg-accent/50 hover:border-primary/50 focus-visible:ring-primary/50 flex items-center gap-(--spacing-sm) rounded-(--radius-lg) border px-(--spacing-sm) py-(--spacing-sm) text-xs font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-hidden sm:px-(--spacing-lg) sm:text-sm"
-      onClick={onClick}
-    >
-      <StarIcon className="size-4 text-yellow-500" />
-      <span>Show Star Changes</span>
-      {isOpen ? <ChevronUpIcon className="size-4" /> : <ChevronDownIcon className="size-4" />}
-    </button>
-  );
-}
+import { formatDate, getDaysAgo, timeAgo } from "@ssr/common/utils/time-utils";
+import { useMemo } from "react";
 
 export function LeaderboardStarChangeHistory({
   starChangeHistory,
 }: {
   starChangeHistory: LeaderboardStarChange[];
 }) {
-  const [open, setOpen] = useState(false);
+  const orderedPoints = useMemo(
+    () => starChangeHistory.toSorted((a, b) => a.timestamp.getTime() - b.timestamp.getTime()),
+    [starChangeHistory]
+  );
+
+  const labels = orderedPoints.map(change => change.timestamp.getTime());
+  const formatRelativeDate = (value: number, withTime: boolean) => {
+    const date = new Date(value);
+    if (getDaysAgo(date) <= 7) {
+      return timeAgo(date, 1);
+    }
+    return formatDate(date, withTime ? "Do MMMM, YYYY HH:mm a" : "DD MMMM YYYY");
+  };
+
+  const chartConfig = buildChartConfig({
+    id: "leaderboard-star-change-history",
+    datasetConfig: [
+      {
+        field: "newStars",
+        title: "Stars",
+        color: Colors.generic.green,
+        axisId: "y",
+        pointRadius: 3,
+        labelFormatter: value => `Stars: ${value.toFixed(2)}`,
+        axisConfig: {
+          display: true,
+          displayName: "Star Rating",
+          position: "left",
+          valueFormatter: value => value.toFixed(2),
+        },
+      },
+    ],
+    seriesByField: {
+      newStars: orderedPoints.map(change => change.newStars),
+    },
+    options: {
+      scales: {
+        x: {
+          type: "linear",
+          ticks: {
+            callback: tickValue => {
+              const value = typeof tickValue === "number" ? tickValue : Number(tickValue);
+              return formatRelativeDate(value, false);
+            },
+          },
+        },
+      },
+    },
+  });
+  chartConfig.axes.x = {
+    display: true,
+    displayName: "",
+    valueFormatter: (value: number) => formatRelativeDate(value, true),
+  };
 
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-(--spacing-lg)">
-      <LeaderboardStarChangeHistoryButton onClick={() => setOpen(!open)} isOpen={open} />
-
-      {/* Star change history */}
-      {open && (
-        <div className="animate-in slide-in-from-top-2 w-full max-w-[500px] duration-200">
-          <div className="border-border bg-background/80 rounded-lg border p-2 sm:p-(--spacing-sm)">
-            <div className="flex flex-col gap-1">
-              {starChangeHistory.map((starChange, index) => {
-                const isCurrent = index === 0;
-                const from = starChange.previousStars == 0 ? "Unranked" : starChange.previousStars.toFixed(2);
-                const to = starChange.newStars == 0 ? "Unranked" : starChange.newStars.toFixed(2);
-
-                // Determine colors and icons based on star change
-                const isIncrease = starChange.newStars > starChange.previousStars;
-                const isDecrease = starChange.newStars < starChange.previousStars;
-                const isUnrankedToRanked = starChange.previousStars === 0 && starChange.newStars > 0;
-                const isRankedToUnranked = starChange.previousStars > 0 && starChange.newStars === 0;
-
-                return (
-                  <div
-                    key={`${starChange.timestamp.toISOString()}-${starChange.previousStars}-${starChange.newStars}`}
-                    className={cn(
-                      "hover:bg-accent/30 flex items-center justify-between rounded-md px-1 py-(--spacing-xs) text-xs transition-colors duration-200 sm:px-(--spacing-sm)",
-                      isCurrent && "bg-primary/7"
-                    )}
-                  >
-                    {/* Timestamp and change indicator */}
-                    <SimpleTooltip
-                      display={<p>{formatDate(new Date(starChange.timestamp), "Do MMMM, YYYY HH:mm a")}</p>}
-                    >
-                      <span className="text-muted-foreground truncate text-xs">
-                        {timeAgo(starChange.timestamp)}
-                      </span>
-                    </SimpleTooltip>
-
-                    {/* Star change display */}
-                    <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-                      {/* From */}
-                      <div
-                        className={cn(
-                          "flex items-center gap-(--spacing-xs) rounded-sm px-2 py-1 text-xs font-medium sm:px-(--spacing-md) sm:py-(--spacing-xs)",
-                          starChange.previousStars === 0
-                            ? "bg-muted/50 text-muted-foreground"
-                            : isDecrease || isRankedToUnranked
-                              ? "bg-green-500/10 text-green-600 dark:text-green-400" // Higher to lower or ranked to unranked
-                              : "bg-red-500/10 text-red-600 dark:text-red-400" // Lower to higher
-                        )}
-                      >
-                        {starChange.previousStars > 0 && <StarIcon className="size-3" />}
-                        <span className="font-mono">{from}</span>
-                      </div>
-
-                      {/* Arrow */}
-                      <ArrowRightIcon className="text-muted-foreground size-3 shrink-0" />
-
-                      {/* To */}
-                      <div
-                        className={cn(
-                          "flex items-center gap-(--spacing-xs) rounded-sm px-2 py-1 text-xs font-medium sm:px-(--spacing-md) sm:py-(--spacing-xs)",
-                          starChange.newStars === 0
-                            ? "bg-muted/50 text-muted-foreground"
-                            : isUnrankedToRanked || isIncrease
-                              ? "bg-green-500/10 text-green-600 dark:text-green-400"
-                              : "bg-red-500/10 text-red-600 dark:text-red-400"
-                        )}
-                      >
-                        <StarIcon className="size-3" />
-                        <span className="font-mono">{to}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="h-[450px] w-full">
+      <GenericChart config={chartConfig} labels={labels} />
     </div>
   );
 }

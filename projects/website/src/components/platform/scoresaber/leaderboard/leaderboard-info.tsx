@@ -15,7 +15,7 @@ type LeaderboardInfoProps = {
 };
 
 export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
-  const { leaderboard: leaderboardData, beatsaver: beatSaverMap } = leaderboard;
+  const { leaderboard: leaderboardData, beatsaver: beatSaverMap, starChangeHistory } = leaderboard;
 
   const accentColor = getDifficulty(leaderboardData.difficulty.difficulty).color;
 
@@ -31,8 +31,8 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   };
 
   return (
-    <Card className="h-fit w-full flex-col items-center gap-8 overflow-hidden p-6" style={cardSurfaceStyle}>
-      <div className="flex flex-col items-center gap-3 text-center">
+    <Card className="h-fit w-full flex-col items-center gap-8 overflow-hidden p-0" style={cardSurfaceStyle}>
+      <div className="flex flex-col items-center gap-3 p-6 text-center">
         <NextImage
           src={leaderboardData.songArt}
           alt={`${leaderboardData.songName} Cover Image`}
@@ -84,8 +84,12 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         </LeaderboardStatColumn>
       </div>
 
-      <div className="flex justify-center">
-        <LeaderboardButtons leaderboard={leaderboardData} beatSaverMap={beatSaverMap} />
+      <div className="bg-background/70 flex w-full items-center justify-center gap-1 py-2.5">
+        <LeaderboardButtons
+          leaderboard={leaderboardData}
+          beatSaverMap={beatSaverMap}
+          starChangeHistory={starChangeHistory}
+        />
       </div>
     </Card>
   );
