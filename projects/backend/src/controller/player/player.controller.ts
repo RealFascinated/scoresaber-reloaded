@@ -127,7 +127,7 @@ export default function playerController(app: Elysia) {
           if (!player) {
             throw new NotFoundError(`Player "${playerId}" not found`);
           }
-          const statistics = await PlayerStatisticsService.getPlayerStatistics(player, true);
+          const statistics = await PlayerStatisticsService.getPlayerStatistics(player);
           return await PlayerHistoryService.getPlayerStatisticHistories(player, statistics, count);
         },
         {
