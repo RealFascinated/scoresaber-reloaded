@@ -98,7 +98,14 @@ export class ScoreCoreService {
         formatDuration(performance.now() - before)
       );
 
-      PlayerStatisticsService.handleScoreSaberScore(score);
+      void PlayerStatisticsService.handleScoreSaberScore(score).catch(error => {
+        ScoreCoreService.logger.error(
+          `Failed to update player statistics for "%s" after tracking score "%s": %s`,
+          score.playerId,
+          score.scoreId,
+          error instanceof Error ? error.message : String(error)
+        );
+      });
     }
     return { score: score, hasPreviousScore: isImprovement, tracked: true };
   }
