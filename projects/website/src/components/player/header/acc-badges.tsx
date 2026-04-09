@@ -1,11 +1,10 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import StatValue from "@/components/statistic/stat-value";
-import type { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getAccDetails, getScoreBadgeFromName } from "@ssr/common/utils/song-utils";
 
-const badges: Record<keyof ScoreSaberPlayerScoreStats, string> = {
+const badges: Partial<Record<keyof ScoreSaberPlayerStatistics, string>> = {
   aPlays: "A",
   sPlays: "S",
   spPlays: "S+",
