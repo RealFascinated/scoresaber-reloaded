@@ -78,6 +78,15 @@ export class ScoreSaberAccountsRepository {
     return limit != null ? q.limit(limit) : q;
   }
 
+  public static async markInactiveWhereIdNotIn(activeIds: string[]): Promise<{ rowCount: number | null }> {
+    // `notInArray` is NOT IN ($1..$N); tens of thousands of ids exceed driver/protocol limits.
+    const inactiveUpdate = await db
+      .update(scoreSaberAccountsTable)
+      .set({ inactive: true })
+      .where(sql`NOT (${scoreSaberAccountsTable.id} = ANY(${sql.param(activeIds)}))`);
+    return { rowCount: inactiveUpdate.rowCount ?? null };
+  }
+
   public static async countInactive(): Promise<number> {
     const [row] = await db
       .select({ c: count() })
@@ -101,25 +110,5 @@ export class ScoreSaberAccountsRepository {
 
   public static async selectAllIds(): Promise<{ id: string }[]> {
     return db.select({ id: scoreSaberAccountsTable.id }).from(scoreSaberAccountsTable);
-  }
-
-  private static async updateWithRowCount(query: ReturnType<typeof sql>): Promise<number> {
-    const [row] = await db.execute<{ rowCount: number }>(query);
-    return row?.rowCount ?? 0;
-  }
-
-  public static async markInactiveWhereIdNotIn(activeIds: string[]): Promise<{ rowCount: number | null }> {
-    // `notInArray` is NOT IN ($1..$N); tens of thousands of ids exceed driver/protocol limits.
-    // Use a CTE to get a single-row count without returning all updated ids.
-    const rowCount = await this.updateWithRowCount(sql`
-      WITH updated AS (
-        UPDATE "scoresaber-accounts"
-        SET "inactive" = true
-        WHERE NOT ("id" = ANY(${sql.param(activeIds)}))
-        RETURNING 1
-      )
-      SELECT COUNT(*)::int AS "rowCount" FROM updated
-    `);
-    return { rowCount };
   }
 }

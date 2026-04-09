@@ -1,5 +1,5 @@
 import Logger from "@ssr/common/logger";
-import { migrate } from "drizzle-orm/bun-sql/migrator";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { db } from "./index";
