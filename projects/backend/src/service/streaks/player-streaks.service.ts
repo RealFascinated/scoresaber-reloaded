@@ -1,5 +1,6 @@
 import Logger, { ScopedLogger } from "@ssr/common/logger";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
+import { formatDuration } from "@ssr/common/utils/time-utils";
 import dayjs from "dayjs";
 import { sql } from "drizzle-orm";
 import { db } from "../../db";
@@ -44,12 +45,14 @@ export class PlayerPlayedStreakService {
    * Expires broken streaks.
    */
   public static async expireBrokenStreaks(): Promise<void> {
-    await db.execute(sql`
+    const before = performance.now();
+    const result = await db.execute(sql`
       UPDATE "scoresaber-accounts"
       SET "currentStreak" = 0
       WHERE "currentStreak" > 0
         AND "lastPlayedDate" IS NOT NULL
         AND "lastPlayedDate" < (CURRENT_DATE - INTERVAL '1 day')::date
     `);
+    PlayerPlayedStreakService.logger.info(`Expired ${result.rowCount} broken streaks in ${formatDuration(performance.now() - before)}`);
   }
 }

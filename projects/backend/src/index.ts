@@ -169,6 +169,7 @@ export const app = new Elysia()
   .use(
     cron({
       name: "expire-broken-streaks",
+      // pattern: "*/1 * * * *", // Every minute
       pattern: "0 0 * * *", // Every day at 00:00
       timezone: "UTC",
       protect: true,

@@ -29,7 +29,6 @@ import {
   type DailyScoreCounterKey,
 } from "../../repositories/player-history.repository";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
-import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { PlayerCoreService } from "./player-core.service";
@@ -79,26 +78,18 @@ export class PlayerHistoryService {
     }
     PlayerHistoryService.logger.info(`Found ${players.length} active players from ScoreSaber API`);
 
-    await processInBatches(players, 10, async player => {
-      const foundPlayer = await PlayerCoreService.getOrCreateAccount(player.id, player);
+    await processInBatches(players, 150, async player => {
+      const account = await PlayerCoreService.getOrCreateAccount(player.id, player);
+      const statistics = await PlayerHistoryService.trackPlayerHistory(account, now, player);
 
-      const [, trackedScores] = await Promise.all([
-        // Track the player's history
-        PlayerHistoryService.trackPlayerHistory(foundPlayer, now, player),
-
-        // Get the number of scores tracked for the player
-        ScoreSaberScoresRepository.countByPlayerId(player.id),
-
-        // Update the player's inactive status if it has changed
-        foundPlayer.inactive !== player.inactive &&
-          (async () => {
-            await PlayerCoreService.updatePlayer(foundPlayer.id, { inactive: player.inactive });
-            redisClient.del(cachedPlayerTokenCacheKey(foundPlayer.id));
-          })(),
-      ]);
+      // Update the player's inactive status if it has changed
+      if (account.inactive !== player.inactive) {
+        PlayerCoreService.updatePlayer(account.id, { inactive: player.inactive });
+        redisClient.del(cachedPlayerTokenCacheKey(account.id));
+      }
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
-      if (trackedScores < player.scoreStats.totalPlayCount && !player.banned) {
+      if (statistics && ((statistics?.totalScores ?? 0) < player.scoreStats.totalPlayCount && !player.banned)) {
         PlayerHistoryService.logger.info(
           `Player ${player.id} has missing scores. Adding them to the refresh queue...`
         );
@@ -126,14 +117,13 @@ export class PlayerHistoryService {
     const activePlayerIdsArray = Array.from(playerIds);
     PlayerHistoryService.logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
 
-    // Mark players as inactive (Mongo `$nin: []` matches all ids when the list is empty)
+    // Mark players as inactive
     const inactiveUpdate = await ScoreSaberAccountsRepository.markInactiveWhereIdNotIn(activePlayerIdsArray);
+    const inactivePlayers = inactiveUpdate.rowCount ?? 0;
 
-    if ((inactiveUpdate.rowCount ?? 0) > 0) {
-      PlayerHistoryService.logger.info(`Marked ${inactiveUpdate.rowCount} players as inactive`);
+    if (inactivePlayers > 0) {
+      PlayerHistoryService.logger.info(`Marked ${inactivePlayers} players as inactive`);
     }
-
-    const inactivePlayers = await ScoreSaberAccountsRepository.countInactive();
 
     sendEmbedToChannel(
       DiscordChannels.BACKEND_LOGS,
@@ -150,9 +140,9 @@ export class PlayerHistoryService {
     );
     PlayerHistoryService.logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-        `Successfully processed: ${successCount} players\n` +
-        `Failed to process: ${errorCount} players\n` +
-        `Total inactive players: ${inactivePlayers}`
+      `Successfully processed: ${successCount} players\n` +
+      `Failed to process: ${errorCount} players\n` +
+      `Total inactive players: ${inactivePlayers}`
     );
   }
 
@@ -169,10 +159,10 @@ export class PlayerHistoryService {
     player: ScoreSaberAccount,
     trackTime: Date,
     playerToken: ScoreSaberPlayerToken
-  ): Promise<void> {
+  ): Promise<ScoreSaberPlayerStatistics | undefined> {
     // Don't track inactive players
     if (!playerToken || playerToken.inactive) {
-      return;
+      return undefined;
     }
 
     await PlayerCoreService.updatePeakRank(playerToken);
@@ -185,15 +175,18 @@ export class PlayerHistoryService {
     const date = getMidnightAlignedDate(trackTime);
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(player.id, date);
 
+    const statistics = await PlayerStatisticsService.getStatistics(playerToken);
     await PlayerHistoryRepository.upsertByPlayerAndDate(
       player.id,
       date,
       existingEntry,
       PlayerHistoryService.createHistoryEntry(
-        await PlayerStatisticsService.getStatistics(playerToken),
+        statistics,
         existingEntry ?? undefined
       )
     );
+
+    return statistics;
   }
 
   /**
