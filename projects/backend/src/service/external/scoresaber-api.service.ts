@@ -15,6 +15,7 @@ import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/
 import { ScoreSaberPlayerSearchToken } from "@ssr/common/types/token/scoresaber/player-search";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
+import { CoalescingLoader } from "@ssr/common/utils/coalescing-loader";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import { scoreSaberApiResponseCacheKey } from "../../common/cache-keys";
@@ -49,6 +50,16 @@ const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
  */
 const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 
+type SerializableValue =
+  | string
+  | number
+  | boolean
+  | null
+  | SerializableValue[]
+  | {
+    [key: string]: SerializableValue;
+  };
+
 type CachedResponse<T> = {
   data: T | string;
   type: "json" | "text";
@@ -58,6 +69,7 @@ export class ScoreSaberApiService {
   public static totalRequests: number = 0;
   public static failedRequests: number = 0;
   private static totalRequestLatencyMs: number = 0;
+  private static coalescingLoader = new CoalescingLoader<string, CachedResponse<SerializableValue> | undefined>();
 
   /**
    * Fetches data from the ScoreSaber API.
@@ -79,54 +91,55 @@ export class ScoreSaberApiService {
     const data = await CacheService.fetch<CachedResponse<T> | undefined>(
       CacheId.SCORESABER_API_RESPONSE,
       scoreSaberApiResponseCacheKey(cacheHash),
-      async () => {
-        ScoreSaberApiService.totalRequests++;
+      async () =>
+        (await ScoreSaberApiService.coalescingLoader.get(cacheHash, async () => {
+          ScoreSaberApiService.totalRequests++;
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15_000);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
-        let response: Response | undefined;
-        try {
-          response = await fetch(
-            `https://p.fascinated.cc/${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`,
-            {
-              signal: controller.signal,
-            }
-          );
-        } catch {
-          // Network failures / aborts should be treated as "no result" for callers.
-          ScoreSaberApiService.failedRequests++;
-          return undefined;
-        } finally {
-          clearTimeout(timeoutId);
-        }
+          let response: Response | undefined;
+          try {
+            response = await fetch(
+              `https://p.fascinated.cc/${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`,
+              {
+                signal: controller.signal,
+              }
+            );
+          } catch {
+            // Network failures / aborts should be treated as "no result" for callers.
+            ScoreSaberApiService.failedRequests++;
+            return undefined;
+          } finally {
+            clearTimeout(timeoutId);
+          }
 
-        if (!response) {
-          return undefined;
-        }
+          if (!response) {
+            return undefined;
+          }
 
-        if (!response.ok || response.status !== 200) {
-          ScoreSaberApiService.failedRequests++;
-          return undefined;
-        }
+          if (!response.ok || response.status !== 200) {
+            ScoreSaberApiService.failedRequests++;
+            return undefined;
+          }
 
-        const isJson =
-          !url.includes("/players/count") && // Umbra once again can't code and returns JSON content-type but it's actually text !!
-          response.headers.get("content-type")?.includes("application/json");
+          const isJson =
+            !url.includes("/players/count") && // Umbra once again can't code and returns JSON content-type but it's actually text !!
+            response.headers.get("content-type")?.includes("application/json");
 
-        let responseData: T | string;
-        try {
-          responseData = isJson ? ((await response.json()) as T) : await response.text();
-        } catch {
-          ScoreSaberApiService.failedRequests++;
-          return undefined;
-        }
+          let responseData: T | string;
+          try {
+            responseData = isJson ? ((await response.json()) as T) : await response.text();
+          } catch {
+            ScoreSaberApiService.failedRequests++;
+            return undefined;
+          }
 
-        return {
-          data: responseData,
-          type: isJson ? "json" : "text",
-        };
-      }
+          return {
+            data: responseData as SerializableValue,
+            type: isJson ? "json" : "text",
+          };
+        })) as CachedResponse<T> | undefined
     );
 
     ScoreSaberApiService.totalRequestLatencyMs += Math.max(0, performance.now() - startedAt);
@@ -218,7 +231,7 @@ export class ScoreSaberApiService {
     ScoreSaberApiService.log(`Looking up players on page "${page}" for country "${country}"...`);
     const response = await ScoreSaberApiService.fetch<ScoreSaberPlayersPageToken>(
       LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT.replace(":page", page.toString()).replace(":country", country) +
-        (search ? `&search=${search}` : "")
+      (search ? `&search=${search}` : "")
     );
     if (response === undefined) {
       return undefined;
@@ -384,9 +397,9 @@ export class ScoreSaberApiService {
           ...(options?.category ? { category: options.category.toString() } : {}),
           ...(options?.stars
             ? {
-                minStar: (options.stars.min ?? 0).toString(),
-                maxStar: (options.stars.max ?? 0).toString(),
-              }
+              minStar: (options.stars.min ?? 0).toString(),
+              maxStar: (options.stars.max ?? 0).toString(),
+            }
             : {}),
           ...(options?.sort ? { sort: options.sort.toString() } : {}),
           ...(options?.search ? { search: options.search } : {}),
