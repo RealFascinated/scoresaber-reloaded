@@ -26,8 +26,8 @@ export default class BeatSaverService {
     const normalizedHash = normalizeSongHash(hash);
 
     return await CacheService.fetch(
-      CacheId.BEATSAVER_MAP_BY_HASH,
-      beatSaverMapCacheKey(normalizedHash),
+      CacheId.BEATSAVER_MAP,
+      beatSaverMapCacheKey(normalizedHash, difficulty, characteristic),
       async () => {
         let rows = await BeatSaverRepository.findMapBundleByVersionHash(normalizedHash);
 

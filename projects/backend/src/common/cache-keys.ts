@@ -1,4 +1,6 @@
 import { DetailType } from "@ssr/common/detail-type";
+import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 
 export function normalizeSongHash(hash: string): string {
   return hash.trim().toLowerCase();
@@ -37,8 +39,8 @@ export function miniRankingCacheKey(
 }
 
 // BeatSaver
-export function beatSaverMapCacheKey(hash: string): string {
-  return `beatsaver:${normalizeSongHash(hash)}`;
+export function beatSaverMapCacheKey(hash: string, difficulty: MapDifficulty, characteristic: MapCharacteristic): string {
+  return `beatsaver:${normalizeSongHash(hash)}-${difficulty.toLowerCase()}-${characteristic.toLowerCase()}`;
 }
 
 // BeatLeader

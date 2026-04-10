@@ -5,34 +5,35 @@ import FallbackLink from "@/components/fallback-link";
 import LeaderboardButtons from "@/components/platform/scoresaber/leaderboard/leaderboard-buttons";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
+import { formatDate, formatTime } from "@ssr/common/utils/time-utils";
 import NextImage from "next/image";
-import type { CSSProperties } from "react";
+import StatValue from "../../../statistic/stat-value";
 
 type LeaderboardInfoProps = {
   leaderboard: LeaderboardResponse;
 };
 
 export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
-  const { leaderboard: leaderboardData, beatsaver: beatSaverMap, starChangeHistory } = leaderboard;
+  const { leaderboard: leaderboardData, beatsaver, starChangeHistory } = leaderboard;
 
   const accentColor = getDifficulty(leaderboardData.difficulty.difficulty).color;
 
-  /** One soft wash only — low mix so difficulty color doesn’t dominate the whole card. */
-  const cardSurfaceStyle: CSSProperties = {
-    backgroundColor: "var(--card)",
-    backgroundImage: `linear-gradient(
-      to bottom,
-      color-mix(in srgb, ${accentColor} 16%, var(--card)) 0%,
-      var(--card) 38%,
-      var(--card) 100%
-    )`,
-  };
-
   return (
-    <Card className="h-fit w-full flex-col items-center gap-8 overflow-hidden p-0" style={cardSurfaceStyle}>
-      <div className="flex flex-col items-center gap-3 p-6 text-center">
+    <Card
+      className="h-fit w-full flex-col items-center gap-8 overflow-hidden p-0"
+      style={{
+        backgroundColor: "var(--card)",
+        backgroundImage: `linear-gradient(
+        to bottom,
+        color-mix(in srgb, ${accentColor} 16%, var(--card)) 0%,
+        var(--card) 38%,
+        var(--card) 100%
+      )`,
+      }}
+    >
+      <div className="flex flex-col items-center gap-3 p-6 pb-0 text-center">
         <NextImage
           src={leaderboardData.songArt}
           alt={`${leaderboardData.songName} Cover Image`}
@@ -42,23 +43,33 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         />
 
         <div className="flex max-w-[900px] min-w-0 flex-col items-center gap-1">
+          {/* Song Name */}
           <FallbackLink
-            href={beatSaverMap ? `https://beatsaver.com/maps/${beatSaverMap.bsr}` : undefined}
+            href={beatsaver ? `https://beatsaver.com/maps/${beatsaver.bsr}` : undefined}
             className="hover:text-primary/80 text-song-name w-fit max-w-full min-w-0 transition-all"
           >
             <h3 className="line-clamp-2 text-2xl leading-tight font-bold wrap-break-word">
               {leaderboardData.fullName}
             </h3>
           </FallbackLink>
+
+          {/* Song Author */}
           <p className="text-muted-foreground text-sm">{leaderboardData.songAuthorName}</p>
+
+          {/* Mapper */}
           <p className="text-muted-foreground text-sm">
             Mapped by{" "}
             <FallbackLink
-              href={getBeatSaverMapperProfileUrl(beatSaverMap)}
+              href={getBeatSaverMapperProfileUrl(beatsaver)}
               className="text-foreground hover:text-primary/80 transition-all"
             >
               {leaderboardData.levelAuthorName}
             </FallbackLink>
+          </p>
+
+          {/* Created At */}
+          <p className="text-muted-foreground text-sm">
+            Created {formatDate(leaderboardData.timestamp, "Do MMMM, YYYY HH:mm a")}
           </p>
         </div>
       </div>
@@ -84,12 +95,27 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
         </LeaderboardStatColumn>
       </div>
 
-      <div className="bg-background/70 flex w-full items-center justify-center gap-1 py-2.5">
-        <LeaderboardButtons
-          leaderboard={leaderboardData}
-          beatSaverMap={beatSaverMap}
-          starChangeHistory={starChangeHistory}
-        />
+      <div className="flex w-full flex-col gap-4">
+        {/* BeatSaver Info */}
+        {beatsaver && (
+          <div className="flex w-full flex-wrap justify-center gap-2">
+            <StatValue name="NJS" value={formatNumber(beatsaver.difficulty.njs, "number")} />
+            <StatValue name="BPM" value={formatNumber(beatsaver.metadata.bpm, "number")} />
+            <StatValue name="NPS" value={beatsaver.difficulty.nps.toFixed(2)} />
+            <StatValue name="Notes" value={formatNumberWithCommas(beatsaver.difficulty.notes)} />
+            <StatValue name="Bombs" value={formatNumberWithCommas(beatsaver.difficulty.bombs)} />
+            <StatValue name="Obstacles" value={formatNumberWithCommas(beatsaver.difficulty.obstacles)} />
+            <StatValue name="Length" value={formatTime(beatsaver.metadata.duration)} />
+          </div>
+        )}
+
+        <div className="bg-background/70 flex w-full items-center justify-center gap-1 py-2.5">
+          <LeaderboardButtons
+            leaderboard={leaderboardData}
+            beatSaverMap={beatsaver}
+            starChangeHistory={starChangeHistory}
+          />
+        </div>
       </div>
     </Card>
   );

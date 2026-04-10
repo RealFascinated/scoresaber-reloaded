@@ -8,7 +8,7 @@ import { redisClient } from "../../common/redis";
 import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
 
 export enum CacheId {
-  BEATSAVER_MAP_BY_HASH = "beatsaver_map_by_hash",
+  BEATSAVER_MAP = "beatsaver_map",
   SCORESABER_PLAYER = "scoresaber_player",
   SCORESABER_PLAYER_EXISTS = "scoresaber_player_exists",
   SCORESABER_API_RESPONSE = "scoresaber_api_response",
@@ -53,7 +53,7 @@ export default class CacheService {
     },
 
     // Redis caches
-    [CacheId.BEATSAVER_MAP_BY_HASH]: {
+    [CacheId.BEATSAVER_MAP]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
       mode: "REDIS",
     },
