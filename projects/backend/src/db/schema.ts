@@ -156,9 +156,6 @@ export const scoreSaberScoresTable = pgTable(
   table => [
     index("scores_player_leaderboard_idx").on(table.playerId, table.leaderboardId),
     index("scores_player_pp_desc_idx").on(table.playerId, table.pp.desc(), table.scoreId.desc()),
-    index("scores_pp_desc_player_partial_idx")
-      .on(table.pp.desc(), table.playerId)
-      .where(sql`${table.pp} > 0`),
     index("scores_leaderboard_id_idx").on(table.leaderboardId),
     index("scores_leaderboard_player_idx").on(table.leaderboardId, table.playerId),
     index("scores_leaderboard_score_scoreid_desc_idx").on(
@@ -483,7 +480,6 @@ export const scoreSaberScoreEventTable = pgTable(
   table => [
     index("score_events_leaderboard_timestamp_idx").on(table.leaderboardId, table.timestamp),
     index("score_events_timestamp_idx").on(table.timestamp),
-    index("score_events_timestamp_brin_idx").using("brin", table.timestamp),
   ]
 );
 

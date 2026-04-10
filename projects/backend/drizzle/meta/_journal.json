@@ -260,6 +260,13 @@
       "when": 1775800000018,
       "tag": "0036_chubby_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1775800000019,
+      "tag": "0037_fresh_blacklash",
+      "breakpoints": true
     }
   ]
 }
