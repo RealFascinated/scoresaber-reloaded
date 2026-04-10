@@ -1,0 +1,1 @@
+CREATE INDEX "scores_leaderboard_player_idx" ON "scoresaber-scores" USING btree ("leaderboardId","playerId");

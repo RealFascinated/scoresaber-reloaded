@@ -160,6 +160,7 @@ export const scoreSaberScoresTable = pgTable(
       .on(table.pp.desc(), table.playerId)
       .where(sql`${table.pp} > 0`),
     index("scores_leaderboard_id_idx").on(table.leaderboardId),
+    index("scores_leaderboard_player_idx").on(table.leaderboardId, table.playerId),
     index("scores_leaderboard_score_scoreid_desc_idx").on(
       table.leaderboardId,
       table.score.desc(),

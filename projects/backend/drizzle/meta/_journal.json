@@ -253,6 +253,13 @@
       "when": 1775800000017,
       "tag": "0035_drop_player_statistics",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1775800000018,
+      "tag": "0036_chubby_psynapse",
+      "breakpoints": true
     }
   ]
 }
