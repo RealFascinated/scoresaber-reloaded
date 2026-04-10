@@ -1,5 +1,6 @@
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { CountryCounts } from "@ssr/common/schemas/response/country-counts";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
 import { playerRankingCountryCountsCacheKey } from "../../common/cache-keys";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
@@ -77,42 +78,12 @@ export class PlayerSearchService {
   ): Promise<PlayerRankingsResponse> {
     const { country, search } = options ?? {};
     if (search && search.length < 3) {
-      return {
-        ...Pagination.empty<ScoreSaberPlayer>(),
-        countryMetadata: {},
-      };
+      return Pagination.empty<ScoreSaberPlayer>();
     }
 
-    /**
-     * Gets the amount of players in each country.
-     *
-     * @returns the amount of players in each country
-     */
-    async function getPlayerCountryCounts() {
-      return CacheService.fetch<Record<string, number>>(
-        CacheId.SCORESABER_PLAYER_RANKING_COUNTRY_COUNTS,
-        playerRankingCountryCountsCacheKey(),
-        async () => {
-          const rows = await ScoreSaberAccountsRepository.selectCountryCountsActivePlayers();
-          return rows.reduce(
-            (acc, curr) => {
-              if (curr.country) {
-                acc[curr.country] = curr.c;
-              }
-              return acc;
-            },
-            {} as Record<string, number>
-          );
-        }
-      );
-    }
-
-    const [foundPlayers, countryCounts] = await Promise.all([
-      country
-        ? ScoreSaberApiService.lookupPlayersByCountry(page, country, search)
-        : ScoreSaberApiService.lookupPlayers(page, search),
-      getPlayerCountryCounts(),
-    ]);
+    const foundPlayers = country
+      ? await ScoreSaberApiService.lookupPlayersByCountry(page, country, search)
+      : await ScoreSaberApiService.lookupPlayers(page, search);
 
     const tokens = foundPlayers?.players ?? [];
     const items = await Promise.all(
@@ -129,7 +100,25 @@ export class PlayerSearchService {
         page,
         itemsPerPage: foundPlayers?.metadata.itemsPerPage ?? 0,
       },
-      countryMetadata: countryCounts,
     };
+  }
+
+  public static async getPlayerCountryCounts(): Promise<CountryCounts> {
+    return CacheService.fetch<CountryCounts>(
+      CacheId.SCORESABER_PLAYER_RANKING_COUNTRY_COUNTS,
+      playerRankingCountryCountsCacheKey(),
+      async () => {
+        const rows = await ScoreSaberAccountsRepository.selectCountryCountsActivePlayers();
+        return rows.reduce(
+          (acc, curr) => {
+            if (curr.country) {
+              acc[curr.country] = curr.c;
+            }
+            return acc;
+          },
+          {} as CountryCounts
+        );
+      }
+    );
   }
 }

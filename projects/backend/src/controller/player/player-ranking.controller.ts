@@ -1,3 +1,4 @@
+import { CountryCountsSchema } from "@ssr/common/schemas/response/country-counts";
 import { PlayerRankingsResponseSchema } from "@ssr/common/schemas/response/player/player-rankings";
 import { PlayerMedalRankingsResponseSchema } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { Elysia } from "elysia";
@@ -8,6 +9,19 @@ import { PlayerSearchService } from "../../service/player/player-search.service"
 export default function playerRankingController(app: Elysia) {
   return app.group("/ranking", app =>
     app
+      .get(
+        "/country-counts",
+        async () => {
+          return await PlayerSearchService.getPlayerCountryCounts();
+        },
+        {
+          tags: ["Ranking"],
+          response: CountryCountsSchema,
+          detail: {
+            description: "Fetch global active player counts by country",
+          },
+        }
+      )
       .get(
         "/:page",
         async ({ params: { page }, query: { country, search } }) => {
@@ -28,6 +42,19 @@ export default function playerRankingController(app: Elysia) {
           response: PlayerRankingsResponseSchema,
           detail: {
             description: "Fetch player ranking",
+          },
+        }
+      )
+      .get(
+        "/medals/country-counts",
+        async () => {
+          return await PlayerMedalsService.getMedalRankingCountryCounts();
+        },
+        {
+          tags: ["Ranking"],
+          response: CountryCountsSchema,
+          detail: {
+            description: "Fetch medal ranking player counts by country",
           },
         }
       )

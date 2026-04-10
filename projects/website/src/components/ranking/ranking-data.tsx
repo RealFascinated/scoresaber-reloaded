@@ -2,6 +2,7 @@
 
 import { getRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
+import CountryCountsCombobox from "@/components/country-counts-combobox";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
@@ -12,7 +13,6 @@ import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { pluralize } from "@ssr/common/utils/string.util";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { LinkIcon } from "lucide-react";
@@ -22,7 +22,6 @@ import AddFriend from "../friend/add-friend";
 import { ScoreSaberPlayerRanking } from "../player/player-ranking";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
-import Combobox from "../ui/combo-box";
 import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
 import { Input } from "../ui/input";
 
@@ -58,6 +57,11 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
       }),
     refetchIntervalInBackground: false,
     placeholderData: prev => prev,
+  });
+  const { data: countryCountsData } = useQuery({
+    queryKey: ["rankingCountryCounts"],
+    queryFn: () => ssrApi.getPlayerRankingCountryCounts(),
+    staleTime: 1000 * 60 * 5,
   });
 
   useEffect(() => {
@@ -179,23 +183,9 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         >
           <FilterField label="Country">
             <FilterRow>
-              <Combobox<string | undefined>
+              <CountryCountsCombobox
                 className="h-10 w-full"
-                items={Object.entries(rankingData?.countryMetadata ?? {}).map(([key, count]) => ({
-                  value: key,
-                  name: (
-                    <div className="flex w-full min-w-0 items-center justify-between">
-                      <span className="truncate">
-                        {countryFilter.find(c => c.key === key)?.friendlyName ?? key}
-                      </span>
-                      <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
-                        {count.toLocaleString()} {pluralize(count, "player")}
-                      </span>
-                    </div>
-                  ),
-                  displayName: countryFilter.find(c => c.key === key)?.friendlyName ?? key,
-                  icon: <CountryFlag code={key} size={12} />,
-                }))}
+                counts={countryCountsData ?? {}}
                 value={currentCountry}
                 onValueChange={(newCountry: string | undefined) => {
                   setCurrentCountry(newCountry);

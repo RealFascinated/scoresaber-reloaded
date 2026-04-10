@@ -2,6 +2,7 @@ import {
   accSaberScoreSortSchema,
   accSaberScoreTypeSchema,
 } from "@ssr/common/schemas/accsaber/tokens/query/query";
+import { CountryCountsSchema } from "@ssr/common/schemas/response/country-counts";
 import { AccSaberScoresPageResponseSchema } from "@ssr/common/schemas/response/score/accsaber-scores-page";
 import {
   MedalPlayerScoresPageResponseSchema,
@@ -148,6 +149,22 @@ export default function scoresController(app: Elysia) {
           response: ScoreHistoryGraphSchema,
           detail: {
             description: "Fetch player score history graph",
+          },
+        }
+      )
+      .get(
+        "/leaderboard/:leaderboardId/country-counts",
+        async ({ params: { leaderboardId } }) => {
+          return await ScoreSaberLeaderboardScoresService.getLeaderboardCountryCounts(leaderboardId);
+        },
+        {
+          tags: ["Scores"],
+          params: z.object({
+            leaderboardId: z.coerce.number(),
+          }),
+          response: CountryCountsSchema,
+          detail: {
+            description: "Fetch leaderboard score country counts",
           },
         }
       )

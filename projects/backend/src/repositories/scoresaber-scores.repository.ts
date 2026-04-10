@@ -1,6 +1,19 @@
 import { HMD } from "@ssr/common/hmds";
 import type { AnyColumn, SQL } from "drizzle-orm";
-import { and, count, desc, eq, getTableColumns, gt, gte, inArray, lte, sql } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  gt,
+  gte,
+  inArray,
+  isNotNull,
+  lte,
+  ne,
+  sql,
+} from "drizzle-orm";
 import { db } from "../db";
 import {
   scoreSaberAccountsTable,
@@ -314,6 +327,27 @@ export class ScoreSaberScoresRepository {
       .where(eq(scoreSaberScoresTable.playerId, playerId))
       .groupBy(scoreSaberScoresTable.leaderboardId);
     return rows.map(r => r.leaderboardId);
+  }
+
+  public static async selectCountryCountsByLeaderboard(
+    leaderboardId: number
+  ): Promise<{ country: string | null; c: number }[]> {
+    return db
+      .select({
+        country: scoreSaberAccountsTable.country,
+        c: count(),
+      })
+      .from(scoreSaberScoresTable)
+      .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoresTable.playerId, scoreSaberAccountsTable.id))
+      .where(
+        and(
+          eq(scoreSaberScoresTable.leaderboardId, leaderboardId),
+          isNotNull(scoreSaberAccountsTable.country),
+          ne(scoreSaberAccountsTable.country, "")
+        )
+      )
+      .groupBy(scoreSaberAccountsTable.country)
+      .orderBy(desc(count()));
   }
 
   public static async countTotal(): Promise<number> {

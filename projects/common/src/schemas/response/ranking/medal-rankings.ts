@@ -18,7 +18,6 @@ export type MedalRankingPlayer = z.infer<typeof MedalsGlobalRankingSchema>;
 export const PlayerMedalRankingsResponseSchema = z.object({
   items: z.array(MedalsGlobalRankingSchema),
   metadata: PaginationMetadataSchema,
-  countryMetadata: z.record(z.string(), z.number()),
 });
 
 export type PlayerMedalRankingsResponse = z.infer<typeof PlayerMedalRankingsResponseSchema>;

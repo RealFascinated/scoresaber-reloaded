@@ -1,5 +1,6 @@
 "use client";
 
+import CountryCountsCombobox from "@/components/country-counts-combobox";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import ScoreModeSwitcher, { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { Spinner } from "@/components/spinner";
@@ -7,19 +8,17 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { FilterItem } from "@ssr/common/filter-item";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { countryFilter } from "@ssr/common/utils/country.util";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { useQuery } from "@tanstack/react-query";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
 import Card from "../../../card";
 import { CharacteristicButton } from "../../../leaderboard/button/characteristic-button";
 import { DifficultyButton } from "../../../leaderboard/button/difficulty-button";
 import SimplePagination from "../../../simple-pagination";
-import Combobox from "../../../ui/combo-box";
-import CountryFlag from "../../../ui/country-flag";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
 
 function getScoreId(score: ScoreSaberScore) {
@@ -46,6 +45,11 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
     parseAsStringLiteral<ScoreModeEnum>(Object.values(ScoreModeEnum)).withDefault(ScoreModeEnum.Global)
   );
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const { data: countryCountsData } = useQuery({
+    queryKey: ["leaderboardCountryCounts", leaderboard.id],
+    queryFn: () => ssrApi.getLeaderboardCountryCounts(leaderboard.id.toString()),
+    staleTime: 1000 * 60 * 10,
+  });
 
   const {
     data: scores,
@@ -116,22 +120,11 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
           </div>
           <div className="flex w-full min-w-0 justify-center sm:flex-1 sm:justify-end">
             {/* Country Filter */}
-            <Combobox<string | undefined>
+            <CountryCountsCombobox
               className="w-full max-w-72"
               clearable
-              items={countryFilter
-                .map(({ key, friendlyName }: FilterItem) => ({
-                  value: key,
-                  name: friendlyName,
-                  icon: <CountryFlag code={key} size={14} />,
-                }))
-                // The top country is the country of the claimed player
-                .sort((country: { value: string }) => {
-                  if (country.value === mainPlayer?.country) {
-                    return -1;
-                  }
-                  return 1;
-                })}
+              counts={countryCountsData ?? {}}
+              prioritizeCountry={mainPlayer?.country}
               value={filter.country}
               onValueChange={newCountry => {
                 filter.setCountry(newCountry);
