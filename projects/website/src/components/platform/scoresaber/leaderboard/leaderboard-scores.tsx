@@ -152,12 +152,12 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
               <table className="table w-full min-w-[800px] table-auto border-spacing-0 text-left text-sm">
                 <thead>
                   <tr className="border-border bg-muted/30 border-b">
-                    <th className="text-foreground/90 px-3 py-3 font-semibold">Rank</th>
-                    <th className="text-foreground/90 px-3 py-3 font-semibold">Player</th>
-                    <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Date Set</th>
-                    <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Accuracy</th>
-                    <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Misses</th>
-                    <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
+                    <th className="text-foreground/90 py-3 pr-1 pl-3 font-semibold">Rank</th>
+                    <th className="text-foreground/90 px-1 py-3 font-semibold">Player</th>
+                    <th className="text-foreground/90 px-1 py-3 text-center font-semibold">Date Set</th>
+                    <th className="text-foreground/90 px-1 py-3 text-center font-semibold">Accuracy</th>
+                    <th className="text-foreground/90 px-1 py-3 text-center font-semibold">Misses</th>
+                    <th className="text-foreground/90 px-1 py-3 text-center font-semibold">
                       {leaderboard.stars > 0 ? "PP" : "Score"}
                     </th>
                     <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Mods</th>

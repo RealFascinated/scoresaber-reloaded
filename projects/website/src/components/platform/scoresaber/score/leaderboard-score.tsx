@@ -19,7 +19,7 @@ import { useState } from "react";
 import ScoreDetailsDropdown from "./score-details-dropdown";
 import { ScoreSaberScoreHMD } from "./score-hmd";
 
-const TABLE_CELL_WIDTH = "px-3 py-2";
+const TABLE_CELL_WIDTH = "px-1 py-2";
 const TABLE_CELL_WIDTH_SMALL = "px-1.5 py-2";
 
 export default function ScoreSaberLeaderboardScore({
@@ -46,7 +46,7 @@ export default function ScoreSaberLeaderboardScore({
         )}
       >
         {/* Score Rank */}
-        <td className={cn(TABLE_CELL_WIDTH, "whitespace-nowrap")}>
+        <td className={cn(TABLE_CELL_WIDTH, "pr-1 pl-3 whitespace-nowrap")}>
           <p className={getRankColor(score.rank)}>
             {score.rank !== -1 ? `#${formatNumberWithCommas(score.rank)}` : "-"}
           </p>
