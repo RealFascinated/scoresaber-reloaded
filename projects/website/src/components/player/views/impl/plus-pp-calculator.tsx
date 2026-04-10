@@ -6,7 +6,7 @@ import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Spinner } from "../../../spinner";
 import { Button } from "../../../ui/button";
 import { Label } from "../../../ui/label";
@@ -15,6 +15,8 @@ import { Slider } from "../../../ui/slider";
 const ACCURACY_THRESHOLDS = [92, 93, 94, 95, 96, 97, 98, 99] as const;
 const DEFAULT_ACCURACY = 95;
 const DEFAULT_STARS = 10;
+const ACCURACY_BIAS_WEIGHT = 0.01;
+const STARS_BIAS_WEIGHT = 0.017;
 
 /**
  * Gets the stars needed to achieve `rawPp` at a given accuracy.
@@ -25,6 +27,50 @@ const DEFAULT_STARS = 10;
  */
 function starsForRawPpAtAcc(rawPp: number, acc: number): number {
   return rawPp / (ScoreSaberCurve.STAR_MULTIPLIER * ScoreSaberCurve.getModifier(acc));
+}
+
+function getTargetRawPpForOnePpGain(sortedPps: number[]): number | null {
+  if (sortedPps.length === 0) {
+    return null;
+  }
+
+  return ScoreSaberCurve.calcRawPpForExpectedPp(sortedPps, 1);
+}
+
+function getBestAccuracyAndStarsForOnePp(sortedPps: number[]): { accuracy: number; stars: number } {
+  const startTime = performance.now();
+  const targetRawPp = getTargetRawPpForOnePpGain(sortedPps);
+  if (targetRawPp == null) {
+    console.log(`[PlusPpCalculator] +1pp solve completed in ${(performance.now() - startTime).toFixed(2)}ms`);
+    return { accuracy: DEFAULT_ACCURACY, stars: DEFAULT_STARS };
+  }
+
+  let bestAccuracy = DEFAULT_ACCURACY;
+  let bestStars = DEFAULT_STARS;
+  let bestScore = Number.POSITIVE_INFINITY;
+
+  for (let i = 8500; i <= 10000; i++) {
+    const accuracy = i / 100;
+    const starsAtAcc = starsForRawPpAtAcc(targetRawPp, accuracy);
+    const clampedStars = Math.min(Math.max(starsAtAcc, 0), SHARED_CONSTS.maxStars);
+    const roundedStars = Math.round(clampedStars * 10) / 10;
+    const rawPpAtRoundedValues = ScoreSaberCurve.getPp(roundedStars, accuracy);
+    const error = Math.abs(rawPpAtRoundedValues - targetRawPp);
+    const accuracyIncrease = Math.max(0, accuracy - DEFAULT_ACCURACY);
+    const starsIncrease = Math.max(0, roundedStars - DEFAULT_STARS);
+
+    // Bias towards solving with accuracy before stars when candidates are close.
+    const score = error - accuracyIncrease * ACCURACY_BIAS_WEIGHT + starsIncrease * STARS_BIAS_WEIGHT;
+
+    if (score < bestScore) {
+      bestScore = score;
+      bestAccuracy = accuracy;
+      bestStars = roundedStars;
+    }
+  }
+
+  console.log(`[PlusPpCalculator] +1pp solve completed in ${(performance.now() - startTime).toFixed(2)}ms`);
+  return { accuracy: bestAccuracy, stars: bestStars };
 }
 
 function RawPpDisplay({ label, value, onReset }: { label: string; value: string; onReset: () => void }) {
@@ -84,11 +130,28 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
 
   const [accuracy, setAccuracy] = useState(DEFAULT_ACCURACY);
   const [stars, setStars] = useState(DEFAULT_STARS);
+  const [hasInitializedForPlayer, setHasInitializedForPlayer] = useState(false);
 
   const sortedPps = useMemo(
     () => [...(scorePps?.scores.map(s => s.pp) ?? [])].sort((a, b) => b - a),
     [scorePps]
   );
+
+  useEffect(() => {
+    setHasInitializedForPlayer(false);
+  }, [player.id]);
+
+  useEffect(() => {
+    if (isLoading || hasInitializedForPlayer) {
+      return;
+    }
+
+    // Initialize sliders to the closest valid +1pp settings.
+    const { accuracy: initialAccuracy, stars: initialStars } = getBestAccuracyAndStarsForOnePp(sortedPps);
+    setAccuracy(initialAccuracy);
+    setStars(initialStars);
+    setHasInitializedForPlayer(true);
+  }, [isLoading, hasInitializedForPlayer, sortedPps]);
 
   const rawPpFromPlay = useMemo(() => ScoreSaberCurve.getPp(stars, accuracy), [stars, accuracy]);
 
@@ -121,17 +184,8 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   }, [sortedPps, weightedGain, isNegativeGain, rawPpFromPlay]);
 
   const handleReset = () => {
-    setAccuracy(DEFAULT_ACCURACY);
-    if (sortedPps.length === 0) {
-      setStars(DEFAULT_STARS);
-      return;
-    }
-    const rawPpForOnePp = ScoreSaberCurve.calcRawPpForExpectedPp(sortedPps, 1);
-    const resetStars =
-      Math.round(
-        Math.min(Math.max(starsForRawPpAtAcc(rawPpForOnePp, DEFAULT_ACCURACY), 0), SHARED_CONSTS.maxStars) *
-          10
-      ) / 10;
+    const { accuracy: resetAccuracy, stars: resetStars } = getBestAccuracyAndStarsForOnePp(sortedPps);
+    setAccuracy(resetAccuracy);
     setStars(resetStars);
   };
 
