@@ -13,6 +13,7 @@ type CountryCountsComboboxProps = {
   clearable?: boolean;
   placeholder?: string;
   prioritizeCountry?: string;
+  countNoun?: string;
 };
 
 export default function CountryCountsCombobox({
@@ -23,6 +24,7 @@ export default function CountryCountsCombobox({
   clearable,
   placeholder,
   prioritizeCountry,
+  countNoun = "player",
 }: CountryCountsComboboxProps) {
   return (
     <Combobox<string | undefined>
@@ -35,7 +37,7 @@ export default function CountryCountsCombobox({
             <div className="flex w-full min-w-0 items-center justify-between">
               <span className="truncate">{countryFilter.find(c => c.key === key)?.friendlyName ?? key}</span>
               <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
-                {count.toLocaleString()} {pluralize(count, "player")}
+                {count.toLocaleString()} {pluralize(count, countNoun)}
               </span>
             </div>
           ),

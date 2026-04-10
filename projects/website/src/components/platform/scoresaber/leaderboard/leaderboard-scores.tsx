@@ -124,6 +124,7 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
               className="w-full max-w-72"
               clearable
               counts={countryCountsData ?? {}}
+              countNoun="score"
               prioritizeCountry={mainPlayer?.country}
               value={filter.country}
               onValueChange={newCountry => {
