@@ -36,15 +36,14 @@ export class BeatLeaderApiService {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 15_000);
 
-    const baseUrl = options?.useProxy ? "https://p.fascinated.cc/" : "";
+    const baseUrl = options?.useProxy
+      ? `https://p.fascinated.cc/${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`
+      : `${url}${getQueryParamsFromObject(options?.searchParams || {})}`;
     let response: Response | undefined;
     try {
-      response = await fetch(
-        `${baseUrl}${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`,
-        {
-          signal: controller.signal,
-        }
-      );
+      response = await fetch(baseUrl, {
+        signal: controller.signal,
+      });
     } catch {
       BeatLeaderApiService.failedRequests++;
       return undefined;

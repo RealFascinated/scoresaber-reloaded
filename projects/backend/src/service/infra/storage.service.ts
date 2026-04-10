@@ -48,7 +48,7 @@ export default class StorageService {
 
     try {
       const s3file = StorageService.getFileRef(bucket, filename);
-      const bytes = await s3file.bytes();
+      const bytes = await s3file.arrayBuffer();
       const file = Buffer.from(bytes);
       StorageService.CACHE.set(cacheKey, file);
       return file;

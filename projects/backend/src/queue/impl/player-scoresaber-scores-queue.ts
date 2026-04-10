@@ -75,7 +75,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
   private async addPlayersToQueue() {
     try {
       // If there are already items in the queue, don't add more
-      if ((await this.getSize()) !== 0) {
+      if ((await this.getSize()) !== 0 || this.getActiveWorkers() > 0) {
         return;
       }
       const players = await ScoreSaberAccountsRepository.selectIdsNeedingScoreSeed();

@@ -1,8 +1,10 @@
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
+import { playerRankingCountryCountsCacheKey } from "../../common/cache-keys";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
+import CacheService, { CacheId } from "../infra/cache.service";
 import ScoreSaberPlayerService from "./scoresaber-player.service";
 
 export class PlayerSearchService {
@@ -29,9 +31,13 @@ export class PlayerSearchService {
     ]);
 
     const scoreSaberPlayerTokens = scoreSaberResponse?.players;
+    const scoreSaberPlayerTokenMap = new Map((scoreSaberPlayerTokens ?? []).map(token => [token.id, token]));
     const uniquePlayerIds = [
       ...new Set(localMatches.map(p => p.id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])),
     ];
+    const cachedTokens = await ScoreSaberPlayerService.getCachedPlayers(
+      uniquePlayerIds.filter(id => !scoreSaberPlayerTokenMap.has(id))
+    );
 
     // Get players from ScoreSaber
     return (
@@ -40,8 +46,7 @@ export class PlayerSearchService {
           ScoreSaberPlayerService.getPlayer(
             id,
             "basic",
-            scoreSaberPlayerTokens?.find(token => token.id === id) ||
-              (await ScoreSaberPlayerService.getCachedPlayer(id)) // Use the cache for inactive players
+            scoreSaberPlayerTokenMap.get(id) || cachedTokens.get(id)
           )
         )
       )
@@ -84,16 +89,21 @@ export class PlayerSearchService {
      * @returns the amount of players in each country
      */
     async function getPlayerCountryCounts() {
-      const rows = await ScoreSaberAccountsRepository.selectCountryCountsActivePlayers();
-
-      return rows.reduce(
-        (acc, curr) => {
-          if (curr.country) {
-            acc[curr.country] = curr.c;
-          }
-          return acc;
-        },
-        {} as Record<string, number>
+      return CacheService.fetch<Record<string, number>>(
+        CacheId.SCORESABER_PLAYER_RANKING_COUNTRY_COUNTS,
+        playerRankingCountryCountsCacheKey(),
+        async () => {
+          const rows = await ScoreSaberAccountsRepository.selectCountryCountsActivePlayers();
+          return rows.reduce(
+            (acc, curr) => {
+              if (curr.country) {
+                acc[curr.country] = curr.c;
+              }
+              return acc;
+            },
+            {} as Record<string, number>
+          );
+        }
       );
     }
 

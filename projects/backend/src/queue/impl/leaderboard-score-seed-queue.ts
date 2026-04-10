@@ -69,15 +69,26 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         );
       }
 
+      const parsedScores = response.scores.map(rawScore =>
+        getScoreSaberScoreFromToken(rawScore, leaderboard, undefined)
+      );
+      const existingScoreIds = await ScoreSaberScoresRepository.findExistingScoreIds(
+        parsedScores.map(score => score.scoreId)
+      );
+
       await Promise.all(
-        response.scores.map(async rawScore => {
-          const score = getScoreSaberScoreFromToken(rawScore, leaderboard, undefined);
+        parsedScores.map(async score => {
           PlayerCoreService.createIfMissing(score.playerId); // no need to await this
 
-          if (!(await ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId))) {
-            await ScoreCoreService.trackScoreSaberScore(score, leaderboard, false);
+          if (!existingScoreIds.has(score.scoreId)) {
+            await ScoreCoreService.trackScoreSaberScore(score, leaderboard, false, undefined, {
+              skipDuplicateCheck: true,
+            });
             newScoresTracked++;
-          } else if (score.pp > 0) {
+            return;
+          }
+
+          if (score.pp > 0) {
             await ScoreCoreService.upsertScore(score);
             rankedScoresUpdated++;
           }
@@ -110,7 +121,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
    */
   private async insertLeaderboards() {
     // If there are already items in the queue, don't add more
-    if ((await this.getSize()) !== 0) {
+    if ((await this.getSize()) !== 0 || this.getActiveWorkers() > 0) {
       return;
     }
     try {

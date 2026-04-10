@@ -159,4 +159,65 @@ export default class ScoreSaberPlayerService {
     await redisClient.set(cacheKey, stringify(player), "EX", CACHED_PLAYER_EXPIRY);
     return player;
   }
+
+  public static async getCachedPlayers(ids: string[]): Promise<Map<string, ScoreSaberPlayerToken>> {
+    const uniqueIds = [...new Set(ids)];
+    if (uniqueIds.length === 0) {
+      return new Map();
+    }
+
+    const keyToId = new Map<string, string>(
+      uniqueIds.map(id => [cachedPlayerTokenCacheKey(id), id] as const)
+    );
+    const keys = [...keyToId.keys()];
+    const cachedValues = await redisClient.mget(keys);
+    const players = new Map<string, ScoreSaberPlayerToken>();
+    const missingIds: string[] = [];
+
+    for (let index = 0; index < keys.length; index++) {
+      const key = keys[index];
+      const cachedValue = cachedValues[index];
+      const id = keyToId.get(key);
+      if (!id) {
+        continue;
+      }
+
+      if (!cachedValue) {
+        missingIds.push(id);
+        continue;
+      }
+
+      try {
+        players.set(id, parse(cachedValue) as ScoreSaberPlayerToken);
+      } catch {
+        ScoreSaberPlayerService.logger.warn(
+          `Failed to parse cached player data for ${id} in bulk lookup, removing from cache`
+        );
+        await redisClient.del(key);
+        missingIds.push(id);
+      }
+    }
+
+    if (missingIds.length > 0) {
+      const lookedUpPlayers = await Promise.all(
+        missingIds.map(async id => {
+          const player = await ScoreSaberApiService.lookupPlayer(id);
+          return { id, player };
+        })
+      );
+
+      await Promise.all(
+        lookedUpPlayers.map(async ({ id, player }) => {
+          if (!player) {
+            return;
+          }
+
+          players.set(id, player);
+          await redisClient.set(cachedPlayerTokenCacheKey(id), stringify(player), "EX", CACHED_PLAYER_EXPIRY);
+        })
+      );
+    }
+
+    return players;
+  }
 }

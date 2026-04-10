@@ -89,7 +89,7 @@ export class PlayerHistoryService {
       }
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
-      if (statistics && ((statistics?.totalScores ?? 0) < player.scoreStats.totalPlayCount && !player.banned)) {
+      if (statistics && (statistics?.totalScores ?? 0) < player.scoreStats.totalPlayCount && !player.banned) {
         PlayerHistoryService.logger.info(
           `Player ${player.id} has missing scores. Adding them to the refresh queue...`
         );
@@ -140,9 +140,9 @@ export class PlayerHistoryService {
     );
     PlayerHistoryService.logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-      `Successfully processed: ${successCount} players\n` +
-      `Failed to process: ${errorCount} players\n` +
-      `Total inactive players: ${inactivePlayers}`
+        `Successfully processed: ${successCount} players\n` +
+        `Failed to process: ${errorCount} players\n` +
+        `Total inactive players: ${inactivePlayers}`
     );
   }
 
@@ -180,10 +180,7 @@ export class PlayerHistoryService {
       player.id,
       date,
       existingEntry,
-      PlayerHistoryService.createHistoryEntry(
-        statistics,
-        existingEntry ?? undefined
-      )
+      PlayerHistoryService.createHistoryEntry(statistics, existingEntry ?? undefined)
     );
 
     return statistics;
@@ -314,10 +311,12 @@ export class PlayerHistoryService {
     }
 
     if (missingRankUpserts.length > 0) {
-      await Promise.all(
-        missingRankUpserts.map(({ date, rank }) =>
-          PlayerHistoryRepository.upsertRank(playerToken.id, date, rank)
-        )
+      await PlayerHistoryRepository.bulkUpsertRanks(
+        missingRankUpserts.map(({ date, rank }) => ({
+          playerId: playerToken.id,
+          date,
+          rank,
+        }))
       );
       PlayerHistoryService.logger.info(
         `Bulk-upserted ${missingRankUpserts.length} missing history entries for ${playerToken.name ?? playerToken.id}`
@@ -361,6 +360,7 @@ export class PlayerHistoryService {
   ): Promise<void> {
     const playerRankHistory = parseRankHistory(playerToken);
     const historyLength = playerRankHistory.length;
+    const rows: { playerId: string; date: Date; rank: number }[] = [];
 
     for (let i = historyLength - 1; i >= 0; i--) {
       const rank = playerRankHistory[i];
@@ -371,7 +371,11 @@ export class PlayerHistoryService {
       // last element is "today" => 0d ago, then 1d ago, etc.
       const daysAgo = historyLength - 1 - i;
       const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
-      await PlayerHistoryRepository.upsertRank(account.id, date, rank);
+      rows.push({ playerId: account.id, date, rank });
+    }
+
+    if (rows.length > 0) {
+      await PlayerHistoryRepository.bulkUpsertRanks(rows);
     }
   }
 

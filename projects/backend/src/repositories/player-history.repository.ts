@@ -68,6 +68,20 @@ export class PlayerHistoryRepository {
       });
   }
 
+  public static async bulkUpsertRanks(rows: { playerId: string; date: Date; rank: number }[]): Promise<void> {
+    if (rows.length === 0) {
+      return;
+    }
+
+    await db
+      .insert(playerHistoryTable)
+      .values(rows)
+      .onConflictDoUpdate({
+        target: [playerHistoryTable.playerId, playerHistoryTable.date],
+        set: { rank: sql`excluded.rank` },
+      });
+  }
+
   public static async incrementDailyCounter(
     playerId: string,
     date: Date,

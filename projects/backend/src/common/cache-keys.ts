@@ -22,6 +22,10 @@ export function cachedPlayerTokenCacheKey(id: string): string {
   return `scoresaber:cached-player:${id}`;
 }
 
+export function playerRankingCountryCountsCacheKey(): string {
+  return "scoresaber:player-ranking:country-counts";
+}
+
 export function scoreSaberApiResponseCacheKey(cacheHash: string): string {
   return `scoresaber:api-cache:${cacheHash}`;
 }
@@ -39,7 +43,11 @@ export function miniRankingCacheKey(
 }
 
 // BeatSaver
-export function beatSaverMapCacheKey(hash: string, difficulty: MapDifficulty, characteristic: MapCharacteristic): string {
+export function beatSaverMapCacheKey(
+  hash: string,
+  difficulty: MapDifficulty,
+  characteristic: MapCharacteristic
+): string {
   return `beatsaver:${normalizeSongHash(hash)}-${difficulty.toLowerCase()}-${characteristic.toLowerCase()}`;
 }
 

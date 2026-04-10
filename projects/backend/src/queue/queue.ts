@@ -146,6 +146,10 @@ export abstract class Queue<T> {
     return await redisClient.llen(`queue::${this.id}`);
   }
 
+  public getActiveWorkers(): number {
+    return this.activeWorkers;
+  }
+
   public async hasItem(item: T): Promise<boolean> {
     return (await redisClient.lindex(`queue::${this.id}`, 0)) === stringify(item);
   }

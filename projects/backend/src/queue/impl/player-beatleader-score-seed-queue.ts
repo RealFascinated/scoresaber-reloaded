@@ -32,7 +32,7 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
   }
 
   private async insertPlayers() {
-    if ((await this.getSize()) !== 0) {
+    if ((await this.getSize()) !== 0 || this.getActiveWorkers() > 0) {
       return;
     }
     try {

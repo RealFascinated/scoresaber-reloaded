@@ -1,9 +1,6 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
-import {
-  ScoreStatsResponse,
-  ScoreStatsResponseSchema,
-} from "@ssr/common/schemas/response/beatleader/score-stats";
+import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { Elysia, redirect } from "elysia";
 import { z } from "zod";
 import BeatLeaderService from "../../service/beatleader/beatleader.service";
@@ -24,7 +21,6 @@ export default function beatleaderController(app: Elysia) {
           params: z.object({
             scoreId: z.coerce.number(),
           }),
-          response: ScoreStatsResponseSchema,
           detail: {
             description: "Fetch BeatLeader score stats",
           },

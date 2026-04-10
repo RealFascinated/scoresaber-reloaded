@@ -44,13 +44,18 @@ import { PlayerCoreService } from "./player-core.service";
 /**
  * Describes how to paginate and enrich a specific score table.
  */
-type ScoreTableConfig<TRow, TScore> = {
+type ScoreTableConfig<TRow, TScore, TContext = undefined> = {
   buildConditions: (playerIds: string[], leaderboardIds: number[] | null, hmd?: HMD) => SQL[];
   countRows: (conditions: SQL[]) => Promise<number>;
   resolveOrderColumn: (sort: string) => AnyColumn | SQL;
   fetchRows: (conditions: SQL[], orderBy: SQL, limit: number, offset: number) => Promise<TRow[]>;
   getLeaderboardId: (row: TRow) => number;
-  enrichRow: (row: TRow, leaderboard: ScoreSaberLeaderboard) => Promise<PlayerScore<TScore> | undefined>;
+  prepareContext?: (rows: TRow[]) => Promise<TContext>;
+  enrichRow: (
+    row: TRow,
+    leaderboard: ScoreSaberLeaderboard,
+    context: TContext
+  ) => Promise<PlayerScore<TScore> | undefined>;
 };
 
 export class PlayerScoresService {
@@ -138,14 +143,30 @@ export class PlayerScoresService {
       currentPage: number,
       scoresPage: ScoreSaberPlayerScoresPageToken
     ): Promise<boolean> {
+      const parsedScores = scoresPage.playerScores.map(parseScoreToken);
+      const scoreIds = parsedScores.flatMap(entry => (entry.score ? [entry.score.scoreId] : []));
+      const existingScoreIds = await ScoreSaberScoresRepository.findExistingScoreIds(scoreIds);
+
       await Promise.all(
-        scoresPage.playerScores.map(async scoreToken => {
-          const { score, leaderboard } = parseScoreToken(scoreToken);
+        parsedScores.map(async ({ score, leaderboard }) => {
           if (!score || !leaderboard) {
             result.totalScores++;
             return;
           }
-          const trackingResult = await ScoreCoreService.trackScoreSaberScore(score, leaderboard, false);
+
+          if (existingScoreIds.has(score.scoreId)) {
+            return;
+          }
+
+          const trackingResult = await ScoreCoreService.trackScoreSaberScore(
+            score,
+            leaderboard,
+            false,
+            undefined,
+            {
+              skipDuplicateCheck: true,
+            }
+          );
           if (trackingResult.tracked) {
             result.missingScores++;
             result.totalScores++;
@@ -339,13 +360,13 @@ export class PlayerScoresService {
     return { items, metadata: requested.metadata };
   }
 
-  private static async getPaginatedPlayerScores<TRow, TScore>(
+  private static async getPaginatedPlayerScores<TRow, TScore, TContext = undefined>(
     playerId: string,
     page: number,
     sort: string,
     direction: SortDirection,
     query: PlayerScoresQuery,
-    config: ScoreTableConfig<TRow, TScore>
+    config: ScoreTableConfig<TRow, TScore, TContext>
   ): Promise<Page<PlayerScore<TScore>>> {
     const limit = 8;
     const offset = (page - 1) * limit;
@@ -381,6 +402,7 @@ export class PlayerScoresService {
         rows.map(config.getLeaderboardId)
       );
       const leaderboardMap = new Map(leaderboards.map(lb => [lb.id, lb]));
+      const context = config.prepareContext ? await config.prepareContext(rows) : (undefined as TContext);
 
       const scores = await Promise.all(
         rows.map(async row => {
@@ -388,7 +410,7 @@ export class PlayerScoresService {
           if (!leaderboard) {
             return undefined;
           }
-          return config.enrichRow(row, leaderboard);
+          return config.enrichRow(row, leaderboard, context);
         })
       );
 
@@ -454,7 +476,8 @@ export class PlayerScoresService {
 
       getLeaderboardId: row => row.leaderboardId,
 
-      async enrichRow(row, leaderboard) {
+      async enrichRow(row, leaderboard, _context) {
+        void _context;
         const [enrichedScore, beatSaver] = await Promise.all([
           ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(row), leaderboard),
           BeatSaverService.getMap(
@@ -529,16 +552,19 @@ export class PlayerScoresService {
 
       getLeaderboardId: row => row.leaderboardId,
 
-      async enrichRow(row, leaderboard) {
-        const [rankByScoreId] = await Promise.all([
-          ScoreSaberMedalsRepository.getMedalTableScoreRanksForScores([
-            { scoreId: row.scoreId, leaderboardId: row.leaderboardId },
-          ]),
-        ]);
+      async prepareContext(rows) {
+        return ScoreSaberMedalsRepository.getMedalTableScoreRanksForScores(
+          rows.map(row => ({
+            scoreId: row.scoreId,
+            leaderboardId: row.leaderboardId,
+          }))
+        );
+      },
 
+      async enrichRow(row, leaderboard, context) {
         const medalScore: ScoreSaberMedalScore = {
           ...scoreSaberMedalScoreRowToType(row),
-          rank: rankByScoreId.get(row.scoreId) ?? 0,
+          rank: context.get(row.scoreId) ?? 0,
         };
 
         const [enrichedScore, beatSaver] = await Promise.all([

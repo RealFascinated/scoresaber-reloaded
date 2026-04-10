@@ -53,6 +53,8 @@ export class PlayerPlayedStreakService {
         AND "lastPlayedDate" IS NOT NULL
         AND "lastPlayedDate" < (CURRENT_DATE - INTERVAL '1 day')::date
     `);
-    PlayerPlayedStreakService.logger.info(`Expired ${result.rowCount} broken streaks in ${formatDuration(performance.now() - before)}`);
+    PlayerPlayedStreakService.logger.info(
+      `Expired ${result.rowCount} broken streaks in ${formatDuration(performance.now() - before)}`
+    );
   }
 }

@@ -38,7 +38,10 @@ export class ScoreCoreService {
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
     newScore: boolean = false,
-    beatLeaderScore?: BeatLeaderScore
+    beatLeaderScore?: BeatLeaderScore,
+    options?: {
+      skipDuplicateCheck?: boolean;
+    }
   ): Promise<{
     score: ScoreSaberScore | undefined;
     hasPreviousScore: boolean;
@@ -46,7 +49,10 @@ export class ScoreCoreService {
   }> {
     const before = performance.now();
 
-    if (await ScoreSaberScoresRepository.existsByScoreIdAndScore(score.scoreId, score.score)) {
+    if (
+      !options?.skipDuplicateCheck &&
+      (await ScoreSaberScoresRepository.existsByScoreIdAndScore(score.scoreId, score.score))
+    ) {
       return { score: undefined, hasPreviousScore: false, tracked: false };
     }
 
