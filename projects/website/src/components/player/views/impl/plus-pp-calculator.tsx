@@ -15,8 +15,7 @@ import { Slider } from "../../../ui/slider";
 const ACCURACY_THRESHOLDS = [92, 93, 94, 95, 96, 97, 98, 99] as const;
 const DEFAULT_ACCURACY = 95;
 const DEFAULT_STARS = 10;
-const ACCURACY_BIAS_WEIGHT = 0.01;
-const STARS_BIAS_WEIGHT = 0.017;
+const ERROR_TIE_EPSILON = 0.01;
 
 /**
  * Gets the stars needed to achieve `rawPp` at a given accuracy.
@@ -47,7 +46,7 @@ function getBestAccuracyAndStarsForOnePp(sortedPps: number[]): { accuracy: numbe
 
   let bestAccuracy = DEFAULT_ACCURACY;
   let bestStars = DEFAULT_STARS;
-  let bestScore = Number.POSITIVE_INFINITY;
+  let bestError = Number.POSITIVE_INFINITY;
 
   for (let i = 8500; i <= 10000; i++) {
     const accuracy = i / 100;
@@ -56,14 +55,13 @@ function getBestAccuracyAndStarsForOnePp(sortedPps: number[]): { accuracy: numbe
     const roundedStars = Math.round(clampedStars * 10) / 10;
     const rawPpAtRoundedValues = ScoreSaberCurve.getPp(roundedStars, accuracy);
     const error = Math.abs(rawPpAtRoundedValues - targetRawPp);
-    const accuracyIncrease = Math.max(0, accuracy - DEFAULT_ACCURACY);
-    const starsIncrease = Math.max(0, roundedStars - DEFAULT_STARS);
+    const isClearlyBetterError = error + ERROR_TIE_EPSILON < bestError;
+    const isErrorTie = Math.abs(error - bestError) <= ERROR_TIE_EPSILON;
+    const hasBetterTieBreak =
+      accuracy > bestAccuracy || (accuracy === bestAccuracy && roundedStars < bestStars);
 
-    // Bias towards solving with accuracy before stars when candidates are close.
-    const score = error - accuracyIncrease * ACCURACY_BIAS_WEIGHT + starsIncrease * STARS_BIAS_WEIGHT;
-
-    if (score < bestScore) {
-      bestScore = score;
+    if (isClearlyBetterError || (isErrorTie && hasBetterTieBreak)) {
+      bestError = error;
       bestAccuracy = accuracy;
       bestStars = roundedStars;
     }
@@ -219,10 +217,10 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
                   id: "stars-slider",
                   label: "Stars",
                   value: stars,
-                  display: `${stars.toFixed(1)} ★`,
+                  display: `${stars.toFixed(2)} ★`,
                   min: 0,
                   max: SHARED_CONSTS.maxStars,
-                  step: 0.1,
+                  step: 0.01,
                   onChange: (value: number) =>
                     setPlayerInputOverrides({
                       playerId: player.id,
