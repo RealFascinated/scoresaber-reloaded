@@ -6,7 +6,7 @@ import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Spinner } from "../../../spinner";
 import { Button } from "../../../ui/button";
 import { Label } from "../../../ui/label";
@@ -128,30 +128,21 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
     queryFn: () => ssrApi.getPlayerPps(player.id),
   });
 
-  const [accuracy, setAccuracy] = useState(DEFAULT_ACCURACY);
-  const [stars, setStars] = useState(DEFAULT_STARS);
-  const [hasInitializedForPlayer, setHasInitializedForPlayer] = useState(false);
+  const [playerInputOverrides, setPlayerInputOverrides] = useState<{
+    playerId: string;
+    accuracy: number;
+    stars: number;
+  } | null>(null);
 
   const sortedPps = useMemo(
     () => [...(scorePps?.scores.map(s => s.pp) ?? [])].sort((a, b) => b - a),
     [scorePps]
   );
 
-  useEffect(() => {
-    setHasInitializedForPlayer(false);
-  }, [player.id]);
-
-  useEffect(() => {
-    if (isLoading || hasInitializedForPlayer) {
-      return;
-    }
-
-    // Initialize sliders to the closest valid +1pp settings.
-    const { accuracy: initialAccuracy, stars: initialStars } = getBestAccuracyAndStarsForOnePp(sortedPps);
-    setAccuracy(initialAccuracy);
-    setStars(initialStars);
-    setHasInitializedForPlayer(true);
-  }, [isLoading, hasInitializedForPlayer, sortedPps]);
+  const baselineInputs = useMemo(() => getBestAccuracyAndStarsForOnePp(sortedPps), [sortedPps]);
+  const hasOverridesForCurrentPlayer = playerInputOverrides?.playerId === player.id;
+  const accuracy = hasOverridesForCurrentPlayer ? playerInputOverrides.accuracy : baselineInputs.accuracy;
+  const stars = hasOverridesForCurrentPlayer ? playerInputOverrides.stars : baselineInputs.stars;
 
   const rawPpFromPlay = useMemo(() => ScoreSaberCurve.getPp(stars, accuracy), [stars, accuracy]);
 
@@ -184,9 +175,7 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
   }, [sortedPps, weightedGain, isNegativeGain, rawPpFromPlay]);
 
   const handleReset = () => {
-    const { accuracy: resetAccuracy, stars: resetStars } = getBestAccuracyAndStarsForOnePp(sortedPps);
-    setAccuracy(resetAccuracy);
-    setStars(resetStars);
+    setPlayerInputOverrides(null);
   };
 
   // Derived display values
@@ -219,7 +208,12 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
                   min: 85,
                   max: 100,
                   step: 0.01,
-                  onChange: setAccuracy,
+                  onChange: (value: number) =>
+                    setPlayerInputOverrides({
+                      playerId: player.id,
+                      accuracy: value,
+                      stars,
+                    }),
                 },
                 {
                   id: "stars-slider",
@@ -229,7 +223,12 @@ export default function PlusPpCalculator({ player }: { player: ScoreSaberPlayer 
                   min: 0,
                   max: SHARED_CONSTS.maxStars,
                   step: 0.1,
-                  onChange: setStars,
+                  onChange: (value: number) =>
+                    setPlayerInputOverrides({
+                      playerId: player.id,
+                      accuracy,
+                      stars: value,
+                    }),
                 },
               ] as const
             ).map(({ id, label, value, display, min, max, step, onChange }) => (
