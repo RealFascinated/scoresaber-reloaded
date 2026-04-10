@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, ilike, isNotNull, ne, sql } from "drizzle-orm";
+import { and, asc, count, eq, gte, ilike, isNotNull, sql } from "drizzle-orm";
 import { db } from "../db";
 import { scoreSaberAccountsTable, type ScoreSaberAccountRow } from "../db/schema";
 import { TableCountsRepository } from "./table-counts.repository";
@@ -39,24 +39,6 @@ export class ScoreSaberAccountsRepository {
       .where(ilike(scoreSaberAccountsTable.name, pattern))
       .orderBy(asc(scoreSaberAccountsTable.name))
       .limit(limit);
-  }
-
-  public static async selectCountryCountsActivePlayers(): Promise<{ country: string | null; c: number }[]> {
-    return db
-      .select({
-        country: scoreSaberAccountsTable.country,
-        c: count(),
-      })
-      .from(scoreSaberAccountsTable)
-      .where(
-        and(
-          eq(scoreSaberAccountsTable.inactive, false),
-          isNotNull(scoreSaberAccountsTable.country),
-          ne(scoreSaberAccountsTable.country, "")
-        )
-      )
-      .groupBy(scoreSaberAccountsTable.country)
-      .orderBy(desc(count()));
   }
 
   public static async selectHmdCountsActiveAccounts(): Promise<{ hmd: string | null; c: number }[]> {

@@ -5,45 +5,53 @@ import { pluralize } from "@ssr/common/utils/string.util";
 import Combobox from "./ui/combo-box";
 import CountryFlag from "./ui/country-flag";
 
-type CountryCountsComboboxProps = {
-  counts: Record<string, number>;
+type CountrySelectorProps = {
   value?: string;
   onValueChange: (value: string | undefined) => void;
   className?: string;
   clearable?: boolean;
   placeholder?: string;
   prioritizeCountry?: string;
+  counts?: Record<string, number>;
   countNoun?: string;
 };
 
-export default function CountryCountsCombobox({
-  counts,
+export default function CountrySelector({
   value,
   onValueChange,
   className,
   clearable,
   placeholder,
   prioritizeCountry,
+  counts,
   countNoun = "player",
-}: CountryCountsComboboxProps) {
+}: CountrySelectorProps) {
+  const hasCounts = counts != undefined;
+
   return (
     <Combobox<string | undefined>
       className={className}
       clearable={clearable}
-      items={Object.entries(counts)
-        .map(([key, count]) => ({
-          value: key,
-          name: (
-            <div className="flex w-full min-w-0 items-center justify-between">
-              <span className="truncate">{countryFilter.find(c => c.key === key)?.friendlyName ?? key}</span>
-              <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
-                {count.toLocaleString()} {pluralize(count, countNoun)}
-              </span>
-            </div>
-          ),
-          displayName: countryFilter.find(c => c.key === key)?.friendlyName ?? key,
-          icon: <CountryFlag code={key} size={12} />,
-        }))
+      items={countryFilter
+        .map(country => {
+          const count = counts?.[country.key];
+
+          return {
+            value: country.key,
+            name: (
+              <div className="flex w-full min-w-0 items-center justify-between">
+                <span className="truncate">{country.friendlyName}</span>
+                {hasCounts && count != undefined && (
+                  <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
+                    {count.toLocaleString()} {pluralize(count, countNoun)}
+                  </span>
+                )}
+              </div>
+            ),
+            displayName: country.friendlyName,
+            icon: <CountryFlag code={country.key} size={12} />,
+          };
+        })
         .sort((a, b) => {
           if (prioritizeCountry && a.value === prioritizeCountry) {
             return -1;

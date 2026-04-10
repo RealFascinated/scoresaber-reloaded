@@ -12,7 +12,6 @@ import LeaderboardScoresResponse from "../schemas/response/leaderboard/leaderboa
 import { LeaderboardsPageResponse } from "../schemas/response/leaderboard/leaderboards-page";
 import { PlaysByHmdResponse } from "../schemas/response/leaderboard/plays-by-hmd";
 import { RankingQueueLeaderboardsResponse } from "../schemas/response/leaderboard/ranking-queue-leaderboards";
-import { CountryCounts } from "../schemas/response/country-counts";
 import { MiniRankingResponse } from "../schemas/response/player/around-player";
 import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
 import { PlayerRankingsResponse } from "../schemas/response/player/player-rankings";
@@ -334,10 +333,6 @@ class SSRApi {
     });
   }
 
-  async getLeaderboardCountryCounts(leaderboardId: string) {
-    return await this.request<CountryCounts>(`/scores/leaderboard/${leaderboardId}/country-counts`);
-  }
-
   /**
    * Fetches the player's statistic history.
    *
@@ -402,10 +397,6 @@ class SSRApi {
     });
   }
 
-  async getPlayerRankingCountryCounts() {
-    return await this.request<CountryCounts>(`/ranking/country-counts`);
-  }
-
   /**
    * Gets the medal ranked players.
    *
@@ -417,10 +408,6 @@ class SSRApi {
     return await this.request<PlayerMedalRankingsResponse>(`/ranking/medals/${page}`, {
       ...(country ? { country: country } : {}),
     });
-  }
-
-  async getMedalRankingCountryCounts() {
-    return await this.request<CountryCounts>(`/ranking/medals/country-counts`);
   }
 
   /**

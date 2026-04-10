@@ -2,7 +2,7 @@
 
 import { getRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
-import CountryCountsCombobox from "@/components/country-counts-combobox";
+import CountrySelector from "@/components/country-selector";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
@@ -40,12 +40,6 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     refetchIntervalInBackground: false,
     placeholderData: prev => prev,
   });
-  const { data: countryCountsData } = useQuery({
-    queryKey: ["medalRankingCountryCounts"],
-    queryFn: async () => ssrApi.getMedalRankingCountryCounts(),
-    staleTime: 1000 * 60 * 5,
-  });
-
   useEffect(() => {
     navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
   }, [currentPage, currentCountry, navigation]);
@@ -133,9 +127,8 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         >
           <FilterField label="Country">
             <FilterRow>
-              <CountryCountsCombobox
+              <CountrySelector
                 className="h-10 w-full"
-                counts={countryCountsData ?? {}}
                 value={currentCountry}
                 onValueChange={(newCountry: string | undefined) => {
                   setCurrentCountry(newCountry);

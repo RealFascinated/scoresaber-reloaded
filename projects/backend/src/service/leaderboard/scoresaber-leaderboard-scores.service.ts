@@ -1,13 +1,9 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { CountryCounts } from "@ssr/common/schemas/response/country-counts";
 import LeaderboardScoresResponse from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import BeatSaverService from "../external/beatsaver.service";
-import CacheService, { CacheId } from "../infra/cache.service";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
-import { leaderboardCountryCountsCacheKey } from "../../common/cache-keys";
-import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreCoreService } from "../score/score-core.service";
 import { ScoreSaberLeaderboardsService } from "./scoresaber-leaderboards.service";
 
@@ -73,16 +69,5 @@ export class ScoreSaberLeaderboardScoresService {
         itemsPerPage: leaderboardScores.metadata.itemsPerPage,
       },
     };
-  }
-
-  public static async getLeaderboardCountryCounts(leaderboardId: number): Promise<CountryCounts> {
-    return CacheService.fetch<CountryCounts>(
-      CacheId.SCORESABER_LEADERBOARD_COUNTRY_COUNTS,
-      leaderboardCountryCountsCacheKey(leaderboardId),
-      async () => {
-        const rows = await ScoreSaberScoresRepository.selectCountryCountsByLeaderboard(leaderboardId);
-        return Object.fromEntries(rows.filter(row => row.country).map(row => [row.country!, row.c]));
-      }
-    );
   }
 }

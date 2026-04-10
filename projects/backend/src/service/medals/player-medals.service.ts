@@ -1,16 +1,13 @@
 import { Pagination } from "@ssr/common/pagination";
 import type { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
-import { CountryCounts } from "@ssr/common/schemas/response/country-counts";
 import {
   MedalRankingPlayer,
   PlayerMedalRankingsResponse,
 } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { chunkArray } from "@ssr/common/utils/utils";
-import { medalRankingCountryCountsCacheKey } from "../../common/cache-keys";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
-import CacheService, { CacheId } from "../infra/cache.service";
 
 const RANKED_MEDAL_RECOMPUTE_CONCURRENCY = 8;
 
@@ -130,16 +127,5 @@ export class PlayerMedalsService {
     });
 
     return pageData;
-  }
-
-  public static async getMedalRankingCountryCounts(): Promise<CountryCounts> {
-    return CacheService.fetch<CountryCounts>(
-      CacheId.SCORESABER_MEDAL_RANKING_COUNTRY_COUNTS,
-      medalRankingCountryCountsCacheKey(),
-      async () => {
-        const countryMetadataRows = await ScoreSaberMedalsRepository.selectMedalRankingCountryMetadata();
-        return Object.fromEntries(countryMetadataRows.filter(r => r.country).map(r => [r.country!, r.count]));
-      }
-    );
   }
 }

@@ -22,18 +22,6 @@ export function cachedPlayerTokenCacheKey(id: string): string {
   return `scoresaber:cached-player:${id}`;
 }
 
-export function playerRankingCountryCountsCacheKey(): string {
-  return "scoresaber:player-ranking:country-counts";
-}
-
-export function medalRankingCountryCountsCacheKey(): string {
-  return "scoresaber:medal-ranking:country-counts";
-}
-
-export function leaderboardCountryCountsCacheKey(leaderboardId: number): string {
-  return `scoresaber:leaderboard:${leaderboardId}:country-counts`;
-}
-
 export function scoreSaberApiResponseCacheKey(cacheHash: string): string {
   return `scoresaber:api-cache:${cacheHash}`;
 }

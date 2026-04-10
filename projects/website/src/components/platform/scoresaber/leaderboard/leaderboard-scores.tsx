@@ -1,6 +1,6 @@
 "use client";
 
-import CountryCountsCombobox from "@/components/country-counts-combobox";
+import CountrySelector from "@/components/country-selector";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import ScoreModeSwitcher, { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { Spinner } from "@/components/spinner";
@@ -11,8 +11,6 @@ import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { useQuery } from "@tanstack/react-query";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
 import Card from "../../../card";
@@ -45,12 +43,6 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
     parseAsStringLiteral<ScoreModeEnum>(Object.values(ScoreModeEnum)).withDefault(ScoreModeEnum.Global)
   );
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const { data: countryCountsData } = useQuery({
-    queryKey: ["leaderboardCountryCounts", leaderboard.id],
-    queryFn: () => ssrApi.getLeaderboardCountryCounts(leaderboard.id.toString()),
-    staleTime: 1000 * 60 * 10,
-  });
-
   const {
     data: scores,
     isError,
@@ -120,11 +112,9 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
           </div>
           <div className="flex w-full min-w-0 justify-center sm:flex-1 sm:justify-end">
             {/* Country Filter */}
-            <CountryCountsCombobox
+            <CountrySelector
               className="w-full max-w-72"
               clearable
-              counts={countryCountsData ?? {}}
-              countNoun="score"
               prioritizeCountry={mainPlayer?.country}
               value={filter.country}
               onValueChange={newCountry => {

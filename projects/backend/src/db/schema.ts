@@ -157,7 +157,6 @@ export const scoreSaberScoresTable = pgTable(
     index("scores_player_leaderboard_idx").on(table.playerId, table.leaderboardId),
     index("scores_player_pp_desc_idx").on(table.playerId, table.pp.desc(), table.scoreId.desc()),
     index("scores_leaderboard_id_idx").on(table.leaderboardId),
-    index("scores_leaderboard_player_idx").on(table.leaderboardId, table.playerId),
     index("scores_leaderboard_score_scoreid_desc_idx").on(
       table.leaderboardId,
       table.score.desc(),

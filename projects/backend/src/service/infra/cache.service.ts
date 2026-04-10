@@ -14,9 +14,6 @@ export enum CacheId {
   SCORESABER_API_RESPONSE = "scoresaber_api_response",
   SCORESABER_LEADERBOARD_STAR_CHANGE = "scoresaber_leaderboard_star_change",
   SCORESABER_RANKING_QUEUE_LEADERBOARDS = "scoresaber_ranking_queue_leaderboards",
-  SCORESABER_PLAYER_RANKING_COUNTRY_COUNTS = "scoresaber_player_ranking_country_counts",
-  SCORESABER_MEDAL_RANKING_COUNTRY_COUNTS = "scoresaber_medal_ranking_country_counts",
-  SCORESABER_LEADERBOARD_COUNTRY_COUNTS = "scoresaber_leaderboard_country_counts",
   BEATLEADER_SCORE = "beatleader_score",
   SCORESABER_SCORE_HISTORY_GRAPH = "scoresaber_score_history_graph",
 }
@@ -52,18 +49,6 @@ export default class CacheService {
     },
     [CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_PLAYER_RANKING_COUNTRY_COUNTS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Day, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_MEDAL_RANKING_COUNTRY_COUNTS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Day, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_LEADERBOARD_COUNTRY_COUNTS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 6),
       mode: "MEMORY",
     },
 

@@ -1,11 +1,8 @@
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { CountryCounts } from "@ssr/common/schemas/response/country-counts";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
-import { playerRankingCountryCountsCacheKey } from "../../common/cache-keys";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
-import CacheService, { CacheId } from "../infra/cache.service";
 import ScoreSaberPlayerService from "./scoresaber-player.service";
 
 export class PlayerSearchService {
@@ -101,24 +98,5 @@ export class PlayerSearchService {
         itemsPerPage: foundPlayers?.metadata.itemsPerPage ?? 0,
       },
     };
-  }
-
-  public static async getPlayerCountryCounts(): Promise<CountryCounts> {
-    return CacheService.fetch<CountryCounts>(
-      CacheId.SCORESABER_PLAYER_RANKING_COUNTRY_COUNTS,
-      playerRankingCountryCountsCacheKey(),
-      async () => {
-        const rows = await ScoreSaberAccountsRepository.selectCountryCountsActivePlayers();
-        return rows.reduce(
-          (acc, curr) => {
-            if (curr.country) {
-              acc[curr.country] = curr.c;
-            }
-            return acc;
-          },
-          {} as CountryCounts
-        );
-      }
-    );
   }
 }

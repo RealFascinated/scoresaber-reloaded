@@ -1,0 +1,1 @@
+DROP INDEX "scores_leaderboard_player_idx";
