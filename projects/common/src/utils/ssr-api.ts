@@ -4,6 +4,7 @@ import { env } from "../env";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import type { AccSaberScoreSort, AccSaberScoreType } from "../schemas/accsaber/tokens/query/query";
 import { BeatSaverMap } from "../schemas/beatsaver/map/map";
+import { LeaderboardStarChange } from "../schemas/leaderboard/leaderboard-star-change";
 import { MapCharacteristic } from "../schemas/map/map-characteristic";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
@@ -101,6 +102,15 @@ class SSRApi {
     return await this.request<LeaderboardResponse>(
       `/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`
     );
+  }
+
+  /**
+   * Fetches star rating change history for a leaderboard (by id).
+   *
+   * @param leaderboardId the ScoreSaber leaderboard id
+   */
+  async getLeaderboardStarHistory(leaderboardId: number) {
+    return await this.request<LeaderboardStarChange[]>(`/leaderboard/by-id/${leaderboardId}/star-history`);
   }
 
   /**

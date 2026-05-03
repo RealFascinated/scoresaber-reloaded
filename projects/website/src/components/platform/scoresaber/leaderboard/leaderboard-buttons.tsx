@@ -14,7 +14,7 @@ import { LeaderboardStarChangeHistory } from "./leaderboard-star-change-history"
 
 type Props = {
   leaderboard: ScoreSaberLeaderboard;
-  starChangeHistory: LeaderboardStarChange[] | undefined;
+  starChangeHistory: LeaderboardStarChange[];
   beatSaverMap?: BeatSaverMap;
 };
 
@@ -69,7 +69,7 @@ const buttons = [
   },
   {
     render: ({ leaderboard, starChangeHistory }: Props) => {
-      if (!leaderboard.ranked || !starChangeHistory) {
+      if (!leaderboard.ranked || starChangeHistory.length === 0) {
         return null;
       }
       return (

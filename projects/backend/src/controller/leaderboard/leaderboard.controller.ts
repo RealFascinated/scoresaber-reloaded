@@ -42,18 +42,31 @@ export default function leaderboardController(app: Elysia) {
         }
       )
       .get(
+        "/by-id/:leaderboardId/star-history",
+        async ({ params: { leaderboardId } }) => {
+          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
+          return await ScoreSaberLeaderboardsService.getStarChangeHistory(leaderboard);
+        },
+        {
+          tags: ["Leaderboard"],
+          params: z.object({
+            leaderboardId: z.coerce.number(),
+          }),
+          detail: {
+            description: "Fetch leaderboard star rating change history",
+          },
+        }
+      )
+      .get(
         "/by-id/:leaderboardId",
         async ({ params: { leaderboardId } }) => {
           const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
-          const [beatsaver, starChangeHistory] = await Promise.all([
-            BeatSaverService.getMap(
-              leaderboard.songHash,
-              leaderboard.difficulty.difficulty,
-              leaderboard.difficulty.characteristic
-            ),
-            ScoreSaberLeaderboardsService.getStarChangeHistory(leaderboard),
-          ]);
-          return { leaderboard, beatsaver, starChangeHistory } as LeaderboardResponse;
+          const beatsaver = await BeatSaverService.getMap(
+            leaderboard.songHash,
+            leaderboard.difficulty.difficulty,
+            leaderboard.difficulty.characteristic
+          );
+          return { leaderboard, beatsaver } as LeaderboardResponse;
         },
         {
           tags: ["Leaderboard"],
@@ -68,20 +81,11 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/by-hash/:hash/:difficulty/:characteristic",
         async ({ params: { hash, difficulty, characteristic } }) => {
-          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboardByHash(
-            hash,
-            difficulty,
-            characteristic
-          );
-          const [beatsaver, starChangeHistory] = await Promise.all([
-            BeatSaverService.getMap(
-              leaderboard.songHash,
-              leaderboard.difficulty.difficulty,
-              leaderboard.difficulty.characteristic
-            ),
-            ScoreSaberLeaderboardsService.getStarChangeHistory(leaderboard),
+          const [leaderboard, beatsaver] = await Promise.all([
+            ScoreSaberLeaderboardsService.getLeaderboardByHash(hash, difficulty, characteristic),
+            BeatSaverService.getMap(hash, difficulty, characteristic),
           ]);
-          return { leaderboard, beatsaver, starChangeHistory } as LeaderboardResponse;
+          return { leaderboard, beatsaver } as LeaderboardResponse;
         },
         {
           tags: ["Leaderboard"],
