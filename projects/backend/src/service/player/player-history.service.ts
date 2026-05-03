@@ -179,7 +179,6 @@ export class PlayerHistoryService {
     await PlayerHistoryRepository.upsertByPlayerAndDate(
       player.id,
       date,
-      existingEntry,
       PlayerHistoryService.createHistoryEntry(statistics, existingEntry ?? undefined)
     );
 
