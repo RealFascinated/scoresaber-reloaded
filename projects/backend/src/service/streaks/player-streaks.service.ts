@@ -9,6 +9,16 @@ import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-acco
 export class PlayerPlayedStreakService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player Streak");
 
+  private static readonly expireBrokenStreaksMaxAttempts = 4;
+
+  private static isPgDeadlock(e: unknown): boolean {
+    return typeof e === "object" && e !== null && "code" in e && (e as { code: unknown }).code === "40P01";
+  }
+
+  private static delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   /**
    * Handles the score and updates the player's streak.
    *
@@ -43,18 +53,34 @@ export class PlayerPlayedStreakService {
 
   /**
    * Expires broken streaks.
+   *
+   * Retries on deadlock: the bulk UPDATE can overlap concurrent row updates on this table (e.g. streak bumps from score ingestion).
    */
   public static async expireBrokenStreaks(): Promise<void> {
-    const before = performance.now();
-    const result = await db.execute(sql`
-      UPDATE "scoresaber-accounts"
-      SET "currentStreak" = 0
-      WHERE "currentStreak" > 0
-        AND "lastPlayedDate" IS NOT NULL
-        AND "lastPlayedDate" < (CURRENT_DATE - INTERVAL '1 day')::date
-    `);
-    PlayerPlayedStreakService.logger.info(
-      `Expired ${result.rowCount} broken streaks in ${formatDuration(performance.now() - before)}`
-    );
+    for (let attempt = 1; attempt <= PlayerPlayedStreakService.expireBrokenStreaksMaxAttempts; attempt++) {
+      try {
+        const before = performance.now();
+        const result = await db.execute(sql`
+          UPDATE "scoresaber-accounts"
+          SET "currentStreak" = 0
+          WHERE "currentStreak" > 0
+            AND "lastPlayedDate" IS NOT NULL
+            AND "lastPlayedDate" < (CURRENT_DATE - INTERVAL '1 day')::date
+        `);
+        PlayerPlayedStreakService.logger.info(
+          `Expired ${result.rowCount} broken streaks in ${formatDuration(performance.now() - before)}`
+        );
+        return;
+      } catch (e: unknown) {
+        if (
+          attempt < PlayerPlayedStreakService.expireBrokenStreaksMaxAttempts &&
+          PlayerPlayedStreakService.isPgDeadlock(e)
+        ) {
+          await PlayerPlayedStreakService.delay(50 * 2 ** (attempt - 1));
+          continue;
+        }
+        throw e;
+      }
+    }
   }
 }
