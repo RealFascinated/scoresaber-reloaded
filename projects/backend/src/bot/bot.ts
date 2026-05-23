@@ -15,6 +15,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { ScoreSaberScoresRepository } from "../repositories/scoresaber-scores.repository";
 import "./command/fetch-missing-player-scores";
+import "./command/fetch-missing-song-art";
 import "./command/force-track-player-statistics";
 import "./command/refresh-medal-scores";
 import "./command/refresh-ranked-leaderboards";
