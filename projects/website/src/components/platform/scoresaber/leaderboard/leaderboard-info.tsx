@@ -3,6 +3,7 @@
 import Card from "@/components/card";
 import FallbackLink from "@/components/fallback-link";
 import LeaderboardButtons from "@/components/platform/scoresaber/leaderboard/leaderboard-buttons";
+import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
@@ -13,10 +14,11 @@ import StatValue from "../../../statistic/stat-value";
 
 type LeaderboardInfoProps = {
   leaderboard: LeaderboardResponse;
+  starChangeHistory: LeaderboardStarChange[];
 };
 
-export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
-  const { leaderboard: leaderboardData, beatsaver, starChangeHistory } = leaderboard;
+export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardInfoProps) {
+  const { leaderboard: leaderboardData, beatsaver } = leaderboard;
 
   const accentColor = getDifficulty(leaderboardData.difficulty.difficulty).color;
 

@@ -22,7 +22,13 @@ export class BeatSaverWebsocket {
 
       await BeatSaverService.saveMap(map);
 
-      await CacheService.invalidate(beatSaverMapCacheKey(mapHash)); // Invalidate the cache for the map
+      const cacheKeys = new Set<string>();
+      for (const version of map.versions) {
+        for (const diff of version.diffs) {
+          cacheKeys.add(beatSaverMapCacheKey(version.hash, diff.difficulty, diff.characteristic));
+        }
+      }
+      await Promise.all([...cacheKeys].map(key => CacheService.invalidate(key)));
       BeatSaverWebsocket.logger.info(`BeatSaver map ${mapHash} updated`);
 
       await sendEmbedToChannel(

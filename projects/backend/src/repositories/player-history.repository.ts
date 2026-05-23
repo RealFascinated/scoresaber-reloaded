@@ -24,17 +24,39 @@ export class PlayerHistoryRepository {
   public static async upsertByPlayerAndDate(
     playerId: string,
     date: Date,
-    existingEntry: PlayerHistoryRow | undefined,
     data: ScoreSaberPlayerHistory
   ): Promise<void> {
-    if (existingEntry) {
-      await db
-        .update(playerHistoryTable)
-        .set(data)
-        .where(and(eq(playerHistoryTable.playerId, playerId), eq(playerHistoryTable.date, date)));
-    } else {
-      await db.insert(playerHistoryTable).values({ playerId, date, ...data });
-    }
+    await db
+      .insert(playerHistoryTable)
+      .values({ playerId, date, ...data })
+      .onConflictDoUpdate({
+        target: [playerHistoryTable.playerId, playerHistoryTable.date],
+        set: {
+          rank: sql`excluded."rank"`,
+          countryRank: sql`excluded."countryRank"`,
+          medals: sql`excluded."medals"`,
+          pp: sql`excluded."pp"`,
+          plusOnePp: sql`excluded."plusOnePp"`,
+          totalScore: sql`excluded."totalScore"`,
+          totalRankedScore: sql`excluded."totalRankedScore"`,
+          rankedScores: sql`excluded."rankedScores"`,
+          unrankedScores: sql`excluded."unrankedScores"`,
+          rankedScoresImproved: sql`excluded."rankedScoresImproved"`,
+          unrankedScoresImproved: sql`excluded."unrankedScoresImproved"`,
+          totalRankedScores: sql`excluded."totalRankedScores"`,
+          totalUnrankedScores: sql`excluded."totalUnrankedScores"`,
+          totalScores: sql`excluded."totalScores"`,
+          averageRankedAccuracy: sql`excluded."averageRankedAccuracy"`,
+          averageUnrankedAccuracy: sql`excluded."averageUnrankedAccuracy"`,
+          averageAccuracy: sql`excluded."averageAccuracy"`,
+          aPlays: sql`excluded."aPlays"`,
+          sPlays: sql`excluded."sPlays"`,
+          spPlays: sql`excluded."spPlays"`,
+          ssPlays: sql`excluded."ssPlays"`,
+          sspPlays: sql`excluded."sspPlays"`,
+          godPlays: sql`excluded."godPlays"`,
+        },
+      });
   }
 
   public static async getByPlayerOrderedByDateDesc(
