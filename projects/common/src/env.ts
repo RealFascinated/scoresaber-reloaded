@@ -4,7 +4,6 @@ import { z } from "zod";
 export const env = createEnv({
   server: {
     // Databases
-    MONGO_CONNECTION_STRING: z.string(),
     DATABASE_URL: z.string(),
     REDIS_URL: z.string(),
 
@@ -59,9 +58,6 @@ export const env = createEnv({
 
     // PostgreSQL
     DATABASE_URL: process.env.DATABASE_URL,
-
-    // Mongo
-    MONGO_CONNECTION_STRING: process.env.MONGO_CONNECTION_STRING,
 
     // Redis
     REDIS_URL: process.env.REDIS_URL,

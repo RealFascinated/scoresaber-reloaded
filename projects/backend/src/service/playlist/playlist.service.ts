@@ -477,7 +477,7 @@ export default class PlaylistService {
   }
 
   /**
-   * Loads ScoreSaber scores for a player with leaderboard rows from Postgres (replaces legacy Mongo aggregate + $lookup).
+   * Loads ScoreSaber scores for a player with leaderboard rows
    */
   private static async fetchPlayerScoreSaberScoresWithLeaderboards(
     playerId: string,

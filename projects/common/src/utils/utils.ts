@@ -106,29 +106,6 @@ export function getQueryParamsFromObject(params: Record<string, string>) {
 }
 
 /**
- * Converts a MongoDB ObjectId or similar object to a string or number.
- * Handles ObjectId instances by converting them to strings, and converts to number if the string is numeric.
- *
- * @param id the id to convert (can be ObjectId, string, number, or undefined)
- * @returns the converted id as a string or number, or undefined if id is undefined
- */
-export function convertObjectId(id: unknown): string | number | undefined {
-  if (id === undefined || id === null) {
-    return undefined;
-  }
-  if (typeof id === "string" || typeof id === "number") {
-    return id;
-  }
-  if (typeof id === "object" && "toString" in id) {
-    const idObj = id as { toString(): string };
-    const idStr = idObj.toString();
-    // Try to convert to number if it's numeric, otherwise use string
-    return /^\d+$/.test(idStr) ? Number(idStr) : idStr;
-  }
-  return String(id);
-}
-
-/**
  * Chunks an array into smaller arrays.
  *
  * @param array the array to chunk
