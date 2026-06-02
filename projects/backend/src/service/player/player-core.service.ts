@@ -6,7 +6,6 @@ import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
-import { ScoreSaberPlayerScoreStats } from "@ssr/common/schemas/scoresaber/player/score-stats";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
 import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
@@ -338,42 +337,5 @@ export class PlayerCoreService {
 
       PlayerCoreService.logger.warn(`Failed to cache profile picture for player ${playerId}`);
     }
-  }
-
-  /**
-   * Gets the player's score stats.
-   *
-   * @param playerId the player's id
-   * @returns the player's score stats
-   */
-  public static async getPlayerScoreStats(playerId: string): Promise<ScoreSaberPlayerScoreStats> {
-    const scores = await ScoreSaberScoresRepository.getRankedRowsByPlayerId(playerId);
-
-    const scoreStats: ScoreSaberPlayerScoreStats = {
-      aPlays: 0,
-      sPlays: 0,
-      spPlays: 0,
-      ssPlays: 0,
-      sspPlays: 0,
-      godPlays: 0,
-    };
-
-    for (const playerScore of scores) {
-      const accuracy = playerScore.accuracy;
-      if (accuracy >= 98) {
-        scoreStats.godPlays++;
-      } else if (accuracy >= 95) {
-        scoreStats.sspPlays++;
-      } else if (accuracy >= 90) {
-        scoreStats.ssPlays++;
-      } else if (accuracy >= 85) {
-        scoreStats.spPlays++;
-      } else if (accuracy >= 80) {
-        scoreStats.sPlays++;
-      } else if (accuracy >= 70) {
-        scoreStats.aPlays++;
-      }
-    }
-    return scoreStats;
   }
 }

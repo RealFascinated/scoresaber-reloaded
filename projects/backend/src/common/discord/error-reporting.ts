@@ -38,18 +38,45 @@ function truncate(text: string, max: number): string {
   return `${text.slice(0, max - 20)}\n\n… (truncated)`;
 }
 
+function formatPgCause(error: unknown): string | undefined {
+  if (!(error instanceof Error) || !("cause" in error)) {
+    return undefined;
+  }
+
+  const cause = error.cause;
+  if (typeof cause !== "object" || cause === null) {
+    return undefined;
+  }
+
+  const record = cause as { code?: unknown; detail?: unknown; hint?: unknown };
+  const parts: string[] = [];
+  if (typeof record.code === "string") {
+    parts.push(`code: ${record.code}`);
+  }
+  if (typeof record.detail === "string") {
+    parts.push(`detail: ${record.detail}`);
+  }
+  if (typeof record.hint === "string") {
+    parts.push(`hint: ${record.hint}`);
+  }
+
+  return parts.length > 0 ? parts.join("\n") : undefined;
+}
+
 export function formatErrorForDiscord(error: unknown): string {
+  const pgCause = formatPgCause(error);
+
   if (error instanceof Error) {
-    return error.stack ?? `${error.name}: ${error.message}`;
+    const base = error.stack ?? `${error.name}: ${error.message}`;
+    return pgCause ? `${base}\n\nPostgreSQL:\n${pgCause}` : base;
   }
 
   if (typeof error === "object" && error !== null) {
     const record = error as { message?: unknown; stack?: unknown };
     if (typeof record.message === "string") {
-      if (typeof record.stack === "string") {
-        return record.stack;
-      }
-      return record.message;
+      const base =
+        typeof record.stack === "string" ? record.stack : record.message;
+      return pgCause ? `${base}\n\nPostgreSQL:\n${pgCause}` : base;
     }
 
     try {

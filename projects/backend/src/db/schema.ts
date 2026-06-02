@@ -55,6 +55,19 @@ export const scoreSaberAccountsTable = pgTable(
   table => [
     index("accounts_name_trgm_idx").using("gin", sql`${table.name} gin_trgm_ops`),
     index("accounts_medals_idx").on(table.medals.desc()),
+    index("accounts_medal_ranking_idx")
+      .on(table.medals.desc(), table.id.asc())
+      .where(
+        sql`${table.medals} > 0 AND ${table.banned} = false AND ${table.country} IS NOT NULL AND ${table.country} <> ''`
+      ),
+    index("accounts_medal_ranking_country_idx")
+      .on(table.country, table.medals.desc(), table.id.asc())
+      .where(
+        sql`${table.medals} > 0 AND ${table.banned} = false AND ${table.country} IS NOT NULL AND ${table.country} <> ''`
+      ),
+    index("accounts_stale_medals_rank_idx")
+      .on(table.id)
+      .where(sql`${table.medalsRank} <> 0 OR ${table.medalsCountryRank} <> 0`),
     index("accounts_active_hmd_idx")
       .on(table.hmd)
       .where(sql`${table.inactive} = false`),

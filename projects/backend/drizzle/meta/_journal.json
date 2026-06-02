@@ -281,6 +281,13 @@
       "when": 1775833343688,
       "tag": "0039_scores_player_leaderboard_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1775833343689,
+      "tag": "0040_medal_rank_refresh_indexes",
+      "breakpoints": true
     }
   ]
 }

@@ -118,7 +118,12 @@ export const app = new Elysia()
       timezone: "UTC",
       protect: true,
       run: async () => {
-        await ScoreSaberMedalsRepository.refreshMaterializedMedalRanks();
+        try {
+          await ScoreSaberMedalsRepository.refreshMaterializedMedalRanks();
+        } catch (error) {
+          log.error("refresh-medal-scores cron failed:", error);
+          reportErrorToDiscord("Cron: refresh-medal-scores", error);
+        }
       },
     })
   )

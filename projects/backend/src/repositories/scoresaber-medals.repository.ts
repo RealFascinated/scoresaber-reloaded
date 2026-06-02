@@ -215,24 +215,32 @@ export class ScoreSaberMedalsRepository {
   public static async refreshMaterializedMedalRanks(): Promise<void> {
     await db.transaction(async tx => {
       await tx.execute(sql`
-        UPDATE "scoresaber-accounts"
-        SET "medalsRank" = 0, "medalsCountryRank" = 0
-        WHERE "medalsRank" != 0 OR "medalsCountryRank" != 0
-      `);
-      await tx.execute(sql`
-        UPDATE "scoresaber-accounts" AS a
-        SET
-          "medalsRank" = r.global_rank,
-          "medalsCountryRank" = r.country_rank
-        FROM (
+        WITH ranked AS (
           SELECT
             id,
             ROW_NUMBER() OVER (ORDER BY medals DESC, id ASC)::int AS global_rank,
             ROW_NUMBER() OVER (PARTITION BY country ORDER BY medals DESC, id ASC)::int AS country_rank
           FROM "scoresaber-accounts"
           WHERE medals > 0 AND country IS NOT NULL AND country != '' AND banned = false
-        ) AS r
+        )
+        UPDATE "scoresaber-accounts" AS a
+        SET
+          "medalsRank" = r.global_rank,
+          "medalsCountryRank" = r.country_rank
+        FROM ranked AS r
         WHERE a.id = r.id
+      `);
+
+      await tx.execute(sql`
+        UPDATE "scoresaber-accounts"
+        SET "medalsRank" = 0, "medalsCountryRank" = 0
+        WHERE ("medalsRank" != 0 OR "medalsCountryRank" != 0)
+          AND NOT (
+            medals > 0
+            AND country IS NOT NULL
+            AND country != ''
+            AND banned = false
+          )
       `);
     });
   }
