@@ -61,14 +61,14 @@ const playerStats: Stat[] = [
       };
     },
   },
-  {
-    name: "Replays Watched by Others",
-    create: (player: ScoreSaberPlayer) => {
-      return {
-        value: <>{formatNumberWithCommas(player.statistics.replaysWatched)}</>,
-      };
-    },
-  },
+  // {
+  //   name: "Replays Watched by Others",
+  //   create: (player: ScoreSaberPlayer) => {
+  //     return {
+  //       value: <>{formatNumberWithCommas(player.statistics.replaysWatched)}</>,
+  //     };
+  //   },
+  // },
   {
     name: "Joined Date",
     create: (player: ScoreSaberPlayer) => {
