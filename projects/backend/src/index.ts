@@ -14,6 +14,7 @@ import { Elysia, ValidationError } from "elysia";
 import { helmet } from "elysia-helmet";
 import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
+import { registerGlobalErrorHandlers, reportErrorToDiscord } from "./common/discord/error-reporting";
 import { getAppVersion } from "./common/app.util";
 import AppController from "./controller/app/app.controller";
 import BeatLeaderController from "./controller/beatleader/beatleader.controller";
@@ -45,6 +46,8 @@ import { WebsocketManager } from "./websocket/websocket-manager";
 
 const log = Logger.withTopic("SSR Backend");
 
+registerGlobalErrorHandlers();
+
 log.info("Starting SSR Backend...");
 
 try {
@@ -53,6 +56,7 @@ try {
   log.info("Completed database migrations.");
 } catch (error) {
   log.error("Database migration failed:", error);
+  reportErrorToDiscord("Database migration failed", error);
   process.exit(1);
 }
 
@@ -179,7 +183,7 @@ export const app = new Elysia()
     })
   )
   .onRequest(httpMetricsHooks.onRequest)
-  .onError({ as: "global" }, ({ code, error }) => {
+  .onError({ as: "global" }, ({ code, error, request, path, route }) => {
     // Return default error for type validation. JSON round-trip drops Elysia class instances (e.g. RequestParams in `value`) so mapResponse's devalue can serialize.
     if (code === "VALIDATION") {
       return JSON.parse(JSON.stringify((error as ValidationError).all));
@@ -214,6 +218,11 @@ export const app = new Elysia()
 
     if (status === 500) {
       log.error("Internal server error:", error);
+      reportErrorToDiscord(
+        "HTTP 500",
+        error,
+        `${request.method} ${path}\nRoute: ${route}\nCode: ${code}`
+      );
     }
 
     const errorMessage =
@@ -403,6 +412,7 @@ const gracefulShutdown = async (signal: string) => {
     process.exit(0);
   } catch (error) {
     log.error("Error during shutdown:", error);
+    reportErrorToDiscord("Shutdown error", error);
     clearTimeout(forceExit);
     process.exit(1);
   }
