@@ -10,30 +10,7 @@ import {
 } from "../db/schema";
 import { TableCountsRepository } from "./table-counts.repository";
 
-export type ScoreSaberScoreUpsertRow = typeof scoreSaberScoresTable.$inferInsert;
-
-export const scoresaberScoresBulkUpsertSet = {
-  playerId: sql`excluded."playerId"`,
-  leaderboardId: sql`excluded."leaderboardId"`,
-  difficulty: sql`excluded."difficulty"`,
-  characteristic: sql`excluded."characteristic"`,
-  score: sql`excluded."score"`,
-  accuracy: sql`excluded."accuracy"`,
-  pp: sql`excluded."pp"`,
-  missedNotes: sql`excluded."missedNotes"`,
-  badCuts: sql`excluded."badCuts"`,
-  maxCombo: sql`excluded."maxCombo"`,
-  fullCombo: sql`excluded."fullCombo"`,
-  modifiers: sql`excluded."modifiers"`,
-  hmd: sql`excluded."hmd"`,
-  rightController: sql`excluded."rightController"`,
-  leftController: sql`excluded."leftController"`,
-  timestamp: sql`excluded."timestamp"`,
-  /** Preserved until the periodic medal recompute job runs. */
-  medals: sql`"scoresaber-scores".medals`,
-} as const;
-
-const scoresaberScoresUpsertOnConflictSet = scoresaberScoresBulkUpsertSet;
+export type ScoreSaberScoreInsertRow = typeof scoreSaberScoresTable.$inferInsert;
 
 export class ScoreSaberScoresRepository {
   public static async deleteByScoreId(scoreId: number): Promise<void> {
@@ -80,7 +57,7 @@ export class ScoreSaberScoresRepository {
     playerId: string,
     leaderboardId: number
   ): Promise<ScoreSaberScoreRow | undefined> {
-    const rows = await db
+    const [row] = await db
       .select()
       .from(scoreSaberScoresTable)
       .where(
@@ -89,25 +66,18 @@ export class ScoreSaberScoresRepository {
           eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
         )
       )
+      .orderBy(desc(scoreSaberScoresTable.timestamp), desc(scoreSaberScoresTable.scoreId))
       .limit(1);
-    return rows[0];
+    return row;
   }
 
-  public static async upsertScore(row: ScoreSaberScoreUpsertRow): Promise<void> {
-    await db.insert(scoreSaberScoresTable).values(row).onConflictDoUpdate({
-      target: scoreSaberScoresTable.scoreId,
-      set: scoresaberScoresUpsertOnConflictSet,
-    });
-  }
-
-  public static async bulkUpsertScores(rows: ScoreSaberScoreUpsertRow[]): Promise<void> {
-    if (rows.length === 0) {
-      return;
-    }
-    await db.insert(scoreSaberScoresTable).values(rows).onConflictDoUpdate({
-      target: scoreSaberScoresTable.scoreId,
-      set: scoresaberScoresBulkUpsertSet,
-    });
+  public static async insertScore(row: ScoreSaberScoreInsertRow): Promise<boolean> {
+    const result = await db
+      .insert(scoreSaberScoresTable)
+      .values(row)
+      .onConflictDoNothing({ target: scoreSaberScoresTable.scoreId })
+      .returning({ scoreId: scoreSaberScoresTable.scoreId });
+    return result.length > 0;
   }
 
   public static async countByPlayerId(playerId: string): Promise<number> {

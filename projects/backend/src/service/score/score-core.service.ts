@@ -8,8 +8,12 @@ import { eq } from "drizzle-orm";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { db } from "../../db";
 import { ScoreSaberAccountRow, scoreSaberAccountsTable } from "../../db/schema";
+import type { ScoreSaberScoreRow } from "../../db/schema";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
-import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import {
+  ScoreSaberScoresRepository,
+  type ScoreSaberScoreInsertRow,
+} from "../../repositories/scoresaber-scores.repository";
 import BeatLeaderService from "../beatleader/beatleader.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerMedalsService } from "../medals/player-medals.service";
@@ -30,7 +34,7 @@ export class ScoreCoreService {
    *
    * @param score the score to track
    * @param leaderboard the leaderboard for the score
-   * @param newScore whether the score was just set
+   * @param newScore whether the score was just set (live websocket)
    * @param beatLeaderScore optional BeatLeader replay link for Discord medal notifications
    * @returns whether the score was tracked
    */
@@ -56,33 +60,43 @@ export class ScoreCoreService {
       return { score: undefined, hasPreviousScore: false, tracked: false };
     }
 
+    if (await ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId)) {
+      return { score: undefined, hasPreviousScore: false, tracked: false };
+    }
+
     const playerId = score.playerId;
-    let isImprovement = false;
-    if (newScore) {
-      const previousRow = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
-        playerId,
-        leaderboard.id
-      );
+    const currentRow = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
+      playerId,
+      leaderboard.id
+    );
 
-      isImprovement = previousRow !== undefined;
-      if (isImprovement && previousRow) {
-        const previous = previousRow;
+    let hasPreviousScore = false;
+    const insertRow = ScoreCoreService.toInsertRow(score);
 
-        // Move old score to history (snapshot the row being replaced, not the incoming score)
-        await ScoreSaberScoreHistoryRepository.insertSnapshot(previous, playerId, leaderboard.id);
+    if (currentRow && currentRow.scoreId !== score.scoreId) {
+      hasPreviousScore = true;
+      const shouldReplaceCurrent =
+        newScore || ScoreCoreService.shouldIncomingReplaceCurrent(score, currentRow);
 
-        await ScoreSaberScoresRepository.deleteByScoreId(previous.scoreId);
+      if (shouldReplaceCurrent) {
+        await ScoreSaberScoreHistoryRepository.insertSnapshot(currentRow, playerId, leaderboard.id);
+        await ScoreSaberScoresRepository.deleteByScoreId(currentRow.scoreId);
+      } else {
+        await ScoreSaberScoreHistoryRepository.insertAttempt(insertRow, playerId, leaderboard.id);
+        return { score: undefined, hasPreviousScore: true, tracked: true };
       }
     }
 
+    const inserted = await ScoreSaberScoresRepository.insertScore(insertRow);
+    if (!inserted) {
+      return { score: undefined, hasPreviousScore, tracked: false };
+    }
+
     const playerUpdates: Partial<ScoreSaberAccountRow> = {};
-    // We only want to update the player's HMD if the score is new
     if (newScore) {
       playerUpdates.hmd = score.hmd;
     }
     await PlayerCoreService.updatePlayer(playerId, playerUpdates);
-
-    await ScoreCoreService.upsertScore(score);
 
     if (newScore && leaderboard.ranked && score.rank <= 10) {
       const medalChanges = await PlayerMedalsService.refreshLeaderboardMedals(leaderboard);
@@ -99,21 +113,38 @@ export class ScoreCoreService {
         leaderboard.songName,
         leaderboard.difficulty.difficulty,
         leaderboard.difficulty.characteristic,
-        isImprovement ? ` (improvement)` : "",
+        hasPreviousScore ? ` (improvement)` : "",
         formatDuration(performance.now() - before)
       );
     }
-    return { score: score, hasPreviousScore: isImprovement, tracked: true };
+    return { score: score, hasPreviousScore, tracked: true };
   }
 
   /**
-   * Upserts a ScoreSaber score.
-   *
-   * @param score the score to upsert
+   * Whether an ingested score should replace the stored current PB (sync/backfill paths).
    */
-  public static async upsertScore(score: ScoreSaberScore): Promise<void> {
+  private static shouldIncomingReplaceCurrent(
+    incoming: ScoreSaberScore,
+    current: ScoreSaberScoreRow
+  ): boolean {
+    if (incoming.timestamp.getTime() > current.timestamp.getTime()) {
+      return true;
+    }
+    if (incoming.timestamp.getTime() < current.timestamp.getTime()) {
+      return false;
+    }
+    if (incoming.score > current.score) {
+      return true;
+    }
+    if (incoming.score < current.score) {
+      return false;
+    }
+    return incoming.pp > current.pp;
+  }
+
+  public static toInsertRow(score: ScoreSaberScore): ScoreSaberScoreInsertRow {
     const modifiers = score.modifiers.map(modifier => modifier.toString());
-    await ScoreSaberScoresRepository.upsertScore({
+    return {
       scoreId: score.scoreId,
       playerId: score.playerId,
       leaderboardId: score.leaderboardId,
@@ -132,7 +163,7 @@ export class ScoreCoreService {
       rightController: score.rightController,
       leftController: score.leftController,
       timestamp: score.timestamp,
-    });
+    };
   }
 
   /**
@@ -168,7 +199,6 @@ export class ScoreCoreService {
       ? await ScoreSaberLeaderboardsService.getLeaderboard(score.leaderboardId)
       : leaderboard;
 
-    // If the leaderboard is not found, return the plain score
     if (!leaderboard) {
       return score;
     }

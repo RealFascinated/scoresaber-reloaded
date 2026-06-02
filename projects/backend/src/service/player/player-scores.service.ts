@@ -32,6 +32,7 @@ import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberScoresTable } from "../../db/schema";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
+import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import BeatLeaderService from "../beatleader/beatleader.service";
 import BeatSaverService from "../external/beatsaver.service";
@@ -94,9 +95,7 @@ export class PlayerScoresService {
     const rankedLeaderboardsToRefresh = new Map<number, ScoreSaberLeaderboard>();
     const playerScoresCount = await ScoreSaberScoresRepository.countByPlayerId(playerId);
 
-    // The player has the correct number of scores
     if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
-      // Mark player as seeded
       if (!account.seededScores) {
         await PlayerCoreService.updatePlayer(account.id, { seededScores: true });
       }
@@ -144,17 +143,10 @@ export class PlayerScoresService {
       scoresPage: ScoreSaberPlayerScoresPageToken
     ): Promise<boolean> {
       const parsedScores = scoresPage.playerScores.map(parseScoreToken);
-      const scoreIds = parsedScores.flatMap(entry => (entry.score ? [entry.score.scoreId] : []));
-      const existingScoreIds = await ScoreSaberScoresRepository.findExistingScoreIds(scoreIds);
 
       await Promise.all(
         parsedScores.map(async ({ score, leaderboard }) => {
           if (!score || !leaderboard) {
-            result.totalScores++;
-            return;
-          }
-
-          if (existingScoreIds.has(score.scoreId)) {
             return;
           }
 
@@ -169,13 +161,14 @@ export class PlayerScoresService {
           );
           if (trackingResult.tracked) {
             result.missingScores++;
-            result.totalScores++;
             if (leaderboard.ranked) {
               rankedLeaderboardsToRefresh.set(leaderboard.id, leaderboard);
             }
           }
         })
       );
+
+      result.totalScores = await ScoreSaberScoresRepository.countByPlayerId(playerId);
 
       if (result.totalScores >= scoresPage.metadata.total) {
         return false;
@@ -205,6 +198,8 @@ export class PlayerScoresService {
     for (const leaderboard of rankedLeaderboardsToRefresh.values()) {
       await PlayerMedalsService.refreshLeaderboardMedals(leaderboard);
     }
+
+    result.totalScores = await ScoreSaberScoresRepository.countByPlayerId(playerId);
 
     if (!account.seededScores) {
       await PlayerCoreService.updatePlayer(account.id, { seededScores: true });
@@ -255,7 +250,9 @@ export class PlayerScoresService {
    * @returns the score
    */
   public static async getScore(scoreId: number): Promise<PlayerScore<ScoreSaberScore>> {
-    const scoreRow = await ScoreSaberScoresRepository.findRowByScoreId(scoreId);
+    const scoreRow =
+      (await ScoreSaberScoresRepository.findRowByScoreId(scoreId)) ??
+      (await ScoreSaberScoreHistoryRepository.findRowByScoreId(scoreId));
     if (!scoreRow) {
       throw new NotFoundError("Score not found");
     }

@@ -4,7 +4,6 @@ import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { asc, eq } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberLeaderboardsTable } from "../../db/schema";
-import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 import { PlayerMedalsService } from "../../service/medals/player-medals.service";
@@ -28,7 +27,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
 
     let newScoresTracked = 0;
-    let rankedScoresUpdated = 0;
+    let currentPbReplaced = 0;
 
     let consecutiveFailures = 0;
     let scrape = true;
@@ -72,25 +71,24 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       const parsedScores = response.scores.map(rawScore =>
         getScoreSaberScoreFromToken(rawScore, leaderboard, undefined)
       );
-      const existingScoreIds = await ScoreSaberScoresRepository.findExistingScoreIds(
-        parsedScores.map(score => score.scoreId)
-      );
-
       await Promise.all(
         parsedScores.map(async score => {
           PlayerCoreService.createIfMissing(score.playerId); // no need to await this
 
-          if (!existingScoreIds.has(score.scoreId)) {
-            await ScoreCoreService.trackScoreSaberScore(score, leaderboard, false, undefined, {
+          const trackingResult = await ScoreCoreService.trackScoreSaberScore(
+            score,
+            leaderboard,
+            false,
+            undefined,
+            {
               skipDuplicateCheck: true,
-            });
+            }
+          );
+          if (trackingResult.tracked) {
             newScoresTracked++;
-            return;
-          }
-
-          if (score.pp > 0) {
-            await ScoreCoreService.upsertScore(score);
-            rankedScoresUpdated++;
+            if (trackingResult.hasPreviousScore) {
+              currentPbReplaced++;
+            }
           }
         })
       );
@@ -105,7 +103,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
     await this.markLeaderboardSeeded(leaderboardId);
     LeaderboardScoreSeedQueue.logger.info(
-      `Updated seeded scores status for leaderboard "${leaderboardId}" tracked ${newScoresTracked} new scores and updated ${rankedScoresUpdated} ranked scores`
+      `Updated seeded scores status for leaderboard "${leaderboardId}" tracked ${newScoresTracked} scores (${currentPbReplaced} current PB replacements)`
     );
   }
 
