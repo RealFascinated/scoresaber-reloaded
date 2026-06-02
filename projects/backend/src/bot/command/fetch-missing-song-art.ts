@@ -18,14 +18,13 @@ class FetchMissingSongArt {
   })
   async fetchMissingSongArt(interaction: CommandInteraction) {
     try {
-      await interaction.deferReply();
+      await interaction.reply({
+        content: "Fetching missing song art for leaderboards...",
+      });
       const leaderboards = await db.select().from(scoreSaberLeaderboardsTable).where(eq(scoreSaberLeaderboardsTable.cachedSongArt, false));
       for (const leaderboard of leaderboards) {
         await ScoreSaberLeaderboardsService.cacheLeaderboardSongArt(leaderboardRowToType(leaderboard));
       }
-      await interaction.editReply({
-        content: `Cached song art for ${leaderboards.length} leaderboards`,
-      });
     } catch (error) {
       interaction.reply({
         content: error instanceof Error ? error.message : "An unknown error occurred",
