@@ -65,7 +65,7 @@ ENV PORT $PORT
 EXPOSE $PORT
 
 # Add healthcheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
 
 WORKDIR /app/projects/backend
