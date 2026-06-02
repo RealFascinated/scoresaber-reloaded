@@ -1,7 +1,5 @@
 export enum StorageBucket {
   BeatLeaderReplays = "ssr-beatleader-replays",
-  LeaderboardSongArt = "ssr-leaderboard-song-art",
-  PlayerAvatars = "ssr-player-avatars",
   BeatLeaderScoreStats = "ssr-beatleader-score-stats",
 }
 

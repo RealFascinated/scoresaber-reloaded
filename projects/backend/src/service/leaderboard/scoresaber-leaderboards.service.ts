@@ -1,6 +1,5 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import { StorageBucket } from "@ssr/common/minio-buckets";
 import { Pagination } from "@ssr/common/pagination";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
@@ -15,7 +14,6 @@ import type { ScoreSaberLeaderboardQueryFilters } from "@ssr/common/schemas/scor
 import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
-import Request from "@ssr/common/utils/request";
 import { getScoreSaberDifficultyFromDifficulty } from "@ssr/common/utils/scoresaber.util";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { count } from "drizzle-orm";
@@ -33,7 +31,6 @@ import {
 } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
-import StorageService from "../infra/storage.service";
 
 export class ScoreSaberLeaderboardsService {
   private static readonly logger: ScopedLogger = Logger.withTopic("ScoreSaber Leaderboards");
@@ -192,14 +189,13 @@ export class ScoreSaberLeaderboardsService {
   }
 
   /**
-   * Saves a leaderboard to the database and caches the song art.
+   * Saves a leaderboard to the database.
    *
    * @param id the ID of the leaderboard to save
    * @param leaderboard the leaderboard to save
    */
   public static async saveLeaderboard(id: number, leaderboard: ScoreSaberLeaderboard) {
-    const cachedSongArt = await ScoreSaberLeaderboardsService.cacheLeaderboardSongArt(leaderboard);
-    await ScoreSaberLeaderboardsRepository.insert(id, leaderboard, cachedSongArt);
+    await ScoreSaberLeaderboardsRepository.insert(id, leaderboard);
   }
 
   /**
@@ -236,46 +232,5 @@ export class ScoreSaberLeaderboardsService {
         };
       }
     );
-  }
-
-  /**
-   * Caches the song art for a leaderboard.
-   *
-   * @param leaderboard the leaderboard to cache the song art for
-   * @returns whether the song art was cached successfully
-   */
-  public static async cacheLeaderboardSongArt(leaderboard: ScoreSaberLeaderboard): Promise<boolean> {
-    const objectKey = `${leaderboard.songHash}.png`;
-
-    const exists = await StorageService.fileExists(StorageBucket.LeaderboardSongArt, objectKey);
-    if (exists) {
-      await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, {
-        cachedSongArt: true,
-      });
-      return true;
-    }
-
-    const request = await Request.get<ArrayBuffer>(
-      `https://cdn.scoresaber.com/covers/${leaderboard.songHash}.png`,
-      {
-        returns: "arraybuffer",
-      }
-    );
-    if (request) {
-      await StorageService.saveFile(StorageBucket.LeaderboardSongArt, objectKey, Buffer.from(request));
-      await ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboard.id, {
-        cachedSongArt: true,
-      });
-
-      ScoreSaberLeaderboardsService.logger.info(
-        `Cached song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`
-      );
-      return true;
-    }
-
-    ScoreSaberLeaderboardsService.logger.warn(
-      `Failed to cache song art for leaderboard ${leaderboard.id}: ${leaderboard.songHash}`
-    );
-    return false;
   }
 }

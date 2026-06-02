@@ -19,7 +19,6 @@ export function scoreSaberAccountRowToType(row: ScoreSaberAccountRow): ScoreSabe
         : undefined,
     seededScores: row.seededScores,
     seededBeatLeaderScores: row.seededBeatLeaderScores,
-    cachedProfilePicture: row.cachedProfilePicture,
     trackReplays: row.trackReplays,
     inactive: row.inactive,
     banned: row.banned,

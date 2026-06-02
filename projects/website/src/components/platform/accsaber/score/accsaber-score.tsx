@@ -3,10 +3,9 @@
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import { SparklesIcon } from "@heroicons/react/24/solid";
-import { env } from "@ssr/common/env";
-import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
+import { getScoreSaberLeaderboardCoverUrl } from "@ssr/common/utils/scoresaber.util";
 import { AccSaberBadges } from "./accsaber-badges";
 import { AccSaberRankTime } from "./accsaber-rank-time";
 
@@ -28,7 +27,7 @@ export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
             song={{
               name: score.leaderboard.song.name,
               authorName: score.leaderboard.song.author,
-              art: `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${score.leaderboard.song.hash.toUpperCase()}.png`,
+              art: getScoreSaberLeaderboardCoverUrl(score.leaderboard.song.hash),
             }}
             level={{
               authorName: score.leaderboard.song.mapper,

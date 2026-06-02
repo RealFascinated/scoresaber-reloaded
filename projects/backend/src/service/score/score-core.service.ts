@@ -7,8 +7,8 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import { eq } from "drizzle-orm";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { db } from "../../db";
-import { ScoreSaberAccountRow, scoreSaberAccountsTable } from "../../db/schema";
 import type { ScoreSaberScoreRow } from "../../db/schema";
+import { ScoreSaberAccountRow, scoreSaberAccountsTable } from "../../db/schema";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import {
   ScoreSaberScoresRepository,
@@ -65,10 +65,7 @@ export class ScoreCoreService {
     }
 
     const playerId = score.playerId;
-    const currentRow = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
-      playerId,
-      leaderboard.id
-    );
+    const currentRow = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(playerId, leaderboard.id);
 
     let hasPreviousScore = false;
     const insertRow = ScoreCoreService.toInsertRow(score);

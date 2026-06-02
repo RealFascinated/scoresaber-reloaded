@@ -288,6 +288,20 @@
       "when": 1775833343689,
       "tag": "0040_medal_rank_refresh_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1775833343690,
+      "tag": "0041_fine_ironclad",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1780440183060,
+      "tag": "0042_goofy_molten_man",
+      "breakpoints": true
     }
   ]
 }

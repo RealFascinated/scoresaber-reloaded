@@ -303,11 +303,7 @@ export class ScoreSaberLeaderboardsRepository {
     return rows.map(row => leaderboardRowToType(row));
   }
 
-  public static async insert(
-    id: number,
-    leaderboard: ScoreSaberLeaderboard,
-    cachedSongArt: boolean
-  ): Promise<void> {
+  public static async insert(id: number, leaderboard: ScoreSaberLeaderboard): Promise<void> {
     await db
       .insert(scoreSaberLeaderboardsTable)
       .values({
@@ -328,7 +324,6 @@ export class ScoreSaberLeaderboardsRepository {
         plays: leaderboard.plays,
         dailyPlays: leaderboard.dailyPlays,
         seededScores: false,
-        cachedSongArt,
         timestamp: leaderboard.timestamp,
       })
       .onConflictDoNothing({ target: scoreSaberLeaderboardsTable.id });
@@ -364,7 +359,6 @@ export class ScoreSaberLeaderboardsRepository {
       plays: lb.plays,
       dailyPlays: lb.dailyPlays,
       seededScores: false,
-      cachedSongArt: false,
       trendingScore: 0,
       timestamp: lb.timestamp,
     }));
@@ -392,7 +386,6 @@ export class ScoreSaberLeaderboardsRepository {
           dailyPlays: sql`excluded."dailyPlays"`,
           timestamp: sql`excluded."timestamp"`,
           seededScores: sql`${scoreSaberLeaderboardsTable.seededScores}`,
-          cachedSongArt: sql`${scoreSaberLeaderboardsTable.cachedSongArt}`,
         },
       });
   }

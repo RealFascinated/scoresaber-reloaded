@@ -1,6 +1,4 @@
-import { env } from "./env";
 import type { HMD } from "./hmds";
-import { getS3BucketName, StorageBucket } from "./minio-buckets";
 import { MapCharacteristic } from "./schemas/map/map-characteristic";
 import { ScoreSaberLeaderboardDifficulty } from "./schemas/scoresaber/leaderboard/difficulty";
 import {
@@ -48,7 +46,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
       fullName: `${token.songName} ${token.songSubName}`.trim(),
       songAuthorName: token.songAuthorName,
       levelAuthorName: token.levelAuthorName,
-      songArt: `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${token.songHash}.png`,
+      songArt: token.coverImage,
       difficulty: difficulty,
       difficulties: [],
       maxScore: token.maxScore,

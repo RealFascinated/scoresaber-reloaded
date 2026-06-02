@@ -31,7 +31,6 @@ export const scoreSaberAccountsTable = pgTable(
 
     seededScores: boolean().notNull(),
     seededBeatLeaderScores: boolean().notNull(),
-    cachedProfilePicture: boolean().notNull(),
 
     trackReplays: boolean().notNull(),
 
@@ -262,7 +261,6 @@ export const scoreSaberLeaderboardsTable = pgTable(
 
     // Misc
     seededScores: boolean().notNull(),
-    cachedSongArt: boolean().notNull(),
     trendingScore: doublePrecision().notNull().default(0),
 
     timestamp: timestamp().notNull(),

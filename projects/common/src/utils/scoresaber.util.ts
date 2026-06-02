@@ -173,3 +173,12 @@ export function updateScoreWeights(scores: PlayerPpsResponse["scores"]) {
     scores[i].weight = Math.pow(ScoreSaberCurve.WEIGHT_COEFFICIENT, i);
   }
 }
+
+/**
+ * Gets the ScoreSaber CDN cover URL for a song hash.
+ *
+ * @param songHash the song hash
+ */
+export function getScoreSaberLeaderboardCoverUrl(songHash: string): string {
+  return `https://cdn.scoresaber.com/covers/${songHash.toUpperCase()}.png`;
+}

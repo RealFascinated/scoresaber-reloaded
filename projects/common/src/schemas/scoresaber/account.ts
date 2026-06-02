@@ -12,7 +12,6 @@ export const ScoreSaberAccountSchema = z.object({
   peakRank: ScoreSaberPeakRankSchema.optional(),
   seededScores: z.boolean().optional(),
   seededBeatLeaderScores: z.boolean().optional(),
-  cachedProfilePicture: z.boolean().optional(),
   trackReplays: z.boolean(),
   inactive: z.boolean(),
   banned: z.boolean(),

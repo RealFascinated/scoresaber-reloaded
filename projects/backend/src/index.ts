@@ -14,8 +14,8 @@ import { Elysia, ValidationError } from "elysia";
 import { helmet } from "elysia-helmet";
 import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
-import { registerGlobalErrorHandlers, reportErrorToDiscord } from "./common/discord/error-reporting";
 import { getAppVersion } from "./common/app.util";
+import { registerGlobalErrorHandlers, reportErrorToDiscord } from "./common/discord/error-reporting";
 import AppController from "./controller/app/app.controller";
 import BeatLeaderController from "./controller/beatleader/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver/beatsaver.controller";
@@ -223,11 +223,7 @@ export const app = new Elysia()
 
     if (status === 500) {
       log.error("Internal server error:", error);
-      reportErrorToDiscord(
-        "HTTP 500",
-        error,
-        `${request.method} ${path}\nRoute: ${route}\nCode: ${code}`
-      );
+      reportErrorToDiscord("HTTP 500", error, `${request.method} ${path}\nRoute: ${route}\nCode: ${code}`);
     }
 
     const errorMessage =

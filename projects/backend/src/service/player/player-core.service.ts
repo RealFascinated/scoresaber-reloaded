@@ -1,13 +1,10 @@
-import { env } from "@ssr/common/env";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
-import Request from "@ssr/common/utils/request";
 import { isProduction } from "@ssr/common/utils/utils";
 import { playerCacheKey } from "../../common/cache-keys";
 import { logNewTrackedPlayer } from "../../common/embds";
@@ -19,7 +16,6 @@ import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-acco
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService from "../infra/cache.service";
-import StorageService from "../infra/storage.service";
 
 export const accountCreationLock: Record<string, Promise<ScoreSaberAccount | undefined>> = {};
 
@@ -61,27 +57,6 @@ export class PlayerCoreService {
       }
     }
 
-    const isOculusAccount =
-      playerToken?.id.length === 16 ||
-      playerToken?.profilePicture === "https://cdn.scoresaber.com/avatars/oculus.png";
-    let avatar = playerToken?.profilePicture ?? "https://cdn.fascinated.cc/assets/unknown.png";
-    if (isOculusAccount) {
-      avatar = "https://cdn.fascinated.cc/assets/oculus-avatar.jpg";
-    } else if (playerToken?.profilePicture === "https://cdn.scoresaber.com/avatars/steam.png") {
-      avatar = "https://cdn.fascinated.cc/assets/unknown.png";
-    } else if (account) {
-      avatar = `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.PlayerAvatars)}/${id}.jpg`;
-    }
-
-    if (
-      account &&
-      !isOculusAccount &&
-      !account.cachedProfilePicture &&
-      playerToken?.profilePicture !== "https://cdn.scoresaber.com/avatars/steam.png"
-    ) {
-      await PlayerCoreService.cachePlayerProfilePicture(id);
-    }
-
     let shouldSave = false;
     const updates: Partial<Pick<ScoreSaberAccountRow, "country" | "banned" | "avatar">> = {};
     if (playerToken?.country !== account.country) {
@@ -92,8 +67,8 @@ export class PlayerCoreService {
       updates.banned = playerToken?.banned ?? false;
       shouldSave = true;
     }
-    if (account.avatar !== avatar) {
-      updates.avatar = avatar;
+    if (playerToken && account.avatar !== playerToken.profilePicture) {
+      updates.avatar = playerToken.profilePicture;
       shouldSave = true;
     }
 
@@ -148,12 +123,11 @@ export class PlayerCoreService {
               id: id,
               name: token.name,
               country: token.country,
-              avatar: "https://cdn.fascinated.cc/assets/unknown.png",
+              avatar: token.profilePicture,
               peakRank: token.rank,
               peakRankTimestamp: new Date(),
               seededScores: false,
               seededBeatLeaderScores: false,
-              cachedProfilePicture: false,
               trackReplays: false,
               inactive: token.inactive,
               banned: token.banned,
@@ -246,11 +220,6 @@ export class PlayerCoreService {
         CacheService.invalidate(playerCacheKey(id, "basic")),
         CacheService.invalidate(playerCacheKey(id, "full")),
       ]);
-
-      const isOculusAccount = id.length === 16;
-      if (!isOculusAccount) {
-        await PlayerCoreService.cachePlayerProfilePicture(id, true);
-      }
       return response;
     }
     return { result: false };
@@ -308,34 +277,5 @@ export class PlayerCoreService {
     }
 
     return scoreSaberAccountRowToType(account);
-  }
-
-  /**
-   * Caches the profile picture for a player.
-   *
-   * @param playerId the player's id
-   * @param force when true, re-downloads even if already cached
-   */
-  public static async cachePlayerProfilePicture(playerId: string, force = false): Promise<void> {
-    const exists = await StorageService.fileExists(StorageBucket.PlayerAvatars, `${playerId}.jpg`);
-    if (!exists || force) {
-      const request = await Request.get<ArrayBuffer>(`https://cdn.scoresaber.com/avatars/${playerId}.jpg`, {
-        returns: "arraybuffer",
-      });
-      if (request) {
-        await StorageService.saveFile(StorageBucket.PlayerAvatars, `${playerId}.jpg`, Buffer.from(request));
-        await ScoreSaberAccountsRepository.updateAccount(playerId, { cachedProfilePicture: true });
-        await Promise.all([
-          CacheService.invalidate(playerCacheKey(playerId, "basic")),
-          CacheService.invalidate(playerCacheKey(playerId, "full")),
-        ]);
-        PlayerCoreService.logger.info(
-          `Cached profile picture for player ${playerId}${force ? " (force)" : ""}`
-        );
-        return;
-      }
-
-      PlayerCoreService.logger.warn(`Failed to cache profile picture for player ${playerId}`);
-    }
   }
 }

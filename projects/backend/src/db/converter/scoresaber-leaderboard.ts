@@ -1,5 +1,3 @@
-import { env } from "@ssr/common/env";
-import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import {
@@ -7,6 +5,7 @@ import {
   ScoreSaberLeaderboardSchema,
 } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import type { ScoreSaberLeaderboardStatus } from "@ssr/common/schemas/scoresaber/leaderboard/status";
+import { getScoreSaberLeaderboardCoverUrl } from "@ssr/common/utils/scoresaber.util";
 import { ScoreSaberLeaderboardRow } from "../schema";
 
 export type LeaderboardDifficultyJoinRow = {
@@ -45,9 +44,7 @@ export function leaderboardRowToType(
       songSubName: row.songSubName,
       songAuthorName: row.songAuthorName,
       levelAuthorName: row.levelAuthorName,
-      songArt: row.cachedSongArt
-        ? `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.LeaderboardSongArt)}/${row.songHash}.png`
-        : "https://cdn.fascinated.cc/assets/unknown.png",
+      songArt: getScoreSaberLeaderboardCoverUrl(row.songHash),
       difficulty,
       difficulties: difficulties ?? [],
       maxScore: row.maxScore,

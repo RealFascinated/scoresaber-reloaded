@@ -74,8 +74,7 @@ export function formatErrorForDiscord(error: unknown): string {
   if (typeof error === "object" && error !== null) {
     const record = error as { message?: unknown; stack?: unknown };
     if (typeof record.message === "string") {
-      const base =
-        typeof record.stack === "string" ? record.stack : record.message;
+      const base = typeof record.stack === "string" ? record.stack : record.message;
       return pgCause ? `${base}\n\nPostgreSQL:\n${pgCause}` : base;
     }
 
@@ -101,13 +100,12 @@ export function reportErrorToDiscord(title: string, error: unknown, extra?: stri
     return;
   }
 
-  const descriptionParts = [extra, message].filter((part): part is string => part !== undefined && part.length > 0);
+  const descriptionParts = [extra, message].filter(
+    (part): part is string => part !== undefined && part.length > 0
+  );
   const description = truncate(descriptionParts.join("\n\n"), EMBED_DESCRIPTION_MAX);
 
-  void sendEmbedToChannel(
-    DiscordChannels.BACKEND_LOGS,
-    createGenericEmbed(title, description, "error")
-  );
+  void sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, createGenericEmbed(title, description, "error"));
 }
 
 /**
