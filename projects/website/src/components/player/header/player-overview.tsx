@@ -14,7 +14,7 @@ import CountryFlag from "../../ui/country-flag";
 
 function PlayerOverviewItem({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-background/80 border-border flex h-9 items-center gap-2 rounded-lg border px-3 py-1.5 text-gray-300 shadow-xs backdrop-blur-xs">
+    <div className="border-primary/20 bg-primary/10 flex h-10 items-center gap-2 rounded-full border px-4 py-1.5">
       {children}
     </div>
   );
@@ -29,9 +29,9 @@ const playerData = [
 
       return (
         <PlayerOverviewItem>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <SimpleTooltip display={<span>Global Rank</span>} side="bottom">
-              <GlobeAmericasIcon className="text-muted-foreground h-5 w-5" />
+              <GlobeAmericasIcon className="text-muted-foreground h-5 w-5 shrink-0" />
             </SimpleTooltip>
             <ChangeOverTime
               player={player}
@@ -47,7 +47,7 @@ const playerData = [
               }
             >
               <SimpleLink href={`/ranking/${player.rankPages.global}`}>
-                <span className="hover:text-primary/80 focus-visible:outline-primary/50 m-0 text-sm transition-all focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
+                <span className="text-foreground hover:text-primary focus-visible:outline-primary/50 m-0 text-base font-semibold transition-colors focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
               </SimpleLink>
@@ -66,7 +66,7 @@ const playerData = [
 
       return (
         <PlayerOverviewItem>
-          <div className="flex items-center justify-center gap-1">
+          <div className="flex items-center justify-center gap-2">
             <CountryFlag
               code={player.country}
               size={10}
@@ -76,7 +76,7 @@ const playerData = [
             />
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
               <SimpleLink href={`/ranking/${player.country}/${player.rankPages.country}`}>
-                <span className="hover:text-primary/80 focus-visible:outline-primary/50 m-0 text-sm transition-all focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
+                <span className="text-foreground hover:text-primary focus-visible:outline-primary/50 m-0 text-base font-semibold transition-colors focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
               </SimpleLink>
@@ -92,12 +92,12 @@ const playerData = [
     render: (player: ScoreSaberPlayer) => {
       return (
         <PlayerOverviewItem>
-          <Medal className="text-muted-foreground size-4" />
+          <Medal className="text-muted-foreground size-4 shrink-0" />
           <FallbackLink href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}>
             <span
               className={cn(
-                "m-0 text-sm leading-[1.4]",
-                player.rankPages.medals ? "hover:text-primary/80 cursor-pointer transition-all" : ""
+                "text-foreground m-0 text-base font-semibold",
+                player.rankPages.medals ? "hover:text-primary cursor-pointer transition-colors" : ""
               )}
             >
               {formatNumberWithCommas(player.medals)} {pluralize(player.medals, "Medal")}
@@ -115,12 +115,9 @@ const playerData = [
 
       return (
         <PlayerOverviewItem>
-          <div className="flex items-center gap-1" style={{ height: "100%" }}>
+          <div className="flex items-center gap-2">
             <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
-              <span
-                className="text-pp hover:text-primary/80 m-0 truncate text-sm leading-[1.4] font-semibold transition-all"
-                style={{ display: "inline-block", verticalAlign: "middle" }}
-              >
+              <span className="text-pp hover:text-primary m-0 truncate text-base font-semibold transition-colors">
                 {formatPp(player.pp)}pp
               </span>
             </ChangeOverTime>
@@ -138,7 +135,7 @@ type PlayerOverviewProps = {
 
 export default function PlayerOverview({ player }: PlayerOverviewProps) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-1 lg:items-start lg:justify-start">
+    <div className="flex flex-wrap items-center justify-center gap-2 lg:items-start lg:justify-start">
       {playerData.map((subName, index) => {
         // Check if the player is inactive or banned and if the data should be shown
         if (!subName.showWhenInactiveOrBanned && (player.inactive || player.banned)) {

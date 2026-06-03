@@ -32,7 +32,7 @@ export default function PlayerAccBadges({ statistics }: { statistics: ScoreSaber
           >
             <StatValue
               name={badge.name}
-              color={badge.color}
+              textColor={badge.color}
               value={formatNumberWithCommas(statistics[name as keyof ScoreSaberPlayerStatistics] ?? 0)}
               className="h-full"
               size="lg"

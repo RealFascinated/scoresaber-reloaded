@@ -12,14 +12,19 @@ type Props = {
   icon?: React.ReactNode;
 
   /**
-   * The background color of the stat.
-   */
-  color?: string;
-
-  /**
    * The additional classes for the stat.
    */
   className?: string;
+
+  /**
+   * The text color of the stat.
+   */
+  textColor?: string;
+
+  /**
+   * The value color of the stat.
+   */
+  valueColor?: string;
 
   /**
    * The value of the stat.
@@ -33,37 +38,42 @@ type Props = {
   size?: "md" | "lg";
 };
 
-export default function StatValue({ name, icon, color, className, value, size = "md" }: Props) {
+export default function StatValue({
+  name,
+  icon,
+  className,
+  value,
+  textColor,
+  valueColor,
+  size = "md",
+}: Props) {
   const sizeClasses = {
-    md: "p-1 text-sm gap-2",
+    md: "p-1 px-1.5 text-sm gap-2",
     lg: "px-3 py-1.5 text-sm gap-2",
-  };
-
-  const dividerHeight = {
-    md: "h-4",
-    lg: "h-5",
   };
 
   return (
     <div
       className={clsx(
-        "flex min-w-16 cursor-default items-center justify-center rounded-lg",
+        "border-border bg-background/90 flex min-w-16 cursor-default items-center justify-center rounded-lg border",
         sizeClasses[size],
-        color ? color : "bg-accent",
         className
       )}
-      style={{
-        backgroundColor: (!color?.includes("bg") && color) || undefined,
-      }}
     >
       {icon}
       {name && (
         <>
-          <p className="font-medium">{name}</p>
-          <div className={clsx("w-px bg-white/30", dividerHeight[size])} />
+          <p className={clsx("text-muted-foreground font-medium", textColor)} style={{ color: textColor }}>
+            {name}
+          </p>
         </>
       )}
-      <div className="flex items-center gap-1">{typeof value === "string" ? <p>{value}</p> : value}</div>
+      <div
+        className={clsx("flex items-center gap-1 font-semibold", valueColor)}
+        style={{ color: valueColor }}
+      >
+        {typeof value === "string" ? <p>{value}</p> : value}
+      </div>
     </div>
   );
 }
