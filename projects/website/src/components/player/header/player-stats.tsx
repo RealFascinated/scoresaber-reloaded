@@ -1,3 +1,5 @@
+"use client";
+
 import SimpleTooltip from "@/components/simple-tooltip";
 import StatValue from "@/components/statistic/stat-value";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
@@ -5,11 +7,13 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
-import { ReactNode } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { ReactNode, useState } from "react";
 import HMDIcon from "../../hmd-icon";
 
 type Stat = {
   name: string;
+  defaultHidden?: boolean;
   create: (player: ScoreSaberPlayer) => ReactNode | undefined;
 };
 
@@ -95,6 +99,7 @@ const playerStats: Stat[] = [
   },
   {
     name: "Tracked Since",
+    defaultHidden: true,
     create: player =>
       statWithTooltip(
         <p>
@@ -105,6 +110,7 @@ const playerStats: Stat[] = [
   },
   {
     name: "Headset",
+    defaultHidden: true,
     create: player => {
       if (player.hmd === undefined) {
         return undefined;
@@ -163,6 +169,7 @@ const playerStats: Stat[] = [
   },
   {
     name: "Peak Rank",
+    defaultHidden: true,
     create: player => {
       if (player.peakRank === undefined) {
         return undefined;
@@ -178,6 +185,7 @@ const playerStats: Stat[] = [
   },
   {
     name: "+1 PP",
+    defaultHidden: true,
     create: player =>
       statWithTooltip(
         <p>Amount of raw PP required to increase your global pp by 1pp</p>,
@@ -191,9 +199,17 @@ type Props = {
 };
 
 export default function PlayerStats({ player }: Props) {
+  const [showMore, setShowMore] = useState(false);
+
+  const hiddenStatCount = playerStats.filter(
+    stat => stat.defaultHidden && stat.create(player) !== undefined
+  ).length;
+
+  const stats = playerStats.filter(stat => !stat.defaultHidden || showMore);
+
   return (
-    <div className={`flex w-full flex-wrap justify-center gap-2 lg:justify-start`}>
-      {playerStats.map(stat => {
+    <div className="flex w-full flex-wrap justify-center gap-2 lg:justify-start">
+      {stats.map(stat => {
         const content = stat.create(player);
         if (content === undefined) {
           return undefined;
@@ -201,6 +217,18 @@ export default function PlayerStats({ player }: Props) {
 
         return <div key={`player-stat-${stat.name}`}>{content}</div>;
       })}
+
+      {hiddenStatCount > 0 && (
+        <button
+          type="button"
+          aria-expanded={showMore}
+          onClick={() => setShowMore(current => !current)}
+          className="border-border bg-background/90 text-muted-foreground hover:border-primary/50 hover:text-foreground flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
+        >
+          {showMore ? "Show less" : `Show ${hiddenStatCount} more`}
+          {showMore ? <ChevronUp className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
+        </button>
+      )}
     </div>
   );
 }
