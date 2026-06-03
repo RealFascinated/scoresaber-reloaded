@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.13-debian AS base
+FROM oven/bun:1.3.14-debian AS base
 
 # Set the environment
 ENV NEXT_PUBLIC_APP_ENV=production
