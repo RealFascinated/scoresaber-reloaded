@@ -49,7 +49,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     isRefetching,
     isError,
   } = useQuery({
-    queryKey: ["rankingData", currentPage, currentCountry, isValidSearch],
+    queryKey: ["rankingData", currentPage, currentCountry, isValidSearch, includeInactives],
     queryFn: async () =>
       ssrApi.searchPlayersRanking(currentPage, {
         country: currentCountry,
@@ -61,7 +61,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   });
   useEffect(() => {
     navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
-  }, [currentPage, currentCountry, navigation]);
+  }, [currentPage, currentCountry, includeInactives, navigation]);
 
   const firstColumnWidth = getRankingColumnWidth(
     rankingData?.items ?? [],
