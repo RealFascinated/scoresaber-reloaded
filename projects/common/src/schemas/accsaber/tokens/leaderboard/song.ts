@@ -6,5 +6,5 @@ export const accSaberScoreSongSchema = z.object({
   subName: z.string(),
   author: z.string(),
   mapper: z.string(),
-  beatsaverKey: z.string(),
+  beatsaverKey: z.string().nullable(),
 });
