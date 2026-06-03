@@ -8,6 +8,7 @@ import { redisClient } from "../../common/redis";
 import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
 
 export enum CacheId {
+  PLAYER_PLUS_ONE_PP = "player_plus_one_pp",
   BEATSAVER_MAP = "beatsaver_map",
   SCORESABER_PLAYER = "scoresaber_player",
   SCORESABER_PLAYER_EXISTS = "scoresaber_player_exists",
@@ -31,6 +32,10 @@ export default class CacheService {
 
   public static readonly CACHE_INFO: Record<CacheId, { ttl: number; mode: CacheMode }> = {
     // Memory caches
+    [CacheId.PLAYER_PLUS_ONE_PP]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      mode: "MEMORY",
+    },
     [CacheId.SCORESABER_PLAYER]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
       mode: "MEMORY",
