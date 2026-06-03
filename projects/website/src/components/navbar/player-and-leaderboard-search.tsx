@@ -4,6 +4,10 @@ import Avatar from "@/components/avatar";
 import PlayerSearchResultItem from "@/components/player/player-search-result-item";
 import { useSearch } from "@/components/providers/search-provider";
 import SearchDialog from "@/components/ui/search-dialog";
+import {
+  isPlayerSearchQueryTooShort,
+  PLAYER_SEARCH_TOO_SHORT_MESSAGE,
+} from "@/common/search-query-utils";
 import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
@@ -23,6 +27,7 @@ export default function PlayerAndLeaderboardSearch() {
   const [query, setQuery] = useState<string>("");
   const debouncedQuery = useDebounce(query, 200);
   const trimmedQuery = debouncedQuery.trim();
+  const isQueryTooShort = isPlayerSearchQueryTooShort(query);
 
   const { data: results, isLoading } = useQuery({
     queryKey: ["playerAndLeaderboardSearch", trimmedQuery],
@@ -30,7 +35,7 @@ export default function PlayerAndLeaderboardSearch() {
       players: ScoreSaberPlayer[];
       leaderboards: ScoreSaberLeaderboard[];
     }> => {
-      if (trimmedQuery.length > 0 && trimmedQuery.length <= 3) {
+      if (isPlayerSearchQueryTooShort(trimmedQuery)) {
         return { players: [], leaderboards: [] };
       }
       const playerPromise = ssrApi.searchPlayers(trimmedQuery);
@@ -109,7 +114,11 @@ export default function PlayerAndLeaderboardSearch() {
         isLoading={isLoading}
         placeholder="Enter a player or leaderboard name..."
       >
-        {isLoading ? (
+        {isQueryTooShort ? (
+          <div className="flex flex-col items-center justify-center px-4 py-12">
+            <p className="text-muted-foreground text-center text-sm">{PLAYER_SEARCH_TOO_SHORT_MESSAGE}</p>
+          </div>
+        ) : isLoading ? (
           <div className="flex flex-col items-center justify-center py-12">
             <LoaderCircle className="text-muted-foreground mb-3 size-6 animate-spin" />
             <p className="text-muted-foreground text-sm">Searching...</p>

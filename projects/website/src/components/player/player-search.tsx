@@ -1,3 +1,7 @@
+import {
+  isPlayerSearchQueryTooShort,
+  PLAYER_SEARCH_TOO_SHORT_MESSAGE,
+} from "@/common/search-query-utils";
 import SearchDialog from "@/components/ui/search-dialog";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -40,11 +44,12 @@ const PlayerSearch = ({
   const [query, setQuery] = useState<string>("");
   const debouncedQuery = useDebounce(query, 500);
   const trimmedQuery = debouncedQuery.trim();
+  const isQueryTooShort = isPlayerSearchQueryTooShort(query);
 
   const { data: results, isLoading } = useQuery({
     queryKey: ["player-search", trimmedQuery],
     queryFn: async () => {
-      if (trimmedQuery.length > 0 && trimmedQuery.length <= 3) {
+      if (isPlayerSearchQueryTooShort(trimmedQuery)) {
         return { players: [] };
       }
       const playerResults = await ssrApi.searchPlayers(trimmedQuery);
@@ -69,7 +74,11 @@ const PlayerSearch = ({
       isLoading={isLoading}
       placeholder={placeholder}
     >
-      {isLoading ? (
+      {isQueryTooShort ? (
+        <div className="flex flex-col items-center justify-center px-4 py-12">
+          <p className="text-muted-foreground text-center text-sm">{PLAYER_SEARCH_TOO_SHORT_MESSAGE}</p>
+        </div>
+      ) : isLoading ? (
         <div className="flex flex-col items-center justify-center py-12">
           <LoaderCircle className="text-muted-foreground mb-3 size-6 animate-spin" />
           <p className="text-muted-foreground text-sm">Searching players...</p>
