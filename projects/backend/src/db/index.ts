@@ -6,10 +6,10 @@ import * as schema from "./schema";
 
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
-  max: 50, // max connections
-  min: 10, // min connections
-  idleTimeoutMillis: 30000, // close idle connections after 30s
-  connectionTimeoutMillis: 2000,
+  max: env.DATABASE_POOL_MAX,
+  min: env.DATABASE_POOL_MIN,
+  idleTimeoutMillis: env.DATABASE_POOL_IDLE_TIMEOUT_MS,
+  connectionTimeoutMillis: env.DATABASE_POOL_CONNECTION_TIMEOUT_MS,
 });
 
 export const db = drizzle(pool, { schema: { ...schema } });

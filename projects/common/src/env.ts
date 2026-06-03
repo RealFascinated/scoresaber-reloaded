@@ -5,6 +5,10 @@ export const env = createEnv({
   server: {
     // Databases
     DATABASE_URL: z.string(),
+    DATABASE_POOL_MAX: z.coerce.number().int().positive().default(50),
+    DATABASE_POOL_MIN: z.coerce.number().int().nonnegative().default(10),
+    DATABASE_POOL_IDLE_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
+    DATABASE_POOL_CONNECTION_TIMEOUT_MS: z.coerce.number().int().positive().default(2000),
     REDIS_URL: z.string(),
 
     LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).optional(),
@@ -60,6 +64,10 @@ export const env = createEnv({
 
     // PostgreSQL
     DATABASE_URL: process.env.DATABASE_URL,
+    DATABASE_POOL_MAX: process.env.DATABASE_POOL_MAX,
+    DATABASE_POOL_MIN: process.env.DATABASE_POOL_MIN,
+    DATABASE_POOL_IDLE_TIMEOUT_MS: process.env.DATABASE_POOL_IDLE_TIMEOUT_MS,
+    DATABASE_POOL_CONNECTION_TIMEOUT_MS: process.env.DATABASE_POOL_CONNECTION_TIMEOUT_MS,
 
     // Redis
     REDIS_URL: process.env.REDIS_URL,

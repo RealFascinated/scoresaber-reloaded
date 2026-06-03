@@ -6,9 +6,9 @@
       "name": "scoresaber-reloaded",
       "dependencies": {
         "cross-env": "^10.1.0",
-        "prettier": "^3.8.1",
+        "prettier": "^3.8.3",
         "prettier-plugin-organize-imports": "^4.3.0",
-        "prettier-plugin-tailwindcss": "^0.7.2",
+        "prettier-plugin-tailwindcss": "^0.7.4",
       },
       "devDependencies": {
         "eslint": "^9.39.4",
