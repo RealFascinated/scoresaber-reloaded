@@ -1,5 +1,5 @@
 import { ScoreSaberPlayerHistory } from "../schemas/scoresaber/player/history";
-import { ScoreSaberPlayerToken } from "../types/token/scoresaber/player";
+import { ScoreSaberPlayerToken } from "../types/token/scoresaber/v1/player";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "./time-utils";
 
 /**

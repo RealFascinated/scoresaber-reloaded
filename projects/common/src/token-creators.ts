@@ -8,10 +8,45 @@ import {
 import { ScoreSaberLeaderboardStatus } from "./schemas/scoresaber/leaderboard/status";
 import { ScoreSaberScore, ScoreSaberScoreSchema } from "./schemas/scoresaber/score/score";
 import { Modifier } from "./score/modifier";
-import ScoreSaberLeaderboardToken from "./types/token/scoresaber/leaderboard";
-import ScoreSaberScoreToken from "./types/token/scoresaber/score";
+import ScoreSaberLeaderboardToken from "./types/token/scoresaber/v1/leaderboard";
+import { ScoreSaberPlayerToken } from "./types/token/scoresaber/v1/player";
+import ScoreSaberScoreToken from "./types/token/scoresaber/v1/score";
+import { ScoreSaberV2PlayerPageToken } from "./types/token/scoresaber/v2/players-page";
 import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
 import { parseDate } from "./utils/time-utils";
+
+/**
+ * Parses a {@link ScoreSaberV2PlayerPageToken} into a {@link ScoreSaberPlayerToken}.
+ *
+ * @param token the v2 token to parse
+ */
+export function getScoreSaberPlayerFromV2Token(token: ScoreSaberV2PlayerPageToken): ScoreSaberPlayerToken {
+  return {
+    id: token.id,
+    name: token.name,
+    profilePicture: token.avatar,
+    bio: null,
+    country: token.country,
+    pp: token.stats.totalPP,
+    rank: token.stats.rank,
+    countryRank: token.stats.countryRank,
+    role: token.role,
+    badges: null,
+    histories: "",
+    scoreStats: {
+      totalScore: Number(token.stats.totalScore),
+      totalRankedScore: Number(token.stats.totalRankedScore),
+      averageRankedAccuracy: token.stats.averageAccuracy,
+      totalPlayCount: token.stats.totalSubmittedPlays,
+      rankedPlayCount: token.stats.totalSubmittedPlays,
+      replaysWatched: token.stats.totalReplayViews,
+    },
+    permissions: token.permissions,
+    banned: token.banned,
+    inactive: token.inactive,
+    firstSeen: new Date().toISOString(),
+  };
+}
 
 /**
  * Parses a {@link ScoreSaberLeaderboardToken} into a {@link ScoreSaberLeaderboard}.
@@ -80,13 +115,13 @@ export function getScoreSaberScoreFromToken(
     token.modifiers == undefined || token.modifiers === ""
       ? []
       : token.modifiers.split(",").map(mod => {
-          mod = mod.toUpperCase();
-          const modifier = Modifier[mod as keyof typeof Modifier];
-          if (modifier === undefined) {
-            throw new Error(`Unknown modifier: ${mod}`);
-          }
-          return modifier;
-        });
+        mod = mod.toUpperCase();
+        const modifier = Modifier[mod as keyof typeof Modifier];
+        if (modifier === undefined) {
+          throw new Error(`Unknown modifier: ${mod}`);
+        }
+        return modifier;
+      });
 
   return ScoreSaberScoreSchema.parse(
     {

@@ -39,7 +39,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentCountry, setCurrentCountry] = useState(initialCountry);
   const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
-
+  const [includeInactives, setIncludeInactives] = useState<boolean>(false);
   const debouncedSearch = useDebounce(currentSearch, 500);
   const isValidSearch = debouncedSearch != undefined && debouncedSearch.length >= 3;
 
@@ -54,6 +54,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
       ssrApi.searchPlayersRanking(currentPage, {
         country: currentCountry,
         search: isValidSearch ? debouncedSearch : undefined,
+        includeInactives: includeInactives,
       }),
     refetchIntervalInBackground: false,
     placeholderData: prev => prev,
@@ -197,6 +198,12 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 onChange={e => setCurrentSearch(e.target.value)}
                 className="h-10"
               />
+            </FilterRow>
+          </FilterField>
+
+          <FilterField label="Include Inactives">
+            <FilterRow>
+              <Switch checked={includeInactives} onCheckedChange={setIncludeInactives} />
             </FilterRow>
           </FilterField>
         </FilterSection>

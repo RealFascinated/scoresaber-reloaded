@@ -1,5 +1,4 @@
 import { Colors } from "@/common/colors";
-import { PreloadResources } from "@/components/preload-resources";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { PageTransitionProvider } from "@/contexts/page-transition-context";
@@ -49,7 +48,7 @@ export const metadata: Metadata = {
     title: env.NEXT_PUBLIC_WEBSITE_NAME,
     description:
       "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
-    url: "https://ssr.fascinated.cc",
+    url: env.NEXT_PUBLIC_WEBSITE_URL,
     locale: "en_US",
     type: "website",
   },
@@ -77,7 +76,6 @@ export default function RootLayout({
           />
         )}
         <Toaster />
-        <PreloadResources />
         <LazyMotion features={domAnimation} strict>
           <PageTransitionProvider>
             <QueryProvider>{children}</QueryProvider>

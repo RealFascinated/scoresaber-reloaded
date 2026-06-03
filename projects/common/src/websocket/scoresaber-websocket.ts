@@ -1,4 +1,4 @@
-import ScoreSaberPlayerScoreToken from "../types/token/scoresaber/player-score";
+import ScoreSaberPlayerScoreToken from "../types/token/scoresaber/v1/player-score";
 import { ScoreSaberWebsocketMessageToken } from "../types/token/scoresaber/websocket/websocket-message";
 import { connectWebSocket, WebsocketCallbacks } from "./websocket";
 

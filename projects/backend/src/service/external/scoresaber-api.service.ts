@@ -1,12 +1,13 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { DetailType } from "@ssr/common/detail-type";
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import ScoreSaberRankingRequestsResponse from "@ssr/common/schemas/response/scoresaber/ranking-requests";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberPlayerFromV2Token } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
 import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/leaderboard-scores-page";
@@ -15,6 +16,7 @@ import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/
 import { ScoreSaberPlayerSearchToken } from "@ssr/common/types/token/scoresaber/player-search";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/players-page";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
+import ScoreSaberV2PlayersPageToken from "@ssr/common/types/token/scoresaber/v2/players-page";
 import { CoalescingLoader } from "@ssr/common/utils/coalescing-loader";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
@@ -30,8 +32,6 @@ const API_BASE = "https://scoresaber.com/api";
  */
 const SEARCH_PLAYERS_ENDPOINT = `${API_BASE}/players?search=:query`;
 const LOOKUP_PLAYER_ENDPOINT = `${API_BASE}/player/:id/:type`;
-const LOOKUP_PLAYERS_ENDPOINT = `${API_BASE}/players?page=:page`;
-const LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT = `${API_BASE}/players?page=:page&countries=:country`;
 const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limit&sort=:sort&page=:page`;
 const LOOKUP_ACTIVE_PLAYER_COUNT = `${API_BASE}/players/count`;
 const REFRESH_PLAYER_ENDPOINT = `${API_BASE}/user/:id/refresh`;
@@ -50,6 +50,11 @@ const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
  */
 const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 
+/**
+ * v2 endpoints
+ */
+const LOOKUP_PLAYERS_V2_ENDPOINT = `${API_BASE}/v2/players`;
+
 type SerializableValue =
   | string
   | number
@@ -57,8 +62,8 @@ type SerializableValue =
   | null
   | SerializableValue[]
   | {
-      [key: string]: SerializableValue;
-    };
+    [key: string]: SerializableValue;
+  };
 
 type CachedResponse<T> = {
   data: T | string;
@@ -84,7 +89,6 @@ export class ScoreSaberApiService {
   private static async fetch<T>(
     url: string,
     options?: {
-      priority?: CooldownPriority;
       searchParams?: Record<string, string>;
     }
   ): Promise<T | undefined> {
@@ -104,7 +108,7 @@ export class ScoreSaberApiService {
           let response: Response | undefined;
           try {
             response = await fetch(
-              `https://p.fascinated.cc/${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`,
+              `${env.PROXY_URL}/${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`,
               {
                 signal: controller.signal,
               }
@@ -198,51 +202,44 @@ export class ScoreSaberApiService {
    * Lookup players on a specific page
    *
    * @param page the page to get players for
+   * @param options the options to use when looking up the players (optional)
    * @returns the players on the page, or undefined
    */
   public static async lookupPlayers(
     page: number,
-    search?: string
+    options?: {
+      search?: string;
+      country?: string;
+      includeInactives?: boolean;
+    }
   ): Promise<ScoreSaberPlayersPageToken | undefined> {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up players on page "${page}"...`);
-    const response = await ScoreSaberApiService.fetch<ScoreSaberPlayersPageToken>(
-      LOOKUP_PLAYERS_ENDPOINT.replace(":page", page.toString()) + (search ? `&search=${search}` : "")
+    const response = await ScoreSaberApiService.fetch<ScoreSaberV2PlayersPageToken>(
+      LOOKUP_PLAYERS_V2_ENDPOINT,
+      {
+        searchParams: {
+          page: page.toString(),
+          ...(options?.search ? { search: options.search } : {}),
+          ...(options?.country ? { country: options.country } : {}),
+          ...(options?.includeInactives ? { includeInactives: options.includeInactives.toString() } : {}),
+        },
+      }
     );
     if (response === undefined) {
       return undefined;
     }
     ScoreSaberApiService.log(
-      `Found ${response.players.length} players in ${formatDuration(performance.now() - before)}`
+      `Found ${response.data.length} players in ${formatDuration(performance.now() - before)}`
     );
-    return response;
-  }
-
-  /**
-   * Lookup players on a specific page and country
-   *
-   * @param page the page to get players for
-   * @param country the country to get players for
-   * @returns the players on the page, or undefined
-   */
-  public static async lookupPlayersByCountry(
-    page: number,
-    country: string,
-    search?: string
-  ): Promise<ScoreSaberPlayersPageToken | undefined> {
-    const before = performance.now();
-    ScoreSaberApiService.log(`Looking up players on page "${page}" for country "${country}"...`);
-    const response = await ScoreSaberApiService.fetch<ScoreSaberPlayersPageToken>(
-      LOOKUP_PLAYERS_BY_COUNTRY_ENDPOINT.replace(":page", page.toString()).replace(":country", country) +
-        (search ? `&search=${search}` : "")
-    );
-    if (response === undefined) {
-      return undefined;
-    }
-    ScoreSaberApiService.log(
-      `Found ${response.players.length} players in ${formatDuration(performance.now() - before)}`
-    );
-    return response;
+    return {
+      players: response.data.map(getScoreSaberPlayerFromV2Token),
+      metadata: {
+        page: response.metadata.page,
+        itemsPerPage: response.metadata.itemsPerPage,
+        total: response.metadata.totalItems,
+      },
+    };
   }
 
   /**
@@ -276,8 +273,7 @@ export class ScoreSaberApiService {
     sort,
     limit = 8,
     page,
-    search,
-    priority = CooldownPriority.NORMAL,
+    search
   }: {
     playerId: string;
     sort: ScoreSaberScoreSort;
@@ -295,9 +291,6 @@ export class ScoreSaberApiService {
         .replace(":limit", limit.toString())
         .replace(":sort", sort)
         .replace(":page", page.toString()) + (search ? `&search=${search}` : ""),
-      {
-        priority,
-      }
     );
     if (response === undefined) {
       return undefined;
@@ -314,16 +307,12 @@ export class ScoreSaberApiService {
    * @param leaderboardId the ID of the leaderboard to look up
    */
   public static async lookupLeaderboard(
-    leaderboardId: string | number,
-    priority?: CooldownPriority
+    leaderboardId: string | number
   ): Promise<ScoreSaberLeaderboardToken | undefined> {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up leaderboard "${leaderboardId}"...`);
     const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardToken>(
       LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId.toString()),
-      {
-        priority,
-      }
     );
     if (response === undefined) {
       return undefined;
@@ -400,9 +389,9 @@ export class ScoreSaberApiService {
           ...(options?.category ? { category: options.category.toString() } : {}),
           ...(options?.stars
             ? {
-                minStar: (options.stars.min ?? 0).toString(),
-                maxStar: (options.stars.max ?? 0).toString(),
-              }
+              minStar: (options.stars.min ?? 0).toString(),
+              maxStar: (options.stars.max ?? 0).toString(),
+            }
             : {}),
           ...(options?.sort ? { sort: options.sort.toString() } : {}),
           ...(options?.search ? { search: options.search } : {}),
@@ -452,7 +441,6 @@ export class ScoreSaberApiService {
     page: number,
     options?: {
       country?: string;
-      priority?: CooldownPriority;
     }
   ): Promise<ScoreSaberLeaderboardScoresPageToken | undefined> {
     const before = performance.now();
@@ -461,10 +449,7 @@ export class ScoreSaberApiService {
       LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId.toString()).replace(
         ":page",
         page.toString()
-      ) + (options?.country ? `&countries=${options.country}` : ""),
-      {
-        ...(options?.priority ? { priority: options.priority } : {}),
-      }
+      ) + (options?.country ? `&countries=${options.country}` : "")
     );
 
     if (response === undefined) {

@@ -29,6 +29,8 @@ export const env = createEnv({
     DISCORD_CHANNEL_MEDAL_SCORES_FEED: z.string().optional(),
     DISCORD_CHANNEL_BACKEND_LOGS: z.string().optional(),
     DISCORD_CHANNEL_BEATSAVER_LOGS: z.string().optional(),
+
+    PROXY_URL: z.string(),
   },
 
   client: {
@@ -85,15 +87,17 @@ export const env = createEnv({
     PROMETHEUS_AUTH_TOKEN: process.env.PROMETHEUS_AUTH_TOKEN,
 
     // Misc
-    NEXT_PUBLIC_WEBSITE_NAME: process.env.NEXT_PUBLIC_WEBSITE_NAME ?? "ScoreSaber Reloaded",
-    NEXT_PUBLIC_WEBSITE_URL: process.env.NEXT_PUBLIC_WEBSITE_URL ?? "https://ssr.fascinated.cc",
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? "https://ssr-api.fascinated.cc",
-    NEXT_PUBLIC_CDN_URL: process.env.NEXT_PUBLIC_CDN_URL ?? "https://s3.fascinated.cc",
-    NEXT_PUBLIC_WEBSOCKET_URL: process.env.NEXT_PUBLIC_WEBSOCKET_URL ?? "wss://ssr-api.fascinated.cc",
+    NEXT_PUBLIC_WEBSITE_NAME: process.env.NEXT_PUBLIC_WEBSITE_NAME,
+    NEXT_PUBLIC_WEBSITE_URL: process.env.NEXT_PUBLIC_WEBSITE_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_CDN_URL: process.env.NEXT_PUBLIC_CDN_URL,
+    NEXT_PUBLIC_WEBSOCKET_URL: process.env.NEXT_PUBLIC_WEBSOCKET_URL,
 
     // Analytics
     NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: process.env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID,
     NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL,
+
+    PROXY_URL: process.env.PROXY_URL,
   },
 
   /**
