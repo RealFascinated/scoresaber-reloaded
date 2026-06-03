@@ -84,8 +84,8 @@ export class PlayerHistoryService {
 
       // Update the player's inactive status if it has changed
       if (account.inactive !== player.inactive) {
-        PlayerCoreService.updatePlayer(account.id, { inactive: player.inactive });
-        redisClient.del(cachedPlayerTokenCacheKey(account.id));
+        await PlayerCoreService.updatePlayer(account.id, { inactive: player.inactive });
+        await redisClient.del(cachedPlayerTokenCacheKey(account.id));
       }
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue

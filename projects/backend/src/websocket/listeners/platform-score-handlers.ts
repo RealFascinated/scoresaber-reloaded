@@ -181,11 +181,10 @@ export class ScoreWebsockets implements EventListener {
       const isTop50GlobalScore = await TopScoresService.isTop50GlobalScore(score);
 
       // Create the player, update their name if they are already being tracked
-      if (!(await PlayerCoreService.createPlayer(player.id))) {
-        Promise.all([
-          // Update the player's name last
-          player.name ? PlayerCoreService.updatePlayer(player.id, { name: player.name }) : undefined,
-        ]);
+      if (!(await PlayerCoreService.createPlayer(player.id)) && player.name) {
+        void PlayerCoreService.updatePlayer(player.id, { name: player.name }).catch(error => {
+          scoresWsLog.warn(`Failed to update name for player "${player.id}":`, error);
+        });
       }
 
       // Fetch the leaderboard if it doesn't exist
