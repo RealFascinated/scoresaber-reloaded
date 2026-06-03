@@ -4,7 +4,7 @@ import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
 import { isProduction } from "@ssr/common/utils/utils";
 import { playerCacheKey } from "../../common/cache-keys";
 import { logNewTrackedPlayer } from "../../common/embds";

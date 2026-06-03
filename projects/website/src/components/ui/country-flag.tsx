@@ -14,10 +14,9 @@ type Props = {
 };
 
 export default function CountryFlag({ code, size = 24, className, tooltip, tooltipSide = "top" }: Props) {
-  const getFlagSrc = (nextCode: string) =>
-    `https://cdn.fascinated.cc/assets/flags/${nextCode.toLowerCase()}.png`;
+  const getFlagSrc = (nextCode: string) => `/assets/flags/${nextCode.toLowerCase()}.png`;
 
-  const unknownSrc = "https://cdn.fascinated.cc/assets/flags/unknown.png";
+  const unknownSrc = "/assets/flags/unknown.png";
   const [failedForCode, setFailedForCode] = useState<string | null>(null);
   const primarySrc = code ? getFlagSrc(code) : unknownSrc;
   const flagSrc = failedForCode === code ? unknownSrc : primarySrc;

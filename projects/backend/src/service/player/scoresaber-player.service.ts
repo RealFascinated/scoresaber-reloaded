@@ -3,7 +3,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";

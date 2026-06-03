@@ -15,13 +15,13 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["scoresaber", "beatsaber", "games", "entertainment"],
     screenshots: [
       {
-        src: "https://cdn.fascinated.cc/xmvzAW.png",
+        src: "/manifest/large.png",
         sizes: "2500x1270",
         type: "image/png",
         form_factor: "wide",
       },
       {
-        src: "https://cdn.fascinated.cc/NdniRT.png",
+        src: "/manifest/mobile.png",
         sizes: "446x994",
         type: "image/png",
         form_factor: "narrow",

@@ -1,3 +1,4 @@
+import { env } from "@ssr/common/env";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { normalizeModifiers } from "@ssr/common/score/modifier";
 import { ScoreSaberScoreHistoryRow, ScoreSaberScoreRow } from "../schema";
@@ -30,7 +31,7 @@ export function scoreSaberScoreRowToType(
     modifiers: normalizeModifiers(row.modifiers ?? []),
     playerInfo: {
       id: row.playerId,
-      avatar: "https://cdn.fascinated.cc/assets/unknown.png",
+      avatar: env.NEXT_PUBLIC_WEBSITE_URL + "/assets/unknown.png",
     },
     hmd: row.hmd ?? null,
     rightController: row.rightController ?? null,

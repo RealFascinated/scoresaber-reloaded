@@ -5,7 +5,7 @@ import {
   ScoreSaberPlayerHistoryEntries,
 } from "@ssr/common/schemas/scoresaber/player/history";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/player";
+import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
 import {
@@ -140,9 +140,9 @@ export class PlayerHistoryService {
     );
     PlayerHistoryService.logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-        `Successfully processed: ${successCount} players\n` +
-        `Failed to process: ${errorCount} players\n` +
-        `Total inactive players: ${inactivePlayers}`
+      `Successfully processed: ${successCount} players\n` +
+      `Failed to process: ${errorCount} players\n` +
+      `Total inactive players: ${inactivePlayers}`
     );
   }
 

@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function HMDIcon({ hmd }: { hmd: HMDInfo }) {
   return (
     <Image
-      src={`https://cdn.fascinated.cc/assets/hmds/${hmd.logo}`}
+      src={`/assets/hmds/${hmd.logo}`}
       alt={`${hmd.logo} Logo`}
       width={24}
       height={24}
