@@ -13,26 +13,28 @@ export class PlayerRankedService {
    * @returns the ranked pp scores
    */
   public static async getPlayerPps(playerId: string): Promise<PlayerPpsResponse> {
-    await PlayerCoreService.playerExists(playerId, true);
+    return CacheService.fetch(CacheId.PLAYER_PPS, playerId, async () => {
+      await PlayerCoreService.playerExists(playerId, true);
 
-    const playerScores = await ScoreSaberScoresRepository.getPpAndScoreIdByPlayer(playerId);
+      const playerScores = await ScoreSaberScoresRepository.getPpAndScoreIdByPlayer(playerId);
 
-    if (playerScores.length === 0) {
+      if (playerScores.length === 0) {
+        return {
+          scores: [],
+        };
+      }
+
+      const scores = playerScores.map(score => ({
+        pp: score.pp,
+        scoreId: score.scoreId,
+        weight: 0,
+      }));
+
+      updateScoreWeights(scores); // Set the weights for the scores
       return {
-        scores: [],
+        scores,
       };
-    }
-
-    const scores = playerScores.map(score => ({
-      pp: score.pp,
-      scoreId: score.scoreId,
-      weight: 0,
-    }));
-
-    updateScoreWeights(scores); // Set the weights for the scores
-    return {
-      scores,
-    };
+    });
   }
 
   /**
