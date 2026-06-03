@@ -45,8 +45,8 @@ export default async function MapsPage({ params }: MapsPageProps) {
   const { type } = await params;
 
   return (
-    <main className="w-full">
+    <section className="w-full">
       <MapsData type={type} />
-    </main>
+    </section>
   );
 }

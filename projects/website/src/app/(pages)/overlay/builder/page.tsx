@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 
 export default async function OverlayPage() {
   return (
-    <main className="flex w-full justify-center">
+    <section className="flex w-full justify-center">
       <OverlayBuilder />
-    </main>
+    </section>
   );
 }

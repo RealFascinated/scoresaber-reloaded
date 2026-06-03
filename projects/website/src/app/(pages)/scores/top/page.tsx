@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 
 export default async function TopScoresPage() {
   return (
-    <main className="flex w-full justify-center">
+    <section className="flex w-full justify-center">
       <TopScoresData />
-    </main>
+    </section>
   );
 }

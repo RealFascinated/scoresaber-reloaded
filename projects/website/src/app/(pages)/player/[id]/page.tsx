@@ -70,8 +70,8 @@ export default async function PlayerPage(props: Props) {
   }
 
   return (
-    <main className="flex w-full justify-center">
+    <section className="flex w-full justify-center">
       <PlayerData player={player} />
-    </main>
+    </section>
   );
 }

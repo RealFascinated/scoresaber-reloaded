@@ -34,8 +34,8 @@ export default async function MedalsPage(props: MedalProps) {
   const { page } = await getMedalsData(props);
 
   return (
-    <main className="flex w-full flex-col items-center text-sm">
+    <section className="flex w-full flex-col items-center text-sm">
       <MedalsData initialPage={page} />
-    </main>
+    </section>
   );
 }

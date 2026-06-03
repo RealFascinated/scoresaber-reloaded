@@ -53,8 +53,8 @@ export default async function RankingPage(props: Props) {
   const { page, country } = await getRankingData(props);
 
   return (
-    <main className="flex w-full flex-col items-center text-sm">
+    <section className="flex w-full flex-col items-center text-sm">
       <RankingData initialPage={page} initialCountry={country} />
-    </main>
+    </section>
   );
 }
