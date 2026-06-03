@@ -222,7 +222,7 @@ export class ScoreSaberApiService {
           page: page.toString(),
           ...(options?.search ? { search: options.search } : {}),
           ...(options?.country ? { countries: options.country } : {}),
-          ...(options?.includeInactives ? { includeInactives: options.includeInactives.toString() } : {}),
+          ...(options?.includeInactives ? { includeInactive: options.includeInactives.toString() } : {}),
         },
       }
     );
