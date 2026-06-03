@@ -8,14 +8,14 @@ import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberPlayerFromV2Token } from "@ssr/common/token-creators";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
-import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/leaderboard-page";
-import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/leaderboard-scores-page";
-import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/v1/leaderboard";
+import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/v1/leaderboard-page";
+import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/v1/leaderboard-scores-page";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/v1/player-scores-page";
 import { ScoreSaberPlayerSearchToken } from "@ssr/common/types/token/scoresaber/v1/player-search";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/v1/players-page";
+import RankingRequestToken from "@ssr/common/types/token/scoresaber/v1/ranking-request-token";
 import ScoreSaberV2PlayersPageToken from "@ssr/common/types/token/scoresaber/v2/players-page";
 import { CoalescingLoader } from "@ssr/common/utils/coalescing-loader";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -221,7 +221,7 @@ export class ScoreSaberApiService {
         searchParams: {
           page: page.toString(),
           ...(options?.search ? { search: options.search } : {}),
-          ...(options?.country ? { country: options.country } : {}),
+          ...(options?.country ? { countries: options.country } : {}),
           ...(options?.includeInactives ? { includeInactives: options.includeInactives.toString() } : {}),
         },
       }

@@ -4,10 +4,9 @@ import { MiniRankingResponse } from "@ssr/common/schemas/response/player/around-
 import { miniRankingCacheKey } from "../../common/cache-keys";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
-import { PlayerMedalsService } from "../medals/player-medals.service";
 import ScoreSaberPlayerService from "./scoresaber-player.service";
 
-type MiniRankingType = "global" | "country" | "medals";
+type MiniRankingType = "global" | "country";
 
 export default class MiniRankingService {
   /**
@@ -69,37 +68,13 @@ export default class MiniRankingService {
     const extraPagesNeeded = rank <= 3 ? Math.ceil(5 / itemsPerPage) : 0;
     const finalEndPage = endPage + extraPagesNeeded;
 
-    // Handle medal rankings differently - use PlayerService instead of ScoreSaber API
-    if (type === "medals") {
-      const pageResponses = await Promise.all(
-        Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
-          CacheService.fetch(
-            CacheId.SCORESABER_PLAYER,
-            miniRankingCacheKey(player.id, "medals", page),
-            async () => PlayerMedalsService.getPlayerMedalRanking(page)
-          )
-        )
-      );
-
-      const allPlayers = pageResponses
-        .filter((response): response is NonNullable<typeof response> => response !== undefined)
-        .flatMap(response => response.items);
-
-      return this.processPlayersAndBuildResult(
-        allPlayers.map(playerData => ScoreSaberPlayerService.getPlayer(playerData.id, "basic")),
-        player,
-        type,
-        getRank
-      );
-    }
-
     // Fetch all required pages in parallel with caching for global and country rankings
     const pageResponses = await Promise.all(
       Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
         CacheService.fetch(
           CacheId.SCORESABER_PLAYER,
           miniRankingCacheKey(player.id, type, page, player.country),
-          async () => ScoreSaberApiService.lookupPlayers(page, { ...(type === "global" ? { country: player.country } : {}) })
+          async () => ScoreSaberApiService.lookupPlayers(page, { ...(type !== "global" ? { country: player.country } : {}) })
         )
       )
     );
