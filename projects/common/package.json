@@ -16,15 +16,15 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.9.1",
     "@types/ws": "^8.18.1",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.11",
-    "dayjs": "^1.11.20",
-    "devalue": "^5.7.0",
-    "ws": "^8.20.0",
-    "zod": "^4.3.6"
+    "dayjs": "^1.11.21",
+    "devalue": "^5.8.1",
+    "ws": "^8.21.0",
+    "zod": "^4.4.3"
   }
 }
