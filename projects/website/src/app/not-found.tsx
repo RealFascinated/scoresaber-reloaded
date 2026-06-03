@@ -1,7 +1,8 @@
+import { NotFoundSearchButton } from "@/components/not-found-search-button";
 import SimpleLink from "@/components/simple-link";
 import { DiscordButton } from "@/components/social/discord-button";
 import { Button } from "@/components/ui/button";
-import { HomeIcon, SearchIcon } from "lucide-react";
+import { HomeIcon } from "lucide-react";
 
 export default function NotFoundPage() {
   return (
@@ -38,17 +39,7 @@ export default function NotFoundPage() {
               </Button>
             </SimpleLink>
 
-            <SimpleLink href="/search">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 group relative h-12 overflow-hidden rounded-xl border-2 px-8 backdrop-blur-xs transition-all duration-300"
-              >
-                <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <SearchIcon className="relative z-10 mr-2 h-5 w-5" />
-                <span className="relative z-10 font-semibold">Search Players</span>
-              </Button>
-            </SimpleLink>
+            <NotFoundSearchButton />
           </div>
 
           {/* Discord Support */}
