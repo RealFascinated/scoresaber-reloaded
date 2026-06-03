@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { DEBOUNCE_MS_FORM } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
 import type { LucideIcon } from "lucide-react";
 import { ReactElement, ReactNode, Ref, useEffect, useState } from "react";
@@ -185,7 +186,7 @@ function FormFieldComponent<TFormValues extends FieldValues, TName extends Path<
   form,
   onFormSubmit,
 }: FormFieldComponentProps<TFormValues, TName>) {
-  const debouncedValue = useDebounce(formField.value, 500);
+  const debouncedValue = useDebounce(formField.value, DEBOUNCE_MS_FORM);
   const [hasChanged, setHasChanged] = useState(false);
 
   const wrappedOnChange = (value: TFormValues[TName]) => {

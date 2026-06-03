@@ -31,10 +31,10 @@ export function EmptyState({ icon, title, description, className }: EmptyStatePr
       className={cn("bg-secondary/90 flex min-h-[200px] flex-col items-center justify-center p-8", className)}
     >
       <div className="mb-6">
-        {icon || <ChartBarIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />}
+        {icon || <ChartBarIcon className="text-muted-foreground h-10 w-10" />}
       </div>
-      <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
-      <p className="max-w-[500px] text-center text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+      <h3 className="text-foreground mb-2 text-lg font-semibold">{title}</h3>
+      <p className="text-muted-foreground max-w-[500px] text-center text-sm leading-relaxed">
         {description}
       </p>
     </div>

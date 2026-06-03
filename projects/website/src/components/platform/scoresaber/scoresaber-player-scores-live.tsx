@@ -14,6 +14,7 @@ import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
 import { ClockIcon, SearchIcon, TrendingUpIcon, XIcon } from "lucide-react";
@@ -52,7 +53,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
 
   // Search
   const [search, setSearch] = useQueryState("search", parseAsString);
-  const debouncedSearchTerm = useDebounce(search || "", 250);
+  const debouncedSearchTerm = useDebounce(search || "", DEBOUNCE_MS_SEARCH);
   const invalidSearch = search && search.length >= 1 && search.length < 3;
 
   useDocumentTitle(
@@ -167,7 +168,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
               <EmptyState
                 className="border-border rounded-lg border"
                 title="No Results"
-                description="No score were found on this page"
+                description="No scores were found on this page"
                 icon={<SearchIcon />}
               />
             ))}

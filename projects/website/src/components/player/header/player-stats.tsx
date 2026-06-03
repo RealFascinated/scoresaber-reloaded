@@ -14,13 +14,15 @@ import HMDIcon from "../../hmd-icon";
 type Stat = {
   name: string;
   defaultHidden?: boolean;
-  create: (player: ScoreSaberPlayer) => ReactNode | undefined;
+  create: (player: ScoreSaberPlayer, statName: string) => ReactNode | undefined;
 };
 
-function statWithTooltip(tooltip: ReactNode, stat: ReactNode) {
+type StatValueProps = React.ComponentProps<typeof StatValue>;
+
+function statWithTooltip(statName: string, tooltip: ReactNode, statProps: Omit<StatValueProps, "name">) {
   return (
     <SimpleTooltip display={tooltip} side="bottom" showOnMobile>
-      {stat}
+      <StatValue name={statName} {...statProps} />
     </SimpleTooltip>
   );
 }
@@ -30,9 +32,9 @@ const RANKED_VALUE_COLOR = "text-pp";
 const playerStats: Stat[] = [
   {
     name: "Ranked Play Count",
-    create: player => (
+    create: (player, statName) => (
       <StatValue
-        name="Ranked Play Count"
+        name={statName}
         value={formatNumberWithCommas(player.statistics.totalRankedScores)}
         size="lg"
         valueColor={RANKED_VALUE_COLOR}
@@ -41,9 +43,9 @@ const playerStats: Stat[] = [
   },
   {
     name: "Total Ranked Score",
-    create: player => (
+    create: (player, statName) => (
       <StatValue
-        name="Total Ranked Score"
+        name={statName}
         value={formatNumberWithCommas(player.statistics.totalRankedScore)}
         size="lg"
         valueColor={RANKED_VALUE_COLOR}
@@ -52,9 +54,9 @@ const playerStats: Stat[] = [
   },
   {
     name: "Average Ranked Accuracy",
-    create: player => (
+    create: (player, statName) => (
       <StatValue
-        name="Average Ranked Accuracy"
+        name={statName}
         value={`${player.statistics.averageRankedAccuracy.toFixed(2)}%`}
         size="lg"
         valueColor={RANKED_VALUE_COLOR}
@@ -63,18 +65,14 @@ const playerStats: Stat[] = [
   },
   {
     name: "Total Play Count",
-    create: player => (
-      <StatValue
-        name="Total Play Count"
-        value={formatNumberWithCommas(player.statistics.totalScores)}
-        size="lg"
-      />
+    create: (player, statName) => (
+      <StatValue name={statName} value={formatNumberWithCommas(player.statistics.totalScores)} size="lg" />
     ),
   },
   {
     name: "Total Score",
-    create: player => (
-      <StatValue name="Total Score" value={formatNumberWithCommas(player.statistics.totalScore)} size="lg" />
+    create: (player, statName) => (
+      <StatValue name={statName} value={formatNumberWithCommas(player.statistics.totalScore)} size="lg" />
     ),
   },
   // {
@@ -89,29 +87,31 @@ const playerStats: Stat[] = [
   // },
   {
     name: "Joined Date",
-    create: player =>
+    create: (player, statName) =>
       statWithTooltip(
+        statName,
         <p>
           {formatDate(player.joinedDate, "DD MMMM YYYY HH:mm")} ({timeAgo(player.joinedDate)})
         </p>,
-        <StatValue name="Joined Date" value={formatDate(player.joinedDate)} size="lg" />
+        { value: formatDate(player.joinedDate), size: "lg" }
       ),
   },
   {
     name: "Tracked Since",
     defaultHidden: true,
-    create: player =>
+    create: (player, statName) =>
       statWithTooltip(
+        statName,
         <p>
           {formatDate(player.trackedSince, "DD MMMM YYYY HH:mm")} ({timeAgo(player.trackedSince)})
         </p>,
-        <StatValue name="Tracked Since" value={formatDate(player.trackedSince)} size="lg" />
+        { value: formatDate(player.trackedSince), size: "lg" }
       ),
   },
   {
     name: "Headset",
     defaultHidden: true,
-    create: player => {
+    create: (player, statName) => {
       if (player.hmd === undefined) {
         return undefined;
       }
@@ -119,6 +119,7 @@ const playerStats: Stat[] = [
       const hmd = getHMDInfo(player.hmd as HMD);
 
       return statWithTooltip(
+        statName,
         <div className="flex flex-col gap-1">
           <p className="mb-1">Percentage breakdown of headsets for all scores</p>
           {Object.entries(player.hmdBreakdown ?? {}).map(([hmdKey, percentage]) => (
@@ -129,28 +130,28 @@ const playerStats: Stat[] = [
             </div>
           ))}
         </div>,
-        <StatValue
-          name="Headset"
-          value={
+        {
+          value: (
             <div className="flex items-center gap-1.5">
               <HMDIcon hmd={hmd} />
               <span>{player.hmd}</span>
             </div>
-          }
-          size="lg"
-        />
+          ),
+          size: "lg",
+        }
       );
     },
   },
   {
     name: "Roles",
-    create: player => {
+    create: (player, statName) => {
       const roles = getScoreSaberRoles(player);
       if (roles.length === 0) {
         return undefined;
       }
 
       return statWithTooltip(
+        statName,
         <div className="flex flex-col gap-0.5">
           {roles.map(role => (
             <div key={role.roleId} className="flex items-center gap-2">
@@ -159,37 +160,38 @@ const playerStats: Stat[] = [
             </div>
           ))}
         </div>,
-        <StatValue
-          name="Roles"
-          value={<p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p>}
-          size="lg"
-        />
+        {
+          value: <p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p>,
+          size: "lg",
+        }
       );
     },
   },
   {
     name: "Peak Rank",
     defaultHidden: true,
-    create: player => {
+    create: (player, statName) => {
       if (player.peakRank === undefined) {
         return undefined;
       }
 
       return statWithTooltip(
+        statName,
         <p>
           {formatDate(player.peakRank.timestamp, "DD MMMM YYYY")} ({timeAgo(player.peakRank.timestamp)})
         </p>,
-        <StatValue name="Peak Rank" value={`#${formatNumberWithCommas(player.peakRank.rank)}`} size="lg" />
+        { value: `#${formatNumberWithCommas(player.peakRank.rank)}`, size: "lg" }
       );
     },
   },
   {
     name: "+1 PP",
     defaultHidden: true,
-    create: player =>
+    create: (player, statName) =>
       statWithTooltip(
+        statName,
         <p>Amount of raw PP required to increase your global pp by 1pp</p>,
-        <StatValue name="+1 PP" value={`${formatPp(player.plusOnePp)}pp`} size="lg" />
+        { value: `${formatPp(player.plusOnePp)}pp`, size: "lg" }
       ),
   },
 ];
@@ -202,7 +204,7 @@ export default function PlayerStats({ player }: Props) {
   const [showMore, setShowMore] = useState(false);
 
   const hiddenStatCount = playerStats.filter(
-    stat => stat.defaultHidden && stat.create(player) !== undefined
+    stat => stat.defaultHidden && stat.create(player, stat.name) !== undefined
   ).length;
 
   const stats = playerStats.filter(stat => !stat.defaultHidden || showMore);
@@ -210,7 +212,7 @@ export default function PlayerStats({ player }: Props) {
   return (
     <div className="flex w-full flex-wrap justify-center gap-2 lg:justify-start">
       {stats.map(stat => {
-        const content = stat.create(player);
+        const content = stat.create(player, stat.name);
         if (content === undefined) {
           return undefined;
         }

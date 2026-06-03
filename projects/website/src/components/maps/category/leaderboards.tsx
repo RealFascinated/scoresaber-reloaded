@@ -13,13 +13,14 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
+import { DEBOUNCE_MS_FILTER } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ChartBarIcon, PlayIcon } from "lucide-react";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 export default function Leaderboards() {
   const filter = useMapFilter();
-  const filterDebounced = useDebounce(filter, 100);
+  const filterDebounced = useDebounce(filter, DEBOUNCE_MS_FILTER);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
   const {

@@ -14,6 +14,7 @@ import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
 import { LinkIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -40,7 +41,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   const [currentCountry, setCurrentCountry] = useState(initialCountry);
   const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
   const [includeInactives, setIncludeInactives] = useState<boolean>(false);
-  const debouncedSearch = useDebounce(currentSearch, 500);
+  const debouncedSearch = useDebounce(currentSearch, DEBOUNCE_MS_SEARCH);
   const isValidSearch = debouncedSearch != undefined && debouncedSearch.length >= 3;
 
   const {

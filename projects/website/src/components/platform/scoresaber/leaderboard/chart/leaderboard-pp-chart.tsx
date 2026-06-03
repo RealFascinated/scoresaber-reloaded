@@ -11,6 +11,7 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
+import { DEBOUNCE_MS_SLIDER } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ChartBarIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -27,7 +28,7 @@ export default function LeaderboardPpChartButton({ leaderboard }: Props) {
   const whatIfRange = useStableLiveQuery(() => database.getWhatIfRange());
 
   const [values, setValues] = useState(DEFAULT_WHAT_IF_RANGE);
-  const debouncedValues = useDebounce(values, 250);
+  const debouncedValues = useDebounce(values, DEBOUNCE_MS_SLIDER);
 
   useEffect(() => {
     if (whatIfRange) {

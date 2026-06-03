@@ -15,6 +15,7 @@ import { SortDirection } from "@ssr/common/schemas/score/query/sort/sort-directi
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
 import {
@@ -109,7 +110,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
 
   // Search
   const [search, setSearch] = useQueryState("search", parseAsString);
-  const debouncedSearchTerm = useDebounce(search || "", 250);
+  const debouncedSearchTerm = useDebounce(search || "", DEBOUNCE_MS_SEARCH);
   const invalidSearch = search && search.length >= 1 && search.length < 3;
 
   useDocumentTitle(
@@ -233,7 +234,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
               <EmptyState
                 className="border-border rounded-lg border"
                 title="No Results"
-                description="No score were found on this page"
+                description="No scores were found on this page"
                 icon={<SearchIcon />}
               />
             ))}

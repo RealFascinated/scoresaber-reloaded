@@ -6,6 +6,7 @@ import SearchDialog from "@/components/ui/search-dialog";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
 import { LoaderCircle, SearchX, Users } from "lucide-react";
 import { useState } from "react";
@@ -42,7 +43,7 @@ const PlayerSearch = ({
   excludePlayerIds = [],
 }: PlayerSearchProps) => {
   const [query, setQuery] = useState<string>("");
-  const debouncedQuery = useDebounce(query, 500);
+  const debouncedQuery = useDebounce(query, DEBOUNCE_MS_SEARCH);
   const trimmedQuery = debouncedQuery.trim();
   const isQueryTooShort = isPlayerSearchQueryTooShort(query);
 

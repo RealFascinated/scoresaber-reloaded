@@ -15,6 +15,7 @@ import { truncateText } from "@ssr/common/string-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
+import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
 import { LoaderCircle, Music, SearchX, Users, UserSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -25,7 +26,7 @@ export default function PlayerAndLeaderboardSearch() {
   const { isOpen, openSearch, closeSearch } = useSearch();
 
   const [query, setQuery] = useState<string>("");
-  const debouncedQuery = useDebounce(query, 200);
+  const debouncedQuery = useDebounce(query, DEBOUNCE_MS_SEARCH);
   const trimmedQuery = debouncedQuery.trim();
   const isQueryTooShort = isPlayerSearchQueryTooShort(query);
 

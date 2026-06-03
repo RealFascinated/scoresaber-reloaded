@@ -1,6 +1,7 @@
 import { BACKGROUND_COVERS } from "@/components/background-cover";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { DEBOUNCE_MS_FORM } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useEffect, useRef, useState } from "react";
 
@@ -10,7 +11,7 @@ export function useBackgroundCover(onChange: (value: string | number | boolean) 
   const [selectedOption, setSelectedOption] = useState("default");
   const [isInitialized, setIsInitialized] = useState(false);
   const previousDebouncedValue = useRef<string>("");
-  const debouncedCustomValue = useDebounce(customValue, 500);
+  const debouncedCustomValue = useDebounce(customValue, DEBOUNCE_MS_FORM);
 
   const backgroundCoverOption = useStableLiveQuery(() => database.getBackgroundCover());
   const customBackgroundCover = useStableLiveQuery(() => database.getCustomBackgroundUrl());

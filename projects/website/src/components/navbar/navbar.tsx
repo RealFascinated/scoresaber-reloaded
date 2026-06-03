@@ -105,7 +105,7 @@ export default function Navbar() {
             src="/assets/logos/scoresaber.png"
             alt="ScoreSaber Logo"
           />
-          <h1 className="text-primary hidden text-base font-bold md:flex md:text-lg">SSR</h1>
+          <span className="text-primary hidden text-base font-bold md:flex md:text-lg">SSR</span>
         </SimpleLink>
 
         {/* Links */}
