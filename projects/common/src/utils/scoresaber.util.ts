@@ -103,7 +103,7 @@ export function getScoreSaberRoles(player: { role?: string | null }): ScoreSaber
   if ("role" in player) {
     const rawRoles = player.role?.split(", ") || [player.role];
     for (const role of rawRoles) {
-      const found = scoreSaberRoles.find(r => r.roleId === role);
+      const found = scoreSaberRoles.find(r => r.roleId.toLowerCase() === role?.toLowerCase());
       if (found) {
         toReturn.push(found);
       }
