@@ -6,8 +6,7 @@ import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { pluralize } from "@ssr/common/utils/string.util";
-import { Medal } from "lucide-react";
+import { Medal, Trophy } from "lucide-react";
 import { ChangeOverTime } from "../../statistic/change-over-time";
 import { DailyChange } from "../../statistic/daily-change";
 import CountryFlag from "../../ui/country-flag";
@@ -90,19 +89,29 @@ const playerData = [
   {
     showWhenInactiveOrBanned: true,
     render: (player: ScoreSaberPlayer) => {
+      const statisticChange = player.statisticChange;
+      const medalsChange = statisticChange?.daily?.medals ?? 0;
+
       return (
         <PlayerOverviewItem>
-          <Medal className="text-muted-foreground size-4 shrink-0" />
-          <FallbackLink href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}>
-            <span
-              className={cn(
-                "text-foreground m-0 text-base font-semibold",
-                player.rankPages.medals ? "hover:text-primary cursor-pointer transition-colors" : ""
-              )}
-            >
-              {formatNumberWithCommas(player.medals)} {pluralize(player.medals, "Medal")}
-            </span>
-          </FallbackLink>
+          <div className="flex items-center gap-2">
+            <SimpleTooltip display={<span>Medals</span>} side="bottom">
+              <Medal className="text-muted-foreground h-5 w-5 shrink-0" />
+            </SimpleTooltip>
+            <ChangeOverTime player={player} type={PlayerStatChange.Medals}>
+              <FallbackLink href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}>
+                <span
+                  className={cn(
+                    "text-foreground m-0 text-base font-semibold",
+                    player.rankPages.medals ? "hover:text-primary cursor-pointer transition-colors" : ""
+                  )}
+                >
+                  {formatNumberWithCommas(player.medals)}
+                </span>
+              </FallbackLink>
+            </ChangeOverTime>
+            <DailyChange type={PlayerStatChange.Medals} change={medalsChange} />
+          </div>
         </PlayerOverviewItem>
       );
     },
@@ -116,6 +125,9 @@ const playerData = [
       return (
         <PlayerOverviewItem>
           <div className="flex items-center gap-2">
+            <SimpleTooltip display={<span>Performance Points</span>} side="bottom">
+              <Trophy className="text-muted-foreground h-5 w-5 shrink-0" />
+            </SimpleTooltip>
             <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
               <span className="text-pp hover:text-primary m-0 truncate text-base font-semibold transition-colors">
                 {formatPp(player.pp)}pp
