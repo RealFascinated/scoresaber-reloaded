@@ -242,7 +242,10 @@ export class PlayerCoreService {
       return;
     }
 
-    await ScoreSaberAccountsRepository.updateAccount(playerId, patch);
+    const updated = await ScoreSaberAccountsRepository.updateAccount(playerId, patch);
+    if (!updated) {
+      return;
+    }
 
     if (options?.invalidateCache !== false) {
       await Promise.all([

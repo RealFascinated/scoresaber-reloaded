@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { db } from "../../db";
 import type { ScoreSaberScoreRow } from "../../db/schema";
-import { ScoreSaberAccountRow, scoreSaberAccountsTable } from "../../db/schema";
+import { scoreSaberAccountsTable } from "../../db/schema";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import {
   ScoreSaberScoresRepository,
@@ -89,11 +89,9 @@ export class ScoreCoreService {
       return { score: undefined, hasPreviousScore, tracked: false };
     }
 
-    const playerUpdates: Partial<ScoreSaberAccountRow> = {};
     if (newScore) {
-      playerUpdates.hmd = score.hmd;
+      await PlayerCoreService.updatePlayer(playerId, { hmd: score.hmd });
     }
-    await PlayerCoreService.updatePlayer(playerId, playerUpdates);
 
     if (newScore && leaderboard.ranked && score.rank <= 10) {
       const medalChanges = await PlayerMedalsService.refreshLeaderboardMedals(leaderboard);

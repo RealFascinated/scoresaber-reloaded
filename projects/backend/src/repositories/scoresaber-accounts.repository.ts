@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gte, ilike, isNotNull, sql } from "drizzle-orm";
+import { and, asc, count, eq, gte, ilike, isNotNull, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { scoreSaberAccountsTable, type ScoreSaberAccountRow } from "../db/schema";
 import { TableCountsRepository } from "./table-counts.repository";
@@ -28,8 +28,24 @@ export class ScoreSaberAccountsRepository {
   public static async updateAccount(
     id: string,
     patch: Partial<Omit<ScoreSaberAccountRow, "id">>
-  ): Promise<void> {
-    await db.update(scoreSaberAccountsTable).set(patch).where(eq(scoreSaberAccountsTable.id, id));
+  ): Promise<boolean> {
+    type UpdatableKey = Exclude<keyof ScoreSaberAccountRow, "id">;
+    const entries = Object.entries(patch) as [UpdatableKey, ScoreSaberAccountRow[UpdatableKey]][];
+    if (entries.length === 0) {
+      return false;
+    }
+
+    const changeConditions = entries.map(([key, value]) => {
+      const column = scoreSaberAccountsTable[key];
+      return sql`${column} IS DISTINCT FROM ${value}`;
+    });
+
+    const result = await db
+      .update(scoreSaberAccountsTable)
+      .set(patch)
+      .where(and(eq(scoreSaberAccountsTable.id, id), or(...changeConditions)));
+
+    return (result.rowCount ?? 0) > 0;
   }
 
   public static async searchIdsByNameIlike(pattern: string, limit: number): Promise<{ id: string }[]> {
@@ -73,7 +89,12 @@ export class ScoreSaberAccountsRepository {
     const inactiveUpdate = await db
       .update(scoreSaberAccountsTable)
       .set({ inactive: true })
-      .where(sql`NOT (${scoreSaberAccountsTable.id} = ANY(${sql.param(activeIds)}))`);
+      .where(
+        and(
+          eq(scoreSaberAccountsTable.inactive, false),
+          sql`NOT (${scoreSaberAccountsTable.id} = ANY(${sql.param(activeIds)}))`
+        )
+      );
     return { rowCount: inactiveUpdate.rowCount ?? null };
   }
 

@@ -175,6 +175,7 @@ export class ScoreSaberMedalsRepository {
           GROUP BY s."playerId"
         ) AS sub
         WHERE a.id = sub."playerId"
+          AND a.medals IS DISTINCT FROM sub.total
       `);
     });
   }
@@ -208,6 +209,7 @@ export class ScoreSaberMedalsRepository {
         SET medals = v.medals
         FROM (VALUES ${sql.join(valueRows, sql`, `)}) AS v(id, medals)
         WHERE a.id = v.id
+          AND a.medals IS DISTINCT FROM v.medals
       `);
     });
   }
@@ -229,12 +231,19 @@ export class ScoreSaberMedalsRepository {
           "medalsCountryRank" = r.country_rank
         FROM ranked AS r
         WHERE a.id = r.id
+          AND (
+            a."medalsRank" IS DISTINCT FROM r.global_rank
+            OR a."medalsCountryRank" IS DISTINCT FROM r.country_rank
+          )
       `);
 
       await tx.execute(sql`
         UPDATE "scoresaber-accounts"
         SET "medalsRank" = 0, "medalsCountryRank" = 0
-        WHERE ("medalsRank" != 0 OR "medalsCountryRank" != 0)
+        WHERE (
+            "medalsRank" IS DISTINCT FROM 0
+            OR "medalsCountryRank" IS DISTINCT FROM 0
+          )
           AND NOT (
             medals > 0
             AND country IS NOT NULL
