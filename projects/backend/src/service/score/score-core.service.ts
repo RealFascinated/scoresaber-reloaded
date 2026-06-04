@@ -157,6 +157,8 @@ export class ScoreCoreService {
       fullCombo: score.fullCombo,
       modifiers: modifiers.length > 0 ? modifiers : null,
       hmd: score.hmd,
+      rank: score.rank,
+      weight: score.weight,
       rightController: score.rightController,
       leftController: score.leftController,
       timestamp: score.timestamp,

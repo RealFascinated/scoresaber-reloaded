@@ -70,6 +70,8 @@ export class ScoreSaberScoreHistoryRepository {
         score: previous.score,
         accuracy: previous.accuracy,
         pp: previous.pp,
+        rank: previous.rank,
+        weight: previous.weight,
         medals: previous.medals,
         missedNotes: previous.missedNotes,
         badCuts: previous.badCuts,
