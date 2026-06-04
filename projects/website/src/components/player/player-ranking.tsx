@@ -10,6 +10,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { PlayerAvatar } from "../ranking/player-avatar";
+import SimpleTooltip from "../simple-tooltip";
 import CountryFlag from "../ui/country-flag";
 
 /** Row types supported by {@link PlayerRanking}: display fields used by the layout. */
@@ -24,8 +25,8 @@ export type PlayerRankingRow = {
 export function ScoreSaberPlayerRanking<T extends ScoreSaberPlayer>({
   player,
   firstColumnWidth,
-  getRank = p => p.rank,
-  getCountryRank = p => p.countryRank,
+  getRank = p => p.contextualRank ?? p.rank,
+  getCountryRank = p => p.contextualCountryRank ?? p.countryRank,
   mainPlayer,
   relativePerformancePoints,
   showAccountInactive = true,
@@ -43,6 +44,8 @@ export function ScoreSaberPlayerRanking<T extends ScoreSaberPlayer>({
       player={player}
       getRank={getRank}
       getCountryRank={getCountryRank}
+      getActiveRank={p => p.rank !== getRank(p) ? p.rank: undefined}
+      getActiveCountryRank={p => p.countryRank !== getCountryRank(p) ? p.countryRank: undefined}
       firstColumnWidth={firstColumnWidth}
       showAccountInactive={showAccountInactive}
       worth={
@@ -61,6 +64,8 @@ export function PlayerRanking<T extends PlayerRankingRow>({
   player,
   getRank,
   getCountryRank,
+  getActiveRank,
+  getActiveCountryRank,
   firstColumnWidth,
   worth,
   showAccountInactive = true,
@@ -68,6 +73,8 @@ export function PlayerRanking<T extends PlayerRankingRow>({
   player: T;
   getRank: (player: T) => number;
   getCountryRank: (player: T) => number;
+  getActiveRank?: (player: T) => number | undefined;
+  getActiveCountryRank?: (player: T) => number | undefined;
   firstColumnWidth: number;
   worth: React.ReactNode;
   showAccountInactive?: boolean;
@@ -77,6 +84,8 @@ export function PlayerRanking<T extends PlayerRankingRow>({
 
   const rank = getRank(player);
   const countryRank = getCountryRank(player);
+  const activeRank = getActiveRank?.(player);
+  const activeCountryRank = getActiveCountryRank?.(player);
   const country = player.country ?? "";
   const inactive = Boolean(player.inactive);
 
@@ -86,7 +95,8 @@ export function PlayerRanking<T extends PlayerRankingRow>({
       <div
         className={cn(
           "bg-accent-deep hover:bg-accent-deep/50 hidden items-center gap-2 rounded-md px-(--spacing-xs) py-(--spacing-xs) lg:flex",
-          mainPlayer?.id == player.id ? "bg-primary/10 hover:bg-primary/15" : ""
+          mainPlayer?.id === player.id ? "bg-primary/10 hover:bg-primary/15" : "",
+          inactive && 'opacity-50 grayscale-20'
         )}
       >
         {/* Rank, Weekly Change, and Country Rank */}
@@ -102,8 +112,9 @@ export function PlayerRanking<T extends PlayerRankingRow>({
           <PlayerRanks
             rank={rank}
             countryRank={countryRank}
+            activeRank={activeRank}
+            activeCountryRank={activeCountryRank}
             country={country}
-            inactive={inactive && showAccountInactive}
           />
         </div>
 
@@ -132,7 +143,6 @@ export function PlayerRanking<T extends PlayerRankingRow>({
                 rank={rank}
                 countryRank={countryRank}
                 country={country}
-                inactive={inactive && showAccountInactive}
               />
             </div>
           </div>
@@ -157,8 +167,8 @@ export function PlayerRanking<T extends PlayerRankingRow>({
   );
 }
 
-function RankDisplay({ rank }: { rank: number }) {
-  return (
+function RankDisplay({ rank, activeRank }: { rank: number, activeRank?: number }) {
+  const pill = (
     <div
       className={cn(
         "flex h-[24px] w-fit items-center justify-center gap-1 rounded-sm px-1 py-1 text-xs font-semibold",
@@ -167,11 +177,21 @@ function RankDisplay({ rank }: { rank: number }) {
     >
       <span>#{formatNumberWithCommas(rank)}</span>
     </div>
-  );
+  )
+
+  if (activeRank) {
+    return (
+      <SimpleTooltip display={`Active: #${formatNumberWithCommas(activeRank)}`}>
+        {pill}
+      </SimpleTooltip>
+    )
+  }
+
+  return pill;
 }
 
-function CountryRankDisplay({ country, countryRank }: { country: string; countryRank: number }) {
-  return (
+function CountryRankDisplay({ country, countryRank, activeCountryRank }: { country: string; countryRank: number; activeCountryRank?: number; }) {
+  const pill = (
     <div className="flex items-center">
       <div
         className={cn(
@@ -183,7 +203,17 @@ function CountryRankDisplay({ country, countryRank }: { country: string; country
         <span>#{formatNumberWithCommas(countryRank)}</span>
       </div>
     </div>
-  );
+  )
+
+  if (activeCountryRank) {
+    return (
+      <SimpleTooltip display={`Active: #${formatNumberWithCommas(activeCountryRank)}`}>
+        {pill}
+      </SimpleTooltip>
+    )
+  }
+
+  return pill;
 }
 
 function PlayerNameDisplay<T extends PlayerRankingRow>({
@@ -213,21 +243,19 @@ function PlayerRanks({
   rank,
   countryRank,
   country,
-  inactive,
+  activeRank,
+  activeCountryRank
 }: {
   rank: number;
   countryRank: number;
   country: string;
-  inactive: boolean;
+  activeRank?: number;
+  activeCountryRank?: number;
 }) {
-  if (inactive) {
-    return <p className="text-inactive-account text-xs font-bold">Inactive Account</p>;
-  }
-
   return (
     <>
-      <RankDisplay rank={rank} />
-      <CountryRankDisplay country={country} countryRank={countryRank} />
+      <RankDisplay rank={rank} activeRank={activeRank} />
+      <CountryRankDisplay country={country} countryRank={countryRank} activeCountryRank={activeCountryRank} />
     </>
   );
 }
