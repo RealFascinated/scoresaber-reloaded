@@ -5,7 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { DEBOUNCE_MS_FORM } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
-import type { SharedIcon } from "@/shared-icons";
+import type { SharedDecorativeIcon } from "@/shared-icons";
 import { ReactElement, ReactNode, Ref, useEffect, useState } from "react";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel } from "../ui/form";
@@ -64,7 +64,7 @@ export type Field<TFormValues extends FieldValues, TName extends Path<TFormValue
 
 interface SettingSectionProps<TFormValues extends FieldValues> {
   title: string;
-  icon: SharedIcon;
+  icon: SharedDecorativeIcon;
   fields: readonly Field<TFormValues, Path<TFormValues>>[];
   form: UseFormReturn<TFormValues>;
   onFormSubmit?: (values: TFormValues) => void | Promise<void>;

@@ -4,7 +4,7 @@ import { cn } from "@/common/utils";
 import ScoreSettings from "@/components/settings/category/score-settings";
 import WebsiteSettings from "@/components/settings/category/website-settings";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SharedIcons, type SharedIcon } from "@/shared-icons";
+import { SharedIcons, type SharedDecorativeIcon } from "@/shared-icons";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactNode, useCallback, useMemo } from "react";
 import ResetSettings from "./buttons/reset-settings";
@@ -16,7 +16,7 @@ type Category = {
   slug: SettingsCategorySlug;
   name: string;
   description: string;
-  icon: SharedIcon;
+  icon: SharedDecorativeIcon;
   component: ReactNode;
 };
 

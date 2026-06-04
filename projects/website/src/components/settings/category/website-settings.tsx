@@ -11,7 +11,7 @@ import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ssrConfig } from "config";
-import { SharedIcons, type SharedIcon } from "@/shared-icons";
+import { SharedIcons, type SharedDecorativeIcon } from "@/shared-icons";
 import { useTheme } from "next-themes";
 import { Path, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -95,7 +95,7 @@ const BackgroundCoverControl = (props: {
 const settings: {
   id: string;
   title: string;
-  icon: SharedIcon;
+  icon: SharedDecorativeIcon;
   fields: Field<FormValues, keyof FormValues>[];
 }[] = [
   {

@@ -328,3 +328,6 @@ export const SharedIcons = {
 } as const;
 
 export type SharedIcon = (typeof SharedIcons)[keyof typeof SharedIcons];
+
+/** Icons usable with `className` / `aria-hidden` only (excludes HMD, which needs `hmd`). */
+export type SharedDecorativeIcon = Exclude<SharedIcon, typeof SharedIcons.HeadMountedDisplayIcon>;
