@@ -1,11 +1,11 @@
 "use client";
 
 import { type DialogProps } from "@radix-ui/react-dialog";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Command as CommandPrimitive } from "cmdk";
 import * as React from "react";
 
 import { cn } from "@/common/utils";
+import { SharedIcons } from "@/shared-icons";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/contexts/viewport-context";
 
@@ -47,7 +47,7 @@ const CommandInput = ({
     className="border-border hover:border-primary/50 flex items-center border-b px-3 transition-colors duration-200"
     cmdk-input-wrapper=""
   >
-    <MagnifyingGlassIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+    <SharedIcons.CommandPaletteSearchIcon className="mr-2 h-4 w-4 shrink-0 opacity-50" />
     <CommandPrimitive.Input
       className={cn(
         "placeholder:text-muted-foreground flex h-10 w-full rounded-(--radius-md) bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",

@@ -1,6 +1,6 @@
 import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
-import { QuestionMarkCircledIcon } from "@radix-ui/react-icons";
+import { SharedIcons } from "@/shared-icons";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
@@ -59,7 +59,7 @@ export function CharacteristicButton({
           {icon ? (
             <Image src={icon} alt={leaderboardDifficulty.characteristic} width={20} height={20} />
           ) : (
-            <QuestionMarkCircledIcon className="size-[20px]" />
+            <SharedIcons.UnknownMapCharacteristicIcon className="size-[20px]" />
           )}
         </Button>
       </SimpleLink>

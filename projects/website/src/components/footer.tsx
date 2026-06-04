@@ -5,7 +5,7 @@ import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
 import SimpleLink from "@/components/simple-link";
 import { env } from "@ssr/common/env";
-import { ExternalLink } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
@@ -172,7 +172,7 @@ export default function Footer({
                     >
                       <span className={cn("hidden sm:flex", !link.shortName && "flex")}>{link.name}</span>
                       {link.shortName && <span className="flex sm:hidden">{link.shortName}</span>}
-                      {external && <ExternalLink className="h-3.5 w-3.5" />}
+                      {external && <SharedIcons.ExternalNavigationIcon className="h-3.5 w-3.5" />}
                     </SimpleLink>
                   );
                 })}

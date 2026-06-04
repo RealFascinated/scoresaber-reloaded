@@ -1,10 +1,9 @@
-import HMDIcon from "@/components/hmd-icon";
 import { PlayerAvatar } from "@/components/ranking/player-avatar";
 import { getHMDInfo } from "@ssr/common/hmds";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { formatDate } from "@ssr/common/utils/time-utils";
-import { CalendarDays } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import Card from "../../../card";
 import ScoreSongInfo from "../../score-song-info";
 import LeaderboardButton from "./buttons/leaderboard-button";
@@ -51,7 +50,7 @@ export default function ScoreDetails({ score: playerScore }: { score: PlayerScor
             <p className="truncate text-base font-semibold">{playerInfo.name}</p>
             {score.hmd && (
               <div className="text-muted-foreground mt-1 flex items-center gap-2 text-sm">
-                <HMDIcon hmd={getHMDInfo(score.hmd)} />
+                <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd)} />
                 <span>{score.hmd}</span>
               </div>
             )}
@@ -59,7 +58,7 @@ export default function ScoreDetails({ score: playerScore }: { score: PlayerScor
         </div>
 
         <div className="text-muted-foreground flex shrink-0 items-center gap-2 sm:justify-end">
-          <CalendarDays className="size-4 shrink-0" aria-hidden />
+          <SharedIcons.ScoreDateIcon className="size-4 shrink-0" aria-hidden />
           <span className="text-sm whitespace-nowrap">
             {formatDate(score.timestamp, "Do MMMM, YYYY HH:mm a")}
           </span>

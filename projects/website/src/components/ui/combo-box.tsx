@@ -11,7 +11,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronsUpDown, X } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { ReactElement, ReactNode, useId, useState } from "react";
 
 /**
@@ -132,7 +132,7 @@ const Combobox = <T,>({
                 ) : null}
                 <span className="truncate">{triggerLabel}</span>
               </span>
-              <ChevronsUpDown className="text-muted-foreground size-4 shrink-0 opacity-70" />
+              <SharedIcons.ComboBoxToggleIcon className="text-muted-foreground size-4 shrink-0 opacity-70" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-fit p-0">
@@ -182,7 +182,7 @@ const Combobox = <T,>({
           aria-label="Clear selection"
           onClick={() => handleValueChange(undefined)}
         >
-          <X className="size-4" />
+          <SharedIcons.ComboBoxClearIcon className="size-4" />
         </Button>
       ) : null}
     </div>

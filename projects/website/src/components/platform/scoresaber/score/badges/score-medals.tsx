@@ -1,14 +1,14 @@
 import { ScoreBadgeProps } from "@/components/platform/scoresaber/score/badges/badge-props";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
-import { Medal } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 
 export function ScoreMedalsBadge({ score }: ScoreBadgeProps) {
   if ("medals" in score) {
     return (
       <SimpleTooltip display="The amount of medals this score awarded the player" className="h-full">
         <div className="flex h-full items-center gap-1">
-          <Medal className="h-4 w-4" />
+          <SharedIcons.MedalsIcon className="h-4 w-4" />
           <span className="text-sm font-medium">{(score as ScoreSaberMedalScore).medals}</span>
         </div>
       </SimpleTooltip>

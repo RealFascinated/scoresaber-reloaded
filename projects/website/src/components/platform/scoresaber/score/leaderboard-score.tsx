@@ -1,6 +1,5 @@
 import { getRankColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
-import HMDIcon from "@/components/hmd-icon";
 import ScoreMissesAndPausesBadge from "@/components/platform/scoresaber/score/badges/score-misses-and-pauses";
 import { ScorePpBadge } from "@/components/platform/scoresaber/score/badges/score-pp";
 import { ScoreSaberScoreModifiers } from "@/components/platform/scoresaber/score/score-modifiers";
@@ -14,7 +13,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
-import { ChevronDown } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 import ScoreDetailsDropdown from "./score-details-dropdown";
 import { ScoreSaberScoreHMD } from "./score-hmd";
@@ -59,7 +58,7 @@ export default function ScoreSaberLeaderboardScore({
           {scorePlayer ? (
             <>
               <ScoreSaberScoreHMD score={score}>
-                <HMDIcon hmd={getHMDInfo(score.hmd as HMD)} />
+                <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd as HMD)} />
               </ScoreSaberScoreHMD>
               <PlayerInfo
                 player={scorePlayer}
@@ -142,7 +141,7 @@ export default function ScoreSaberLeaderboardScore({
                 {isDetailsLoading ? (
                   <Spinner size="sm" />
                 ) : (
-                  <ChevronDown
+                  <SharedIcons.ExpandLeaderboardRowIcon
                     className={cn(
                       "size-6 transition-transform duration-200",
                       detailsExpanded ? "" : "rotate-180"

@@ -3,7 +3,7 @@ import Avatar from "@/components/avatar";
 import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { useIsMobile } from "@/contexts/viewport-context";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
@@ -22,7 +22,7 @@ type Variants = {
 
 const miniVariants: Variants = {
   Global: {
-    icon: () => <GlobeAmericasIcon className="size-6" />,
+    icon: () => <SharedIcons.GlobalRankIcon className="size-6" />,
   },
   Country: {
     icon: (player: ScoreSaberPlayer) => {

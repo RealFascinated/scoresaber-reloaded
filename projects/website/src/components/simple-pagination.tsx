@@ -1,9 +1,8 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import { SharedIcons } from "@/shared-icons";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import React, { useCallback } from "react";
 import { useIsMobile } from "../contexts/viewport-context";
 import { Button } from "./ui/button";
@@ -71,7 +70,7 @@ const PageButton = React.memo(
           </span>
           {isButtonLoading && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <ArrowPathIcon className="h-4 w-4 animate-spin motion-reduce:animate-none" />
+              <SharedIcons.PaginationLoadingIcon className="h-4 w-4 animate-spin motion-reduce:animate-none" />
             </div>
           )}
         </a>
@@ -254,7 +253,7 @@ export default function SimplePagination({
           ariaLabel="Go to first page"
           chevronMotion="left"
         >
-          <ChevronsLeft className="h-4 w-4" />
+          <SharedIcons.PaginationFirstPageIcon className="h-4 w-4" />
         </NavigationButton>
         <NavigationButton
           page={page - 1}
@@ -264,7 +263,7 @@ export default function SimplePagination({
           generatePageUrl={generatePageUrl}
           chevronMotion="left"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <SharedIcons.PaginationPreviousPageIcon className="h-4 w-4" />
         </NavigationButton>
         {isMobile ? (
           <div
@@ -287,7 +286,7 @@ export default function SimplePagination({
           generatePageUrl={generatePageUrl}
           chevronMotion="right"
         >
-          <ChevronRight className="h-4 w-4" />
+          <SharedIcons.PaginationNextPageIcon className="h-4 w-4" />
         </NavigationButton>
         <NavigationButton
           page={totalPages}
@@ -298,7 +297,7 @@ export default function SimplePagination({
           ariaLabel="Go to last page"
           chevronMotion="right"
         >
-          <ChevronsRight className="h-4 w-4" />
+          <SharedIcons.PaginationLastPageIcon className="h-4 w-4" />
         </NavigationButton>
       </nav>
     </div>

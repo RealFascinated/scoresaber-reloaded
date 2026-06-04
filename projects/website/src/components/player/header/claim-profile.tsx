@@ -6,7 +6,7 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { ShieldCheck } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { toast } from "sonner";
 import { Button } from "../../ui/button";
 
@@ -40,7 +40,7 @@ export default function ClaimProfile({ playerId }: Props) {
       <ConfirmationDialog
         trigger={
           <Button variant={"outline"}>
-            <ShieldCheck className="size-5 text-green-500" />
+            <SharedIcons.VerifiedPlayerIcon className="size-5 text-green-500" />
           </Button>
         }
         title="Claim Profile"

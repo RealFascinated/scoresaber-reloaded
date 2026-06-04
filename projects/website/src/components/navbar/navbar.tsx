@@ -4,8 +4,7 @@ import { cn } from "@/common/utils";
 import FriendsButton from "@/components/friend/friends-button";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import SimpleLink from "@/components/simple-link";
-import { CubeIcon } from "@radix-ui/react-icons";
-import { Medal, MusicIcon, Settings, TrendingUpIcon, TrophyIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
@@ -34,13 +33,13 @@ const links: Link[] = [
   },
   {
     name: "Ranking",
-    icon: <TrendingUpIcon className="size-5" />,
+    icon: <SharedIcons.RankingNavIcon className="size-5" />,
     href: "/ranking",
     side: "left",
   },
   {
     name: "Medals",
-    icon: <Medal className="size-5" />,
+    icon: <SharedIcons.MedalsNavIcon className="size-5" />,
     href: "/medals",
     side: "left",
   },
@@ -48,26 +47,26 @@ const links: Link[] = [
   // Right
   {
     name: "Maps",
-    icon: <MusicIcon className="size-5" />,
+    icon: <SharedIcons.MapsNavIcon className="size-5" />,
     href: "/maps/leaderboards",
     side: "right",
   },
   {
     name: "Overlay",
-    icon: <CubeIcon className="size-5" />,
+    icon: <SharedIcons.OverlayNavIcon className="size-5" />,
     href: "/overlay/builder",
     hideOnMobile: true,
     side: "right",
   },
   {
     name: "Top Scores",
-    icon: <TrophyIcon className="size-5" />,
+    icon: <SharedIcons.TopScoresNavIcon className="size-5" />,
     href: "/scores/top",
     side: "right",
   },
   {
     name: "Settings",
-    icon: <Settings className="size-5" />,
+    icon: <SharedIcons.SettingsNavIcon className="size-5" />,
     href: "/settings",
     side: "right",
   },

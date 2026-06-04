@@ -8,7 +8,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
-import { LoaderCircle, SearchX, Users } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 import PlayerSearchResultItem from "./player-search-result-item";
 
@@ -81,12 +81,12 @@ const PlayerSearch = ({
         </div>
       ) : isLoading ? (
         <div className="flex flex-col items-center justify-center py-12">
-          <LoaderCircle className="text-muted-foreground mb-3 size-6 animate-spin" />
+          <SharedIcons.SearchLoadingIcon className="text-muted-foreground mb-3 size-6 animate-spin" />
           <p className="text-muted-foreground text-sm">Searching players...</p>
         </div>
       ) : !results?.players.length ? (
         <div className="flex flex-col items-center justify-center px-4 py-12">
-          <SearchX className="text-muted-foreground/50 mb-3 size-10" />
+          <SharedIcons.SearchNoResultsIcon className="text-muted-foreground/50 mb-3 size-10" />
           <p className="text-muted-foreground mb-1 text-sm font-medium">No players found</p>
           <p className="text-muted-foreground/70 text-center text-xs">
             {query.trim().length > 0
@@ -97,7 +97,7 @@ const PlayerSearch = ({
       ) : (
         <div className="p-2">
           <div className="text-muted-foreground mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider uppercase">
-            <Users className="size-3.5" />
+            <SharedIcons.SearchPlayersIcon className="size-3.5" />
             <span>Players</span>
             <span className="text-muted-foreground/50">
               ({results.players.filter(player => !excludePlayerIds.includes(player.id)).length})

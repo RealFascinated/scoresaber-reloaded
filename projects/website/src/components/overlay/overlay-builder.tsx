@@ -19,7 +19,7 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { Eye, Monitor, User } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -32,19 +32,19 @@ const viewToggles = [
     name: "Player Info",
     value: OverlayViews.PlayerInfo,
     requiresRealTimeData: false,
-    icon: <User className="size-4" />,
+    icon: <SharedIcons.OverlayPlayerLayerIcon className="size-4" />,
   },
   {
     name: "Score Info",
     value: OverlayViews.ScoreInfo,
     requiresRealTimeData: true,
-    icon: <Eye className="size-4" />,
+    icon: <SharedIcons.OverlayPreviewLayerIcon className="size-4" />,
   },
   {
     name: "Song Info",
     value: OverlayViews.SongInfo,
     requiresRealTimeData: true,
-    icon: <Monitor className="size-4" />,
+    icon: <SharedIcons.OverlayDisplayLayerIcon className="size-4" />,
   },
 ];
 

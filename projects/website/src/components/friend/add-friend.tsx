@@ -6,7 +6,7 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MedalRankingPlayer } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
-import { UserMinus, UserPlus } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { toast } from "sonner";
 import useDatabase from "../../hooks/use-database";
 import SimpleTooltip from "../simple-tooltip";
@@ -78,9 +78,9 @@ export default function FriendAction({
   }
 
   const icon = isFriend ? (
-    <UserMinus className="size-5 text-red-300" />
+    <SharedIcons.RemoveFriendIcon className="size-5 text-red-300" />
   ) : (
-    <UserPlus className="size-5 text-white" />
+    <SharedIcons.AddFriendIcon className="size-5 text-white" />
   );
 
   const tooltipText = isFriend ? (

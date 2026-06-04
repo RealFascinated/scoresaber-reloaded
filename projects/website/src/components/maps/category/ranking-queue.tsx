@@ -9,7 +9,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDownIcon, PlayIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 import SimpleTooltip from "../../simple-tooltip";
 
@@ -73,7 +73,7 @@ export default function RankingQueue() {
                     <td className="px-3 py-1.5 text-center text-xs text-gray-400">
                       <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
                         <p className="inline-flex items-center justify-center gap-1">
-                          <PlayIcon className="h-3 w-3" />
+                          <SharedIcons.PlayMapIcon className="h-3 w-3" />
                           {formatNumberWithCommas(leaderboard.dailyPlays)}
                         </p>
                       </SimpleTooltip>
@@ -83,7 +83,7 @@ export default function RankingQueue() {
                     <td className="px-3 py-1.5 text-center text-xs text-gray-400">
                       <SimpleTooltip display="Total plays on this leaderboard">
                         <p className="inline-flex items-center justify-center gap-1">
-                          <PlayIcon className="h-3 w-3" />
+                          <SharedIcons.PlayMapIcon className="h-3 w-3" />
                           {formatNumberWithCommas(leaderboard.plays)}
                         </p>
                       </SimpleTooltip>
@@ -126,7 +126,7 @@ export default function RankingQueue() {
         className="w-fit gap-(--spacing-sm)"
         onClick={() => setShowOpenRankUnrank(!showOpenRankUnrank)}
       >
-        <ChevronDownIcon
+        <SharedIcons.RankingQueueExpandIcon
           className={cn("h-4 w-4 transition-transform duration-200", showOpenRankUnrank ? "rotate-180" : "")}
         />
         {(showOpenRankUnrank ? "Show" : "Hide") + " All Requests"}

@@ -1,4 +1,4 @@
-import { XIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { ReactNode } from "react";
 import Card from "../card";
 import SimpleTooltip from "../simple-tooltip";
@@ -36,7 +36,7 @@ export function FilterSection({
                 className="text-muted-foreground hover:text-destructive size-7"
                 onClick={onClear}
               >
-                <XIcon className="size-4" />
+                <SharedIcons.FilterClearIcon className="size-4" />
               </Button>
             </SimpleTooltip>
           )}

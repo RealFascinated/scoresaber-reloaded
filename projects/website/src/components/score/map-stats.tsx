@@ -1,9 +1,8 @@
 import StatValue from "@/components/statistic/stat-value";
-import { CubeIcon } from "@heroicons/react/24/solid";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatTime } from "@ssr/common/utils/time-utils";
-import { BombIcon, BrickWallIcon, DrumIcon, GaugeIcon, MusicIcon, TimerIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 
 type MapAndScoreData = {
   /**
@@ -22,37 +21,37 @@ export function MapStats({ beatSaver }: MapAndScoreData) {
         <div className="flex flex-wrap justify-center gap-2">
           <StatValue
             name="Length"
-            icon={<TimerIcon className="h-4 w-4" />}
+            icon={<SharedIcons.MapLengthStatIcon className="h-4 w-4" />}
             value={formatTime(metadata.duration)}
           />
           <StatValue
             name="BPM"
-            icon={<MusicIcon className="h-4 w-4" />}
+            icon={<SharedIcons.MapBpmStatIcon className="h-4 w-4" />}
             value={formatNumberWithCommas(metadata.bpm)}
           />
           <StatValue
             name="NPS"
-            icon={<DrumIcon className="h-4 w-4" />}
+            icon={<SharedIcons.MapNpsStatIcon className="h-4 w-4" />}
             value={beatSaver.difficulty.nps.toFixed(2)}
           />
           <StatValue
             name="NJS"
-            icon={<GaugeIcon className="h-4 w-4" />}
+            icon={<SharedIcons.MapNjsStatIcon className="h-4 w-4" />}
             value={beatSaver.difficulty.njs.toFixed(2)}
           />
           <StatValue
             name="Notes"
-            icon={<CubeIcon className="h-4 w-4" />}
+            icon={<SharedIcons.MapNotesStatIcon className="h-4 w-4" />}
             value={formatNumberWithCommas(beatSaver.difficulty.notes)}
           />
           <StatValue
             name="Bombs"
-            icon={<BombIcon className="h-4 w-4" />}
+            icon={<SharedIcons.MapBombsStatIcon className="h-4 w-4" />}
             value={formatNumberWithCommas(beatSaver.difficulty.bombs)}
           />
           <StatValue
             name="Obstacles"
-            icon={<BrickWallIcon className="h-4 w-4" />}
+            icon={<SharedIcons.MapObstaclesStatIcon className="h-4 w-4" />}
             value={formatNumberWithCommas(beatSaver.difficulty.obstacles)}
           />
         </div>

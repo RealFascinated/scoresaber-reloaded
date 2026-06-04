@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import HMDIcon from "@/components/hmd-icon";
 import { Spinner } from "@/components/spinner";
+import { SharedIcons } from "@/shared-icons";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/contexts/page-transition-context";
@@ -18,17 +18,6 @@ import { useQuery } from "@tanstack/react-query";
 import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import {
-  ArrowDown,
-  ArrowUp,
-  BarChart3,
-  ClockIcon,
-  Hash,
-  SearchIcon,
-  Target,
-  Trophy,
-  XIcon,
-} from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect } from "react";
 import ScoresCard from "../../score/scores-card";
@@ -53,37 +42,37 @@ const SORT_OPTIONS: SortOption[] = [
   {
     name: "PP",
     value: "pp",
-    icon: <Trophy className="h-4 w-4" />,
+    icon: <SharedIcons.PerformancePointsSortIcon className="h-4 w-4" />,
     defaultOrder: "desc" as const,
   },
   {
     name: "Date",
     value: "date",
-    icon: <ClockIcon className="h-4 w-4" />,
+    icon: <SharedIcons.DateSortIcon className="h-4 w-4" />,
     defaultOrder: "desc" as const,
   },
   {
     name: "Misses",
     value: "misses",
-    icon: <XIcon className="h-4 w-4" />,
+    icon: <SharedIcons.MissesSortIcon className="h-4 w-4" />,
     defaultOrder: "desc" as const,
   },
   {
     name: "Accuracy",
     value: "acc",
-    icon: <Target className="h-4 w-4" />,
+    icon: <SharedIcons.AccuracySortIcon className="h-4 w-4" />,
     defaultOrder: "desc" as const,
   },
   {
     name: "Score",
     value: "score",
-    icon: <BarChart3 className="h-4 w-4" />,
+    icon: <SharedIcons.ScoreValueSortIcon className="h-4 w-4" />,
     defaultOrder: "desc" as const,
   },
   {
     name: "Max Combo",
     value: "maxcombo",
-    icon: <Hash className="h-4 w-4" />,
+    icon: <SharedIcons.MaxComboSortIcon className="h-4 w-4" />,
     defaultOrder: "desc" as const,
   },
 ];
@@ -235,7 +224,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
                 className="border-border rounded-lg border"
                 title="No Results"
                 description="No scores were found on this page"
-                icon={<SearchIcon />}
+                icon={<SharedIcons.SearchNoResultsIcon />}
               />
             ))}
         </div>
@@ -287,9 +276,9 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
                     isLoading || isRefetching ? (
                       <Spinner size="sm" className="size-4" />
                     ) : direction === "desc" ? (
-                      <ArrowDown className="size-4" />
+                      <SharedIcons.SortDescendingIcon className="size-4" />
                     ) : (
-                      <ArrowUp className="size-4" />
+                      <SharedIcons.SortAscendingIcon className="size-4" />
                     )
                   ) : (
                     sortOption.icon
@@ -303,7 +292,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
           <ControlRow>
             <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
               <div className="relative w-full sm:w-auto">
-                <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+                <SharedIcons.SearchFieldIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
                 <Input
                   type="search"
                   placeholder="Query..."
@@ -312,7 +301,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
                   onChange={e => handleSearchChange(e.target.value)}
                 />
                 {search && search.length > 0 && (
-                  <XIcon
+                  <SharedIcons.ClearSearchInputIcon
                     className="text-muted-foreground absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
                     onClick={() => handleSearchChange("")}
                   />
@@ -335,7 +324,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
                   <SelectContent>
                     <SelectItem value={"All Hmds"}>
                       <div className="flex items-center gap-2">
-                        <HMDIcon hmd={getHMDInfo("Unknown")} />
+                        <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo("Unknown")} />
                         <span>All HMDs</span>
                       </div>
                     </SelectItem>
@@ -345,7 +334,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
                         .map(filter => (
                           <SelectItem key={filter} value={filter}>
                             <div className="flex items-center gap-2">
-                              <HMDIcon hmd={getHMDInfo(filter as HMD)} />
+                              <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(filter as HMD)} />
                               <span>{filter}</span>
                             </div>
                           </SelectItem>

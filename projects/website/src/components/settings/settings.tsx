@@ -4,7 +4,7 @@ import { cn } from "@/common/utils";
 import ScoreSettings from "@/components/settings/category/score-settings";
 import WebsiteSettings from "@/components/settings/category/website-settings";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Box, Globe, type LucideIcon, User } from "lucide-react";
+import { SharedIcons, type SharedIcon } from "@/shared-icons";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ReactNode, useCallback, useMemo } from "react";
 import ResetSettings from "./buttons/reset-settings";
@@ -16,7 +16,7 @@ type Category = {
   slug: SettingsCategorySlug;
   name: string;
   description: string;
-  icon: LucideIcon;
+  icon: SharedIcon;
   component: ReactNode;
 };
 
@@ -25,21 +25,21 @@ const categories: Category[] = [
     slug: "website",
     name: "Website",
     description: "Customize your experience",
-    icon: Globe,
+    icon: SharedIcons.WebsiteSettingsCategoryIcon,
     component: <WebsiteSettings />,
   },
   {
     slug: "scores",
     name: "Scores",
     description: "Manage your scores",
-    icon: Box,
+    icon: SharedIcons.ScoreSettingsCategoryIcon,
     component: <ScoreSettings />,
   },
   {
     slug: "player",
     name: "Player",
     description: "Manage your player",
-    icon: User,
+    icon: SharedIcons.PlayerSettingsCategoryIcon,
     component: <PlayerSettings />,
   },
 ];

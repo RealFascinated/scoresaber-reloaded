@@ -20,37 +20,24 @@ import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { SnipeSettings, snipeSettingsSchema } from "@ssr/common/snipe/snipe-settings-schema";
 import { truncateText } from "@ssr/common/string-utils";
-import {
-  ArrowDown,
-  ArrowUp,
-  BarChart3,
-  Clock,
-  Crosshair,
-  Download,
-  Filter,
-  Hash,
-  MusicIcon,
-  Target,
-  Trophy,
-  XIcon,
-} from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 
 const SORT_OPTIONS = {
-  pp: { name: "PP", icon: Trophy, defaultOrder: "desc" as const },
-  date: { name: "Date", icon: Clock, defaultOrder: "desc" as const },
-  misses: { name: "Misses", icon: XIcon, defaultOrder: "desc" as const },
-  acc: { name: "Accuracy", icon: Target, defaultOrder: "desc" as const },
-  score: { name: "Score", icon: BarChart3, defaultOrder: "desc" as const },
-  maxcombo: { name: "Max Combo", icon: Hash, defaultOrder: "desc" as const },
+  pp: { name: "PP", icon: SharedIcons.PerformancePointsSortIcon, defaultOrder: "desc" as const },
+  date: { name: "Date", icon: SharedIcons.DateSortIcon, defaultOrder: "desc" as const },
+  misses: { name: "Misses", icon: SharedIcons.MissesSortIcon, defaultOrder: "desc" as const },
+  acc: { name: "Accuracy", icon: SharedIcons.AccuracySortIcon, defaultOrder: "desc" as const },
+  score: { name: "Score", icon: SharedIcons.ScoreValueSortIcon, defaultOrder: "desc" as const },
+  maxcombo: { name: "Max Combo", icon: SharedIcons.MaxComboSortIcon, defaultOrder: "desc" as const },
 } as const;
 
 const RANKED_OPTIONS = [
-  { value: "all" as const, label: "All Scores", icon: Filter },
-  { value: "ranked" as const, label: "Ranked Only", icon: Trophy },
-  { value: "unranked" as const, label: "Unranked Only", icon: MusicIcon },
+  { value: "all" as const, label: "All Scores", icon: SharedIcons.AllScoresFilterIcon },
+  { value: "ranked" as const, label: "Ranked Only", icon: SharedIcons.RankedScoresFilterIcon },
+  { value: "unranked" as const, label: "Unranked Only", icon: SharedIcons.UnrankedScoresFilterIcon },
 ] as const;
 
 type SortOption = keyof typeof SORT_OPTIONS;
@@ -149,7 +136,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
           }
         >
           <PlayerActionButtonWrapper>
-            <Crosshair className="h-5 w-5" />
+            <SharedIcons.SnipePlaylistIcon className="h-5 w-5" />
           </PlayerActionButtonWrapper>
         </SimpleTooltip>
       </DialogTrigger>
@@ -177,7 +164,10 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                     {availableSorts.map(opt => {
                       const isActive = opt.value === sort;
                       const Icon = opt.icon;
-                      const DirectionIcon = isActive && sortDirection === "desc" ? ArrowDown : ArrowUp;
+                      const DirectionIcon =
+                        isActive && sortDirection === "desc"
+                          ? SharedIcons.SortDescendingIcon
+                          : SharedIcons.SortAscendingIcon;
                       return (
                         <ControlButton
                           key={opt.value}
@@ -304,7 +294,11 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
           {/* Footer */}
           <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
             <Button type="submit" form="snipe-playlist-form" className="gap-2" disabled={downloading}>
-              {downloading ? <Spinner className="size-4" /> : <Download className="size-4" />}
+              {downloading ? (
+                <Spinner className="size-4" />
+              ) : (
+                <SharedIcons.DownloadPlaylistIcon className="size-4" />
+              )}
               <span>Download Playlist</span>
             </Button>
           </div>

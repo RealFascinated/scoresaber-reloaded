@@ -1,4 +1,4 @@
-import HMDIcon from "@/components/hmd-icon";
+import { SharedIcons } from "@/shared-icons";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -16,7 +16,7 @@ export function ScoreSaberScoreHMD({
         <div className="flex flex-col gap-2">
           {score.hmd !== "Unknown" && score.hmd !== undefined ? (
             <div className="flex items-center gap-2">
-              Score was set using a <HMDIcon hmd={getHMDInfo(score.hmd as HMD)} />{" "}
+              Score was set using a <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd as HMD)} />{" "}
               <span className="font-semibold">{score.hmd}</span>
             </div>
           ) : (

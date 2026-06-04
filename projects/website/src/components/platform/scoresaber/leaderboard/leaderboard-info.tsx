@@ -9,6 +9,7 @@ import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate, formatTime } from "@ssr/common/utils/time-utils";
+import { SharedIcons } from "@/shared-icons";
 import NextImage from "next/image";
 import StatValue from "../../../statistic/stat-value";
 
@@ -101,13 +102,41 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
         {/* BeatSaver Info */}
         {beatsaver && (
           <div className="flex w-full flex-wrap justify-center gap-2">
-            <StatValue name="NJS" value={formatNumber(beatsaver.difficulty.njs, "number")} />
-            <StatValue name="BPM" value={formatNumber(beatsaver.metadata.bpm, "number")} />
-            <StatValue name="NPS" value={beatsaver.difficulty.nps.toFixed(2)} />
-            <StatValue name="Notes" value={formatNumberWithCommas(beatsaver.difficulty.notes)} />
-            <StatValue name="Bombs" value={formatNumberWithCommas(beatsaver.difficulty.bombs)} />
-            <StatValue name="Obstacles" value={formatNumberWithCommas(beatsaver.difficulty.obstacles)} />
-            <StatValue name="Length" value={formatTime(beatsaver.metadata.duration)} />
+            <StatValue
+              name="NJS"
+              icon={<SharedIcons.MapNjsStatIcon className="h-4 w-4" />}
+              value={formatNumber(beatsaver.difficulty.njs, "number")}
+            />
+            <StatValue
+              name="BPM"
+              icon={<SharedIcons.MapBpmStatIcon className="h-4 w-4" />}
+              value={formatNumber(beatsaver.metadata.bpm, "number")}
+            />
+            <StatValue
+              name="NPS"
+              icon={<SharedIcons.MapNpsStatIcon className="h-4 w-4" />}
+              value={beatsaver.difficulty.nps.toFixed(2)}
+            />
+            <StatValue
+              name="Notes"
+              icon={<SharedIcons.MapNotesStatIcon className="h-4 w-4" />}
+              value={formatNumberWithCommas(beatsaver.difficulty.notes)}
+            />
+            <StatValue
+              name="Bombs"
+              icon={<SharedIcons.MapBombsStatIcon className="h-4 w-4" />}
+              value={formatNumberWithCommas(beatsaver.difficulty.bombs)}
+            />
+            <StatValue
+              name="Obstacles"
+              icon={<SharedIcons.MapObstaclesStatIcon className="h-4 w-4" />}
+              value={formatNumberWithCommas(beatsaver.difficulty.obstacles)}
+            />
+            <StatValue
+              name="Length"
+              icon={<SharedIcons.MapLengthStatIcon className="h-4 w-4" />}
+              value={formatTime(beatsaver.metadata.duration)}
+            />
           </div>
         )}
 

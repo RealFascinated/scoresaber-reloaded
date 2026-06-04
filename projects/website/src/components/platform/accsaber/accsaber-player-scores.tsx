@@ -12,18 +12,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import {
-  ArrowDown,
-  ArrowUp,
-  BarChart3,
-  ClockIcon,
-  Crosshair,
-  Gauge,
-  SearchIcon,
-  Target,
-  Trophy,
-  Zap,
-} from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect } from "react";
 import { usePageTransition } from "../../../contexts/page-transition-context";
@@ -40,17 +29,26 @@ const DEFAULT_DIRECTION: SortDirection = "desc";
 const DEFAULT_PAGE = 1;
 
 const scoreSort = [
-  { name: "AP", value: "ap", icon: <Trophy className="h-4 w-4" /> },
-  { name: "Date", value: "date", icon: <ClockIcon className="h-4 w-4" /> },
-  { name: "Acc", value: "acc", icon: <Target className="h-4 w-4" /> },
-  { name: "Rank", value: "ranking", icon: <Trophy className="h-4 w-4" />, defaultOrder: "asc" },
+  { name: "AP", value: "ap", icon: <SharedIcons.AccSaberApSortIcon className="h-4 w-4" /> },
+  { name: "Date", value: "date", icon: <SharedIcons.AccSaberDateSortIcon className="h-4 w-4" /> },
+  { name: "Acc", value: "acc", icon: <SharedIcons.AccSaberAccuracySortIcon className="h-4 w-4" /> },
+  {
+    name: "Rank",
+    value: "ranking",
+    icon: <SharedIcons.AccSaberRankSortIcon className="h-4 w-4" />,
+    defaultOrder: "asc",
+  },
 ];
 
 const scoreTypes = [
-  { name: "Overall", value: "overall", icon: <BarChart3 className="h-4 w-4" /> },
-  { name: "Tech Acc", value: "tech", icon: <Zap className="h-4 w-4" /> },
-  { name: "Standard Acc", value: "standard", icon: <Gauge className="h-4 w-4" /> },
-  { name: "True Acc", value: "true", icon: <Crosshair className="h-4 w-4" /> },
+  { name: "Overall", value: "overall", icon: <SharedIcons.AccSaberOverallSortIcon className="h-4 w-4" /> },
+  { name: "Tech Acc", value: "tech", icon: <SharedIcons.AccSaberTechAccuracySortIcon className="h-4 w-4" /> },
+  {
+    name: "Standard Acc",
+    value: "standard",
+    icon: <SharedIcons.AccSaberStandardAccuracySortIcon className="h-4 w-4" />,
+  },
+  { name: "True Acc", value: "true", icon: <SharedIcons.AccSaberTrueAccuracySortIcon className="h-4 w-4" /> },
 ];
 
 type Props = {
@@ -198,9 +196,9 @@ export default function AccSaberPlayerScores({ player }: Props) {
                     isLoading || isRefetching ? (
                       <Spinner size="sm" className="size-4" />
                     ) : direction === "desc" ? (
-                      <ArrowDown className="size-4" />
+                      <SharedIcons.SortDescendingIcon className="size-4" />
                     ) : (
-                      <ArrowUp className="size-4" />
+                      <SharedIcons.SortAscendingIcon className="size-4" />
                     )
                   ) : (
                     sortOption.icon
@@ -228,7 +226,7 @@ export default function AccSaberPlayerScores({ player }: Props) {
                     className="border-border rounded-lg border"
                     title="No Results"
                     description="No scores were found on this page"
-                    icon={<SearchIcon />}
+                    icon={<SharedIcons.SearchNoResultsIcon />}
                   />
                 ))}
             </div>

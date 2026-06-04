@@ -12,13 +12,12 @@ import ScoreSaberScoreStats from "@/components/platform/scoresaber/score/score-s
 import ScoreSongInfo from "@/components/score/score-song-info";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
-import { StarIcon } from "@heroicons/react/24/solid";
+import { SharedIcons } from "@/shared-icons";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { ChevronDown } from "lucide-react";
 import ScoreDetailsDropdown from "./score-details-dropdown";
 
 export default function ScoreSaberScoreDisplay({
@@ -83,7 +82,7 @@ export default function ScoreSaberScoreDisplay({
               }}
               metric={{
                 value: leaderboard.stars,
-                icon: StarIcon,
+                icon: SharedIcons.DifficultyStarIcon,
               }}
               beatSaverMap={beatSaverMap}
               leaderboardId={leaderboard.id}
@@ -113,7 +112,7 @@ export default function ScoreSaberScoreDisplay({
                     {isDetailsLoading ? (
                       <Spinner size="sm" />
                     ) : (
-                      <ChevronDown
+                      <SharedIcons.ExpandLeaderboardRowIcon
                         className={cn(
                           "size-6 transition-transform duration-200",
                           detailsExpanded ? "" : "rotate-180"

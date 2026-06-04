@@ -16,7 +16,7 @@ type Props = {
   /**
    * The icon for the stat (decorative when a name is present).
    */
-  icon?: React.ReactNode;
+  icon: React.ReactNode;
 
   /**
    * The additional classes for the stat.
@@ -61,8 +61,6 @@ export default function StatValue({
     lg: "px-3 py-1.5 text-sm gap-2",
   };
 
-  const hasTerm = name !== undefined || icon !== undefined;
-
   return (
     <dl
       className={clsx(
@@ -72,20 +70,18 @@ export default function StatValue({
       )}
     >
       <div className="flex items-center gap-2">
-        {hasTerm && (
-          <dt
-            id={name !== undefined ? termId : undefined}
-            className={clsx(
-              "text-muted-foreground m-0 flex items-center gap-2 font-medium",
-              labelSrOnly && "sr-only",
-              textColor
-            )}
-            style={{ color: textColor }}
-          >
-            {icon !== undefined && <span aria-hidden="true">{icon}</span>}
-            {name}
-          </dt>
-        )}
+        <dt
+          id={name !== undefined ? termId : undefined}
+          className={clsx(
+            "text-muted-foreground m-0 flex items-center gap-2 font-medium",
+            labelSrOnly && "sr-only",
+            textColor
+          )}
+          style={{ color: textColor }}
+        >
+          <span aria-hidden="true">{icon}</span>
+          {name}
+        </dt>
         <dd
           className={clsx("m-0 flex items-center gap-1 font-semibold", valueColor)}
           style={{ color: valueColor }}

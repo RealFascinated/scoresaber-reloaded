@@ -2,11 +2,10 @@ import { cn } from "@/common/utils";
 import FallbackLink from "@/components/fallback-link";
 import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { Medal, Trophy } from "lucide-react";
 import { ChangeOverTime } from "../../statistic/change-over-time";
 import { DailyChange } from "../../statistic/daily-change";
 import CountryFlag from "../../ui/country-flag";
@@ -30,7 +29,7 @@ const playerData = [
         <PlayerOverviewItem>
           <div className="flex items-center gap-2">
             <SimpleTooltip display={<span>Global Rank</span>} side="bottom">
-              <GlobeAmericasIcon className="text-muted-foreground h-5 w-5 shrink-0" />
+              <SharedIcons.GlobalRankIcon className="text-muted-foreground h-5 w-5 shrink-0" />
             </SimpleTooltip>
             <ChangeOverTime
               player={player}
@@ -96,7 +95,7 @@ const playerData = [
         <PlayerOverviewItem>
           <div className="flex items-center gap-2">
             <SimpleTooltip display={<span>Medals</span>} side="bottom">
-              <Medal className="text-muted-foreground h-5 w-5 shrink-0" />
+              <SharedIcons.MedalsIcon className="text-muted-foreground h-5 w-5 shrink-0" />
             </SimpleTooltip>
             <ChangeOverTime player={player} type={PlayerStatChange.Medals}>
               <FallbackLink href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}>
@@ -126,7 +125,7 @@ const playerData = [
         <PlayerOverviewItem>
           <div className="flex items-center gap-2">
             <SimpleTooltip display={<span>Performance Points</span>} side="bottom">
-              <Trophy className="text-muted-foreground h-5 w-5 shrink-0" />
+              <SharedIcons.PerformancePointsIcon className="text-muted-foreground h-5 w-5 shrink-0" />
             </SimpleTooltip>
             <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
               <span className="text-pp hover:text-primary m-0 truncate text-base font-semibold transition-colors">

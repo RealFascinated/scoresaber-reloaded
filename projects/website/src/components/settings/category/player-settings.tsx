@@ -4,7 +4,7 @@ import { HistoryMode } from "@/common/player/history-mode";
 import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { History } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { Path, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form } from "../../ui/form";
@@ -22,7 +22,7 @@ const settings = [
   {
     id: "historyMode",
     title: "History Mode",
-    icon: History,
+    icon: SharedIcons.PlayerHistorySettingsIcon,
     fields: [
       {
         name: "historyMode" as Path<FormValues>,

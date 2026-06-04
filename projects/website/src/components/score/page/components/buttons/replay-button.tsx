@@ -7,7 +7,7 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
-import { PlayCircle } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 
 type ReplayButtonProps = {
   score: ScoreSaberScore;
@@ -36,7 +36,7 @@ export default function ReplayButton({
       )}
     >
       <Button variant={variant} size={size} className={cn("gap-1.5 font-medium", className)} {...buttonProps}>
-        <PlayCircle className="size-3.5 shrink-0 opacity-90" aria-hidden />
+        <SharedIcons.WatchReplayIcon className="size-3.5 shrink-0 opacity-90" aria-hidden />
         Replay
       </Button>
     </SimpleLink>

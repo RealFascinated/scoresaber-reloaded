@@ -1,7 +1,7 @@
 import ScoreButton from "@/components/score/button/score-button";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import { PlayCircleIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 
 type MapPreviewButtonProps = {
   leaderboard: ScoreSaberLeaderboard;
@@ -14,7 +14,7 @@ export function MapPreviewButton({ leaderboard, beatSaverMap }: MapPreviewButton
       href={`https://allpoland.github.io/ArcViewer/?id=${beatSaverMap.bsr}&difficulty=${leaderboard.difficulty.difficulty}&mode=${leaderboard.difficulty.characteristic}`}
       tooltip={<p>Click to view a preview of the map</p>}
     >
-      <PlayCircleIcon className="h-5 w-5" />
+      <SharedIcons.PreviewMapIcon className="h-5 w-5" />
     </ScoreButton>
   );
 }

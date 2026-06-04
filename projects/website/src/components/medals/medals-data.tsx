@@ -6,10 +6,9 @@ import CountrySelector from "@/components/country-selector";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { LinkIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
@@ -55,7 +54,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
       <div className="flex w-full flex-col gap-2 xl:w-[750px]">
         <Card>
           <div className="flex items-center gap-(--spacing-sm)">
-            <GlobeAmericasIcon className="size-6" />
+            <SharedIcons.GlobalPlayersRankingIcon className="size-6" />
             <h1 className="text-lg font-semibold">Medal Ranking</h1>
           </div>
         </Card>
@@ -71,7 +70,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               <SimpleLink href="/medals">
                 <Button variant="outline" className="gap-2">
                   Go to Page 1
-                  <LinkIcon className="size-4" />
+                  <SharedIcons.RankingPageLinkIcon className="size-4" />
                 </Button>
               </SimpleLink>
             </div>

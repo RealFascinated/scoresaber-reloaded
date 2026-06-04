@@ -2,6 +2,7 @@ import Card from "@/components/card";
 import PlayerScoreAccuracyChart from "@/components/platform/scoresaber/score/chart/player-score-accuracy-chart";
 import ScoreAccuracyStats from "@/components/score/score-accuracy-stats";
 import StatValue from "@/components/statistic/stat-value";
+import { SharedIcons } from "@/shared-icons";
 import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -33,18 +34,25 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
       {/* Stats */}
       <Card className="flex w-full flex-col items-center justify-center gap-3 rounded-xl md:mb-0 md:max-w-[360px]">
         <div className="flex w-full flex-row flex-wrap items-center justify-center gap-2">
-          {score.beatLeaderScore && <StatValue value={score.beatLeaderScore.pauses} name="Pauses" />}
+          {score.beatLeaderScore && (
+            <StatValue
+              name="Pauses"
+              icon={<SharedIcons.StatScorePausesIcon className="size-4 shrink-0" />}
+              value={score.beatLeaderScore.pauses}
+            />
+          )}
           {scoreStats && (
-            <StatValue value={scoreStats.current.winTracker.jumpDistance.toFixed(2)} name="JD" />
+            <StatValue
+              name="JD"
+              icon={<SharedIcons.StatJumpDistanceIcon className="size-4 shrink-0" />}
+              value={scoreStats.current.winTracker.jumpDistance.toFixed(2)}
+            />
           )}
           {!score.fullCombo && score.beatLeaderScore && (
             <StatValue
-              value={
-                <div className="flex items-center gap-2">
-                  <p>{score.beatLeaderScore.fcAccuracy.toFixed(2)}%</p>
-                </div>
-              }
               name="FC Acc"
+              icon={<SharedIcons.StatFullComboAccuracyIcon className="size-4 shrink-0" />}
+              value={`${score.beatLeaderScore.fcAccuracy.toFixed(2)}%`}
             />
           )}
         </div>

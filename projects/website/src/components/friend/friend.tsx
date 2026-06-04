@@ -7,7 +7,7 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import useDatabase from "@/hooks/use-database";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { XIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { toast } from "sonner";
 
 type FriendProps = {
@@ -66,7 +66,7 @@ export default function Friend({ player, onClick }: FriendProps) {
         <ConfirmationDialog
           trigger={
             <div className="cursor-pointer">
-              <XIcon className="h-5 w-5" />
+              <SharedIcons.RemoveFriendFromListIcon className="h-5 w-5" />
             </div>
           }
           title={`Remove ${name}?`}

@@ -20,7 +20,7 @@ import {
 } from "@ssr/common/playlist/self/self-playlist-settings-schema";
 import { encodeSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
-import { Download, Filter, MusicIcon, Trophy, User } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
@@ -33,9 +33,9 @@ const SORT_OPTIONS = {
 } as const;
 
 const RANKED_OPTIONS = [
-  { value: "all" as const, label: "All Scores", icon: Filter },
-  { value: "ranked" as const, label: "Ranked Only", icon: Trophy },
-  { value: "unranked" as const, label: "Unranked Only", icon: MusicIcon },
+  { value: "all" as const, label: "All Scores", icon: SharedIcons.AllScoresFilterIcon },
+  { value: "ranked" as const, label: "Ranked Only", icon: SharedIcons.RankedScoresFilterIcon },
+  { value: "unranked" as const, label: "Unranked Only", icon: SharedIcons.UnrankedScoresFilterIcon },
 ] as const;
 
 type SortOption = keyof typeof SORT_OPTIONS;
@@ -119,7 +119,7 @@ export default function SelfPlaylistCreator() {
           }
         >
           <PlayerActionButtonWrapper>
-            <User className="size-5" />
+            <SharedIcons.SelfPlaylistPlayerIcon className="size-5" />
           </PlayerActionButtonWrapper>
         </SimpleTooltip>
       </DialogTrigger>
@@ -253,7 +253,11 @@ export default function SelfPlaylistCreator() {
 
           <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
             <Button type="submit" form="self-playlist-form" className="gap-2" disabled={downloading}>
-              {downloading ? <Spinner className="size-4" /> : <Download className="size-4" />}
+              {downloading ? (
+                <Spinner className="size-4" />
+              ) : (
+                <SharedIcons.DownloadPlaylistIcon className="size-4" />
+              )}
               <span>Download Playlist</span>
             </Button>
           </div>

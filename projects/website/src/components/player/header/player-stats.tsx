@@ -7,9 +7,8 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { ReactNode, useState } from "react";
-import HMDIcon from "../../hmd-icon";
 
 type Stat = {
   name: string;
@@ -35,6 +34,7 @@ const playerStats: Stat[] = [
     create: (player, statName) => (
       <StatValue
         name={statName}
+        icon={<SharedIcons.StatRankedPlayCountIcon className="size-4 shrink-0" />}
         value={formatNumberWithCommas(player.statistics.totalRankedScores)}
         size="lg"
         valueColor={RANKED_VALUE_COLOR}
@@ -46,6 +46,7 @@ const playerStats: Stat[] = [
     create: (player, statName) => (
       <StatValue
         name={statName}
+        icon={<SharedIcons.StatTotalRankedScoreIcon className="size-4 shrink-0" />}
         value={formatNumberWithCommas(player.statistics.totalRankedScore)}
         size="lg"
         valueColor={RANKED_VALUE_COLOR}
@@ -57,6 +58,7 @@ const playerStats: Stat[] = [
     create: (player, statName) => (
       <StatValue
         name={statName}
+        icon={<SharedIcons.StatAverageRankedAccuracyIcon className="size-4 shrink-0" />}
         value={`${player.statistics.averageRankedAccuracy.toFixed(2)}%`}
         size="lg"
         valueColor={RANKED_VALUE_COLOR}
@@ -66,13 +68,23 @@ const playerStats: Stat[] = [
   {
     name: "Total Play Count",
     create: (player, statName) => (
-      <StatValue name={statName} value={formatNumberWithCommas(player.statistics.totalScores)} size="lg" />
+      <StatValue
+        name={statName}
+        icon={<SharedIcons.StatTotalPlayCountIcon className="size-4 shrink-0" />}
+        value={formatNumberWithCommas(player.statistics.totalScores)}
+        size="lg"
+      />
     ),
   },
   {
     name: "Total Score",
     create: (player, statName) => (
-      <StatValue name={statName} value={formatNumberWithCommas(player.statistics.totalScore)} size="lg" />
+      <StatValue
+        name={statName}
+        icon={<SharedIcons.StatTotalScoreIcon className="size-4 shrink-0" />}
+        value={formatNumberWithCommas(player.statistics.totalScore)}
+        size="lg"
+      />
     ),
   },
   // {
@@ -93,7 +105,11 @@ const playerStats: Stat[] = [
         <p>
           {formatDate(player.joinedDate, "DD MMMM YYYY HH:mm")} ({timeAgo(player.joinedDate)})
         </p>,
-        { value: formatDate(player.joinedDate), size: "lg" }
+        {
+          icon: <SharedIcons.StatJoinedDateIcon className="size-4 shrink-0" />,
+          value: formatDate(player.joinedDate),
+          size: "lg",
+        }
       ),
   },
   {
@@ -105,7 +121,11 @@ const playerStats: Stat[] = [
         <p>
           {formatDate(player.trackedSince, "DD MMMM YYYY HH:mm")} ({timeAgo(player.trackedSince)})
         </p>,
-        { value: formatDate(player.trackedSince), size: "lg" }
+        {
+          icon: <SharedIcons.StatTrackedSinceIcon className="size-4 shrink-0" />,
+          value: formatDate(player.trackedSince),
+          size: "lg",
+        }
       ),
   },
   {
@@ -124,19 +144,15 @@ const playerStats: Stat[] = [
           <p className="mb-1">Percentage breakdown of headsets for all scores</p>
           {Object.entries(player.hmdBreakdown ?? {}).map(([hmdKey, percentage]) => (
             <div key={hmdKey} className="flex items-center gap-2">
-              <HMDIcon hmd={getHMDInfo(hmdKey as HMD)} />
+              <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(hmdKey as HMD)} />
               <span>{hmdKey}</span>
               <span className="text-muted-foreground text-sm">{percentage.toFixed(2)}%</span>
             </div>
           ))}
         </div>,
         {
-          value: (
-            <div className="flex items-center gap-1.5">
-              <HMDIcon hmd={hmd} />
-              <span>{player.hmd}</span>
-            </div>
-          ),
+          icon: <SharedIcons.HeadMountedDisplayIcon hmd={hmd} />,
+          value: player.hmd,
           size: "lg",
         }
       );
@@ -161,6 +177,7 @@ const playerStats: Stat[] = [
           ))}
         </div>,
         {
+          icon: <SharedIcons.StatPlayerRolesIcon className="size-4 shrink-0" />,
           value: <p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p>,
           size: "lg",
         }
@@ -180,7 +197,11 @@ const playerStats: Stat[] = [
         <p>
           {formatDate(player.peakRank.timestamp, "DD MMMM YYYY")} ({timeAgo(player.peakRank.timestamp)})
         </p>,
-        { value: `#${formatNumberWithCommas(player.peakRank.rank)}`, size: "lg" }
+        {
+          icon: <SharedIcons.StatPeakRankIcon className="size-4 shrink-0" />,
+          value: `#${formatNumberWithCommas(player.peakRank.rank)}`,
+          size: "lg",
+        }
       );
     },
   },
@@ -191,7 +212,11 @@ const playerStats: Stat[] = [
       statWithTooltip(
         statName,
         <p>Amount of raw PP required to increase your global pp by 1pp</p>,
-        { value: `${formatPp(player.plusOnePp)}pp`, size: "lg" }
+        {
+          icon: <SharedIcons.StatPlusOnePpIcon className="size-4 shrink-0" />,
+          value: `${formatPp(player.plusOnePp)}pp`,
+          size: "lg",
+        }
       ),
   },
 ];
@@ -228,7 +253,7 @@ export default function PlayerStats({ player }: Props) {
           className="border-border bg-background/90 text-muted-foreground hover:border-primary/50 hover:text-foreground flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
         >
           {showMore ? "Show less" : `Show ${hiddenStatCount} more`}
-          {showMore ? <ChevronUp className="size-4 shrink-0" /> : <ChevronDown className="size-4 shrink-0" />}
+          {showMore ? <SharedIcons.CollapsePlayerStatsIcon className="size-4 shrink-0" /> : <SharedIcons.ExpandPlayerStatsIcon className="size-4 shrink-0" />}
         </button>
       )}
     </div>

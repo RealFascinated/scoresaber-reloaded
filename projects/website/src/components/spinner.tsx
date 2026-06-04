@@ -1,5 +1,5 @@
 import { cn } from "@/common/utils";
-import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import { SharedIcons } from "@/shared-icons";
 
 interface SpinnerProps {
   size?: "sm" | "md" | "lg";
@@ -15,7 +15,7 @@ export function Spinner({ size = "md", className }: SpinnerProps) {
 
   return (
     <div className="flex items-center justify-center">
-      <ArrowPathIcon className={cn("animate-spin text-white", sizeClasses[size], className)} />
+      <SharedIcons.PaginationLoadingIcon className={cn("animate-spin text-white", sizeClasses[size], className)} />
     </div>
   );
 }

@@ -1,8 +1,6 @@
 "use client";
 
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
-import { PersonIcon } from "@radix-ui/react-icons";
-import { TrendingUpIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { ReactElement, useState } from "react";
 import { ControlRow, Tab, TabGroup } from "../ui/control-panel";
 
@@ -26,21 +24,21 @@ export const scoreModes: ScoreModeType[] = [
     id: ScoreModeEnum.Global,
     color: "bg-primary/15 border-primary text-primary",
     hoverColor: "hover:border-primary hover:text-primary",
-    icon: <GlobeAmericasIcon className="h-4 w-4" />,
+    icon: <SharedIcons.GlobalScoresModeIcon className="h-4 w-4" />,
   },
   {
     name: "Friends",
     id: ScoreModeEnum.Friends,
     color: "bg-friends/15 border-friends text-friends",
     hoverColor: "hover:border-friends hover:text-friends",
-    icon: <PersonIcon className="h-4 w-4" />,
+    icon: <SharedIcons.FriendsScoresModeIcon className="h-4 w-4" />,
   },
   {
     name: "History",
     id: ScoreModeEnum.History,
     color: "bg-history/15 border-history text-history",
     hoverColor: "hover:border-history hover:text-history",
-    icon: <TrendingUpIcon className="h-4 w-4" />,
+    icon: <SharedIcons.HistoryScoresModeIcon className="h-4 w-4" />,
   },
 ];
 

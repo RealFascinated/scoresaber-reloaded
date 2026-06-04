@@ -8,7 +8,7 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
-import { AlertCircle, BarChart3, FileX } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { Metadata } from "next";
 import { cache } from "react";
 import CutDistributionChart from "../../../../components/score/page/components/charts/cut-distribution-chart";
@@ -96,7 +96,7 @@ export default async function ScorePage({ params }: ScorePageProps) {
   if (score === undefined) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <AlertCircle className="size-16 text-amber-500" />
+        <SharedIcons.WarningAlertIcon className="size-16 text-amber-500" />
         <h2 className="text-xl font-semibold">Score Not Found</h2>
         <p className="text-muted-foreground">This score could not be found or may have been removed.</p>
       </div>
@@ -122,20 +122,20 @@ export default async function ScorePage({ params }: ScorePageProps) {
       {!hasAnyAdditionalData ? (
         <Card className="flex flex-col items-center justify-center py-8 text-center">
           <div className="mb-6 flex flex-col items-center gap-4">
-            <AlertCircle className="size-16 text-amber-500" />
+            <SharedIcons.WarningAlertIcon className="size-16 text-amber-500" />
             <h2 className="text-xl font-semibold">Limited Score Data</h2>
           </div>
 
           <div className="mb-6 flex flex-col gap-3 text-left">
             {!hasScoreStats && (
               <div className="flex items-center gap-3">
-                <BarChart3 className="text-muted-foreground size-5" />
+                <SharedIcons.StatsUnavailableIcon className="text-muted-foreground size-5" />
                 <span className="text-muted-foreground">Score statistics unavailable</span>
               </div>
             )}
             {!hasReplay && (
               <div className="flex items-center gap-3">
-                <FileX className="text-muted-foreground size-5" />
+                <SharedIcons.MissingContentIcon className="text-muted-foreground size-5" />
                 <span className="text-muted-foreground">Replay analysis data unavailable</span>
               </div>
             )}

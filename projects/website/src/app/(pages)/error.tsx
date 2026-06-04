@@ -4,7 +4,7 @@ import Card from "@/components/card";
 import SimpleLink from "@/components/simple-link";
 import { DiscordButton } from "@/components/social/discord-button";
 import { Button } from "@/components/ui/button";
-import { Frown, HomeIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useEffect } from "react";
 
 type ErrorProps = {
@@ -25,7 +25,7 @@ export default function Error(props: ErrorProps) {
       <Card className="mt-2 flex w-full max-w-2xl flex-col items-center gap-4">
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="flex items-center gap-2 text-2xl font-bold text-red-400">
-            Something went wrong <Frown className="size-6" />
+            Something went wrong <SharedIcons.PageErrorIcon className="size-6" />
           </h1>
           <p className="text-muted-foreground text-lg">{errorMessage}</p>
         </div>
@@ -56,7 +56,7 @@ export default function Error(props: ErrorProps) {
         <div className="flex flex-col gap-3 sm:flex-row">
           <SimpleLink href="/">
             <Button variant="outline" className="gap-2">
-              <HomeIcon className="size-4" />
+              <SharedIcons.GoHomeIcon className="size-4" />
               Go back to homepage
             </Button>
           </SimpleLink>

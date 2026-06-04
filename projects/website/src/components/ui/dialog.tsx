@@ -1,10 +1,10 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { XIcon } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/common/utils";
+import { SharedIcons } from "@/shared-icons";
 
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
@@ -60,7 +60,7 @@ function DialogContent({
             data-slot="dialog-close"
             className="ring-offset-background data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-(--radius-xs) opacity-70 transition-opacity duration-200 hover:opacity-100 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
-            <XIcon />
+            <SharedIcons.DialogCloseIcon />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}

@@ -1,5 +1,6 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import StatValue from "@/components/statistic/stat-value";
+import { SharedIcons } from "@/shared-icons";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getAccDetails, getScoreBadgeFromName } from "@ssr/common/utils/song-utils";
@@ -32,6 +33,7 @@ export default function PlayerAccBadges({ statistics }: { statistics: ScoreSaber
           >
             <StatValue
               name={badge.name}
+              icon={<SharedIcons.StatAccuracyGradeIcon className="size-4 shrink-0" />}
               textColor={badge.color}
               value={formatNumberWithCommas(statistics[name as keyof ScoreSaberPlayerStatistics] ?? 0)}
               className="h-full"

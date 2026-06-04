@@ -13,7 +13,7 @@ import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve"
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { DEBOUNCE_MS_SLIDER } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
-import { ChartBarIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useEffect, useMemo, useState } from "react";
 
 type Props = {
@@ -123,7 +123,7 @@ export default function LeaderboardPpChartButton({ leaderboard }: Props) {
     <Dialog>
       <DialogTrigger asChild>
         <ScoreButton tooltip={<p>View PP Chart</p>}>
-          <ChartBarIcon className="h-4 w-4" />
+          <SharedIcons.LeaderboardPpChartIcon className="h-4 w-4" />
         </ScoreButton>
       </DialogTrigger>
       <DialogContent className="sm:max-w-3xl">

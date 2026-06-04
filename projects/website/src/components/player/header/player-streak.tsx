@@ -2,7 +2,7 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { pluralize } from "@ssr/common/utils/string.util";
-import { Flame } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 
 type PlayerStreakProps = {
   player: ScoreSaberPlayer;
@@ -44,7 +44,7 @@ export default function PlayerStreak({ player }: PlayerStreakProps) {
           <span className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
             Streak
           </span>
-          <Flame className="size-3.5 text-orange-300/90" />
+          <SharedIcons.PlayerStreakIcon className="size-3.5 text-orange-300/90" />
         </div>
 
         <div className="relative mt-0.5 flex items-end gap-1">

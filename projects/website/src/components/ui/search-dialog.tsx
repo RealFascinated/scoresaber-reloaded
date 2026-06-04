@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { LoaderCircle, Search } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { ReactNode } from "react";
 
 type SearchDialogProps = {
@@ -54,9 +54,9 @@ const SearchDialog = ({
         <div className="border-border/50 bg-muted/30 relative border-b">
           <div className="flex h-14 items-center gap-3 px-4">
             {isLoading ? (
-              <LoaderCircle className="text-muted-foreground size-4 shrink-0 animate-spin" />
+              <SharedIcons.SearchLoadingIcon className="text-muted-foreground size-4 shrink-0 animate-spin" />
             ) : (
-              <Search className="text-muted-foreground size-4 shrink-0" />
+              <SharedIcons.SearchIcon className="text-muted-foreground size-4 shrink-0" />
             )}
             <input
               className="placeholder:text-muted-foreground focus:text-foreground flex h-full w-full rounded-md bg-transparent py-3 text-sm outline-hidden transition-colors disabled:cursor-not-allowed disabled:opacity-50"

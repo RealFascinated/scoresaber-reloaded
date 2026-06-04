@@ -9,7 +9,7 @@ import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, BarChart3, FileX, Loader2 } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import dynamic from "next/dynamic";
 import ScoreDetails from "./components/score-details";
 
@@ -19,7 +19,7 @@ const CutDistributionChart = dynamic(
     ssr: false,
     loading: () => (
       <div className="bg-chart-card flex min-h-[280px] items-center justify-center rounded-lg border">
-        <Loader2 className="text-primary size-8 animate-spin" />
+        <SharedIcons.PageLoadingIcon className="text-primary size-8 animate-spin" />
       </div>
     ),
   }
@@ -29,7 +29,7 @@ const SwingSpeedChart = dynamic(() => import("./components/charts/swing-speed-ch
   ssr: false,
   loading: () => (
     <div className="bg-chart-card flex min-h-[280px] items-center justify-center rounded-lg border">
-      <Loader2 className="text-primary size-8 animate-spin" />
+      <SharedIcons.PageLoadingIcon className="text-primary size-8 animate-spin" />
     </div>
   ),
 });
@@ -69,7 +69,7 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
   if (isError) {
     return (
       <Card className="flex flex-col items-center justify-center text-center">
-        <AlertCircle className="mb-(--spacing-xl) size-16 text-red-500" />
+        <SharedIcons.WarningAlertIcon className="mb-(--spacing-xl) size-16 text-red-500" />
         <h2 className="mb-(--spacing-sm) text-xl font-semibold">Score Not Found</h2>
         <p className="text-muted-foreground">This score has not been tracked or may have been removed.</p>
       </Card>
@@ -99,7 +99,7 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
 
       {isAnyDataLoading && (
         <Card className="flex flex-col items-center justify-center gap-4 py-8">
-          <Loader2 className="text-primary size-8 animate-spin" />
+          <SharedIcons.PageLoadingIcon className="text-primary size-8 animate-spin" />
           <p className="text-muted-foreground">Loading additional score data...</p>
         </Card>
       )}
@@ -107,20 +107,20 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
       {!hasAnyAdditionalData && !isAnyDataLoading ? (
         <Card className="flex flex-col items-center justify-center py-8 text-center">
           <div className="mb-6 flex flex-col items-center gap-4">
-            <AlertCircle className="size-16 text-amber-500" />
+            <SharedIcons.WarningAlertIcon className="size-16 text-amber-500" />
             <h2 className="text-xl font-semibold">Limited Score Data</h2>
           </div>
 
           <div className="mb-6 flex flex-col gap-3 text-left">
             {!hasScoreStats && (
               <div className="flex items-center gap-3">
-                <BarChart3 className="text-muted-foreground size-5" />
+                <SharedIcons.StatsUnavailableIcon className="text-muted-foreground size-5" />
                 <span className="text-muted-foreground">Score statistics unavailable</span>
               </div>
             )}
             {!hasReplay && (
               <div className="flex items-center gap-3">
-                <FileX className="text-muted-foreground size-5" />
+                <SharedIcons.MissingContentIcon className="text-muted-foreground size-5" />
                 <span className="text-muted-foreground">Replay analysis data unavailable</span>
               </div>
             )}

@@ -2,7 +2,7 @@ import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
-import { StarIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useIsMobile } from "../../../contexts/viewport-context";
 import SimpleLink from "../../simple-link";
 
@@ -47,7 +47,7 @@ export function DifficultyButton({ leaderboardDifficulty, selectedId }: Difficul
         {leaderboardDifficulty.stars > 0 && (
           <div className="flex items-center gap-1 text-xs">
             {leaderboardDifficulty.stars.toFixed(isMobile ? 1 : 2)}{" "}
-            {!isMobile && <StarIcon className="size-3" />}
+            {!isMobile && <SharedIcons.DifficultyStarIcon className="size-3" />}
           </div>
         )}
       </Button>

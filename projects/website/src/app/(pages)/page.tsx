@@ -1,7 +1,7 @@
 import { SearchButton } from "@/components/landing/search-button";
 import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart3, Database, Globe, Heart, Monitor, Star, Users } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 
 export default async function LandingPage() {
   return (
@@ -15,9 +15,9 @@ export default async function LandingPage() {
               target="_blank"
               className="border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center gap-(--spacing-sm) rounded-full border px-(--spacing-lg) py-(--spacing-sm) text-sm transition-all"
             >
-              <Star className="h-4 w-4" />
+              <SharedIcons.OpenSourceBadgeIcon className="h-4 w-4" />
               <span>Open Source</span>
-              <ArrowRight className="h-4 w-4" />
+              <SharedIcons.OpenSourceArrowIcon className="h-4 w-4" />
             </SimpleLink>
           </div>
 
@@ -62,37 +62,37 @@ export default async function LandingPage() {
 
           <div className="grid gap-(--spacing-lg) md:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
-              icon={<Database className="h-6 w-6" />}
+              icon={<SharedIcons.ComprehensiveDataFeatureIcon className="h-6 w-6" />}
               title="Comprehensive Data"
               description="Access detailed statistics, accuracy breakdowns, and performance metrics that go beyond basic score tracking."
             />
 
             <FeatureCard
-              icon={<Users className="h-6 w-6" />}
+              icon={<SharedIcons.FriendSystemFeatureIcon className="h-6 w-6" />}
               title="Friend System"
               description="Connect with friends, track their progress, and compete together in a social gaming experience."
             />
 
             <FeatureCard
-              icon={<BarChart3 className="h-6 w-6" />}
+              icon={<SharedIcons.AdvancedAnalyticsFeatureIcon className="h-6 w-6" />}
               title="Advanced Analytics"
               description="Visualize your improvement with detailed charts, trends, and performance insights."
             />
 
             <FeatureCard
-              icon={<Globe className="h-6 w-6" />}
+              icon={<SharedIcons.GlobalLeaderboardsFeatureIcon className="h-6 w-6" />}
               title="Global Leaderboards"
               description="Compete on global and country leaderboards with real-time rankings and statistics."
             />
 
             <FeatureCard
-              icon={<Monitor className="h-6 w-6" />}
+              icon={<SharedIcons.CustomOverlaysFeatureIcon className="h-6 w-6" />}
               title="Custom Overlays"
               description="Create beautiful, customizable overlays for your streams with real-time score and player data."
             />
 
             <FeatureCard
-              icon={<Heart className="h-6 w-6" />}
+              icon={<SharedIcons.CommunityDrivenFeatureIcon className="h-6 w-6" />}
               title="Community Driven"
               description="Built by players, for players. Open source and constantly improving based on community feedback."
             />

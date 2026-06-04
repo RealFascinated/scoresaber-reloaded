@@ -2,7 +2,7 @@
 
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import ScoreSongInfo from "@/components/score/score-song-info";
-import { SparklesIcon } from "@heroicons/react/24/solid";
+import { SharedIcons } from "@/shared-icons";
 import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { getScoreSaberLeaderboardCoverUrl } from "@ssr/common/utils/scoresaber.util";
@@ -35,7 +35,7 @@ export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
             }}
             metric={{
               value: score.leaderboard.complexity,
-              icon: SparklesIcon,
+              icon: SharedIcons.AccSaberBadgeIcon,
             }}
           />
         </div>

@@ -8,8 +8,8 @@ import {
   isPlayerSearchQueryTooShort,
   PLAYER_SEARCH_TOO_SHORT_MESSAGE,
 } from "@/common/search-query-utils";
-import { StarIcon } from "@heroicons/react/24/solid";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { SharedIcons } from "@/shared-icons";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { truncateText } from "@ssr/common/string-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
@@ -17,7 +17,6 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
-import { LoaderCircle, Music, SearchX, Users, UserSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -94,7 +93,7 @@ export default function PlayerAndLeaderboardSearch() {
         className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-center rounded-xl border px-2 backdrop-blur-xs transition-all duration-200 select-none sm:min-w-16 xl:w-48 xl:justify-start xl:px-(--spacing-sm)"
         onClick={openSearch}
       >
-        <UserSearch className="text-muted-foreground size-5" />
+        <SharedIcons.SearchLeaderboardsPlayersIcon className="text-muted-foreground size-5" />
 
         <p className="text-muted-foreground group-hover:text-foreground hidden flex-1 px-(--spacing-sm) text-sm transition-colors duration-200 xl:block">
           Query...
@@ -121,12 +120,12 @@ export default function PlayerAndLeaderboardSearch() {
           </div>
         ) : isLoading ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <LoaderCircle className="text-muted-foreground mb-3 size-6 animate-spin" />
+            <SharedIcons.SearchLoadingIcon className="text-muted-foreground mb-3 size-6 animate-spin" />
             <p className="text-muted-foreground text-sm">Searching...</p>
           </div>
         ) : !results?.players.length && !results?.leaderboards.length ? (
           <div className="flex flex-col items-center justify-center px-4 py-12">
-            <SearchX className="text-muted-foreground/50 mb-3 size-10" />
+            <SharedIcons.SearchNoResultsIcon className="text-muted-foreground/50 mb-3 size-10" />
             <p className="text-muted-foreground mb-1 text-sm font-medium">No results found</p>
             <p className="text-muted-foreground/70 text-center text-xs">
               {query.trim().length > 0
@@ -139,7 +138,7 @@ export default function PlayerAndLeaderboardSearch() {
             {results.players.length > 0 && (
               <div className="p-2">
                 <div className="text-muted-foreground mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider uppercase">
-                  <Users className="size-3.5" />
+                  <SharedIcons.SearchPlayersIcon className="size-3.5" />
                   <span>Players</span>
                   <span className="text-muted-foreground/50">({results.players.length})</span>
                 </div>
@@ -162,7 +161,7 @@ export default function PlayerAndLeaderboardSearch() {
             {results.leaderboards.length > 0 && (
               <div className="p-2">
                 <div className="text-muted-foreground mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider uppercase">
-                  <Music className="size-3.5" />
+                  <SharedIcons.SearchLeaderboardsMusicIcon className="size-3.5" />
                   <span>Leaderboards</span>
                   <span className="text-muted-foreground/50">({results.leaderboards.length})</span>
                 </div>
@@ -200,7 +199,7 @@ export default function PlayerAndLeaderboardSearch() {
                                 <span className="text-muted-foreground/60">·</span>
                                 <div className="text-pp flex items-center gap-1">
                                   <span className="font-medium">{leaderboard.stars.toFixed(2)}</span>
-                                  <StarIcon className="w-3.5" />
+                                  <SharedIcons.ScoreStarBadgeIcon className="w-3.5" />
                                 </div>
                               </>
                             )}

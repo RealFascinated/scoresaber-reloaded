@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { UsersIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useRef, useState } from "react";
 import NavbarButton from "../navbar/navbar-button";
 
@@ -41,7 +41,7 @@ export default function FriendsButton() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="h-full" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
         <NavbarButton>
-          <UsersIcon className="size-5" />
+          <SharedIcons.FriendsNavIcon className="size-5" />
           <span className="hidden 2xl:flex">Friends</span>
         </NavbarButton>
       </PopoverTrigger>

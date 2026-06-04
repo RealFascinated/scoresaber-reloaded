@@ -1,7 +1,7 @@
 import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
 import SimpleTooltip from "@/components/simple-tooltip";
-import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useState } from "react";
@@ -54,7 +54,7 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
             aria-label="Refresh player data"
             className="bg-muted/90 hover:bg-muted focus-visible:ring-primary/50 flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <ArrowPathIcon className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
+            <SharedIcons.AvatarRefreshIcon className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
           </button>
         </SimpleTooltip>
       </div>

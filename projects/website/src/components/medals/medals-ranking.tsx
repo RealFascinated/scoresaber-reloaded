@@ -3,7 +3,7 @@
 import { PlayerRanking } from "@/components/player/player-ranking";
 import type { MedalRankingPlayer } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { Medal } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 
 export function MedalsRanking({
   player,
@@ -23,7 +23,7 @@ export function MedalsRanking({
       showAccountInactive={showAccountInactive}
       worth={
         <div className="ml-auto flex min-w-[70px] flex-row items-center justify-end gap-2">
-          <Medal className="size-4" />
+          <SharedIcons.MedalsRankingHeaderIcon className="size-4" />
           <p className="text-pp font-semibold">{formatNumberWithCommas(player.medals)}</p>
         </div>
       }

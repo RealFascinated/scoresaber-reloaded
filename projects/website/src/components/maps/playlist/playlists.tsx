@@ -1,7 +1,7 @@
 import Card from "@/components/card";
 import PlaylistDownloadButton from "@/components/maps/playlist/playlist-download-button";
 import { env } from "@ssr/common/env";
-import { CheckCircleIcon, ClockIcon, CrownIcon, FlameIcon, Star } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { ElementType } from "react";
 import { Button } from "../../ui/button";
 import CustomPlaylistCreator from "./custom-playlist-creator";
@@ -27,22 +27,22 @@ const playlists: Playlist[] = [
   {
     name: "Ranked Maps",
     id: "scoresaber-ranked-maps",
-    icon: CrownIcon,
+    icon: SharedIcons.RankedMapsPlaylistIcon,
   },
   {
     name: "Qualified Maps",
     id: "scoresaber-qualified-maps",
-    icon: CheckCircleIcon,
+    icon: SharedIcons.QualifiedMapsPlaylistIcon,
   },
   {
     name: "Ranking Queue",
     id: "scoresaber-ranking-queue-maps",
-    icon: ClockIcon,
+    icon: SharedIcons.RankingQueuePlaylistIcon,
   },
   {
     name: "Trending",
     id: "scoresaber-trending",
-    icon: FlameIcon,
+    icon: SharedIcons.TrendingMapsPlaylistIcon,
   },
 ];
 
@@ -66,7 +66,7 @@ export default function Playlists() {
         <CustomPlaylistCreator
           trigger={
             <Button className="flex items-center gap-2">
-              <Star size={16} className="shrink-0" aria-hidden />
+              <SharedIcons.CustomPlaylistIcon size={16} className="shrink-0" aria-hidden />
               Custom Playlist
             </Button>
           }

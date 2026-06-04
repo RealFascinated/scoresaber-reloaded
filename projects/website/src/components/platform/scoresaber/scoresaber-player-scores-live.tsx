@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import { ClockIcon, SearchIcon, TrendingUpIcon, XIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect } from "react";
 import ScoresCard from "../../score/scores-card";
@@ -29,8 +29,8 @@ import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 const DEFAULT_SORT: ScoreSaberScoreSort = "recent";
 
 const SORT_OPTIONS = [
-  { name: "Top", value: "top", icon: <TrendingUpIcon className="h-4 w-4" /> },
-  { name: "Recent", value: "recent", icon: <ClockIcon className="h-4 w-4" /> },
+  { name: "Top", value: "top", icon: <SharedIcons.TopScoresTabIcon className="h-4 w-4" /> },
+  { name: "Recent", value: "recent", icon: <SharedIcons.RecentScoresTabIcon className="h-4 w-4" /> },
 ];
 
 interface ScoreSaberPlayerScoresLiveProps {
@@ -169,7 +169,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
                 className="border-border rounded-lg border"
                 title="No Results"
                 description="No scores were found on this page"
-                icon={<SearchIcon />}
+                icon={<SharedIcons.SearchNoResultsIcon />}
               />
             ))}
         </div>
@@ -229,7 +229,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
           <ControlRow>
             <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
               <div className="relative w-full sm:w-auto">
-                <SearchIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+                <SharedIcons.SearchFieldIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
                 <Input
                   type="search"
                   placeholder="Query..."
@@ -238,7 +238,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
                   onChange={e => handleSearchChange(e.target.value)}
                 />
                 {search && search.length > 0 && (
-                  <XIcon
+                  <SharedIcons.ClearSearchInputIcon
                     className="text-muted-foreground absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
                     onClick={() => handleSearchChange("")}
                   />

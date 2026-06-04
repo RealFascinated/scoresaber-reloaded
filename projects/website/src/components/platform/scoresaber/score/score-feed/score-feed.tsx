@@ -13,7 +13,7 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import { parseDate } from "@ssr/common/utils/time-utils";
 import { useCallback, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import HMDIcon from "../../../../hmd-icon";
+import { SharedIcons } from "@/shared-icons";
 
 const LIVE_FEED_MAX_ITEMS = 12;
 
@@ -112,7 +112,7 @@ function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
             <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
               <PlayerScoreHeader player={player!} />
               <div className="flex items-center gap-2">
-                <HMDIcon hmd={getHMDInfo(score.hmd)} />
+                <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd)} />
                 <span className="text-muted-foreground text-xs">
                   {score.hmd ? `on ${score.hmd}` : "Unknown device"}
                 </span>

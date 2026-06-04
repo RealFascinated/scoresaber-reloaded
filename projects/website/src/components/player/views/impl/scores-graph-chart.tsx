@@ -20,7 +20,7 @@ import {
   ScatterController,
   Tooltip,
 } from "chart.js";
-import { Users, X } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 import { Line } from "react-chartjs-2";
 import PlayerSearch from "../../player-search";
@@ -335,7 +335,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
               className="w-full text-sm font-medium md:w-auto"
               disabled={comparisonPlayers.length >= MAX_COMPARISON_PLAYERS}
             >
-              <Users className="mr-2 h-4 w-4" />
+              <SharedIcons.ScoresGraphFriendIcon className="mr-2 h-4 w-4" />
               Add Player to Compare
               {comparisonPlayers.length > 0 && (
                 <span className="bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-xs">
@@ -362,7 +362,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
                         setComparisonPlayers(players => players.filter(p => p.id !== comparisonPlayer.id))
                       }
                     >
-                      <X className="h-3 w-3" />
+                      <SharedIcons.ScoresGraphRemoveIcon className="h-3 w-3" />
                     </Button>
                   </div>
                 ))}

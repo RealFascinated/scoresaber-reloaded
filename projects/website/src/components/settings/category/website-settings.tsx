@@ -11,8 +11,7 @@ import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ssrConfig } from "config";
-import type { LucideIcon } from "lucide-react";
-import { Globe, Image as ImageIcon, Palette, Snowflake } from "lucide-react";
+import { SharedIcons, type SharedIcon } from "@/shared-icons";
 import { useTheme } from "next-themes";
 import { Path, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -96,13 +95,13 @@ const BackgroundCoverControl = (props: {
 const settings: {
   id: string;
   title: string;
-  icon: LucideIcon;
+  icon: SharedIcon;
   fields: Field<FormValues, keyof FormValues>[];
 }[] = [
   {
     id: "background",
     title: "Background",
-    icon: ImageIcon,
+    icon: SharedIcons.WebsiteCoverImageSettingsIcon,
     fields: [
       {
         name: "backgroundCover" as Path<FormValues>,
@@ -134,7 +133,7 @@ const settings: {
   {
     id: "effects",
     title: "Visual Effects",
-    icon: Snowflake,
+    icon: SharedIcons.WebsiteSnowfallSettingsIcon,
     fields: [
       {
         name: "snowParticles" as Path<FormValues>,
@@ -153,7 +152,7 @@ const settings: {
   {
     id: "navigation",
     title: "Navigation",
-    icon: Globe,
+    icon: SharedIcons.WebsiteGlobalSettingsIcon,
     fields: [
       {
         name: "websiteLanding" as Path<FormValues>,
@@ -171,7 +170,7 @@ const settings: {
   {
     id: "theme",
     title: "Theme",
-    icon: Palette,
+    icon: SharedIcons.WebsiteThemeSettingsIcon,
     fields: [
       {
         name: "theme" as Path<FormValues>,

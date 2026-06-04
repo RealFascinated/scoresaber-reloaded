@@ -5,7 +5,7 @@ import Avatar from "@/components/avatar";
 import { useSearch } from "@/components/providers/search-provider";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { ShieldCheck } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { usePathname } from "next/navigation";
 import NavbarButton from "./navbar-button";
 
@@ -19,7 +19,7 @@ export default function ProfileButton() {
   if (mainPlayerId == null || mainPlayerId === "") {
     return (
       <NavbarButton onClick={openSearch}>
-        <ShieldCheck className="size-5 shrink-0 text-green-500" />
+        <SharedIcons.VerifiedPlayerIcon className="size-5 shrink-0 text-green-500" />
         <span className="hidden 2xl:flex">Claim profile</span>
       </NavbarButton>
     );

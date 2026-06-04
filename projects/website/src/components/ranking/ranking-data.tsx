@@ -10,13 +10,12 @@ import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
-import { LinkIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
@@ -86,7 +85,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               )}
               {!currentCountry && (
                 <>
-                  <GlobeAmericasIcon className="size-6" />
+                  <SharedIcons.GlobalPlayersRankingIcon className="size-6" />
                   <h1 className="text-lg font-semibold">Global Players</h1>
                 </>
               )}
@@ -117,7 +116,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               <SimpleLink href="/ranking">
                 <Button variant="outline" className="gap-2">
                   Back to Global
-                  <LinkIcon className="size-4" />
+                  <SharedIcons.RankingPageLinkIcon className="size-4" />
                 </Button>
               </SimpleLink>
             </div>

@@ -5,7 +5,7 @@ import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, getDaysAgo, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { ChartBarIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 import { buildChartConfig } from "../../../../../common/chart/build-chart-config";
 import { Colors } from "../../../../../common/colors";
@@ -79,7 +79,7 @@ export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberSc
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <ScoreButton tooltip={<p>View Score History Graph</p>}>
-          <ChartBarIcon className="h-4 w-4" />
+          <SharedIcons.ScoreHistoryChartIcon className="h-4 w-4" />
         </ScoreButton>
       </DialogTrigger>
       <DialogContent className="sm:max-w-3xl">

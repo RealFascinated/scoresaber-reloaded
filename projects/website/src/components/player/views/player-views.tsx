@@ -8,12 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerHistoryEntries } from "@ssr/common/schemas/scoresaber/player/history";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { Award, CalculatorIcon, ChartBarIcon, SwordIcon, TrendingUpIcon, TriangleIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ReactElement, useState } from "react";
 import { cn } from "../../../common/utils";
@@ -84,49 +83,49 @@ const VIEW_METAS: ViewMeta[] = [
   {
     index: 0,
     label: "Ranking",
-    icon: GlobeAmericasIcon,
+    icon: SharedIcons.PlayerRankingViewIcon,
     showDateRangeSelector: true,
     isChart: true,
   },
   {
     index: 1,
     label: "Accuracy",
-    icon: TrendingUpIcon,
+    icon: SharedIcons.PlayerAccuracyViewIcon,
     showDateRangeSelector: true,
     isChart: true,
   },
   {
     index: 2,
     label: "Scores",
-    icon: SwordIcon,
+    icon: SharedIcons.PlayerScoresViewIcon,
     showDateRangeSelector: true,
     isChart: true,
   },
   {
     index: 3,
     label: "Scores Graph",
-    icon: ChartBarIcon,
+    icon: SharedIcons.PlayerScoresGraphViewIcon,
     showDateRangeSelector: false,
     isChart: true,
   },
   {
     index: 4,
     label: "Skill Triangle",
-    icon: TriangleIcon,
+    icon: SharedIcons.PlayerSkillTriangleViewIcon,
     showDateRangeSelector: false,
     isChart: false,
   },
   {
     index: 5,
     label: "PP Calculator",
-    icon: CalculatorIcon,
+    icon: SharedIcons.PlayerPpCalculatorViewIcon,
     showDateRangeSelector: false,
     isChart: false,
   },
   {
     index: 6,
     label: "Acc Badges",
-    icon: Award,
+    icon: SharedIcons.PlayerAccuracyBadgesViewIcon,
     showDateRangeSelector: true,
     isChart: true,
   },

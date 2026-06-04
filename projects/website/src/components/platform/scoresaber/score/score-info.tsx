@@ -1,11 +1,10 @@
 import { getRankColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
-import HMDIcon from "@/components/hmd-icon";
 import { ScoreSaberScoreTimeSetVs } from "@/components/platform/scoresaber/score/score-time-set-vs";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { SharedIcons } from "@/shared-icons";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -25,7 +24,7 @@ export default function ScoreSaberScoreInfo({
   return (
     <div className="flex w-full flex-row items-center justify-between lg:w-[120px] lg:flex-col lg:justify-center">
       <div className="flex items-center gap-1">
-        <GlobeAmericasIcon className="size-5" />
+        <SharedIcons.GlobalRankIcon className="size-5" />
         {score.rank === -1 ? (
           <SimpleTooltip display="Unknown Score Rank">
             <p className="font-semibold">#-</p>
@@ -44,7 +43,7 @@ export default function ScoreSaberScoreInfo({
         )}
         {hmd.logo && (
           <ScoreSaberScoreHMD score={score}>
-            <HMDIcon hmd={hmd} />
+            <SharedIcons.HeadMountedDisplayIcon hmd={hmd} />
           </ScoreSaberScoreHMD>
         )}
       </div>

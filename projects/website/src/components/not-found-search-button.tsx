@@ -3,7 +3,7 @@
 import PlayerSearch from "@/components/player/player-search";
 import { Button } from "@/components/ui/button";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { SearchIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -18,7 +18,7 @@ export function NotFoundSearchButton() {
   return (
     <>
       <Button variant="outline" onClick={() => setIsOpen(true)}>
-        <SearchIcon className="mr-2 h-4 w-4" />
+        <SharedIcons.NotFoundSearchIcon className="mr-2 h-4 w-4" />
         Search Players
       </Button>
       <PlayerSearch

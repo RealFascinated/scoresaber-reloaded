@@ -3,7 +3,7 @@
 import { getRankColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
-import { GlobeAmericasIcon } from "@heroicons/react/24/solid";
+import { SharedIcons } from "@/shared-icons";
 import type { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
@@ -15,7 +15,7 @@ export function AccSaberRankTime({ score }: AccSaberRankTimeProps) {
   return (
     <div className="flex w-full flex-row items-center justify-between lg:w-[120px] lg:flex-col lg:justify-center">
       <div className="flex items-center gap-1">
-        <GlobeAmericasIcon className="h-5 w-5" />
+        <SharedIcons.AccSaberGlobalRankIcon className="h-5 w-5" />
         <p
           className={cn(
             getRankColor(score.score.rank),

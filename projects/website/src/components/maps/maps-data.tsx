@@ -8,8 +8,7 @@ import { MapFilterProvider } from "@/components/providers/maps/map-filter-provid
 import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
-import { TrophyIcon } from "@heroicons/react/24/solid";
-import { ExternalLinkIcon, TrendingUpIcon } from "lucide-react";
+import { SharedIcons } from "@/shared-icons";
 import { ElementType, ReactNode } from "react";
 import Card from "../card";
 
@@ -25,7 +24,7 @@ type Category = {
 const categories: Category[] = [
   {
     name: "Leaderboards",
-    icon: TrophyIcon,
+    icon: SharedIcons.MapsLeaderboardsTabIcon,
     id: "leaderboards",
     showFilter: true,
     preservePage: true,
@@ -33,7 +32,7 @@ const categories: Category[] = [
   },
   {
     name: "Ranking Queue",
-    icon: TrendingUpIcon,
+    icon: SharedIcons.MapsRankingQueueTabIcon,
     id: "ranking-queue",
     showFilter: false,
     render: () => <RankingQueue />,
@@ -85,7 +84,7 @@ export function MapsData({ type }: MapsDataProps) {
               <SimpleTooltip display={<p>Click to open the Ranking Queue on ScoreSaber</p>} side="bottom">
                 <SimpleLink href="https://scoresaber.com/ranking/requests" target="_blank" className="w-full">
                   <Button className="flex w-full items-center justify-center gap-2">
-                    <ExternalLinkIcon className="h-4 w-4" />
+                    <SharedIcons.MapsExternalLinkIcon className="h-4 w-4" />
                     <span>ScoreSaber Ranking Queue</span>
                   </Button>
                 </SimpleLink>
