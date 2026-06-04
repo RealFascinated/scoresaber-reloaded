@@ -23,7 +23,7 @@ export const scoreSaberAccountsTable = pgTable(
     id: varchar({ length: 32 }).primaryKey(),
     name: text().notNull(),
     country: varchar({ length: 32 }),
-    avatar: text().notNull().default("https://cdn.fascinated.cc/assets/unknown.png"),
+    avatar: text().notNull(),
 
     // Peak rank
     peakRank: integer(),
@@ -151,6 +151,8 @@ export const scoreSaberScoresTable = pgTable(
     score: integer().notNull(),
     accuracy: doublePrecision().notNull(),
     pp: doublePrecision().notNull().default(0),
+    rank: integer().notNull().default(-1),
+    weight: doublePrecision().notNull().default(0),
     medals: integer().notNull().default(0),
     missedNotes: integer().notNull(),
     badCuts: integer().notNull(),
@@ -200,6 +202,8 @@ export const scoreSaberScoreHistoryTable = pgTable(
     score: integer().notNull(),
     accuracy: doublePrecision().notNull(),
     pp: doublePrecision().notNull().default(0),
+    rank: integer().notNull().default(-1),
+    weight: doublePrecision().notNull().default(0),
     medals: integer().notNull().default(0),
     missedNotes: integer().notNull(),
     badCuts: integer().notNull(),
