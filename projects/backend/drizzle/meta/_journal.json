@@ -309,6 +309,13 @@
       "when": 1780440183061,
       "tag": "0043_table_counts_triggers",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1780440183062,
+      "tag": "0044_accounts_clear_medals_rank_idx",
+      "breakpoints": true
     }
   ]
 }

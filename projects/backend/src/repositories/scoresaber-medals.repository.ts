@@ -223,7 +223,7 @@ export class ScoreSaberMedalsRepository {
             ROW_NUMBER() OVER (ORDER BY medals DESC, id ASC)::int AS global_rank,
             ROW_NUMBER() OVER (PARTITION BY country ORDER BY medals DESC, id ASC)::int AS country_rank
           FROM "scoresaber-accounts"
-          WHERE medals > 0 AND country IS NOT NULL AND country != '' AND banned = false
+          WHERE medals > 0 AND country IS NOT NULL AND country <> '' AND banned = false
         )
         UPDATE "scoresaber-accounts" AS a
         SET
@@ -232,8 +232,8 @@ export class ScoreSaberMedalsRepository {
         FROM ranked AS r
         WHERE a.id = r.id
           AND (
-            a."medalsRank" IS DISTINCT FROM r.global_rank
-            OR a."medalsCountryRank" IS DISTINCT FROM r.country_rank
+            a."medalsRank" <> r.global_rank
+            OR a."medalsCountryRank" <> r.country_rank
           )
       `);
 
@@ -241,13 +241,13 @@ export class ScoreSaberMedalsRepository {
         UPDATE "scoresaber-accounts"
         SET "medalsRank" = 0, "medalsCountryRank" = 0
         WHERE (
-            "medalsRank" IS DISTINCT FROM 0
-            OR "medalsCountryRank" IS DISTINCT FROM 0
+            "medalsRank" <> 0
+            OR "medalsCountryRank" <> 0
           )
           AND NOT (
             medals > 0
             AND country IS NOT NULL
-            AND country != ''
+            AND country <> ''
             AND banned = false
           )
       `);

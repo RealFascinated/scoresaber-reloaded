@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "accounts_clear_medals_rank_idx" ON "scoresaber-accounts" USING btree ("id") WHERE ("scoresaber-accounts"."medalsRank" <> 0 OR "scoresaber-accounts"."medalsCountryRank" <> 0) AND NOT ("scoresaber-accounts"."medals" > 0 AND "scoresaber-accounts"."country" IS NOT NULL AND "scoresaber-accounts"."country" <> '' AND "scoresaber-accounts"."banned" = false);
