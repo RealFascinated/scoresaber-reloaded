@@ -12,7 +12,6 @@
  *   bun run scripts/create-missing-scoresaber-leaderboards.ts --search=Camellia
  *   bun run scripts/create-missing-scoresaber-leaderboards.ts --limit=500 --max-pages=20
  */
-import { CooldownPriority } from "@ssr/common/cooldown";
 import Logger from "@ssr/common/logger";
 import "dotenv/config";
 import { db } from "../src/db";
@@ -77,7 +76,6 @@ async function main(): Promise<void> {
   do {
     const response = await ScoreSaberApiService.lookupLeaderboards(page, {
       search,
-      priority: CooldownPriority.LOW,
     });
 
     if (response == null || response.leaderboards.length === 0) {

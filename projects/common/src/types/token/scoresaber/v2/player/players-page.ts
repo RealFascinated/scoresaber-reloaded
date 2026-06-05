@@ -1,4 +1,4 @@
-import ScoreSaberV2MetadataToken from "./metadata";
+import ScoreSaberV2MetadataToken from "../metadata";
 import { ScoreSaberV2PlayerStatsToken } from "./player-stats";
 
 export type ScoreSaberV2PlayerPageToken = {

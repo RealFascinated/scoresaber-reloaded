@@ -7,7 +7,11 @@ import ScoreSaberRankingRequestsResponse from "@ssr/common/schemas/response/scor
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
-import { getScoreSaberLeaderboardFromToken, getScoreSaberPlayerFromV2Token } from "@ssr/common/token-creators";
+import {
+  getScoreSaberLeaderboardFromToken,
+  getScoreSaberLeaderboardFromV2Token,
+  getScoreSaberPlayerFromV2Token,
+} from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/v1/leaderboard";
 import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/v1/leaderboard-page";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/v1/leaderboard-scores-page";
@@ -16,7 +20,9 @@ import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/
 import { ScoreSaberPlayerSearchToken } from "@ssr/common/types/token/scoresaber/v1/player-search";
 import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/v1/players-page";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/v1/ranking-request-token";
-import ScoreSaberV2PlayersPageToken from "@ssr/common/types/token/scoresaber/v2/players-page";
+import { ScoreSaberV2LeaderboardStatusToken } from "@ssr/common/types/token/scoresaber/v2/leaderboard/leaderboard-status";
+import ScoreSaberV2LeaderboardsPageToken from "@ssr/common/types/token/scoresaber/v2/leaderboard/leaderboards-page";
+import ScoreSaberV2PlayersPageToken from "@ssr/common/types/token/scoresaber/v2/player/players-page";
 import { CoalescingLoader } from "@ssr/common/utils/coalescing-loader";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
@@ -42,7 +48,6 @@ const REFRESH_PLAYER_ENDPOINT = `${API_BASE}/user/:id/refresh`;
 const LOOKUP_LEADERBOARD_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/info`;
 const LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT = `${API_BASE}/leaderboard/by-hash/:query/info?difficulty=:difficulty&gameMode=:gameMode`;
 const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/scores?page=:page`;
-const LOOKUP_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards`;
 const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
 
 /**
@@ -54,6 +59,7 @@ const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
  * v2 endpoints
  */
 const LOOKUP_PLAYERS_V2_ENDPOINT = `${API_BASE}/v2/players`;
+const LOOKUP_LEADERBOARDS_V2_ENDPOINT = `${API_BASE}/v2/leaderboards`;
 
 type SerializableValue =
   | string
@@ -362,50 +368,55 @@ export class ScoreSaberApiService {
   public static async lookupLeaderboards(
     page: number,
     options?: {
-      ranked?: boolean;
-      qualified?: boolean;
+      limit?: number;
+      status?: ScoreSaberV2LeaderboardStatusToken | ScoreSaberV2LeaderboardStatusToken[];
       verified?: boolean;
-      category?: number;
-      stars?: {
-        min?: number;
-        max?: number;
-      };
-      sort?: number;
-      priority?: CooldownPriority;
+      minStars?: number;
+      maxStars?: number;
       search?: string;
+      sortBy?: "createdAt" | "rankedAt" | "stars" | "totalScores" | "dailyScores" | "trending";
+      sortDirection?: "asc" | "desc";
+      realmId?: number;
     }
   ): Promise<ScoreSaberLeaderboardPageToken | undefined> {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up leaderboard page "${page}"...`);
 
-    const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardPageToken>(
-      LOOKUP_LEADERBOARDS_ENDPOINT,
+    const response = await ScoreSaberApiService.fetch<ScoreSaberV2LeaderboardsPageToken>(
+      LOOKUP_LEADERBOARDS_V2_ENDPOINT,
       {
         searchParams: {
           page: page.toString(),
-          ...(options?.ranked ? { ranked: options.ranked.toString() } : {}),
-          ...(options?.qualified ? { qualified: options.qualified.toString() } : {}),
-          ...(options?.verified ? { verified: options.verified.toString() } : {}),
-          ...(options?.category ? { category: options.category.toString() } : {}),
-          ...(options?.stars
+          ...(options?.limit ? { limit: options.limit.toString() } : {}),
+          ...(options?.status
             ? {
-              minStar: (options.stars.min ?? 0).toString(),
-              maxStar: (options.stars.max ?? 0).toString(),
+              status: Array.isArray(options.status) ? options.status.join(",") : options.status,
             }
             : {}),
-          ...(options?.sort ? { sort: options.sort.toString() } : {}),
+          ...(options?.verified ? { verified: "true" } : {}),
+          ...(options?.minStars != null ? { minStars: options.minStars.toString() } : {}),
+          ...(options?.maxStars != null ? { maxStars: options.maxStars.toString() } : {}),
           ...(options?.search ? { search: options.search } : {}),
+          ...(options?.sortBy ? { sortBy: options.sortBy } : {}),
+          ...(options?.sortDirection ? { sortDirection: options.sortDirection } : {}),
+          ...(options?.realmId != null ? { realmId: options.realmId.toString() } : {}),
         },
-        ...(options?.priority ? { priority: options.priority } : {}),
       }
     );
     if (response === undefined) {
       return undefined;
     }
     ScoreSaberApiService.log(
-      `Found ${response.leaderboards.length} leaderboards in ${formatDuration(performance.now() - before)}`
+      `Found ${response.data.length} leaderboards in ${formatDuration(performance.now() - before)}`
     );
-    return response;
+    return {
+      leaderboards: response.data.map(getScoreSaberLeaderboardFromV2Token),
+      metadata: {
+        page: response.metadata.page,
+        itemsPerPage: response.metadata.itemsPerPage,
+        total: response.metadata.totalItems,
+      },
+    };
   }
 
   /**
@@ -528,8 +539,8 @@ export class ScoreSaberApiService {
 
     while (hasMorePages) {
       const response = await ScoreSaberApiService.lookupLeaderboards(page, {
-        [status]: true,
-        priority: CooldownPriority.LOW,
+        status: status === "ranked" ? "RANKED" : "QUALIFIED",
+        limit: 100
       });
       if (!response) {
         hasMorePages = false;

@@ -59,10 +59,10 @@ export class LeaderboardRankedSyncService {
         updatedLeaderboards.push({
           previousLeaderboard: dbLeaderboard
             ? {
-                ranked: dbLeaderboard.ranked,
-                qualified: dbLeaderboard.qualified,
-                stars: dbLeaderboard.stars ?? 0,
-              }
+              ranked: dbLeaderboard.ranked,
+              qualified: dbLeaderboard.qualified,
+              stars: dbLeaderboard.stars ?? 0,
+            }
             : undefined,
           newLeaderboard: apiLeaderboard,
         });
@@ -98,19 +98,19 @@ export class LeaderboardRankedSyncService {
         await ScoreSaberLeaderboardsRepository.upsertLeaderboards(batch);
         LeaderboardRankedSyncService.logger.info(`Updated batch of ${batch.length} leaderboards!`);
       }
-
-      const duration = formatDuration(performance.now() - before);
-      LeaderboardRankedSyncService.logger.info(
-        `Updated ${leaderboardsToUpsert.length} leaderboards in ${duration}`
-      );
-      sendEmbedToChannel(
-        DiscordChannels.BACKEND_LOGS,
-        new EmbedBuilder()
-          .setTitle("Ranked Leaderboards Updated")
-          .setDescription(`Updated ${leaderboardsToUpsert.length} leaderboards in ${duration}`)
-          .setColor("#00ff00")
-      );
     }
+    const duration = formatDuration(performance.now() - before);
+    LeaderboardRankedSyncService.logger.info(
+      `Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`
+    );
+
+    sendEmbedToChannel(
+      DiscordChannels.BACKEND_LOGS,
+      new EmbedBuilder()
+        .setTitle("Ranked Leaderboards Updated")
+        .setDescription(`Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`)
+        .setColor("#00ff00")
+    );
 
     const medalRefreshSeen = new Set<number>();
     for (const leaderboard of updatedLeaderboards) {
@@ -151,17 +151,18 @@ export class LeaderboardRankedSyncService {
       LeaderboardRankedSyncService.logger.info(`Updating ${leaderboardsToUpsert.length} leaderboards...`);
       await ScoreSaberLeaderboardsRepository.upsertLeaderboards(leaderboardsToUpsert);
 
-      const duration = formatDuration(performance.now() - before);
-      LeaderboardRankedSyncService.logger.info(
-        `Updated ${leaderboardsToUpsert.length} leaderboards in ${duration}`
-      );
-      sendEmbedToChannel(
-        DiscordChannels.BACKEND_LOGS,
-        new EmbedBuilder()
-          .setTitle("Qualified Leaderboards Updated")
-          .setDescription(`Updated ${leaderboardsToUpsert.length} leaderboards in ${duration}`)
-          .setColor("#00ff00")
-      );
     }
+    const duration = formatDuration(performance.now() - before);
+    LeaderboardRankedSyncService.logger.info(
+      `Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`
+    );
+
+    sendEmbedToChannel(
+      DiscordChannels.BACKEND_LOGS,
+      new EmbedBuilder()
+        .setTitle("Qualified Leaderboards Updated")
+        .setDescription(`Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`)
+        .setColor("#00ff00")
+    );
   }
 }

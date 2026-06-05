@@ -11,7 +11,8 @@ import { Modifier } from "./score/modifier";
 import ScoreSaberLeaderboardToken from "./types/token/scoresaber/v1/leaderboard";
 import { ScoreSaberPlayerToken } from "./types/token/scoresaber/v1/player";
 import ScoreSaberScoreToken from "./types/token/scoresaber/v1/score";
-import { ScoreSaberV2PlayerPageToken } from "./types/token/scoresaber/v2/players-page";
+import { ScoreSaberV2LeaderboardPageToken } from "./types/token/scoresaber/v2/leaderboard/leaderboards-page";
+import { ScoreSaberV2PlayerPageToken } from "./types/token/scoresaber/v2/player/players-page";
 import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
 import { parseDate } from "./utils/time-utils";
 
@@ -45,6 +46,45 @@ export function getScoreSaberPlayerFromV2Token(token: ScoreSaberV2PlayerPageToke
     banned: token.banned,
     inactive: token.inactive,
     firstSeen: new Date().toISOString(),
+  };
+}
+
+/**
+ * Parses a {@link ScoreSaberV2LeaderboardPageToken} into a {@link ScoreSaberLeaderboardToken}.
+ *
+ * @param token the v2 token to parse
+ */
+export function getScoreSaberLeaderboardFromV2Token(
+  token: ScoreSaberV2LeaderboardPageToken
+): ScoreSaberLeaderboardToken {
+  return {
+    id: token.id,
+    songHash: token.map.hash,
+    songName: token.map.songName,
+    songSubName: token.map.songSubName,
+    songAuthorName: token.map.songAuthorName,
+    levelAuthorName: token.map.levelAuthorName,
+    difficulty: {
+      leaderboardId: token.difficulty.id,
+      difficulty: token.difficulty.difficulty,
+      gameMode: token.difficulty.gameMode,
+      difficultyRaw: token.difficulty.rawDifficulty,
+    },
+    maxScore: token.maxScore,
+    createdDate: token.createdAt,
+    rankedDate: token.realm.rankedAt ?? "",
+    qualifiedDate: token.realm.qualifiedAt ?? "",
+    lovedDate: token.realm.lovedAt ?? "",
+    ranked: token.realm.leaderboardStatus === "RANKED",
+    qualified: token.realm.leaderboardStatus === "QUALIFIED",
+    loved: token.realm.leaderboardStatus === "LOVED",
+    maxPP: 0,
+    stars: token.realm.stars,
+    positiveModifiers: token.realm.positiveModifiers,
+    plays: token.totalScores,
+    dailyPlays: token.dailyScores,
+    coverImage: token.map.coverUrl,
+    difficulties: [],
   };
 }
 
