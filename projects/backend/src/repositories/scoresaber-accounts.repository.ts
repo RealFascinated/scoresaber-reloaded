@@ -99,11 +99,8 @@ export class ScoreSaberAccountsRepository {
   }
 
   public static async countInactive(): Promise<number> {
-    const [row] = await db
-      .select({ c: count() })
-      .from(scoreSaberAccountsTable)
-      .where(eq(scoreSaberAccountsTable.inactive, true));
-    return row?.c ?? 0;
+    const counts = await TableCountsRepository.getCounts();
+    return counts.scoresaberInactiveAccounts;
   }
 
   public static async countTotal(): Promise<number> {

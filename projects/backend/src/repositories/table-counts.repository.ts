@@ -7,6 +7,7 @@ export type TableCountsRow = {
   scoresaberScores: number;
   scoresaberScoreHistory: number;
   scoresaberAccounts: number;
+  scoresaberInactiveAccounts: number;
   scoresaberLeaderboards: number;
   refreshedAt: Date;
 };

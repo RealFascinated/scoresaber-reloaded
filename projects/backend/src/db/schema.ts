@@ -504,6 +504,7 @@ export const tableCountsTable = pgTable("ssr_table_counts", {
   scoresaberScores: bigint({ mode: "number" }).notNull(),
   scoresaberScoreHistory: bigint({ mode: "number" }).notNull(),
   scoresaberAccounts: bigint({ mode: "number" }).notNull(),
+  scoresaberInactiveAccounts: bigint({ mode: "number" }).notNull(),
   scoresaberLeaderboards: bigint({ mode: "number" }).notNull(),
   refreshedAt: timestamp().notNull(),
 });
