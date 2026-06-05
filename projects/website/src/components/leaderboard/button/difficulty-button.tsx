@@ -1,8 +1,8 @@
 import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
+import { SharedIcons } from "@/shared-icons";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
-import { SharedIcons } from "@/shared-icons";
 import { useIsMobile } from "../../../contexts/viewport-context";
 import SimpleLink from "../../simple-link";
 

@@ -1,8 +1,8 @@
 import StatValue from "@/components/statistic/stat-value";
+import { SharedIcons } from "@/shared-icons";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatTime } from "@ssr/common/utils/time-utils";
-import { SharedIcons } from "@/shared-icons";
 
 type MapAndScoreData = {
   /**

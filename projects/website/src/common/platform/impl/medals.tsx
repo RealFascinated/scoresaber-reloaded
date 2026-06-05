@@ -1,6 +1,6 @@
+import { SharedIcons } from "@/shared-icons";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { SharedIcons } from "@/shared-icons";
 import { Platform } from "../platform";
 import { PlatformType } from "../platform-repository";
 

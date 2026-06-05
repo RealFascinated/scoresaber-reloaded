@@ -2,9 +2,9 @@
 
 import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
+import { SharedIcons } from "@/shared-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
-import { SharedIcons } from "@/shared-icons";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form } from "../../ui/form";

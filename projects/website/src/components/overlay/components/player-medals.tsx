@@ -1,8 +1,8 @@
 import { DailyChange } from "@/components/statistic/daily-change";
+import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { SharedIcons } from "@/shared-icons";
 
 type OverlayPlayerMedalsProps = {
   /**

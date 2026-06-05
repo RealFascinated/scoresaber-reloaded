@@ -8,6 +8,7 @@ import { ButtonGroup, ControlButton } from "@/components/ui/control-panel";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { SharedIcons } from "@/shared-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { env } from "@ssr/common/env";
 import {
@@ -15,7 +16,6 @@ import {
   encodeCustomRankedPlaylistSettings,
 } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
-import { SharedIcons } from "@/shared-icons";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -136,7 +136,11 @@ export default function CustomPlaylistCreator({ trigger }: CustomPlaylistCreator
 
           <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
             <Button type="submit" form="custom-playlist-form" className="gap-2" disabled={downloading}>
-              {downloading ? <Spinner className="size-4" /> : <SharedIcons.DownloadPlaylistIcon className="size-4" />}
+              {downloading ? (
+                <Spinner className="size-4" />
+              ) : (
+                <SharedIcons.DownloadPlaylistIcon className="size-4" />
+              )}
               <span>Download Playlist</span>
             </Button>
           </div>

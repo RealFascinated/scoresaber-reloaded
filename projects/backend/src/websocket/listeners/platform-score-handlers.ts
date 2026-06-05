@@ -1,9 +1,9 @@
 import Logger from "@ssr/common/logger";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/leaderboard-player-info";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/score";
+import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/v1/leaderboard";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/v1/leaderboard-player-info";
+import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/v1/score";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
@@ -37,8 +37,6 @@ export class ScoreWebsockets implements EventListener {
   private static readonly PENDING_SCORES = new Map<string, PendingScore>();
 
   constructor() {
-    // Unique daily players are now managed by the metric itself with Redis
-
     // Start the match timeout interval timer
     setInterval(
       () => {

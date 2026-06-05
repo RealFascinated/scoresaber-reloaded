@@ -1,6 +1,6 @@
 {
-  "id": "7c5c1690-a483-4870-a548-7e00f0ef3c9a",
-  "prevId": "a05ab818-807e-41b6-8e44-1955246afa20",
+  "id": "a8f3e2d1-4b5c-6d7e-8f90-1a2b3c4d5e6f",
+  "prevId": "7c5c1690-a483-4870-a548-7e00f0ef3c9a",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -448,8 +448,12 @@
           "name": "beatsaver-map-difficulties_versionId_beatsaver-map-versions_id_fk",
           "tableFrom": "beatsaver-map-difficulties",
           "tableTo": "beatsaver-map-versions",
-          "columnsFrom": ["versionId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "versionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -556,8 +560,12 @@
           "name": "beatsaver-map-versions_mapId_beatsaver-maps_id_fk",
           "tableFrom": "beatsaver-map-versions",
           "tableTo": "beatsaver-maps",
-          "columnsFrom": ["mapId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "mapId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -697,8 +705,12 @@
           "name": "beatsaver-maps_uploaderId_beatsaver-uploaders_id_fk",
           "tableFrom": "beatsaver-maps",
           "tableTo": "beatsaver-uploaders",
-          "columnsFrom": ["uploaderId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "uploaderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1031,7 +1043,8 @@
           "name": "avatar",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'https://cdn.fascinated.cc/assets/unknown.png'"
         },
         "peakRank": {
           "name": "peakRank",
@@ -1807,8 +1820,12 @@
           "name": "scoresaber-score-events_playerId_scoresaber-accounts_id_fk",
           "tableFrom": "scoresaber-score-events",
           "tableTo": "scoresaber-accounts",
-          "columnsFrom": ["playerId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "playerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1816,8 +1833,12 @@
           "name": "scoresaber-score-events_leaderboardId_scoresaber-leaderboards_id_fk",
           "tableFrom": "scoresaber-score-events",
           "tableTo": "scoresaber-leaderboards",
-          "columnsFrom": ["leaderboardId"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "leaderboardId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2268,6 +2289,55 @@
           "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ssr_table_counts": {
+      "name": "ssr_table_counts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "scoresaberScores": {
+          "name": "scoresaberScores",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scoresaberScoreHistory": {
+          "name": "scoresaberScoreHistory",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scoresaberAccounts": {
+          "name": "scoresaberAccounts",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scoresaberLeaderboards": {
+          "name": "scoresaberLeaderboards",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "refreshedAt": {
+          "name": "refreshedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

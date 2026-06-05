@@ -3,10 +3,10 @@ import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-bu
 import { OneClickInstallButton } from "@/components/leaderboard/button/one-click-install-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
+import { SharedIcons } from "@/shared-icons";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import { SharedIcons } from "@/shared-icons";
 import ScoreButton from "../../../score/button/score-button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "../../../ui/dialog";
 import LeaderboardPpChartButton from "./chart/leaderboard-pp-chart";

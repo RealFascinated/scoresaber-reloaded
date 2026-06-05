@@ -4,12 +4,12 @@ import Card from "@/components/card";
 import { FancyLoader } from "@/components/fancy-loader";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
 import { MapStats } from "@/components/score/map-stats";
+import { SharedIcons } from "@/shared-icons";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { SharedIcons } from "@/shared-icons";
 import dynamic from "next/dynamic";
 import ScoreDetails from "./components/score-details";
 

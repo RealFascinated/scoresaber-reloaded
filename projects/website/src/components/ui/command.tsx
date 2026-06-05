@@ -5,9 +5,9 @@ import { Command as CommandPrimitive } from "cmdk";
 import * as React from "react";
 
 import { cn } from "@/common/utils";
-import { SharedIcons } from "@/shared-icons";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useIsMobile } from "@/contexts/viewport-context";
+import { SharedIcons } from "@/shared-icons";
 
 const Command = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof CommandPrimitive>) => (
   <CommandPrimitive

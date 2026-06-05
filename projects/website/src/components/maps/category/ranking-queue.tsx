@@ -4,12 +4,12 @@ import ScoreSongInfo from "@/components/score/score-song-info";
 import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
+import { SharedIcons } from "@/shared-icons";
 import { RankingQueueLeaderboard } from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 import SimpleTooltip from "../../simple-tooltip";
 

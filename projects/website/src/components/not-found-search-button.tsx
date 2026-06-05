@@ -2,8 +2,8 @@
 
 import PlayerSearch from "@/components/player/player-search";
 import { Button } from "@/components/ui/button";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { SharedIcons } from "@/shared-icons";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

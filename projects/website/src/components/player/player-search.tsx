@@ -1,14 +1,11 @@
-import {
-  isPlayerSearchQueryTooShort,
-  PLAYER_SEARCH_TOO_SHORT_MESSAGE,
-} from "@/common/search-query-utils";
+import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
+import { isPlayerSearchQueryTooShort, PLAYER_SEARCH_TOO_SHORT_MESSAGE } from "@/common/search-query-utils";
 import SearchDialog from "@/components/ui/search-dialog";
+import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
-import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 import PlayerSearchResultItem from "./player-search-result-item";
 

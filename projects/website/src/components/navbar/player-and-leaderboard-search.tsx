@@ -1,21 +1,18 @@
 "use client";
 
+import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
+import { isPlayerSearchQueryTooShort, PLAYER_SEARCH_TOO_SHORT_MESSAGE } from "@/common/search-query-utils";
 import Avatar from "@/components/avatar";
 import PlayerSearchResultItem from "@/components/player/player-search-result-item";
 import { useSearch } from "@/components/providers/search-provider";
 import SearchDialog from "@/components/ui/search-dialog";
-import {
-  isPlayerSearchQueryTooShort,
-  PLAYER_SEARCH_TOO_SHORT_MESSAGE,
-} from "@/common/search-query-utils";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { SharedIcons } from "@/shared-icons";
+import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { truncateText } from "@ssr/common/string-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

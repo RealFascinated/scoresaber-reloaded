@@ -140,9 +140,9 @@ export class PlayerHistoryService {
     );
     PlayerHistoryService.logger.info(
       `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
-      `Successfully processed: ${successCount} players\n` +
-      `Failed to process: ${errorCount} players\n` +
-      `Total inactive players: ${inactivePlayers}`
+        `Successfully processed: ${successCount} players\n` +
+        `Failed to process: ${errorCount} players\n` +
+        `Total inactive players: ${inactivePlayers}`
     );
   }
 

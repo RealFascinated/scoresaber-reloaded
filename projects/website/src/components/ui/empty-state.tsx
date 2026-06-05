@@ -34,9 +34,7 @@ export function EmptyState({ icon, title, description, className }: EmptyStatePr
         {icon || <SharedIcons.LeaderboardEmptyStateIcon className="text-muted-foreground h-10 w-10" />}
       </div>
       <h3 className="text-foreground mb-2 text-lg font-semibold">{title}</h3>
-      <p className="text-muted-foreground max-w-[500px] text-center text-sm leading-relaxed">
-        {description}
-      </p>
+      <p className="text-muted-foreground max-w-[500px] text-center text-sm leading-relaxed">{description}</p>
     </div>
   );
 }

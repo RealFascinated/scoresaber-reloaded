@@ -1,7 +1,7 @@
 import { ScoreBadgeProps } from "@/components/platform/scoresaber/score/badges/badge-props";
 import SimpleTooltip from "@/components/simple-tooltip";
-import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { SharedIcons } from "@/shared-icons";
+import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 
 export function ScoreMedalsBadge({ score }: ScoreBadgeProps) {
   if ("medals" in score) {

@@ -15,7 +15,9 @@ export function Spinner({ size = "md", className }: SpinnerProps) {
 
   return (
     <div className="flex items-center justify-center">
-      <SharedIcons.PaginationLoadingIcon className={cn("animate-spin text-white", sizeClasses[size], className)} />
+      <SharedIcons.PaginationLoadingIcon
+        className={cn("animate-spin text-white", sizeClasses[size], className)}
+      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
-import { MEDAL_COUNTS } from "@ssr/common/medal";
 import { SharedIcons } from "@/shared-icons";
+import { MEDAL_COUNTS } from "@ssr/common/medal";
 
 export default function MedalsInfo() {
   return (

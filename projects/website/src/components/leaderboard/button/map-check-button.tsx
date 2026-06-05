@@ -1,6 +1,6 @@
 import ScoreButton from "@/components/score/button/score-button";
-import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { SharedIcons } from "@/shared-icons";
+import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 
 type MapCheckButtonProps = {
   beatSaverMap: BeatSaverMap;

@@ -1,8 +1,8 @@
 import { cn } from "@/common/utils";
 import SimpleLink from "@/components/simple-link";
 import { Button, type ButtonProps } from "@/components/ui/button";
-import { env } from "@ssr/common/env";
 import { SharedIcons } from "@/shared-icons";
+import { env } from "@ssr/common/env";
 
 type PlayerButtonProps = {
   playerId: string;

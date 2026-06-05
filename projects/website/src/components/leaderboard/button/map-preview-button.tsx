@@ -1,7 +1,7 @@
 import ScoreButton from "@/components/score/button/score-button";
+import { SharedIcons } from "@/shared-icons";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import { SharedIcons } from "@/shared-icons";
 
 type MapPreviewButtonProps = {
   leaderboard: ScoreSaberLeaderboard;

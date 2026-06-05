@@ -1,8 +1,8 @@
 import SimpleTooltip from "@/components/simple-tooltip";
+import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { pluralize } from "@ssr/common/utils/string.util";
-import { SharedIcons } from "@/shared-icons";
 
 type PlayerStreakProps = {
   player: ScoreSaberPlayer;

@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { SharedIcons } from "@/shared-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -20,7 +21,6 @@ import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import { SnipeSettings, snipeSettingsSchema } from "@ssr/common/snipe/snipe-settings-schema";
 import { truncateText } from "@ssr/common/string-utils";
-import { SharedIcons } from "@/shared-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";

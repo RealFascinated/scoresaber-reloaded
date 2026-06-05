@@ -1,5 +1,6 @@
 "use client";
 
+import { DEBOUNCE_MS_FILTER } from "@/common/debounce";
 import Card from "@/components/card";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
 import ScoreSongInfo from "@/components/score/score-song-info";
@@ -8,13 +9,12 @@ import SimplePagination from "@/components/simple-pagination";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
+import { SharedIcons } from "@/shared-icons";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { DEBOUNCE_MS_FILTER } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
-import { SharedIcons } from "@/shared-icons";
 import { parseAsInteger, useQueryState } from "nuqs";
 
 export default function Leaderboards() {
@@ -56,7 +56,9 @@ export default function Leaderboards() {
             <EmptyState
               title="No Leaderboards Found"
               description="No leaderboards were found on this page"
-              icon={<SharedIcons.LeaderboardEmptyStateIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />}
+              icon={
+                <SharedIcons.LeaderboardEmptyStateIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />
+              }
             />
           </div>
         )}

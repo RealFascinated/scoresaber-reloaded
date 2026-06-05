@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { useIsMobile } from "@/contexts/viewport-context";
+import { SharedIcons } from "@/shared-icons";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import type { PlayerPpsResponse } from "@ssr/common/schemas/response/player/player-pps";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
@@ -12,7 +13,6 @@ import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 
 type ScoreEditorButtonProps = {

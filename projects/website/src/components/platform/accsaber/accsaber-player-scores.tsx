@@ -1,6 +1,7 @@
 "use client";
 
 import { Spinner } from "@/components/spinner";
+import { SharedIcons } from "@/shared-icons";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
@@ -12,7 +13,6 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import { SharedIcons } from "@/shared-icons";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect } from "react";
 import { usePageTransition } from "../../../contexts/page-transition-context";

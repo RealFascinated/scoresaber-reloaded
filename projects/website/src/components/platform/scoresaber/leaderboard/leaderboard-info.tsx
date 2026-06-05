@@ -3,13 +3,13 @@
 import Card from "@/components/card";
 import FallbackLink from "@/components/fallback-link";
 import LeaderboardButtons from "@/components/platform/scoresaber/leaderboard/leaderboard-buttons";
+import { SharedIcons } from "@/shared-icons";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate, formatTime } from "@ssr/common/utils/time-utils";
-import { SharedIcons } from "@/shared-icons";
 import NextImage from "next/image";
 import StatValue from "../../../statistic/stat-value";
 

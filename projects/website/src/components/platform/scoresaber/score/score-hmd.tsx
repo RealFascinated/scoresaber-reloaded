@@ -1,5 +1,5 @@
-import { SharedIcons } from "@/shared-icons";
 import SimpleTooltip from "@/components/simple-tooltip";
+import { SharedIcons } from "@/shared-icons";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 

@@ -8,12 +8,12 @@ import { ScoreReplayButton } from "@/components/score/button/score-replay-button
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
+import { SharedIcons } from "@/shared-icons";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
-import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 import ScoreDetailsDropdown from "./score-details-dropdown";
 import { ScoreSaberScoreHMD } from "./score-hmd";

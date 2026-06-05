@@ -68,8 +68,8 @@ type SerializableValue =
   | null
   | SerializableValue[]
   | {
-    [key: string]: SerializableValue;
-  };
+      [key: string]: SerializableValue;
+    };
 
 type CachedResponse<T> = {
   data: T | string;
@@ -279,7 +279,7 @@ export class ScoreSaberApiService {
     sort,
     limit = 8,
     page,
-    search
+    search,
   }: {
     playerId: string;
     sort: ScoreSaberScoreSort;
@@ -296,7 +296,7 @@ export class ScoreSaberApiService {
       LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":id", playerId)
         .replace(":limit", limit.toString())
         .replace(":sort", sort)
-        .replace(":page", page.toString()) + (search ? `&search=${search}` : ""),
+        .replace(":page", page.toString()) + (search ? `&search=${search}` : "")
     );
     if (response === undefined) {
       return undefined;
@@ -318,7 +318,7 @@ export class ScoreSaberApiService {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up leaderboard "${leaderboardId}"...`);
     const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardToken>(
-      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId.toString()),
+      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId.toString())
     );
     if (response === undefined) {
       return undefined;
@@ -390,8 +390,8 @@ export class ScoreSaberApiService {
           ...(options?.limit ? { limit: options.limit.toString() } : {}),
           ...(options?.status
             ? {
-              status: Array.isArray(options.status) ? options.status.join(",") : options.status,
-            }
+                status: Array.isArray(options.status) ? options.status.join(",") : options.status,
+              }
             : {}),
           ...(options?.verified ? { verified: "true" } : {}),
           ...(options?.minStars != null ? { minStars: options.minStars.toString() } : {}),
@@ -540,7 +540,7 @@ export class ScoreSaberApiService {
     while (hasMorePages) {
       const response = await ScoreSaberApiService.lookupLeaderboards(page, {
         status: status === "ranked" ? "RANKED" : "QUALIFIED",
-        limit: 100
+        limit: 100,
       });
       if (!response) {
         hasMorePages = false;

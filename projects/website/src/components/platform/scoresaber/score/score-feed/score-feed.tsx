@@ -5,6 +5,7 @@ import Card from "@/components/card";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
 import PlayerScoreHeader from "@/components/score/player-score-header";
 import { Spinner } from "@/components/spinner";
+import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import { getHMDInfo } from "@ssr/common/hmds";
 import Logger from "@ssr/common/logger";
@@ -13,7 +14,6 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import { parseDate } from "@ssr/common/utils/time-utils";
 import { useCallback, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { SharedIcons } from "@/shared-icons";
 
 const LIVE_FEED_MAX_ITEMS = 12;
 

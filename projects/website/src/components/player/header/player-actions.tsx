@@ -1,6 +1,5 @@
 "use client";
 
-import { SharedIcons } from "@/shared-icons";
 import AccSaberLogo from "@/components/logos/logos/accsaber-logo";
 import BeatLeaderLogo from "@/components/logos/logos/beatleader-logo";
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
@@ -9,6 +8,7 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrConfig } from "config";
 import { ReactNode } from "react";

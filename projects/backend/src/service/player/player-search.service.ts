@@ -79,7 +79,11 @@ export class PlayerSearchService {
       return Pagination.empty<ScoreSaberPlayer>();
     }
 
-    const foundPlayers = await ScoreSaberApiService.lookupPlayers(page, { country, search, includeInactives });
+    const foundPlayers = await ScoreSaberApiService.lookupPlayers(page, {
+      country,
+      search,
+      includeInactives,
+    });
 
     const tokens = foundPlayers?.players ?? [];
     const items = await Promise.all(

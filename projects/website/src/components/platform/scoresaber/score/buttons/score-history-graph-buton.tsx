@@ -1,11 +1,11 @@
 "use client";
 
+import { SharedIcons } from "@/shared-icons";
 import type { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-history-graph";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, getDaysAgo, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 import { buildChartConfig } from "../../../../../common/chart/build-chart-config";
 import { Colors } from "../../../../../common/colors";

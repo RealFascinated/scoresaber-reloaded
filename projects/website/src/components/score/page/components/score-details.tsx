@@ -1,9 +1,9 @@
 import { PlayerAvatar } from "@/components/ranking/player-avatar";
+import { SharedIcons } from "@/shared-icons";
 import { getHMDInfo } from "@ssr/common/hmds";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { formatDate } from "@ssr/common/utils/time-utils";
-import { SharedIcons } from "@/shared-icons";
 import Card from "../../../card";
 import ScoreSongInfo from "../../score-song-info";
 import LeaderboardButton from "./buttons/leaderboard-button";

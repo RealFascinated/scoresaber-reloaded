@@ -1,5 +1,6 @@
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "../db";
+import { tableCountsTable } from "../db/schema";
 
 export type TableCountsRow = {
   id: number;
@@ -10,43 +11,16 @@ export type TableCountsRow = {
   refreshedAt: Date;
 };
 
-type RawTableCountsRow = {
-  id: string;
-  scoresaberScores: string;
-  scoresaberScoreHistory: string;
-  scoresaberAccounts: string;
-  scoresaberLeaderboards: string;
-  refreshedAt: Date;
-};
-
 export class TableCountsRepository {
   public static async getCounts(): Promise<TableCountsRow> {
-    const result = await db.execute<RawTableCountsRow>(sql`
-      SELECT
-        "id"::text AS "id",
-        "scoresaberScores"::text AS "scoresaberScores",
-        "scoresaberScoreHistory"::text AS "scoresaberScoreHistory",
-        "scoresaberAccounts"::text AS "scoresaberAccounts",
-        "scoresaberLeaderboards"::text AS "scoresaberLeaderboards",
-        "refreshedAt"
-      FROM "ssr_table_counts"
-      WHERE "id" = 1
-    `);
-    const rawCounts = result.rows[0];
-    if (!rawCounts) {
-      throw new Error('Materialized counts row missing from "ssr_table_counts"');
+    const [counts] = await db.select().from(tableCountsTable).where(eq(tableCountsTable.id, 1));
+    if (!counts) {
+      throw new Error('Table counts row missing from "ssr_table_counts"');
     }
-    return {
-      id: Number.parseInt(rawCounts.id, 10),
-      scoresaberScores: Number.parseInt(rawCounts.scoresaberScores, 10),
-      scoresaberScoreHistory: Number.parseInt(rawCounts.scoresaberScoreHistory, 10),
-      scoresaberAccounts: Number.parseInt(rawCounts.scoresaberAccounts, 10),
-      scoresaberLeaderboards: Number.parseInt(rawCounts.scoresaberLeaderboards, 10),
-      refreshedAt: rawCounts.refreshedAt,
-    };
+    return counts;
   }
 
-  public static async refreshConcurrently(): Promise<void> {
-    await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY "ssr_table_counts"`);
+  public static async reconcile(): Promise<void> {
+    await db.execute(sql`SELECT reconcile_ssr_table_counts()`);
   }
 }

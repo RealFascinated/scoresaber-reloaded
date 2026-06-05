@@ -3,6 +3,7 @@ import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/contexts/viewport-context";
+import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatPp } from "@ssr/common/utils/number-utils";
@@ -20,7 +21,6 @@ import {
   ScatterController,
   Tooltip,
 } from "chart.js";
-import { SharedIcons } from "@/shared-icons";
 import { useState } from "react";
 import { Line } from "react-chartjs-2";
 import PlayerSearch from "../../player-search";

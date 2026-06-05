@@ -2,11 +2,11 @@
 
 import { cn } from "@/common/utils";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MedalRankingPlayer } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
-import { SharedIcons } from "@/shared-icons";
 import { toast } from "sonner";
 import useDatabase from "../../hooks/use-database";
 import SimpleTooltip from "../simple-tooltip";

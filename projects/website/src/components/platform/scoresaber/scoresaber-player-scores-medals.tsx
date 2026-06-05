@@ -1,11 +1,12 @@
 "use client";
 
+import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { cn } from "@/common/utils";
 import { Spinner } from "@/components/spinner";
-import { SharedIcons } from "@/shared-icons";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/contexts/page-transition-context";
+import { SharedIcons } from "@/shared-icons";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -15,7 +16,6 @@ import { SortDirection } from "@ssr/common/schemas/score/query/sort/sort-directi
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";

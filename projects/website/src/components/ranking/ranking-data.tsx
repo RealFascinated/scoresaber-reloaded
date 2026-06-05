@@ -1,5 +1,6 @@
 "use client";
 
+import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { getRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
 import CountrySelector from "@/components/country-selector";
@@ -10,12 +11,11 @@ import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { SharedIcons } from "@/shared-icons";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
-import { SharedIcons } from "@/shared-icons";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";

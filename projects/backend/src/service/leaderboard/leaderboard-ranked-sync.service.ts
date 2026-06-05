@@ -59,10 +59,10 @@ export class LeaderboardRankedSyncService {
         updatedLeaderboards.push({
           previousLeaderboard: dbLeaderboard
             ? {
-              ranked: dbLeaderboard.ranked,
-              qualified: dbLeaderboard.qualified,
-              stars: dbLeaderboard.stars ?? 0,
-            }
+                ranked: dbLeaderboard.ranked,
+                qualified: dbLeaderboard.qualified,
+                stars: dbLeaderboard.stars ?? 0,
+              }
             : undefined,
           newLeaderboard: apiLeaderboard,
         });
@@ -108,7 +108,9 @@ export class LeaderboardRankedSyncService {
       DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder()
         .setTitle("Ranked Leaderboards Updated")
-        .setDescription(`Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`)
+        .setDescription(
+          `Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`
+        )
         .setColor("#00ff00")
     );
 
@@ -150,7 +152,6 @@ export class LeaderboardRankedSyncService {
     if (leaderboardsToUpsert.length > 0) {
       LeaderboardRankedSyncService.logger.info(`Updating ${leaderboardsToUpsert.length} leaderboards...`);
       await ScoreSaberLeaderboardsRepository.upsertLeaderboards(leaderboardsToUpsert);
-
     }
     const duration = formatDuration(performance.now() - before);
     LeaderboardRankedSyncService.logger.info(
@@ -161,7 +162,9 @@ export class LeaderboardRankedSyncService {
       DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder()
         .setTitle("Qualified Leaderboards Updated")
-        .setDescription(`Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`)
+        .setDescription(
+          `Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`
+        )
         .setColor("#00ff00")
     );
   }

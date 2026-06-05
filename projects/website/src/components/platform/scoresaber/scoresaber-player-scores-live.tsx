@@ -1,5 +1,6 @@
 "use client";
 
+import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { cn } from "@/common/utils";
 import { Spinner } from "@/components/spinner";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import PageTransition from "@/components/ui/page-transition";
 import { usePageTransition } from "@/contexts/page-transition-context";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { SharedIcons } from "@/shared-icons";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
@@ -14,10 +16,8 @@ import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import { SharedIcons } from "@/shared-icons";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useCallback, useEffect } from "react";
 import ScoresCard from "../../score/scores-card";

@@ -3,17 +3,17 @@
 import { ChartConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import { DEFAULT_WHAT_IF_RANGE, SettingIds } from "@/common/database/database";
+import { DEBOUNCE_MS_SLIDER } from "@/common/debounce";
 import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import ScoreButton from "@/components/score/button/score-button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { SharedIcons } from "@/shared-icons";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import { DEBOUNCE_MS_SLIDER } from "@/common/debounce";
 import { useDebounce } from "@uidotdev/usehooks";
-import { SharedIcons } from "@/shared-icons";
 import { useEffect, useMemo, useState } from "react";
 
 type Props = {

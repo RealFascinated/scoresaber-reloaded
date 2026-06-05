@@ -3,6 +3,7 @@ import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { isNotNull, sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   date,
   doublePrecision,
@@ -492,6 +493,17 @@ export const scoreSaberScoreEventTable = pgTable(
     index("score_events_timestamp_idx").on(table.timestamp),
   ]
 );
+
+export const tableCountsTable = pgTable("ssr_table_counts", {
+  id: integer().primaryKey(),
+  scoresaberScores: bigint({ mode: "number" }).notNull(),
+  scoresaberScoreHistory: bigint({ mode: "number" }).notNull(),
+  scoresaberAccounts: bigint({ mode: "number" }).notNull(),
+  scoresaberLeaderboards: bigint({ mode: "number" }).notNull(),
+  refreshedAt: timestamp().notNull(),
+});
+
+export type TableCountsTableRow = typeof tableCountsTable.$inferSelect;
 
 export type ScoreSaberAccountRow = typeof scoreSaberAccountsTable.$inferSelect;
 export type PlayerHistoryRow = typeof playerHistoryTable.$inferSelect;

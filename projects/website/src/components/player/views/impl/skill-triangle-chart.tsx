@@ -259,7 +259,7 @@ function TimelineSlider({
         labelPosition="none"
         className="w-full"
       />
-      <div className="scrollbar-none max-h-[min(42vh,220px)] overflow-y-auto overscroll-contain md:max-h-[280px]">
+      <div className="max-h-[min(42vh,220px)] scrollbar-none overflow-y-auto overscroll-contain md:max-h-[280px]">
         <div className="flex flex-col gap-0.5 md:gap-0.5">
           {[...timeline].reverse().map((entry, reverseIdx) => {
             const idx = timeline.length - 1 - reverseIdx;

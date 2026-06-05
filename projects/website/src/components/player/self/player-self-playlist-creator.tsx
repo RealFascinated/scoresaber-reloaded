@@ -12,6 +12,7 @@ import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/component
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { SharedIcons } from "@/shared-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { env } from "@ssr/common/env";
 import {
@@ -20,7 +21,6 @@ import {
 } from "@ssr/common/playlist/self/self-playlist-settings-schema";
 import { encodeSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
-import { SharedIcons } from "@/shared-icons";
 import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";

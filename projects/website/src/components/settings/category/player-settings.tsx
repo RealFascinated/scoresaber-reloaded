@@ -3,8 +3,8 @@
 import { HistoryMode } from "@/common/player/history-mode";
 import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { SharedIcons } from "@/shared-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Path, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form } from "../../ui/form";

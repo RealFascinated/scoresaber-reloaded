@@ -1,9 +1,9 @@
 "use client";
 
 import { PlayerRanking } from "@/components/player/player-ranking";
+import { SharedIcons } from "@/shared-icons";
 import type { MedalRankingPlayer } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { SharedIcons } from "@/shared-icons";
 
 export function MedalsRanking({
   player,

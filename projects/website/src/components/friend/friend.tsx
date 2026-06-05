@@ -5,9 +5,9 @@ import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import useDatabase from "@/hooks/use-database";
+import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { SharedIcons } from "@/shared-icons";
 import { toast } from "sonner";
 
 type FriendProps = {

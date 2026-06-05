@@ -2,12 +2,12 @@
 
 import SimpleTooltip from "@/components/simple-tooltip";
 import StatValue from "@/components/statistic/stat-value";
+import { SharedIcons } from "@/shared-icons";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
-import { SharedIcons } from "@/shared-icons";
 import { ReactNode, useState } from "react";
 
 type Stat = {
@@ -209,15 +209,11 @@ const playerStats: Stat[] = [
     name: "+1 PP",
     defaultHidden: true,
     create: (player, statName) =>
-      statWithTooltip(
-        statName,
-        <p>Amount of raw PP required to increase your global pp by 1pp</p>,
-        {
-          icon: <SharedIcons.StatPlusOnePpIcon className="size-4 shrink-0" />,
-          value: `${formatPp(player.plusOnePp)}pp`,
-          size: "lg",
-        }
-      ),
+      statWithTooltip(statName, <p>Amount of raw PP required to increase your global pp by 1pp</p>, {
+        icon: <SharedIcons.StatPlusOnePpIcon className="size-4 shrink-0" />,
+        value: `${formatPp(player.plusOnePp)}pp`,
+        size: "lg",
+      }),
   },
 ];
 
@@ -253,7 +249,11 @@ export default function PlayerStats({ player }: Props) {
           className="border-border bg-background/90 text-muted-foreground hover:border-primary/50 hover:text-foreground flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
         >
           {showMore ? "Show less" : `Show ${hiddenStatCount} more`}
-          {showMore ? <SharedIcons.CollapsePlayerStatsIcon className="size-4 shrink-0" /> : <SharedIcons.ExpandPlayerStatsIcon className="size-4 shrink-0" />}
+          {showMore ? (
+            <SharedIcons.CollapsePlayerStatsIcon className="size-4 shrink-0" />
+          ) : (
+            <SharedIcons.ExpandPlayerStatsIcon className="size-4 shrink-0" />
+          )}
         </button>
       )}
     </div>

@@ -302,6 +302,13 @@
       "when": 1780440183060,
       "tag": "0042_goofy_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1780440183061,
+      "tag": "0043_table_counts_triggers",
+      "breakpoints": true
     }
   ]
 }
