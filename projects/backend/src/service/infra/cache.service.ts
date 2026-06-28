@@ -11,6 +11,7 @@ export enum CacheId {
   PLAYER_HMD_BREAKDOWN = "player_hmd_breakdown",
   PLAYER_PLUS_ONE_PP = "player_plus_one_pp",
   PLAYER_PPS = "player_pps",
+  PLAYER_SCORE_STATISTICS = "player_score_statistics",
   BEATSAVER_MAP = "beatsaver_map",
   SCORESABER_PLAYER = "scoresaber_player",
   SCORESABER_PLAYER_EXISTS = "scoresaber_player_exists",
@@ -43,6 +44,10 @@ export default class CacheService {
       mode: "MEMORY",
     },
     [CacheId.PLAYER_PPS]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      mode: "MEMORY",
+    },
+    [CacheId.PLAYER_SCORE_STATISTICS]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
       mode: "MEMORY",
     },

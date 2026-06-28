@@ -52,6 +52,7 @@ export class TrackScoreListener implements EventListener {
     PlayerHistoryService.updatePlayerDailyScoreStats(score.playerId, leaderboard.stars > 0, hasPreviousScore);
 
     // Invalidate player caches
+    CacheService.invalidate(score.playerId);
     CacheService.invalidate(cachedPlayerTokenCacheKey(player.id));
     CacheService.invalidate(playerCacheKey(player.id, "basic"));
     CacheService.invalidate(playerCacheKey(player.id, "full"));

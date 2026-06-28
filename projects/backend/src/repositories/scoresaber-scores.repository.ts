@@ -12,6 +12,40 @@ import { TableCountsRepository } from "./table-counts.repository";
 
 export type ScoreSaberScoreInsertRow = typeof scoreSaberScoresTable.$inferInsert;
 
+export type ScoreSaberPlayerScoreStatistics = {
+  totalScore: number;
+  totalRankedScore: number;
+  totalRankedScores: number;
+  totalUnrankedScores: number;
+  totalScores: number;
+  averageRankedAccuracy: number;
+  averageUnrankedAccuracy: number;
+  averageAccuracy: number;
+  aPlays: number;
+  sPlays: number;
+  spPlays: number;
+  ssPlays: number;
+  sspPlays: number;
+  godPlays: number;
+};
+
+export const emptyScoreSaberPlayerScoreStatistics = (): ScoreSaberPlayerScoreStatistics => ({
+  totalScore: 0,
+  totalRankedScore: 0,
+  totalRankedScores: 0,
+  totalUnrankedScores: 0,
+  totalScores: 0,
+  averageRankedAccuracy: 0,
+  averageUnrankedAccuracy: 0,
+  averageAccuracy: 0,
+  aPlays: 0,
+  sPlays: 0,
+  spPlays: 0,
+  ssPlays: 0,
+  sspPlays: 0,
+  godPlays: 0,
+});
+
 export class ScoreSaberScoresRepository {
   public static async deleteByScoreId(scoreId: number): Promise<void> {
     await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.scoreId, scoreId));
@@ -163,6 +197,49 @@ export class ScoreSaberScoresRepository {
       .select()
       .from(scoreSaberScoresTable)
       .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)));
+  }
+
+  public static async getPlayerScoreStatistics(playerId: string): Promise<ScoreSaberPlayerScoreStatistics> {
+    const [scoreStats] = await db
+      .select({
+        totalScore: sql<number>`(coalesce(sum(${scoreSaberScoresTable.score}), 0))::double precision`,
+        totalRankedScore: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 then ${scoreSaberScoresTable.score} else 0 end), 0))::double precision`,
+        totalRankedScores: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 then 1 else 0 end), 0))::double precision`,
+        totalUnrankedScores: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} = 0 then 1 else 0 end), 0))::double precision`,
+        totalScores: sql<number>`(coalesce(count(*), 0))::double precision`,
+        averageRankedAccuracy: sql<number>`coalesce(avg(case when ${scoreSaberScoresTable.pp} > 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
+        averageUnrankedAccuracy: sql<number>`coalesce(avg(case when ${scoreSaberScoresTable.pp} = 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
+        averageAccuracy: sql<number>`coalesce(avg(${scoreSaberScoresTable.accuracy}), 0)`,
+        aPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 70 and ${scoreSaberScoresTable.accuracy} < 80 then 1 else 0 end), 0))::double precision`,
+        sPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 80 and ${scoreSaberScoresTable.accuracy} < 85 then 1 else 0 end), 0))::double precision`,
+        spPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 85 and ${scoreSaberScoresTable.accuracy} < 90 then 1 else 0 end), 0))::double precision`,
+        ssPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 90 and ${scoreSaberScoresTable.accuracy} < 95 then 1 else 0 end), 0))::double precision`,
+        sspPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 95 and ${scoreSaberScoresTable.accuracy} < 98 then 1 else 0 end), 0))::double precision`,
+        godPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 98 then 1 else 0 end), 0))::double precision`,
+      })
+      .from(scoreSaberScoresTable)
+      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gte(scoreSaberScoresTable.accuracy, 0)));
+
+    if (!scoreStats) {
+      return emptyScoreSaberPlayerScoreStatistics();
+    }
+
+    return {
+      totalScore: Number(scoreStats.totalScore),
+      totalRankedScore: Number(scoreStats.totalRankedScore),
+      totalRankedScores: Number(scoreStats.totalRankedScores),
+      totalUnrankedScores: Number(scoreStats.totalUnrankedScores),
+      totalScores: Number(scoreStats.totalScores),
+      averageRankedAccuracy: Number(scoreStats.averageRankedAccuracy),
+      averageUnrankedAccuracy: Number(scoreStats.averageUnrankedAccuracy),
+      averageAccuracy: Number(scoreStats.averageAccuracy),
+      aPlays: Number(scoreStats.aPlays),
+      sPlays: Number(scoreStats.sPlays),
+      spPlays: Number(scoreStats.spPlays),
+      ssPlays: Number(scoreStats.ssPlays),
+      sspPlays: Number(scoreStats.sspPlays),
+      godPlays: Number(scoreStats.godPlays),
+    };
   }
 
   public static async getAverageAccuracies(playerId: string): Promise<{
