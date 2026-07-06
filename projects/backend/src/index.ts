@@ -84,17 +84,22 @@ export const app = new Elysia()
       protect: true,
       run: async () => {
         const before = Date.now();
-        await sendEmbedToChannel(
-          DiscordChannels.BACKEND_LOGS,
-          new EmbedBuilder().setDescription(`Updating player statistics...`)
-        );
-        await PlayerHistoryService.updatePlayerStatistics();
-        await sendEmbedToChannel(
-          DiscordChannels.BACKEND_LOGS,
-          new EmbedBuilder().setDescription(
-            `Updated player statistics in ${formatDuration(Date.now() - before)}`
-          )
-        );
+        try {
+          await sendEmbedToChannel(
+            DiscordChannels.BACKEND_LOGS,
+            new EmbedBuilder().setDescription(`Updating player statistics...`)
+          );
+          await PlayerHistoryService.updatePlayerStatistics();
+          await sendEmbedToChannel(
+            DiscordChannels.BACKEND_LOGS,
+            new EmbedBuilder().setDescription(
+              `Updated player statistics in ${formatDuration(Date.now() - before)}`
+            )
+          );
+        } catch (error) {
+          log.error("player-statistics-tracker-cron failed:", error);
+          reportErrorToDiscord("Cron: player-statistics-tracker", error);
+        }
       },
     })
   )

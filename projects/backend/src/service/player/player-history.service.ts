@@ -1,3 +1,4 @@
+import { env } from "@ssr/common/env";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import {
@@ -79,42 +80,51 @@ export class PlayerHistoryService {
     }
     PlayerHistoryService.logger.info(`Found ${players.length} active players from ScoreSaber API`);
 
-    await processInBatches(players, 150, async player => {
-      const account = await PlayerCoreService.getOrCreateAccount(player.id, player);
-      const statistics = await PlayerHistoryService.trackPlayerHistory(account, now, player);
+    const batchSize = Math.max(1, env.DATABASE_POOL_MAX - 10);
 
-      // Update the player's inactive status if it has changed
-      if (account.inactive !== player.inactive) {
-        await PlayerCoreService.updatePlayer(account.id, { inactive: player.inactive });
-        await redisClient.del(cachedPlayerTokenCacheKey(account.id));
-      }
+    await processInBatches(players, batchSize, async player => {
+      const playerId = String(player.id);
 
-      // If the player has less scores tracked than the total play count, add them to the refresh queue
-      if (statistics && (statistics?.totalScores ?? 0) < player.stats.totalSubmittedPlays && !player.banned) {
-        PlayerHistoryService.logger.info(
-          `Player ${player.id} has missing scores. Adding them to the refresh queue...`
-        );
-        // Add the player to the refresh queue
-        (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
-          id: player.id,
-          data: player.id,
-        });
-        (QueueManager.getQueue(QueueId.PlayerBeatLeaderScoreSeedQueue) as PlayerBeatLeaderScoreSeedQueue).add(
-          {
-            id: player.id,
-            data: player.id,
-          }
-        );
-      }
+      try {
+        const account = await PlayerCoreService.getOrCreateAccount(playerId, player);
+        const statistics = await PlayerHistoryService.trackPlayerHistory(account, now, player);
 
-      successCount++;
+        // Update the player's inactive status if it has changed
+        if (account.inactive !== player.inactive) {
+          await PlayerCoreService.updatePlayer(account.id, { inactive: player.inactive });
+          await redisClient.del(cachedPlayerTokenCacheKey(account.id));
+        }
 
-      if (successCount % 1000 === 0) {
-        PlayerHistoryService.logger.info(`Tracked ${successCount}/${players.length} players...`);
+        // If the player has less scores tracked than the total play count, add them to the refresh queue
+        if (statistics && (statistics?.totalScores ?? 0) < player.stats.totalSubmittedPlays && !player.banned) {
+          PlayerHistoryService.logger.info(
+            `Player ${playerId} has missing scores. Adding them to the refresh queue...`
+          );
+          // Add the player to the refresh queue
+          (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
+            id: playerId,
+            data: playerId,
+          });
+          (QueueManager.getQueue(QueueId.PlayerBeatLeaderScoreSeedQueue) as PlayerBeatLeaderScoreSeedQueue).add(
+            {
+              id: playerId,
+              data: playerId,
+            }
+          );
+        }
+
+        successCount++;
+
+        if (successCount % 1000 === 0) {
+          PlayerHistoryService.logger.info(`Tracked ${successCount}/${players.length} players...`);
+        }
+      } catch (err) {
+        errorCount++;
+        PlayerHistoryService.logger.error(`Failed to track player "${playerId}"`, err);
       }
     });
 
-    const playerIds = new Set(players.map(player => player.id));
+    const playerIds = new Set(players.map(player => String(player.id)));
     const activePlayerIdsArray = Array.from(playerIds);
     PlayerHistoryService.logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
 

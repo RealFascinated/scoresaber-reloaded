@@ -39,6 +39,8 @@ export class PlayerCoreService {
     id: string,
     playerToken?: ScoreSaberPlayerLookupToken
   ): Promise<ScoreSaberAccount> {
+    id = String(id);
+
     // Wait for the existing lock if it's in progress
     if (accountCreationLock[id] !== undefined) {
       const result = await accountCreationLock[id];
@@ -113,6 +115,8 @@ export class PlayerCoreService {
     id: string,
     playerToken?: ScoreSaberV2PlayerToken
   ): Promise<ScoreSaberAccount | undefined> {
+    id = String(id);
+
     let lockPromise = accountCreationLock[id];
     if (lockPromise === undefined) {
       lockPromise = (async (): Promise<ScoreSaberAccount | undefined> => {

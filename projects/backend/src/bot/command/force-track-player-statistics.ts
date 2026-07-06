@@ -15,14 +15,20 @@ class ForceTrackPlayerStatistics {
   })
   async forceTrackPlayerStatistics(interaction: CommandInteraction) {
     const before = Date.now();
-    interaction.reply({
+    await interaction.reply({
       content: "Updating player statistics...",
     });
 
-    await PlayerHistoryService.updatePlayerStatistics();
-
-    interaction.editReply({
-      content: `Player statistics updated in ${formatDuration(Date.now() - before)}`,
-    });
+    try {
+      await PlayerHistoryService.updatePlayerStatistics();
+      await interaction.editReply({
+        content: `Player statistics updated in ${formatDuration(Date.now() - before)}`,
+      });
+    } catch (error) {
+      await interaction.editReply({
+        content: `Player statistics update failed after ${formatDuration(Date.now() - before)}. Check backend logs.`,
+      });
+      throw error;
+    }
   }
 }
