@@ -11,9 +11,12 @@ import {
 } from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import type { ScoreSaberLeaderboardQueryFilters } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
-import { getScoreSaberLeaderboardFromToken, getScoreSaberLeaderboardFromV2PageToken } from "@ssr/common/token-creators";
+import {
+  getScoreSaberLeaderboardFromToken,
+  getScoreSaberLeaderboardFromV2PageToken,
+} from "@ssr/common/token-creators";
+import RankingRequestToken from "@ssr/common/types/token/scoresaber/v1/ranking-request-token";
 import type { ScoreSaberV2LeaderboardPageToken } from "@ssr/common/types/token/scoresaber/v2/leaderboard/leaderboards-page";
-import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
 import { getScoreSaberDifficultyFromDifficulty } from "@ssr/common/utils/scoresaber.util";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { count } from "drizzle-orm";

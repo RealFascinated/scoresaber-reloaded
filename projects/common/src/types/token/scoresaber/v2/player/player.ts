@@ -36,3 +36,9 @@ export type ScoreSaberV2PlayerToken = {
 };
 
 export type ScoreSaberPlayerLookupToken = ScoreSaberV2PlayerToken | ScoreSaberV2PlayerPageToken;
+
+export function isScoreSaberV2PlayerToken(
+  token: ScoreSaberPlayerLookupToken
+): token is ScoreSaberV2PlayerToken {
+  return "createdAt" in token;
+}

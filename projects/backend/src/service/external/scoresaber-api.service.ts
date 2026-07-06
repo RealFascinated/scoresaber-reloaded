@@ -57,8 +57,8 @@ type SerializableValue =
   | null
   | SerializableValue[]
   | {
-    [key: string]: SerializableValue;
-  };
+      [key: string]: SerializableValue;
+    };
 
 type CachedResponse<T> = {
   data: T | string;
@@ -158,12 +158,15 @@ export class ScoreSaberApiService {
     const before = performance.now();
     const trimmedQuery = query.trim();
     ScoreSaberApiService.log(`Searching for players matching "${trimmedQuery}"...`);
-    const results = await ScoreSaberApiService.fetch<ScoreSaberV2PlayersPageToken>(LOOKUP_PLAYERS_V2_ENDPOINT, {
-      searchParams: {
-        page: "1",
-        ...(trimmedQuery ? { search: trimmedQuery } : {}),
-      },
-    });
+    const results = await ScoreSaberApiService.fetch<ScoreSaberV2PlayersPageToken>(
+      LOOKUP_PLAYERS_V2_ENDPOINT,
+      {
+        searchParams: {
+          page: "1",
+          ...(trimmedQuery ? { search: trimmedQuery } : {}),
+        },
+      }
+    );
     if (results === undefined || results.data.length === 0) {
       return undefined;
     }
@@ -372,8 +375,8 @@ export class ScoreSaberApiService {
           ...(options?.limit ? { limit: options.limit.toString() } : {}),
           ...(options?.status
             ? {
-              status: Array.isArray(options.status) ? options.status.join(",") : options.status,
-            }
+                status: Array.isArray(options.status) ? options.status.join(",") : options.status,
+              }
             : {}),
           ...(options?.verified ? { verified: "true" } : {}),
           ...(options?.minStars != null ? { minStars: options.minStars.toString() } : {}),
@@ -518,9 +521,7 @@ export class ScoreSaberApiService {
       }
 
       if (logProgress && (page % 10 === 0 || page === 1 || page >= totalPages)) {
-        scoreSaberApiLog.info(
-          `Fetched ${response.data.length} leaderboards on page ${page}/${totalPages}.`
-        );
+        scoreSaberApiLog.info(`Fetched ${response.data.length} leaderboards on page ${page}/${totalPages}.`);
       }
 
       page++;

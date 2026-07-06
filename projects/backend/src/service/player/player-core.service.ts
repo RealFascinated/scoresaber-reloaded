@@ -4,7 +4,11 @@ import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
-import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
+import {
+  isScoreSaberV2PlayerToken,
+  type ScoreSaberPlayerLookupToken,
+  type ScoreSaberV2PlayerToken,
+} from "@ssr/common/types/token/scoresaber/v2/player/player";
 import { isProduction } from "@ssr/common/utils/utils";
 import { playerCacheKey } from "../../common/cache-keys";
 import { logNewTrackedPlayer } from "../../common/embds";
@@ -47,7 +51,14 @@ export class PlayerCoreService {
     let account = await ScoreSaberAccountsRepository.findRowById(id);
 
     if (!account) {
-      const created = await PlayerCoreService.createPlayer(id, playerToken);
+      const fullToken =
+        playerToken && isScoreSaberV2PlayerToken(playerToken)
+          ? playerToken
+          : await ScoreSaberApiService.lookupPlayer(id);
+      if (!fullToken) {
+        throw new NotFoundError(`Player "${id}" not found`);
+      }
+      const created = await PlayerCoreService.createPlayer(id, fullToken);
       if (!created) {
         throw new NotFoundError(`Player "${id}" not found after creation`);
       }
@@ -100,7 +111,7 @@ export class PlayerCoreService {
    */
   public static async createPlayer(
     id: string,
-    playerToken?: ScoreSaberPlayerLookupToken
+    playerToken?: ScoreSaberV2PlayerToken
   ): Promise<ScoreSaberAccount | undefined> {
     let lockPromise = accountCreationLock[id];
     if (lockPromise === undefined) {
@@ -140,7 +151,7 @@ export class PlayerCoreService {
               longestStreak: 0,
               lastPlayedDate: null,
               trackedSince: new Date(),
-              joinedDate: "createdAt" in token ? new Date(token.createdAt) : new Date(),
+              joinedDate: new Date(token.createdAt),
             };
             await ScoreSaberAccountsRepository.insert(playerInsert);
 
