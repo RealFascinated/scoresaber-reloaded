@@ -1,0 +1,64 @@
+{
+  "name": "elysia-mcp",
+  "type": "module",
+  "version": "0.1.2-ssr.0",
+  "description": "Vendored ElysiaJS MCP plugin (forked from kerlos/elysia-mcp). Fixes catch-all routing under basePath.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "dev": "bun run --watch example/basic-server.ts",
+    "example": "bun run example/basic-server.ts",
+    "example:multi": "bun run example/multiple-server.ts",
+    "build": "bun run build.ts",
+    "prepublishOnly": "bun run build",
+    "lint": "bunx biome lint ./src",
+    "lint:fix": "bunx biome lint --write ./src",
+    "test": "bun test",
+    "test:bail": "bun test --bail"
+  },
+  "keywords": [
+    "elysia",
+    "mcp",
+    "model-context-protocol",
+    "http",
+    "streaming",
+    "json-rpc",
+    "typescript",
+    "plugin"
+  ],
+  "author": "Vatunyoo Suwannapisit <s.vatunyoo@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  },
+  "peerDependencies": {
+    "elysia": ">=1.4.21"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "^1.3.5",
+    "@types/node": "^25.0.3",
+    "bun-plugin-dts": "^0.3.0",
+    "elysia": "^1.4.22",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kerlos/elysia-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kerlos/elysia-mcp/issues"
+  },
+  "homepage": "https://github.com/kerlos/elysia-mcp#readme",
+  "packageManager": "bun@1.3.6"
+}

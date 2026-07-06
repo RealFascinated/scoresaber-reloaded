@@ -35,7 +35,7 @@
     "drizzle-orm": "^0.45.2",
     "elysia": "^1.4.28",
     "elysia-helmet": "^3.1.0",
-    "elysia-mcp": "^0.1.1",
+    "elysia-mcp": "workspace:*",
     "eslint": "^9.39.4",
     "globals": "^17.6.0",
     "ioredis": "^5.11.0",
