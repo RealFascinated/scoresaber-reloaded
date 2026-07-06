@@ -1,7 +1,7 @@
 {
   "name": "elysia-mcp",
   "type": "module",
-  "version": "0.1.2-ssr.0",
+  "version": "0.1.2-ssr.1",
   "description": "Vendored ElysiaJS MCP plugin (forked from kerlos/elysia-mcp). Fixes catch-all routing under basePath.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

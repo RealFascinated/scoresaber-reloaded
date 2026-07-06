@@ -1468,12 +1468,21 @@ describe('ElysiaStreamingHttpTransport in stateless mode', () => {
     expect(toolsResponse.status).toBe(200);
   });
 
-  it('should not route subpaths under basePath to the MCP handler', async () => {
+  it('should serve an OpenAPI document at basePath/openapi.json', async () => {
     const response = await server.handle(
       new Request('http://localhost/mcp/openapi.json', { method: 'GET' })
     );
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(200);
+    const document = (await response.json()) as {
+      openapi: string;
+      'x-mcp-tools': { name: string }[];
+    };
+    expect(document.openapi).toBe('3.1.0');
+    expect(document['x-mcp-tools'].length).toBeGreaterThan(0);
+    expect(document['x-mcp-tools'].some((tool) => tool.name === 'greet')).toBe(
+      true
+    );
   });
 
   it('should handle POST requests with various session IDs in stateless mode', async () => {

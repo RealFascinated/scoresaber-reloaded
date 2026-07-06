@@ -16,6 +16,7 @@ The SSR backend exposes a public MCP endpoint for AI assistants at `POST /mcp`:
 
 - Production: `https://ssr-api.fascinated.cc/mcp`
 - Local dev: `http://localhost:8080/mcp`
+- Tool catalog (OpenAPI): `GET /mcp/openapi.json`
 
 Add to Cursor (`~/.cursor/mcp.json` or project `.cursor/mcp.json`):
 

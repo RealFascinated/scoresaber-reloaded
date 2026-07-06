@@ -66,6 +66,7 @@ new EventsManager();
 new MetricsService();
 
 const httpMetricsHooks = createHttpMetricsHooks();
+const appVersion = await getAppVersion();
 
 export const app = new Elysia()
   .use(
@@ -317,7 +318,7 @@ export const app = new Elysia()
     mcp({
       serverInfo: {
         name: "ssr",
-        version: await getAppVersion(),
+        version: appVersion,
       },
       capabilities: {
         tools: {},
@@ -325,6 +326,7 @@ export const app = new Elysia()
       basePath: "/mcp",
       stateless: true,
       enableJsonResponse: true,
+      openApiServerUrl: env.NEXT_PUBLIC_API_URL,
       setupServer: registerMcpTools,
     })
   )
@@ -335,7 +337,7 @@ export const app = new Elysia()
         info: {
           title: "SSR Backend",
           description: "The API for ScoreSaber Reloaded!",
-          version: await getAppVersion(),
+          version: appVersion,
         },
         servers: [
           {

@@ -7,6 +7,7 @@ import {
   type ServerCapabilities,
 } from '@modelcontextprotocol/sdk/types.js';
 import { Elysia } from 'elysia';
+import { buildMcpOpenApiDocument } from './openapi';
 import { ElysiaStreamingHttpTransport } from './transport';
 import type { EventStore, McpContext } from './types';
 import { createLogger, type ILogger } from './utils/logger';
@@ -76,6 +77,11 @@ export interface MCPPluginOptions {
    * Event store for resumability support
    */
   eventStore?: EventStore;
+
+  /**
+   * Base URL for the OpenAPI document `servers` entry (default: request origin)
+   */
+  openApiServerUrl?: string;
 }
 
 export const transports: Record<string, ElysiaStreamingHttpTransport> = {};
@@ -295,7 +301,12 @@ export const mcp = (options: MCPPluginOptions = {}) => {
     })
     .post(basePath, mcpHandler)
     .get(basePath, mcpHandler)
-    .delete(basePath, mcpHandler);
+    .delete(basePath, mcpHandler)
+    .get(`${basePath}/openapi.json`, async ({ request }) => {
+      await setupPromise;
+      const serverUrl = options.openApiServerUrl ?? new URL(request.url).origin;
+      return buildMcpOpenApiDocument(server, serverInfo, basePath, serverUrl);
+    });
 
   return app;
 };
