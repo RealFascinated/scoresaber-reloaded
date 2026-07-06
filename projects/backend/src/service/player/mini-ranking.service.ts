@@ -85,7 +85,7 @@ export default class MiniRankingService {
     // Combine and sort all players
     const allPlayers = pageResponses
       .filter((response): response is NonNullable<typeof response> => response !== undefined)
-      .flatMap(response => response.players)
+      .flatMap(response => response.data)
       .map(async player => await ScoreSaberPlayerService.getPlayer(player.id, "basic", player));
 
     return this.processPlayersAndBuildResult(allPlayers, player, type, getRank);

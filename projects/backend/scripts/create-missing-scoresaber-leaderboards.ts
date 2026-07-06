@@ -1,6 +1,6 @@
 /**
  * Loads all `scoresaber-leaderboards` ids into a `Set` once, then paginates ScoreSaber
- * `GET /api/leaderboards` via {@link ScoreSaberApiService.lookupLeaderboards} (optional `--search=`).
+ * `GET /api/v2/leaderboards` via {@link ScoreSaberApiService.lookupLeaderboards} (optional `--search=`).
  * For each list item whose id is not in the set, calls {@link ScoreSaberLeaderboardsService.createLeaderboard}
  * and adds the id to the set (so we avoid per-row DB existence checks).
  * Passes the list token through so we do not re-fetch by id. Uses `skipScoreSeedQueue` so this
@@ -78,7 +78,7 @@ async function main(): Promise<void> {
       search,
     });
 
-    if (response == null || response.leaderboards.length === 0) {
+    if (response == null || response.data.length === 0) {
       if (page === 1) {
         scriptLog.warn(`No leaderboards on page 1 (search=${search ?? "(none)"})`);
       }
@@ -87,7 +87,7 @@ async function main(): Promise<void> {
 
     totalPages = Math.max(
       1,
-      Math.ceil(response.metadata.total / Math.max(1, response.metadata.itemsPerPage))
+      Math.ceil(response.metadata.totalItems / Math.max(1, response.metadata.itemsPerPage))
     );
 
     if (maxPages != null && page > maxPages) {
@@ -96,10 +96,10 @@ async function main(): Promise<void> {
     }
 
     scriptLog.info(
-      `Page ${page}/${totalPages} (items=${response.leaderboards.length}, total=${response.metadata.total})`
+      `Page ${page}/${totalPages} (items=${response.data.length}, total=${response.metadata.totalItems})`
     );
 
-    for (const token of response.leaderboards) {
+    for (const token of response.data) {
       if (createLimit != null && created >= createLimit) {
         scriptLog.info(`Stopping at --limit=${createLimit} created`);
         scriptLog.info(

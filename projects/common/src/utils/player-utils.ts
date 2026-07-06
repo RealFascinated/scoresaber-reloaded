@@ -1,5 +1,5 @@
 import { ScoreSaberPlayerHistory } from "../schemas/scoresaber/player/history";
-import { ScoreSaberPlayerToken } from "../types/token/scoresaber/v1/player";
+import type { ScoreSaberPlayerLookupToken } from "../types/token/scoresaber/v2/player/player";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "./time-utils";
 
 /**
@@ -82,6 +82,6 @@ export function getPlayerStatisticChanges(
  * @param playerToken - The ScoreSaber player token
  * @returns Array of rank numbers
  */
-export function parseRankHistory(playerToken: ScoreSaberPlayerToken): number[] {
-  return [...playerToken.histories.split(",").map(Number), playerToken.rank];
+export function parseRankHistory(playerToken: ScoreSaberPlayerLookupToken): number[] {
+  return [playerToken.stats.rank];
 }

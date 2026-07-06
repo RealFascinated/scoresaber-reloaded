@@ -50,10 +50,6 @@ const SkillTriangleChart = dynamic(() => import("./impl/skill-triangle-chart"), 
   ssr: false,
   loading: ChartPanelSkeleton,
 });
-const PlusPpCalculator = dynamic(() => import("./impl/plus-pp-calculator"), {
-  ssr: false,
-  loading: ChartPanelSkeleton,
-});
 const PlayerAccuracyBadgesChart = dynamic(() => import("./impl/player-accuracy-badges-chart"), {
   ssr: false,
   loading: ChartPanelSkeleton,
@@ -117,13 +113,6 @@ const VIEW_METAS: ViewMeta[] = [
   },
   {
     index: 5,
-    label: "PP Calculator",
-    icon: SharedIcons.PlayerPpCalculatorViewIcon,
-    showDateRangeSelector: false,
-    isChart: false,
-  },
-  {
-    index: 6,
     label: "Acc Badges",
     icon: SharedIcons.PlayerAccuracyBadgesViewIcon,
     showDateRangeSelector: true,
@@ -159,8 +148,6 @@ function PlayerViewPanel({
     case 4:
       return <SkillTriangleChart player={player} />;
     case 5:
-      return <PlusPpCalculator player={player} />;
-    case 6:
       return <PlayerAccuracyBadgesChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;
     default:
       return <PlayerSimpleRankingChart statisticHistory={statisticHistory} daysAmount={actualDaysAgo} />;

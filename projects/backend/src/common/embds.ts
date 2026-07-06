@@ -1,4 +1,4 @@
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
+import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
@@ -8,7 +8,7 @@ import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";
  *
  * @param player the player being tracked
  */
-export async function logNewTrackedPlayer(player: ScoreSaberPlayerToken) {
+export async function logNewTrackedPlayer(player: ScoreSaberPlayerLookupToken) {
   await sendEmbedToChannel(
     DiscordChannels.TRACKED_PLAYER_LOGS,
     new EmbedBuilder()
@@ -27,11 +27,11 @@ export async function logNewTrackedPlayer(player: ScoreSaberPlayerToken) {
         },
         {
           name: "PP",
-          value: formatPp(player.pp) + "pp",
+          value: formatPp(player.stats.totalPP) + "pp",
           inline: true,
         },
       ])
-      .setThumbnail(player.profilePicture)
+      .setThumbnail(player.avatar)
       .setColor("#00ff00")
   );
 }

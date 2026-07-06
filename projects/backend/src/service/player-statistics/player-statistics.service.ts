@@ -1,14 +1,11 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
+import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
 import { eq } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberAccountsTable } from "../../db/schema";
-import {
-  ScoreSaberScoresRepository,
-} from "../../repositories/scoresaber-scores.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import CacheService, { CacheId } from "../infra/cache.service";
-import { PlayerRankedService } from "../player/player-ranked.service";
 
 export class PlayerStatisticsService {
   /**
@@ -17,7 +14,9 @@ export class PlayerStatisticsService {
    * @param playerId the ID of the player to insert the statistics for
    * @returns the inserted statistics
    */
-  public static async getStatistics(playerToken: ScoreSaberPlayerToken): Promise<ScoreSaberPlayerStatistics> {
+  public static async getStatistics(
+    playerToken: ScoreSaberPlayerLookupToken
+  ): Promise<ScoreSaberPlayerStatistics> {
     const playerId = String(playerToken.id);
     const [account] = await db
       .select({
@@ -29,22 +28,19 @@ export class PlayerStatisticsService {
       throw new NotFoundError(`Account "${playerId}" not found`);
     }
 
-    const [scoreStats, plusOne] = await Promise.all([
-      PlayerStatisticsService.getScoreStats(playerId),
-      PlayerRankedService.getPlayerPlusOnePp(playerId),
-    ]);
+    const scoreStats = await PlayerStatisticsService.getScoreStats(playerId);
 
     return {
       // Rank stats
-      rank: playerToken.rank,
-      countryRank: playerToken.countryRank,
+      rank: playerToken.stats.rank,
+      countryRank: playerToken.stats.countryRank,
 
       // Medals stats
       medals: account.medals,
 
       // PP stats
-      pp: playerToken.pp,
-      plusOnePp: plusOne,
+      pp: playerToken.stats.totalPP,
+      plusOnePp: playerToken.stats.plusOnePP ?? 0,
 
       // Score stats
       totalScore: scoreStats.totalScore,
@@ -54,7 +50,7 @@ export class PlayerStatisticsService {
       totalRankedScores: scoreStats.totalRankedScores,
       totalUnrankedScores: scoreStats.totalUnrankedScores,
       totalScores: scoreStats.totalScores,
-      replaysWatched: playerToken.scoreStats.replaysWatched,
+      replaysWatched: playerToken.stats.totalReplayViews,
 
       // Accuracy stats
       averageRankedAccuracy: scoreStats.averageRankedAccuracy,

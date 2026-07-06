@@ -11,8 +11,8 @@ import {
 } from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import type { ScoreSaberLeaderboardQueryFilters } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
-import { getScoreSaberLeaderboardFromToken } from "@ssr/common/token-creators";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/leaderboard";
+import { getScoreSaberLeaderboardFromToken, getScoreSaberLeaderboardFromV2PageToken } from "@ssr/common/token-creators";
+import type { ScoreSaberV2LeaderboardPageToken } from "@ssr/common/types/token/scoresaber/v2/leaderboard/leaderboards-page";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/ranking-request-token";
 import { getScoreSaberDifficultyFromDifficulty } from "@ssr/common/utils/scoresaber.util";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -144,15 +144,20 @@ export class ScoreSaberLeaderboardsService {
    */
   public static async createLeaderboard(
     id: number,
-    token?: ScoreSaberLeaderboardToken,
+    token?: ScoreSaberV2LeaderboardPageToken,
     options?: { skipScoreSeedQueue?: boolean }
   ): Promise<ScoreSaberLeaderboard> {
     const before = performance.now();
-    const leaderboardToken = token ?? (await ScoreSaberApiService.lookupLeaderboard(id));
-    if (leaderboardToken == undefined) {
-      throw new NotFoundError(`Leaderboard not found for "${id}"`);
+    let leaderboard: ScoreSaberLeaderboard;
+    if (token) {
+      leaderboard = getScoreSaberLeaderboardFromV2PageToken(token);
+    } else {
+      const leaderboardToken = await ScoreSaberApiService.lookupLeaderboard(id);
+      if (leaderboardToken == undefined) {
+        throw new NotFoundError(`Leaderboard not found for "${id}"`);
+      }
+      leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
     }
-    const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
 
     await ScoreSaberLeaderboardsService.saveLeaderboard(id, leaderboard);
     if (!options?.skipScoreSeedQueue) {

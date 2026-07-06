@@ -5,7 +5,8 @@ import {
   ScoreSaberPlayerHistoryEntries,
 } from "@ssr/common/schemas/scoresaber/player/history";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
+import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
+import { ScoreSaberV2PlayerPageToken } from "@ssr/common/types/token/scoresaber/v2/player/players-page";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { parseRankHistory } from "@ssr/common/utils/player-utils";
 import {
@@ -55,14 +56,14 @@ export class PlayerHistoryService {
       return;
     }
 
-    const pages = Math.ceil(firstPage.metadata.total / (firstPage.metadata.itemsPerPage ?? 100));
+    const pages = Math.ceil(firstPage.metadata.totalItems / (firstPage.metadata.itemsPerPage ?? 100));
     PlayerHistoryService.logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
     PlayerHistoryService.logger.info(`Fetching page 1 of ${pages}...`);
 
     let successCount = 0;
     let errorCount = 0;
 
-    const players: ScoreSaberPlayerToken[] = [...(firstPage.players ?? [])];
+    const players: ScoreSaberV2PlayerPageToken[] = [...(firstPage.data ?? [])];
 
     for (let page = 2; page <= pages; page++) {
       if (page % 10 === 0 || page === pages) {
@@ -74,7 +75,7 @@ export class PlayerHistoryService {
         errorCount++;
         continue;
       }
-      players.push(...(response.players ?? []));
+      players.push(...(response.data ?? []));
     }
     PlayerHistoryService.logger.info(`Found ${players.length} active players from ScoreSaber API`);
 
@@ -89,7 +90,11 @@ export class PlayerHistoryService {
       }
 
       // If the player has less scores tracked than the total play count, add them to the refresh queue
-      if (statistics && (statistics?.totalScores ?? 0) < player.scoreStats.totalPlayCount && !player.banned) {
+      if (
+        statistics &&
+        (statistics?.totalScores ?? 0) < player.stats.totalSubmittedPlays &&
+        !player.banned
+      ) {
         PlayerHistoryService.logger.info(
           `Player ${player.id} has missing scores. Adding them to the refresh queue...`
         );
@@ -158,7 +163,7 @@ export class PlayerHistoryService {
   public static async trackPlayerHistory(
     player: ScoreSaberAccount,
     trackTime: Date,
-    playerToken: ScoreSaberPlayerToken
+    playerToken: ScoreSaberPlayerLookupToken
   ): Promise<ScoreSaberPlayerStatistics | undefined> {
     // Don't track inactive players
     if (!playerToken || playerToken.inactive) {
@@ -196,7 +201,7 @@ export class PlayerHistoryService {
    * @returns the statistic history
    */
   public static async getPlayerStatisticHistory(
-    playerToken: ScoreSaberPlayerToken,
+    playerToken: ScoreSaberPlayerLookupToken,
     date: Date,
     statistics: ScoreSaberPlayerStatistics,
     includeToday?: boolean
@@ -251,7 +256,7 @@ export class PlayerHistoryService {
    * @returns the statistic history
    */
   public static async getPlayerStatisticHistories(
-    playerToken: ScoreSaberPlayerToken,
+    playerToken: ScoreSaberPlayerLookupToken,
     statistics: ScoreSaberPlayerStatistics,
     count: number
   ): Promise<ScoreSaberPlayerHistoryEntries> {
@@ -341,7 +346,7 @@ export class PlayerHistoryService {
    * Gets today's player statistics, either from database or generates fresh data.
    */
   public static async getTodayPlayerStatistic(
-    playerToken: ScoreSaberPlayerToken,
+    playerToken: ScoreSaberPlayerLookupToken,
     statistics: ScoreSaberPlayerStatistics
   ): Promise<ScoreSaberPlayerHistory | undefined> {
     const today = getMidnightAlignedDate(new Date());
@@ -355,7 +360,7 @@ export class PlayerHistoryService {
    */
   public static async seedPlayerRankHistory(
     account: ScoreSaberAccount,
-    playerToken: ScoreSaberPlayerToken
+    playerToken: ScoreSaberPlayerLookupToken
   ): Promise<void> {
     const playerRankHistory = parseRankHistory(playerToken);
     const historyLength = playerRankHistory.length;

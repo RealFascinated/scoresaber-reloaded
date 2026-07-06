@@ -208,12 +208,17 @@ const playerStats: Stat[] = [
   {
     name: "+1 PP",
     defaultHidden: true,
-    create: (player, statName) =>
-      statWithTooltip(statName, <p>Amount of raw PP required to increase your global pp by 1pp</p>, {
+    create: (player, statName) => {
+      if (!player.plusOnePp) {
+        return undefined;
+      }
+
+      return statWithTooltip(statName, <p>Amount of raw PP required to increase your global pp by 1pp</p>, {
         icon: <SharedIcons.StatPlusOnePpIcon className="size-4 shrink-0" />,
         value: `${formatPp(player.plusOnePp)}pp`,
         size: "lg",
-      }),
+      });
+    },
   },
 ];
 

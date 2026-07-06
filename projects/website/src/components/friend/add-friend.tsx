@@ -6,7 +6,6 @@ import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MedalRankingPlayer } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
 import { toast } from "sonner";
 import useDatabase from "../../hooks/use-database";
 import SimpleTooltip from "../simple-tooltip";
@@ -20,7 +19,7 @@ export default function FriendAction({
   /**
    * The ID of the players profile to claim.
    */
-  player: ScoreSaberPlayer | ScoreSaberPlayerToken | MedalRankingPlayer;
+  player: ScoreSaberPlayer | MedalRankingPlayer | { id: string; name: string };
 
   /**
    * Whether to show the icon only.

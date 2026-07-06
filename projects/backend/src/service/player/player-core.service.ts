@@ -4,7 +4,7 @@ import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
+import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
 import { isProduction } from "@ssr/common/utils/utils";
 import { playerCacheKey } from "../../common/cache-keys";
 import { logNewTrackedPlayer } from "../../common/embds";
@@ -33,7 +33,7 @@ export class PlayerCoreService {
    */
   public static async getOrCreateAccount(
     id: string,
-    playerToken?: ScoreSaberPlayerToken
+    playerToken?: ScoreSaberPlayerLookupToken
   ): Promise<ScoreSaberAccount> {
     // Wait for the existing lock if it's in progress
     if (accountCreationLock[id] !== undefined) {
@@ -67,8 +67,8 @@ export class PlayerCoreService {
       updates.banned = playerToken?.banned ?? false;
       shouldSave = true;
     }
-    if (playerToken && account.avatar !== playerToken.profilePicture) {
-      updates.avatar = playerToken.profilePicture;
+    if (playerToken && account.avatar !== playerToken.avatar) {
+      updates.avatar = playerToken.avatar;
       shouldSave = true;
     }
 
@@ -100,7 +100,7 @@ export class PlayerCoreService {
    */
   public static async createPlayer(
     id: string,
-    playerToken?: ScoreSaberPlayerToken
+    playerToken?: ScoreSaberPlayerLookupToken
   ): Promise<ScoreSaberAccount | undefined> {
     let lockPromise = accountCreationLock[id];
     if (lockPromise === undefined) {
@@ -123,15 +123,15 @@ export class PlayerCoreService {
               id: id,
               name: token.name,
               country: token.country,
-              avatar: token.profilePicture,
-              peakRank: token.rank,
+              avatar: token.avatar,
+              peakRank: token.stats.rank,
               peakRankTimestamp: new Date(),
               seededScores: false,
               seededBeatLeaderScores: false,
               trackReplays: false,
               inactive: token.inactive,
               banned: token.banned,
-              pp: token.pp,
+              pp: token.stats.totalPP,
               medals: 0,
               medalsRank: 0,
               medalsCountryRank: 0,
@@ -140,13 +140,13 @@ export class PlayerCoreService {
               longestStreak: 0,
               lastPlayedDate: null,
               trackedSince: new Date(),
-              joinedDate: new Date(token.firstSeen),
+              joinedDate: "createdAt" in token ? new Date(token.createdAt) : new Date(),
             };
             await ScoreSaberAccountsRepository.insert(playerInsert);
 
             // If the player has less scores tracked than the total play count, add them to the refresh queue
             const trackedScores = await ScoreSaberScoresRepository.countByPlayerId(id);
-            if (trackedScores < token.scoreStats.totalPlayCount) {
+            if (trackedScores < token.stats.totalSubmittedPlays) {
               const seedQueue = QueueManager.getQueue(
                 QueueId.PlayerScoreRefreshQueue
               ) as FetchMissingScoresQueue;
@@ -260,21 +260,22 @@ export class PlayerCoreService {
    *
    * @param playerToken the player's token
    */
-  public static async updatePeakRank(playerToken: ScoreSaberPlayerToken) {
+  public static async updatePeakRank(playerToken: ScoreSaberPlayerLookupToken) {
     const account = await ScoreSaberAccountsRepository.findRowById(playerToken.id);
     if (!account) {
       return;
     }
-    if (account.peakRank === playerToken.rank) {
+    const rank = playerToken.stats.rank;
+    if (account.peakRank === rank) {
       return;
     }
-    if (playerToken.rank == 0) {
+    if (rank == 0) {
       return;
     }
 
-    if (!account.peakRank || (account.peakRank && playerToken.rank < account.peakRank)) {
+    if (!account.peakRank || (account.peakRank && rank < account.peakRank)) {
       await ScoreSaberAccountsRepository.updateAccount(playerToken.id, {
-        peakRank: playerToken.rank,
+        peakRank: rank,
         peakRankTimestamp: new Date(),
       });
     }

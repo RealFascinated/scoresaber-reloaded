@@ -3,7 +3,10 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
+import {
+  ScoreSaberV2PlayerToken,
+  type ScoreSaberPlayerLookupToken,
+} from "@ssr/common/types/token/scoresaber/v2/player/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
@@ -44,12 +47,16 @@ export default class ScoreSaberPlayerService {
   public static async getPlayer(
     id: string,
     type: DetailType = "basic",
-    player?: ScoreSaberPlayerToken
+    player?: ScoreSaberPlayerLookupToken
   ): Promise<ScoreSaberPlayer> {
     player ??= await ScoreSaberApiService.lookupPlayer(id);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
+
+    const rank = player.stats.rank;
+    const countryRank = player.stats.countryRank;
+    const pp = player.stats.totalPP;
 
     return CacheService.fetch(CacheId.SCORESABER_PLAYER, playerCacheKey(id, type), async () => {
       const account = await PlayerCoreService.getOrCreateAccount(id, player).catch(() => undefined);
@@ -62,9 +69,9 @@ export default class ScoreSaberPlayerService {
         name: player.name,
         avatar: account.avatar,
         country: player.country,
-        rank: player.rank,
-        countryRank: player.countryRank,
-        pp: player.pp,
+        rank,
+        countryRank,
+        pp,
         medals: account.medals,
         medalsRank: account.medalsRank,
         medalsCountryRank: account.medalsCountryRank,
@@ -74,7 +81,7 @@ export default class ScoreSaberPlayerService {
         banned: player.banned,
         inactive: player.inactive,
         trackedSince: account.trackedSince,
-        joinedDate: new Date(player.firstSeen),
+        joinedDate: "createdAt" in player ? new Date(player.createdAt) : new Date(),
       } as ScoreSaberPlayer;
 
       if (type === "basic") {
@@ -90,8 +97,7 @@ export default class ScoreSaberPlayerService {
       ]);
 
       let rankPercentile =
-        (player.rank /
-          (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1)) *
+        (rank / (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1)) *
         100;
       if (isNaN(rankPercentile)) {
         rankPercentile = 0;
@@ -100,10 +106,12 @@ export default class ScoreSaberPlayerService {
       return {
         ...basePlayer,
         badges:
-          player.badges?.map(badge => ({
-            url: badge.image,
-            description: badge.description,
-          })) || [],
+          ("badges" in player && player.badges
+            ? player.badges.map(badge => ({
+                url: badge.image,
+                description: badge.description,
+              }))
+            : []) || [],
         statisticChange: {
           daily: getPlayerStatisticChanges(history, 1),
           weekly: getPlayerStatisticChanges(history, 7),
@@ -113,8 +121,8 @@ export default class ScoreSaberPlayerService {
         peakRank: account.peakRank,
         hmdBreakdown: hmdBreakdown,
         rankPages: {
-          global: getPageFromRank(player.rank, 50),
-          country: getPageFromRank(player.countryRank, 50),
+          global: getPageFromRank(rank, 50),
+          country: getPageFromRank(countryRank, 50),
           medals:
             account?.medalsRank && account.medalsRank > 0
               ? getPageFromRank(account.medalsRank, 50)
@@ -136,13 +144,13 @@ export default class ScoreSaberPlayerService {
    * @param useShortCache whether to use the short cache
    * @returns the player token
    */
-  public static async getCachedPlayer(id: string): Promise<ScoreSaberPlayerToken> {
+  public static async getCachedPlayer(id: string): Promise<ScoreSaberV2PlayerToken> {
     const cacheKey = cachedPlayerTokenCacheKey(id);
 
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
       try {
-        return parse(cachedData) as ScoreSaberPlayerToken;
+        return parse(cachedData) as ScoreSaberV2PlayerToken;
       } catch {
         ScoreSaberPlayerService.logger.warn(
           `Failed to parse cached player data for ${id}, removing from cache`
@@ -160,7 +168,7 @@ export default class ScoreSaberPlayerService {
     return player;
   }
 
-  public static async getCachedPlayers(ids: string[]): Promise<Map<string, ScoreSaberPlayerToken>> {
+  public static async getCachedPlayers(ids: string[]): Promise<Map<string, ScoreSaberV2PlayerToken>> {
     const uniqueIds = [...new Set(ids)];
     if (uniqueIds.length === 0) {
       return new Map();
@@ -171,7 +179,7 @@ export default class ScoreSaberPlayerService {
     );
     const keys = [...keyToId.keys()];
     const cachedValues = await redisClient.mget(keys);
-    const players = new Map<string, ScoreSaberPlayerToken>();
+    const players = new Map<string, ScoreSaberV2PlayerToken>();
     const missingIds: string[] = [];
 
     for (let index = 0; index < keys.length; index++) {
@@ -188,7 +196,7 @@ export default class ScoreSaberPlayerService {
       }
 
       try {
-        players.set(id, parse(cachedValue) as ScoreSaberPlayerToken);
+        players.set(id, parse(cachedValue) as ScoreSaberV2PlayerToken);
       } catch {
         ScoreSaberPlayerService.logger.warn(
           `Failed to parse cached player data for ${id} in bulk lookup, removing from cache`

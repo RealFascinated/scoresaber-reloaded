@@ -28,7 +28,7 @@ export class PlayerSearchService {
       normalizedQuery.length > 0 ? ScoreSaberAccountsRepository.searchIdsByNameIlike(pattern, 20) : [],
     ]);
 
-    const scoreSaberPlayerTokens = scoreSaberResponse?.players;
+    const scoreSaberPlayerTokens = scoreSaberResponse?.data;
     const scoreSaberPlayerTokenMap = new Map((scoreSaberPlayerTokens ?? []).map(token => [token.id, token]));
     const uniquePlayerIds = [
       ...new Set(localMatches.map(p => p.id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])),
@@ -85,7 +85,7 @@ export class PlayerSearchService {
       includeInactives,
     });
 
-    const tokens = foundPlayers?.players ?? [];
+    const tokens = foundPlayers?.data ?? [];
     const items = await Promise.all(
       tokens.map(token => ScoreSaberPlayerService.getPlayer(token.id, "basic", token))
     );
@@ -94,9 +94,9 @@ export class PlayerSearchService {
       items,
       metadata: {
         totalPages: Math.ceil(
-          (foundPlayers?.metadata.total ?? 0) / (foundPlayers?.metadata.itemsPerPage ?? 0)
+          (foundPlayers?.metadata.totalItems ?? 0) / (foundPlayers?.metadata.itemsPerPage ?? 0)
         ),
-        totalItems: foundPlayers?.metadata.total ?? 0,
+        totalItems: foundPlayers?.metadata.totalItems ?? 0,
         page,
         itemsPerPage: foundPlayers?.metadata.itemsPerPage ?? 0,
       },

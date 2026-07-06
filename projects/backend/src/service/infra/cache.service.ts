@@ -9,7 +9,6 @@ import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance
 
 export enum CacheId {
   PLAYER_HMD_BREAKDOWN = "player_hmd_breakdown",
-  PLAYER_PLUS_ONE_PP = "player_plus_one_pp",
   PLAYER_PPS = "player_pps",
   PLAYER_SCORE_STATISTICS = "player_score_statistics",
   BEATSAVER_MAP = "beatsaver_map",
@@ -36,10 +35,6 @@ export default class CacheService {
   public static readonly CACHE_INFO: Record<CacheId, { ttl: number; mode: CacheMode }> = {
     // Memory caches
     [CacheId.PLAYER_HMD_BREAKDOWN]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.PLAYER_PLUS_ONE_PP]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
       mode: "MEMORY",
     },

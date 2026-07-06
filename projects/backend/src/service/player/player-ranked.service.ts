@@ -1,4 +1,3 @@
-import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { PlayerPpsResponse } from "@ssr/common/schemas/response/player/player-pps";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
@@ -34,27 +33,6 @@ export class PlayerRankedService {
       return {
         scores,
       };
-    });
-  }
-
-  /**
-   * Gets the raw pp needed to gain 1 weighted pp for a player.
-   *
-   * @param playerId the player's id
-   * @returns the raw pp needed to gain 1 weighted pp
-   */
-  public static async getPlayerPlusOnePp(playerId: string): Promise<number> {
-    return CacheService.fetch(CacheId.PLAYER_PLUS_ONE_PP, playerId, async () => {
-      const playerScores = await ScoreSaberScoresRepository.getPpByPlayer(playerId);
-
-      // No ranked score set
-      if (playerScores.length === 0) {
-        return 0;
-      }
-      return ScoreSaberCurve.calcRawPpForExpectedPp(
-        playerScores.map(score => score.pp),
-        1
-      );
     });
   }
 }

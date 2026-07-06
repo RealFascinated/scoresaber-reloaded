@@ -184,14 +184,6 @@ export class ScoreSaberScoresRepository {
       .orderBy(desc(scoreSaberScoresTable.pp));
   }
 
-  public static async getPpByPlayer(playerId: string): Promise<{ pp: number }[]> {
-    return db
-      .select({ pp: scoreSaberScoresTable.pp })
-      .from(scoreSaberScoresTable)
-      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)))
-      .orderBy(desc(scoreSaberScoresTable.pp));
-  }
-
   public static async getRankedRowsByPlayerId(playerId: string): Promise<ScoreSaberScoreRow[]> {
     return db
       .select()

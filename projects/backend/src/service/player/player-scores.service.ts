@@ -20,11 +20,11 @@ import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
 import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/v1/player-score";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/v1/player-scores-page";
 import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-difficulty";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
+import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { SQL, asc, desc, eq, gt, gte, inArray, isNotNull, sql, type AnyColumn } from "drizzle-orm";
 import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
@@ -71,7 +71,7 @@ export class PlayerScoresService {
    */
   public static async fetchMissingPlayerScores(
     account: ScoreSaberAccount,
-    playerToken: ScoreSaberPlayerToken
+    playerToken: ScoreSaberPlayerLookupToken
   ): Promise<{
     missingScores: number;
     totalScores: number;
@@ -95,7 +95,7 @@ export class PlayerScoresService {
     const rankedLeaderboardsToRefresh = new Map<number, ScoreSaberLeaderboard>();
     const playerScoresCount = await ScoreSaberScoresRepository.countByPlayerId(playerId);
 
-    if (playerScoresCount === playerToken.scoreStats.totalPlayCount) {
+    if (playerScoresCount === playerToken.stats.totalSubmittedPlays) {
       if (!account.seededScores) {
         await PlayerCoreService.updatePlayer(account.id, { seededScores: true });
       }

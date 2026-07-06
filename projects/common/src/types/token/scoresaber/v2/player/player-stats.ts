@@ -6,6 +6,7 @@ export type ScoreSaberV2PlayerStatsToken = {
   rank: number;
   countryRank: number;
   totalPP: number;
+  plusOnePP: number | null;
   totalScore: string;
   totalRankedScore: string;
   totalPlayedLeaderboards: number;
@@ -15,5 +16,5 @@ export type ScoreSaberV2PlayerStatsToken = {
   averageAccuracy: number;
   weightedAverageAccuracy: number;
   completionAccuracy: number;
-  device: ScoreSaberV2PlayerDeviceToken;
+  device: ScoreSaberV2PlayerDeviceToken | null;
 };

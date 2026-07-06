@@ -1,5 +1,4 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
-import { DetailType } from "@ssr/common/detail-type";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
@@ -7,21 +6,14 @@ import ScoreSaberRankingRequestsResponse from "@ssr/common/schemas/response/scor
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
-import {
-  getScoreSaberLeaderboardFromToken,
-  getScoreSaberLeaderboardFromV2Token,
-  getScoreSaberPlayerFromV2Token,
-} from "@ssr/common/token-creators";
+import { getScoreSaberLeaderboardFromV2PageToken } from "@ssr/common/token-creators";
 import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/v1/leaderboard";
-import ScoreSaberLeaderboardPageToken from "@ssr/common/types/token/scoresaber/v1/leaderboard-page";
 import ScoreSaberLeaderboardScoresPageToken from "@ssr/common/types/token/scoresaber/v1/leaderboard-scores-page";
-import { ScoreSaberPlayerToken } from "@ssr/common/types/token/scoresaber/v1/player";
 import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/v1/player-scores-page";
-import { ScoreSaberPlayerSearchToken } from "@ssr/common/types/token/scoresaber/v1/player-search";
-import { ScoreSaberPlayersPageToken } from "@ssr/common/types/token/scoresaber/v1/players-page";
 import RankingRequestToken from "@ssr/common/types/token/scoresaber/v1/ranking-request-token";
 import { ScoreSaberV2LeaderboardStatusToken } from "@ssr/common/types/token/scoresaber/v2/leaderboard/leaderboard-status";
 import ScoreSaberV2LeaderboardsPageToken from "@ssr/common/types/token/scoresaber/v2/leaderboard/leaderboards-page";
+import { ScoreSaberV2PlayerToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
 import ScoreSaberV2PlayersPageToken from "@ssr/common/types/token/scoresaber/v2/player/players-page";
 import { CoalescingLoader } from "@ssr/common/utils/coalescing-loader";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -36,10 +28,10 @@ const API_BASE = "https://scoresaber.com/api";
 /**
  * Player
  */
-const SEARCH_PLAYERS_ENDPOINT = `${API_BASE}/players?search=:query`;
-const LOOKUP_PLAYER_ENDPOINT = `${API_BASE}/player/:id/:type`;
+const LOOKUP_PLAYER_V2_ENDPOINT = `${API_BASE}/v2/players/:id`;
+const LOOKUP_PLAYERS_V2_ENDPOINT = `${API_BASE}/v2/players`;
 const LOOKUP_PLAYER_SCORES_ENDPOINT = `${API_BASE}/player/:id/scores?limit=:limit&sort=:sort&page=:page`;
-const LOOKUP_ACTIVE_PLAYER_COUNT = `${API_BASE}/players/count`;
+const LOOKUP_ACTIVE_PLAYER_COUNT = `${API_BASE}/v2/players/count`;
 const REFRESH_PLAYER_ENDPOINT = `${API_BASE}/user/:id/refresh`;
 
 /**
@@ -48,8 +40,6 @@ const REFRESH_PLAYER_ENDPOINT = `${API_BASE}/user/:id/refresh`;
 const LOOKUP_LEADERBOARD_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/info`;
 const LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT = `${API_BASE}/leaderboard/by-hash/:query/info?difficulty=:difficulty&gameMode=:gameMode`;
 const LOOKUP_LEADERBOARD_SCORES_ENDPOINT = `${API_BASE}/leaderboard/by-id/:id/scores?page=:page`;
-const SEARCH_LEADERBOARDS_ENDPOINT = `${API_BASE}/leaderboards?search=:query`;
-
 /**
  * Ranking Queue
  */
@@ -58,7 +48,6 @@ const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 /**
  * v2 endpoints
  */
-const LOOKUP_PLAYERS_V2_ENDPOINT = `${API_BASE}/v2/players`;
 const LOOKUP_LEADERBOARDS_V2_ENDPOINT = `${API_BASE}/v2/leaderboards`;
 
 type SerializableValue =
@@ -68,8 +57,8 @@ type SerializableValue =
   | null
   | SerializableValue[]
   | {
-      [key: string]: SerializableValue;
-    };
+    [key: string]: SerializableValue;
+  };
 
 type CachedResponse<T> = {
   data: T | string;
@@ -165,18 +154,22 @@ export class ScoreSaberApiService {
    * @param query the query to search for
    * @returns the players that match the query, or undefined if no players were found
    */
-  public static async searchPlayers(query: string): Promise<ScoreSaberPlayerSearchToken | undefined> {
+  public static async searchPlayers(query: string): Promise<ScoreSaberV2PlayersPageToken | undefined> {
     const before = performance.now();
-    ScoreSaberApiService.log(`Searching for players matching "${query}"...`);
-    const results = await ScoreSaberApiService.fetch<ScoreSaberPlayerSearchToken>(
-      SEARCH_PLAYERS_ENDPOINT.replace(":query", query)
-    );
-    if (results === undefined || results.players.length === 0) {
+    const trimmedQuery = query.trim();
+    ScoreSaberApiService.log(`Searching for players matching "${trimmedQuery}"...`);
+    const results = await ScoreSaberApiService.fetch<ScoreSaberV2PlayersPageToken>(LOOKUP_PLAYERS_V2_ENDPOINT, {
+      searchParams: {
+        page: "1",
+        ...(trimmedQuery ? { search: trimmedQuery } : {}),
+      },
+    });
+    if (results === undefined || results.data.length === 0) {
       return undefined;
     }
-    results.players.sort((a, b) => a.rank - b.rank);
+    results.data.sort((a, b) => a.stats.rank - b.stats.rank);
     ScoreSaberApiService.log(
-      `Found ${results.players.length} players in ${formatDuration(performance.now() - before)}`
+      `Found ${results.data.length} players in ${formatDuration(performance.now() - before)}`
     );
     return results;
   }
@@ -185,17 +178,13 @@ export class ScoreSaberApiService {
    * Looks up a player by their ID.
    *
    * @param playerId the ID of the player to look up
-   * @param type the data type to return (default: full)
    * @returns the player that matches the ID, or undefined
    */
-  public static async lookupPlayer(
-    playerId: string,
-    type: DetailType = "full"
-  ): Promise<ScoreSaberPlayerToken | undefined> {
+  public static async lookupPlayer(playerId: string): Promise<ScoreSaberV2PlayerToken | undefined> {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up player "${playerId}"...`);
-    const token = await ScoreSaberApiService.fetch<ScoreSaberPlayerToken>(
-      LOOKUP_PLAYER_ENDPOINT.replace(":id", playerId).replace(":type", type)
+    const token = await ScoreSaberApiService.fetch<ScoreSaberV2PlayerToken>(
+      LOOKUP_PLAYER_V2_ENDPOINT.replace(":id", playerId)
     );
     if (token === undefined) {
       return undefined;
@@ -218,7 +207,7 @@ export class ScoreSaberApiService {
       country?: string;
       includeInactives?: boolean;
     }
-  ): Promise<ScoreSaberPlayersPageToken | undefined> {
+  ): Promise<ScoreSaberV2PlayersPageToken | undefined> {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up players on page "${page}"...`);
     const response = await ScoreSaberApiService.fetch<ScoreSaberV2PlayersPageToken>(
@@ -238,14 +227,7 @@ export class ScoreSaberApiService {
     ScoreSaberApiService.log(
       `Found ${response.data.length} players in ${formatDuration(performance.now() - before)}`
     );
-    return {
-      players: response.data.map(getScoreSaberPlayerFromV2Token),
-      metadata: {
-        page: response.metadata.page,
-        itemsPerPage: response.metadata.itemsPerPage,
-        total: response.metadata.totalItems,
-      },
-    };
+    return response;
   }
 
   /**
@@ -256,12 +238,12 @@ export class ScoreSaberApiService {
   public static async lookupActivePlayerCount(): Promise<number | undefined> {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up active player count...`);
-    const response = await ScoreSaberApiService.fetch<number>(LOOKUP_ACTIVE_PLAYER_COUNT);
+    const response = await ScoreSaberApiService.fetch<{ count: number }>(LOOKUP_ACTIVE_PLAYER_COUNT);
     if (response === undefined) {
       return undefined;
     }
     ScoreSaberApiService.log(`Found active player count in ${formatDuration(performance.now() - before)}`);
-    return Number(response);
+    return response.count;
   }
 
   /**
@@ -378,7 +360,7 @@ export class ScoreSaberApiService {
       sortDirection?: "asc" | "desc";
       realmId?: number;
     }
-  ): Promise<ScoreSaberLeaderboardPageToken | undefined> {
+  ): Promise<ScoreSaberV2LeaderboardsPageToken | undefined> {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up leaderboard page "${page}"...`);
 
@@ -390,8 +372,8 @@ export class ScoreSaberApiService {
           ...(options?.limit ? { limit: options.limit.toString() } : {}),
           ...(options?.status
             ? {
-                status: Array.isArray(options.status) ? options.status.join(",") : options.status,
-              }
+              status: Array.isArray(options.status) ? options.status.join(",") : options.status,
+            }
             : {}),
           ...(options?.verified ? { verified: "true" } : {}),
           ...(options?.minStars != null ? { minStars: options.minStars.toString() } : {}),
@@ -408,33 +390,6 @@ export class ScoreSaberApiService {
     }
     ScoreSaberApiService.log(
       `Found ${response.data.length} leaderboards in ${formatDuration(performance.now() - before)}`
-    );
-    return {
-      leaderboards: response.data.map(getScoreSaberLeaderboardFromV2Token),
-      metadata: {
-        page: response.metadata.page,
-        itemsPerPage: response.metadata.itemsPerPage,
-        total: response.metadata.totalItems,
-      },
-    };
-  }
-
-  /**
-   * Searches for leaderboards
-   *
-   * @param query the query to search for
-   */
-  public static async searchLeaderboards(query: string): Promise<ScoreSaberLeaderboardPageToken | undefined> {
-    const before = performance.now();
-    ScoreSaberApiService.log(`Searching for leaderboards matching "${query}"...`);
-    const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardPageToken>(
-      SEARCH_LEADERBOARDS_ENDPOINT.replace(":query", query)
-    );
-    if (response === undefined) {
-      return undefined;
-    }
-    ScoreSaberApiService.log(
-      `Found ${response.leaderboards.length} leaderboards in ${formatDuration(performance.now() - before)}`
     );
     return response;
   }
@@ -547,9 +502,9 @@ export class ScoreSaberApiService {
         continue;
       }
 
-      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
-      for (const token of response.leaderboards) {
-        const leaderboard = getScoreSaberLeaderboardFromToken(token);
+      const totalPages = Math.ceil(response.metadata.totalItems / response.metadata.itemsPerPage);
+      for (const token of response.data) {
+        const leaderboard = getScoreSaberLeaderboardFromV2PageToken(token);
         leaderboards.push(leaderboard);
 
         const difficulties = leaderboardDifficulties.get(leaderboard.songHash) ?? [];
@@ -564,7 +519,7 @@ export class ScoreSaberApiService {
 
       if (logProgress && (page % 10 === 0 || page === 1 || page >= totalPages)) {
         scoreSaberApiLog.info(
-          `Fetched ${response.leaderboards.length} leaderboards on page ${page}/${totalPages}.`
+          `Fetched ${response.data.length} leaderboards on page ${page}/${totalPages}.`
         );
       }
 
