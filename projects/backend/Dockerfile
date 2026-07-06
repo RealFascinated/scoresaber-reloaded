@@ -8,7 +8,6 @@ WORKDIR /app
 COPY package.json bun.lock ./
 COPY projects/common/package.json ./projects/common/
 COPY projects/backend/package.json ./projects/backend/
-COPY projects/elysia-mcp/package.json ./projects/elysia-mcp/
 COPY projects/website/package.json ./projects/website/
 
 # Install production dependencies
@@ -16,8 +15,6 @@ RUN bun install --frozen-lockfile --production
 
 # Copy source code after dependencies are installed
 COPY projects/common ./projects/common
-COPY projects/elysia-mcp ./projects/elysia-mcp
-RUN cd projects/elysia-mcp && bun run build:docker
 COPY projects/backend ./projects/backend
 
 # Run the app
@@ -35,7 +32,6 @@ COPY --from=depends /app/node_modules ./node_modules
 COPY --from=depends /app/projects/common ./projects/common
 RUN cd projects/common && bun run build
 
-COPY --from=depends /app/projects/elysia-mcp ./projects/elysia-mcp
 COPY --from=depends /app/projects/backend ./projects/backend
 
 # Lint before starting

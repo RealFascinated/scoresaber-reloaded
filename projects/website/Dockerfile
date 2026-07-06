@@ -17,7 +17,6 @@ COPY package.json bun.lock ./
 COPY projects/common/package.json ./projects/common/
 COPY projects/website/package.json ./projects/website/
 COPY projects/backend/package.json ./projects/backend/
-COPY projects/elysia-mcp/package.json ./projects/elysia-mcp/
 
 # Install dependencies (including dev dependencies for build)
 RUN bun install --frozen-lockfile

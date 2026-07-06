@@ -12,7 +12,6 @@ import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { helmet } from "elysia-helmet";
-import { mcp } from "elysia-mcp";
 import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
@@ -27,7 +26,6 @@ import PlaylistController from "./controller/playlist/playlist.controller";
 import ScoresController from "./controller/scores/scores.controller";
 import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
-import { registerMcpTools } from "./mcp/register-tools";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { QueueManager } from "./queue/queue-manager";
 import { ScoreSaberMedalsRepository } from "./repositories/scoresaber-medals.repository";
@@ -314,22 +312,6 @@ export const app = new Elysia()
   .use(BeatSaverController)
   .use(BeatLeaderController)
   .use(PlayerRankingController)
-  .use(
-    mcp({
-      serverInfo: {
-        name: "ssr",
-        version: appVersion,
-      },
-      capabilities: {
-        tools: {},
-      },
-      basePath: "/mcp",
-      stateless: true,
-      enableJsonResponse: true,
-      openApiServerUrl: env.NEXT_PUBLIC_API_URL,
-      setupServer: registerMcpTools,
-    })
-  )
   .use(
     openapi({
       path: "/swagger",
