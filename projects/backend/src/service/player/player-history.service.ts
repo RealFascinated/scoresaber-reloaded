@@ -190,7 +190,7 @@ export class PlayerHistoryService {
     await PlayerHistoryRepository.upsertByPlayerAndDate(
       player.id,
       date,
-      PlayerHistoryService.createHistoryEntry(statistics, existingEntry ?? undefined)
+      PlayerHistoryService.createHistoryEntry(statistics, playerToken, existingEntry ?? undefined)
     );
 
     return statistics;
@@ -357,7 +357,7 @@ export class PlayerHistoryService {
   ): Promise<ScoreSaberPlayerHistory | undefined> {
     const today = getMidnightAlignedDate(new Date());
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(playerToken.id, today);
-    return PlayerHistoryService.createHistoryEntry(statistics, existingEntry ?? undefined);
+    return PlayerHistoryService.createHistoryEntry(statistics, playerToken, existingEntry ?? undefined);
   }
 
   /**
@@ -398,6 +398,7 @@ export class PlayerHistoryService {
    */
   public static createHistoryEntry(
     statistics: ScoreSaberPlayerStatistics,
+    playerToken: ScoreSaberPlayerLookupToken,
     existingEntry?: PlayerHistoryRow
   ): ScoreSaberPlayerHistory {
     return {
@@ -416,7 +417,7 @@ export class PlayerHistoryService {
       totalRankedScores: statistics.totalRankedScores,
       totalScore: statistics.totalScore,
       totalRankedScore: statistics.totalRankedScore,
-      plusOnePp: statistics.plusOnePp,
+      plusOnePp: playerToken.stats.plusOnePP ?? 0,
       aPlays: statistics.aPlays,
       sPlays: statistics.sPlays,
       spPlays: statistics.spPlays,

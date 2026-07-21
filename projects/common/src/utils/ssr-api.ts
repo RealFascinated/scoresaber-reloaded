@@ -17,7 +17,6 @@ import { MiniRankingResponse } from "../schemas/response/player/around-player";
 import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
 import { PlayerRankingsResponse } from "../schemas/response/player/player-rankings";
 import { PlayerSearchResponse } from "../schemas/response/player/player-search";
-import { PpGainResponse } from "../schemas/response/player/pp-boundary";
 import { PlayerScoresChartResponse } from "../schemas/response/player/scores-chart";
 import { PlayerMedalRankingsResponse } from "../schemas/response/ranking/medal-rankings";
 import { AccSaberScoresPageResponse } from "../schemas/response/score/accsaber-scores-page";
@@ -131,16 +130,6 @@ class SSRApi {
    */
   async getScoreSaberStatistics() {
     return await this.request<StatisticsResponse>(`/statistics/scoresaber`);
-  }
-
-  /**
-   * Gets the pp gain for a player.
-   *
-   * @param playerId the player's id
-   * @param count the number of raw pp values to get
-   */
-  async getPlayerWeightedPpGainForRawPps(playerId: string, count: number = 1) {
-    return await this.request<PpGainResponse>(`/player/pp-gain/${playerId}/${count}`);
   }
 
   /**
