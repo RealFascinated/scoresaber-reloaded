@@ -43,6 +43,7 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
     parseAsStringLiteral<ScoreModeEnum>(Object.values(ScoreModeEnum)).withDefault(ScoreModeEnum.Global)
   );
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [highlight] = useQueryState("highlight");
   const {
     data: scores,
     isError,
@@ -174,6 +175,7 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
                       key={getScoreId(playerScore)}
                       score={playerScore}
                       leaderboard={leaderboard}
+                      highlightedPlayerId={highlight ?? undefined}
                     />
                   ))}
               </table>
