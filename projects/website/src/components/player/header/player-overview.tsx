@@ -155,7 +155,7 @@ export default function PlayerOverview({ player }: PlayerOverviewProps) {
 
         return (
           <div key={`player-overview-${index}-${subName.showWhenInactiveOrBanned}`}>
-            {subName.render && subName.render(player)}
+            {subName.render?.(player)}
           </div>
         );
       })}

@@ -8,6 +8,16 @@ import Player, { StatisticChange } from "../player";
  */
 export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   /**
+   * The contextual rank for this player
+   */
+  contextualRank?: number;
+
+  /**
+   * The contextual country rank for this player
+   */
+  contextualCountryRank?: number;
+
+  /**
    * The change in pp compared to yesterday.
    */
   statisticChange: StatisticChange | undefined;
