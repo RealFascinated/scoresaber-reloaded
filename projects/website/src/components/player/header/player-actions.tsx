@@ -81,7 +81,7 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
       <PlayerLink
         playerName={player.name}
         name="AccSaber"
-        url={`https://accsaber.com/profile/${player.id}`}
+        url={`https://accsaber.com/players/${player.id}`}
         icon={<AccSaberLogo size={20} className="select-none" />}
       />
 
