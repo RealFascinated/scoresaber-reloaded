@@ -7,7 +7,6 @@ import SimplePagination from "@/components/simple-pagination";
 import { PageTitle } from "@/components/page-title";
 import { useRouter } from "next/navigation";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
-import { cn } from "@/common/utils";
 import { SharedIcons } from "@/shared-icons";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";

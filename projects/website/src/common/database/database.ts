@@ -1,6 +1,6 @@
 import Logger from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { ReplayViewer, ReplayViewers, ReplayViewerTypes } from "@ssr/common/replay-viewer";
+import { ReplayViewer, ReplayViewers } from "@ssr/common/replay-viewer";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import Dexie, { EntityTable } from "dexie";
 import { deleteCookieValue, setCookieValue } from "../cookie.util";

@@ -36,7 +36,7 @@ export function TopScoresData() {
         <div className="flex flex-col gap-4">
           {scores.items.map(({ score, leaderboard, beatSaver }) => {
             const player = score.playerInfo;
-            if (!player) return null;
+            if (!player) {return null;}
 
             return (
               <div key={score.scoreId} className="rounded-xl ring-1 ring-border bg-card overflow-hidden">

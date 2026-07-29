@@ -54,7 +54,7 @@ export function FriendScores() {
             const leaderboard = playerScore.leaderboard;
             const beatSaverMap = playerScore.beatSaver;
             const player = score.playerInfo;
-            if (!player) return null;
+            if (!player) {return null;}
 
             return (
               <div key={score.scoreId} className="rounded-xl ring-1 ring-border bg-card overflow-hidden">

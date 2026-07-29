@@ -113,7 +113,7 @@ function FriendsPopover() {
   const closeTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
-    if (isMobile) return;
+    if (isMobile) {return;}
     if (closeTimeout.current) {
       clearTimeout(closeTimeout.current);
     }
@@ -121,7 +121,7 @@ function FriendsPopover() {
   };
 
   const handleMouseLeave = () => {
-    if (isMobile) return;
+    if (isMobile) {return;}
     closeTimeout.current = setTimeout(() => setOpen(false), 200);
   };
 
@@ -171,8 +171,8 @@ function FriendsPopover() {
             <div className="flex flex-col gap-px">
               {friends
                 .sort((a, b) => {
-                  if (a.inactive && !b.inactive) return 1;
-                  if (!a.inactive && b.inactive) return -1;
+                  if (a.inactive && !b.inactive) {return 1;}
+                  if (!a.inactive && b.inactive) {return -1;}
                   return a.rank - b.rank;
                 })
                 .map(friend => (

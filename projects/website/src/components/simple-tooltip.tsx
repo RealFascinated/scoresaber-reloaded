@@ -7,7 +7,7 @@ export default function SimpleTooltip({
   display,
   side,
   className,
-  showOnMobile,
+  showOnMobile: _showOnMobile,
 }: {
   children: React.ReactNode;
   display: ReactNode | string;

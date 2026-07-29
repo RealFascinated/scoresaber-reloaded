@@ -7,10 +7,10 @@ export function LandingBackground() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) {return;}
 
     let animationId: number;
     let particles: { x: number; y: number; size: number; speedX: number; speedY: number; opacity: number }[] = [];
@@ -42,10 +42,10 @@ export function LandingBackground() {
         p.x += p.speedX;
         p.y += p.speedY;
 
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
+        if (p.x < 0) {p.x = canvas.width;}
+        if (p.x > canvas.width) {p.x = 0;}
+        if (p.y < 0) {p.y = canvas.height;}
+        if (p.y > canvas.height) {p.y = 0;}
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
