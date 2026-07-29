@@ -15,13 +15,13 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import useDatabase from "@/hooks/use-database";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
@@ -107,11 +107,13 @@ function FriendsPopover() {
   const database = useDatabase();
   const friends = useStableLiveQuery(() => database.getFriends());
   const { openSearch } = useSearch();
+  const isMobile = useIsMobile();
 
   const [open, setOpen] = useState(false);
   const closeTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
+    if (isMobile) return;
     if (closeTimeout.current) {
       clearTimeout(closeTimeout.current);
     }
@@ -119,48 +121,88 @@ function FriendsPopover() {
   };
 
   const handleMouseLeave = () => {
+    if (isMobile) return;
     closeTimeout.current = setTimeout(() => setOpen(false), 200);
   };
+
+  const friendCount = friends?.length ?? 0;
+  const isLoading = friends === undefined;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <SidebarMenuButton onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+        <SidebarMenuButton onClick={() => isMobile && setOpen(prev => !prev)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           <SharedIcons.FriendsNavIcon className="size-5" />
           <span>Friends</span>
+          {friendCount > 0 && (
+            <span className="bg-muted text-muted-foreground ml-auto rounded-md px-1.5 py-0.5 text-xs font-medium tabular-nums">
+              {friendCount}
+            </span>
+          )}
         </SidebarMenuButton>
       </PopoverTrigger>
       <PopoverContent
-        className="ml-3 max-h-[400px] w-screen overflow-hidden overflow-y-auto p-2 text-sm select-none md:w-[350px]"
+        side={isMobile ? "bottom" : "right"}
+        sideOffset={isMobile ? 4 : 8}
+        className="flex max-h-[420px] flex-col overflow-hidden p-0 text-sm select-none w-screen md:w-[340px]"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {friends && friends.length > 0 ? (
-          <div className="flex flex-col gap-0.5">
-            {friends
-              .sort((a, b) => {
-                if (a.inactive && !b.inactive) return 1;
-                if (!a.inactive && b.inactive) return -1;
-                return a.rank - b.rank;
-              })
-              .map(friend => (
-                <Friend player={friend} key={friend.id} onClick={() => setOpen(false)} />
-              ))}
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-border/50 px-3 py-2.5">
+          <div className="flex items-center gap-2">
+            <SharedIcons.FriendsNavIcon className="text-muted-foreground size-4" />
+            <span className="font-semibold">Friends</span>
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-2 text-sm">
-            <p className="pointer-events-none">You don&#39;t have any friends :(</p>
-            <Button
-              size="sm"
-              onClick={() => {
-                setOpen(false);
-                openSearch();
-              }}
-            >
-              Search Player
-            </Button>
-          </div>
-        )}
+          {friendCount > 0 && (
+            <span className="bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-xs font-medium tabular-nums">
+              {friendCount}
+            </span>
+          )}
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-2">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <SharedIcons.PageLoadingIcon className="text-muted-foreground size-5 animate-spin" />
+            </div>
+          ) : friendCount > 0 ? (
+            <div className="flex flex-col gap-px">
+              {friends
+                .sort((a, b) => {
+                  if (a.inactive && !b.inactive) return 1;
+                  if (!a.inactive && b.inactive) return -1;
+                  return a.rank - b.rank;
+                })
+                .map(friend => (
+                  <Friend player={friend} key={friend.id} onClick={() => setOpen(false)} />
+                ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-3 py-8">
+              <SharedIcons.FriendsNavIcon className="text-muted-foreground/30 size-10" />
+              <div className="flex flex-col items-center gap-1">
+                <p className="text-muted-foreground font-medium">No friends yet</p>
+                <p className="text-muted-foreground/60 max-w-[220px] text-center text-xs">
+                  Search for players to add them to your friends list
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  setOpen(false);
+                  openSearch();
+                }}
+                className="gap-1.5"
+              >
+                <SharedIcons.SearchPlayersIcon className="size-4" />
+                Find Players
+              </Button>
+            </div>
+          )}
+        </div>
       </PopoverContent>
     </Popover>
   );
@@ -245,7 +287,6 @@ export function AppSidebar() {
 
         {/* Profile & Friends */}
         <SidebarGroup>
-          <SidebarGroupLabel>Profile</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <ProfileSection />
@@ -256,9 +297,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <hr className="border-sidebar-border mx-3" />
+
         {/* Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map(item => (
@@ -274,7 +316,6 @@ export function AppSidebar() {
       </SidebarContent>
 
       <div className="px-2 pb-2">
-        <div className="mb-1 px-2 text-xs font-medium text-sidebar-foreground/70">Links</div>
         <SidebarMenu>
           {resourceLinks.map(link => (
             <SidebarMenuItem key={link.name}>

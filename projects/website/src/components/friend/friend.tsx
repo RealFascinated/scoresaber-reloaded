@@ -4,6 +4,7 @@ import Avatar from "@/components/avatar";
 import SimpleLink from "@/components/simple-link";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import CountryFlag from "@/components/ui/country-flag";
 import useDatabase from "@/hooks/use-database";
 import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -44,19 +45,22 @@ export default function Friend({ player, onClick }: FriendProps) {
   }
 
   return (
-    <div className="hover:bg-accent flex items-center justify-between gap-2 rounded-md p-2 transition-all select-none">
+    <div className="hover:bg-accent group flex items-center justify-between gap-2 rounded-lg p-2 transition-all select-none">
       <SimpleLink
         href={`/player/${player.id}`}
         onClick={() => onClick?.()}
-        className="flex w-full items-center gap-2"
+        className="flex min-w-0 flex-1 items-center gap-2.5"
       >
-        <Avatar src={player.avatar} size={40} alt={`${player.name}'s Profile Picture`} />
-        <div className="flex flex-col">
-          <p className="font-semibold">{player.name}</p>
+        <Avatar src={player.avatar} size={36} alt={`${player.name}'s Profile Picture`} className="shrink-0" />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <p className="truncate text-sm font-medium">{player.name}</p>
           {player.inactive ? (
-            <p className="text-inactive-account">Inactive Account</p>
+            <span className="text-inactive-account text-xs">Inactive Account</span>
           ) : (
-            <p className="text-gray-400">#{formatNumberWithCommas(player.rank)}</p>
+            <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+              <CountryFlag code={player.country} size={5} />
+              #{formatNumberWithCommas(player.rank)}
+            </span>
           )}
         </div>
       </SimpleLink>
@@ -65,8 +69,8 @@ export default function Friend({ player, onClick }: FriendProps) {
       >
         <ConfirmationDialog
           trigger={
-            <div className="cursor-pointer">
-              <SharedIcons.RemoveFriendFromListIcon className="h-5 w-5" />
+            <div className="text-muted-foreground hover:text-foreground cursor-pointer rounded-md p-1 opacity-0 transition-all group-hover:opacity-100">
+              <SharedIcons.RemoveFriendFromListIcon className="size-4" />
             </div>
           }
           title={`Remove ${name}?`}
