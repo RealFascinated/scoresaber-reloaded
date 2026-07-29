@@ -49,7 +49,6 @@ export function ScoreSaberPlayerRanking<T extends ScoreSaberPlayer>({
       worth={
         <PlayerPpDisplay
           pp={player.pp}
-          mainPlayer={mainPlayer}
           className="ml-auto min-w-[70px]"
         />
       }
