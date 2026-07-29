@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function ScoresLivePage() {
   return (
-    <section className="flex w-full justify-center">
+    <section className="w-full">
       <ScoreFeed />
     </section>
   );

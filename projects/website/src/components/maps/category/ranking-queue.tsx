@@ -1,7 +1,5 @@
 import { cn } from "@/common/utils";
-import Card from "@/components/card";
 import ScoreSongInfo from "@/components/score/score-song-info";
-import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { SharedIcons } from "@/shared-icons";
@@ -9,9 +7,11 @@ import { RankingQueueLeaderboard } from "@ssr/common/schemas/response/leaderboar
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import SimpleTooltip from "../../simple-tooltip";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
 
 export default function RankingQueue() {
   const { data: rankingRequests, isLoading } = useQuery({
@@ -19,106 +19,90 @@ export default function RankingQueue() {
     queryFn: async () => ssrApi.fetchRankingQueue(),
   });
   const [showOpenRankUnrank, setShowOpenRankUnrank] = useState(false);
+  const router = useRouter();
 
   const renderRequests = (name: string, requests: RankingQueueLeaderboard[]) => {
     return (
-      <Card className="flex flex-col gap-(--spacing-lg)">
+      <div className="flex flex-col gap-4">
         <h3 className="text-lg font-semibold">{name}</h3>
 
-        <div className="relative overflow-x-auto rounded-xl ring-1 ring-border">
-          <table className="table w-full min-w-[760px] table-auto border-spacing-0 text-left text-sm">
-            <thead>
-              <tr className="border-b border-border/50">
-                <th className="text-foreground/90 px-3 py-2.5 font-semibold">Leaderboard</th>
-                <th className="text-foreground/90 px-2 py-2.5 text-center font-semibold">Difficulties</th>
-                <th className="text-foreground/90 min-w-[130px] px-3 py-2.5 text-center font-semibold">
-                  Daily Plays
-                </th>
-                <th className="text-foreground/90 px-2 py-2.5 text-center font-semibold">Plays</th>
-                <th className="text-foreground/90 min-w-[130px] px-2 py-2.5 text-center font-semibold">
-                  Created
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {requests.map(leaderboard => {
-                return (
-                  <tr
-                    key={leaderboard.id}
-                    className="border-b border-border/50 hover:bg-muted/30 transition-colors last:border-b-0"
-                  >
-                    {/* Leaderboard Name */}
-                    <td className="px-3 py-1.5">
-                      <SimpleLink href={`/leaderboard/${leaderboard.id}`} className="block">
-                        <ScoreSongInfo
-                          song={{
-                            name: leaderboard.fullName,
-                            authorName: leaderboard.songAuthorName,
-                            art: leaderboard.songArt,
-                          }}
-                          level={{
-                            authorName: leaderboard.levelAuthorName,
-                            difficulty: leaderboard.difficulty.difficulty,
-                          }}
-                          imageSize={42}
-                          clickableSongName={false}
-                          shortDiffNames
-                        />
-                      </SimpleLink>
-                    </td>
-                    {/* Difficulties */}
-                    <td className="px-3 py-1.5 text-center text-xs">{leaderboard.difficultyCount}</td>
-
-                    {/* Daily Plays */}
-                    <td className="px-3 py-1.5 text-center text-xs text-gray-400">
-                      <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
-                        <p className="inline-flex items-center justify-center gap-1">
-                          <SharedIcons.PlayMapIcon className="h-3 w-3" />
-                          {formatNumberWithCommas(leaderboard.dailyPlays)}
-                        </p>
-                      </SimpleTooltip>
-                    </td>
-
-                    {/* Plays */}
-                    <td className="px-3 py-1.5 text-center text-xs text-gray-400">
-                      <SimpleTooltip display="Total plays on this leaderboard">
-                        <p className="inline-flex items-center justify-center gap-1">
-                          <SharedIcons.PlayMapIcon className="h-3 w-3" />
-                          {formatNumberWithCommas(leaderboard.plays)}
-                        </p>
-                      </SimpleTooltip>
-                    </td>
-
-                    {/* Created */}
-                    <td className="px-3 py-1.5 text-center text-xs">
-                      <SimpleTooltip
-                        display={<p>{formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}</p>}
-                      >
-                        <p className="text-gray-400">{timeAgo(leaderboard.timestamp)}</p>
-                      </SimpleTooltip>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="rounded-xl ring-1 ring-border bg-card overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Leaderboard</TableHead>
+                <TableHead className="text-center">Difficulties</TableHead>
+                <TableHead className="text-center">Daily Plays</TableHead>
+                <TableHead className="text-center">Plays</TableHead>
+                <TableHead className="text-center">Created</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {requests.map(leaderboard => (
+                <TableRow
+                  key={leaderboard.id}
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/leaderboard/${leaderboard.id}`)}
+                >
+                  <TableCell className="py-1.5">
+                    <ScoreSongInfo
+                      song={{
+                        name: leaderboard.fullName,
+                        authorName: leaderboard.songAuthorName,
+                        art: leaderboard.songArt,
+                      }}
+                      level={{
+                        authorName: leaderboard.levelAuthorName,
+                        difficulty: leaderboard.difficulty.difficulty,
+                      }}
+                      imageSize={42}
+                      clickableSongName={false}
+                      shortDiffNames
+                    />
+                  </TableCell>
+                  <TableCell className="text-center text-xs">{leaderboard.difficultyCount}</TableCell>
+                  <TableCell className="text-center text-xs text-muted-foreground">
+                    <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
+                      <p className="inline-flex items-center justify-center gap-1">
+                        <SharedIcons.PlayMapIcon className="h-3 w-3" />
+                        {formatNumberWithCommas(leaderboard.dailyPlays)}
+                      </p>
+                    </SimpleTooltip>
+                  </TableCell>
+                  <TableCell className="text-center text-xs text-muted-foreground">
+                    <SimpleTooltip display="Total plays on this leaderboard">
+                      <p className="inline-flex items-center justify-center gap-1">
+                        <SharedIcons.PlayMapIcon className="h-3 w-3" />
+                        {formatNumberWithCommas(leaderboard.plays)}
+                      </p>
+                    </SimpleTooltip>
+                  </TableCell>
+                  <TableCell className="text-center text-xs">
+                    <SimpleTooltip
+                      display={<p>{formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}</p>}
+                    >
+                      <p className="text-muted-foreground">{timeAgo(leaderboard.timestamp)}</p>
+                    </SimpleTooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
-      </Card>
+      </div>
     );
   };
 
   if (isLoading) {
     return (
-      <Card>
-        <div className="flex w-full justify-center">
-          <Spinner />
-        </div>
-      </Card>
+      <div className="flex w-full justify-center py-12">
+        <Spinner />
+      </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-(--spacing-lg)">
+    <div className="flex flex-col gap-4">
       {renderRequests("Next in Queue", rankingRequests?.nextInQueue ?? [])}
 
       <Button

@@ -7,9 +7,12 @@ import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
+import { useRouter } from "next/navigation";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { cn } from "@/common/utils";
 import { SharedIcons } from "@/shared-icons";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -31,6 +34,7 @@ type RankingDataProps = {
 
 export default function RankingData({ initialPage, initialCountry }: RankingDataProps) {
   const navigation = usePageNavigation();
+  const router = useRouter();
   const database = useDatabase();
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
 
@@ -64,33 +68,34 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
   return (
     <div className="flex w-full flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {currentCountry ? (
+            <CountryFlag code={currentCountry} size={20} />
+          ) : (
+            <SharedIcons.GlobalPlayersRankingIcon className="size-6 text-primary" />
+          )}
+          <h1 className="text-2xl font-bold tracking-tight">
+            {currentCountry
+              ? countryFilter.find(c => c.key === currentCountry)?.friendlyName
+              : "Global Players"}
+          </h1>
+        </div>
+        {mainPlayer !== undefined && (
+          <div className="flex items-center gap-2">
+            <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
+              <span className="text-sm text-muted-foreground">Relative PP</span>
+            </SimpleTooltip>
+            <Switch
+              checked={showRelativePPDifference}
+              onCheckedChange={checked => setShowRelativePPDifference(checked)}
+            />
+          </div>
+        )}
+      </div>
+
       <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {currentCountry ? (
-                <CountryFlag code={currentCountry} size={20} />
-              ) : (
-                <SharedIcons.GlobalPlayersRankingIcon className="size-6 text-primary" />
-              )}
-              <h1 className="text-2xl font-bold tracking-tight">
-                {currentCountry
-                  ? countryFilter.find(c => c.key === currentCountry)?.friendlyName
-                  : "Global Players"}
-              </h1>
-            </div>
-            {mainPlayer !== undefined && (
-              <div className="flex items-center gap-2">
-                <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
-                  <span className="text-sm text-muted-foreground">Relative PP</span>
-                </SimpleTooltip>
-                <Switch
-                  checked={showRelativePPDifference}
-                  onCheckedChange={checked => setShowRelativePPDifference(checked)}
-                />
-              </div>
-            )}
-          </div>
 
           {!rankingData && !isError && (
             <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
@@ -110,16 +115,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
           {rankingData && (
             <div className="flex flex-col gap-4">
-              <SimplePagination
-                page={currentPage}
-                totalItems={rankingData.metadata.totalItems}
-                itemsPerPage={rankingData.metadata.itemsPerPage}
-                loadingPage={isLoading || isRefetching ? currentPage : undefined}
-                generatePageUrl={page => buildPageUrl(currentCountry, page)}
-                onPageChange={setCurrentPage}
-              />
-
-              <div className="rounded-xl ring-1 ring-border overflow-hidden">
+              <div className="rounded-xl ring-1 ring-border overflow-hidden bg-card">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -127,9 +123,6 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                       <TableHead className="w-20">Country</TableHead>
                       <TableHead>Player</TableHead>
                       <TableHead className="text-right w-24">PP</TableHead>
-                      <TableHead className="text-right w-24">Ranked</TableHead>
-                      <TableHead className="text-right w-24">Total</TableHead>
-                      <TableHead className="text-right w-28">Avg Acc</TableHead>
                       <TableHead className="w-10"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -137,7 +130,8 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                     {rankingData.items.map(player => (
                       <TableRow
                         key={player.id}
-                        className={mainPlayer?.id === player.id ? "bg-primary/5" : ""}
+                        className={cn(mainPlayer?.id === player.id ? "bg-primary/5" : "", "cursor-pointer")}
+                        onClick={() => router.push(`/player/${player.id}`)}
                       >
                         <TableCell className="py-2">
                           <span className="font-mono text-sm font-semibold">#{player.rank}</span>
@@ -155,19 +149,8 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                         </TableCell>
                         <TableCell className="py-2 text-right">
                           <span className="font-semibold text-primary">
-                            {player.pp.toFixed(2)}
+                            {formatPp(player.pp)}
                           </span>
-                        </TableCell>
-                        <TableCell className="py-2 text-right text-sm text-muted-foreground">
-                          {player.statistics?.rankedScores?.toLocaleString() ?? "-"}
-                        </TableCell>
-                        <TableCell className="py-2 text-right text-sm text-muted-foreground">
-                          {player.statistics?.totalScores?.toLocaleString() ?? "-"}
-                        </TableCell>
-                        <TableCell className="py-2 text-right text-sm text-muted-foreground">
-                          {player.statistics?.averageRankedAccuracy != null
-                            ? (player.statistics.averageRankedAccuracy * 100).toFixed(2) + "%"
-                            : "-"}
                         </TableCell>
                         <TableCell className="py-2">
                           <AddFriend player={player} className="bg-ssr rounded-full p-1.5" iconOnly />
@@ -190,7 +173,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
           )}
         </div>
 
-        <div className="w-full lg:w-72 shrink-0">
+        <div className="w-full lg:w-96 shrink-0">
           <FilterSection
             title="Filters"
             description="Filter players by country or search"

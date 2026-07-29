@@ -51,34 +51,12 @@ export function MapsData({ type }: MapsDataProps) {
 
   return (
     <MapFilterProvider>
-      <div className="flex w-full flex-col items-center gap-2 xl:flex-row xl:items-start xl:justify-center">
-        <article className="flex w-full flex-col gap-2 2xl:w-[1050px]">
-          <div className="flex w-full flex-col gap-2 md:flex-row">
-            {categories.map(category => (
-              <SimpleLink href={`/maps/${category.id}`} key={category.name} className="w-full">
-                <Button
-                  className="w-full"
-                  variant={category.name == selectedCategory.name ? "default" : "secondary"}
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="text-2xl">
-                      <category.icon className="h-4 w-4" />
-                    </span>
-                    <span>{category.name}</span>
-                  </span>
-                </Button>
-              </SimpleLink>
-            ))}
-          </div>
-
-          {/* Category Render */}
+      <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
           {selectedCategory.render()}
-        </article>
-        <div className="flex w-full flex-col gap-2 xl:w-[430px] xl:flex-col-reverse">
-          {/* Map Filters */}
+        </div>
+        <div className="flex w-full flex-col gap-4 lg:w-96 shrink-0">
           {selectedCategory.showFilter && <MapFilters />}
-
-          {/* External Links */}
           {selectedCategory.id === "ranking-queue" && (
             <Card>
               <SimpleTooltip display={<p>Click to open the Ranking Queue on ScoreSaber</p>} side="bottom">
@@ -91,8 +69,6 @@ export function MapsData({ type }: MapsDataProps) {
               </SimpleTooltip>
             </Card>
           )}
-
-          {/* Playlists */}
           <Playlists />
         </div>
       </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { PlatformRepository, PlatformType } from "@/common/platform/platform-repository";
-import Card from "@/components/card";
 import PlayerBadges from "@/components/player/player-badges";
 import PlayerViews from "@/components/player/views/player-views";
 import { useIsMobile } from "@/contexts/viewport-context";
@@ -83,50 +82,42 @@ export default function PlayerData({ player }: PlayerDataProps) {
 
   const showRankings = !isMobile && !player.inactive && !player.banned;
   return (
-    <div className="flex w-full justify-center gap-(--spacing-sm)">
-      <article className="flex w-full flex-1 flex-col gap-(--spacing-sm)">
+    <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-6">
+      <div className="flex min-w-0 flex-1 flex-col gap-4">
         <PlayerHeader player={player} />
 
-        {/* Player Badges */}
         {player.badges.length > 0 && (
-          <Card>
+          <div className="rounded-xl ring-1 ring-border bg-card p-4">
             <PlayerBadges player={player} />
-          </Card>
-        )}
-
-        {/* Player Views */}
-        {!player.inactive && (
-          <Card>
-            <PlayerViews player={player} key={player.id} />
-          </Card>
-        )}
-
-        {/* Platform Selector and Score Component */}
-        <div className="flex flex-col">
-          <div className="flex flex-col">
-            {/* Platform Selector */}
-            <div className="flex">
-              {availablePlatforms.map(platform => (
-                <Button
-                  key={platform.getDisplayName()}
-                  variant={selectedPlatform === platform.getType() ? "default" : "secondary"}
-                  className="flex items-center gap-(--spacing-sm) rounded-b-none"
-                  onClick={() => setSelectedPlatform(platform.getType())}
-                >
-                  {platform.getLogo()}
-                  <span className="hidden md:block">{platform.getDisplayName()}</span>
-                </Button>
-              ))}
-            </div>
-            {/* Score Component */}
-            <div className="[&>div]:rounded-tl-none">{platform}</div>
           </div>
-        </div>
-      </article>
+        )}
 
-      {/* Mini Rankings */}
+        {!player.inactive && (
+          <div className="rounded-xl ring-1 ring-border bg-card p-4">
+            <PlayerViews player={player} key={player.id} />
+          </div>
+        )}
+
+        <div className="flex flex-col">
+          <div className="flex">
+            {availablePlatforms.map(platform => (
+              <Button
+                key={platform.getDisplayName()}
+                variant={selectedPlatform === platform.getType() ? "default" : "secondary"}
+                className="flex items-center gap-2 rounded-b-none"
+                onClick={() => setSelectedPlatform(platform.getType())}
+              >
+                {platform.getLogo()}
+                <span className="hidden md:block">{platform.getDisplayName()}</span>
+              </Button>
+            ))}
+          </div>
+          <div className="[&>div]:rounded-tl-none">{platform}</div>
+        </div>
+      </div>
+
       {showRankings && (
-        <aside className="hidden w-[400px] flex-col gap-(--spacing-sm) 2xl:flex">
+        <aside className="w-full lg:w-96 shrink-0">
           <PlayerMiniRankings player={player} />
         </aside>
       )}

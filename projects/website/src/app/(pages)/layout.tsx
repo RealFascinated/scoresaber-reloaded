@@ -34,7 +34,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/80 px-4">
                   <SidebarTrigger className="-ml-1" />
                 </header>
-                <div className="flex min-w-0 flex-1 flex-col px-3 py-6 sm:px-4">
+                <div className="flex min-w-0 flex-1 flex-col px-3 py-4 sm:px-4">
                   <SSRLayout className="flex flex-col gap-2">{children}</SSRLayout>
                 </div>
               </SidebarInset>

@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import Card from "@/components/card";
+import Avatar from "@/components/avatar";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
-import PlayerScoreHeader from "@/components/score/player-score-header";
+import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
@@ -83,7 +83,7 @@ function FeedConnectionStatus({ readyState }: { readyState: ReadyState }) {
 function FeedEmptyState({ variant }: { variant: EmptyVariant }) {
   if (variant === "connecting") {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-(--spacing-2xl)">
+      <div className="flex flex-col items-center justify-center gap-3 py-12">
         <Spinner />
         <p className="text-muted-foreground text-sm">{EMPTY_COPY[variant]}</p>
       </div>
@@ -91,13 +91,13 @@ function FeedEmptyState({ variant }: { variant: EmptyVariant }) {
   }
 
   return (
-    <p className="text-muted-foreground py-(--spacing-2xl) text-center text-sm">{EMPTY_COPY[variant]}</p>
+    <p className="text-muted-foreground py-12 text-center text-sm">{EMPTY_COPY[variant]}</p>
   );
 }
 
 function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
   return (
-    <div className="flex flex-col gap-(--spacing-sm)">
+    <div className="flex flex-col gap-4">
       {scores.map(scoreToken => {
         if (!scoreToken.leaderboard || !scoreToken.score) {
           return null;
@@ -108,26 +108,35 @@ function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
         const leaderboard = scoreToken.leaderboard;
 
         return (
-          <div key={score.scoreId} className="flex flex-col">
-            <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
-              <PlayerScoreHeader player={player!} />
-              <div className="flex items-center gap-2">
+          <div key={score.scoreId} className="rounded-xl ring-1 ring-border bg-card overflow-hidden">
+            <div className="flex items-center gap-2 border-b border-border/50 px-4 py-2">
+              <Avatar
+                src={player?.avatar ?? ""}
+                alt={`${player?.name ?? "Unknown"}'s Profile Picture`}
+                size={20}
+                className="shrink-0"
+              />
+              <SimpleLink
+                href={`/player/${player?.id}`}
+                className="text-sm font-medium hover:text-primary transition-colors"
+              >
+                {player?.name ?? "Unknown"}
+              </SimpleLink>
+              <div className="flex items-center gap-2 ml-auto">
                 <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd)} />
-                <span className="text-muted-foreground text-xs">
-                  {score.hmd ? `on ${score.hmd}` : "Unknown device"}
+                <span className="text-xs text-muted-foreground">
+                  {score.hmd ?? "Unknown device"}
                 </span>
               </div>
             </div>
-            <Card className="rounded-xl rounded-tl-none p-0">
-              <ScoreSaberScoreDisplay
-                score={score}
-                leaderboard={leaderboard}
-                settings={{
-                  noScoreButtons: true,
-                  hideDetailsDropdown: true,
-                }}
-              />
-            </Card>
+            <ScoreSaberScoreDisplay
+              score={score}
+              leaderboard={leaderboard}
+              settings={{
+                noScoreButtons: true,
+                hideDetailsDropdown: true,
+              }}
+            />
           </div>
         );
       })}
@@ -180,11 +189,11 @@ export default function ScoreFeed() {
   const phase = getFeedPhase(readyState, scores);
 
   return (
-    <Card className="flex h-fit w-full flex-col 2xl:w-[75%]">
-      <div className="mb-(--spacing-lg) flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex w-full flex-col gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold">Live Score Feed</h1>
-          <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+          <h1 className="text-2xl font-bold tracking-tight">Live Score Feed</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
             New scores from ScoreSaber appear here as they are submitted. The list keeps the{" "}
             {LIVE_FEED_MAX_ITEMS} most recent plays.
           </p>
@@ -192,6 +201,6 @@ export default function ScoreFeed() {
         <FeedConnectionStatus readyState={readyState} />
       </div>
       <FeedBody phase={phase} />
-    </Card>
+    </div>
   );
 }

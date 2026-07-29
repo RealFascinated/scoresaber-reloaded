@@ -12,12 +12,7 @@ export function MedalsRanking({
   return (
     <SimpleLink href={`/player/${player.id}`} className="flex items-center gap-2.5">
       <PlayerAvatar profilePicture={player.avatar} name={player.name} />
-      <div className="flex flex-col">
-        <span className="text-sm font-medium leading-tight">{player.name}</span>
-        {player.country && (
-          <span className="text-xs text-muted-foreground">{player.country}</span>
-        )}
-      </div>
+      <span className="text-sm font-medium leading-tight">{player.name}</span>
     </SimpleLink>
   );
 }

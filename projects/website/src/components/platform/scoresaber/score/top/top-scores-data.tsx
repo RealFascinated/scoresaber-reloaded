@@ -1,7 +1,7 @@
 "use client";
 
-import Card from "@/components/card";
-import PlayerScoreHeader from "@/components/score/player-score-header";
+import Avatar from "@/components/avatar";
+import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -24,45 +24,59 @@ export function TopScoresData() {
   });
 
   return (
-    <Card className="flex h-fit w-full flex-col 2xl:w-[75%]">
-      {/* Header Section */}
-      <div className="mb-(--spacing-lg)">
-        <h1 className="text-2xl font-semibold">Top ScoreSaber Scores</h1>
-        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+    <div className="flex w-full flex-col gap-4">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Top ScoreSaber Scores</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
           Discover the highest scores tracked across ScoreSaber
         </p>
       </div>
 
       {isLoading || !scores ? (
-        <div className="flex items-center justify-center py-(--spacing-2xl)">
+        <div className="flex items-center justify-center py-12">
           <Spinner />
         </div>
       ) : (
-        <div className="flex flex-col gap-(--spacing-sm)">
-          {/* Scores */}
+        <div className="flex flex-col gap-4">
           {scores.items.map(({ score, leaderboard, beatSaver }) => {
             const player = score.playerInfo;
+            if (!player) return null;
 
             return (
-              <div key={score.scoreId} className="flex flex-col">
-                <PlayerScoreHeader player={player!} />
-
-                <Card className="rounded-xl rounded-tl-none p-0">
-                  <ScoreSaberScoreDisplay
-                    key={score.scoreId}
-                    score={score}
-                    leaderboard={leaderboard}
-                    beatSaverMap={beatSaver}
-                    settings={{
-                      hideAccuracyChanger: true,
-                    }}
+              <div key={score.scoreId} className="rounded-xl ring-1 ring-border bg-card overflow-hidden">
+                <div className="flex items-center gap-2 border-b border-border/50 px-4 py-2">
+                  <Avatar
+                    src={player.avatar}
+                    alt={`${player.name}'s Profile Picture`}
+                    size={20}
+                    className="shrink-0"
                   />
-                </Card>
+                  <SimpleLink
+                    href={`/player/${player.id}`}
+                    className="text-sm font-medium hover:text-primary transition-colors"
+                  >
+                    {player.name}
+                  </SimpleLink>
+                  {score.rank > 0 && (
+                    <span className="text-xs text-muted-foreground ml-auto">
+                      #{score.rank.toLocaleString()}
+                    </span>
+                  )}
+                </div>
+                <ScoreSaberScoreDisplay
+                  score={score}
+                  leaderboard={leaderboard}
+                  beatSaverMap={beatSaver}
+                  settings={{
+                    hideAccuracyChanger: true,
+                    noScoreButtons: true,
+                    hideDetailsDropdown: true,
+                  }}
+                />
               </div>
             );
           })}
 
-          {/* Pagination */}
           <SimplePagination
             page={page}
             totalItems={scores.metadata.totalItems}
@@ -72,6 +86,6 @@ export function TopScoresData() {
           />
         </div>
       )}
-    </Card>
+    </div>
   );
 }

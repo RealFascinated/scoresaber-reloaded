@@ -96,7 +96,8 @@ const socialLinks: SocialLinkType[] = [
 const navItems = [
   { id: "ranking", name: "Ranking", icon: SharedIcons.RankingNavIcon, href: "/ranking" },
   { id: "medals", name: "Medals", icon: SharedIcons.MedalsNavIcon, href: "/medals" },
-  { id: "maps", name: "Maps", icon: SharedIcons.MapsNavIcon, href: "/maps/leaderboards" },
+  { id: "maps", name: "Leaderboards", icon: SharedIcons.MapsLeaderboardsTabIcon, href: "/maps/leaderboards" },
+  { id: "ranking-queue", name: "Ranking Queue", icon: SharedIcons.MapsRankingQueueTabIcon, href: "/maps/ranking-queue" },
   { id: "overlay", name: "Overlay", icon: SharedIcons.OverlayNavIcon, href: "/overlay/builder" },
   { id: "top-scores", name: "Top Scores", icon: SharedIcons.TopScoresNavIcon, href: "/scores/top" },
   { id: "score-feed", name: "Score Feed", icon: SharedIcons.GlobalScoresModeIcon, href: "/scores/live" },
