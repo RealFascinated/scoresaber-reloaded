@@ -1,4 +1,5 @@
 import OverlayBuilder from "@/components/overlay/overlay-builder";
+import { PageTitle } from "@/components/page-title";
 import { env } from "@ssr/common/env";
 import { Metadata } from "next";
 
@@ -13,8 +14,9 @@ export const metadata: Metadata = {
 
 export default async function OverlayPage() {
   return (
-    <section className="flex w-full justify-center">
+    <div className="flex w-full flex-col gap-4">
+      <PageTitle title="Overlay Builder" description="Create an overlay for your stream!" />
       <OverlayBuilder />
-    </section>
+    </div>
   );
 }

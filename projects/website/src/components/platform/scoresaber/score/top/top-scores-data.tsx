@@ -2,6 +2,7 @@
 
 import Avatar from "@/components/avatar";
 import SimpleLink from "@/components/simple-link";
+import { PageTitle } from "@/components/page-title";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -25,12 +26,7 @@ export function TopScoresData() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Top ScoreSaber Scores</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Discover the highest scores tracked across ScoreSaber
-        </p>
-      </div>
+      <PageTitle title="Top Scores" description="Discover the highest scores tracked across ScoreSaber" />
 
       {isLoading || !scores ? (
         <div className="flex items-center justify-center py-12">
@@ -69,7 +65,6 @@ export function TopScoresData() {
                   beatSaverMap={beatSaver}
                   settings={{
                     hideAccuracyChanger: true,
-                    noScoreButtons: true,
                     hideDetailsDropdown: true,
                   }}
                 />

@@ -2,6 +2,10 @@
 @plugin "tailwindcss-animate";
 @import "./themes.css";
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);

@@ -4,6 +4,7 @@ import CountryFlag from "@/components/ui/country-flag";
 import CountrySelector from "@/components/country-selector";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
+import { PageTitle } from "@/components/page-title";
 import { useRouter } from "next/navigation";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { cn } from "@/common/utils";
@@ -50,12 +51,9 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <SharedIcons.GlobalPlayersRankingIcon className="size-6 text-primary" />
-        <h1 className="text-2xl font-bold tracking-tight">Medal Ranking</h1>
-      </div>
+      <PageTitle title="Medals" description="Track medal rankings and compare players by medal count" />
 
-      <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-6">
+      <div className="flex w-full flex-col gap-4 md:flex-row md:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           {!rankingData && !isError && (
             <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
@@ -127,7 +125,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
           )}
         </div>
 
-        <div className="flex w-full flex-col gap-4 lg:w-96 shrink-0">
+        <div className="flex w-full flex-col gap-4 md:w-96 shrink-0">
           <FilterSection
             title="Filters"
             description="Filter players by country"

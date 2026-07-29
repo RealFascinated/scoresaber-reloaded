@@ -1,8 +1,6 @@
 import Card from "@/components/card";
 import PlaylistDownloadButton from "@/components/maps/playlist/playlist-download-button";
-import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
-import { ElementType } from "react";
 import { Button } from "../../ui/button";
 import CustomPlaylistCreator from "./custom-playlist-creator";
 
@@ -16,33 +14,24 @@ type Playlist = {
    * The id of the playlist
    */
   id: string;
-
-  /**
-   * The icon of the playlist
-   */
-  icon: ElementType;
 };
 
 const playlists: Playlist[] = [
   {
     name: "Ranked Maps",
     id: "scoresaber-ranked-maps",
-    icon: SharedIcons.RankedMapsPlaylistIcon,
   },
   {
     name: "Qualified Maps",
     id: "scoresaber-qualified-maps",
-    icon: SharedIcons.QualifiedMapsPlaylistIcon,
   },
   {
     name: "Ranking Queue",
     id: "scoresaber-ranking-queue-maps",
-    icon: SharedIcons.RankingQueuePlaylistIcon,
   },
   {
     name: "Trending",
     id: "scoresaber-trending",
-    icon: SharedIcons.TrendingMapsPlaylistIcon,
   },
 ];
 
@@ -60,13 +49,11 @@ export default function Playlists() {
             key={playlist.id}
             name={playlist.name}
             url={`${env.NEXT_PUBLIC_API_URL}/playlist/${playlist.id}.bplist`}
-            icon={playlist.icon}
           />
         ))}
         <CustomPlaylistCreator
           trigger={
-            <Button className="flex items-center gap-2">
-              <SharedIcons.CustomPlaylistIcon size={16} className="shrink-0" aria-hidden />
+            <Button className="flex items-center">
               Custom Playlist
             </Button>
           }

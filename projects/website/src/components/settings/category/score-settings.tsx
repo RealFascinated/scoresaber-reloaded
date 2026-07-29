@@ -48,7 +48,7 @@ const ScoreSettings = () => {
 
   // Sync form with database settings
   const { isLoading } = useSettingsForm(form, {
-    replayViewer: () => database.getReplayViewer().then(viewer => viewer.id),
+    replayViewer: () => database.getReplayViewer().then(viewer => viewer?.id ?? ""),
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {

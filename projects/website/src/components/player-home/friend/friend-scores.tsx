@@ -1,12 +1,12 @@
 "use client";
 
-import PlayerScoreHeader from "@/components/score/player-score-header";
+import Avatar from "@/components/avatar";
+import SimpleLink from "@/components/simple-link";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import Card from "../../card";
 import ScoreSaberScoreDisplay from "../../platform/scoresaber/score/scoresaber-score";
 import SimplePagination from "../../simple-pagination";
 import { Spinner } from "../../spinner";
@@ -33,47 +33,57 @@ export function FriendScores() {
   });
 
   return (
-    <Card className="flex h-fit flex-col">
-      <div className="mb-(--spacing-lg)">
+    <div className="rounded-xl ring-1 ring-border bg-card p-5">
+      <div className="mb-4">
         <h2 className="text-lg font-semibold">Friend Scores</h2>
-        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
+        <p className="text-muted-foreground mt-1 text-sm">
           See the recent scores of your friends.
         </p>
       </div>
 
-      {/* Loading */}
       {isLoading && !scoreData && (
-        <div className="flex w-full justify-center py-(--spacing-2xl)">
+        <div className="flex w-full justify-center py-12">
           <Spinner size="md" className="text-primary" />
         </div>
       )}
 
-      {/* Scores */}
       {scoreData && (
-        <div className="flex flex-col gap-(--spacing-lg)">
-          <div className="flex flex-col gap-(--spacing-md)">
-            {scoreData.items.map(playerScore => {
-              const score = playerScore.score;
-              const leaderboard = playerScore.leaderboard;
-              const beatSaverMap = playerScore.beatSaver;
-              return (
-                <div key={score.scoreId} className="flex flex-col">
-                  <PlayerScoreHeader player={playerScore.score.playerInfo!} />
-                  <Card className="rounded-xl rounded-tl-none p-0">
-                    <ScoreSaberScoreDisplay
-                      key={score.scoreId}
-                      score={score}
-                      leaderboard={leaderboard}
-                      beatSaverMap={beatSaverMap}
-                      settings={{
-                        hideAccuracyChanger: true,
-                      }}
-                    />
-                  </Card>
+        <div className="flex flex-col gap-4">
+          {scoreData.items.map(playerScore => {
+            const score = playerScore.score;
+            const leaderboard = playerScore.leaderboard;
+            const beatSaverMap = playerScore.beatSaver;
+            const player = score.playerInfo;
+            if (!player) return null;
+
+            return (
+              <div key={score.scoreId} className="rounded-xl ring-1 ring-border bg-card overflow-hidden">
+                <div className="flex items-center gap-2 border-b border-border/50 px-4 py-2">
+                  <Avatar
+                    src={player.avatar}
+                    alt={`${player.name}'s Profile Picture`}
+                    size={20}
+                    className="shrink-0"
+                  />
+                  <SimpleLink
+                    href={`/player/${player.id}`}
+                    className="text-sm font-medium hover:text-primary transition-colors"
+                  >
+                    {player.name}
+                  </SimpleLink>
                 </div>
-              );
-            })}
-          </div>
+                <ScoreSaberScoreDisplay
+                  key={score.scoreId}
+                  score={score}
+                  leaderboard={leaderboard}
+                  beatSaverMap={beatSaverMap}
+                  settings={{
+                    hideAccuracyChanger: true,
+                  }}
+                />
+              </div>
+            );
+          })}
 
           <SimplePagination
             page={page}
@@ -84,6 +94,6 @@ export function FriendScores() {
           />
         </div>
       )}
-    </Card>
+    </div>
   );
 }

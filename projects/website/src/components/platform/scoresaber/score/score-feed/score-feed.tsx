@@ -5,6 +5,7 @@ import Avatar from "@/components/avatar";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
 import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
+import { PageTitle } from "@/components/page-title";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import { getHMDInfo } from "@ssr/common/hmds";
@@ -190,14 +191,8 @@ export default function ScoreFeed() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-bold tracking-tight">Live Score Feed</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            New scores from ScoreSaber appear here as they are submitted. The list keeps the{" "}
-            {LIVE_FEED_MAX_ITEMS} most recent plays.
-          </p>
-        </div>
+      <div className="flex items-start justify-between gap-3">
+        <PageTitle title="Live Scores" description={<>New scores from ScoreSaber appear here as they are submitted. The list keeps the {LIVE_FEED_MAX_ITEMS} most recent plays.</>} />
         <FeedConnectionStatus readyState={readyState} />
       </div>
       <FeedBody phase={phase} />

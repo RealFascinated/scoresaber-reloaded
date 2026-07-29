@@ -10,6 +10,7 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { SharedIcons } from "@/shared-icons";
 import { ElementType, ReactNode } from "react";
+import { PageTitle } from "@/components/page-title";
 import Card from "../card";
 
 type Category = {
@@ -51,11 +52,13 @@ export function MapsData({ type }: MapsDataProps) {
 
   return (
     <MapFilterProvider>
-      <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-6">
+      <div className="flex w-full flex-col gap-4">
+        <PageTitle title={selectedCategory.name} description="Browse ScoreSaber leaderboards and ranking queue requests" />
+        <div className="flex w-full flex-col gap-4 md:flex-row md:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           {selectedCategory.render()}
         </div>
-        <div className="flex w-full flex-col gap-4 lg:w-96 shrink-0">
+        <div className="flex w-full flex-col gap-4 md:w-96 shrink-0">
           {selectedCategory.showFilter && <MapFilters />}
           {selectedCategory.id === "ranking-queue" && (
             <Card>
@@ -72,6 +75,7 @@ export function MapsData({ type }: MapsDataProps) {
           <Playlists />
         </div>
       </div>
+    </div>
     </MapFilterProvider>
   );
 }

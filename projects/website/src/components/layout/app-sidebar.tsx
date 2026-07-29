@@ -20,7 +20,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
 } from "@/components/ui/sidebar";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -100,7 +99,7 @@ const navItems = [
   { id: "ranking-queue", name: "Ranking Queue", icon: SharedIcons.MapsRankingQueueTabIcon, href: "/maps/ranking-queue" },
   { id: "overlay", name: "Overlay", icon: SharedIcons.OverlayNavIcon, href: "/overlay/builder" },
   { id: "top-scores", name: "Top Scores", icon: SharedIcons.TopScoresNavIcon, href: "/scores/top" },
-  { id: "score-feed", name: "Score Feed", icon: SharedIcons.GlobalScoresModeIcon, href: "/scores/live" },
+  { id: "score-feed", name: "Live Scores", icon: SharedIcons.GlobalScoresModeIcon, href: "/scores/live" },
   { id: "settings", name: "Settings", icon: SharedIcons.SettingsNavIcon, href: "/settings" },
 ];
 
@@ -212,7 +211,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <SimpleLink href="/" draggable={false}>
+              <SimpleLink href="/home" draggable={false}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Image
                     width={32}
@@ -305,8 +304,6 @@ export function AppSidebar() {
           ))}
         </div>
       </SidebarFooter>
-
-      <SidebarRail />
     </Sidebar>
   );
 }

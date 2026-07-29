@@ -1,7 +1,6 @@
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { type SIDE_OPTIONS } from "@radix-ui/react-popper";
-import { clsx } from "clsx";
-import React from "react";
-import { Tooltip } from "./ui/tooltip-custom";
+import { ReactNode } from "react";
 
 export default function SimpleTooltip({
   children,
@@ -9,25 +8,23 @@ export default function SimpleTooltip({
   side,
   className,
   showOnMobile,
-  closeDelayDuration,
 }: {
   children: React.ReactNode;
-  display: React.ReactNode | string;
+  display: ReactNode | string;
   side?: (typeof SIDE_OPTIONS)[number];
   className?: string;
   showOnMobile?: boolean;
-  closeDelayDuration?: number;
 }) {
   return (
-    <Tooltip
-      content={typeof display === "string" ? <p className="max-w-[400px] text-wrap">{display}</p> : display}
-      side={side}
-      showOnMobile={showOnMobile}
-      closeDelayDuration={closeDelayDuration}
-    >
-      <div className={clsx("flex w-full cursor-default items-center justify-center", className)}>
-        {children}
-      </div>
-    </Tooltip>
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          <div className={className}>{children}</div>
+        </TooltipTrigger>
+        <TooltipContent side={side} className="max-w-xs">
+          {typeof display === "string" ? <p>{display}</p> : display}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }

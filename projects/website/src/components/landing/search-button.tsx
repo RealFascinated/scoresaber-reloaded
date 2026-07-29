@@ -10,12 +10,15 @@ export function SearchButton() {
   return (
     <Button
       onClick={openSearch}
-      size="lg"
-      className="from-primary to-accent-secondary group relative h-12 overflow-hidden rounded-xl bg-linear-to-r px-8 text-white shadow-lg transition-all duration-300 hover:shadow-xl"
+      className="ring-border bg-card hover:bg-accent flex h-12 w-full max-w-sm items-center justify-between gap-3 rounded-xl px-4 text-left ring-1 transition-colors"
     >
-      <div className="absolute inset-0 bg-linear-to-r from-black/10 to-black/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <SharedIcons.SearchIcon className="relative z-10 mr-2 h-5 w-5" />
-      <span className="relative z-10 font-semibold">Find Players</span>
+      <div className="flex items-center gap-3">
+        <SharedIcons.SearchIcon className="text-muted-foreground h-4 w-4" />
+        <span className="text-muted-foreground text-sm">Search players...</span>
+      </div>
+      <kbd className="bg-muted text-muted-foreground hidden rounded-md border px-1.5 py-0.5 text-xs font-medium sm:inline-block">
+        Ctrl+K
+      </kbd>
     </Button>
   );
 }

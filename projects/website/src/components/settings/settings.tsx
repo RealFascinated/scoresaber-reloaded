@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/common/utils";
+import { PageTitle } from "@/components/page-title";
 import ScoreSettings from "@/components/settings/category/score-settings";
 import WebsiteSettings from "@/components/settings/category/website-settings";
 import { SharedIcons, type SharedDecorativeIcon } from "@/shared-icons";
@@ -69,16 +70,13 @@ export default function Settings() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Manage your account and preferences</p>
-      </div>
+      <PageTitle title="Settings" description="Manage your account and preferences" />
 
-      <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[16rem_1fr] gap-4 lg:gap-6">
         {/* Category navigation */}
-        <nav className="w-full lg:w-56 shrink-0" aria-label="Settings categories">
-          <div className="rounded-xl ring-1 ring-border bg-card overflow-hidden">
-            {categories.map((category, index) => {
+        <nav className="rounded-xl ring-1 ring-border bg-card p-3 h-fit lg:sticky lg:top-4" aria-label="Settings categories">
+          <div className="flex flex-col gap-1">
+            {categories.map(category => {
               const isActive = selectedCategory.slug === category.slug;
               return (
                 <button
@@ -86,21 +84,15 @@ export default function Settings() {
                   type="button"
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left text-sm transition-colors",
-                    index < categories.length - 1 && "border-b border-border/50",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors w-full cursor-pointer text-left",
                     isActive
-                      ? "bg-muted/20 text-foreground font-medium"
-                      : "text-muted-foreground hover:bg-muted/10 hover:text-foreground"
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                   )}
                   onClick={() => setCategory(category)}
                 >
-                  <category.icon className="size-4 shrink-0 opacity-70" aria-hidden />
-                  <span className="flex min-w-0 flex-col">
-                    <span>{category.name}</span>
-                    <span className="text-xs text-muted-foreground/70 font-normal">
-                      {category.description}
-                    </span>
-                  </span>
+                  <category.icon className="size-4 shrink-0" aria-hidden />
+                  <span>{category.name}</span>
                 </button>
               );
             })}

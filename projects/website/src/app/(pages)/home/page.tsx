@@ -4,14 +4,16 @@ import { Player } from "@/components/player-home/player";
 
 export default function HomePage() {
   return (
-    <section className="flex w-full flex-col gap-(--spacing-xl) 2xl:flex-row">
-      <article className="flex w-full flex-col gap-(--spacing-xl) 2xl:w-[500px]">
-        <Player />
-        <FriendRanking />
-      </article>
-      <article className="flex-1">
-        <FriendScores />
-      </article>
-    </section>
+    <div className="flex w-full flex-col gap-4">
+      <Player />
+      <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-6">
+        <div className="flex w-full lg:w-[32rem] shrink-0 flex-col gap-4">
+          <FriendRanking />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          <FriendScores />
+        </div>
+      </div>
+    </div>
   );
 }

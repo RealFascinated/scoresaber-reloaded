@@ -1,5 +1,4 @@
 import { ApiHealth } from "@/components/api/api-health";
-import BackgroundCover from "@/components/background-cover";
 import { SnowBackground } from "@/components/effects/snow-background";
 import DatabaseLoader from "@/components/loaders/database-loader";
 import MeowMeow from "@/components/meow-meow";
@@ -24,17 +23,16 @@ export default function Layout({ children }: { children: ReactNode }) {
       <DatabaseLoader>
         <NuqsAdapter>
           <MeowMeow />
-          <BackgroundCover />
           <SnowBackground />
           <ApiHealth />
           <SidebarProvider defaultOpen={true}>
             <SearchProvider>
               <AppSidebar />
               <SidebarInset className="text-white">
-                <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/80 px-4">
+                <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/80 bg-background px-4">
                   <SidebarTrigger className="-ml-1" />
                 </header>
-                <div className="flex min-w-0 flex-1 flex-col px-3 py-4 sm:px-4">
+                <div className="flex min-w-0 flex-1 flex-col px-3 py-4 sm:px-4 gap-4">
                   <SSRLayout className="flex flex-col gap-2">{children}</SSRLayout>
                 </div>
               </SidebarInset>

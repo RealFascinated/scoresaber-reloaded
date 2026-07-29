@@ -4,7 +4,6 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import Card from "../card";
 import PlayerPreviewHeader from "../player/header/player-preview-header";
 import { Spinner } from "../spinner";
 
@@ -19,13 +18,13 @@ export function Player() {
   });
 
   return (
-    <Card className="flex min-h-[180px] justify-center">
+    <div>
       {isLoading && (
-        <div className="flex h-full items-center justify-center py-(--spacing-2xl)">
+        <div className="flex h-full items-center justify-center py-12">
           <Spinner />
         </div>
       )}
       {player && <PlayerPreviewHeader player={player} />}
-    </Card>
+    </div>
   );
 }

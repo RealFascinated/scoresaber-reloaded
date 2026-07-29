@@ -173,23 +173,12 @@ export default function OverlayBuilder() {
   }
 
   return (
-    <Card className="flex h-fit w-full flex-col 2xl:w-[75%]">
-      {/* Header Section */}
-      <div className="mb-(--spacing-lg)">
-        <h1 className="text-2xl font-semibold">Overlay Builder</h1>
-        <p className="text-muted-foreground mt-(--spacing-xs) text-sm">
-          Configure your streaming overlay settings
-        </p>
-      </div>
-
+    <Card className="flex h-fit w-full flex-col gap-4 2xl:w-[75%]">
       {/* Streamer Warning */}
-      <div className="mb-(--spacing-lg)">
-        <Notice>You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.</Notice>
-      </div>
+      <Notice>You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.</Notice>
 
-      {/* Unknown Account ID Notice */}
-      <p className="text-muted-foreground mb-(--spacing-lg) text-sm">
-        If you don&#39;t know your player id, you can link your account and it will be automatically filled
+      <p className="text-muted-foreground text-sm">
+        If you don&apos;t know your player id, you can link your account and it will be automatically filled
         in.
       </p>
 
@@ -310,8 +299,8 @@ export default function OverlayBuilder() {
           </div>
 
           {/* Action Buttons */}
-          <div className="border-border flex flex-row gap-(--spacing-sm) border-t pt-(--spacing-xl)">
-            <Button type="submit" className="flex-1">
+          <div className="border-t border-border pt-4">
+            <Button type="submit" className="w-full">
               Open Overlay
             </Button>
           </div>

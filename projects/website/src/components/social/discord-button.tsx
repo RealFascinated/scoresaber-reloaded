@@ -6,11 +6,12 @@ export function DiscordButton() {
   return (
     <SimpleLink href="https://discord.gg/kmNfWGA4A8" target="_blank">
       <Button
-        variant="ghost"
-        className="border-border gap-2 bg-[#5865F2]/65 text-white hover:border-[#5865F2]/80"
+        variant="outline"
+        size="lg"
+        className="rounded-xl px-6 font-semibold gap-2"
       >
-        <Image className="size-6" src="/assets/logos/discord.svg" alt="Discord Logo" width={24} height={24} />
-        <span>Join our Discord</span>
+        <Image className="size-4" src="/assets/logos/discord.svg" alt="" width={16} height={16} />
+        Join Discord
       </Button>
     </SimpleLink>
   );

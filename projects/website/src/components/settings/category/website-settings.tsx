@@ -1,14 +1,9 @@
 "use client";
 
 import { SettingIds, WebsiteLanding } from "@/common/database/database";
-import { BACKGROUND_COVERS } from "@/components/background-cover";
-import { Form, FormDescription, FormLabel } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useBackgroundCover } from "@/hooks/use-background-cover";
-import useDatabase from "@/hooks/use-database";
+import { Form } from "@/components/ui/form";
 import { useSettingsForm } from "@/hooks/use-settings-form";
+import useDatabase from "@/hooks/use-database";
 import { SharedIcons, type SharedDecorativeIcon } from "@/shared-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ssrConfig } from "config";
@@ -20,9 +15,6 @@ import { SettingsCategorySkeleton } from "../settings-category-skeleton";
 import { getMonotonicTimeMs, showSettingsSavedToast } from "../settings-feedback";
 
 const formSchema = z.object({
-  backgroundCover: z.string().min(0).max(128),
-  backgroundCoverBrightness: z.number().min(0).max(100),
-  backgroundCoverBlur: z.number().min(0).max(100),
   snowParticles: z.boolean(),
   showKitty: z.boolean(),
   websiteLanding: z.nativeEnum(WebsiteLanding),
@@ -31,105 +23,12 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const BackgroundCoverControl = (props: {
-  field: {
-    value: string | number | boolean;
-    onChange: (value: string | number | boolean) => void;
-    name?: string;
-  };
-}) => {
-  const { selectedOption, customValue, handleSelectChange, handleCustomInputChange } = useBackgroundCover(
-    props.field.onChange
-  );
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="w-full min-w-0">
-        <FormLabel className="text-foreground text-[15px] leading-snug font-medium">
-          Background Cover
-        </FormLabel>
-        <FormDescription className="text-muted-foreground mt-1 text-[13px] leading-snug">
-          Change the background cover of the website
-        </FormDescription>
-        {selectedOption === "custom" && (
-          <Input
-            placeholder="Hex color or image URL"
-            value={customValue}
-            onChange={e => handleCustomInputChange(e.target.value)}
-            className="mt-2 h-8 w-full max-w-xl text-xs"
-          />
-        )}
-      </div>
-      <div className="w-full min-w-0">
-        <RadioGroup
-          value={selectedOption}
-          onValueChange={handleSelectChange}
-          className="flex max-h-[min(320px,50vh)] flex-col gap-2 overflow-y-auto pr-1"
-        >
-          {Object.values(BACKGROUND_COVERS).map(cover => {
-            const id = `background-cover-${cover.id}`;
-            return (
-              <div key={cover.id} className="flex items-center gap-2.5">
-                <RadioGroupItem value={cover.id} id={id} />
-                <Label htmlFor={id} className="cursor-pointer text-[15px] leading-snug font-normal">
-                  {cover.name}
-                </Label>
-              </div>
-            );
-          })}
-          <div className="flex items-center gap-2.5">
-            <RadioGroupItem value="custom" id="background-cover-custom" />
-            <Label
-              htmlFor="background-cover-custom"
-              className="cursor-pointer text-[15px] leading-snug font-normal"
-            >
-              Custom
-            </Label>
-          </div>
-        </RadioGroup>
-      </div>
-    </div>
-  );
-};
-
 const settings: {
   id: string;
   title: string;
   icon: SharedDecorativeIcon;
   fields: Field<FormValues, keyof FormValues>[];
 }[] = [
-  {
-    id: "background",
-    title: "Background",
-    icon: SharedIcons.WebsiteCoverImageSettingsIcon,
-    fields: [
-      {
-        name: "backgroundCover" as Path<FormValues>,
-        label: "",
-        type: "select" as const,
-        customControl: BackgroundCoverControl,
-      },
-      {
-        name: "backgroundCoverBrightness" as Path<FormValues>,
-        label: "Background Cover Brightness",
-        type: "slider" as const,
-        description: "Adjust the brightness of the background cover",
-        min: 20,
-        max: 100,
-        step: 1,
-      },
-      {
-        name: "backgroundCoverBlur" as Path<FormValues>,
-        label: "Background Cover Blur",
-        type: "slider" as const,
-        description: "Adjust the blur of the background cover",
-        min: 0,
-        max: 10,
-        step: 1,
-        labelFormatter: (value: number | undefined) => `${value}px`,
-      },
-    ],
-  },
   {
     id: "effects",
     title: "Visual Effects",
@@ -190,9 +89,6 @@ const WebsiteSettings = () => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema, { reportInput: true }),
     defaultValues: {
-      backgroundCover: "",
-      backgroundCoverBrightness: 50,
-      backgroundCoverBlur: 6,
       snowParticles: false,
       showKitty: false,
       websiteLanding: WebsiteLanding.PLAYER_HOME,
@@ -200,26 +96,16 @@ const WebsiteSettings = () => {
     },
   });
 
-  // Sync form with database settings
-  const { isLoading } = useSettingsForm(
-    form,
-    {
-      backgroundCover: () => database.getBackgroundCover(),
-      backgroundCoverBrightness: () => database.getBackgroundCoverBrightness(),
-      backgroundCoverBlur: () => database.getBackgroundCoverBlur(),
-      snowParticles: () => database.getSnowParticles(),
-      showKitty: () => database.getShowKitty(),
-      websiteLanding: () => database.getWebsiteLanding(),
-      theme: () => theme,
-    },
-    ["backgroundCover"] // Exclude backgroundCover - let BackgroundCoverControl handle it
-  );
+  const { isLoading } = useSettingsForm(form, {
+    snowParticles: () => database.getSnowParticles(),
+    showKitty: () => database.getShowKitty(),
+    websiteLanding: () => database.getWebsiteLanding(),
+    theme: () => theme,
+  });
 
   async function onSubmit(values: FormValues) {
     const before = getMonotonicTimeMs();
     await Promise.all([
-      database.setBackgroundCoverBrightness(values.backgroundCoverBrightness),
-      database.setBackgroundCoverBlur(values.backgroundCoverBlur),
       database.setSetting(SettingIds.SnowParticles, values.snowParticles),
       database.setSetting(SettingIds.ShowKitty, values.showKitty),
       database.setWebsiteLanding(values.websiteLanding),

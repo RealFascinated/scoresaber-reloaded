@@ -1,127 +1,106 @@
-import { SearchButton } from "@/components/landing/search-button";
+import { LandingBackground } from "@/components/landing/landing-background";
+import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import SimpleLink from "@/components/simple-link";
+import { DiscordButton } from "@/components/social/discord-button";
 import { Button } from "@/components/ui/button";
 import { SharedIcons } from "@/shared-icons";
 
 export default async function LandingPage() {
   return (
-    <div className="w-full">
-      {/* Hero Section */}
-      <section className="mx-auto max-w-6xl px-(--spacing-xl) py-(--spacing-3xl) md:px-(--spacing-2xl)">
-        <div className="text-center">
-          <div className="mb-(--spacing-2xl)">
-            <SimpleLink
-              href="https://github.com/RealFascinated/scoresaber-reloaded"
-              target="_blank"
-              className="border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center gap-(--spacing-sm) rounded-full border px-(--spacing-lg) py-(--spacing-sm) text-sm transition-all"
-            >
-              <SharedIcons.OpenSourceBadgeIcon className="h-4 w-4" />
-              <span>Open Source</span>
-              <SharedIcons.OpenSourceArrowIcon className="h-4 w-4" />
-            </SimpleLink>
-          </div>
-
-          <h1 className="from-primary to-accent-secondary animate-gradient-slow mb-(--spacing-xl) bg-linear-to-r bg-size-[200%_200%] bg-clip-text text-5xl font-bold text-transparent sm:text-6xl lg:text-7xl">
-            ScoreSaber Reloaded
-          </h1>
-
-          <p className="text-muted-foreground mx-auto mb-(--spacing-2xl) max-w-2xl text-lg">
-            The ultimate platform for Beat Saber players. Track your progress, compete with friends, and
-            discover detailed insights about your gameplay like never before. Integrates ScoreSaber, AccSaber,
-            and BeatLeader data in one place.
-          </p>
-
-          <div className="flex flex-col items-center gap-(--spacing-lg) sm:flex-row sm:justify-center">
-            <SearchButton />
-
-            <SimpleLink href="https://discord.gg/kmNfWGA4A8" target="_blank">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-primary/30 bg-primary/5 text-primary hover:border-primary/50 hover:bg-primary/10 group relative h-12 overflow-hidden rounded-xl border-2 px-(--spacing-2xl) backdrop-blur-xs transition-all duration-300"
-              >
-                <div className="from-primary/10 to-accent-secondary/10 absolute inset-0 bg-linear-to-r opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <span className="relative z-10 font-semibold">Join Discord</span>
-              </Button>
-            </SimpleLink>
-          </div>
+    <div className="flex w-full flex-col items-center">
+      <LandingBackground />
+      {/* Hero */}
+      <section className="flex w-full flex-col items-center px-6 py-20 text-center">
+        <h1 className="text-foreground mb-4 text-5xl font-bold tracking-tight sm:text-6xl">
+          ScoreSaber Reloaded
+        </h1>
+        <p className="text-muted-foreground mb-10 max-w-2xl text-balance text-lg leading-relaxed">
+          A modern companion for Beat Saber players. Track your stats, analyse your scores, and keep up with friends across ScoreSaber, BeatLeader, and AccSaber.
+        </p>
+        <div className="w-full max-w-sm">
+          <PlayerAndLeaderboardSearch />
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-(--spacing-3xl)">
-        <div className="mx-auto max-w-6xl px-(--spacing-xl) md:px-(--spacing-2xl)">
-          <div className="mb-(--spacing-3xl) text-center">
-            <h2 className="mb-(--spacing-lg) text-3xl font-bold sm:text-4xl">
-              Why Choose ScoreSaber Reloaded?
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Everything you need to elevate your Beat Saber experience
-            </p>
-          </div>
-
-          <div className="grid gap-(--spacing-lg) md:grid-cols-2 lg:grid-cols-3">
-            <FeatureCard
-              icon={<SharedIcons.ComprehensiveDataFeatureIcon className="h-6 w-6" />}
-              title="Comprehensive Data"
-              description="Access detailed statistics, accuracy breakdowns, and performance metrics that go beyond basic score tracking."
-            />
-
-            <FeatureCard
-              icon={<SharedIcons.FriendSystemFeatureIcon className="h-6 w-6" />}
-              title="Friend System"
-              description="Connect with friends, track their progress, and compete together in a social gaming experience."
-            />
-
-            <FeatureCard
-              icon={<SharedIcons.AdvancedAnalyticsFeatureIcon className="h-6 w-6" />}
-              title="Advanced Analytics"
-              description="Visualize your improvement with detailed charts, trends, and performance insights."
-            />
-
-            <FeatureCard
-              icon={<SharedIcons.GlobalLeaderboardsFeatureIcon className="h-6 w-6" />}
-              title="Global Leaderboards"
-              description="Compete on global and country leaderboards with real-time rankings and statistics."
-            />
-
-            <FeatureCard
-              icon={<SharedIcons.CustomOverlaysFeatureIcon className="h-6 w-6" />}
-              title="Custom Overlays"
-              description="Create beautiful, customizable overlays for your streams with real-time score and player data."
-            />
-
-            <FeatureCard
-              icon={<SharedIcons.CommunityDrivenFeatureIcon className="h-6 w-6" />}
-              title="Community Driven"
-              description="Built by players, for players. Open source and constantly improving based on community feedback."
-            />
-          </div>
-        </div>
-
-        {/* Buttom Padding */}
-        <div className="h-64" />
+      {/* Quick links */}
+      <section className="mx-auto grid w-full max-w-4xl grid-cols-2 gap-4 px-6 sm:grid-cols-4">
+        {[
+          { icon: SharedIcons.RankingNavIcon, label: "Rankings", href: "/ranking", desc: "Player leaderboards" },
+          { icon: SharedIcons.GlobalScoresModeIcon, label: "Live Scores", href: "/scores/live", desc: "Real-time feed" },
+          { icon: SharedIcons.TopScoresNavIcon, label: "Top Scores", href: "/scores/top", desc: "Highest PP plays" },
+          { icon: SharedIcons.MapsNavIcon, label: "Maps", href: "/maps/leaderboards", desc: "Browse leaderboards" },
+        ].map(({ icon: Icon, label, href, desc }) => (
+          <SimpleLink
+            key={label}
+            href={href}
+            className="ring-border bg-card hover:bg-accent flex flex-col gap-1 rounded-xl p-5 text-left ring-1 transition-colors"
+          >
+            <Icon className="text-muted-foreground mb-2 h-5 w-5" />
+            <span className="text-foreground font-semibold">{label}</span>
+            <span className="text-muted-foreground text-xs">{desc}</span>
+          </SimpleLink>
+        ))}
       </section>
-    </div>
-  );
-}
 
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="border-border bg-card relative overflow-hidden rounded-xl border p-4 transition-all hover:shadow-xl">
-      <div className="relative">
-        <div className="bg-primary/10 text-primary mb-3 inline-flex rounded-lg p-2">{icon}</div>
-        <h3 className="text-foreground mb-1 text-lg font-semibold">{title}</h3>
-        <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
-      </div>
+      {/* Features */}
+      <section className="mx-auto mt-16 grid w-full max-w-4xl gap-4 px-6 sm:grid-cols-2">
+        {[
+          {
+            icon: SharedIcons.FriendSystemFeatureIcon,
+            title: "Friend System",
+            desc: "Keep tabs on friends across multiple platforms in one unified list.",
+          },
+          {
+            icon: SharedIcons.AdvancedAnalyticsFeatureIcon,
+            title: "Advanced Analytics",
+            desc: "Charts, trends, and stat breakdowns to help you understand your play.",
+          },
+          {
+            icon: SharedIcons.CustomOverlaysFeatureIcon,
+            title: "Custom Overlays",
+            desc: "Build live overlays for your streams with real-time data.",
+          },
+          {
+            icon: SharedIcons.CommunityDrivenFeatureIcon,
+            title: "Open Source",
+            desc: "Community-built and open source. Contributions welcome on GitHub.",
+          },
+        ].map(({ icon: Icon, title, desc }) => (
+          <div
+            key={title}
+            className="ring-border bg-card flex items-start gap-4 rounded-xl p-5 ring-1"
+          >
+            <div className="bg-primary/10 mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+              <Icon className="text-primary h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-foreground mb-1 font-semibold">{title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Get started */}
+      <section className="mt-20 mb-20 flex flex-col items-center gap-6 px-6 text-center">
+        <h2 className="text-foreground text-3xl font-bold tracking-tight">Ready to dive in?</h2>
+        <p className="text-muted-foreground max-w-lg text-balance">
+          Search for a player, browse the rankings, or explore what maps are out there.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <SimpleLink href="/ranking">
+            <Button size="lg" className="rounded-xl px-6 font-semibold">
+              View Rankings
+            </Button>
+          </SimpleLink>
+          <SimpleLink href="/maps/leaderboards">
+            <Button variant="outline" size="lg" className="rounded-xl px-6 font-semibold">
+              Browse Maps
+            </Button>
+          </SimpleLink>
+          <DiscordButton />
+        </div>
+      </section>
     </div>
   );
 }

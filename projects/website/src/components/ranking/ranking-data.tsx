@@ -8,6 +8,7 @@ import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { useRouter } from "next/navigation";
+import { PageTitle } from "@/components/page-title";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { cn } from "@/common/utils";
@@ -38,7 +39,6 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   const database = useDatabase();
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
 
-  const [showRelativePPDifference, setShowRelativePPDifference] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [currentCountry, setCurrentCountry] = useState(initialCountry);
   const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
@@ -68,33 +68,9 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {currentCountry ? (
-            <CountryFlag code={currentCountry} size={20} />
-          ) : (
-            <SharedIcons.GlobalPlayersRankingIcon className="size-6 text-primary" />
-          )}
-          <h1 className="text-2xl font-bold tracking-tight">
-            {currentCountry
-              ? countryFilter.find(c => c.key === currentCountry)?.friendlyName
-              : "Global Players"}
-          </h1>
-        </div>
-        {mainPlayer !== undefined && (
-          <div className="flex items-center gap-2">
-            <SimpleTooltip display="The amount of pp between you and each player" showOnMobile>
-              <span className="text-sm text-muted-foreground">Relative PP</span>
-            </SimpleTooltip>
-            <Switch
-              checked={showRelativePPDifference}
-              onCheckedChange={checked => setShowRelativePPDifference(checked)}
-            />
-          </div>
-        )}
-      </div>
+      <PageTitle title="Ranking" description="View players ranked by performance points globally or by country" />
 
-      <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-6">
+      <div className="flex w-full flex-col gap-4 md:flex-row md:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
 
           {!rankingData && !isError && (
@@ -173,7 +149,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
           )}
         </div>
 
-        <div className="w-full lg:w-96 shrink-0">
+        <div className="w-full md:w-96 shrink-0">
           <FilterSection
             title="Filters"
             description="Filter players by country or search"

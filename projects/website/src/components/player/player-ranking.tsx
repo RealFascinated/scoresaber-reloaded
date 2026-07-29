@@ -28,7 +28,6 @@ export function ScoreSaberPlayerRanking<T extends ScoreSaberPlayer>({
   getRank = p => p.contextualRank ?? p.rank,
   getCountryRank = p => p.contextualCountryRank ?? p.countryRank,
   mainPlayer,
-  relativePerformancePoints,
   showAccountInactive = true,
 }: {
   player: T;
@@ -36,7 +35,6 @@ export function ScoreSaberPlayerRanking<T extends ScoreSaberPlayer>({
   getRank?: (player: T) => number;
   getCountryRank?: (player: T) => number;
   mainPlayer?: ScoreSaberPlayer;
-  relativePerformancePoints: boolean;
   showAccountInactive?: boolean;
 }) {
   return (
@@ -53,7 +51,6 @@ export function ScoreSaberPlayerRanking<T extends ScoreSaberPlayer>({
           pp={player.pp}
           mainPlayer={mainPlayer}
           className="ml-auto min-w-[70px]"
-          relativePerformancePoints={relativePerformancePoints}
         />
       }
     />

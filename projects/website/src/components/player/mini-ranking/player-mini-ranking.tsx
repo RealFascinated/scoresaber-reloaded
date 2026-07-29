@@ -42,7 +42,7 @@ export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlaye
   });
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <PlayerMiniRanking
         type="Global"
         player={player}
@@ -57,7 +57,7 @@ export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlaye
         isLoading={isLoading}
         isError={isError}
       />
-    </>
+    </div>
   );
 }
 
@@ -89,9 +89,9 @@ function PlayerMiniRanking({
   })();
 
   return (
-    <Card className="sticky flex w-full flex-col gap-(--spacing-md) p-(--spacing-md) text-xs select-none sm:w-[400px]">
+    <Card className="sticky flex w-full flex-col gap-2 p-3 text-xs select-none">
       {/* Header */}
-      <div className="flex h-[24px] items-center gap-2">
+      <div className="flex items-center gap-2">
         {icon}
         <p className="font-bold">{type} Ranking</p>
       </div>
@@ -107,7 +107,7 @@ function PlayerMiniRanking({
               <SimpleLink
                 key={playerRanking.id}
                 href={`/player/${playerRanking.id}`}
-                className="group hover:bg-accent/50 sm:px-(--spacing-sm grid cursor-pointer items-center gap-(--spacing-md) px-(--spacing-sm) py-(--spacing-xs) transition-colors duration-200 first:rounded-t-md last:rounded-b-md"
+                className="group hover:bg-accent/50 grid cursor-pointer items-center gap-2 px-2 py-1.5 transition-colors duration-200 first:rounded-t-md last:rounded-b-md"
                 style={{
                   gridTemplateColumns: isMobile
                     ? `${playerRankWidth}px 1fr auto`
@@ -142,7 +142,7 @@ function PlayerMiniRanking({
 
                 {/* PP */}
                 <div
-                  className="grid w-fit items-center gap-(--spacing-sm) md:w-[100px]"
+                  className="grid w-fit items-center gap-1.5 md:w-[100px]"
                   style={{
                     gridTemplateColumns: isMobile ? "1fr" : "1fr 0.3fr",
                   }}
@@ -168,15 +168,15 @@ function PlayerMiniRanking({
         ) : (
           <>
             {isLoading ? (
-              <div className="flex items-center justify-center py-(--spacing-xl)">
+              <div className="flex items-center justify-center py-6">
                 <Spinner />
               </div>
             ) : isError ? (
-              <div className="flex items-center justify-center py-(--spacing-xl)">
+              <div className="flex items-center justify-center py-6">
                 <p className="text-muted-foreground text-sm">Failed to load rankings</p>
               </div>
             ) : (
-              <div className="flex items-center justify-center py-(--spacing-xl)">
+              <div className="flex items-center justify-center py-6">
                 <p className="text-muted-foreground text-sm">No rankings found</p>
               </div>
             )}

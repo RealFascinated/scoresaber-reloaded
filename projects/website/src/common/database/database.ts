@@ -1,4 +1,3 @@
-import { BACKGROUND_COVERS } from "@/components/background-cover";
 import Logger from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ReplayViewer, ReplayViewers, ReplayViewerTypes } from "@ssr/common/replay-viewer";
@@ -39,10 +38,6 @@ type Setting = {
 
 export enum SettingIds {
   MainPlayer = "mainPlayer",
-  BackgroundCover = "backgroundCover",
-  BackgroundCoverBrightness = "backgroundCoverBrightness",
-  BackgroundCoverBlur = "backgroundCoverBlur",
-  CustomBackgroundUrl = "customBackgroundCover",
   ShowKitty = "showKitty",
   SnowParticles = "snowParticles",
   WhatIfRange = "whatIfRange",
@@ -60,11 +55,9 @@ export const DEFAULT_WHAT_IF_RANGE: [number, number] = [90, 98.5];
 const DEFAULT_CACHE_TTL: number = 60 * 60;
 const DEFAULT_PLAYER_CACHE_TTL: number = 60 * 60 * 6;
 const DEFAULT_CHART_LEGEND_STATE: boolean = false;
-const DEFAULT_BACKGROUND_COVER_BRIGHTNESS: number = 50;
-const DEFAULT_BACKGROUND_COVER_BLUR: number = 6;
 const DEFAULT_SHOW_KITTY: boolean = false;
 const DEFAULT_SNOW_PARTICLES: boolean = false;
-const DEFAULT_REPLAY_VIEWER: ReplayViewerTypes = "chroviewer";
+const DEFAULT_REPLAY_VIEWER: string = "beatleader";
 const DEFAULT_PLUS_PP_DEFAULT_ACCURACY: number = 95;
 
 export enum WebsiteLanding {
@@ -344,83 +337,6 @@ export default class Database extends Dexie {
   /**
    * Gets the background cover from the database
    *
-   * @returns the background cover
-   */
-  async getBackgroundCover(): Promise<string> {
-    const cover = await this.getSetting<string>(SettingIds.BackgroundCover, BACKGROUND_COVERS[0].id);
-    // Default to the first cover if no cover is set
-    return cover ?? BACKGROUND_COVERS[0].id;
-  }
-
-  /**
-   * Sets the background cover in the database
-   *
-   * @param cover the background cover
-   */
-  async setBackgroundCover(cover: string) {
-    await this.setSetting(SettingIds.BackgroundCover, cover);
-  }
-
-  /**
-   * Gets the custom background url from the database
-   *
-   * @returns the custom background url
-   */
-  async getCustomBackgroundUrl(): Promise<string> {
-    return (await this.getSetting<string>(SettingIds.CustomBackgroundUrl, BACKGROUND_COVERS[0].value))!;
-  }
-
-  /**
-   * Sets the custom background url in the database
-   *
-   * @param url the custom background url
-   */
-  async setCustomBackgroundUrl(url: string) {
-    await this.setSetting(SettingIds.CustomBackgroundUrl, url);
-  }
-  /**
-   * Gets the background cover brightness from the database
-   *
-   * @returns the background cover brightness
-   */
-  async getBackgroundCoverBrightness(): Promise<number> {
-    return (await this.getSetting<number>(
-      SettingIds.BackgroundCoverBrightness,
-      DEFAULT_BACKGROUND_COVER_BRIGHTNESS
-    ))!;
-  }
-
-  /**
-   * Sets the background cover brightness in the database
-   *
-   * @param brightness the background cover brightness
-   */
-  async setBackgroundCoverBrightness(brightness: number) {
-    await this.setSetting(SettingIds.BackgroundCoverBrightness, brightness);
-  }
-
-  /**
-   * Gets the background cover blur from the database
-   *
-   * @returns the background cover blur
-   */
-  async getBackgroundCoverBlur(): Promise<number> {
-    return (await this.getSetting<number>(SettingIds.BackgroundCoverBlur, DEFAULT_BACKGROUND_COVER_BLUR))!;
-  }
-
-  /**
-   * Sets the background cover blur in the database
-   *
-   * @param blur the background cover blur
-   */
-  async setBackgroundCoverBlur(blur: number) {
-    await this.setSetting(SettingIds.BackgroundCoverBlur, blur);
-  }
-
-  /**
-   * Gets the show kitty setting from the database
-   *
-   * @returns the show kitty setting
    */
   async getShowKitty(): Promise<boolean> {
     return (await this.getSetting<boolean>(SettingIds.ShowKitty, DEFAULT_SHOW_KITTY))!;
