@@ -1,15 +1,15 @@
 "use client";
 
 import FallbackLink from "@/components/fallback-link";
+import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-button";
+import { OneClickInstallButton } from "@/components/leaderboard/button/one-click-install-button";
+import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
+import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { SharedIcons } from "@/shared-icons";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { timeAgo } from "@ssr/common/utils/time-utils";
-import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-button";
-import { OneClickInstallButton } from "@/components/leaderboard/button/one-click-install-button";
-import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
-import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import NextImage from "next/image";
 import { LeaderboardStatus } from "./leaderboard-status";
 
@@ -75,35 +75,47 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
 
       {/* BeatSaver stats */}
       {beatsaver && (
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-xs text-muted-foreground sm:justify-start">
+        <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-xs sm:justify-start">
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapNjsStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">{formatNumber(beatsaver.difficulty.njs, "number")}</span>
+            <span className="text-foreground font-semibold tabular-nums">
+              {formatNumber(beatsaver.difficulty.njs, "number")}
+            </span>
             <span>NJS</span>
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapBpmStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">{formatNumber(beatsaver.metadata.bpm, "number")}</span>
+            <span className="text-foreground font-semibold tabular-nums">
+              {formatNumber(beatsaver.metadata.bpm, "number")}
+            </span>
             <span>BPM</span>
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapNpsStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">{beatsaver.difficulty.nps.toFixed(2)}</span>
+            <span className="text-foreground font-semibold tabular-nums">
+              {beatsaver.difficulty.nps.toFixed(2)}
+            </span>
             <span>NPS</span>
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapNotesStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">{formatNumberWithCommas(beatsaver.difficulty.notes)}</span>
+            <span className="text-foreground font-semibold tabular-nums">
+              {formatNumberWithCommas(beatsaver.difficulty.notes)}
+            </span>
             <span>Notes</span>
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapBombsStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">{formatNumberWithCommas(beatsaver.difficulty.bombs)}</span>
+            <span className="text-foreground font-semibold tabular-nums">
+              {formatNumberWithCommas(beatsaver.difficulty.bombs)}
+            </span>
             <span>Bombs</span>
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapObstaclesStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">{formatNumberWithCommas(beatsaver.difficulty.obstacles)}</span>
+            <span className="text-foreground font-semibold tabular-nums">
+              {formatNumberWithCommas(beatsaver.difficulty.obstacles)}
+            </span>
             <span>Obstacles</span>
           </span>
           <span className="flex items-center gap-1.5">
@@ -112,7 +124,9 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.StatTotalPlayCountIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">{formatNumberWithCommas(leaderboardData.plays)}</span>
+            <span className="text-foreground font-semibold tabular-nums">
+              {formatNumberWithCommas(leaderboardData.plays)}
+            </span>
             <span>plays</span>
           </span>
         </div>

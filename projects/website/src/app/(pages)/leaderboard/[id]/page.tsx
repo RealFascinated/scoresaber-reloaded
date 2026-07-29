@@ -66,10 +66,9 @@ export default async function LeaderboardPage(props: Props) {
       />
     );
   }
-  const starChangeHistory = await ssrApi.getLeaderboardStarHistory(id);
   return (
     <section className="flex w-full justify-center">
-      <ScoreSaberLeaderboardData leaderboardData={response} starChangeHistory={starChangeHistory ?? []} />
+      <ScoreSaberLeaderboardData leaderboardData={response} />
     </section>
   );
 }

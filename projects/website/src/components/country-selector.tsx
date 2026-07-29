@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import CountryFlag from "@/components/ui/country-flag";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { pluralize } from "@ssr/common/utils/string.util";
 
@@ -46,8 +40,12 @@ export default function CountrySelector({
       };
     })
     .sort((a, b) => {
-      if (prioritizeCountry && a.value === prioritizeCountry) return -1;
-      if (prioritizeCountry && b.value === prioritizeCountry) return 1;
+      if (prioritizeCountry && a.value === prioritizeCountry) {
+        return -1;
+      }
+      if (prioritizeCountry && b.value === prioritizeCountry) {
+        return 1;
+      }
       return 0;
     });
 
