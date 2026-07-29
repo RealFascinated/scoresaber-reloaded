@@ -118,7 +118,7 @@ function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
                 </span>
               </div>
             </div>
-            <Card className="rounded-lg rounded-tl-none p-0">
+            <Card className="rounded-xl rounded-tl-none p-0">
               <ScoreSaberScoreDisplay
                 score={score}
                 leaderboard={leaderboard}

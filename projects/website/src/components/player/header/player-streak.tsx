@@ -35,7 +35,7 @@ export default function PlayerStreak({ player }: PlayerStreakProps) {
       side="bottom"
       showOnMobile
     >
-      <div className="bg-background/85 border-border relative w-[132px] rounded-xl border px-3 py-2 shadow-xs backdrop-blur-xs">
+      <div className="bg-background/85 border-border relative w-[132px] rounded-xl border px-3 py-2 shadow-xs">
         {currentStreak > 0 && (
           <div className="absolute inset-0 rounded-xl bg-linear-to-r from-orange-500/8 via-amber-500/6 to-transparent" />
         )}

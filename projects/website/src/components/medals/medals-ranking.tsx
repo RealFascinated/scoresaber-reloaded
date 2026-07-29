@@ -1,32 +1,23 @@
 "use client";
 
-import { PlayerRanking } from "@/components/player/player-ranking";
-import { SharedIcons } from "@/shared-icons";
+import { PlayerAvatar } from "@/components/ranking/player-avatar";
+import SimpleLink from "@/components/simple-link";
 import type { MedalRankingPlayer } from "@ssr/common/schemas/response/ranking/medal-rankings";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 export function MedalsRanking({
   player,
-  firstColumnWidth,
-  showAccountInactive = false,
 }: {
   player: MedalRankingPlayer;
-  firstColumnWidth: number;
-  showAccountInactive?: boolean;
 }) {
   return (
-    <PlayerRanking<MedalRankingPlayer>
-      player={player}
-      getRank={p => p.medalsRank}
-      getCountryRank={p => p.medalsCountryRank}
-      firstColumnWidth={firstColumnWidth}
-      showAccountInactive={showAccountInactive}
-      worth={
-        <div className="ml-auto flex min-w-[70px] flex-row items-center justify-end gap-2">
-          <SharedIcons.MedalsRankingHeaderIcon className="size-4" />
-          <p className="text-pp font-semibold">{formatNumberWithCommas(player.medals)}</p>
-        </div>
-      }
-    />
+    <SimpleLink href={`/player/${player.id}`} className="flex items-center gap-2.5">
+      <PlayerAvatar profilePicture={player.avatar} name={player.name} />
+      <div className="flex flex-col">
+        <span className="text-sm font-medium leading-tight">{player.name}</span>
+        {player.country && (
+          <span className="text-xs text-muted-foreground">{player.country}</span>
+        )}
+      </div>
+    </SimpleLink>
   );
 }

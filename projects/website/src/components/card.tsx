@@ -9,7 +9,7 @@ type Props = {
 export default function Card({ children, className, style }: Props) {
   return (
     <div
-      className={clsx("bg-card/90 border-border flex flex-col rounded-lg border p-(--spacing-lg)", className)}
+      className={clsx("bg-card flex flex-col rounded-xl p-4 text-sm ring-1 ring-border", className)}
       style={style}
     >
       {children}

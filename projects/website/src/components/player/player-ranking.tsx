@@ -94,15 +94,15 @@ export function PlayerRanking<T extends PlayerRankingRow>({
       {/* Desktop Layout */}
       <div
         className={cn(
-          "bg-accent-deep hover:bg-accent-deep/50 hidden items-center gap-2 rounded-md px-(--spacing-xs) py-(--spacing-xs) lg:flex",
-          mainPlayer?.id === player.id ? "bg-primary/10 hover:bg-primary/15" : "",
+          "flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted/30",
+          mainPlayer?.id === player.id ? "bg-primary/5" : "",
           inactive && 'opacity-50 grayscale-20'
         )}
       >
         {/* Rank, Weekly Change, and Country Rank */}
         <div
           className={cn(
-            "grid grid-cols-[0.55fr_0.9fr] items-center gap-3",
+            "flex items-center gap-2",
             inactive && showAccountInactive ? "flex" : ""
           )}
           style={{
@@ -119,7 +119,7 @@ export function PlayerRanking<T extends PlayerRankingRow>({
         </div>
 
         {/* Avatar and Name */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <PlayerAvatar profilePicture={player.avatar} name={player.name} />
           <PlayerNameDisplay player={player} />
         </div>
@@ -132,7 +132,7 @@ export function PlayerRanking<T extends PlayerRankingRow>({
       <div className="block lg:hidden">
         <div
           className={cn(
-            "bg-muted/50 mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg px-2 py-1 transition-colors hover:shadow-xs",
+            "bg-muted/30 mb-1 flex min-h-[67px] w-full cursor-pointer flex-col justify-center gap-1 rounded-lg px-3 py-2 transition-colors",
             mainPlayer?.id == player.id ? "bg-primary/10" : ""
           )}
         >
@@ -169,11 +169,8 @@ export function PlayerRanking<T extends PlayerRankingRow>({
 
 function RankDisplay({ rank, activeRank }: { rank: number, activeRank?: number }) {
   const pill = (
-    <div
-      className={cn(
-        "flex h-[24px] w-fit items-center justify-center gap-1 rounded-sm px-1 py-1 text-xs font-semibold",
-        getRankBgColor(rank)
-      )}
+    <div className="flex h-[24px] w-fit items-center justify-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold text-white"
+      style={{ backgroundColor: getRankBgColor(rank) }}
     >
       <span>#{formatNumberWithCommas(rank)}</span>
     </div>
@@ -193,11 +190,8 @@ function RankDisplay({ rank, activeRank }: { rank: number, activeRank?: number }
 function CountryRankDisplay({ country, countryRank, activeCountryRank }: { country: string; countryRank: number; activeCountryRank?: number; }) {
   const pill = (
     <div className="flex items-center">
-      <div
-        className={cn(
-          "flex h-[24px] items-center gap-1 rounded-sm px-1 py-1 text-xs font-semibold",
-          getRankBgColor(countryRank)
-        )}
+      <div className="flex h-[24px] items-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold text-white"
+        style={{ backgroundColor: getRankBgColor(countryRank) }}
       >
         <CountryFlag code={country} size={10} />
         <span>#{formatNumberWithCommas(countryRank)}</span>
@@ -228,7 +222,7 @@ function PlayerNameDisplay<T extends PlayerRankingRow>({
   return (
     <div className={cn("flex min-w-0 flex-1 justify-start", className)}>
       <span
-        className="truncate text-sm font-medium text-white"
+        className="truncate text-sm font-medium"
         style={{
           color: roles[0]?.color,
         }}

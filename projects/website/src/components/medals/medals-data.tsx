@@ -1,6 +1,6 @@
 "use client";
+import CountryFlag from "@/components/ui/country-flag";
 
-import { getRankingColumnWidth } from "@/common/player-utils";
 import Card from "@/components/card";
 import CountrySelector from "@/components/country-selector";
 import SimpleLink from "@/components/simple-link";
@@ -14,6 +14,7 @@ import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
 import { Button } from "../ui/button";
 import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import MedalsInfo from "./medals-info";
 import { MedalsRanking } from "./medals-ranking";
 
@@ -43,29 +44,23 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
   }, [currentPage, currentCountry, navigation]);
 
-  const firstColumnWidth = getRankingColumnWidth(
-    rankingData?.items ?? [],
-    player => player.medalsRank,
-    player => player.medalsCountryRank
-  );
-
   return (
-    <div className="flex w-full flex-col justify-center gap-2 xl:flex-row xl:gap-2">
-      <div className="flex w-full flex-col gap-2 xl:w-[750px]">
-        <Card>
-          <div className="flex items-center gap-(--spacing-sm)">
-            <SharedIcons.GlobalPlayersRankingIcon className="size-6" />
-            <h1 className="text-lg font-semibold">Medal Ranking</h1>
+    <div className="flex w-full flex-col gap-4">
+      <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <SharedIcons.GlobalPlayersRankingIcon className="size-6 text-primary" />
+              <h1 className="text-2xl font-bold tracking-tight">Medal Ranking</h1>
+            </div>
           </div>
-        </Card>
 
-        <Card className="h-fit w-full gap-4">
           {!rankingData && !isError && (
             <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
           )}
 
           {isError && (
-            <div className="mt-2 flex h-full flex-col items-center justify-center gap-3">
+            <div className="flex h-full flex-col items-center justify-center gap-3 py-12">
               <p className="text-lg">No players were found for this country or page.</p>
               <SimpleLink href="/medals">
                 <Button variant="outline" className="gap-2">
@@ -87,18 +82,44 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 onPageChange={setCurrentPage}
               />
 
-              <div className="flex flex-col gap-2">
-                {rankingData.items.map(player => (
-                  <div key={player.id} className="grid grid-cols-[1fr_25px] gap-3">
-                    <div className="grow">
-                      <MedalsRanking player={player} firstColumnWidth={firstColumnWidth} />
-                    </div>
-
-                    <div className="flex h-full w-full items-center justify-center">
-                      <AddFriend player={player} className="bg-ssr rounded-full p-1.5" iconOnly />
-                    </div>
-                  </div>
-                ))}
+              <div className="rounded-xl ring-1 ring-border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-20">Rank</TableHead>
+                      <TableHead className="w-20">Country</TableHead>
+                      <TableHead>Player</TableHead>
+                      <TableHead className="text-right w-24">Medals</TableHead>
+                      <TableHead className="w-10"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rankingData.items.map(player => (
+                      <TableRow key={player.id}>
+                        <TableCell className="py-2">
+                          <span className="font-mono text-sm font-semibold">#{player.medalsRank}</span>
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <div className="flex items-center gap-2">
+                            <CountryFlag code={player.country ?? ""} size={14} />
+                            <span className="font-mono text-sm text-muted-foreground">
+                              #{player.medalsCountryRank}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <MedalsRanking player={player} />
+                        </TableCell>
+                        <TableCell className="py-2 text-right">
+                          <span className="font-semibold text-primary">{player.medals}</span>
+                        </TableCell>
+                        <TableCell className="py-2">
+                          <AddFriend player={player} className="bg-ssr rounded-full p-1.5" iconOnly />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
 
               <SimplePagination
@@ -111,37 +132,39 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               />
             </div>
           )}
-        </Card>
-      </div>
+        </div>
 
-      <div className="flex w-full flex-col gap-2 xl:w-[25%]">
-        <FilterSection
-          title="Filters"
-          description="Filter players by country"
-          hasActiveFilters={Boolean(currentCountry)}
-          onClear={() => {
-            setCurrentCountry(undefined);
-            setCurrentPage(1);
-          }}
-        >
-          <FilterField label="Country">
-            <FilterRow>
-              <CountrySelector
-                className="h-10 w-full"
-                value={currentCountry}
-                onValueChange={(newCountry: string | undefined) => {
-                  setCurrentCountry(newCountry);
-                  setCurrentPage(1);
-                }}
-                placeholder="Select country..."
-              />
-            </FilterRow>
-          </FilterField>
-        </FilterSection>
+        <div className="w-full lg:w-72 shrink-0">
+          <div className="flex flex-col gap-4">
+            <FilterSection
+              title="Filters"
+              description="Filter players by country"
+              hasActiveFilters={Boolean(currentCountry)}
+              onClear={() => {
+                setCurrentCountry(undefined);
+                setCurrentPage(1);
+              }}
+            >
+              <FilterField label="Country">
+                <FilterRow>
+                  <CountrySelector
+                    className="h-10 w-full"
+                    value={currentCountry}
+                    onValueChange={(newCountry: string | undefined) => {
+                      setCurrentCountry(newCountry);
+                      setCurrentPage(1);
+                    }}
+                    placeholder="Select country..."
+                  />
+                </FilterRow>
+              </FilterField>
+            </FilterSection>
 
-        <Card>
-          <MedalsInfo />
-        </Card>
+            <Card>
+              <MedalsInfo />
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

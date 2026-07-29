@@ -69,8 +69,8 @@ export default function Settings() {
   );
 
   return (
-    <div className="bg-card/80 border-border flex w-full flex-col overflow-hidden rounded-xl border shadow-sm">
-      <div className="border-border bg-muted/15 border-b p-(--spacing-md) md:hidden">
+    <div className="bg-card flex w-full flex-col overflow-hidden rounded-xl ring-1 ring-border">
+      <div className="border-border/50 bg-muted/15 border-b p-(--spacing-md) md:hidden">
         <Select
           value={selectedCategory.slug}
           onValueChange={value => {
@@ -106,7 +106,7 @@ export default function Settings() {
 
       <div className="flex">
         <nav
-          className="border-border bg-muted/25 hidden w-[220px] shrink-0 flex-col border-r md:flex lg:w-[240px]"
+          className="border-border/50 bg-muted/10 hidden w-[220px] shrink-0 flex-col border-r md:flex lg:w-[240px]"
           aria-label="Settings categories"
         >
           <div className="border-border/60 border-b px-3 py-3">
@@ -167,7 +167,7 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="border-border bg-muted/10 flex flex-wrap items-center gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-md) md:px-8 md:py-(--spacing-lg)">
+      <div className="border-border/50 bg-muted/5 flex flex-wrap items-center gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-md) md:px-8 md:py-(--spacing-lg)">
         <ResetSettings />
       </div>
     </div>

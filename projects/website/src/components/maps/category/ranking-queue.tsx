@@ -25,10 +25,10 @@ export default function RankingQueue() {
       <Card className="flex flex-col gap-(--spacing-lg)">
         <h3 className="text-lg font-semibold">{name}</h3>
 
-        <div className="border-border bg-background/50 relative overflow-x-auto rounded-lg border">
+        <div className="relative overflow-x-auto rounded-xl ring-1 ring-border">
           <table className="table w-full min-w-[760px] table-auto border-spacing-0 text-left text-sm">
             <thead>
-              <tr className="border-border bg-muted/30 border-b">
+              <tr className="border-b border-border/50">
                 <th className="text-foreground/90 px-3 py-2.5 font-semibold">Leaderboard</th>
                 <th className="text-foreground/90 px-2 py-2.5 text-center font-semibold">Difficulties</th>
                 <th className="text-foreground/90 min-w-[130px] px-3 py-2.5 text-center font-semibold">
@@ -45,7 +45,7 @@ export default function RankingQueue() {
                 return (
                   <tr
                     key={leaderboard.id}
-                    className="border-border/60 hover:bg-accent/40 border-b transition-colors last:border-b-0"
+                    className="border-b border-border/50 hover:bg-muted/30 transition-colors last:border-b-0"
                   >
                     {/* Leaderboard Name */}
                     <td className="px-3 py-1.5">

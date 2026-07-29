@@ -1,36 +1,36 @@
 :root {
-  --background: rgb(12, 10, 9);
+  --background: hsl(0, 0%, 6%);
   --foreground: hsl(60 9.1% 97.8%);
-  --card: hsl(40, 8%, 7%);
-  --chart-card: hsl(40, 8%, 5.5%);
+  --card: hsl(0, 0%, 10%);
+  --chart-card: hsl(0, 0%, 8.5%);
   --card-foreground: hsl(60 9.1% 97.8%);
-  --popover: hsl(20 14.3% 4.1%);
+  --popover: hsl(0, 0%, 10%);
   --popover-foreground: hsl(60 9.1% 97.8%);
   --primary: hsl(216 100% 58%);
   --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(12 6.5% 9.5%);
+  --secondary: hsl(0, 0%, 12%);
   --secondary-foreground: hsl(60 9.1% 97.8%);
-  --muted: hsl(0 0% 20%);
-  --muted-foreground: hsl(24 5.4% 63.9%);
-  --accent: hsl(12 4% 16%);
+  --muted: hsl(0, 0%, 14%);
+  --muted-foreground: hsl(0, 0%, 55%);
+  --accent: hsl(0, 0%, 15%);
   --accent-foreground: hsl(60 9.1% 97.8%);
-  --accent-deep: hsl(20, 5%, 13%);
+  --accent-deep: hsl(0, 0%, 11%);
   --accent-deep-foreground: hsl(60 9.1% 97.8%);
   --accent-secondary: hsl(270 100% 60%);
   --destructive: hsl(0 62.8% 30.6%);
   --destructive-foreground: hsl(60 9.1% 97.8%);
-  --border: hsl(12 6.5% 15.1%);
-  --input: hsl(12 6.5% 45.1%);
-  --ring: hsl(24 5.7% 82.9%);
+  --border: hsl(0, 0%, 18%);
+  --input: hsl(0, 0%, 25%);
+  --ring: hsl(0, 0%, 60%);
 
-  /* Sidebar Colors — slightly lighter than main background for visual separation */
-  --sidebar-background: hsl(40, 8%, 6.5%);
+  /* Sidebar Colors */
+  --sidebar-background: hsl(0, 0%, 8.5%);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: hsl(12, 4%, 18%);
+  --sidebar-accent: hsl(0, 0%, 14%);
   --sidebar-accent-foreground: var(--accent-foreground);
-  --sidebar-border: hsl(12, 6.5%, 18%);
+  --sidebar-border: hsl(0, 0%, 16%);
   --sidebar-ring: var(--ring);
 
   /* SSR Colors */

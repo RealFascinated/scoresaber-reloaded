@@ -87,7 +87,7 @@ export default function PlayerAndLeaderboardSearch() {
   return (
     <>
       <div
-        className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-start gap-2 rounded-xl border px-2 backdrop-blur-xs transition-all duration-200 select-none"
+        className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-start gap-2 rounded-xl border px-2 transition-all duration-200 select-none"
         onClick={openSearch}
       >
         <SharedIcons.SearchLeaderboardsPlayersIcon className="text-muted-foreground size-5" />

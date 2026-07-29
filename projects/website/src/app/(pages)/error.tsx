@@ -32,7 +32,7 @@ export default function Error(props: ErrorProps) {
 
         {/* Error Details */}
         <div className="w-full">
-          <div className="border-border bg-muted/50 mt-2 rounded-lg border p-4 text-left">
+          <div className="border-border bg-muted/50 mt-2 rounded-xl ring-1 ring-border p-4 text-left">
             <div className="flex flex-col gap-2">
               {error.message && (
                 <div>

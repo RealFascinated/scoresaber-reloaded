@@ -221,7 +221,7 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
           {isError ||
             (scores.items.length === 0 && (
               <EmptyState
-                className="border-border rounded-lg border"
+                className="rounded-xl ring-1 ring-border"
                 title="No Results"
                 description="No scores were found on this page"
                 icon={<SharedIcons.SearchNoResultsIcon />}

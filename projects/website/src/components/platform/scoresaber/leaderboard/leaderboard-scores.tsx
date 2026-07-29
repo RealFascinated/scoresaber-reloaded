@@ -133,10 +133,10 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
           </div>
         ) : (
           <>
-            <div className="border-border bg-background/50 relative overflow-x-auto rounded-lg border">
+            <div className="relative overflow-x-auto rounded-xl ring-1 ring-border">
               <table className="table w-full min-w-[800px] table-auto border-spacing-0 text-left text-sm">
                 <thead>
-                  <tr className="border-border bg-muted/30 border-b">
+                  <tr className="border-b border-border/50">
                     <th className="text-foreground/90 py-3 pr-1 pl-3 font-semibold">Rank</th>
                     <th className="text-foreground/90 px-1 py-3 font-semibold">Player</th>
                     <th className="text-foreground/90 px-1 py-3 text-center font-semibold">Date Set</th>

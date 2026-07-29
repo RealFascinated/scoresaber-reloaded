@@ -59,7 +59,7 @@ export function FriendScores() {
               return (
                 <div key={score.scoreId} className="flex flex-col">
                   <PlayerScoreHeader player={playerScore.score.playerInfo!} />
-                  <Card className="rounded-lg rounded-tl-none p-0">
+                  <Card className="rounded-xl rounded-tl-none p-0">
                     <ScoreSaberScoreDisplay
                       key={score.scoreId}
                       score={score}

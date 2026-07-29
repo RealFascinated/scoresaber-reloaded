@@ -349,7 +349,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
                 {comparisonPlayers.map(comparisonPlayer => (
                   <div
                     key={comparisonPlayer.id}
-                    className="bg-primary/10 border-primary/20 flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium md:w-auto"
+                    className="bg-primary/10 border-primary/20 flex w-full items-center gap-2 rounded-xl ring-1 ring-border px-3 py-2 text-sm font-medium md:w-auto"
                   >
                     <span className="text-primary-foreground flex-1 md:flex-initial">
                       {comparisonPlayer.name}

@@ -15,6 +15,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -244,6 +245,7 @@ export function AppSidebar() {
 
         {/* Profile & Friends */}
         <SidebarGroup>
+          <SidebarGroupLabel>Profile</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <ProfileSection />
@@ -256,6 +258,7 @@ export function AppSidebar() {
 
         {/* Navigation */}
         <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map(item => (
@@ -271,6 +274,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <div className="px-2 pb-2">
+        <div className="mb-1 px-2 text-xs font-medium text-sidebar-foreground/70">Links</div>
         <SidebarMenu>
           {resourceLinks.map(link => (
             <SidebarMenuItem key={link.name}>

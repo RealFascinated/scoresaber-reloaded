@@ -18,7 +18,7 @@ const CutDistributionChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="bg-chart-card flex min-h-[280px] items-center justify-center rounded-lg border">
+      <div className="bg-chart-card flex min-h-[280px] items-center justify-center rounded-xl ring-1 ring-border">
         <SharedIcons.PageLoadingIcon className="text-primary size-8 animate-spin" />
       </div>
     ),
@@ -28,7 +28,7 @@ const CutDistributionChart = dynamic(
 const SwingSpeedChart = dynamic(() => import("./components/charts/swing-speed-chart").then(m => m.default), {
   ssr: false,
   loading: () => (
-    <div className="bg-chart-card flex min-h-[280px] items-center justify-center rounded-lg border">
+    <div className="bg-chart-card flex min-h-[280px] items-center justify-center rounded-xl ring-1 ring-border">
       <SharedIcons.PageLoadingIcon className="text-primary size-8 animate-spin" />
     </div>
   ),
