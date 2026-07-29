@@ -121,6 +121,8 @@ export class PlayerHistoryRepository {
           return {
             unrankedScoresImproved: sql`COALESCE(${playerHistoryTable.unrankedScoresImproved}, 0) + 1`,
           };
+        case "plusOnePp":
+          return { plusOnePp: sql`COALESCE(${playerHistoryTable.plusOnePp}, 0) + 1` };
       }
     })();
 
