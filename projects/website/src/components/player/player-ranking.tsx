@@ -27,14 +27,12 @@ export function ScoreSaberPlayerRanking<T extends ScoreSaberPlayer>({
   firstColumnWidth,
   getRank = p => p.contextualRank ?? p.rank,
   getCountryRank = p => p.contextualCountryRank ?? p.countryRank,
-  _mainPlayer,
   showAccountInactive = true,
 }: {
   player: T;
   firstColumnWidth: number;
   getRank?: (player: T) => number;
   getCountryRank?: (player: T) => number;
-  mainPlayer?: ScoreSaberPlayer;
   showAccountInactive?: boolean;
 }) {
   return (
