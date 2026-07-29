@@ -34,6 +34,12 @@ export const ReplayViewers: Record<string, ReplayViewer> = {
     generateUrl: (id, replayUrl) =>
       `https://allpoland.github.io/ArcViewer/${replayUrl ? `?replayURL=${replayUrl}` : `?scoreID=${id}`}`,
   },
+  chroviewer: {
+    id: "chroviewer",
+    name: "ChroViewer",
+    generateUrl: (id) =>
+      `https://replay.fascinated.cc/?scoreIdBL=${id}`,
+  },
 };
 
 export type ReplayViewerTypes = keyof typeof ReplayViewers;

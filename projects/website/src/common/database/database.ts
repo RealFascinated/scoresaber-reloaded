@@ -64,7 +64,7 @@ const DEFAULT_BACKGROUND_COVER_BRIGHTNESS: number = 50;
 const DEFAULT_BACKGROUND_COVER_BLUR: number = 6;
 const DEFAULT_SHOW_KITTY: boolean = false;
 const DEFAULT_SNOW_PARTICLES: boolean = false;
-const DEFAULT_REPLAY_VIEWER: ReplayViewerTypes = "beatleader";
+const DEFAULT_REPLAY_VIEWER: ReplayViewerTypes = "chroviewer";
 const DEFAULT_PLUS_PP_DEFAULT_ACCURACY: number = 95;
 
 export enum WebsiteLanding {
