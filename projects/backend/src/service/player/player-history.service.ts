@@ -96,7 +96,11 @@ export class PlayerHistoryService {
         }
 
         // If the player has less scores tracked than the total play count, add them to the refresh queue
-        if (statistics && (statistics?.totalScores ?? 0) < player.stats.totalSubmittedPlays && !player.banned) {
+        if (
+          statistics &&
+          (statistics?.totalScores ?? 0) < player.stats.totalSubmittedPlays &&
+          !player.banned
+        ) {
           PlayerHistoryService.logger.info(
             `Player ${playerId} has missing scores. Adding them to the refresh queue...`
           );
@@ -105,12 +109,12 @@ export class PlayerHistoryService {
             id: playerId,
             data: playerId,
           });
-          (QueueManager.getQueue(QueueId.PlayerBeatLeaderScoreSeedQueue) as PlayerBeatLeaderScoreSeedQueue).add(
-            {
-              id: playerId,
-              data: playerId,
-            }
-          );
+          (
+            QueueManager.getQueue(QueueId.PlayerBeatLeaderScoreSeedQueue) as PlayerBeatLeaderScoreSeedQueue
+          ).add({
+            id: playerId,
+            data: playerId,
+          });
         }
 
         successCount++;

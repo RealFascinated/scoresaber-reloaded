@@ -40,16 +40,11 @@ export function ScoreSaberPlayerRanking<T extends ScoreSaberPlayer>({
       player={player}
       getRank={getRank}
       getCountryRank={getCountryRank}
-      getActiveRank={p => p.rank !== getRank(p) ? p.rank: undefined}
-      getActiveCountryRank={p => p.countryRank !== getCountryRank(p) ? p.countryRank: undefined}
+      getActiveRank={p => (p.rank !== getRank(p) ? p.rank : undefined)}
+      getActiveCountryRank={p => (p.countryRank !== getCountryRank(p) ? p.countryRank : undefined)}
       firstColumnWidth={firstColumnWidth}
       showAccountInactive={showAccountInactive}
-      worth={
-        <PlayerPpDisplay
-          pp={player.pp}
-          className="ml-auto min-w-[70px]"
-        />
-      }
+      worth={<PlayerPpDisplay pp={player.pp} className="ml-auto min-w-[70px]" />}
     />
   );
 }
@@ -88,17 +83,14 @@ export function PlayerRanking<T extends PlayerRankingRow>({
       {/* Desktop Layout */}
       <div
         className={cn(
-          "flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted/30",
+          "hover:bg-muted/30 flex items-center gap-3 rounded-lg px-2 py-2 transition-colors",
           mainPlayer?.id === player.id ? "bg-primary/5" : "",
-          inactive && 'opacity-50 grayscale-20'
+          inactive && "opacity-50 grayscale-20"
         )}
       >
         {/* Rank, Weekly Change, and Country Rank */}
         <div
-          className={cn(
-            "flex items-center gap-2",
-            inactive && showAccountInactive ? "flex" : ""
-          )}
+          className={cn("flex items-center gap-2", inactive && showAccountInactive ? "flex" : "")}
           style={{
             width: `${firstColumnWidth}px`,
           }}
@@ -113,7 +105,7 @@ export function PlayerRanking<T extends PlayerRankingRow>({
         </div>
 
         {/* Avatar and Name */}
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5">
           <PlayerAvatar profilePicture={player.avatar} name={player.name} />
           <PlayerNameDisplay player={player} />
         </div>
@@ -133,11 +125,7 @@ export function PlayerRanking<T extends PlayerRankingRow>({
           {/* Top row: Rank, Country Rank, and Weekly Change */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <PlayerRanks
-                rank={rank}
-                countryRank={countryRank}
-                country={country}
-              />
+              <PlayerRanks rank={rank} countryRank={countryRank} country={country} />
             </div>
           </div>
 
@@ -161,44 +149,48 @@ export function PlayerRanking<T extends PlayerRankingRow>({
   );
 }
 
-function RankDisplay({ rank, activeRank }: { rank: number, activeRank?: number }) {
+function RankDisplay({ rank, activeRank }: { rank: number; activeRank?: number }) {
   const pill = (
-    <div className="flex h-[24px] w-fit items-center justify-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold text-white"
+    <div
+      className="flex h-[24px] w-fit items-center justify-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold text-white"
       style={{ backgroundColor: getRankBgColor(rank) }}
     >
       <span>#{formatNumberWithCommas(rank)}</span>
     </div>
-  )
+  );
 
   if (activeRank) {
-    return (
-      <SimpleTooltip display={`Active: #${formatNumberWithCommas(activeRank)}`}>
-        {pill}
-      </SimpleTooltip>
-    )
+    return <SimpleTooltip display={`Active: #${formatNumberWithCommas(activeRank)}`}>{pill}</SimpleTooltip>;
   }
 
   return pill;
 }
 
-function CountryRankDisplay({ country, countryRank, activeCountryRank }: { country: string; countryRank: number; activeCountryRank?: number; }) {
+function CountryRankDisplay({
+  country,
+  countryRank,
+  activeCountryRank,
+}: {
+  country: string;
+  countryRank: number;
+  activeCountryRank?: number;
+}) {
   const pill = (
     <div className="flex items-center">
-      <div className="flex h-[24px] items-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold text-white"
+      <div
+        className="flex h-[24px] items-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold text-white"
         style={{ backgroundColor: getRankBgColor(countryRank) }}
       >
         <CountryFlag code={country} size={10} />
         <span>#{formatNumberWithCommas(countryRank)}</span>
       </div>
     </div>
-  )
+  );
 
   if (activeCountryRank) {
     return (
-      <SimpleTooltip display={`Active: #${formatNumberWithCommas(activeCountryRank)}`}>
-        {pill}
-      </SimpleTooltip>
-    )
+      <SimpleTooltip display={`Active: #${formatNumberWithCommas(activeCountryRank)}`}>{pill}</SimpleTooltip>
+    );
   }
 
   return pill;
@@ -232,7 +224,7 @@ function PlayerRanks({
   countryRank,
   country,
   activeRank,
-  activeCountryRank
+  activeCountryRank,
 }: {
   rank: number;
   countryRank: number;

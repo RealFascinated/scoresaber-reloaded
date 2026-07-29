@@ -2,8 +2,8 @@
 
 import { SettingIds, WebsiteLanding } from "@/common/database/database";
 import { Form } from "@/components/ui/form";
-import { useSettingsForm } from "@/hooks/use-settings-form";
 import useDatabase from "@/hooks/use-database";
+import { useSettingsForm } from "@/hooks/use-settings-form";
 import { SharedIcons, type SharedDecorativeIcon } from "@/shared-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ssrConfig } from "config";

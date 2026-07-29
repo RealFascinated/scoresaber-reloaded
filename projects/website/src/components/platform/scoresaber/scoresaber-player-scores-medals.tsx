@@ -220,7 +220,7 @@ export default function ScoreSaberPlayerMedalScores({ player }: { player: ScoreS
           {isError ||
             (scores.items.length === 0 && (
               <EmptyState
-                className="rounded-xl ring-1 ring-border"
+                className="ring-border rounded-xl ring-1"
                 title="No Results"
                 description="No scores were found on this page"
                 icon={<SharedIcons.SearchNoResultsIcon />}

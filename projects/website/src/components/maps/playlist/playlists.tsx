@@ -51,13 +51,7 @@ export default function Playlists() {
             url={`${env.NEXT_PUBLIC_API_URL}/playlist/${playlist.id}.bplist`}
           />
         ))}
-        <CustomPlaylistCreator
-          trigger={
-            <Button className="flex items-center">
-              Custom Playlist
-            </Button>
-          }
-        />
+        <CustomPlaylistCreator trigger={<Button className="flex items-center">Custom Playlist</Button>} />
       </div>
     </Card>
   );

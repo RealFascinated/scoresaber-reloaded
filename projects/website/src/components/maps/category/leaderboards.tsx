@@ -11,9 +11,9 @@ import { SharedIcons } from "@/shared-icons";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
+import { useRouter } from "next/navigation";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
 
@@ -47,7 +47,9 @@ export default function Leaderboards() {
   return (
     <div className="flex flex-col gap-4">
       {isLoading && leaderboardResponse == undefined && (
-        <div className="flex w-full justify-center py-4"><Spinner /></div>
+        <div className="flex w-full justify-center py-4">
+          <Spinner />
+        </div>
       )}
 
       <div className="flex flex-col gap-4">
@@ -65,7 +67,7 @@ export default function Leaderboards() {
 
         {leaderboards && leaderboards.length > 0 && (
           <div className="flex flex-col gap-4">
-            <div className="rounded-xl ring-1 ring-border bg-card overflow-hidden">
+            <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -112,7 +114,7 @@ export default function Leaderboards() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-center text-xs text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-center text-xs">
                         <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
                           <p className="inline-flex items-center justify-center gap-1">
                             <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -120,7 +122,7 @@ export default function Leaderboards() {
                           </p>
                         </SimpleTooltip>
                       </TableCell>
-                      <TableCell className="text-center text-xs text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-center text-xs">
                         <SimpleTooltip display="Total plays on this leaderboard">
                           <p className="inline-flex items-center justify-center gap-1">
                             <SharedIcons.PlayMapIcon className="h-3 w-3" />

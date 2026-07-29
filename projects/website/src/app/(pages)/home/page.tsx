@@ -7,7 +7,7 @@ export default function HomePage() {
     <div className="flex w-full flex-col gap-4">
       <Player />
       <div className="flex w-full flex-col gap-4 lg:flex-row lg:gap-6">
-        <div className="flex w-full lg:w-[32rem] shrink-0 flex-col gap-4">
+        <div className="flex w-full shrink-0 flex-col gap-4 lg:w-[32rem]">
           <FriendRanking />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-4">

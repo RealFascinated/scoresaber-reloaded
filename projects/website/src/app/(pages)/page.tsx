@@ -14,8 +14,9 @@ export default async function LandingPage() {
         <h1 className="text-foreground mb-4 text-5xl font-bold tracking-tight sm:text-6xl">
           ScoreSaber Reloaded
         </h1>
-        <p className="text-muted-foreground mb-10 max-w-2xl text-balance text-lg leading-relaxed">
-          A modern companion for Beat Saber players. Track your stats, analyse your scores, and keep up with friends across ScoreSaber, BeatLeader, and AccSaber.
+        <p className="text-muted-foreground mb-10 max-w-2xl text-lg leading-relaxed text-balance">
+          A modern companion for Beat Saber players. Track your stats, analyse your scores, and keep up with
+          friends across ScoreSaber, BeatLeader, and AccSaber.
         </p>
         <div className="w-full max-w-sm">
           <PlayerAndLeaderboardSearch />
@@ -25,10 +26,30 @@ export default async function LandingPage() {
       {/* Quick links */}
       <section className="mx-auto grid w-full max-w-4xl grid-cols-2 gap-4 px-6 sm:grid-cols-4">
         {[
-          { icon: SharedIcons.RankingNavIcon, label: "Rankings", href: "/ranking", desc: "Player leaderboards" },
-          { icon: SharedIcons.GlobalScoresModeIcon, label: "Live Scores", href: "/scores/live", desc: "Real-time feed" },
-          { icon: SharedIcons.TopScoresNavIcon, label: "Top Scores", href: "/scores/top", desc: "Highest PP plays" },
-          { icon: SharedIcons.MapsNavIcon, label: "Maps", href: "/maps/leaderboards", desc: "Browse leaderboards" },
+          {
+            icon: SharedIcons.RankingNavIcon,
+            label: "Rankings",
+            href: "/ranking",
+            desc: "Player leaderboards",
+          },
+          {
+            icon: SharedIcons.GlobalScoresModeIcon,
+            label: "Live Scores",
+            href: "/scores/live",
+            desc: "Real-time feed",
+          },
+          {
+            icon: SharedIcons.TopScoresNavIcon,
+            label: "Top Scores",
+            href: "/scores/top",
+            desc: "Highest PP plays",
+          },
+          {
+            icon: SharedIcons.MapsNavIcon,
+            label: "Maps",
+            href: "/maps/leaderboards",
+            desc: "Browse leaderboards",
+          },
         ].map(({ icon: Icon, label, href, desc }) => (
           <SimpleLink
             key={label}
@@ -66,10 +87,7 @@ export default async function LandingPage() {
             desc: "Community-built and open source. Contributions welcome on GitHub.",
           },
         ].map(({ icon: Icon, title, desc }) => (
-          <div
-            key={title}
-            className="ring-border bg-card flex items-start gap-4 rounded-xl p-5 ring-1"
-          >
+          <div key={title} className="ring-border bg-card flex items-start gap-4 rounded-xl p-5 ring-1">
             <div className="bg-primary/10 mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
               <Icon className="text-primary h-5 w-5" />
             </div>

@@ -1,164 +1,122 @@
 "use client";
 
-import Card from "@/components/card";
 import FallbackLink from "@/components/fallback-link";
-import LeaderboardButtons from "@/components/platform/scoresaber/leaderboard/leaderboard-buttons";
 import { SharedIcons } from "@/shared-icons";
-import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
-import { formatDate, formatTime } from "@ssr/common/utils/time-utils";
+import { timeAgo } from "@ssr/common/utils/time-utils";
+import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-button";
+import { OneClickInstallButton } from "@/components/leaderboard/button/one-click-install-button";
+import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
+import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import NextImage from "next/image";
-import StatValue from "../../../statistic/stat-value";
+import { LeaderboardStatus } from "./leaderboard-status";
 
 type LeaderboardInfoProps = {
   leaderboard: LeaderboardResponse;
-  starChangeHistory: LeaderboardStarChange[];
 };
 
-export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardInfoProps) {
+export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   const { leaderboard: leaderboardData, beatsaver } = leaderboard;
 
-  const accentColor = getDifficulty(leaderboardData.difficulty.difficulty).color;
-
   return (
-    <Card
-      className="h-fit w-full flex-col items-center gap-8 overflow-hidden p-0"
-      style={{
-        backgroundColor: "var(--card)",
-        backgroundImage: `linear-gradient(
-        to bottom,
-        color-mix(in srgb, ${accentColor} 16%, var(--card)) 0%,
-        var(--card) 38%,
-        var(--card) 100%
-      )`,
-      }}
-    >
-      <div className="flex flex-col items-center gap-3 p-6 pb-0 text-center">
+    <section className="flex w-full flex-col gap-5">
+      {/* Song header */}
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
+        {/* Album Art */}
         <NextImage
           src={leaderboardData.songArt}
-          alt={`${leaderboardData.songName} Cover Image`}
-          className="border-border/80 rounded-xl border object-cover shadow-md"
-          width={128}
-          height={128}
+          alt={`${leaderboardData.songName} cover`}
+          className="border-border/80 mx-auto shrink-0 rounded-xl border object-cover shadow-md sm:mx-0"
+          width={160}
+          height={160}
         />
 
-        <div className="flex max-w-[900px] min-w-0 flex-col items-center gap-1">
+        {/* Song info */}
+        <div className="flex min-w-0 flex-1 flex-col items-center gap-2.5 text-center sm:items-start sm:text-left">
+          {/* Status Badge */}
+          <div className="sm:mx-0">
+            <LeaderboardStatus leaderboard={leaderboardData} />
+          </div>
+
           {/* Song Name */}
           <FallbackLink
             href={beatsaver ? `https://beatsaver.com/maps/${beatsaver.bsr}` : undefined}
-            className="hover:text-primary/80 text-song-name w-fit max-w-full min-w-0 transition-all"
+            className="hover:text-primary/80 transition-all sm:w-fit"
           >
-            <h3 className="line-clamp-2 text-2xl leading-tight font-bold wrap-break-word">
-              {leaderboardData.fullName}
-            </h3>
+            <h1 className="text-2xl leading-tight font-bold sm:text-3xl">{leaderboardData.fullName}</h1>
           </FallbackLink>
 
-          {/* Song Author */}
-          <p className="text-muted-foreground text-sm">{leaderboardData.songAuthorName}</p>
-
-          {/* Mapper */}
+          {/* Author and Mapper */}
           <p className="text-muted-foreground text-sm">
-            Mapped by{" "}
+            by <span className="text-foreground font-medium">{leaderboardData.songAuthorName}</span>
+            {" · "}
+            mapped by{" "}
             <FallbackLink
               href={getBeatSaverMapperProfileUrl(beatsaver)}
-              className="text-foreground hover:text-primary/80 transition-all"
+              className="text-foreground hover:text-primary/80 font-medium transition-all"
             >
               {leaderboardData.levelAuthorName}
             </FallbackLink>
           </p>
 
-          {/* Created At */}
-          <p className="text-muted-foreground text-sm">
-            Created {formatDate(leaderboardData.timestamp, "Do MMMM, YYYY HH:mm a")}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex w-full max-w-3xl flex-wrap justify-between gap-x-4 gap-y-6 px-1 sm:gap-x-8">
-        <LeaderboardStatColumn label={leaderboard.leaderboard.ranked ? "Stars" : "Difficulty"}>
-          {leaderboard.leaderboard.ranked ? (
-            <span className="tabular-nums">{leaderboardData.stars.toFixed(2)}</span>
-          ) : (
-            <span className="max-w-[140px] truncate text-sm sm:text-base">
-              {getDifficultyName(leaderboardData.difficulty.difficulty)}
-            </span>
+          {/* Map action buttons */}
+          {beatsaver && (
+            <div className="flex items-center justify-center gap-1 sm:justify-start">
+              <ScoreCopyBsrButton beatSaverMap={beatsaver} />
+              <BeatSaverMapButton beatSaverMap={beatsaver} />
+              <MapPreviewButton leaderboard={leaderboardData} beatSaverMap={beatsaver} />
+              <OneClickInstallButton beatSaverMap={beatsaver} />
+            </div>
           )}
-        </LeaderboardStatColumn>
-        <LeaderboardStatColumn label="Status">
-          <span className="uppercase">{leaderboard.leaderboard.status}</span>
-        </LeaderboardStatColumn>
-        <LeaderboardStatColumn label="Plays">
-          {formatNumberWithCommas(leaderboardData.plays)}
-        </LeaderboardStatColumn>
-        <LeaderboardStatColumn label="Plays 24h">
-          {formatNumberWithCommas(leaderboardData.dailyPlays)}
-        </LeaderboardStatColumn>
-      </div>
-
-      <div className="flex w-full flex-col gap-4">
-        {/* BeatSaver Info */}
-        {beatsaver && (
-          <div className="flex w-full flex-wrap justify-center gap-2">
-            <StatValue
-              name="NJS"
-              icon={<SharedIcons.MapNjsStatIcon className="h-4 w-4" />}
-              value={formatNumber(beatsaver.difficulty.njs, "number")}
-            />
-            <StatValue
-              name="BPM"
-              icon={<SharedIcons.MapBpmStatIcon className="h-4 w-4" />}
-              value={formatNumber(beatsaver.metadata.bpm, "number")}
-            />
-            <StatValue
-              name="NPS"
-              icon={<SharedIcons.MapNpsStatIcon className="h-4 w-4" />}
-              value={beatsaver.difficulty.nps.toFixed(2)}
-            />
-            <StatValue
-              name="Notes"
-              icon={<SharedIcons.MapNotesStatIcon className="h-4 w-4" />}
-              value={formatNumberWithCommas(beatsaver.difficulty.notes)}
-            />
-            <StatValue
-              name="Bombs"
-              icon={<SharedIcons.MapBombsStatIcon className="h-4 w-4" />}
-              value={formatNumberWithCommas(beatsaver.difficulty.bombs)}
-            />
-            <StatValue
-              name="Obstacles"
-              icon={<SharedIcons.MapObstaclesStatIcon className="h-4 w-4" />}
-              value={formatNumberWithCommas(beatsaver.difficulty.obstacles)}
-            />
-            <StatValue
-              name="Length"
-              icon={<SharedIcons.MapLengthStatIcon className="h-4 w-4" />}
-              value={formatTime(beatsaver.metadata.duration)}
-            />
-          </div>
-        )}
-
-        <div className="bg-background/70 flex w-full items-center justify-center gap-1 py-2.5">
-          <LeaderboardButtons
-            leaderboard={leaderboardData}
-            beatSaverMap={beatsaver}
-            starChangeHistory={starChangeHistory}
-          />
         </div>
       </div>
-    </Card>
-  );
-}
 
-function LeaderboardStatColumn({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex min-w-0 flex-1 basis-[45%] flex-col items-center gap-1 text-center sm:basis-0">
-      <p className="text-muted-foreground text-[10px] font-medium tracking-wide uppercase">{label}</p>
-      <div className="text-foreground text-base leading-tight font-semibold tabular-nums sm:text-lg">
-        {children}
-      </div>
-    </div>
+      {/* BeatSaver stats */}
+      {beatsaver && (
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-xs text-muted-foreground sm:justify-start">
+          <span className="flex items-center gap-1.5">
+            <SharedIcons.MapNjsStatIcon className="size-3.5" />
+            <span className="text-foreground font-semibold tabular-nums">{formatNumber(beatsaver.difficulty.njs, "number")}</span>
+            <span>NJS</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <SharedIcons.MapBpmStatIcon className="size-3.5" />
+            <span className="text-foreground font-semibold tabular-nums">{formatNumber(beatsaver.metadata.bpm, "number")}</span>
+            <span>BPM</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <SharedIcons.MapNpsStatIcon className="size-3.5" />
+            <span className="text-foreground font-semibold tabular-nums">{beatsaver.difficulty.nps.toFixed(2)}</span>
+            <span>NPS</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <SharedIcons.MapNotesStatIcon className="size-3.5" />
+            <span className="text-foreground font-semibold tabular-nums">{formatNumberWithCommas(beatsaver.difficulty.notes)}</span>
+            <span>Notes</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <SharedIcons.MapBombsStatIcon className="size-3.5" />
+            <span className="text-foreground font-semibold tabular-nums">{formatNumberWithCommas(beatsaver.difficulty.bombs)}</span>
+            <span>Bombs</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <SharedIcons.MapObstaclesStatIcon className="size-3.5" />
+            <span className="text-foreground font-semibold tabular-nums">{formatNumberWithCommas(beatsaver.difficulty.obstacles)}</span>
+            <span>Obstacles</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <SharedIcons.ScoreDateIcon className="size-3.5" />
+            <span className="text-foreground tabular-nums">{timeAgo(leaderboardData.timestamp)}</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <SharedIcons.StatTotalPlayCountIcon className="size-3.5" />
+            <span className="text-foreground font-semibold tabular-nums">{formatNumberWithCommas(leaderboardData.plays)}</span>
+            <span>plays</span>
+          </span>
+        </div>
+      )}
+    </section>
   );
 }

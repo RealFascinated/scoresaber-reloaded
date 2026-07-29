@@ -37,8 +37,7 @@ export const ReplayViewers: Record<string, ReplayViewer> = {
   chroviewer: {
     id: "chroviewer",
     name: "ChroViewer",
-    generateUrl: (id) =>
-      `https://replay.fascinated.cc/?scoreIdBL=${id}&autoplay=true`,
+    generateUrl: id => `https://replay.fascinated.cc/?scoreIdBL=${id}&autoplay=true`,
   },
 };
 

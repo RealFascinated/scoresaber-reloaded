@@ -88,12 +88,12 @@ export class PlayerSearchService {
     const tokens = foundPlayers?.data ?? [];
     const items = await Promise.all(
       tokens.map(async token => {
-        const player = await ScoreSaberPlayerService.getPlayer(token.id, "basic", token)
+        const player = await ScoreSaberPlayerService.getPlayer(token.id, "basic", token);
         return {
           ...player,
           contextualRank: token.rank,
           contextualCountryRank: token.countryRank,
-        }
+        };
       })
     );
 

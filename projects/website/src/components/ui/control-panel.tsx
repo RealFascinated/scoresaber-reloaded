@@ -3,9 +3,7 @@ import { ReactNode } from "react";
 import SimpleTooltip from "../simple-tooltip";
 
 export function ControlPanel({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={cn("rounded-xl ring-1 ring-border bg-card p-4", className)}>{children}</div>
-  );
+  return <div className={cn("ring-border bg-card rounded-xl p-4 ring-1", className)}>{children}</div>;
 }
 
 export function ControlRow({ children, className = "" }: { children: ReactNode; className?: string }) {

@@ -67,9 +67,9 @@ export function FriendRanking() {
             <SimpleLink
               key={player.id}
               href={`/player/${player.id}`}
-              className="flex items-center gap-4 rounded-xl bg-card ring-1 ring-border p-4 transition-colors hover:bg-muted/20"
+              className="bg-card ring-border hover:bg-muted/20 flex items-center gap-4 rounded-xl p-4 ring-1 transition-colors"
             >
-              <span className="font-mono text-sm font-semibold text-muted-foreground w-8 shrink-0 text-right">
+              <span className="text-muted-foreground w-8 shrink-0 text-right font-mono text-sm font-semibold">
                 #{player.rank}
               </span>
               <Avatar
@@ -79,13 +79,13 @@ export function FriendRanking() {
                 className="shrink-0"
               />
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="text-sm font-medium truncate">{player.name}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="truncate text-sm font-medium">{player.name}</span>
+                <span className="text-muted-foreground text-xs">
                   #{formatNumberWithCommas(player.countryRank)} · {player.country}
                 </span>
               </div>
-              <div className="text-right shrink-0">
-                <p className="text-sm font-semibold text-primary">{formatPp(player.pp)}pp</p>
+              <div className="shrink-0 text-right">
+                <p className="text-primary text-sm font-semibold">{formatPp(player.pp)}pp</p>
               </div>
             </SimpleLink>
           ))}

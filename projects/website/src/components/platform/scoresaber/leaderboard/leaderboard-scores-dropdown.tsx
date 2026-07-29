@@ -76,10 +76,10 @@ export default function LeaderboardScoresDropdown({
         </div>
       ) : (
         <>
-          <div className="relative overflow-x-auto rounded-xl ring-1 ring-border">
+          <div className="ring-border relative overflow-x-auto rounded-xl ring-1">
             <table className="table w-full min-w-[800px] table-auto border-spacing-0 text-left text-sm">
               <thead>
-                <tr className="border-b border-border/50">
+                <tr className="border-border/50 border-b">
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Rank</th>
                   <th className="text-foreground/90 px-3 py-3 font-semibold">Player</th>
                   <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Date Set</th>

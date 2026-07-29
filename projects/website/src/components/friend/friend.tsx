@@ -58,8 +58,7 @@ export default function Friend({ player, onClick }: FriendProps) {
             <span className="text-inactive-account text-xs">Inactive Account</span>
           ) : (
             <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
-              <CountryFlag code={player.country} size={5} />
-              #{formatNumberWithCommas(player.rank)}
+              <CountryFlag code={player.country} size={5} />#{formatNumberWithCommas(player.rank)}
             </span>
           )}
         </div>

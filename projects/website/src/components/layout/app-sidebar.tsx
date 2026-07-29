@@ -75,13 +75,7 @@ const socialLinks: SocialLinkType[] = [
   {
     name: "Discord",
     logo: (
-      <Image
-        className="size-5"
-        src="/assets/logos/discord.svg"
-        alt="Discord Logo"
-        width={20}
-        height={20}
-      />
+      <Image className="size-5" src="/assets/logos/discord.svg" alt="Discord Logo" width={20} height={20} />
     ),
     href: "https://discord.gg/kmNfWGA4A8",
   },
@@ -96,7 +90,12 @@ const navItems = [
   { id: "ranking", name: "Ranking", icon: SharedIcons.RankingNavIcon, href: "/ranking" },
   { id: "medals", name: "Medals", icon: SharedIcons.MedalsNavIcon, href: "/medals" },
   { id: "maps", name: "Leaderboards", icon: SharedIcons.MapsLeaderboardsTabIcon, href: "/maps/leaderboards" },
-  { id: "ranking-queue", name: "Ranking Queue", icon: SharedIcons.MapsRankingQueueTabIcon, href: "/maps/ranking-queue" },
+  {
+    id: "ranking-queue",
+    name: "Ranking Queue",
+    icon: SharedIcons.MapsRankingQueueTabIcon,
+    href: "/maps/ranking-queue",
+  },
   { id: "overlay", name: "Overlay", icon: SharedIcons.OverlayNavIcon, href: "/overlay/builder" },
   { id: "top-scores", name: "Top Scores", icon: SharedIcons.TopScoresNavIcon, href: "/scores/top" },
   { id: "score-feed", name: "Live Scores", icon: SharedIcons.GlobalScoresModeIcon, href: "/scores/live" },
@@ -113,7 +112,9 @@ function FriendsPopover() {
   const closeTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
-    if (isMobile) {return;}
+    if (isMobile) {
+      return;
+    }
     if (closeTimeout.current) {
       clearTimeout(closeTimeout.current);
     }
@@ -121,7 +122,9 @@ function FriendsPopover() {
   };
 
   const handleMouseLeave = () => {
-    if (isMobile) {return;}
+    if (isMobile) {
+      return;
+    }
     closeTimeout.current = setTimeout(() => setOpen(false), 200);
   };
 
@@ -131,7 +134,11 @@ function FriendsPopover() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <SidebarMenuButton onClick={() => isMobile && setOpen(prev => !prev)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+        <SidebarMenuButton
+          onClick={() => isMobile && setOpen(prev => !prev)}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
           <SharedIcons.FriendsNavIcon className="size-5" />
           <span>Friends</span>
           {friendCount > 0 && (
@@ -144,12 +151,12 @@ function FriendsPopover() {
       <PopoverContent
         side={isMobile ? "bottom" : "right"}
         sideOffset={isMobile ? 4 : 8}
-        className="flex max-h-[420px] flex-col overflow-hidden p-0 text-sm select-none w-screen md:w-[340px]"
+        className="flex max-h-[420px] w-screen flex-col overflow-hidden p-0 text-sm select-none md:w-[340px]"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border/50 px-3 py-2.5">
+        <div className="border-border/50 flex items-center justify-between border-b px-3 py-2.5">
           <div className="flex items-center gap-2">
             <SharedIcons.FriendsNavIcon className="text-muted-foreground size-4" />
             <span className="font-semibold">Friends</span>
@@ -171,8 +178,12 @@ function FriendsPopover() {
             <div className="flex flex-col gap-px">
               {friends
                 .sort((a, b) => {
-                  if (a.inactive && !b.inactive) {return 1;}
-                  if (!a.inactive && b.inactive) {return -1;}
+                  if (a.inactive && !b.inactive) {
+                    return 1;
+                  }
+                  if (!a.inactive && b.inactive) {
+                    return -1;
+                  }
                   return a.rank - b.rank;
                 })
                 .map(friend => (
@@ -265,7 +276,7 @@ export function AppSidebar() {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">SSR</span>
-                  <span className="truncate text-xs text-muted-foreground">ScoreSaber Reloaded</span>
+                  <span className="text-muted-foreground truncate text-xs">ScoreSaber Reloaded</span>
                 </div>
               </SimpleLink>
             </SidebarMenuButton>
@@ -330,7 +341,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </div>
 
-      <SidebarFooter className="border-t border-sidebar-border p-3">
+      <SidebarFooter className="border-sidebar-border border-t p-3">
         <div className="flex items-center justify-center gap-3">
           {socialLinks.map(link => (
             <SimpleLink

@@ -7,8 +7,8 @@ import { RankingQueueLeaderboard } from "@ssr/common/schemas/response/leaderboar
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import SimpleTooltip from "../../simple-tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
@@ -26,7 +26,7 @@ export default function RankingQueue() {
       <div className="flex flex-col gap-4">
         <h3 className="text-lg font-semibold">{name}</h3>
 
-        <div className="rounded-xl ring-1 ring-border bg-card overflow-hidden">
+        <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
           <Table>
             <TableHeader>
               <TableRow>
@@ -61,7 +61,7 @@ export default function RankingQueue() {
                     />
                   </TableCell>
                   <TableCell className="text-center text-xs">{leaderboard.difficultyCount}</TableCell>
-                  <TableCell className="text-center text-xs text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-center text-xs">
                     <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
                       <p className="inline-flex items-center justify-center gap-1">
                         <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -69,7 +69,7 @@ export default function RankingQueue() {
                       </p>
                     </SimpleTooltip>
                   </TableCell>
-                  <TableCell className="text-center text-xs text-muted-foreground">
+                  <TableCell className="text-muted-foreground text-center text-xs">
                     <SimpleTooltip display="Total plays on this leaderboard">
                       <p className="inline-flex items-center justify-center gap-1">
                         <SharedIcons.PlayMapIcon className="h-3 w-3" />

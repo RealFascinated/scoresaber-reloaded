@@ -33,12 +33,10 @@ export function FriendScores() {
   });
 
   return (
-    <div className="rounded-xl ring-1 ring-border bg-card p-5">
+    <div className="ring-border bg-card rounded-xl p-5 ring-1">
       <div className="mb-4">
         <h2 className="text-lg font-semibold">Friend Scores</h2>
-        <p className="text-muted-foreground mt-1 text-sm">
-          See the recent scores of your friends.
-        </p>
+        <p className="text-muted-foreground mt-1 text-sm">See the recent scores of your friends.</p>
       </div>
 
       {isLoading && !scoreData && (
@@ -54,11 +52,13 @@ export function FriendScores() {
             const leaderboard = playerScore.leaderboard;
             const beatSaverMap = playerScore.beatSaver;
             const player = score.playerInfo;
-            if (!player) {return null;}
+            if (!player) {
+              return null;
+            }
 
             return (
-              <div key={score.scoreId} className="rounded-xl ring-1 ring-border bg-card overflow-hidden">
-                <div className="flex items-center gap-2 border-b border-border/50 px-4 py-2">
+              <div key={score.scoreId} className="ring-border bg-card overflow-hidden rounded-xl ring-1">
+                <div className="border-border/50 flex items-center gap-2 border-b px-4 py-2">
                   <Avatar
                     src={player.avatar}
                     alt={`${player.name}'s Profile Picture`}
@@ -67,7 +67,7 @@ export function FriendScores() {
                   />
                   <SimpleLink
                     href={`/player/${player.id}`}
-                    className="text-sm font-medium hover:text-primary transition-colors"
+                    className="hover:text-primary text-sm font-medium transition-colors"
                   >
                     {player.name}
                   </SimpleLink>

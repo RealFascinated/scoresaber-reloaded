@@ -11,7 +11,7 @@ export function LeaderboardStatus({ leaderboard }: { leaderboard: ScoreSaberLead
   return (
     <div
       className={cn(
-        "rounded-md border p-(--spacing-md) py-(--spacing-xs) font-bold uppercase",
+        "w-fit rounded-md border px-2 py-0.5 text-xs font-bold uppercase",
         colors[leaderboard.status.toLowerCase() as keyof typeof colors]
       )}
     >

@@ -299,7 +299,7 @@ export default function OverlayBuilder() {
           </div>
 
           {/* Action Buttons */}
-          <div className="border-t border-border pt-4">
+          <div className="border-border border-t pt-4">
             <Button type="submit" className="w-full">
               Open Overlay
             </Button>

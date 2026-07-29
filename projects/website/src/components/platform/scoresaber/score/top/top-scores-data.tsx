@@ -1,8 +1,8 @@
 "use client";
 
 import Avatar from "@/components/avatar";
-import SimpleLink from "@/components/simple-link";
 import { PageTitle } from "@/components/page-title";
+import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -36,11 +36,13 @@ export function TopScoresData() {
         <div className="flex flex-col gap-4">
           {scores.items.map(({ score, leaderboard, beatSaver }) => {
             const player = score.playerInfo;
-            if (!player) {return null;}
+            if (!player) {
+              return null;
+            }
 
             return (
-              <div key={score.scoreId} className="rounded-xl ring-1 ring-border bg-card overflow-hidden">
-                <div className="flex items-center gap-2 border-b border-border/50 px-4 py-2">
+              <div key={score.scoreId} className="ring-border bg-card overflow-hidden rounded-xl ring-1">
+                <div className="border-border/50 flex items-center gap-2 border-b px-4 py-2">
                   <Avatar
                     src={player.avatar}
                     alt={`${player.name}'s Profile Picture`}
@@ -49,12 +51,12 @@ export function TopScoresData() {
                   />
                   <SimpleLink
                     href={`/player/${player.id}`}
-                    className="text-sm font-medium hover:text-primary transition-colors"
+                    className="hover:text-primary text-sm font-medium transition-colors"
                   >
                     {player.name}
                   </SimpleLink>
                   {score.rank > 0 && (
-                    <span className="text-xs text-muted-foreground ml-auto">
+                    <span className="text-muted-foreground ml-auto text-xs">
                       #{score.rank.toLocaleString()}
                     </span>
                   )}

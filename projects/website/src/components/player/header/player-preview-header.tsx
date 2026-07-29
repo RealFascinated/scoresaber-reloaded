@@ -36,7 +36,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
         {/* Name */}
         <SimpleLink
           href={`/player/${player.id}`}
-          className="hover:text-primary/80 text-3xl font-bold leading-tight tracking-tight transition-all"
+          className="hover:text-primary/80 text-3xl leading-tight font-bold tracking-tight transition-all"
           style={{
             color: getScoreSaberRoles(player)[0]?.color,
           }}
@@ -50,23 +50,23 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
             <>
               {/* Global rank */}
               <SimpleTooltip display={<span>Global Rank</span>} side="bottom">
-                <span className="text-white/85 flex items-center gap-1.5 font-medium">
-                  <SharedIcons.GlobalRankIcon className="text-white/50 size-3.5" />
-                  #{formatNumberWithCommas(player.rank)}
+                <span className="flex items-center gap-1.5 font-medium text-white/85">
+                  <SharedIcons.GlobalRankIcon className="size-3.5 text-white/50" />#
+                  {formatNumberWithCommas(player.rank)}
                 </span>
               </SimpleTooltip>
 
-              <span className="text-white/15 hidden sm:inline">|</span>
+              <span className="hidden text-white/15 sm:inline">|</span>
 
               {/* Country rank */}
               <SimpleTooltip display={<span>Country Rank</span>} side="bottom">
-                <span className="text-white/85 flex items-center gap-1.5 font-medium">
-                  <CountryFlag code={player.country} size={9} className="rounded-xs" />
-                  #{formatNumberWithCommas(player.countryRank)}
+                <span className="flex items-center gap-1.5 font-medium text-white/85">
+                  <CountryFlag code={player.country} size={9} className="rounded-xs" />#
+                  {formatNumberWithCommas(player.countryRank)}
                 </span>
               </SimpleTooltip>
 
-              <span className="text-white/15 hidden sm:inline">|</span>
+              <span className="hidden text-white/15 sm:inline">|</span>
             </>
           )}
 
@@ -78,18 +78,18 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
             </span>
           </SimpleTooltip>
 
-          <span className="text-white/15 hidden sm:inline">|</span>
+          <span className="hidden text-white/15 sm:inline">|</span>
 
           {/* Medals */}
           <SimpleTooltip display={<span>Medals</span>} side="bottom">
-            <span className="text-white/85 flex items-center gap-1.5 font-medium">
-              <SharedIcons.MedalsIcon className="text-white/50 size-3.5" />
+            <span className="flex items-center gap-1.5 font-medium text-white/85">
+              <SharedIcons.MedalsIcon className="size-3.5 text-white/50" />
               {formatNumberWithCommas(player.medals)}
             </span>
           </SimpleTooltip>
 
           {/* Compact inline streak */}
-          <span className="text-white/15 hidden sm:inline">|</span>
+          <span className="hidden text-white/15 sm:inline">|</span>
           <SimpleTooltip
             display={
               <div className="space-y-1">
@@ -98,17 +98,14 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
                   Current: <b>{formatNumberWithCommas(currentStreak)}</b>
                 </p>
                 <p>
-                  Best:{" "}
-                  <b>
-                    {formatNumberWithCommas(Math.max(player.longestStreak, 0))}
-                  </b>
+                  Best: <b>{formatNumberWithCommas(Math.max(player.longestStreak, 0))}</b>
                 </p>
               </div>
             }
             side="bottom"
             showOnMobile
           >
-            <span className="text-white/85 flex items-center gap-1.5 font-medium">
+            <span className="flex items-center gap-1.5 font-medium text-white/85">
               <SharedIcons.PlayerStreakIcon className="size-3.5 text-orange-400" />
               {formatNumberWithCommas(currentStreak)}
             </span>

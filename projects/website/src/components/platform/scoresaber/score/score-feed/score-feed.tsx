@@ -2,10 +2,10 @@
 
 import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
+import { PageTitle } from "@/components/page-title";
 import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
 import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
-import { PageTitle } from "@/components/page-title";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import { getHMDInfo } from "@ssr/common/hmds";
@@ -91,9 +91,7 @@ function FeedEmptyState({ variant }: { variant: EmptyVariant }) {
     );
   }
 
-  return (
-    <p className="text-muted-foreground py-12 text-center text-sm">{EMPTY_COPY[variant]}</p>
-  );
+  return <p className="text-muted-foreground py-12 text-center text-sm">{EMPTY_COPY[variant]}</p>;
 }
 
 function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
@@ -109,8 +107,8 @@ function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
         const leaderboard = scoreToken.leaderboard;
 
         return (
-          <div key={score.scoreId} className="rounded-xl ring-1 ring-border bg-card overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-border/50 px-4 py-2">
+          <div key={score.scoreId} className="ring-border bg-card overflow-hidden rounded-xl ring-1">
+            <div className="border-border/50 flex items-center gap-2 border-b px-4 py-2">
               <Avatar
                 src={player?.avatar ?? ""}
                 alt={`${player?.name ?? "Unknown"}'s Profile Picture`}
@@ -119,15 +117,13 @@ function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
               />
               <SimpleLink
                 href={`/player/${player?.id}`}
-                className="text-sm font-medium hover:text-primary transition-colors"
+                className="hover:text-primary text-sm font-medium transition-colors"
               >
                 {player?.name ?? "Unknown"}
               </SimpleLink>
-              <div className="flex items-center gap-2 ml-auto">
+              <div className="ml-auto flex items-center gap-2">
                 <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd)} />
-                <span className="text-xs text-muted-foreground">
-                  {score.hmd ?? "Unknown device"}
-                </span>
+                <span className="text-muted-foreground text-xs">{score.hmd ?? "Unknown device"}</span>
               </div>
             </div>
             <ScoreSaberScoreDisplay
@@ -192,7 +188,15 @@ export default function ScoreFeed() {
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
-        <PageTitle title="Live Scores" description={<>New scores from ScoreSaber appear here as they are submitted. The list keeps the {LIVE_FEED_MAX_ITEMS} most recent plays.</>} />
+        <PageTitle
+          title="Live Scores"
+          description={
+            <>
+              New scores from ScoreSaber appear here as they are submitted. The list keeps the{" "}
+              {LIVE_FEED_MAX_ITEMS} most recent plays.
+            </>
+          }
+        />
         <FeedConnectionStatus readyState={readyState} />
       </div>
       <FeedBody phase={phase} />

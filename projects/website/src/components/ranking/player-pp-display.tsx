@@ -6,10 +6,7 @@ type PlayerPpDisplayProps = {
   className?: string;
 };
 
-export function PlayerPpDisplay({
-  pp,
-  className,
-}: PlayerPpDisplayProps) {
+export function PlayerPpDisplay({ pp, className }: PlayerPpDisplayProps) {
   return (
     <div className={cn("flex flex-col items-center lg:flex-row lg:gap-3", className)}>
       <span className="text-pp text-sm font-bold">{formatPp(pp)}pp</span>

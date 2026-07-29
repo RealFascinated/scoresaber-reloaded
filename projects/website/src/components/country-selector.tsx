@@ -1,9 +1,15 @@
 "use client";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import CountryFlag from "@/components/ui/country-flag";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { pluralize } from "@ssr/common/utils/string.util";
-import Combobox from "./ui/combo-box";
-import CountryFlag from "./ui/country-flag";
 
 type CountrySelectorProps = {
   value?: string;
@@ -16,54 +22,74 @@ type CountrySelectorProps = {
   countNoun?: string;
 };
 
+const CLEAR_VALUE = "__clear__";
+
 export default function CountrySelector({
   value,
   onValueChange,
   className,
   clearable,
-  placeholder,
+  placeholder = "All countries",
   prioritizeCountry,
   counts,
   countNoun = "player",
 }: CountrySelectorProps) {
   const hasCounts = counts != undefined;
 
-  return (
-    <Combobox<string | undefined>
-      className={className}
-      clearable={clearable}
-      items={countryFilter
-        .map(country => {
-          const count = counts?.[country.key];
+  const items = countryFilter
+    .map(country => {
+      const count = counts?.[country.key];
+      return {
+        value: country.key,
+        name: country.friendlyName,
+        count,
+      };
+    })
+    .sort((a, b) => {
+      if (prioritizeCountry && a.value === prioritizeCountry) return -1;
+      if (prioritizeCountry && b.value === prioritizeCountry) return 1;
+      return 0;
+    });
 
-          return {
-            value: country.key,
-            name: (
-              <div className="flex w-full min-w-0 items-center justify-between">
-                <span className="truncate">{country.friendlyName}</span>
-                {hasCounts && count != undefined && (
-                  <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap">
-                    {count.toLocaleString()} {pluralize(count, countNoun)}
-                  </span>
-                )}
-              </div>
-            ),
-            displayName: country.friendlyName,
-            icon: <CountryFlag code={country.key} size={12} />,
-          };
-        })
-        .sort((a, b) => {
-          if (prioritizeCountry && a.value === prioritizeCountry) {
-            return -1;
-          }
-          if (prioritizeCountry && b.value === prioritizeCountry) {
-            return 1;
-          }
-          return 0;
-        })}
-      value={value}
-      onValueChange={onValueChange}
-      placeholder={placeholder}
-    />
+  return (
+    <Select
+      value={value ?? CLEAR_VALUE}
+      onValueChange={val => onValueChange(val === CLEAR_VALUE ? undefined : val)}
+    >
+      <SelectTrigger className={className}>
+        <SelectValue placeholder={placeholder}>
+          {value ? (
+            <div className="flex items-center gap-2">
+              <CountryFlag code={value} size={12} />
+              <span>{countryFilter.find(c => c.key === value)?.friendlyName ?? value}</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {clearable && (
+          <SelectItem value={CLEAR_VALUE}>
+            <span className="text-muted-foreground">{placeholder}</span>
+          </SelectItem>
+        )}
+        {items.map(item => (
+          <SelectItem key={item.value} value={item.value}>
+            <div className="flex w-full min-w-0 items-center justify-between gap-2">
+              <span className="flex items-center gap-2 truncate">
+                <CountryFlag code={item.value} size={12} />
+                <span className="truncate">{item.name}</span>
+              </span>
+              {hasCounts && item.count != undefined && (
+                <span className="text-muted-foreground ml-4 text-sm whitespace-nowrap tabular-nums">
+                  {item.count.toLocaleString()} {pluralize(item.count, countNoun)}
+                </span>
+              )}
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

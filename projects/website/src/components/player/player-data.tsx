@@ -87,13 +87,13 @@ export default function PlayerData({ player }: PlayerDataProps) {
         <PlayerHeader player={player} />
 
         {player.badges.length > 0 && (
-          <div className="rounded-xl ring-1 ring-border bg-card p-4">
+          <div className="ring-border bg-card rounded-xl p-4 ring-1">
             <PlayerBadges player={player} />
           </div>
         )}
 
         {!player.inactive && (
-          <div className="rounded-xl ring-1 ring-border bg-card p-4">
+          <div className="ring-border bg-card rounded-xl p-4 ring-1">
             <PlayerViews player={player} key={player.id} />
           </div>
         )}
@@ -117,7 +117,7 @@ export default function PlayerData({ player }: PlayerDataProps) {
       </div>
 
       {showRankings && (
-        <aside className="w-full md:w-96 shrink-0">
+        <aside className="w-full shrink-0 md:w-96">
           <PlayerMiniRankings player={player} />
         </aside>
       )}

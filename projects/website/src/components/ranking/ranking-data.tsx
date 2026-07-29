@@ -1,30 +1,30 @@
 "use client";
 
 import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
-import SimpleLink from "@/components/simple-link";
+import { cn } from "@/common/utils";
 import CountrySelector from "@/components/country-selector";
+import { PageTitle } from "@/components/page-title";
+import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
-import { useRouter } from "next/navigation";
-import { PageTitle } from "@/components/page-title";
 import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
-import { cn } from "@/common/utils";
 import { SharedIcons } from "@/shared-icons";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
+import { PlayerAvatar } from "../ranking/player-avatar";
 import { Button } from "../ui/button";
 import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
 import { Input } from "../ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { PlayerAvatar } from "../ranking/player-avatar";
 
 type RankingDataProps = {
   initialPage: number;
@@ -66,11 +66,13 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <PageTitle title="Ranking" description="View players ranked by performance points globally or by country" />
+      <PageTitle
+        title="Ranking"
+        description="View players ranked by performance points globally or by country"
+      />
 
       <div className="flex w-full flex-col gap-4 md:flex-row md:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
-
           {!rankingData && !isError && (
             <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
           )}
@@ -89,14 +91,14 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 
           {rankingData && (
             <div className="flex flex-col gap-4">
-              <div className="rounded-xl ring-1 ring-border overflow-hidden bg-card">
+              <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-20">Rank</TableHead>
                       <TableHead className="w-20">Country</TableHead>
                       <TableHead>Player</TableHead>
-                      <TableHead className="text-right w-24">PP</TableHead>
+                      <TableHead className="w-24 text-right">PP</TableHead>
                       <TableHead className="w-10"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -113,18 +115,14 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                         <TableCell className="py-2">
                           <div className="flex items-center gap-2">
                             <CountryFlag code={player.country} size={14} />
-                            <span className="font-mono text-sm text-foreground">
-                              #{player.countryRank}
-                            </span>
+                            <span className="text-foreground font-mono text-sm">#{player.countryRank}</span>
                           </div>
                         </TableCell>
                         <TableCell className="py-2">
                           <PlayerTableName player={player} />
                         </TableCell>
                         <TableCell className="py-2 text-right">
-                          <span className="font-semibold text-primary">
-                            {formatPp(player.pp)}
-                          </span>
+                          <span className="text-primary font-semibold">{formatPp(player.pp)}</span>
                         </TableCell>
                         <TableCell className="py-2">
                           <AddFriend player={player} className="bg-ssr rounded-full p-1.5" iconOnly />
@@ -147,7 +145,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
           )}
         </div>
 
-        <div className="w-full md:w-96 shrink-0">
+        <div className="w-full shrink-0 md:w-96">
           <FilterSection
             title="Filters"
             description="Filter players by country or search"
