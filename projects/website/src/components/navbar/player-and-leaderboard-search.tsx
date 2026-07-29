@@ -87,16 +87,16 @@ export default function PlayerAndLeaderboardSearch() {
   return (
     <>
       <div
-        className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-center rounded-xl border px-2 backdrop-blur-xs transition-all duration-200 select-none sm:min-w-16 xl:w-48 xl:justify-start xl:px-(--spacing-sm)"
+        className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-start gap-2 rounded-xl border px-2 backdrop-blur-xs transition-all duration-200 select-none"
         onClick={openSearch}
       >
         <SharedIcons.SearchLeaderboardsPlayersIcon className="text-muted-foreground size-5" />
 
-        <p className="text-muted-foreground group-hover:text-foreground hidden flex-1 px-(--spacing-sm) text-sm transition-colors duration-200 xl:block">
+        <p className="text-muted-foreground group-hover:text-foreground flex-1 text-sm transition-colors duration-200">
           Query...
         </p>
 
-        <div className="hidden shrink-0 xl:flex">
+        <div className="shrink-0">
           <kbd className="bg-muted/80 text-muted-foreground pointer-events-none inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs font-medium shadow-xs select-none">
             <span className="text-xs">⌘</span>K
           </kbd>

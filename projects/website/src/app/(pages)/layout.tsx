@@ -1,12 +1,11 @@
-import { getBuildInformation } from "@/common/website-utils";
 import { ApiHealth } from "@/components/api/api-health";
 import BackgroundCover from "@/components/background-cover";
 import { SnowBackground } from "@/components/effects/snow-background";
-import Footer from "@/components/footer";
 import DatabaseLoader from "@/components/loaders/database-loader";
 import MeowMeow from "@/components/meow-meow";
-import Navbar from "@/components/navbar/navbar";
+import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SearchProvider } from "@/components/providers/search-provider";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import ThemeProvider from "@/components/providers/theme-provider";
 import SSRLayout from "@/components/ssr-layout";
 import { SiteTheme, ssrConfig } from "config";
@@ -14,7 +13,6 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ReactNode } from "react";
 
 export default function Layout({ children }: { children: ReactNode }) {
-  const { buildId, buildTimeShort } = getBuildInformation();
 
   return (
     <ThemeProvider
@@ -29,13 +27,19 @@ export default function Layout({ children }: { children: ReactNode }) {
           <BackgroundCover />
           <SnowBackground />
           <ApiHealth />
-          <main className="flex min-h-screen w-full flex-col text-white">
+          <SidebarProvider defaultOpen={true}>
             <SearchProvider>
-              <Navbar />
-              <SSRLayout className="flex flex-col gap-2 px-2 pt-2">{children}</SSRLayout>
+              <AppSidebar />
+              <SidebarInset className="text-white">
+                <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/80 px-4">
+                  <SidebarTrigger className="-ml-1" />
+                </header>
+                <div className="flex min-w-0 flex-1 flex-col px-3 py-6 sm:px-4">
+                  <SSRLayout className="flex flex-col gap-2">{children}</SSRLayout>
+                </div>
+              </SidebarInset>
             </SearchProvider>
-          </main>
-          <Footer buildId={buildId} buildTimeShort={buildTimeShort} />
+          </SidebarProvider>
         </NuqsAdapter>
       </DatabaseLoader>
     </ThemeProvider>

@@ -1,7 +1,7 @@
 import { type SIDE_OPTIONS } from "@radix-ui/react-popper";
 import { clsx } from "clsx";
 import React from "react";
-import { Tooltip } from "./ui/tooltip";
+import { Tooltip } from "./ui/tooltip-custom";
 
 export default function SimpleTooltip({
   children,

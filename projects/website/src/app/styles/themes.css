@@ -23,6 +23,16 @@
   --input: hsl(12 6.5% 45.1%);
   --ring: hsl(24 5.7% 82.9%);
 
+  /* Sidebar Colors — slightly lighter than main background for visual separation */
+  --sidebar-background: hsl(40, 8%, 6.5%);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: hsl(12, 4%, 18%);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: hsl(12, 6.5%, 18%);
+  --sidebar-ring: var(--ring);
+
   /* SSR Colors */
   --pp: #5c6bff;
   --ssr: #5c6bff;
@@ -183,6 +193,15 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
   --animate-shiny-text: shiny-text 8s infinite;
   --animate-border-beam: border-beam calc(var(--duration) * 1s) infinite linear;
