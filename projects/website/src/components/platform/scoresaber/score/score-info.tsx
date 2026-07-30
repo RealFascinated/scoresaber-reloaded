@@ -24,7 +24,6 @@ export default function ScoreSaberScoreInfo({
   return (
     <div className="flex w-full flex-row items-center justify-between lg:w-[120px] lg:flex-col lg:justify-center">
       <div className="flex items-center gap-1">
-        <SharedIcons.GlobalRankIcon className="size-5" />
         {score.rank === -1 ? (
           <SimpleTooltip display="Unknown Score Rank">
             <p className="font-semibold">#-</p>
@@ -36,7 +35,7 @@ export default function ScoreSaberScoreInfo({
             <p
               className={cn(
                 getRankColor(score.rank),
-                "hover:text-primary/80 cursor-pointer font-semibold transition-all"
+                "hover:text-primary/80 cursor-pointer text-base font-bold transition-all"
               )}
             >
               #{formatNumberWithCommas(score.rank)}
@@ -45,7 +44,9 @@ export default function ScoreSaberScoreInfo({
         )}
         {hmd.logo && (
           <ScoreSaberScoreHMD score={score}>
-            <SharedIcons.HeadMountedDisplayIcon hmd={hmd} />
+            <span className="flex items-center">
+              <SharedIcons.HeadMountedDisplayIcon hmd={hmd} />
+            </span>
           </ScoreSaberScoreHMD>
         )}
       </div>

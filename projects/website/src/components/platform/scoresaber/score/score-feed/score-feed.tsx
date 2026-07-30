@@ -122,7 +122,9 @@ function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
                 {player?.name ?? "Unknown"}
               </SimpleLink>
               <div className="ml-auto flex items-center gap-2">
-                <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd)} />
+                <span className="flex items-center">
+                  <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd)} />
+                </span>
                 <span className="text-muted-foreground text-xs">{score.hmd ?? "Unknown device"}</span>
               </div>
             </div>

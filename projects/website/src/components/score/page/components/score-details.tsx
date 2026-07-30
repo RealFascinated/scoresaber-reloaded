@@ -54,7 +54,9 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
             </span>
             {score.hmd && (
               <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd)} />
+                <span className="flex items-center">
+                  <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd)} />
+                </span>
                 <span className="hidden sm:inline">{score.hmd}</span>
               </span>
             )}

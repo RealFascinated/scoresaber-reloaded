@@ -58,7 +58,9 @@ export default function ScoreSaberLeaderboardScore({
           {scorePlayer ? (
             <>
               <ScoreSaberScoreHMD score={score}>
-                <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd as HMD)} />
+                <span className="flex items-center">
+                  <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd as HMD)} />
+                </span>
               </ScoreSaberScoreHMD>
               <PlayerInfo
                 player={scorePlayer}

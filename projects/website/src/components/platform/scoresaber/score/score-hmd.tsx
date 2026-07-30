@@ -16,7 +16,10 @@ export function ScoreSaberScoreHMD({
         <div className="flex flex-col gap-2">
           {score.hmd !== "Unknown" && score.hmd !== undefined ? (
             <div className="flex items-center gap-2">
-              Score was set using a <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd as HMD)} />{" "}
+              Score was set using a{" "}
+              <span className="flex items-center">
+                <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd as HMD)} />
+              </span>{" "}
               <span className="font-semibold">{score.hmd}</span>
             </div>
           ) : (
