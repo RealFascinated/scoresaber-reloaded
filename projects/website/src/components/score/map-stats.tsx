@@ -1,4 +1,3 @@
-import StatValue from "@/components/statistic/stat-value";
 import { SharedIcons } from "@/shared-icons";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
@@ -14,48 +13,59 @@ type MapAndScoreData = {
 export function MapStats({ beatSaver }: MapAndScoreData) {
   const metadata = beatSaver.metadata;
 
+  if (!beatSaver.difficulty) {
+    return null;
+  }
+
   return (
-    <div className="flex flex-col gap-2">
-      {/* Map Stats */}
-      {beatSaver.difficulty && (
-        <div className="flex flex-wrap justify-center gap-2">
-          <StatValue
-            name="Length"
-            icon={<SharedIcons.MapLengthStatIcon className="h-4 w-4" />}
-            value={formatTime(metadata.duration)}
-          />
-          <StatValue
-            name="BPM"
-            icon={<SharedIcons.MapBpmStatIcon className="h-4 w-4" />}
-            value={formatNumberWithCommas(metadata.bpm)}
-          />
-          <StatValue
-            name="NPS"
-            icon={<SharedIcons.MapNpsStatIcon className="h-4 w-4" />}
-            value={beatSaver.difficulty.nps.toFixed(2)}
-          />
-          <StatValue
-            name="NJS"
-            icon={<SharedIcons.MapNjsStatIcon className="h-4 w-4" />}
-            value={beatSaver.difficulty.njs.toFixed(2)}
-          />
-          <StatValue
-            name="Notes"
-            icon={<SharedIcons.MapNotesStatIcon className="h-4 w-4" />}
-            value={formatNumberWithCommas(beatSaver.difficulty.notes)}
-          />
-          <StatValue
-            name="Bombs"
-            icon={<SharedIcons.MapBombsStatIcon className="h-4 w-4" />}
-            value={formatNumberWithCommas(beatSaver.difficulty.bombs)}
-          />
-          <StatValue
-            name="Obstacles"
-            icon={<SharedIcons.MapObstaclesStatIcon className="h-4 w-4" />}
-            value={formatNumberWithCommas(beatSaver.difficulty.obstacles)}
-          />
-        </div>
-      )}
+    <div className="text-muted-foreground flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs">
+      <span className="flex items-center gap-1.5">
+        <SharedIcons.MapLengthStatIcon className="size-3.5" />
+        <span className="text-foreground font-semibold tabular-nums">{formatTime(metadata.duration)}</span>
+        <span>Length</span>
+      </span>
+      <span className="flex items-center gap-1.5">
+        <SharedIcons.MapBpmStatIcon className="size-3.5" />
+        <span className="text-foreground font-semibold tabular-nums">
+          {formatNumberWithCommas(metadata.bpm)}
+        </span>
+        <span>BPM</span>
+      </span>
+      <span className="flex items-center gap-1.5">
+        <SharedIcons.MapNpsStatIcon className="size-3.5" />
+        <span className="text-foreground font-semibold tabular-nums">
+          {beatSaver.difficulty.nps.toFixed(2)}
+        </span>
+        <span>NPS</span>
+      </span>
+      <span className="flex items-center gap-1.5">
+        <SharedIcons.MapNjsStatIcon className="size-3.5" />
+        <span className="text-foreground font-semibold tabular-nums">
+          {beatSaver.difficulty.njs.toFixed(2)}
+        </span>
+        <span>NJS</span>
+      </span>
+      <span className="flex items-center gap-1.5">
+        <SharedIcons.MapNotesStatIcon className="size-3.5" />
+        <span className="text-foreground font-semibold tabular-nums">
+          {formatNumberWithCommas(beatSaver.difficulty.notes)}
+        </span>
+        <span>Notes</span>
+      </span>
+      <span className="flex items-center gap-1.5">
+        <SharedIcons.MapBombsStatIcon className="size-3.5" />
+        <span className="text-foreground font-semibold tabular-nums">
+          {formatNumberWithCommas(beatSaver.difficulty.bombs)}
+        </span>
+        <span>Bombs</span>
+      </span>
+      <span className="flex items-center gap-1.5">
+        <SharedIcons.MapObstaclesStatIcon className="size-3.5" />
+        <span className="text-foreground font-semibold tabular-nums">
+          {formatNumberWithCommas(beatSaver.difficulty.obstacles)}
+        </span>
+        <span>Obstacles</span>
+      </span>
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import Card from "@/components/card";
 import { FancyLoader } from "@/components/fancy-loader";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
-import { MapStats } from "@/components/score/map-stats";
 import { SharedIcons } from "@/shared-icons";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -83,7 +82,6 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
   // Check if we have any additional data to show
   const hasScoreStats = !!scoreStats;
   const hasReplay = !!replay;
-  const hasBeatSaver = !!score.beatSaver;
   const hasAnyAdditionalData = hasScoreStats || hasReplay;
   const isAnyDataLoading = isScoreStatsLoading || isReplayLoading;
 
@@ -91,43 +89,21 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
     <div className="flex w-full flex-col gap-4">
       <ScoreDetails score={score} />
 
-      {hasBeatSaver && (
-        <Card className="rounded-xl">
-          <MapStats beatSaver={score.beatSaver} />
-        </Card>
-      )}
-
       {isAnyDataLoading && (
-        <Card className="flex flex-col items-center justify-center gap-4 py-8">
+        <div className="ring-border bg-card flex flex-col items-center justify-center gap-4 rounded-xl py-8 ring-1">
           <SharedIcons.PageLoadingIcon className="text-primary size-8 animate-spin" />
           <p className="text-muted-foreground">Loading additional score data...</p>
-        </Card>
+        </div>
       )}
 
       {!hasAnyAdditionalData && !isAnyDataLoading ? (
-        <Card className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="mb-6 flex flex-col items-center gap-4">
-            <SharedIcons.WarningAlertIcon className="size-16 text-amber-500" />
-            <h2 className="text-xl font-semibold">Limited Score Data</h2>
-          </div>
-
-          <div className="mb-6 flex flex-col gap-3 text-left">
-            {!hasScoreStats && (
-              <div className="flex items-center gap-3">
-                <SharedIcons.StatsUnavailableIcon className="text-muted-foreground size-5" />
-                <span className="text-muted-foreground">Score statistics unavailable</span>
-              </div>
-            )}
-            {!hasReplay && (
-              <div className="flex items-center gap-3">
-                <SharedIcons.MissingContentIcon className="text-muted-foreground size-5" />
-                <span className="text-muted-foreground">Replay analysis data unavailable</span>
-              </div>
-            )}
-          </div>
-
-          <p className="text-muted-foreground text-sm">Some data may not be available for this score.</p>
-        </Card>
+        <div className="ring-border bg-card flex flex-col items-center justify-center gap-2 rounded-xl py-8 text-center ring-1">
+          <SharedIcons.LeaderboardEmptyStateIcon className="text-muted-foreground size-10" />
+          <h3 className="font-semibold">Basic Score View</h3>
+          <p className="text-muted-foreground max-w-sm text-sm">
+            Advanced stats and replay analysis are only available for scores tracked by BeatLeader.
+          </p>
+        </div>
       ) : (
         <div className="flex flex-col gap-4">
           {scoreStats && (

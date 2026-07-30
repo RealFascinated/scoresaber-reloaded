@@ -1,6 +1,4 @@
-import Card from "@/components/card";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
-import { MapStats } from "@/components/score/map-stats";
 import ScoreDetails from "@/components/score/page/components/score-details";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
@@ -106,49 +104,24 @@ export default async function ScorePage({ params }: ScorePageProps) {
   // Check if we have any additional data to show
   const hasScoreStats = !!scoreStats;
   const hasReplay = !!replay;
-  const hasBeatSaver = !!score.beatSaver;
   const hasAnyAdditionalData = hasScoreStats || hasReplay;
 
   return (
     <div className="flex w-full flex-col gap-4">
       <ScoreDetails score={score} />
 
-      {hasBeatSaver && (
-        <Card className="rounded-xl">
-          <MapStats beatSaver={score.beatSaver} />
-        </Card>
-      )}
-
       {!hasAnyAdditionalData ? (
-        <Card className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="mb-6 flex flex-col items-center gap-4">
-            <SharedIcons.WarningAlertIcon className="size-16 text-amber-500" />
-            <h2 className="text-xl font-semibold">Limited Score Data</h2>
-          </div>
-
-          <div className="mb-6 flex flex-col gap-3 text-left">
-            {!hasScoreStats && (
-              <div className="flex items-center gap-3">
-                <SharedIcons.StatsUnavailableIcon className="text-muted-foreground size-5" />
-                <span className="text-muted-foreground">Score statistics unavailable</span>
-              </div>
-            )}
-            {!hasReplay && (
-              <div className="flex items-center gap-3">
-                <SharedIcons.MissingContentIcon className="text-muted-foreground size-5" />
-                <span className="text-muted-foreground">Replay analysis data unavailable</span>
-              </div>
-            )}
-          </div>
-
-          <p className="text-muted-foreground text-sm">Some data may not be available for this score.</p>
-        </Card>
+        <div className="ring-border bg-card flex flex-col items-center justify-center gap-2 rounded-xl py-8 text-center ring-1">
+          <SharedIcons.LeaderboardEmptyStateIcon className="text-muted-foreground size-10" />
+          <h3 className="font-semibold">Basic Score View</h3>
+          <p className="text-muted-foreground max-w-sm text-sm">
+            Advanced stats and replay analysis are only available for scores tracked by BeatLeader.
+          </p>
+        </div>
       ) : (
         <div className="flex flex-col gap-4">
           {scoreStats && (
-            <>
-              <ScoreOverview score={score.score} scoreStats={scoreStats} leaderboard={score.leaderboard} />
-            </>
+            <ScoreOverview score={score.score} scoreStats={scoreStats} leaderboard={score.leaderboard} />
           )}
 
           {replay && (
