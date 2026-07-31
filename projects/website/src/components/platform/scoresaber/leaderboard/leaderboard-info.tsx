@@ -4,21 +4,28 @@ import FallbackLink from "@/components/fallback-link";
 import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-button";
 import { OneClickInstallButton } from "@/components/leaderboard/button/one-click-install-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
+import ScoreButton from "@/components/score/button/score-button";
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SharedIcons } from "@/shared-icons";
+import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 import NextImage from "next/image";
+import { LeaderboardStarChangeHistory } from "./leaderboard-star-change-history";
 import { LeaderboardStatus } from "./leaderboard-status";
 
 type LeaderboardInfoProps = {
   leaderboard: LeaderboardResponse;
+  starChangeHistory: LeaderboardStarChange[];
 };
 
-export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
+export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardInfoProps) {
   const { leaderboard: leaderboardData, beatsaver } = leaderboard;
+
+  const showStarHistory = leaderboardData.ranked && starChangeHistory.length > 0;
 
   return (
     <section className="flex w-full flex-col gap-5">
@@ -62,12 +69,29 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           </p>
 
           {/* Map action buttons */}
-          {beatsaver && (
+          {(beatsaver || showStarHistory) && (
             <div className="flex items-center justify-center gap-1 sm:justify-start">
-              <ScoreCopyBsrButton beatSaverMap={beatsaver} />
-              <BeatSaverMapButton beatSaverMap={beatsaver} />
-              <MapPreviewButton leaderboard={leaderboardData} beatSaverMap={beatsaver} />
-              <OneClickInstallButton beatSaverMap={beatsaver} />
+              {beatsaver && (
+                <>
+                  <ScoreCopyBsrButton beatSaverMap={beatsaver} />
+                  <BeatSaverMapButton beatSaverMap={beatsaver} />
+                  <MapPreviewButton leaderboard={leaderboardData} beatSaverMap={beatsaver} />
+                  <OneClickInstallButton beatSaverMap={beatsaver} />
+                </>
+              )}
+              {showStarHistory && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <ScoreButton tooltip={<p>View Star History Graph</p>}>
+                      <SharedIcons.LeaderboardStarHistoryIcon className="h-4 w-4" />
+                    </ScoreButton>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-4xl">
+                    <DialogTitle>Star History</DialogTitle>
+                    <LeaderboardStarChangeHistory starChangeHistory={starChangeHistory} />
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           )}
         </div>
