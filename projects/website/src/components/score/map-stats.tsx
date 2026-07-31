@@ -18,7 +18,7 @@ export function MapStats({ beatSaver }: MapAndScoreData) {
   }
 
   return (
-    <div className="text-muted-foreground flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs">
+    <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs">
       <span className="flex items-center gap-1.5">
         <SharedIcons.MapLengthStatIcon className="size-3.5" />
         <span className="text-foreground font-semibold tabular-nums">{formatTime(metadata.duration)}</span>

@@ -1,6 +1,7 @@
 import { Colors } from "@/common/colors";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { PageTransitionProvider } from "@/contexts/page-transition-context";
 import { env } from "@ssr/common/env";
 import { ssrConfig } from "config";
@@ -78,7 +79,9 @@ export default function RootLayout({
         <Toaster />
         <LazyMotion features={domAnimation} strict>
           <PageTransitionProvider>
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
+            </QueryProvider>
           </PageTransitionProvider>
         </LazyMotion>
       </body>

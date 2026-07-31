@@ -8,8 +8,7 @@ export type ScoreModeType = {
   name: string;
   id: ScoreModeEnum;
   color: string;
-  hoverColor: string;
-  icon: ReactElement<any>;
+  icon: ReactElement;
 };
 
 export enum ScoreModeEnum {
@@ -22,22 +21,19 @@ export const scoreModes: ScoreModeType[] = [
   {
     name: "Global",
     id: ScoreModeEnum.Global,
-    color: "bg-primary/15 border-primary text-primary",
-    hoverColor: "hover:border-primary hover:text-primary",
+    color: "bg-primary/40 border-primary text-primary-foreground",
     icon: <SharedIcons.GlobalScoresModeIcon className="h-4 w-4" />,
   },
   {
     name: "Friends",
     id: ScoreModeEnum.Friends,
-    color: "bg-friends/15 border-friends text-friends",
-    hoverColor: "hover:border-friends hover:text-friends",
+    color: "bg-friends/40 border-friends text-primary-foreground",
     icon: <SharedIcons.FriendsScoresModeIcon className="h-4 w-4" />,
   },
   {
     name: "History",
     id: ScoreModeEnum.History,
-    color: "bg-history/15 border-history text-history",
-    hoverColor: "hover:border-history hover:text-history",
+    color: "bg-history/40 border-history text-primary-foreground",
     icon: <SharedIcons.HistoryScoresModeIcon className="h-4 w-4" />,
   },
 ];
@@ -57,6 +53,7 @@ export default function ScoreModeSwitcher({ initialMode, onModeChange }: ScoreMo
           <Tab
             key={mode.id}
             isActive={mode.id === selectedMode}
+            activeClassName={mode.color}
             onClick={() => {
               setSelectedMode(mode.id);
               if (onModeChange) {
@@ -71,29 +68,4 @@ export default function ScoreModeSwitcher({ initialMode, onModeChange }: ScoreMo
       </TabGroup>
     </ControlRow>
   );
-
-  // return (
-  //   <div className="flex flex-wrap items-center justify-center gap-(--spacing-sm)">
-  //     {scoreModes.map(mode => (
-  //       <Button
-  //         key={mode.name}
-  //         variant={selectedMode === mode.id ? "default" : "ghost"}
-  //         className={cn(
-  //           "flex items-center gap-2 px-(--spacing-lg) py-(--spacing-sm) transition-all duration-200",
-  //           mode.hoverColor,
-  //           selectedMode === mode.id ? `${mode.color} font-bold` : "hover:bg-accent/80"
-  //         )}
-  //         onClick={() => {
-  //           setSelectedMode(mode.id);
-  //           if (onModeChange) {
-  //             onModeChange(mode.id);
-  //           }
-  //         }}
-  //       >
-  //         <span>{mode.icon}</span>
-  //         <span>{mode.name}</span>
-  //       </Button>
-  //     ))}
-  //   </div>
-  // );
 }

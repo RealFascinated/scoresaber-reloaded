@@ -4,6 +4,7 @@ import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderb
 import ScoreModeSwitcher, { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -76,28 +77,25 @@ export default function LeaderboardScoresDropdown({
         </div>
       ) : (
         <>
-          <div className="ring-border relative overflow-x-auto rounded-xl ring-1">
-            <table className="table w-full min-w-[800px] table-auto border-spacing-0 text-left text-sm">
-              <thead>
-                <tr className="border-border/50 border-b">
-                  <th className="text-foreground/90 px-3 py-3 font-semibold">Rank</th>
-                  <th className="text-foreground/90 px-3 py-3 font-semibold">Player</th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Date Set</th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Accuracy</th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Misses</th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">
-                    {leaderboard.stars > 0 ? "PP" : "Score"}
-                  </th>
-                  <th className="text-foreground/90 px-3 py-3 text-center font-semibold">Mods</th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-
-              {noScores && (
-                <tbody className="text-center">
-                  <tr>
-                    <td colSpan={10}>
+          <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
+            <Table className="min-w-[800px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-16">Rank</TableHead>
+                  <TableHead>Player</TableHead>
+                  <TableHead className="text-center">Date Set</TableHead>
+                  <TableHead className="text-center">Accuracy</TableHead>
+                  <TableHead className="text-center">Misses</TableHead>
+                  <TableHead className="text-center">{leaderboard.stars > 0 ? "PP" : "Score"}</TableHead>
+                  <TableHead className="text-center">Mods</TableHead>
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead className="w-10"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {noScores ? (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={10} className="text-center">
                       <EmptyState
                         title="No Scores Found"
                         description={
@@ -106,22 +104,20 @@ export default function LeaderboardScoresDropdown({
                             : "No scores were found on this leaderboard or page"
                         }
                       />
-                    </td>
-                  </tr>
-                </tbody>
-              )}
-
-              {scores &&
-                scores.items.length > 0 &&
-                scores.items.map(playerScore => (
-                  <ScoreSaberLeaderboardScore
-                    key={getScoreId(playerScore)}
-                    score={playerScore}
-                    leaderboard={leaderboard}
-                    highlightedPlayerId={highlightedPlayerId}
-                  />
-                ))}
-            </table>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  scores?.items.map(playerScore => (
+                    <ScoreSaberLeaderboardScore
+                      key={getScoreId(playerScore)}
+                      score={playerScore}
+                      leaderboard={leaderboard}
+                      highlightedPlayerId={highlightedPlayerId}
+                    />
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
 
           {scores && scores.items.length > 0 && (

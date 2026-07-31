@@ -3,6 +3,7 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Slider } from "@/components/ui/slider";
+import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
@@ -286,8 +287,12 @@ function TimelineSlider({
 }
 
 export default function SkillTriangleChart({ player }: { player: ScoreSaberPlayer }) {
-  const { data: chartData, isLoading } = useQuery({
-    queryKey: ["skill-triangle", player.id],
+  const {
+    data: chartData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["player-scores-chart", player.id],
     queryFn: async () => {
       const response = await ssrApi.getPlayerScoresChart(player.id);
       return response?.data || [];
@@ -320,6 +325,17 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
     }
     return normalizeMetrics(metrics);
   }, [metrics]);
+
+  if (isError) {
+    return (
+      <div className="flex min-h-[min(70vh,400px)] items-center justify-center px-4 py-8">
+        <div className="flex flex-col items-center gap-3">
+          <SharedIcons.WarningAlertIcon className="text-destructive size-8" />
+          <p className="text-muted-foreground text-sm">Failed to load skill triangle data</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

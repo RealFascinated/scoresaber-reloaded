@@ -23,20 +23,22 @@ export function Tab({
   isActive,
   onClick,
   tooltip,
+  activeClassName,
 }: {
   children: ReactNode;
   isActive: boolean;
   onClick: () => void;
   tooltip?: string;
+  activeClassName?: string;
 }) {
   const button = (
     <button
       className={cn(
-        "relative flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200",
+        "relative flex cursor-pointer items-center gap-1.5 rounded-md border border-transparent px-3 py-1.5 text-xs font-medium transition-all duration-200",
         "focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
         isActive
-          ? "bg-primary text-primary-foreground shadow-xs"
-          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          ? (activeClassName ?? "bg-primary/40 border-primary text-primary-foreground")
+          : "text-foreground/70 hover:bg-accent hover:text-accent-foreground"
       )}
       onClick={onClick}
     >

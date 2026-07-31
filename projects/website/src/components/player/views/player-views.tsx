@@ -212,7 +212,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
   const [selectedViewIndex, setSelectedViewIndex] = useState(0);
   const [daysAgo, setDaysAgo] = useState(DEFAULT_DAYS_AGO);
 
-  const { data: statisticHistory } = useQuery({
+  const { data: statisticHistory, isError: isHistoryError } = useQuery({
     queryKey: ["player-statistic-history", player.id, daysAgo],
     queryFn: () => ssrApi.getPlayerStatisticHistory(player.id, daysAgo),
     placeholderData: data => data,
@@ -236,6 +236,15 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
             actualDaysAgo={daysAgo}
             historyMode={historyMode}
           />
+        </Card>
+      ) : isHistoryError ? (
+        <Card className="bg-chart-card p-2.5">
+          <div className="flex h-[400px] items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <SharedIcons.WarningAlertIcon className="text-destructive size-8" />
+              <p className="text-muted-foreground text-sm">Failed to load player statistics</p>
+            </div>
+          </div>
         </Card>
       ) : (
         <Card className="bg-chart-card p-2.5">

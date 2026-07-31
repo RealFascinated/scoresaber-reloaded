@@ -55,7 +55,7 @@ export default function PlayerData({ player }: PlayerDataProps) {
           try {
             return {
               platform: p,
-              available: await p.getOptions().displayPredicate(player.id),
+              available: await p.getOptions().displayPredicate(player),
             };
           } catch {
             return { platform: p, available: false };

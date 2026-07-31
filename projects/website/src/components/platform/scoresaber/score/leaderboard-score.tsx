@@ -8,6 +8,7 @@ import { ScoreReplayButton } from "@/components/score/button/score-replay-button
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { SharedIcons } from "@/shared-icons";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
@@ -36,8 +37,8 @@ export default function ScoreSaberLeaderboardScore({
   const scorePlayer = score.playerInfo;
 
   return (
-    <tbody>
-      <tr
+    <>
+      <TableRow
         className={cn(
           "cv-list-row",
           highlightedPlayerId === score.playerId && "bg-primary/10",
@@ -45,14 +46,14 @@ export default function ScoreSaberLeaderboardScore({
         )}
       >
         {/* Score Rank */}
-        <td className={cn(TABLE_CELL_WIDTH, "pr-1 pl-3 whitespace-nowrap")}>
+        <TableCell className={cn(TABLE_CELL_WIDTH, "pr-1 pl-3 whitespace-nowrap")}>
           <p className={getRankColor(score.rank)}>
             {score.rank !== -1 ? `#${formatNumberWithCommas(score.rank)}` : "-"}
           </p>
-        </td>
+        </TableCell>
 
         {/* Player */}
-        <td
+        <TableCell
           className={cn(TABLE_CELL_WIDTH, "flex w-full min-w-[300px] items-center gap-2 whitespace-nowrap")}
         >
           {scorePlayer ? (
@@ -72,20 +73,20 @@ export default function ScoreSaberLeaderboardScore({
           ) : (
             <p className="text-gray-500">Unknown Player</p>
           )}
-        </td>
+        </TableCell>
 
         {/* Time Set */}
-        <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
+        <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
           <ScoreTimeSet timestamp={score.timestamp} />
-        </td>
+        </TableCell>
 
         {/* Score Accuracy */}
-        <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
+        <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
           {formatScoreAccuracy(score.accuracy)}
-        </td>
+        </TableCell>
 
         {/* Score Misses */}
-        <td
+        <TableCell
           className={cn(
             TABLE_CELL_WIDTH,
             "cursor-default whitespace-nowrap",
@@ -93,21 +94,21 @@ export default function ScoreSaberLeaderboardScore({
           )}
         >
           <ScoreMissesAndPausesBadge score={score} hideXMark hidePreviousScore />
-        </td>
+        </TableCell>
 
         {/* PP / Score */}
         {leaderboard.stars > 0 ? (
-          <td className={cn(TABLE_CELL_WIDTH, "text-pp whitespace-nowrap")}>
+          <TableCell className={cn(TABLE_CELL_WIDTH, "text-pp whitespace-nowrap")}>
             <ScorePpBadge score={score} leaderboard={leaderboard} />
-          </td>
+          </TableCell>
         ) : (
-          <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
+          <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
             <p>{formatNumberWithCommas(score.score)}</p>
-          </td>
+          </TableCell>
         )}
 
         {/* Score Modifiers */}
-        <td className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
+        <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
           {score.modifiers.length > 0 ? (
             <SimpleTooltip
               side="bottom"
@@ -125,19 +126,19 @@ export default function ScoreSaberLeaderboardScore({
           ) : (
             "-"
           )}
-        </td>
+        </TableCell>
 
         {/* Score Replay */}
-        <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[37px]")}>
+        <TableCell className={cn(TABLE_CELL_WIDTH_SMALL, "w-[37px]")}>
           {score.beatLeaderScore && (
             <div className="flex justify-center">
               <ScoreReplayButton score={score.beatLeaderScore} size={26} />
             </div>
           )}
-        </td>
+        </TableCell>
 
         {score.beatLeaderScore && (
-          <td className={cn(TABLE_CELL_WIDTH_SMALL, "w-[45px] pr-3")}>
+          <TableCell className={cn(TABLE_CELL_WIDTH_SMALL, "w-[45px] pr-3")}>
             <SimpleTooltip display="View score details">
               <button className="size-6 cursor-pointer" onClick={() => setDetailsExpanded(!detailsExpanded)}>
                 {isDetailsLoading ? (
@@ -152,14 +153,14 @@ export default function ScoreSaberLeaderboardScore({
                 )}
               </button>
             </SimpleTooltip>
-          </td>
+          </TableCell>
         )}
-      </tr>
+      </TableRow>
 
       {/* Dropdown row - appears directly below the clicked row */}
       {detailsExpanded && (
-        <tr className="border-border/50 border-b">
-          <td colSpan={10} className="p-(--spacing-md)">
+        <TableRow className="border-border/50 border-b">
+          <TableCell colSpan={10} className="p-(--spacing-md)">
             <ScoreDetailsDropdown
               score={score}
               leaderboard={leaderboard}
@@ -169,9 +170,9 @@ export default function ScoreSaberLeaderboardScore({
               isExpanded
               isLeaderboardScore
             />
-          </td>
-        </tr>
+          </TableCell>
+        </TableRow>
       )}
-    </tbody>
+    </>
   );
 }

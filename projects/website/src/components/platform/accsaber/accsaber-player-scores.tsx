@@ -1,34 +1,27 @@
 "use client";
 
+import ScoresListPanel from "@/components/platform/shared/scores-list-panel";
+import { usePlayerScoresQuery, type SortOption } from "@/components/platform/shared/use-player-scores-query";
 import { Spinner } from "@/components/spinner";
 import { SharedIcons } from "@/shared-icons";
 import { Pagination } from "@ssr/common/pagination";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
-import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
+import type { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
 import type { AccSaberScoresPageResponse } from "@ssr/common/schemas/response/score/accsaber-scores-page";
-import { SortDirection } from "@ssr/common/schemas/score/query/sort/sort-direction";
+import type { SortDirection } from "@ssr/common/schemas/score/query/sort/sort-direction";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { useQuery } from "@tanstack/react-query";
-import { useDocumentTitle } from "@uidotdev/usehooks";
-import { ssrConfig } from "config";
-import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { useCallback, useEffect } from "react";
-import { usePageTransition } from "../../../contexts/page-transition-context";
+import { parseAsString, useQueryState } from "nuqs";
 import ScoresCard from "../../score/scores-card";
-import SimplePagination from "../../simple-pagination";
 import { ButtonGroup, ControlButton, ControlPanel, ControlRow, Tab, TabGroup } from "../../ui/control-panel";
-import { EmptyState } from "../../ui/empty-state";
-import PageTransition from "../../ui/page-transition";
 import AccSaberScoreComponent from "./score/accsaber-score";
 
 const DEFAULT_SORT: AccSaberScoreSort = "date";
 const DEFAULT_TYPE: AccSaberScoreType = "overall";
 const DEFAULT_DIRECTION: SortDirection = "desc";
-const DEFAULT_PAGE = 1;
 
-const scoreSort = [
+const scoreSort: SortOption<AccSaberScoreSort>[] = [
   { name: "AP", value: "ap", icon: <SharedIcons.AccSaberApSortIcon className="h-4 w-4" /> },
   { name: "Date", value: "date", icon: <SharedIcons.AccSaberDateSortIcon className="h-4 w-4" /> },
   { name: "Acc", value: "acc", icon: <SharedIcons.AccSaberAccuracySortIcon className="h-4 w-4" /> },
@@ -56,97 +49,38 @@ type Props = {
 };
 
 export default function AccSaberPlayerScores({ player }: Props) {
-  const { animateLeft, animateRight, setIsLoading } = usePageTransition();
-
-  // Query params
-  const [sort, setSort] = useQueryState("sort", parseAsString.withDefault(DEFAULT_SORT)) as [
-    AccSaberScoreSort,
-    (value: AccSaberScoreSort | null) => void,
-  ];
   const [type, setType] = useQueryState("type", parseAsString.withDefault(DEFAULT_TYPE)) as [
     AccSaberScoreType,
     (value: AccSaberScoreType | null) => void,
   ];
-  const [direction, setOrder] = useQueryState("direction", parseAsString.withDefault(DEFAULT_DIRECTION)) as [
-    SortDirection,
-    (value: SortDirection | null) => void,
-  ];
-  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(DEFAULT_PAGE));
 
-  useDocumentTitle(
-    ssrConfig.siteTitleTemplate.replace(
-      "%s",
-      `${player.name} / AccSaber / ${page} / ${capitalizeFirstLetter(type)} / ${scoreSort.find(s => s.value === sort)?.name}`
-    )
-  );
-
-  const {
-    data: scores,
-    isError,
-    isLoading,
-    isRefetching,
-  } = useQuery<AccSaberScoresPageResponse>({
-    queryKey: ["playerScores:accsaber", player.id, page, type, sort, direction],
-    queryFn: async () =>
-      (await ssrApi.fetchAccSaberPlayerScores(player.id, page, sort, direction, type)) ??
-      Pagination.empty<AccSaberScore>(),
-    placeholderData: prev => prev,
-  });
-
-  useEffect(() => {
-    setIsLoading(isLoading || isRefetching);
-  }, [isLoading, isRefetching, scores, setIsLoading]);
-
-  const handleSortChange = useCallback(
-    async (newSort: AccSaberScoreSort, defaultOrder: SortDirection) => {
-      if (newSort !== sort) {
-        setSort(newSort);
-        setOrder(defaultOrder);
-        setPage(1);
-        animateLeft();
-      } else {
-        setOrder(direction === "desc" ? "asc" : "desc");
-        animateLeft();
-      }
+  const query = usePlayerScoresQuery<AccSaberScoreSort, AccSaberScoresPageResponse>({
+    queryKeyPrefix: "playerScores:accsaber",
+    playerId: player.id,
+    playerName: player.name,
+    titleLabel: "AccSaber",
+    defaultSort: DEFAULT_SORT,
+    sortOptions: scoreSort,
+    hasDirection: true,
+    hasSearch: false,
+    titleExtra: capitalizeFirstLetter(type),
+    showDirectionInTitle: false,
+    extraKeyParts: [type],
+    queryFn: async ({ page, sort, direction }) => {
+      const response = await ssrApi.fetchAccSaberPlayerScores(player.id, page, sort, direction, type);
+      return response ?? Pagination.empty<AccSaberScore>();
     },
-    [sort, direction, animateLeft, setSort, setOrder, setPage]
-  );
-
-  const handleTypeChange = useCallback(
-    (newType: AccSaberScoreType) => {
-      if (newType !== type) {
-        setType(newType);
-        setPage(1);
-        animateLeft();
-      }
-    },
-    [type, animateLeft, setType, setPage]
-  );
-
-  const handlePageChange = useCallback(
-    (newPage: number) => {
-      if (newPage > page) {
-        animateLeft();
-      } else {
-        animateRight();
-      }
-      setPage(newPage);
-    },
-    [page, animateLeft, animateRight, setPage]
-  );
-
-  const buildUrl = useCallback(
-    (pageNum: number) => {
+    buildUrl: (pageNum, { sort, direction }) => {
       const params = new URLSearchParams();
       params.set("platform", "accsaber");
-      if (sort !== "date") {
+      if (sort !== DEFAULT_SORT) {
         params.set("sort", sort);
       }
-      if (type !== "overall") {
+      if (type !== DEFAULT_TYPE) {
         params.set("type", type);
       }
-      if (direction !== "desc") {
-        params.set("order", direction);
+      if (direction !== DEFAULT_DIRECTION) {
+        params.set("direction", direction);
       }
       if (pageNum !== 1) {
         params.set("page", String(pageNum));
@@ -154,8 +88,7 @@ export default function AccSaberPlayerScores({ player }: Props) {
       const queryString = params.toString();
       return `/player/${player.id}${queryString ? `?${queryString}` : ""}`;
     },
-    [player.id, sort, type, direction]
-  );
+  });
 
   return (
     <ScoresCard>
@@ -169,7 +102,9 @@ export default function AccSaberPlayerScores({ player }: Props) {
                 <Tab
                   key={typeOption.value}
                   isActive={typeOption.value === type}
-                  onClick={() => handleTypeChange(typeOption.value as AccSaberScoreType)}
+                  onClick={() =>
+                    query.handleFilterChange(() => setType(typeOption.value as AccSaberScoreType))
+                  }
                 >
                   {typeOption.icon}
                   {typeOption.name}
@@ -184,18 +119,13 @@ export default function AccSaberPlayerScores({ player }: Props) {
               {scoreSort.map(sortOption => (
                 <ControlButton
                   key={sortOption.value}
-                  isActive={sortOption.value === sort}
-                  onClick={() =>
-                    handleSortChange(
-                      sortOption.value as AccSaberScoreSort,
-                      (sortOption.defaultOrder ?? "desc") as SortDirection
-                    )
-                  }
+                  isActive={sortOption.value === query.sort}
+                  onClick={() => query.handleSortChange(sortOption.value, sortOption.defaultOrder ?? "desc")}
                 >
-                  {sortOption.value === sort ? (
-                    isLoading || isRefetching ? (
+                  {sortOption.value === query.sort ? (
+                    query.isLoading || query.isRefetching ? (
                       <Spinner size="sm" className="size-4" />
-                    ) : direction === "desc" ? (
+                    ) : query.direction === "desc" ? (
                       <SharedIcons.SortDescendingIcon className="size-4" />
                     ) : (
                       <SharedIcons.SortAscendingIcon className="size-4" />
@@ -211,42 +141,17 @@ export default function AccSaberPlayerScores({ player }: Props) {
         </ControlPanel>
 
         {/* Scores List */}
-        {isLoading && scores === undefined && (
-          <div className="flex w-full justify-center py-8">
-            <Spinner size="md" className="text-primary" />
-          </div>
-        )}
-
-        {scores && (
-          <>
-            <div className="text-center">
-              {isError ||
-                (scores.items.length === 0 && (
-                  <EmptyState
-                    className="ring-border rounded-xl ring-1"
-                    title="No Results"
-                    description="No scores were found on this page"
-                    icon={<SharedIcons.SearchNoResultsIcon />}
-                  />
-                ))}
-            </div>
-
-            <PageTransition className="divide-border grid min-w-full grid-cols-1 divide-y">
-              {scores.items.map(score => (
-                <AccSaberScoreComponent key={score.id} score={score} />
-              ))}
-            </PageTransition>
-
-            <SimplePagination
-              page={page}
-              totalItems={scores.metadata.totalItems}
-              itemsPerPage={scores.metadata.itemsPerPage}
-              loadingPage={isLoading || isRefetching ? page : undefined}
-              generatePageUrl={buildUrl}
-              onPageChange={handlePageChange}
-            />
-          </>
-        )}
+        <ScoresListPanel
+          page={query.page}
+          data={query.data}
+          isLoading={query.isLoading}
+          isRefetching={query.isRefetching}
+          isError={query.isError}
+          generatePageUrl={query.buildUrl}
+          onPageChange={query.handlePageChange}
+          getKey={score => String(score.id)}
+          renderItem={score => <AccSaberScoreComponent score={score} />}
+        />
       </div>
     </ScoresCard>
   );

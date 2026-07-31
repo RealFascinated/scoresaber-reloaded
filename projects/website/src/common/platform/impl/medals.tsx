@@ -1,6 +1,6 @@
 import { SharedIcons } from "@/shared-icons";
+import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
-import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { Platform } from "../platform";
 import { PlatformType } from "../platform-repository";
 
@@ -13,9 +13,7 @@ export class MedalScoresPlatform extends Platform {
   constructor() {
     super(PlatformType.MedalScores, "Medals", {
       logo: <SharedIcons.MedalsPlatformLogoIcon className="h-4.5 w-4.5" />,
-      displayPredicate: async player => {
-        return ((await ssrApi.getScoreSaberPlayer(player, "basic"))?.medals ?? 0) > 0;
-      },
+      displayPredicate: async (player: ScoreSaberPlayer) => player.medals > 0,
     });
   }
 }

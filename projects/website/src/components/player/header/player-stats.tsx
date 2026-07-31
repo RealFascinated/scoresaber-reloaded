@@ -229,27 +229,25 @@ type Props = {
 export default function PlayerStats({ player }: Props) {
   const [showMore, setShowMore] = useState(false);
 
-  const hiddenStatCount = playerStats.filter(
-    stat => stat.defaultHidden && stat.create(player, stat.name) !== undefined
+  const allStats = playerStats.map(stat => ({ stat, content: stat.create(player, stat.name) }));
+  const visibleStats = allStats.filter(
+    ({ stat, content }) => content !== undefined && (!stat.defaultHidden || showMore)
+  );
+  const hiddenStatCount = allStats.filter(
+    ({ stat, content }) => content !== undefined && stat.defaultHidden
   ).length;
 
-  const stats = playerStats.filter(stat => !stat.defaultHidden || showMore);
-
   return (
-    <div className="flex w-full flex-wrap justify-center gap-2 lg:justify-start">
-      {stats.map(stat => {
-        const content = stat.create(player, stat.name);
-        if (content === undefined) {
-          return undefined;
-        }
-
-        return <div key={`player-stat-${stat.name}`}>{content}</div>;
-      })}
+    <div id="player-stats" className="flex w-full flex-wrap justify-center gap-2 lg:justify-start">
+      {visibleStats.map(({ stat, content }) => (
+        <div key={`player-stat-${stat.name}`}>{content}</div>
+      ))}
 
       {hiddenStatCount > 0 && (
         <button
           type="button"
           aria-expanded={showMore}
+          aria-controls="player-stats"
           onClick={() => setShowMore(current => !current)}
           className="border-border bg-background/90 text-muted-foreground hover:border-primary/50 hover:text-foreground ring-border flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium ring-1 transition-colors"
         >

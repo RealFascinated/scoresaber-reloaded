@@ -121,9 +121,11 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
               >
                 {getDifficultyName(leaderboard.difficulty.difficulty)}
               </span>
-              <span className="text-muted-foreground/70 text-xs">{leaderboard.difficulty.characteristic}</span>
+              <span className="text-muted-foreground/70 text-xs">
+                {leaderboard.difficulty.characteristic}
+              </span>
               {isRanked && (
-                <span className="bg-background/90 ring-border text-yellow-400 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold ring-1">
+                <span className="bg-background/90 ring-border inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold text-yellow-400 ring-1">
                   <SharedIcons.DifficultyStarIcon className="size-3" />
                   {leaderboard.stars.toFixed(2)}
                 </span>
