@@ -151,6 +151,10 @@ function FriendsPopover() {
       <PopoverContent
         side={isMobile ? "bottom" : "right"}
         sideOffset={isMobile ? 4 : 8}
+        // Hover-triggered popover: don't steal focus on open. Otherwise Radix auto-focuses
+        // the first tabbable element (e.g. a country flag tooltip wrapper), which opens its
+        // tooltip even though the user never hovered it.
+        onOpenAutoFocus={event => event.preventDefault()}
         className="flex max-h-[420px] w-screen flex-col overflow-hidden p-0 text-sm select-none md:w-[340px]"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
