@@ -109,7 +109,11 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                     {rankingData.items.map(player => (
                       <TableRow
                         key={player.id}
-                        className={cn(mainPlayer?.id === player.id ? "bg-primary/5" : "", "cursor-pointer")}
+                        className={cn(
+                          mainPlayer?.id === player.id ? "bg-primary/5" : "",
+                          player.inactive && "bg-inactive-account/10",
+                          "cursor-pointer"
+                        )}
                         onClick={() => router.push(`/player/${player.id}`)}
                       >
                         <TableCell className="py-2">
@@ -122,7 +126,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                           </div>
                         </TableCell>
                         <TableCell className="py-2">
-                          <PlayerTableName player={player} />
+                          <PlayerTableName player={player} inactive={player.inactive} />
                         </TableCell>
                         <TableCell className="py-2 text-right whitespace-nowrap">
                           <span className="text-primary font-semibold">{formatPp(player.pp)}</span>
@@ -210,11 +214,21 @@ function buildPageUrl(country: string | undefined, page: number): string {
   return `/ranking/${country != undefined ? `${country}/` : ""}${page}`;
 }
 
-function PlayerTableName({ player }: { player: { name: string; avatar: string; id: string } }) {
+function PlayerTableName({
+  player,
+  inactive,
+}: {
+  player: { name: string; avatar: string; id: string };
+  inactive: boolean;
+}) {
   return (
     <SimpleLink href={`/player/${player.id}`} className="flex items-center gap-2.5">
-      <PlayerAvatar profilePicture={player.avatar} name={player.name} />
-      <span className="text-sm font-medium">{player.name}</span>
+      <PlayerAvatar
+        profilePicture={player.avatar}
+        name={player.name}
+        className={inactive ? "grayscale" : ""}
+      />
+      <span className={cn("text-sm font-medium", inactive && "text-muted-foreground")}>{player.name}</span>
     </SimpleLink>
   );
 }
