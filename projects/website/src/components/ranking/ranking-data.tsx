@@ -41,6 +41,7 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   const [currentCountry, setCurrentCountry] = useState(initialCountry);
   const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
   const [includeInactives, setIncludeInactives] = useState<boolean>(false);
+  const [showRelativePp, setShowRelativePp] = useState<boolean>(false);
   const debouncedSearch = useDebounce(currentSearch, DEBOUNCE_MS_SEARCH);
   const isValidSearch = debouncedSearch != undefined && debouncedSearch.length >= 3;
 
@@ -98,7 +99,9 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                       <TableHead className="w-20">Rank</TableHead>
                       <TableHead className="w-20">Country</TableHead>
                       <TableHead>Player</TableHead>
-                      <TableHead className="w-24 text-right">PP</TableHead>
+                      <TableHead className={cn("text-right", showRelativePp && mainPlayer ? "w-44" : "w-24")}>
+                        PP
+                      </TableHead>
                       <TableHead className="w-10"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -121,8 +124,11 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                         <TableCell className="py-2">
                           <PlayerTableName player={player} />
                         </TableCell>
-                        <TableCell className="py-2 text-right">
+                        <TableCell className="py-2 text-right whitespace-nowrap">
                           <span className="text-primary font-semibold">{formatPp(player.pp)}</span>
+                          {showRelativePp && mainPlayer && (
+                            <PlayerPpDifference pp={player.pp} mainPp={mainPlayer.pp} />
+                          )}
                         </TableCell>
                         <TableCell className="py-2">
                           <AddFriend player={player} className="bg-ssr rounded-full p-1.5" iconOnly />
@@ -148,7 +154,6 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         <div className="w-full shrink-0 md:w-96">
           <FilterSection
             title="Filters"
-            description="Filter players by country or search"
             hasActiveFilters={Boolean(currentCountry || currentSearch)}
             onClear={() => {
               setCurrentCountry(undefined);
@@ -181,11 +186,19 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
               </FilterRow>
             </FilterField>
 
-            <FilterField label="Include Inactives">
-              <FilterRow>
-                <Switch checked={includeInactives} onCheckedChange={setIncludeInactives} />
-              </FilterRow>
-            </FilterField>
+            <FilterRow className="justify-between">
+              <span className="text-foreground text-sm font-medium">Include Inactives</span>
+              <Switch checked={includeInactives} onCheckedChange={setIncludeInactives} />
+            </FilterRow>
+
+            <FilterRow className="justify-between">
+              <span className="text-foreground text-sm font-medium">Relative PP</span>
+              <Switch
+                checked={showRelativePp}
+                onCheckedChange={setShowRelativePp}
+                disabled={mainPlayer == undefined}
+              />
+            </FilterRow>
           </FilterSection>
         </div>
       </div>
@@ -203,5 +216,18 @@ function PlayerTableName({ player }: { player: { name: string; avatar: string; i
       <PlayerAvatar profilePicture={player.avatar} name={player.name} />
       <span className="text-sm font-medium">{player.name}</span>
     </SimpleLink>
+  );
+}
+
+function PlayerPpDifference({ pp, mainPp }: { pp: number; mainPp: number }) {
+  const difference = pp - mainPp;
+  const colorClass =
+    difference > 0 ? "text-green-400" : difference < 0 ? "text-red-400" : "text-muted-foreground";
+
+  return (
+    <span className={cn("ml-1 font-semibold", colorClass)}>
+      ({difference > 0 ? "+" : ""}
+      {formatPp(difference)})
+    </span>
   );
 }

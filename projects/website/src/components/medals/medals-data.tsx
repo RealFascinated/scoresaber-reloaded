@@ -133,7 +133,6 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
         <div className="flex w-full shrink-0 flex-col gap-4 md:w-96">
           <FilterSection
             title="Filters"
-            description="Filter players by country"
             hasActiveFilters={Boolean(currentCountry)}
             onClear={() => {
               setCurrentCountry(undefined);
