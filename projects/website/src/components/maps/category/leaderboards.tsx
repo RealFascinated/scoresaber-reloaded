@@ -8,6 +8,8 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SharedIcons } from "@/shared-icons";
+import { Pagination } from "@ssr/common/pagination";
+import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
@@ -28,8 +30,8 @@ export default function Leaderboards() {
     isRefetching,
   } = useQuery({
     queryKey: ["maps", filterDebounced, page],
-    queryFn: async () =>
-      ssrApi.searchLeaderboards(page, {
+    queryFn: async () => {
+      const response = await ssrApi.searchLeaderboards(page, {
         category: filterDebounced.category,
         sort: filterDebounced.sort,
         minStars: filterDebounced.starMin,
@@ -37,7 +39,9 @@ export default function Leaderboards() {
         ranked: filterDebounced.ranked,
         qualified: filterDebounced.qualified,
         query: filterDebounced.search.length > 3 ? filterDebounced.search : undefined,
-      }),
+      });
+      return response ?? Pagination.empty<ScoreSaberLeaderboard>();
+    },
     placeholderData: data => data,
   });
 
@@ -145,7 +149,7 @@ export default function Leaderboards() {
           </div>
         )}
 
-        {leaderboardResponse && (
+        {leaderboards && leaderboards.length > 0 && (
           <SimplePagination
             page={page}
             totalItems={leaderboardResponse.metadata.totalItems}

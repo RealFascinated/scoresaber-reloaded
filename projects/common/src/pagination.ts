@@ -54,7 +54,7 @@ export class Pagination<T> {
    * @throws throws an error if the page number is invalid.
    */
   async getPage(page: number, fetchItems?: FetchItemsFunction<T>): Promise<Page<T>> {
-    const totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+    const totalPages = Math.max(Math.ceil(this.totalItems / this.itemsPerPage), 1);
 
     if (page < 1 || page > totalPages) {
       throw new NotFoundError("Invalid page number");
@@ -106,7 +106,7 @@ export class Pagination<T> {
       sortDirection: 1 | -1;
     }
   ): Promise<Page<T>> {
-    const totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
+    const totalPages = Math.max(Math.ceil(this.totalItems / this.itemsPerPage), 1);
 
     if (page < 1 || page > totalPages) {
       throw new NotFoundError("Invalid page number");
