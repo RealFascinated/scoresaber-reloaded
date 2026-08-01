@@ -5,13 +5,12 @@ import { PageTitle } from "@/components/page-title";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
-import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { SharedIcons } from "@/shared-icons";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import Card from "../card";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
@@ -21,17 +20,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import MedalsInfo from "./medals-info";
 import { MedalsRanking } from "./medals-ranking";
 
-type RankingDataProps = {
-  initialPage: number;
-  initialCountry?: string;
-};
-
-export default function RankingData({ initialPage, initialCountry }: RankingDataProps) {
-  const navigation = usePageNavigation();
+export default function MedalsData() {
   const router = useRouter();
 
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [currentCountry, setCurrentCountry] = useState(initialCountry);
+  const [currentPage, setCurrentPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [countryQuery, setCountryQuery] = useQueryState("country", parseAsString);
+  const currentCountry = countryQuery?.toUpperCase() ?? undefined;
+  const setCurrentCountry = (value: string | undefined) =>
+    setCountryQuery(value ? value.toUpperCase() : null);
 
   const {
     data: rankingData,
@@ -44,9 +40,6 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     refetchIntervalInBackground: false,
     placeholderData: prev => prev,
   });
-  useEffect(() => {
-    navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
-  }, [currentPage, currentCountry, navigation]);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -164,5 +157,13 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
 }
 
 function buildPageUrl(country: string | undefined, page: number): string {
-  return `/medals/${country != undefined ? `${country}/` : ""}${page}`;
+  const params = new URLSearchParams();
+  if (country) {
+    params.set("country", country);
+  }
+  if (page > 1) {
+    params.set("page", String(page));
+  }
+  const query = params.toString();
+  return query ? `/medals?${query}` : "/medals";
 }

@@ -44,7 +44,7 @@ const playerData = [
                 </div>
               }
             >
-              <SimpleLink href={`/ranking/${player.rankPages.global}`}>
+              <SimpleLink href={`/ranking?page=${player.rankPages.global}`}>
                 <span className="text-foreground hover:text-primary focus-visible:outline-primary/50 m-0 text-base font-semibold transition-colors focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
@@ -73,7 +73,7 @@ const playerData = [
               tooltip={name => `Country Rank in ${name}`}
             />
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
-              <SimpleLink href={`/ranking/${player.country}/${player.rankPages.country}`}>
+              <SimpleLink href={`/ranking?country=${player.country}&page=${player.rankPages.country}`}>
                 <span className="text-foreground hover:text-primary focus-visible:outline-primary/50 m-0 text-base font-semibold transition-colors focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
@@ -98,7 +98,9 @@ const playerData = [
               <SharedIcons.MedalsIcon className="text-muted-foreground h-5 w-5 shrink-0" />
             </SimpleTooltip>
             <ChangeOverTime player={player} type={PlayerStatChange.Medals}>
-              <FallbackLink href={player.rankPages.medals ? `/medals/${player.rankPages.medals}` : undefined}>
+              <FallbackLink
+                href={player.rankPages.medals ? `/medals?page=${player.rankPages.medals}` : undefined}
+              >
                 <span
                   className={cn(
                     "text-foreground m-0 text-base font-semibold",

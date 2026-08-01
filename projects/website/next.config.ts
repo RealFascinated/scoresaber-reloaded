@@ -41,6 +41,30 @@ const nextConfig: NextConfig = {
     "@heroicons/react/24/outline": { transform: "@heroicons/react/24/outline/{{member}}" },
   },
   poweredByHeader: false,
+  async redirects() {
+    return [
+      {
+        source: "/ranking/:country/:page",
+        destination: "/ranking?country=:country&page=:page",
+        permanent: true,
+      },
+      {
+        source: "/ranking/:page",
+        destination: "/ranking?page=:page",
+        permanent: true,
+      },
+      {
+        source: "/medals/:country/:page",
+        destination: "/medals?country=:country&page=:page",
+        permanent: true,
+      },
+      {
+        source: "/medals/:page",
+        destination: "/medals?page=:page",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     unoptimized: true,
   },

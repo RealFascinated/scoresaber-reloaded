@@ -9,7 +9,6 @@ import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
-import { usePageNavigation } from "@/hooks/use-page-navigation";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
 import { formatPp } from "@ssr/common/utils/number-utils";
@@ -17,7 +16,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { parseAsBoolean, parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
 import { PlayerAvatar } from "../ranking/player-avatar";
@@ -26,24 +25,24 @@ import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
 import { Input } from "../ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
-type RankingDataProps = {
-  initialPage: number;
-  initialCountry?: string;
-};
-
-export default function RankingData({ initialPage, initialCountry }: RankingDataProps) {
-  const navigation = usePageNavigation();
+export default function RankingData() {
   const router = useRouter();
   const database = useDatabase();
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
 
-  const [currentPage, setCurrentPage] = useState(initialPage);
-  const [currentCountry, setCurrentCountry] = useState(initialCountry);
-  const [currentSearch, setCurrentSearch] = useState<string | undefined>(undefined);
-  const [includeInactives, setIncludeInactives] = useState<boolean>(false);
-  const [showRelativePp, setShowRelativePp] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [countryQuery, setCountryQuery] = useQueryState("country", parseAsString);
+  const currentCountry = countryQuery?.toUpperCase() ?? undefined;
+  const setCurrentCountry = (value: string | undefined) =>
+    setCountryQuery(value ? value.toUpperCase() : null);
+  const [currentSearch, setCurrentSearch] = useQueryState("search", parseAsString.withDefault(""));
+  const [includeInactives, setIncludeInactives] = useQueryState(
+    "inactive",
+    parseAsBoolean.withDefault(false)
+  );
+  const [showRelativePp, setShowRelativePp] = useQueryState("relativePp", parseAsBoolean.withDefault(false));
   const debouncedSearch = useDebounce(currentSearch, DEBOUNCE_MS_SEARCH);
-  const isValidSearch = debouncedSearch != undefined && debouncedSearch.length >= 3;
+  const isValidSearch = debouncedSearch.length >= 3;
 
   const {
     data: rankingData,
@@ -51,7 +50,13 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     isRefetching,
     isError,
   } = useQuery({
-    queryKey: ["rankingData", currentPage, currentCountry, isValidSearch, includeInactives],
+    queryKey: [
+      "rankingData",
+      currentPage,
+      currentCountry,
+      isValidSearch ? debouncedSearch : undefined,
+      includeInactives,
+    ],
     queryFn: async () =>
       ssrApi.searchPlayersRanking(currentPage, {
         country: currentCountry,
@@ -61,9 +66,6 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
     refetchIntervalInBackground: false,
     placeholderData: prev => prev,
   });
-  useEffect(() => {
-    navigation.changePageUrl(buildPageUrl(currentCountry, currentPage));
-  }, [currentPage, currentCountry, includeInactives, navigation]);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -148,7 +150,14 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
                 totalItems={rankingData.metadata.totalItems}
                 itemsPerPage={rankingData.metadata.itemsPerPage}
                 loadingPage={isLoading || isRefetching ? currentPage : undefined}
-                generatePageUrl={page => buildPageUrl(currentCountry, page)}
+                generatePageUrl={page =>
+                  buildPageUrl(page, {
+                    country: currentCountry,
+                    search: currentSearch,
+                    includeInactives,
+                    showRelativePp,
+                  })
+                }
                 onPageChange={setCurrentPage}
               />
             </div>
@@ -210,8 +219,33 @@ export default function RankingData({ initialPage, initialCountry }: RankingData
   );
 }
 
-function buildPageUrl(country: string | undefined, page: number): string {
-  return `/ranking/${country != undefined ? `${country}/` : ""}${page}`;
+function buildPageUrl(
+  page: number,
+  filters: {
+    country?: string;
+    search: string;
+    includeInactives: boolean;
+    showRelativePp: boolean;
+  }
+): string {
+  const params = new URLSearchParams();
+  if (filters.country) {
+    params.set("country", filters.country);
+  }
+  if (page > 1) {
+    params.set("page", String(page));
+  }
+  if (filters.search) {
+    params.set("search", filters.search);
+  }
+  if (filters.includeInactives) {
+    params.set("inactive", "true");
+  }
+  if (filters.showRelativePp) {
+    params.set("relativePp", "true");
+  }
+  const query = params.toString();
+  return query ? `/ranking?${query}` : "/ranking";
 }
 
 function PlayerTableName({
