@@ -60,6 +60,7 @@ export default function Leaderboards() {
         {leaderboards?.length === 0 && (
           <div className="mb-2">
             <EmptyState
+              className="ring-border rounded-xl ring-1"
               title="No Leaderboards Found"
               description="No leaderboards were found on this page"
               icon={
