@@ -131,8 +131,8 @@ function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
             <ScoreSaberScoreDisplay
               score={score}
               leaderboard={leaderboard}
+              beatSaverMap={scoreToken.beatSaver}
               settings={{
-                noScoreButtons: true,
                 hideDetailsDropdown: true,
               }}
             />
