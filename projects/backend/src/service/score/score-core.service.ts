@@ -162,6 +162,67 @@ export class ScoreCoreService {
   }
 
   /**
+   * Upserts scores fetched from the ScoreSaber API into the database.
+   *
+   * Fire-and-forget safe: this never throws, so callers can invoke it without
+   * awaiting (e.g. `void ScoreCoreService.upsertScoresFromApi(scores)`) without
+   * blocking the API response. New scores are inserted; scores that already exist
+   * (same scoreId) only have their `pp` refreshed when it differs. If the bulk
+   * upsert hits a row that violates the per-player-per-leaderboard unique
+   * constraint (an older attempt on a map the player already has a current row
+   * for), it falls back to upserting each score individually so a single stale
+   * score cannot block the rest.
+   *
+   * @param scores the scores to upsert
+   */
+  public static async upsertScoresFromApi(scores: ScoreSaberScore[]): Promise<void> {
+    const insertRows: ScoreSaberScoreInsertRow[] = [];
+    try {
+      const seenScoreIds = new Set<number>();
+      const seenPlayerLeaderboards = new Set<string>();
+      for (const score of scores) {
+        const row = ScoreCoreService.toInsertRow(score);
+        const playerLeaderboardKey = `${row.playerId}:${row.leaderboardId}`;
+        if (seenScoreIds.has(row.scoreId) || seenPlayerLeaderboards.has(playerLeaderboardKey)) {
+          continue;
+        }
+        seenScoreIds.add(row.scoreId);
+        seenPlayerLeaderboards.add(playerLeaderboardKey);
+        insertRows.push(row);
+      }
+    } catch (error) {
+      ScoreCoreService.logger.warn(`Failed to prepare score upserts:`, error);
+      return;
+    }
+
+    if (insertRows.length === 0) {
+      return;
+    }
+
+    try {
+      await ScoreSaberScoresRepository.upsertScores(insertRows);
+    } catch (error) {
+      ScoreCoreService.logger.debug(
+        `Bulk score upsert for %d score(s) failed, retrying per score: %s`,
+        insertRows.length,
+        (error as Error).message
+      );
+      await Promise.allSettled(
+        insertRows.map(row =>
+          ScoreSaberScoresRepository.upsertScores([row]).catch(error =>
+            ScoreCoreService.logger.debug(
+              `Failed to upsert score "%s" for player "%s": %s`,
+              row.scoreId,
+              row.playerId,
+              (error as Error).message
+            )
+          )
+        )
+      );
+    }
+  }
+
+  /**
    * Inserts the score data into the score.
    *
    * @param score the score to insert data into

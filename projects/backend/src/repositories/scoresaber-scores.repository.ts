@@ -114,6 +114,31 @@ export class ScoreSaberScoresRepository {
     return result.length > 0;
   }
 
+  /**
+   * Upserts scores into the scores table in a single statement.
+   *
+   * New scores are inserted. Scores that already exist (same scoreId) only have
+   * their `pp` updated, and only when the value actually differs.
+   *
+   * @param rows the score rows to upsert
+   */
+  public static async upsertScores(rows: ScoreSaberScoreInsertRow[]): Promise<void> {
+    if (rows.length === 0) {
+      return;
+    }
+
+    await db
+      .insert(scoreSaberScoresTable)
+      .values(rows)
+      .onConflictDoUpdate({
+        target: scoreSaberScoresTable.scoreId,
+        set: {
+          pp: sql`excluded."pp"`,
+        },
+        setWhere: sql`${scoreSaberScoresTable.pp} is distinct from excluded."pp"`,
+      });
+  }
+
   public static async countByPlayerId(playerId: string): Promise<number> {
     const [row] = await db
       .select({ count: count() })

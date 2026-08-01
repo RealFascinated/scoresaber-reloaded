@@ -289,25 +289,28 @@ export class PlayerScoresService {
       return Pagination.empty<PlayerScore<ScoreSaberScore>>();
     }
 
+    const parsedPlayerScores = requestedPage.playerScores.map(playerScore => {
+      const leaderboard = getScoreSaberLeaderboardFromToken(playerScore.leaderboard);
+      const score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
+      return { score, leaderboard };
+    });
+
+    // Fire-and-forget: persist scores from the ScoreSaber API without blocking the response
+    void ScoreCoreService.upsertScoresFromApi(parsedPlayerScores.map(({ score }) => score));
+
     const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
       .setItemsPerPage(requestedPage.metadata.itemsPerPage)
       .setTotalItems(requestedPage.metadata.total);
 
     return await pagination.getPage(pageNumber, async () => {
       const scores = await Promise.all(
-        requestedPage.playerScores.map(async playerScore => {
-          const leaderboard = getScoreSaberLeaderboardFromToken(playerScore.leaderboard);
-
+        parsedPlayerScores.map(async ({ score, leaderboard }) => {
           const [enrichedScore, beatSaver] = await Promise.all([
-            ScoreCoreService.insertScoreData(
-              getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId),
-              leaderboard,
-              {
-                insertPlayerInfo: false,
-                insertPreviousScore: true,
-                insertBeatLeaderScore: true,
-              }
-            ),
+            ScoreCoreService.insertScoreData(score, leaderboard, {
+              insertPlayerInfo: false,
+              insertPreviousScore: true,
+              insertBeatLeaderScore: true,
+            }),
             BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,

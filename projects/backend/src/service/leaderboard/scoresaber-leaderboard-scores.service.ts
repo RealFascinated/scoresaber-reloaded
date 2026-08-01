@@ -37,6 +37,9 @@ export class ScoreSaberLeaderboardScoresService {
       getScoreSaberScoreFromToken(token, leaderboard, token.leaderboardPlayerInfo.id)
     );
 
+    // Fire-and-forget: persist scores from the ScoreSaber API without blocking the response
+    void ScoreCoreService.upsertScoresFromApi(parsedScores);
+
     const scores = (
       await Promise.all(
         parsedScores.map(score => {

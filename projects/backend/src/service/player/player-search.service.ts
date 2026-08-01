@@ -91,8 +91,8 @@ export class PlayerSearchService {
         const player = await ScoreSaberPlayerService.getPlayer(token.id, "basic", token);
         return {
           ...player,
-          contextualRank: token.rank,
-          contextualCountryRank: token.countryRank,
+          contextualRank: token.stats.rank,
+          contextualCountryRank: token.stats.countryRank,
         };
       })
     );
