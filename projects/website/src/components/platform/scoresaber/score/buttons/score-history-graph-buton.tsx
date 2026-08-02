@@ -26,6 +26,7 @@ export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberSc
   const orderedPoints = (scoreHistoryGraph ?? []).toSorted(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
+  const newestFirstPoints = [...orderedPoints].reverse();
   const labels = orderedPoints.map(point => point.timestamp.getTime());
   const formatRelativeDate = (value: number, withTime: boolean) => {
     const date = new Date(value);
@@ -93,10 +94,7 @@ export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberSc
             </div>
           </div>
 
-          <div className="ring-border bg-card hidden w-full shrink-0 flex-col overflow-hidden rounded-xl ring-1 md:flex md:w-72">
-            <p className="text-foreground border-border/80 border-b px-3 py-2 text-sm font-semibold">
-              Score History
-            </p>
+          <div className="ring-border bg-card hidden w-full shrink-0 flex-col overflow-hidden rounded-xl ring-1 md:flex md:w-96">
             <div className="max-h-[400px] overflow-y-auto">
               <Table className="text-xs">
                 <TableHeader>
@@ -106,7 +104,7 @@ export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberSc
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orderedPoints.map(point => (
+                  {newestFirstPoints.map(point => (
                     <TableRow key={point.timestamp.getTime()} className="hover:bg-accent/40 tabular-nums">
                       <TableCell className="text-muted-foreground px-3 py-1.5 whitespace-nowrap">
                         {formatRelativeDate(point.timestamp.getTime(), true)}
