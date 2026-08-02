@@ -137,11 +137,11 @@ export default function Loading() {
 
         {/* Mini rankings sidebar */}
         <aside className="hidden w-full shrink-0 md:block md:w-96">
-          <div className="flex flex-col gap-4">
+          <div className="sticky top-4 flex flex-col gap-4">
             {Array.from({ length: 2 }).map((_, cardIndex) => (
               <div
                 key={cardIndex}
-                className="bg-card ring-border sticky flex w-full flex-col gap-2 rounded-xl p-3 text-xs ring-1 select-none"
+                className="bg-card ring-border flex w-full flex-col gap-2 rounded-xl p-3 text-xs ring-1 select-none"
               >
                 <div className="flex items-center gap-2">
                   <Skeleton className="size-6 rounded-full" />

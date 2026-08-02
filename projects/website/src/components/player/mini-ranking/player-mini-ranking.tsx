@@ -42,7 +42,7 @@ export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlaye
   });
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="sticky top-4 flex flex-col gap-4">
       <PlayerMiniRanking
         type="Global"
         player={player}
@@ -89,7 +89,7 @@ function PlayerMiniRanking({
   })();
 
   return (
-    <Card className="sticky flex w-full flex-col gap-2 p-3 text-xs select-none">
+    <Card className="flex w-full flex-col gap-2 p-3 text-xs select-none">
       {/* Header */}
       <div className="flex items-center gap-2">
         {icon}
