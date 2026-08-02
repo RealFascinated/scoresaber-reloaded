@@ -1,0 +1,1 @@
+CREATE INDEX "leaderboards_timestamp_desc_idx" ON "scoresaber-leaderboards" USING btree ("timestamp" DESC NULLS LAST);

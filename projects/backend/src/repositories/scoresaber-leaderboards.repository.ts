@@ -122,6 +122,10 @@ export function leaderboardSearchCategoryOrderBy(
       return ascending
         ? [sql`${scoreSaberLeaderboardsTable.rankedDate} ASC NULLS LAST`, idTie]
         : [sql`${scoreSaberLeaderboardsTable.rankedDate} DESC NULLS LAST`, idTie];
+    case "date_created":
+      return ascending
+        ? [sql`${scoreSaberLeaderboardsTable.timestamp} ASC NULLS LAST`, idTie]
+        : [sql`${scoreSaberLeaderboardsTable.timestamp} DESC NULLS LAST`, idTie];
     case "trending":
       return ascending
         ? [sql`${scoreSaberLeaderboardsTable.trendingScore} ASC NULLS LAST`, idTie]
