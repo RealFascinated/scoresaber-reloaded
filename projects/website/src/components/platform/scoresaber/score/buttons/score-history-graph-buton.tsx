@@ -1,5 +1,6 @@
 "use client";
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SharedIcons } from "@/shared-icons";
 import type { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-history-graph";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -82,11 +83,43 @@ export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberSc
           <SharedIcons.ScoreHistoryChartIcon className="h-4 w-4" />
         </ScoreButton>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogTitle>Score Graph</DialogTitle>
 
-        <div className="h-[400px]">
-          <GenericChart config={chartConfig} labels={labels} />
+        <div className="flex w-full flex-col gap-4 md:flex-row">
+          <div className="min-w-0 flex-1">
+            <div className="h-[400px]">
+              <GenericChart config={chartConfig} labels={labels} />
+            </div>
+          </div>
+
+          <div className="ring-border bg-card hidden w-full shrink-0 flex-col overflow-hidden rounded-xl ring-1 md:flex md:w-72">
+            <p className="text-foreground border-border/80 border-b px-3 py-2 text-sm font-semibold">
+              Score History
+            </p>
+            <div className="max-h-[400px] overflow-y-auto">
+              <Table className="text-xs">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="px-3">Date</TableHead>
+                    <TableHead className="px-3 text-right">Accuracy</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {orderedPoints.map(point => (
+                    <TableRow key={point.timestamp.getTime()} className="hover:bg-accent/40 tabular-nums">
+                      <TableCell className="text-muted-foreground px-3 py-1.5 whitespace-nowrap">
+                        {formatRelativeDate(point.timestamp.getTime(), true)}
+                      </TableCell>
+                      <TableCell className="px-3 py-1.5 text-right text-green-400">
+                        {point.accuracy.toFixed(2)}%
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
