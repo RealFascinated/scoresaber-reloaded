@@ -180,11 +180,18 @@ export class PlayerScoresService {
     let currentPage = 1;
     let hasMoreScores = true;
     let pagesFetched = 0;
+    // Set when any page fails to load. ScoreSaberApiService collapses every
+    // failure (429/timeout/5xx) to undefined, so a missing page must not be
+    // treated as end-of-data: the player stays unseeded for the next cycle.
+    let fetchFailed = false;
     while (hasMoreScores) {
       const scoresPage = await getScoresPage(currentPage);
       if (!scoresPage) {
-        hasMoreScores = false;
-        continue;
+        fetchFailed = true;
+        PlayerScoresService.logger.warn(
+          `Failed to fetch page ${currentPage} of scores for "${playerId}"; leaving the player unseeded so the next cycle retries the backfill`
+        );
+        break;
       }
 
       pagesFetched++;
@@ -201,7 +208,7 @@ export class PlayerScoresService {
 
     result.totalScores = await ScoreSaberScoresRepository.countByPlayerId(playerId);
 
-    if (!account.seededScores) {
+    if (!fetchFailed && !account.seededScores) {
       await PlayerCoreService.updatePlayer(account.id, { seededScores: true });
     }
 
