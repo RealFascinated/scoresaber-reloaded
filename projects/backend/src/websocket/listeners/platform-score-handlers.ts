@@ -43,6 +43,18 @@ export class ScoreWebsockets implements EventListener {
   private static readonly PENDING_SCORES = new Map<string, PendingScore>();
 
   /**
+   * Converts a ScoreSaber score `timeSet` (an ISO-8601 string, e.g.
+   * "2021-08-11T17:44:41.000Z") to unix milliseconds. ScoreSaber timestamps are
+   * ISO-8601; BeatLeader's `timeset` is unix seconds and goes through
+   * {@link beatLeaderTimesetToMs} instead. Returns NaN for unparseable input so
+   * window comparisons fail safely.
+   */
+  private static scoresaberTimesetToMs(timeSet: string): number {
+    const ms = new Date(timeSet).getTime();
+    return Number.isFinite(ms) ? ms : NaN;
+  }
+
+  /**
    * Finds a pending BeatLeader score for the same play: same map, play time within the
    * pairing window, and set by the same human as the given ScoreSaber account.
    */
@@ -83,7 +95,9 @@ export class ScoreWebsockets implements EventListener {
       if (!entry.scoreSaberToken || !entry.player || entry.mapKey !== mapKey) {
         continue;
       }
-      const delta = Math.abs(beatLeaderTimesetToMs(entry.scoreSaberToken.timeSet) - timesetMs);
+      const delta = Math.abs(
+        ScoreWebsockets.scoresaberTimesetToMs(entry.scoreSaberToken.timeSet) - timesetMs
+      );
       if (delta <= ScoreWebsockets.PLAY_TIME_WINDOW_MS) {
         matches.push({ key, entry, delta });
       }
@@ -130,7 +144,7 @@ export class ScoreWebsockets implements EventListener {
           const mapKey =
             `${leaderboard.songHash}-${leaderboard.difficulty.difficulty}-${leaderboard.difficulty.characteristic}`.toUpperCase();
           const key = `${player.id}-${mapKey}`;
-          const timesetMs = beatLeaderTimesetToMs(score.score.timeSet);
+          const timesetMs = ScoreWebsockets.scoresaberTimesetToMs(score.score.timeSet);
 
           //scoreSaberWsLog.info(`Received score for player ${player.id} with key ${key}`);
 
@@ -154,6 +168,23 @@ export class ScoreWebsockets implements EventListener {
             ScoreWebsockets.clearPendingScore(blMatch.key);
             await this.processScore(score.score, score.leaderboard, player, blMatch.beatLeaderScore);
             return;
+          }
+
+          // No matching BeatLeader score yet. If this key already holds a pending
+          // score (other platform, or an earlier play), flush it first so it is
+          // never silently discarded by the overwrite below.
+          if (pendingScore) {
+            await this.processScore(
+              pendingScore.scoreSaberToken,
+              pendingScore.leaderboardToken,
+              pendingScore.player,
+              pendingScore.beatLeaderScore
+            );
+            // Only clear if the entry is still the one we flushed (a concurrent
+            // event may have replaced it while we were processing).
+            if (ScoreWebsockets.PENDING_SCORES.get(key) === pendingScore) {
+              ScoreWebsockets.clearPendingScore(key);
+            }
           }
 
           // No matching BeatLeader score yet, store this one
@@ -205,8 +236,9 @@ export class ScoreWebsockets implements EventListener {
             pendingScore?.scoreSaberToken &&
             pendingScore.leaderboardToken &&
             pendingScore.player &&
-            Math.abs(beatLeaderTimesetToMs(pendingScore.scoreSaberToken.timeSet) - timesetMs) <=
-              ScoreWebsockets.PLAY_TIME_WINDOW_MS
+            Math.abs(
+              ScoreWebsockets.scoresaberTimesetToMs(pendingScore.scoreSaberToken.timeSet) - timesetMs
+            ) <= ScoreWebsockets.PLAY_TIME_WINDOW_MS
           ) {
             // Found a matching ScoreSaber score from the same player, process both
             ScoreWebsockets.clearPendingScore(key);
@@ -236,6 +268,23 @@ export class ScoreWebsockets implements EventListener {
               beatLeaderScore
             );
             return;
+          }
+
+          // No matching ScoreSaber score yet. If this key already holds a pending
+          // score (other platform, or an earlier play), flush it first so it is
+          // never silently discarded by the overwrite below.
+          if (pendingScore) {
+            await this.processScore(
+              pendingScore.scoreSaberToken,
+              pendingScore.leaderboardToken,
+              pendingScore.player,
+              pendingScore.beatLeaderScore
+            );
+            // Only clear if the entry is still the one we flushed (a concurrent
+            // event may have replaced it while we were processing).
+            if (ScoreWebsockets.PENDING_SCORES.get(key) === pendingScore) {
+              ScoreWebsockets.clearPendingScore(key);
+            }
           }
 
           // No matching ScoreSaber score yet, store this one
