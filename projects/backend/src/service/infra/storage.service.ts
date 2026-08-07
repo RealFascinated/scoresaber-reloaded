@@ -2,6 +2,7 @@ import { SSRCache } from "@ssr/common/cache";
 import { env } from "@ssr/common/env";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { getS3BucketName, StorageBucket } from "@ssr/common/minio-buckets";
+import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { S3Client } from "bun";
 import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
 
@@ -26,6 +27,11 @@ export default class StorageService {
   constructor() {
     StorageService.CACHE = new SSRCache({
       maxObjects: 5_000,
+      // Bound how long file contents stay resident in heap. Every saved file
+      // (including BeatLeader replay buffers, which are never read back from
+      // this cache) is stored as a full Buffer, so without a TTL replay
+      // buffers would accumulate until the 5000-object cap forced eviction.
+      ttl: TimeUnit.toMillis(TimeUnit.Minute, 10),
     });
     this.initBuckets();
   }
