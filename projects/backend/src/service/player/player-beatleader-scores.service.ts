@@ -70,6 +70,9 @@ export class PlayerBeatLeaderScoresService {
         sortBy: "date",
         order: "desc",
         leaderboardContext: "general",
+        // The page schema requires a non-null `scoreImprovement`; BeatLeader only
+        // includes it when includeIO=true (it is null otherwise), so request it.
+        includeIO: true,
       });
       return scoresPage;
     }

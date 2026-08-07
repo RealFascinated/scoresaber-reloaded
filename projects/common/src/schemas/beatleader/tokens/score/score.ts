@@ -48,7 +48,9 @@ export const BeatLeaderScoreSchema = z
     playCount: z.number(),
     priority: z.number(),
     player: BeatLeaderPlayerSchema.nullable(),
-    scoreImprovement: BeatLeaderScoreImprovementSchema,
+    // BeatLeader returns null here unless the API is queried with includeIO=true
+    // (and can return null for individual scores even then), so accept null.
+    scoreImprovement: BeatLeaderScoreImprovementSchema.nullable(),
     rankVoting: z.null(),
     metadata: z.null(),
     offsets: BeatLeaderScoreOffsetsSchema.nullable().optional(),
