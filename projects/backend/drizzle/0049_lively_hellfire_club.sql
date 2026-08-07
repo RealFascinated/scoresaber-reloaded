@@ -1,0 +1,1 @@
+CREATE INDEX "scoresaber_score_history_score_id_idx" ON "scoresaber-score-history" USING btree ("scoreId");

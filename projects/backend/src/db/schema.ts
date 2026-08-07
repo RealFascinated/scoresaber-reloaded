@@ -227,6 +227,9 @@ export const scoreSaberScoreHistoryTable = pgTable(
   },
   table => [
     index("scoresaber_score_history_leaderboard_idx").on(table.leaderboardId),
+    // Archived-score lookups by scoreId (GET /scores/:scoreId fallback) would
+    // otherwise seq-scan the whole history table.
+    index("scoresaber_score_history_score_id_idx").on(table.scoreId),
     index("scoresaber_score_history_player_leaderboard_time_idx").on(
       table.playerId,
       table.leaderboardId,

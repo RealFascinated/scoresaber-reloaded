@@ -344,6 +344,13 @@
       "when": 1786115657440,
       "tag": "0048_clean_moon_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1786115713897,
+      "tag": "0049_lively_hellfire_club",
+      "breakpoints": true
     }
   ]
 }
