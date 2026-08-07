@@ -71,7 +71,7 @@ const appVersion = await getAppVersion();
 export const app = new Elysia()
   .use(
     logger({
-      enabled: true,
+      enabled: !isProduction(),
       mode: "combined",
     })
   )
