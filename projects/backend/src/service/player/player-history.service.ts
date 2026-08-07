@@ -31,6 +31,7 @@ import {
   type DailyScoreCounterKey,
 } from "../../repositories/player-history.repository";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { PlayerCoreService } from "./player-core.service";
@@ -95,26 +96,30 @@ export class PlayerHistoryService {
           await redisClient.del(cachedPlayerTokenCacheKey(account.id));
         }
 
-        // If the player has less scores tracked than the total play count, add them to the refresh queue
-        if (
-          statistics &&
-          (statistics?.totalScores ?? 0) < player.stats.totalSubmittedPlays &&
-          !player.banned
-        ) {
-          PlayerHistoryService.logger.info(
-            `Player ${playerId} has missing scores. Adding them to the refresh queue...`
-          );
-          // Add the player to the refresh queue
-          (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
-            id: playerId,
-            data: playerId,
-          });
-          (
-            QueueManager.getQueue(QueueId.PlayerBeatLeaderScoreSeedQueue) as PlayerBeatLeaderScoreSeedQueue
-          ).add({
-            id: playerId,
-            data: playerId,
-          });
+        // If the player has fewer recorded plays (current rows + archived attempts)
+        // than their total play count, add them to the refresh queue. Replays are
+        // archived to score history, so the current-rows count alone always looks
+        // incomplete and re-queued the whole player base every night.
+        if (statistics && !player.banned) {
+          const recordedPlays =
+            (statistics?.totalScores ?? 0) +
+            (await ScoreSaberScoreHistoryRepository.countByPlayerId(playerId));
+          if (recordedPlays < player.stats.totalSubmittedPlays) {
+            PlayerHistoryService.logger.info(
+              `Player ${playerId} has missing scores. Adding them to the refresh queue...`
+            );
+            // Add the player to the refresh queue
+            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
+              id: playerId,
+              data: playerId,
+            });
+            (
+              QueueManager.getQueue(QueueId.PlayerBeatLeaderScoreSeedQueue) as PlayerBeatLeaderScoreSeedQueue
+            ).add({
+              id: playerId,
+              data: playerId,
+            });
+          }
         }
 
         successCount++;

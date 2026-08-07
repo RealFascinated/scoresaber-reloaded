@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, getTableColumns, lt, sql } from "drizzle-orm";
+import { and, asc, desc, eq, getTableColumns, inArray, lt, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import {
@@ -73,6 +73,22 @@ export class ScoreSaberScoreHistoryRepository {
       .from(scoreSaberScoreHistoryTable)
       .where(eq(scoreSaberScoreHistoryTable.playerId, playerId));
     return Number(row?.count ?? 0);
+  }
+
+  /**
+   * Returns the score ids already recorded in the history table.
+   *
+   * Used by the backfill to skip archived plays without per-score lookups.
+   */
+  public static async findExistingScoreIds(scoreIds: number[]): Promise<Set<number>> {
+    if (scoreIds.length === 0) {
+      return new Set();
+    }
+    const rows = await db
+      .select({ scoreId: scoreSaberScoreHistoryTable.scoreId })
+      .from(scoreSaberScoreHistoryTable)
+      .where(inArray(scoreSaberScoreHistoryTable.scoreId, scoreIds));
+    return new Set(rows.map(row => row.scoreId));
   }
 
   public static async insertAttempt(

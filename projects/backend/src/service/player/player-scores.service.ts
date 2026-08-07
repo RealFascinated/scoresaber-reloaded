@@ -93,9 +93,16 @@ export class PlayerScoresService {
     const startTime = performance.now();
     const playerId = playerToken.id;
     const rankedLeaderboardsToRefresh = new Map<number, ScoreSaberLeaderboard>();
-    const playerScoresCount = await ScoreSaberScoresRepository.countByPlayerId(playerId);
+    const [playerScoresCount, playerHistoryCount] = await Promise.all([
+      ScoreSaberScoresRepository.countByPlayerId(playerId),
+      ScoreSaberScoreHistoryRepository.countByPlayerId(playerId),
+    ]);
+    // Replays are archived to the score-history table, so the scores-table count
+    // alone can never reach the player's total play count; only the sum of the
+    // current rows and archived attempts represents every recorded play.
+    const recordedPlays = playerScoresCount + playerHistoryCount;
 
-    if (playerScoresCount === playerToken.stats.totalSubmittedPlays) {
+    if (recordedPlays >= playerToken.stats.totalSubmittedPlays) {
       if (!account.seededScores) {
         await PlayerCoreService.updatePlayer(account.id, { seededScores: true });
       }
@@ -142,11 +149,24 @@ export class PlayerScoresService {
       currentPage: number,
       scoresPage: ScoreSaberPlayerScoresPageToken
     ): Promise<boolean> {
-      const parsedScores = scoresPage.playerScores.map(parseScoreToken);
+      const parsedScores = scoresPage.playerScores
+        .map(parseScoreToken)
+        .filter(
+          (parsed): parsed is { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard } =>
+            parsed.score != null && parsed.leaderboard != null
+        );
+
+      // Batched pre-filter: skip plays already recorded (as the current row or
+      // as an archived history entry) so already-tracked pages cost a single
+      // batched read instead of per-score reads and writes.
+      const [existingScores, existingHistory] = await Promise.all([
+        ScoreSaberScoresRepository.findExistingScoreIds(parsedScores.map(score => score.score.scoreId)),
+        ScoreSaberScoreHistoryRepository.findExistingScoreIds(parsedScores.map(score => score.score.scoreId)),
+      ]);
 
       await Promise.all(
         parsedScores.map(async ({ score, leaderboard }) => {
-          if (!score || !leaderboard) {
+          if (existingScores.has(score.scoreId) || existingHistory.has(score.scoreId)) {
             return;
           }
 
@@ -168,9 +188,15 @@ export class PlayerScoresService {
         })
       );
 
-      result.totalScores = await ScoreSaberScoresRepository.countByPlayerId(playerId);
+      // Count recorded plays across both current rows and archived attempts;
+      // the scores-table count alone can never match the API's total.
+      const [scoresCount, historyCount] = await Promise.all([
+        ScoreSaberScoresRepository.countByPlayerId(playerId),
+        ScoreSaberScoreHistoryRepository.countByPlayerId(playerId),
+      ]);
+      result.totalScores = scoresCount;
 
-      if (result.totalScores >= scoresPage.metadata.total) {
+      if (scoresCount + historyCount >= scoresPage.metadata.total) {
         return false;
       }
 
