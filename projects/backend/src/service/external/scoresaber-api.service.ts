@@ -60,19 +60,11 @@ type SerializableValue =
       [key: string]: SerializableValue;
     };
 
-type CachedResponse<T> = {
-  data: T | string;
-  type: "json" | "text";
-};
-
 export class ScoreSaberApiService {
   public static totalRequests: number = 0;
   public static failedRequests: number = 0;
   private static totalRequestLatencyMs: number = 0;
-  private static coalescingLoader = new CoalescingLoader<
-    string,
-    CachedResponse<SerializableValue> | undefined
-  >();
+  private static coalescingLoader = new CoalescingLoader<string, SerializableValue | undefined>();
 
   /**
    * Fetches data from the ScoreSaber API.
@@ -90,7 +82,7 @@ export class ScoreSaberApiService {
     const startedAt = performance.now();
     const cacheHash = Bun.hash(JSON.stringify({ url, options })).toString();
 
-    const data = await CacheService.fetch<CachedResponse<T> | undefined>(
+    const data = await CacheService.fetch<SerializableValue | undefined>(
       CacheId.SCORESABER_API_RESPONSE,
       scoreSaberApiResponseCacheKey(cacheHash),
       async () =>
@@ -125,27 +117,17 @@ export class ScoreSaberApiService {
             return undefined;
           }
 
-          const isJson =
-            !url.includes("/players/count") && // Umbra once again can't code and returns JSON content-type but it's actually text !!
-            response.headers.get("content-type")?.includes("application/json");
-
-          let responseData: T | string;
           try {
-            responseData = isJson ? ((await response.json()) as T) : await response.text();
+            return (await response.json()) as SerializableValue;
           } catch {
             ScoreSaberApiService.failedRequests++;
             return undefined;
           }
-
-          return {
-            data: responseData as SerializableValue,
-            type: isJson ? "json" : "text",
-          };
-        })) as CachedResponse<T> | undefined
+        })) as SerializableValue | undefined
     );
 
     ScoreSaberApiService.totalRequestLatencyMs += Math.max(0, performance.now() - startedAt);
-    return data?.data as T;
+    return data as T;
   }
 
   /**
