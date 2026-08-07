@@ -9,13 +9,11 @@ import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/playe
 import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
 import { ScoreSaberV2PlayerPageToken } from "@ssr/common/types/token/scoresaber/v2/player/players-page";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
-import { parseRankHistory } from "@ssr/common/utils/player-utils";
 import {
   formatDateMinimal,
   getDaysAgoDate,
   getMidnightAlignedDate,
   isToday,
-  TimeUnit,
 } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
@@ -35,8 +33,6 @@ import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { PlayerCoreService } from "./player-core.service";
-
-const INACTIVE_RANK = 999_999;
 
 export class PlayerHistoryService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player History");
@@ -187,11 +183,6 @@ export class PlayerHistoryService {
 
     await PlayerCoreService.updatePeakRank(playerToken);
 
-    const daysTracked = await PlayerHistoryRepository.countRowsForPlayer(player.id);
-    if (daysTracked === 0) {
-      await PlayerHistoryService.seedPlayerRankHistory(player, playerToken);
-    }
-
     const date = getMidnightAlignedDate(trackTime);
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(player.id, date);
 
@@ -247,19 +238,9 @@ export class PlayerHistoryService {
       }
     }
 
-    if (!isTargetToday && !entry && !includeToday) {
-      // If no entry found and not today, try to get rank from history
-      const playerRankHistory = parseRankHistory(playerToken);
-      const daysAgo = Math.floor((Date.now() - targetDate.getTime()) / TimeUnit.toMillis(TimeUnit.Day, 1));
-
-      if (daysAgo >= 0 && daysAgo < playerRankHistory.length) {
-        const rankIndex = playerRankHistory.length - 1 - daysAgo;
-        const rank = playerRankHistory[rankIndex];
-        if (rank !== INACTIVE_RANK && rank !== 0) {
-          history[dateKey] = { rank };
-        }
-      }
-    }
+    // Past dates without a DB entry stay empty: ScoreSaber's v2 API no longer
+    // exposes the daily `histories` string, so the DB history table (populated
+    // by the nightly tracking job) is the only rank-history source.
     return history;
   }
 
@@ -295,53 +276,6 @@ export class PlayerHistoryService {
       history[dateKey] = playerHistoryRowToType(entry);
     }
 
-    // `parseRankHistory()` includes today's rank (playerToken.rank) as the last element.
-    // ScoreSaber's `histories` string ends at yesterday, so we start at "yesterday"
-    // (length - 2) and derive `daysAgo` from the array index to avoid off-by-one drift.
-    const playerRankHistory = parseRankHistory(playerToken);
-    const historyLength = playerRankHistory.length;
-    const daysDiff = allTime
-      ? Math.max(1, historyLength)
-      : Math.abs(Math.ceil((endTimestamp - startTimestamp) / TimeUnit.toMillis(TimeUnit.Day, 1))) + 1;
-
-    const missingRankUpserts: Array<{ date: Date; rank: number }> = [];
-    for (
-      let i = historyLength - 2; // yesterday
-      i >= Math.max(0, historyLength - daysDiff);
-      i--
-    ) {
-      const rank = playerRankHistory[i];
-      // Player was inactive on this day
-      if (rank === INACTIVE_RANK || rank === 0) {
-        continue;
-      }
-
-      // last element is "today" => 0d ago, then 1d ago, etc.
-      const daysAgo = historyLength - 1 - i;
-      const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
-      const dateKey = formatDateMinimal(date);
-
-      // If the rank is missing, add it to the history
-      if (!history[dateKey] || history[dateKey].rank === undefined) {
-        history[dateKey] = { rank };
-
-        missingRankUpserts.push({ date, rank });
-      }
-    }
-
-    if (missingRankUpserts.length > 0) {
-      await PlayerHistoryRepository.bulkUpsertRanks(
-        missingRankUpserts.map(({ date, rank }) => ({
-          playerId: playerToken.id,
-          date,
-          rank,
-        }))
-      );
-      PlayerHistoryService.logger.info(
-        `Bulk-upserted ${missingRankUpserts.length} missing history entries for ${playerToken.name ?? playerToken.id}`
-      );
-    }
-
     const todayData = await PlayerHistoryService.getTodayPlayerStatistic(playerToken, statistics);
     if (todayData) {
       history[formatDateMinimal(today)] = todayData;
@@ -367,35 +301,6 @@ export class PlayerHistoryService {
     const today = getMidnightAlignedDate(new Date());
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(playerToken.id, today);
     return PlayerHistoryService.createHistoryEntry(statistics, playerToken, existingEntry ?? undefined);
-  }
-
-  /**
-   * Seeds a player's history with data from ScoreSaber API.
-   * This method populates the player's rank history from their ScoreSaber profile.
-   */
-  public static async seedPlayerRankHistory(
-    account: ScoreSaberAccount,
-    playerToken: ScoreSaberPlayerLookupToken
-  ): Promise<void> {
-    const playerRankHistory = parseRankHistory(playerToken);
-    const historyLength = playerRankHistory.length;
-    const rows: { playerId: string; date: Date; rank: number }[] = [];
-
-    for (let i = historyLength - 1; i >= 0; i--) {
-      const rank = playerRankHistory[i];
-      if (rank === INACTIVE_RANK || rank === 0) {
-        continue;
-      }
-
-      // last element is "today" => 0d ago, then 1d ago, etc.
-      const daysAgo = historyLength - 1 - i;
-      const date = getMidnightAlignedDate(getDaysAgoDate(daysAgo));
-      rows.push({ playerId: account.id, date, rank });
-    }
-
-    if (rows.length > 0) {
-      await PlayerHistoryRepository.bulkUpsertRanks(rows);
-    }
   }
 
   /**

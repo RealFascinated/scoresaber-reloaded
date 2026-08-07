@@ -1,5 +1,5 @@
 import { ScoreSaberPlayerHistory } from "@ssr/common/schemas/scoresaber/player/history";
-import { and, count, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "../db";
 import { type PlayerHistoryRow, playerHistoryTable } from "../db/schema";
 
@@ -87,20 +87,6 @@ export class PlayerHistoryRepository {
       });
   }
 
-  public static async bulkUpsertRanks(rows: { playerId: string; date: Date; rank: number }[]): Promise<void> {
-    if (rows.length === 0) {
-      return;
-    }
-
-    await db
-      .insert(playerHistoryTable)
-      .values(rows)
-      .onConflictDoUpdate({
-        target: [playerHistoryTable.playerId, playerHistoryTable.date],
-        set: { rank: sql`excluded.rank` },
-      });
-  }
-
   public static async incrementDailyCounter(
     playerId: string,
     date: Date,
@@ -132,13 +118,5 @@ export class PlayerHistoryRepository {
         target: [playerHistoryTable.playerId, playerHistoryTable.date],
         set: incrementSet,
       });
-  }
-
-  public static async countRowsForPlayer(playerId: string): Promise<number> {
-    const [row] = await db
-      .select({ c: count() })
-      .from(playerHistoryTable)
-      .where(eq(playerHistoryTable.playerId, playerId));
-    return row?.c ?? 0;
   }
 }
