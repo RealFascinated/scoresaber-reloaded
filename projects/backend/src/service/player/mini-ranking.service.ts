@@ -82,42 +82,40 @@ export default class MiniRankingService {
       )
     );
 
-    // Combine and sort all players
+    // Combine all players and resolve their basic profiles with a single
+    // batched account lookup (instead of one DB query per player).
     const allPlayers = pageResponses
       .filter((response): response is NonNullable<typeof response> => response !== undefined)
-      .flatMap(response => response.data)
-      .map(async player => await ScoreSaberPlayerService.getPlayer(player.id, "basic", player));
+      .flatMap(response => response.data);
 
-    return this.processPlayersAndBuildResult(allPlayers, player, type, getRank);
+    const players = await ScoreSaberPlayerService.getBasicPlayers(allPlayers);
+
+    return this.processPlayersAndBuildResult(players, player, type, getRank);
   }
 
   /**
    * Processes the players and builds the result array with the target player and surrounding players.
    *
-   * @param allPlayers the array of player promises
+   * @param allPlayers the resolved players around the target
    * @param targetPlayer the target player to find
    * @param type the ranking type
    * @param getRank the function to get rank for a player and type
    * @returns the processed result array
    */
-  private static async processPlayersAndBuildResult(
-    allPlayers: Promise<ScoreSaberPlayer | undefined>[],
+  private static processPlayersAndBuildResult(
+    allPlayers: ScoreSaberPlayer[],
     targetPlayer: ScoreSaberPlayer,
     type: MiniRankingType,
     getRank: (player: ScoreSaberPlayer, type: MiniRankingType) => number | undefined
-  ): Promise<ScoreSaberPlayer[]> {
-    // Await all player promises and then sort
-    const resolvedPlayers = await Promise.all(allPlayers);
-    const sortedPlayers = resolvedPlayers
-      .filter((player): player is NonNullable<typeof player> => player !== undefined)
-      .sort((a, b) => {
-        const rankA = getRank(a, type);
-        const rankB = getRank(b, type);
-        if (rankA == undefined || rankB == undefined) {
-          return 0;
-        }
-        return rankA - rankB;
-      });
+  ): ScoreSaberPlayer[] {
+    const sortedPlayers = allPlayers.sort((a, b) => {
+      const rankA = getRank(a, type);
+      const rankB = getRank(b, type);
+      if (rankA == undefined || rankB == undefined) {
+        return 0;
+      }
+      return rankA - rankB;
+    });
 
     // Find the target player
     const playerIndex = sortedPlayers.findIndex(p => p.id === targetPlayer.id);

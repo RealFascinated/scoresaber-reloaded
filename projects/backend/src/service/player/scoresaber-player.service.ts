@@ -3,8 +3,10 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import {
   ScoreSaberV2PlayerToken,
+  isScoreSaberV2PlayerToken,
   type ScoreSaberPlayerLookupToken,
 } from "@ssr/common/types/token/scoresaber/v2/player/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
@@ -13,7 +15,9 @@ import { getPageFromRank } from "@ssr/common/utils/utils";
 import { parse, stringify } from "devalue";
 import { cachedPlayerTokenCacheKey, playerCacheKey } from "../../common/cache-keys";
 import { redisClient } from "../../common/redis";
+import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
+import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 import MetricsService, { MetricType } from "../infra/metrics.service";
@@ -56,7 +60,6 @@ export default class ScoreSaberPlayerService {
 
     const rank = player.stats.rank;
     const countryRank = player.stats.countryRank;
-    const pp = player.stats.totalPP;
 
     return CacheService.fetch(CacheId.SCORESABER_PLAYER, playerCacheKey(id, type), async () => {
       const account = await PlayerCoreService.getOrCreateAccount(id, player).catch(() => undefined);
@@ -64,25 +67,7 @@ export default class ScoreSaberPlayerService {
         throw new NotFoundError(`Player account "${id}" not found`);
       }
 
-      const basePlayer = {
-        id: player.id,
-        name: player.name,
-        avatar: account.avatar,
-        country: player.country,
-        rank,
-        countryRank,
-        pp,
-        medals: account.medals,
-        medalsRank: account.medalsRank,
-        medalsCountryRank: account.medalsCountryRank,
-        hmd: account.hmd,
-        role: player.role,
-        permissions: player.permissions,
-        banned: player.banned,
-        inactive: player.inactive,
-        trackedSince: account.trackedSince,
-        joinedDate: "createdAt" in player ? new Date(player.createdAt) : new Date(),
-      } as ScoreSaberPlayer;
+      const basePlayer = ScoreSaberPlayerService.buildBasePlayer(player, account);
 
       if (type === "basic") {
         return basePlayer;
@@ -134,6 +119,70 @@ export default class ScoreSaberPlayerService {
         statistics: statistics,
       } as ScoreSaberPlayer;
     });
+  }
+
+  /**
+   * Builds the base (basic-type) ScoreSaberPlayer object shared by all detail
+   * types, from the player token and the tracked account row.
+   */
+  private static buildBasePlayer(
+    player: ScoreSaberPlayerLookupToken,
+    account: ScoreSaberAccount
+  ): ScoreSaberPlayer {
+    return {
+      id: player.id,
+      name: player.name,
+      avatar: account.avatar,
+      country: player.country,
+      rank: player.stats.rank,
+      countryRank: player.stats.countryRank,
+      pp: player.stats.totalPP,
+      medals: account.medals,
+      medalsRank: account.medalsRank,
+      medalsCountryRank: account.medalsCountryRank,
+      hmd: account.hmd,
+      role: player.role,
+      permissions: player.permissions,
+      banned: player.banned,
+      inactive: player.inactive,
+      trackedSince: account.trackedSince,
+      joinedDate: "createdAt" in player ? new Date(player.createdAt) : new Date(),
+    } as ScoreSaberPlayer;
+  }
+
+  /**
+   * Resolves basic player objects for a batch of player tokens using a single
+   * batched account lookup, instead of one DB query per player.
+   *
+   * Players without a tracked account are created using the provided token
+   * (matching getPlayer's behavior); page tokens that cannot be created are
+   * skipped.
+   */
+  public static async getBasicPlayers(players: ScoreSaberPlayerLookupToken[]): Promise<ScoreSaberPlayer[]> {
+    if (players.length === 0) {
+      return [];
+    }
+    const uniquePlayers = [...new Map(players.map(player => [player.id, player])).values()];
+    const accountRows = await ScoreSaberAccountsRepository.findManyByIds(
+      uniquePlayers.map(player => player.id)
+    );
+    const accountsById = new Map(accountRows.map(row => [row.id, scoreSaberAccountRowToType(row)]));
+
+    const result: ScoreSaberPlayer[] = [];
+    for (const player of uniquePlayers) {
+      let account = accountsById.get(player.id);
+      if (!account) {
+        if (!isScoreSaberV2PlayerToken(player)) {
+          continue; // page tokens do not carry the full profile needed to create an account
+        }
+        account = await PlayerCoreService.createPlayer(player.id, player);
+        if (!account) {
+          continue;
+        }
+      }
+      result.push(ScoreSaberPlayerService.buildBasePlayer(player, account));
+    }
+    return result;
   }
 
   /**
