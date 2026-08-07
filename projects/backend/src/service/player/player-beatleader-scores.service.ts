@@ -138,6 +138,7 @@ export class PlayerBeatLeaderScoresService {
     }
 
     let currentPage = 1;
+    let pagesFetched = 0;
     let completed = false;
     while (true) {
       const scoresPage = await getScoresPage(currentPage);
@@ -152,6 +153,7 @@ export class PlayerBeatLeaderScoresService {
         }
         break;
       }
+      pagesFetched++;
 
       const scores = scoresPage.data ?? [];
       if (scores.length === 0) {
@@ -178,7 +180,7 @@ export class PlayerBeatLeaderScoresService {
     }
 
     result.timeTaken = performance.now() - startTime;
-    result.totalPagesFetched = currentPage - 1;
+    result.totalPagesFetched = pagesFetched;
 
     if (completed) {
       // Cache the player's linked BeatLeader account IDs so real-time scores can be
