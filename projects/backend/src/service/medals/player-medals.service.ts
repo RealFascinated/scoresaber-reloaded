@@ -111,19 +111,17 @@ export class PlayerMedalsService {
         return [];
       }
 
-      return rows.map(
-        (row): MedalRankingPlayer => ({
-          id: row.id,
-          name: row.name,
-          avatar: row.avatar,
-          country: row.country,
-          medals: row.medals,
-          medalsRank: row.medalsRank,
-          medalsCountryRank: row.medalsCountryRank,
-          trackedSince: row.trackedSince,
-          joinedDate: row.joinedDate,
-        })
-      );
+      return rows.map((row): MedalRankingPlayer => ({
+        id: row.id,
+        name: row.name,
+        avatar: row.avatar,
+        country: row.country,
+        medals: row.medals,
+        medalsRank: row.medalsRank,
+        medalsCountryRank: row.medalsCountryRank,
+        trackedSince: row.trackedSince,
+        joinedDate: row.joinedDate,
+      }));
     });
 
     return pageData;

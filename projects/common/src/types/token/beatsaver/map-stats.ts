@@ -1,11 +1,6 @@
 /** BeatSaver API `MapStats.sentiment` (Swagger). */
 export type BeatSaverMapStatsSentiment =
-  | "PENDING"
-  | "VERY_NEGATIVE"
-  | "MOSTLY_NEGATIVE"
-  | "MIXED"
-  | "MOSTLY_POSITIVE"
-  | "VERY_POSITIVE";
+  "PENDING" | "VERY_NEGATIVE" | "MOSTLY_NEGATIVE" | "MIXED" | "MOSTLY_POSITIVE" | "VERY_POSITIVE";
 
 /** Shapes `MapStats` (BeatSaver Swagger). */
 export default interface BeatSaverMapStatsToken {

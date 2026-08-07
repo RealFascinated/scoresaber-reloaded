@@ -4,10 +4,7 @@ import { db } from "../db";
 import { type PlayerHistoryRow, playerHistoryTable } from "../db/schema";
 
 export type DailyScoreCounterKey =
-  | "rankedScores"
-  | "unrankedScores"
-  | "rankedScoresImproved"
-  | "unrankedScoresImproved";
+  "rankedScores" | "unrankedScores" | "rankedScoresImproved" | "unrankedScoresImproved";
 
 export class PlayerHistoryRepository {
   public static async findByPlayerAndDate(

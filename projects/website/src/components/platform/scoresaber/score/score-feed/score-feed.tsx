@@ -27,8 +27,7 @@ const EMPTY_COPY = {
 type EmptyVariant = keyof typeof EMPTY_COPY;
 
 type FeedPhase =
-  | { kind: "list"; scores: PlayerScore<ScoreSaberScore>[] }
-  | { kind: "empty"; variant: EmptyVariant };
+  { kind: "list"; scores: PlayerScore<ScoreSaberScore>[] } | { kind: "empty"; variant: EmptyVariant };
 
 function sortByNewestFirst(a: PlayerScore<ScoreSaberScore>, b: PlayerScore<ScoreSaberScore>): number {
   return (
