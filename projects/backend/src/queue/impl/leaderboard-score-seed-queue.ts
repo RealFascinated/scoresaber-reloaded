@@ -33,6 +33,10 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     let scrape = true;
     let page = 1;
     let lastSeenTotalPages: number | undefined;
+    // Whether every page up to the last one was fetched. Cleared when a page is
+    // skipped or the scrape is aborted so the leaderboard is not marked seeded
+    // and the next 10-minute cycle retries it.
+    let fullySeeded = true;
 
     while (scrape) {
       const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page);
@@ -44,12 +48,14 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
               `Failed to fetch page ${page} for leaderboard "${leaderboardId}" after 2 attempts; skipping this page and continuing (leaderboard may be incompletely seeded)`
             );
             consecutiveFailures = 0;
+            fullySeeded = false;
             page++;
             continue;
           }
           LeaderboardScoreSeedQueue.logger.warn(
             `Aborting leaderboard "${leaderboardId}" after 2 consecutive page failures (page ${page}${lastSeenTotalPages !== undefined ? ` of ${lastSeenTotalPages}` : ""})`
           );
+          fullySeeded = false;
           break;
         }
         LeaderboardScoreSeedQueue.logger.warn(
@@ -100,6 +106,13 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     }
 
     await PlayerMedalsService.refreshLeaderboardMedals(leaderboard);
+
+    if (!fullySeeded) {
+      LeaderboardScoreSeedQueue.logger.warn(
+        `Leaderboard "${leaderboardId}" was not fully seeded; leaving it unseeded so the next cycle retries it`
+      );
+      return;
+    }
 
     await this.markLeaderboardSeeded(leaderboardId);
     LeaderboardScoreSeedQueue.logger.info(
