@@ -117,6 +117,12 @@ export default class BeatLeaderService {
     };
     const row = await BeatLeaderScoresRepository.insertReturning(insertRow);
 
+    // Save the score stats alongside the score. Best-effort: failures are logged and
+    // the stats are still fetched lazily on first request (see getScoreStats).
+    void BeatLeaderService.saveScoreStats(scoreToken.id).catch(error => {
+      BeatLeaderService.logger.error(`Failed to save score stats for "${scoreToken.id}": ${error}`);
+    });
+
     const timeTaken = performance.now() - before;
     if (log) {
       BeatLeaderService.logger.info(
