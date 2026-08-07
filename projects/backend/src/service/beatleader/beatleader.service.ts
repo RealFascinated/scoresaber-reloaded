@@ -55,17 +55,7 @@ export default class BeatLeaderService {
     accountId?: string
   ): Promise<BeatLeaderScore | undefined> {
     const before = performance.now();
-    // Prefer the account that actually set the score when known (the paired ScoreSaber
-    // score or the account being seeded); otherwise resolve it from the BeatLeader
-    // player's linked accounts, using the play time to disambiguate.
-    const account = accountId
-      ? await PlayerCoreService.getAccount(accountId)
-      : (await BeatLeaderPlayersRepository.findById(scoreToken.playerId)) != null
-        ? await BeatLeaderService.resolveAccountForBlPlayer(
-            scoreToken.playerId,
-            beatLeaderTimesetToMs(scoreToken.timeset)
-          )
-        : await PlayerCoreService.getAccount(scoreToken.playerId);
+    const account = await BeatLeaderService.resolveScoreAccount(scoreToken, accountId);
 
     // Only track for players that are being tracked
     if (account == null) {
@@ -130,6 +120,35 @@ export default class BeatLeaderService {
       );
     }
     return beatLeaderScoreRowToType(row);
+  }
+
+  /**
+   * Resolves the SSR account a BeatLeader score should be attributed to: the explicitly
+   * known account when one is passed (paired ScoreSaber score or seeding), otherwise the
+   * BeatLeader player's linked accounts (using the play time to disambiguate), and finally
+   * a ScoreSaber account sharing the player's ID. Only cached BeatLeader player mappings
+   * are used, so unknown players never trigger a BeatLeader API fetch.
+   *
+   * @param scoreToken the BeatLeader API score payload
+   * @param accountId the SSR account the score should be attributed to, when known
+   * @returns the SSR account, or undefined if none is tracked
+   */
+  private static async resolveScoreAccount(
+    scoreToken: BeatLeaderScoreToken,
+    accountId?: string
+  ): Promise<ScoreSaberAccount | undefined> {
+    if (accountId) {
+      return await PlayerCoreService.getAccount(accountId);
+    }
+
+    if ((await BeatLeaderPlayersRepository.findById(scoreToken.playerId)) != null) {
+      return await BeatLeaderService.resolveAccountForBlPlayer(
+        scoreToken.playerId,
+        beatLeaderTimesetToMs(scoreToken.timeset)
+      );
+    }
+
+    return await PlayerCoreService.getAccount(scoreToken.playerId);
   }
 
   /**
