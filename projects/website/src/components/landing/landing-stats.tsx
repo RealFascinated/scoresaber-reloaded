@@ -112,25 +112,27 @@ export function LandingStats() {
         return (
           <div
             key={label}
-            className="ring-border bg-card relative flex flex-col items-center gap-1 rounded-xl p-5 text-center ring-1"
+            className="ring-border bg-card flex flex-col items-center gap-1 rounded-xl p-5 text-center ring-1"
           >
             <Icon className="text-muted-foreground mb-1 h-5 w-5" />
-            <span className="text-foreground text-xl font-bold tabular-nums">
-              {formatNumberWithCommas(liveValue)}
-            </span>
+            <div className="flex items-center gap-1">
+              <span className="text-foreground text-xl font-bold tabular-nums">
+                {formatNumberWithCommas(liveValue)}
+              </span>
+              {bump && (
+                <m.span
+                  key={bump.id}
+                  initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                  animate={{ opacity: [0, 1, 1, 0], y: -16, scale: 1 }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  onAnimationComplete={() => removeBump(key)}
+                  className="text-primary text-sm font-bold select-none"
+                >
+                  +{bump.amount}
+                </m.span>
+              )}
+            </div>
             <span className="text-muted-foreground text-xs">{label}</span>
-            {bump && (
-              <m.span
-                key={bump.id}
-                initial={{ opacity: 0, y: 0, scale: 0.5 }}
-                animate={{ opacity: [0, 1, 1, 0], y: -28, scale: 1 }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                onAnimationComplete={() => removeBump(key)}
-                className="text-primary pointer-events-none absolute top-2 right-2 text-sm font-bold select-none"
-              >
-                +{bump.amount}
-              </m.span>
-            )}
           </div>
         );
       })}
