@@ -64,7 +64,10 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         continue;
       }
 
-      const totalPages = Math.ceil(response.metadata.total / response.metadata.itemsPerPage);
+      // An empty leaderboard has totalPages 0; the loop must still terminate
+      // (see the page >= max(1, totalPages) check below) instead of fetching
+      // out-of-range pages forever.
+      const totalPages = Math.ceil(response.metadata.total / Math.max(1, response.metadata.itemsPerPage));
       lastSeenTotalPages = totalPages;
       consecutiveFailures = 0;
 
@@ -99,7 +102,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         })
       );
 
-      if (page === totalPages) {
+      // Treat an empty leaderboard (totalPages 0) as complete after its first
+      // page, and terminate on or after the last page.
+      if (page >= Math.max(1, totalPages)) {
         scrape = false;
       }
       page++;
