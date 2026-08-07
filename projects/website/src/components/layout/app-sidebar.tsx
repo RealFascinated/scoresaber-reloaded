@@ -268,7 +268,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <SimpleLink href="/home" draggable={false}>
+              <SimpleLink href="/" draggable={false}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Image
                     width={32}
