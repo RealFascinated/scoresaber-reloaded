@@ -142,10 +142,14 @@ export class PlayerBeatLeaderScoresService {
     while (true) {
       const scoresPage = await getScoresPage(currentPage);
       if (!scoresPage) {
-        // The page fetch failed. If the player definitively does not exist on BeatLeader
-        // (404), there is nothing to seed; otherwise this is a transient failure and we
-        // leave the player unseeded so the queue retries them.
-        completed = currentPage === 1 && !(await BeatLeaderApiService.lookupPlayer(playerId));
+        // The page fetch failed. Only treat the player as seeded when they
+        // definitively do not exist on BeatLeader (404) and there is nothing to
+        // backfill; every other failure (rate limit, timeout, 5xx) leaves the
+        // player unseeded so the queue retries them.
+        if (currentPage === 1) {
+          const exists = await BeatLeaderApiService.playerExists(playerId);
+          completed = exists === false;
+        }
         break;
       }
 

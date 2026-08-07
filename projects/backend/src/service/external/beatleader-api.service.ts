@@ -24,13 +24,18 @@ export class BeatLeaderApiService {
   public static failedRequests: number = 0;
   private static totalRequestLatencyMs: number = 0;
 
-  private static async fetch<T>(
+  /**
+   * Executes a BeatLeader API request and returns the response status and parsed
+   * JSON. Returns `undefined` for transport failures (network error, 15s abort
+   * timeout, JSON parse failure) which are counted as failed requests.
+   */
+  private static async request(
     url: string,
     options?: {
       searchParams?: Record<string, string>;
       useProxy?: boolean;
     }
-  ): Promise<T | undefined> {
+  ): Promise<{ status: number; data: unknown } | undefined> {
     options = {
       useProxy: true,
       ...options,
@@ -56,21 +61,39 @@ export class BeatLeaderApiService {
       clearTimeout(timeoutId);
     }
 
-    if (!response?.ok || response.status !== 200) {
+    if (!response) {
       BeatLeaderApiService.failedRequests++;
       return undefined;
     }
 
-    let data: T | undefined;
+    let data: unknown;
     try {
-      data = (await response.json()) as T;
+      data = await response.json();
     } catch {
       BeatLeaderApiService.failedRequests++;
       return undefined;
     }
 
     BeatLeaderApiService.totalRequestLatencyMs += Math.max(0, performance.now() - startedAt);
-    return data;
+    return { status: response.status, data };
+  }
+
+  private static async fetch<T>(
+    url: string,
+    options?: {
+      searchParams?: Record<string, string>;
+      useProxy?: boolean;
+    }
+  ): Promise<T | undefined> {
+    const result = await BeatLeaderApiService.request(url, options);
+    if (result == undefined) {
+      return undefined;
+    }
+    if (result.status !== 200) {
+      BeatLeaderApiService.failedRequests++;
+      return undefined;
+    }
+    return result.data as T;
   }
 
   public static async lookupScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
@@ -142,6 +165,32 @@ export class BeatLeaderApiService {
       `Found BeatLeader player "${parsed.data.name}" in ${formatDuration(performance.now() - before)}`
     );
     return parsed.data;
+  }
+
+  /**
+   * Whether a BeatLeader player exists, distinguishing a definitive "not found"
+   * (404) from a failed request.
+   *
+   * @param playerId the player ID to check
+   * @returns `true` when the player exists, `false` when the API reports 404,
+   *   or `undefined` when the request failed (network error, timeout, 429/5xx,
+   *   parse failure) and the answer is unknown
+   */
+  public static async playerExists(playerId: string): Promise<boolean | undefined> {
+    const result = await BeatLeaderApiService.request(
+      LOOKUP_PLAYER_ENDPOINT.replace(":playerId", playerId)
+    );
+    if (result == undefined) {
+      return undefined;
+    }
+    if (result.status === 404) {
+      return false;
+    }
+    if (result.status !== 200) {
+      BeatLeaderApiService.failedRequests++;
+      return undefined;
+    }
+    return true;
   }
 
   public static async lookupPlayerScores(
