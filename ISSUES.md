@@ -10,33 +10,48 @@
 
 | Severity | Count |
 |---|---|
-| Critical | 2 |
-| High | 17 |
-| Medium | 46 |
+| Critical | 0 |
+| High | 6 |
+| Medium | 37 |
 | Low | 25 |
 | Info | 7 |
 
-**The two Criticals share one root cause:** the BeatLeader attribution rework (commit `21800d04`, "Attribute BeatLeader scores using linked accounts") broke both the real-time and the backfill paths of the BeatLeader score pipeline. Together they reproduce the user-reported bug ("players such as `ssr.fascinated.cc/player/3469851723141662` do not have their beatleader scores saved"): **no historical BL score is ever inserted, and for players whose BeatLeader ID equals their ScoreSaber ID (all Steam players) one platform's real-time score per play is silently discarded.**
+**Status:** 22 of the original 97 findings are fixed (see [Recently fixed](#recently-fixed) below); 75 remain open. Finding IDs are stable — gaps (e.g. no C1/C2, no H2-H11) mean that finding has been fixed.
+
+**Current priorities:** the highest-value remaining work is the unauthenticated/unthrottled HTTP surface that can create DB rows and enqueue full upstream scrapes (**H1**), the still-broken landing "Active Players" stat (**H14**, the fix is a one-liner: `lookupActivePlayerCount` reads `.count` off a text body), deranked maps that never lose ranked status (**H12**), and the queue/ingestion reliability items (M1, M2, M5, M6, M7). The remaining performance items are mostly index migrations (H8/H9/M34 are done; H13/M42 are query-shape fixes).
 
 Other themes: the seed/backfill queues are at-most-once with no retry and mark work permanently complete after partial/transient failure; several hot queries scan the ~80M-row `scoresaber-scores` table without index support; the entire HTTP surface is unauthenticated and unthrottled, and GETs can create DB rows and enqueue full upstream scrapes.
 
 ---
 
-## Critical
+## Recently fixed
 
-### C1. BeatLeader historical scores are never seeded — schema requires `scoreImprovement`, API sends `null` (A4-01)
-- **Status:** ✅ Fixed 2026-08-07 — the seed now requests `includeIO: true` (`player-beatleader-scores.service.ts:74`) and `scoreImprovement` is nullable in `BeatLeaderScoreSchema` (`tokens/score/score.ts:51`). Verified against the live API with the repo's schema: `includeIO=true` parses (improvement + offsets present) and `includeIO=false` (null) now parses too. Both consumers (`improvementRowFromToken`, `beatLeaderScoreFromToken`) already handled null.
-- **Category:** Bug | **Files:** `projects/common/src/schemas/beatleader/tokens/score/score.ts:51`, `projects/backend/src/service/external/beatleader-api.service.ts:197,205`, `projects/backend/src/service/player/player-beatleader-scores.service.ts:141-146`
-- **Problem:** The seed/backfill path validates every scores page against `BeatLeaderScoreSchema`, which requires `scoreImprovement` as a non-null object. The API call sends `includeIO: "false"`, and the live BeatLeader API (verified: `GET /player/335393/scores?...&includeIO=false` returns `"scoreImprovement": null` for every score; `includeIO=true` returns the object) then fails `safeParse`. `lookupPlayerScores` returns `undefined`, the seed breaks on page 1 for every player, and `seededBeatLeaderScores` is never set — **no historical BL score is ever inserted**. Because the whole ~37k-account population re-runs the failing seed every 10 minutes, this also sustains constant BL API load (see H4/H6).
-- **Evidence:** `score.ts:51` `scoreImprovement: BeatLeaderScoreImprovementSchema` (non-null); `beatleader-api.service.ts:197` `includeIO: o.includeIO ? "true" : "false"` with the seed not passing `includeIO`; live API responses verified both ways.
-- **Fix:** Send `includeIO: "true"` from the seed, and/or make `scoreImprovement` (and other potentially-null fields like `accuracy`, `modifiers`) nullable in `BeatLeaderScoreSchema`. `improvementRowFromToken` already tolerates null improvements.
+| ID | Finding | Fix |
+|---|---|---|
+| C1 | BL historical scores never seeded (`scoreImprovement` null vs schema) | `30551e95` |
+| C2 | Cross-platform realtime pairing dead (NaN timeset) + pending overwrites | `913a2dd8` |
+| H2 | Leaderboard marked seeded after skipped/aborted scrape | `fe198170` |
+| H3 | Player backfill permanently lost on transient failure | `1483c066` |
+| H4 | BL seed marks player seeded on transient outage (404 vs failure) | `41ff361e` |
+| H5 | Replace-current path non-transactional and race-loses scores | `91374974` |
+| H6 | BL API calls: no retry/backoff/429 handling, no concurrency cap | `aa318e3f` |
+| H7 | BL player mapping only populated by completed seed | `3ce71c58` |
+| H8 | Global pp-ordering queries seq-scan (partial index) | `d580a71c` (migration 0048) |
+| H9 | score-history scoreId lookups seq-scan (index) | `60ba2051` (migration 0049) |
+| H10 | getOrCreateAccount wipes country/clears banned without token | `a5f6e8f7` |
+| H11 | Player backfill never early-exits; per-page pre-filter restored | `77ac445f` |
+| H17 | Storage cache retains files/replay buffers forever (TTL) | `11c7c290` |
+| M22 | /beatsaver/map/:hash accepts arbitrary strings; no negative cache | `0147dc70` |
+| M23 | /statistics recounts per request (serves samples) | `622cdc96` |
+| M24 | Empty leaderboards never terminate the seed loop | `4b04fb23` |
+| M29 | Mini-ranking ~200 queries per request (batched) | `d74c750c` |
+| M31 | Dead rank-history fallback/seed code | `e063b43a` (+ `dbeafb50`) |
+| M33 | Bulk history reweight: N UPDATEs → VALUES statement | `21f11572` |
+| M34 | per-player time-window scans (index) | `e6be9eb7` (migration 0050) |
+| M39 | Row-level table-count triggers serialize writes (statement-level) | `fd84afef` (migration 0051) |
+| M47 | Crons without error handling; batch notifications lost | `f9eb8110` |
 
-### C2. Cross-platform real-time score pairing is dead (NaN timeset) — one platform's score silently dropped per play (A3-01)
-- **Status:** ✅ Fixed 2026-08-07 — ScoreSaber `timeSet` values are now converted with `new Date(timeSet).getTime()` (`scoresaberTimesetToMs`, `platform-score-handlers.ts:52`) at all three SS-timeset comparison sites, and both pending-score stores flush (process) any existing entry under the key before overwriting instead of discarding it. Verified with a simulation of the same play (SS ISO + BL unix-seconds): old math `NaN` → never matched; new math `delta 0` → matched within the 5s window. Backend typecheck + lint pass.
-- **Category:** Bug | **Files:** `projects/backend/src/websocket/listeners/platform-score-handlers.ts:133,138-166,203-246`, `projects/common/src/utils/beatleader-utils.ts:14-16`, `projects/common/src/token-creators.ts:167`
-- **Problem:** ScoreSaber's `timeSet` is an ISO-8601 string (verified live: `"2021-08-11T17:44:41.000Z"`; the same field is parsed with `new Date(token.timeSet)` at `token-creators.ts:167`). The new pairing code feeds it to `beatLeaderTimesetToMs`, which does `Number(timeset)` → `NaN` for ISO strings. Every `Math.abs(... - NaN) <= 5000` check is false, so neither the direct-key match nor `findPendingBlScore`/`findPendingSsScore` can ever pair. Every play falls through to `PENDING_SCORES.set(key, …)`, which **overwrites whichever platform's event arrived first** under the same key. For players whose SS ID equals their BL ID (all Steam players — both are the 17-digit Steam ID), the first platform's score token is discarded; the 60s sweep then processes only the survivor (SS-only or BL-only). The discarded platform's score never reaches the DB, never creates a score event, never increments plays, and never notifies. Regression introduced by `21800d04` (the pre-rework code paired by key alone).
-- **Evidence:** `platform-score-handlers.ts:133` `beatLeaderTimesetToMs(score.score.timeSet)` on an ISO string; `beatleader-utils.ts:14-16` `Number("2024-06-03T07:58:26.000Z")` → NaN; verified `NaN <= 5000` → false; overwrite at lines 160-166 / 242-246.
-- **Fix:** Convert ScoreSaber timesets with a date parser (`new Date(score.timeSet).getTime()`, or reuse the already-parsed `score.timestamp`), and before overwriting a pending entry holding the other platform's score, process/merge it instead of discarding it.
+Note: H8/H9/M34/M39 ship as migrations (0048–0051) and take effect after `bun run db:migrate` on deploy.
 
 ---
 
@@ -47,59 +62,6 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - **Problem:** Every state-changing operation is reachable via unauthenticated GET: `GET /player/:id`, `/player/search`, `/ranking/:page` → `createPlayer` (inserts an account row and enqueues a multi-page `FetchMissingScoresQueue` job); `GET /leaderboard/by-id/:id`, `/scores/leaderboard/:id/:page`, `/scores/:scoreId`, `/player/score-history/...` → `createLeaderboard` (upstream fetch + insert + full `LeaderboardScoreSeedQueue` scrape); `/player/refresh/:id` fires an upstream refresh; live-scores GETs fire-and-forget `upsertScoresFromApi` DB upserts. There is no auth middleware, no rate limiting, and no per-IP throttle anywhere (`/metrics` is the only authed endpoint). All upstream traffic flows through one shared `PROXY_URL`; an attacker enumerating sequential leaderboard/player IDs can exhaust the ScoreSaber quota and starve the legitimate ingestion pipeline, while polluting the DB.
 - **Evidence:** `scoresaber-leaderboards.service.ts:47-52` `getLeaderboard` → `createLeaderboard` on miss; `:168-173` seed-queue enqueue; `player-core.service.ts:163-177` refresh-queue enqueue on `trackedScores < totalSubmittedPlays`; `scoresaber-api.service.ts:105-110` single shared proxy fetch.
 - **Fix:** Auth (Bearer/API key) or per-IP rate limits on state-changing routes; gate account/leaderboard auto-creation and queue enqueues; cap seed queue depth; don't enqueue background jobs from unauthenticated requests.
-
-### H2. Leaderboard marked seeded even when pages were skipped or the scrape aborted — permanently incomplete scores (A10-01, A5-03)
-- **Category:** Data Integrity | **Files:** `projects/backend/src/queue/impl/leaderboard-score-seed-queue.ts:37-104`
-- **Problem:** The scrape loop skips pages after 2 consecutive upstream failures ("skipping this page and continuing (leaderboard may be incompletely seeded)") or aborts, but `markLeaderboardSeeded(leaderboardId)` at line 104 runs unconditionally afterwards. Once `seededScores = true`, `insertLeaderboards()` (selects only `seededScores = false`) never re-queues the leaderboard — the missing pages are permanently lost. Since `ScoreSaberApiService.fetch` collapses every failure (429/timeout/5xx) to `undefined` with no retry/backoff, this triggers under ordinary API blips.
-- **Evidence:** skip/abort branches at lines 41-53; unconditional `markLeaderboardSeeded` at 104; requeue filter at 126-130.
-- **Fix:** Track `pagesSkipped`; skip `markLeaderboardSeeded` when any page was skipped or aborted so the next 10-minute cycle retries.
-
-### H3. Player score backfill lost permanently after one transient API failure (A10-02)
-- **Category:** Data Integrity | **Files:** `projects/backend/src/queue/impl/player-scoresaber-scores-queue.ts:24-73`, `player-scores.service.ts:184-188,204-206`, `queue/queue.ts:95-138`
-- **Problem:** The queue is at-most-once (pops before processing, drops the item on error, no retry/dead-letter). Worse, `fetchMissingPlayerScores` sets `hasMoreScores = false` when any page returns `undefined` (rate limit/5xx/timeout) and then **unconditionally marks the account `seededScores: true`**. The player is never re-fetched — a transient mid-refresh failure becomes permanent missing scores for that player.
-- **Evidence:** `player-scores.service.ts:184-188` `if (!scoresPage) { hasMoreScores = false; continue; }`; `:204-206` `updatePlayer(account.id, { seededScores: true })`; `selectIdsNeedingScoreSeed` selects only unseeded.
-- **Fix:** Only set `seededScores` when the full fetch completed; treat a failed page as an error (throw → queue retry) or add retry/backoff + dead-letter.
-
-### H4. BL seed marks player seeded with zero scores on a transient outage (A4-02)
-- **Category:** Error Handling | **Files:** `player-beatleader-scores.service.ts:141-146,176-177`, `beatleader-api.service.ts:52-62`
-- **Problem:** On a page-1 failure, `completed = currentPage === 1 && !(await lookupPlayer(playerId))`. `lookupPlayer` returns `undefined` both for a genuine 404 and for any transport/HTTP/parse failure — so a BL/proxy outage makes real players get `seededBeatLeaderScores = true` with zero scores, permanently (the code comment claims the opposite behavior). Any outage window silently loses the whole BL backfill for every player processed during it.
-- **Fix:** Distinguish 404 from other failures (tagged union / `{ notFound }`); only mark completed on a genuine 404.
-
-### H5. Replace-current score path is non-transactional and race-loses scores (A3-02)
-- **Category:** Data Integrity | **Files:** `score-core.service.ts:73-90`, `scoresaber-scores.repository.ts:134-141`, `schema.ts:175`
-- **Problem:** `trackScoreSaberScore` snapshots the old row → **deletes it** → inserts the new row, in three separate statements with no transaction (crash between delete and insert loses the player's current PB; only the history snapshot survives). `insertScore` uses `onConflictDoNothing({ target: scoreId })`, but the table also has `uniqueIndex("scores_player_leaderboard_unique")` on `(playerId, leaderboardId)`: two concurrent plays (live pipeline + 10-worker seed queue, or two live events) both pass the check-then-act guards, and the loser raises `23505`, which the scoreId-targeted ON CONFLICT does not suppress. The exception is only logged in `processScore` (platform-score-handlers.ts:328-330) — the newer play is silently lost and the player's current row may be left stale or missing.
-- **Fix:** Wrap snapshot+delete+insert in a DB transaction and handle the `(playerId, leaderboardId)` conflict (`onConflictDoUpdate` on that target, or catch 23505 and re-fetch/retry).
-
-### H6. BL API calls have no retry, backoff, or 429 handling; mitigations removed by the rework (A4-03)
-- **Category:** Performance | **Files:** `beatleader-api.service.ts:27-74`, `player-beatleader-scores.service.ts:67-75`, `player-beatleader-score-seed-queue.ts:16`
-- **Problem:** `BeatLeaderApiService.fetch` is a single attempt with a 15s abort; any non-200 (including 429) returns `undefined` with no retry and no `Retry-After` handling. The previous implementation had `MAX_LOOKUP_ATTEMPTS = 5` with exponential backoff (commit `c9b868db`) and inter-page throttling (commit `a3b8aa08`); `21800d04` deleted both. With C1 active, ~37k unseeded accounts each re-issue a failing scores call + a lookup every 10 minutes (~74k requests/cycle) — guaranteed rate-limit churn that feeds H4.
-- **Fix:** Re-introduce exponential backoff for 429/5xx/timeout (honor `Retry-After`), cap concurrent BL fetches globally, treat only a definitive 404 as non-retryable.
-
-### H7. BL player mapping cache only populated by a completed seed — real-time attribution disabled (A4-04)
-- **Category:** Consistency | **Files:** `player-beatleader-scores.service.ts:176-181`, `beatleader.service.ts:136-152,353-359`, `platform-score-handlers.ts:337-342`
-- **Problem:** Real-time BL scores for players whose BL ID differs from their SS account ID are only resolvable via the `beatleader-players` cache, which is written in exactly one place: `upsertBeatLeaderPlayer` inside the seed's `if (completed)` block. Two holes: the account is marked `seededBeatLeaderScores = true` **before** the upsert, and `upsertBeatLeaderPlayer` silently returns `undefined` on lookup failure — leaving no mapping, never re-seeded. With C1 the seed never completes, so the cache is never populated at all and the linked-account attribution the rework was built for is dead.
-- **Fix:** Populate the mapping before marking seeded; retry the upsert (or don't set `seededBeatLeaderScores` on failure); opportunistically upsert the mapping when a real-time BL score arrives for an unknown playerId.
-
-### H8. Global `ORDER BY pp DESC` queries seq-scan the 80M-row scores table; the pp index was dropped (A2-01, A1-03)
-- **Category:** Performance | **Files:** `scoresaber-scores.repository.ts:207-225`, `schema.ts:174-189`, `drizzle/0037_fresh_blacklash.sql`, `platform-score-handlers.ts:280`
-- **Problem:** `selectTopPp` (WHERE pp > 0 ORDER BY pp DESC LIMIT 50) and `getTopScores` have no supporting index — every scores index leads with playerId or leaderboardId. Postgres seq-scans + top-N sorts ~80M rows per call. This runs on **every websocket score event** (`isTop50GlobalScore` → `selectTopPp`) and on every `GET /scores/top/:page` (uncached). The only pp-leading partial index (`scores_pp_desc_player_partial_idx`, added in 0028) was dropped in migration 0037.
-- **Fix:** Recreate a partial index `(pp DESC, scoreId DESC) WHERE pp > 0` (declare in `schema.ts`), and/or cache the top-50 result.
-
-### H9. `scoresaber-score-history` has no index on `scoreId` — archived-score lookups seq-scan (A2-02, A12-02, A1-07)
-- **Category:** Performance | **Files:** `scoresaber-score-history.repository.ts:42-48`, `schema.ts:223-235`, `player-scores.service.ts:253-255`, `scores.controller.ts:31-47`
-- **Problem:** `findRowByScoreId` filters `WHERE scoreId = $1` on the history table, whose indexes are (leaderboardId), (playerId, leaderboardId, timestamp DESC), (leaderboardId, playerId, score) — none leads with scoreId. The public, unauthenticated `GET /scores/:scoreId` falls back to this method for every archived score → full sequential scan of a very large table per request, attacker-driven with no rate limit.
-- **Fix:** Add an index on `scoreId` (declare in schema.ts), or resolve history lookups via a join keyed on (leaderboardId, playerId).
-
-### H10. `getOrCreateAccount` without a player token wipes `country` and clears `banned` (A6-01)
-- **Category:** Data Integrity | **Files:** `player-core.service.ts:74-81`, `common/score/score.util.ts:166`
-- **Problem:** The country/banned sync is not guarded on the token being present: with `playerToken` undefined, `playerToken?.country !== account.country` is true for any non-null country → `updates.country = null`; likewise `banned` resets to false. `sendMedalScoreNotification` calls `getOrCreateAccount(playerId)` with **no token** on every medal change (every new top-10 ranked score). Players drop out of country medal rankings (`accounts_medal_ranking_country_idx` requires country NOT NULL) and banned players can be un-banned, until the nightly job re-syncs.
-- **Evidence:** `player-core.service.ts:75-81` `updates.country = playerToken?.country ?? null; updates.banned = playerToken?.banned ?? false;` — the avatar check is correctly guarded with `playerToken &&`, these two are not.
-- **Fix:** Guard the sync block on `playerToken` being present.
-
-### H11. Player score backfill never early-exits — full daily re-walk of every player's entire history (A6-02)
-- **Category:** Performance | **Files:** `player-scores.service.ts:96-177`, `player-history.service.ts:99-118`, `score-core.service.ts:79-84`
-- **Problem:** The early-exit compares the `scoresaber-scores` row count against `totalSubmittedPlays`, but replays with a worse score are archived to `scoresaber-score-history` and never counted in `scoresaber-scores` (unique per player+leaderboard). The count can never equal `totalSubmittedPlays` for any player who ever replayed a map, so the loop always fetches **every page** of the player's full SS history, and since commit `610617ac` removed the batched existing-scoreId pre-filter, each score runs ~2 reads + 1 write. `updatePlayerStatistics` re-queues nearly all ~37k active players nightly → this full re-walk runs daily for the whole player base.
-- **Fix:** Count scores + history (or compare against the sum) so the early exit can trigger; restore a batched existing-scoreId pre-filter per page.
 
 ### H12. Deranked/removed maps never lose `ranked`/`qualified` status (A7-01)
 - **Category:** Data Integrity | **Files:** `leaderboard-ranked-sync.service.ts:40-101`
@@ -125,13 +87,6 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - **Category:** Error Handling | **Files:** `common/src/utils/request.ts:92-98`, `beatleader.service.ts:83,298-300`
 - **Problem:** `Request.executeRequest` passes no AbortController/signal (unlike `ScoreSaberApiService.fetch`, which has a 15s timeout). BeatSaver lookups on the HTTP hot path and the BeatLeader replay download (awaited inside `trackBeatLeaderScore` on the live websocket path) can stall indefinitely on a hung connection: no timeout, no size cap.
 - **Fix:** Add an AbortController with a per-request timeout in `executeRequest`; propagate abort as a normal `undefined` result.
-
-### H17. Storage memory cache retains every saved file with no TTL; replay buffers accumulate in heap (A9-01)
-- **Category:** Performance | **Files:** `storage.service.ts:27-31,68-76`, `beatleader.service.ts:303`
-- **Problem:** `StorageService.CACHE` is an `SSRCache` with `maxObjects: 5000` and **no TTL**; `saveFile` unconditionally stores the full file Buffer. BL replays are written through `saveFile` but never read from cache (only served from the CDN URL), so every tracked replay becomes a permanently resident heap Buffer until FIFO eviction. Scale note: only ~242 replays exist today (bounded), but it grows unbounded with `trackReplays` adoption; also, FIFO eviction evicts frequently re-set hot keys first, causing S3 refetch thrash.
-- **Fix:** Don't cache replay buffers (skip `CACHE.set` for large blobs or add a TTL + byte cap); switch eviction to true LRU.
-
----
 
 ## Medium
 
@@ -195,9 +150,6 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - **Problem:** `Boolean("false")` is true in zod 4's coercion, so `?ranked=false` returns only ranked maps. The first-party website never sends `false` (ssr-api.ts only spreads truthy values), so this is a latent API-contract bug for third-party clients.
 - **Fix:** `z.enum(["true","false"]).transform(v => v === "true")`.
 
-### M13. `ranked=false`/`qualified=false` semantics — see M12 (same finding, alternate slice)
-- Merged into M12.
-
 ### M14. Playlist settings parsed via unvalidated `JSON.parse` — user error yields 500s, contradictory ranges accepted (A8-06)
 - **Files:** `common/src/playlist/ranked/custom-ranked-playlist.ts:20-41`, `self-playlist-utils.ts:9-29`, `snipe-playlist-utils.ts:10-31`
 - **Problem:** The defined zod schemas are never used; malformed base64/JSON → SyntaxError → 500; `{}` → TypeError at `settings.stars.min` → 500; `{stars:{min:99,max:1}}` silently returns an empty playlist instead of 400. Routes are unauthenticated, so clients can spam Discord error reports.
@@ -238,21 +190,6 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - **Problem:** `&search=${search}` / `&countries=${country}` without `encodeURIComponent`; values come from unvalidated query params. After the proxy decodes the encoded URL, characters like `&`/`=` inject additional upstream parameters (e.g. overriding page/limit), and every returned score is parsed and upserted into the DB. Fixed host limits it to param injection (no full SSRF).
 - **Fix:** `encodeURIComponent` the values and cap their length in the route schema.
 
-### M22. `/beatsaver/map/:hash` accepts arbitrary strings — path traversal into other BeatSaver endpoints, DB write on miss, cooldown starvation (A8-09, A5-12)
-- **Files:** `beatsaver.controller.ts:22-26`, `common/src/api-service/impl/beatsaver.ts:8-9,32`, `beatsaver.service.ts:41`
-- **Problem:** `hash: z.string()` with no hex/length constraint. A hash with `/../../` normalizes into other `api.beatsaver.com` endpoints; on a miss the fetched body is cast and persisted (`saveMap` → `upsertMap`), and >64-char hashes overflow the varchar(64) column → 500. Negative lookups are not cached, so nonexistent hashes re-hit upstream on every request, consuming the global 10 req/s BeatSaver cooldown shared with legitimate traffic.
-- **Fix:** Validate hash as hex of the expected length; cache negative results for a short TTL; rate-limit the route.
-
-### M23. `/statistics` recomputes all raw counts on every request, including a full count scan over `beatleader-scores` (A8-10)
-- **Files:** `app.service.ts:136-154,170-181`, `beatleader-scores.repository.ts:89-95`
-- **Problem:** `getAppStatistics` runs 5 count queries per request; four hit the small `ssr_table_counts` row, but `countSavedReplays` scans `beatleader-scores WHERE savedReplay = true` (multi-million rows) on every landing-page visit, unauthenticated and uncached — even though the service already samples these exact values every minute.
-- **Fix:** Serve the latest sampled values (with on-demand fallback), or add savedReplay counts to the nightly-reconciled table counts.
-
-### M24. Empty leaderboards never satisfy the seed-loop termination condition (A5-06)
-- **Files:** `leaderboard-score-seed-queue.ts:61-99`
-- **Problem:** For `total = 0`, `totalPages = 0` and `page === totalPages` never becomes true; the loop fetches pages 1, 2, 3… until two consecutive failures abort — and 0-play leaderboards are exactly the ones selected first (`orderBy(plays)`), so workers can spin on empty boards hammering the SS API.
-- **Fix:** Terminate when `page > totalPages` (or `page >= Math.max(1, totalPages)`); treat `total === 0` as complete.
-
 ### M25. Unknown SS modifier throws and poisons whole pages / leaderboard seeding (A5-08, A6-07)
 - **Files:** `common/src/token-creators.ts:136-143`, `leaderboard-score-seed-queue.ts:71-73`, `player-scores.service.ts:292-296`
 - **Problem:** `getScoreSaberScoreFromToken` throws `Unknown modifier: ${mod}` inside `response.scores.map(...)`: one new SS modifier rejects the entire seed page (leaderboard stays unseeded, re-fetches the same failing page every 10 min), drops the score on the live websocket path, and 500s the whole live-scores page (7 good scores lost because 1 is malformed).
@@ -273,30 +210,10 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - **Problem:** Unlike BeatSaver (10 req/s Cooldown), the SS API service has no throttle; 10 seed workers + player backfills fetch pages as fast as responses arrive, guaranteeing 429s, which the code then misreads as page failures (H2/H15). The `priority?: CooldownPriority` option is declared but never used.
 - **Fix:** Add a Cooldown with background-priority support and pass `options.priority` through.
 
-### M29. Mini-ranking performs ~100–200 `getPlayer`/DB queries per request (A6-04)
-- **Files:** `mini-ranking.service.ts:72-91`, `scoresaber-player.service.ts:61-62`
-- **Problem:** Each page of the mini-ranking widget resolves every listed player through `CacheService.fetch(SCORESABER_PLAYER, …)` → on TTL miss a DB query per player; a cold request issues ~200 queries against the accounts table, repeated as the 2-minute TTL expires.
-- **Fix:** Batch account lookups with `findManyByIds` for the page's ids and construct basic player objects from the page tokens.
-
-### M31. `parseRankHistory` v2 regression left rank-history fallback and seeding dead (A6-03)
-- **Files:** `common/src/utils/player-utils.ts:85-87`, `player-history.service.ts:245-257,296-338,371-394`
-- **Problem:** Commit `90384444` changed `parseRankHistory` to return `[today's rank]` only, but consumers still expect a multi-day array: the fallback guard `daysAgo < playerRankHistory.length` (length 1) is unreachable for `daysAgo >= 1`, the backfill loop starts at `historyLength - 2 = -1` and never iterates, and seeding writes only today's rank. Past-date history requests silently return no rank for players without a DB row.
-- **Fix:** Drop the dead fallback/seed code and rely on DB history, or restore a real rank-history source.
-
 ### M32. BL score seeding tracks scores one-by-one and fires an API stats fetch per new score (A6-10)
 - **Files:** `player-beatleader-scores.service.ts:119-132`, `beatleader.service.ts:112`
 - **Problem:** Sequential awaited `trackBeatLeaderScore` per score (up to 100/page), plus a fire-and-forget external stats API call per new score — thousands of API requests for a player with many scores, all serialized.
 - **Fix:** Chunk with a concurrency cap per page; rate-limit/batch `saveScoreStats`.
-
-### M33. Bulk history reweight issues one UPDATE per row inside a single transaction (A2-03, A7-05)
-- **Files:** `scoresaber-score-history.repository.ts:233-252`, `player-score-history.service.ts:32`, `leaderboard-ranked-sync.service.ts:71-72`
-- **Problem:** `bulkUpsetHistoryScores` runs N single-row UPDATEs via `Promise.all` in one transaction (serialized on one pooled connection), after loading every row into memory. A star change on a popular map means tens of thousands of round trips blocking the ranked-sync job.
-- **Fix:** Single bulk statement (CASE/VALUES update) or chunked multi-row upserts.
-
-### M34. `findPlayerIdsInTimeRange` scans each candidate's full score history — no `(playerId, timestamp)` index (A2-04)
-- **Files:** `scoresaber-scores.repository.ts:61-74`, `beatleader.service.ts:408-416`, `schema.ts:174-189`
-- **Problem:** New code from `21800d04` filters `playerId IN (...) AND timestamp BETWEEN ...`; the scores table has no timestamp index, so the ±5-minute window is applied by scanning every row of each candidate (thousands of rows for active players), on the BL ingestion hot path for multi-account players.
-- **Fix:** Add an index on `(playerId, timestamp)`.
 
 ### M35. `upsertByPlayerAndDate` clobbers stored fields with NULL when given a partial history object (A2-06)
 - **Files:** `player-history.repository.ts:26-57`, `player-history.service.ts:403-433`
@@ -317,11 +234,6 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - **Files:** `drizzle/0002_*.sql`, `drizzle/0042_goofy_molten_man.sql`, `schema.ts:27`
 - **Problem:** 0002 adds nullable `avatar` with the unknown.png default; 0042's `ADD COLUMN IF NOT EXISTS ... NOT NULL DEFAULT ''` + `DROP DEFAULT` is a no-op on existing DBs and removes the default — net DB state is nullable, no default, while schema.ts/snapshot 0047 declare `NOT NULL DEFAULT 'unknown.png'`. Fresh DBs diverge from the declared schema; `drizzle-kit push` would fail if any NULLs exist.
 - **Fix:** Rewrite 0042 to set the default and NOT NULL state-correctly (backfilling NULLs), or align schema.ts with reality.
-
-### M39. Row-level AFTER INSERT/DELETE triggers serialize score writes on the single `ssr_table_counts` row (A1-08)
-- **Files:** `drizzle/0043_table_counts_triggers.sql:31-66`, `drizzle/0045_*.sql`
-- **Problem:** Every score insert/delete fires a trigger that `UPDATE ssr_table_counts ... WHERE id = 1`; all concurrent ingestion transactions contend for the one row lock, and each batch pays N extra UPDATEs on the hottest write table.
-- **Fix:** Statement-level triggers (update once per statement) or debounced reconcile.
 
 ### M40. CORS reflect-any-origin + credentials by default (A12-05)
 - **Files:** `index.ts:263`
@@ -358,11 +270,6 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - **Problem:** Slow API lookups exceed Discord's 3s reply window; the reply fails, the catch re-replies (also failing), the message is lost, and `fetchMissingPlayerScores` is un-awaited/un-caught.
 - **Fix:** `deferReply()` first, `editReply` for both outcomes, await the service call.
 
-### M47. `refresh-leaderboards-cron` (and 4 other crons) lack try/catch and error reporting; batch notifications lost on failure (A7-08)
-- **Files:** `index.ts:107-121` (also 163-196)
-- **Problem:** Only 2 of 7 crons wrap errors (`player-statistics-tracker-cron`, `refresh-medal-scores`). The leaderboard sync cron runs bare: a mid-loop throw skips `refreshQualifiedLeaderboards` and goes unreported; worse, if `handleRankedBatch` throws after the DB updated, the Discord notification is lost permanently.
-- **Fix:** Wrap cron bodies in try/catch + `reportErrorToDiscord`; make the notification step resilient.
-
 ### M48. Redis health metric + cache `invalidate()` semantics (A9-06)
 - **Files:** `cache.service.ts:222-242`
 - **Problem:** `invalidate` doesn't clear in-flight fetches (a fetch that started before invalidation re-populates the cache with pre-write data) and awaits `redisClient.del` before clearing memory caches — during a Redis outage (M4) memory invalidation never runs.
@@ -381,9 +288,6 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - **Files:** `platform-score-handlers.ts:178-181`
 - **Problem:** `if (beatLeaderScore.playerId == "335393") { beatLeaderScore.playerId = "76561198979484227"; }` — a hardcoded special case with an emoji-laden comment ("a reallyyyyyyyyyyyyyyy jank fix because ell"). Mutates the parsed token before keying; will break silently if BL ever changes this player's ID.
 - **Fix:** Remove or move to a configurable mapping table.
-
-### L3. `onStop`/sweep drop pending scores during shutdown (A10-07 — see M1)
-- Covered by M1.
 
 ### L4. Pending-score map sweep cadence (60s) vs 10s timeout; O(n) scans per event (A10-08)
 - **Files:** `platform-score-handlers.ts:49-122`
@@ -462,9 +366,6 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - **Files:** `metrics/impl/player/active-accounts.ts:11`
 - **Fix:** try/catch + log; keep stale value.
 
-### L21. `invalidate()` doesn't clear in-flight fetches; memory invalidation blocked on Redis (A9-06) — see M48
-- Merged into M48.
-
 ### L22. Cache hit ratio counts unparseable Redis entries as hits (A9-09)
 - **Files:** `cache.service.ts:100-108,181-189`
 - **Problem:** `recordHit` runs before parse; a corrupted entry records hit+miss, polluting the ratio that's meant to surface cache health.
@@ -492,21 +393,10 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - **Files:** `db/run-migrations.ts:19-24`
 - **Fix:** `pg_advisory_lock` around migration apply.
 
-### L28. Playlist settings star-range contradictions silently accepted (A8-06 — see M14)
-- Merged into M14.
-
-### L29. Fractional page on `/scores/top` — see M18
-- Merged into M18.
-
-### L30. `beatleader-score` cache never invalidated on BL insert (A9-07) — see M3
-- Merged into M3.
-
----
-
 ## Info / Positive findings
 
 - **I1. BigInt audit of the HTTP layer is clean (A8-15):** ScoreSaber player IDs are strings end-to-end (17-18 digits never pass through `Number()`); the only `parseInt` (replay `scoreId`) is safe because BL score ids are int4.
-- **I2. Account resolution design is sound (own verification):** `resolveAccountForBlPlayer` disambiguates multi-account players by play-time window and falls back to most-recently-active — good design, currently unreachable for the linked-ID cases it was built for because of C1/H7.
+- **I2. Account resolution design is sound (own verification):** `resolveAccountForBlPlayer` disambiguates multi-account players by play-time window and falls back to most-recently-active — the linked-ID attribution it serves was disabled by the (now fixed) C1/H7 issues.
 - **I3. Queue metrics / events manager are correct (A10-13):** no division-by-zero, failure counting works, listener dedupe is sound.
 - **I4. Dependencies are current (mid-2026); no obvious CVE candidates (A12-09):** minor hygiene: `dotenv` and `@dotenvx/dotenvx` both present (redundant).
 - **I5. Public `/swagger` + relaxed security headers (hsts/CSP off) are deliberate but undocumented (A12-10).** HSTS recommended on the API host.
@@ -523,18 +413,3 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 - All findings were cross-checked by reading the cited code; the top-severity items (C1, C2, H2, H5, H14) were additionally reproduced/verified against live API responses or the actual query plans implied by schema indexes.
 
 ## Slice map (agent → prefix)
-
-| Slice | Prefix | Coverage |
-|---|---|---|
-| Migrations & schema | A1 | drizzle/**, src/db/** |
-| Repositories | A2 | src/repositories/** |
-| Score ingestion | A3 | event, websocket listeners, score services, seed queues |
-| BeatLeader | A4 | beatleader service/API, BL seed queue, BL repos |
-| External services | A5 | ScoreSaber API, BeatSaver, replay downloads |
-| Player services | A6 | src/service/player/**, statistics, streaks, medals |
-| Leaderboard services | A7 | leaderboard services, ranked sync, notifications |
-| Controllers/HTTP | A8 | src/controller/**, index.ts |
-| Cache/infra | A9 | cache, redis, storage, metrics.service |
-| Queue/events/websocket | A10 | queue/**, event/**, websocket/** |
-| Bot/metrics/common | A11 | bot/**, metrics/impl/**, common/**, @ssr/common |
-| Security | A12 | full backend surface, deps |
