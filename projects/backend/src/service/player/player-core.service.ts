@@ -72,17 +72,22 @@ export class PlayerCoreService {
 
     let shouldSave = false;
     const updates: Partial<Pick<ScoreSaberAccountRow, "country" | "banned" | "avatar">> = {};
-    if (playerToken?.country !== account.country) {
-      updates.country = playerToken?.country ?? null;
-      shouldSave = true;
-    }
-    if (playerToken?.banned !== account.banned) {
-      updates.banned = playerToken?.banned ?? false;
-      shouldSave = true;
-    }
-    if (playerToken && account.avatar !== playerToken.avatar) {
-      updates.avatar = playerToken.avatar;
-      shouldSave = true;
+    // Only sync country/banned/avatar when a fresh player token is available.
+    // Without one (e.g. score notifications), the stored values must not be
+    // overwritten with null/false.
+    if (playerToken) {
+      if (playerToken.country !== account.country) {
+        updates.country = playerToken.country ?? null;
+        shouldSave = true;
+      }
+      if (playerToken.banned !== account.banned) {
+        updates.banned = playerToken.banned ?? false;
+        shouldSave = true;
+      }
+      if (account.avatar !== playerToken.avatar) {
+        updates.avatar = playerToken.avatar;
+        shouldSave = true;
+      }
     }
 
     if (shouldSave) {
