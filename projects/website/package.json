@@ -71,17 +71,17 @@
     "@tailwindcss/postcss": "^4.3.0",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^25.9.1",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
     "baseline-browser-mapping": "^2.10.33",
     "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.2",
+    "eslint-config-next": "16.3.0",
     "postcss": "^8.5.15",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3"
   },
   "overrides": {
     "@types/react": "19.2.6",
-    "@types/react-dom": "19.2.3"
+    "@types/react-dom": "19.2.4"
   }
 }
