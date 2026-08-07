@@ -1,11 +1,11 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
 import { MapDifficultySchema } from "../../map/map-difficulty";
 
-export const ScoreSaberLeaderboardDifficultySchema = z.object({
-  id: z.number(),
-  stars: z.number(),
+export const ScoreSaberLeaderboardDifficultySchema = Type.Object({
+  id: Type.Number(),
+  stars: Type.Number(),
   difficulty: MapDifficultySchema,
   characteristic: MapCharacteristicSchema,
 });
-export type ScoreSaberLeaderboardDifficulty = z.infer<typeof ScoreSaberLeaderboardDifficultySchema>;
+export type ScoreSaberLeaderboardDifficulty = StaticDecode<typeof ScoreSaberLeaderboardDifficultySchema>;

@@ -1,3 +1,4 @@
+import { Value } from "@sinclair/typebox/value";
 import type { HMD } from "./hmds";
 import { MapCharacteristic } from "./schemas/map/map-characteristic";
 import { ScoreSaberLeaderboardDifficulty } from "./schemas/scoresaber/leaderboard/difficulty";
@@ -7,10 +8,10 @@ import {
 } from "./schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardStatus } from "./schemas/scoresaber/leaderboard/status";
 import { ScoreSaberScore, ScoreSaberScoreSchema } from "./schemas/scoresaber/score/score";
+import { ScoreSaberLeaderboardToken } from "./schemas/scoresaber/tokens/v1/leaderboard";
+import { ScoreSaberScoreToken } from "./schemas/scoresaber/tokens/v1/score";
+import { ScoreSaberV2LeaderboardPageToken } from "./schemas/scoresaber/tokens/v2/leaderboard/leaderboards-page";
 import { Modifier } from "./score/modifier";
-import ScoreSaberLeaderboardToken from "./types/token/scoresaber/v1/leaderboard";
-import ScoreSaberScoreToken from "./types/token/scoresaber/v1/score";
-import { ScoreSaberV2LeaderboardPageToken } from "./types/token/scoresaber/v2/leaderboard/leaderboards-page";
 import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
 import { parseDate } from "./utils/time-utils";
 
@@ -40,31 +41,28 @@ export function getScoreSaberLeaderboardFromV2PageToken(
     status = "Ranked";
   }
 
-  return ScoreSaberLeaderboardSchema.parse(
-    {
-      id: token.id,
-      songHash: token.map.hash.toUpperCase(),
-      songName: token.map.songName,
-      songSubName: token.map.songSubName,
-      fullName: `${token.map.songName} ${token.map.songSubName}`.trim(),
-      songAuthorName: token.map.songAuthorName,
-      levelAuthorName: token.map.levelAuthorName,
-      songArt: token.map.coverUrl,
-      difficulty: difficulty,
-      difficulties: [],
-      maxScore: token.maxScore,
-      ranked: token.realm.leaderboardStatus === "RANKED",
-      timestamp: parseDate(token.createdAt),
-      stars: token.realm.stars,
-      plays: token.totalScores,
-      dailyPlays: token.dailyScores,
-      qualified: token.realm.leaderboardStatus === "QUALIFIED",
-      status: status,
-      rankedDate: token.realm.rankedAt ? parseDate(token.realm.rankedAt) : undefined,
-      qualifiedDate: token.realm.qualifiedAt ? parseDate(token.realm.qualifiedAt) : undefined,
-    },
-    { reportInput: true }
-  );
+  return Value.Parse(ScoreSaberLeaderboardSchema, {
+    id: token.id,
+    songHash: token.map.hash.toUpperCase(),
+    songName: token.map.songName,
+    songSubName: token.map.songSubName,
+    fullName: `${token.map.songName} ${token.map.songSubName}`.trim(),
+    songAuthorName: token.map.songAuthorName,
+    levelAuthorName: token.map.levelAuthorName,
+    songArt: token.map.coverUrl,
+    difficulty: difficulty,
+    difficulties: [],
+    maxScore: token.maxScore,
+    ranked: token.realm.leaderboardStatus === "RANKED",
+    timestamp: parseDate(token.createdAt),
+    stars: token.realm.stars,
+    plays: token.totalScores,
+    dailyPlays: token.dailyScores,
+    qualified: token.realm.leaderboardStatus === "QUALIFIED",
+    status: status,
+    rankedDate: token.realm.rankedAt ? parseDate(token.realm.rankedAt) : undefined,
+    qualifiedDate: token.realm.qualifiedAt ? parseDate(token.realm.qualifiedAt) : undefined,
+  });
 }
 
 /**
@@ -91,31 +89,28 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
     status = "Ranked";
   }
 
-  return ScoreSaberLeaderboardSchema.parse(
-    {
-      id: token.id,
-      songHash: token.songHash.toUpperCase(),
-      songName: token.songName,
-      songSubName: token.songSubName,
-      fullName: `${token.songName} ${token.songSubName}`.trim(),
-      songAuthorName: token.songAuthorName,
-      levelAuthorName: token.levelAuthorName,
-      songArt: token.coverImage,
-      difficulty: difficulty,
-      difficulties: [],
-      maxScore: token.maxScore,
-      ranked: token.ranked,
-      timestamp: parseDate(token.createdDate),
-      stars: token.stars,
-      plays: token.plays,
-      dailyPlays: token.dailyPlays,
-      qualified: token.qualified,
-      status: status,
-      rankedDate: token.rankedDate ? parseDate(token.rankedDate) : undefined,
-      qualifiedDate: token.qualifiedDate ? parseDate(token.qualifiedDate) : undefined,
-    },
-    { reportInput: true }
-  );
+  return Value.Parse(ScoreSaberLeaderboardSchema, {
+    id: token.id,
+    songHash: token.songHash.toUpperCase(),
+    songName: token.songName,
+    songSubName: token.songSubName,
+    fullName: `${token.songName} ${token.songSubName}`.trim(),
+    songAuthorName: token.songAuthorName,
+    levelAuthorName: token.levelAuthorName,
+    songArt: token.coverImage,
+    difficulty: difficulty,
+    difficulties: [],
+    maxScore: token.maxScore,
+    ranked: token.ranked,
+    timestamp: parseDate(token.createdDate),
+    stars: token.stars,
+    plays: token.plays,
+    dailyPlays: token.dailyPlays,
+    qualified: token.qualified,
+    status: status,
+    rankedDate: token.rankedDate ? parseDate(token.rankedDate) : undefined,
+    qualifiedDate: token.qualifiedDate ? parseDate(token.qualifiedDate) : undefined,
+  });
 }
 
 /**
@@ -142,30 +137,37 @@ export function getScoreSaberScoreFromToken(
           return modifier;
         });
 
-  return ScoreSaberScoreSchema.parse(
-    {
-      playerId: playerId ?? token.leaderboardPlayerInfo.id,
-      leaderboardId: leaderboard.id,
-      scoreId: token.id,
-      difficulty: leaderboard.difficulty.difficulty,
-      characteristic: leaderboard.difficulty.characteristic ?? "Standard",
-      score: token.baseScore,
-      accuracy: leaderboard.maxScore ? (token.baseScore / leaderboard.maxScore) * 100 : -1,
-      pp: token.pp,
-      weight: token.weight,
-      rank: token.rank,
-      misses: token.missedNotes + token.badCuts,
-      missedNotes: token.missedNotes,
-      badCuts: token.badCuts,
-      maxCombo: token.maxCombo,
-      fullCombo: token.fullCombo,
-      modifiers,
-      hmd: (token.deviceHmd as HMD) ?? (ScoreSaberHMDs[token.hmd] as HMD | undefined),
-      rightController: token.deviceControllerRight,
-      leftController: token.deviceControllerLeft,
-      ...(token.leaderboardPlayerInfo ? { playerInfo: token.leaderboardPlayerInfo } : {}),
-      timestamp: new Date(token.timeSet),
-    },
-    { reportInput: true }
-  );
+  return Value.Parse(ScoreSaberScoreSchema, {
+    playerId: playerId ?? token.leaderboardPlayerInfo.id,
+    leaderboardId: leaderboard.id,
+    scoreId: token.id,
+    difficulty: leaderboard.difficulty.difficulty,
+    characteristic: leaderboard.difficulty.characteristic ?? "Standard",
+    score: token.baseScore,
+    accuracy: leaderboard.maxScore ? (token.baseScore / leaderboard.maxScore) * 100 : -1,
+    pp: token.pp,
+    weight: token.weight,
+    rank: token.rank,
+    misses: token.missedNotes + token.badCuts,
+    missedNotes: token.missedNotes,
+    badCuts: token.badCuts,
+    maxCombo: token.maxCombo,
+    fullCombo: token.fullCombo,
+    modifiers,
+    hmd: (token.deviceHmd as HMD) ?? (ScoreSaberHMDs[token.hmd] as HMD | undefined),
+    rightController: token.deviceControllerRight,
+    leftController: token.deviceControllerLeft,
+    ...(token.leaderboardPlayerInfo
+      ? {
+          playerInfo: {
+            id: token.leaderboardPlayerInfo.id,
+            name: token.leaderboardPlayerInfo.name,
+            country: token.leaderboardPlayerInfo.country,
+            role: token.leaderboardPlayerInfo.role,
+            avatar: token.leaderboardPlayerInfo.profilePicture,
+          },
+        }
+      : {}),
+    timestamp: new Date(token.timeSet),
+  });
 }

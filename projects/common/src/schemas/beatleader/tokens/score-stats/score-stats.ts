@@ -1,14 +1,14 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { ScoreStatsAccuracyTrackerSchema } from "./accuracy-tracker";
 import { ScoreStatsHitTrackerSchema } from "./hit-tracker";
 import { ScoreStatsGraphTrackerSchema } from "./score-graph-tracker";
 import { ScoreStatsWinTrackerSchema } from "./win-tracker";
 
-export const ScoreStatsSchema = z.object({
+export const ScoreStatsSchema = Type.Object({
   hitTracker: ScoreStatsHitTrackerSchema,
   accuracyTracker: ScoreStatsAccuracyTrackerSchema,
   winTracker: ScoreStatsWinTrackerSchema,
   scoreGraphTracker: ScoreStatsGraphTrackerSchema,
 });
 
-export type ScoreStatsToken = z.infer<typeof ScoreStatsSchema>;
+export type ScoreStatsToken = StaticDecode<typeof ScoreStatsSchema>;

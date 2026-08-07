@@ -1,5 +1,5 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import LeaderboardScoresResponse from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
+import { LeaderboardScoresResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import BeatSaverService from "../external/beatsaver.service";

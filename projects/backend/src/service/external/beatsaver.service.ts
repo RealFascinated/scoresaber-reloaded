@@ -1,8 +1,8 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
+import { BeatSaverMapToken } from "@ssr/common/schemas/beatsaver/tokens/map";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
-import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { beatSaverMapCacheKey, normalizeSongHash } from "../../common/cache-keys";
 import { beatSaverRowsToMap } from "../../db/converter/beatsaver-map";

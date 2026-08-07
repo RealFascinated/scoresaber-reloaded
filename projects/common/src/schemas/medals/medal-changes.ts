@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const MedalChangeSchema = z.object({
-  before: z.number(),
-  after: z.number(),
+export const MedalChangeSchema = Type.Object({
+  before: Type.Number(),
+  after: Type.Number(),
 });
-export type MedalChange = z.infer<typeof MedalChangeSchema>;
+export type MedalChange = StaticDecode<typeof MedalChangeSchema>;

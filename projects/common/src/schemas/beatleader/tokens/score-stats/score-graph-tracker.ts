@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const ScoreStatsGraphTrackerSchema = z.object({
-  graph: z.array(z.number()),
+export const ScoreStatsGraphTrackerSchema = Type.Object({
+  graph: Type.Array(Type.Number()),
 });
 
-export type ScoreStatsGraphTrackerToken = z.infer<typeof ScoreStatsGraphTrackerSchema>;
+export type ScoreStatsGraphTrackerToken = StaticDecode<typeof ScoreStatsGraphTrackerSchema>;

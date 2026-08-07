@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const PlayerRefreshResponseSchema = z.object({
-  result: z.boolean(),
+export const PlayerRefreshResponseSchema = Type.Object({
+  result: Type.Boolean(),
 });
-export type PlayerRefreshResponse = z.infer<typeof PlayerRefreshResponseSchema>;
+export type PlayerRefreshResponse = StaticDecode<typeof PlayerRefreshResponseSchema>;

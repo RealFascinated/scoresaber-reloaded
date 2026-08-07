@@ -1,29 +1,28 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { ScoreSaberPeakRankSchema } from "./player/peak-rank";
 
-export const ScoreSaberAccountSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  avatar: z.string(),
-  country: z
-    .string()
-    .nullable()
-    .transform(value => value ?? "Unknown"),
-  peakRank: ScoreSaberPeakRankSchema.optional(),
-  seededScores: z.boolean().optional(),
-  seededBeatLeaderScores: z.boolean().optional(),
-  trackReplays: z.boolean(),
-  inactive: z.boolean(),
-  banned: z.boolean(),
-  hmd: z.string().nullable(),
-  pp: z.number(),
-  medals: z.number(),
-  medalsRank: z.number(),
-  medalsCountryRank: z.number(),
-  currentStreak: z.number(),
-  longestStreak: z.number(),
-  trackedSince: z.coerce.date(),
-  joinedDate: z.coerce.date(),
+export const ScoreSaberAccountSchema = Type.Object({
+  id: Type.String(),
+  name: Type.String(),
+  avatar: Type.String(),
+  country: Type.Transform(Type.Union([Type.String(), Type.Null()]))
+    .Decode(value => value ?? "Unknown")
+    .Encode(value => value),
+  peakRank: Type.Optional(ScoreSaberPeakRankSchema),
+  seededScores: Type.Optional(Type.Boolean()),
+  seededBeatLeaderScores: Type.Optional(Type.Boolean()),
+  trackReplays: Type.Boolean(),
+  inactive: Type.Boolean(),
+  banned: Type.Boolean(),
+  hmd: Type.Union([Type.String(), Type.Null()]),
+  pp: Type.Number(),
+  medals: Type.Number(),
+  medalsRank: Type.Number(),
+  medalsCountryRank: Type.Number(),
+  currentStreak: Type.Number(),
+  longestStreak: Type.Number(),
+  trackedSince: Type.Date(),
+  joinedDate: Type.Date(),
 });
 
-export type ScoreSaberAccount = z.infer<typeof ScoreSaberAccountSchema>;
+export type ScoreSaberAccount = StaticDecode<typeof ScoreSaberAccountSchema>;

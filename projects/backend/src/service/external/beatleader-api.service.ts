@@ -1,3 +1,4 @@
+import { Value } from "@sinclair/typebox/value";
 import Logger from "@ssr/common/logger";
 import { BeatLeaderPlayersTotalSchema } from "@ssr/common/schemas/beatleader/tokens/players/page";
 import {
@@ -235,15 +236,14 @@ export class BeatLeaderApiService {
       return undefined;
     }
 
-    const parsed = BeatLeaderPlayersTotalSchema.safeParse(response, { reportInput: true });
-    if (!parsed.success) {
+    if (!Value.Check(BeatLeaderPlayersTotalSchema, response)) {
       return undefined;
     }
 
     BeatLeaderApiService.log(
       `Found BeatLeader players total in ${formatDuration(performance.now() - before)}`
     );
-    return parsed.data.metadata.total;
+    return Value.Parse(BeatLeaderPlayersTotalSchema, response).metadata.total;
   }
 
   /**
@@ -265,16 +265,18 @@ export class BeatLeaderApiService {
       return undefined;
     }
 
-    const parsed = BeatLeaderPlayerLookupSchema.safeParse(response, { reportInput: true });
-    if (!parsed.success) {
-      BeatLeaderApiService.log(`Failed to parse BeatLeader player "${playerId}": ${parsed.error.message}`);
+    if (!Value.Check(BeatLeaderPlayerLookupSchema, response)) {
+      BeatLeaderApiService.log(
+        `Failed to parse BeatLeader player "${playerId}": ${Value.Errors(BeatLeaderPlayerLookupSchema, response).First()?.message}`
+      );
       return undefined;
     }
 
+    const parsed = Value.Parse(BeatLeaderPlayerLookupSchema, response);
     BeatLeaderApiService.log(
-      `Found BeatLeader player "${parsed.data.name}" in ${formatDuration(performance.now() - before)}`
+      `Found BeatLeader player "${parsed.name}" in ${formatDuration(performance.now() - before)}`
     );
-    return parsed.data;
+    return parsed;
   }
 
   /**
@@ -359,18 +361,18 @@ export class BeatLeaderApiService {
       return undefined;
     }
 
-    const parsed = BeatLeaderPlayerScoresPageSchema.safeParse(response, { reportInput: true });
-    if (!parsed.success) {
+    if (!Value.Check(BeatLeaderPlayerScoresPageSchema, response)) {
       BeatLeaderApiService.log(
-        `Failed to parse BeatLeader scores page ${page} for "${playerId}": ${parsed.error.message}`
+        `Failed to parse BeatLeader scores page ${page} for "${playerId}": ${Value.Errors(BeatLeaderPlayerScoresPageSchema, response).First()?.message}`
       );
       return undefined;
     }
 
+    const parsed = Value.Parse(BeatLeaderPlayerScoresPageSchema, response);
     BeatLeaderApiService.log(
       `Found BeatLeader scores page ${page} for "${playerId}" in ${formatDuration(performance.now() - before)}`
     );
-    return parsed.data;
+    return parsed;
   }
 
   private static log(message: string): void {

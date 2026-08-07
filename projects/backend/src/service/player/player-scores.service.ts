@@ -3,9 +3,8 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination, type Page } from "@ssr/common/pagination";
-import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
-import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
-import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
+import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/query/query";
+import { ScoreResponse } from "@ssr/common/schemas/accsaber/score/score";
 import { PlayerScoresChartResponse } from "@ssr/common/schemas/response/player/scores-chart";
 import type { AccSaberScoresPageResponse } from "@ssr/common/schemas/response/score/accsaber-scores-page";
 import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
@@ -17,12 +16,12 @@ import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
+import { ScoreSaberPlayerScoreToken } from "@ssr/common/schemas/scoresaber/tokens/v1/player-score";
+import { ScoreSaberPlayerScoresPageToken } from "@ssr/common/schemas/scoresaber/tokens/v1/player-scores-page";
+import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import ScoreSaberPlayerScoreToken from "@ssr/common/types/token/scoresaber/v1/player-score";
-import ScoreSaberPlayerScoresPageToken from "@ssr/common/types/token/scoresaber/v1/player-scores-page";
-import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
 import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-difficulty";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -371,12 +370,12 @@ export class PlayerScoresService {
       .getAccSaberService()
       .getPlayerScores(playerId, pageNumber, { sort, direction, type });
 
-    const items: AccSaberScore[] = await Promise.all(
+    const items: ScoreResponse[] = await Promise.all(
       requested.items.map(async row => {
-        const songHash = row.leaderboard.song.hash;
-        const difficulty = accSaberDifficultyToMapDifficulty(row.leaderboard.diffInfo.diff);
-        const characteristic = (row.leaderboard.diffInfo.type ?? "Standard") as MapCharacteristic;
-        const songScore = row.score.unmodifiedScore;
+        const songHash = row.songHash;
+        const difficulty = accSaberDifficultyToMapDifficulty(row.difficulty);
+        const characteristic = row.characteristic;
+        const songScore = row.scoreNoMods;
 
         const beatLeaderScore = await BeatLeaderService.getBeatLeaderScoreFromSong(
           playerId,

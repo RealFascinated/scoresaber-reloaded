@@ -1,13 +1,9 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const BeatLeaderMetadataSchema = z.object({
-  itemsPerPage: z.number(),
-  page: z.number(),
-  total: z.number(),
+export const BeatLeaderMetadataSchema = Type.Object({
+  itemsPerPage: Type.Number(),
+  page: Type.Number(),
+  total: Type.Number(),
 });
 
-export type BeatLeaderMetadataToken = z.infer<typeof BeatLeaderMetadataSchema>;
-
-// Backwards-compatible aliases
-export const BeatLeaderPlayersMetadataSchema = BeatLeaderMetadataSchema;
-export type BeatLeaderPlayersMetadata = BeatLeaderMetadataToken;
+export type BeatLeaderMetadataToken = StaticDecode<typeof BeatLeaderMetadataSchema>;

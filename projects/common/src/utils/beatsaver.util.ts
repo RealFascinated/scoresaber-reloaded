@@ -1,8 +1,8 @@
 import { BeatSaverMap } from "../schemas/beatsaver/map/map";
+import { BeatSaverMapToken } from "../schemas/beatsaver/tokens/map";
+import { BeatSaverMapDifficultyToken } from "../schemas/beatsaver/tokens/map-difficulty";
 import { MapCharacteristic } from "../schemas/map/map-characteristic";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
-import BeatSaverMapToken from "../types/token/beatsaver/map";
-import BeatSaverMapDifficultyToken from "../types/token/beatsaver/map-difficulty";
 
 /**
  * Gets the BeatSaver mapper profile url.

@@ -1,17 +1,17 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const PlayerScoreChartDataPointSchema = z.object({
-  accuracy: z.number(),
-  stars: z.number(),
-  pp: z.number(),
-  timestamp: z.date(),
-  leaderboardId: z.number(),
-  leaderboardName: z.string(),
-  leaderboardDifficulty: z.string(),
+export const PlayerScoreChartDataPointSchema = Type.Object({
+  accuracy: Type.Number(),
+  stars: Type.Number(),
+  pp: Type.Number(),
+  timestamp: Type.Date(),
+  leaderboardId: Type.Number(),
+  leaderboardName: Type.String(),
+  leaderboardDifficulty: Type.String(),
 });
-export const PlayerScoresChartResponseSchema = z.object({
-  data: z.array(PlayerScoreChartDataPointSchema),
+export const PlayerScoresChartResponseSchema = Type.Object({
+  data: Type.Array(PlayerScoreChartDataPointSchema),
 });
 
-export type PlayerScoreChartDataPoint = z.infer<typeof PlayerScoreChartDataPointSchema>;
-export type PlayerScoresChartResponse = z.infer<typeof PlayerScoresChartResponseSchema>;
+export type PlayerScoreChartDataPoint = StaticDecode<typeof PlayerScoreChartDataPointSchema>;
+export type PlayerScoresChartResponse = StaticDecode<typeof PlayerScoresChartResponseSchema>;

@@ -2,8 +2,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { BeatSaverMapSchema } from "@ssr/common/schemas/beatsaver/map/map";
 import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
-import { Elysia } from "elysia";
-import { z } from "zod";
+import { Elysia, t } from "elysia";
 import BeatSaverService from "../../service/external/beatsaver.service";
 
 export default function beatsaverController(app: Elysia) {
@@ -19,11 +18,11 @@ export default function beatsaverController(app: Elysia) {
       },
       {
         tags: ["BeatSaver"],
-        params: z.object({
+        params: t.Object({
           // BeatSaver map hashes are 32-character hex (MD5 of the map zip);
           // reject path separators and over-long values that could reach the
           // upstream API or overflow the varchar(64) hash column.
-          hash: z.string().regex(/^[0-9a-fA-F]{32}$/, "BeatSaver map hashes are 32-character hex strings"),
+          hash: t.String({ pattern: "^[0-9a-fA-F]{32}$" }),
           difficulty: MapDifficultySchema,
           characteristic: MapCharacteristicSchema,
         }),

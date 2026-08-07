@@ -1,15 +1,20 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { SHARED_CONSTS } from "../../shared-consts";
 
-export const customRankedPlaylistSchema = z.object({
-  stars: z.object({
-    min: z.number().min(0),
-    max: z.number().max(SHARED_CONSTS.maxStars),
+export const customRankedPlaylistSchema = Type.Object({
+  stars: Type.Object({
+    min: Type.Number({ minimum: 0 }),
+    max: Type.Number({ maximum: SHARED_CONSTS.maxStars }),
   }),
-  sort: z.enum(["stars", "dateRanked", "plays", "dailyPlays"]),
+  sort: Type.Union([
+    Type.Literal("stars"),
+    Type.Literal("dateRanked"),
+    Type.Literal("plays"),
+    Type.Literal("dailyPlays"),
+  ]),
 });
 
-export type CustomRankedPlaylist = z.infer<typeof customRankedPlaylistSchema>;
+export type CustomRankedPlaylist = StaticDecode<typeof customRankedPlaylistSchema>;
 
 /**
  * Parses the raw settings into a custom ranked playlist settings object.

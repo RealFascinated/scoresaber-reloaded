@@ -1,12 +1,12 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const PlayerPpsResponseSchema = z.object({
-  scores: z.array(
-    z.object({
-      pp: z.number(),
-      weight: z.number(),
-      scoreId: z.number(),
+export const PlayerPpsResponseSchema = Type.Object({
+  scores: Type.Array(
+    Type.Object({
+      pp: Type.Number(),
+      weight: Type.Number(),
+      scoreId: Type.Number(),
     })
   ),
 });
-export type PlayerPpsResponse = z.infer<typeof PlayerPpsResponseSchema>;
+export type PlayerPpsResponse = StaticDecode<typeof PlayerPpsResponseSchema>;

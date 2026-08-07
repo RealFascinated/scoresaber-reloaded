@@ -6,8 +6,8 @@ import {
   ScoreSaberPlayerHistoryEntries,
 } from "@ssr/common/schemas/scoresaber/player/history";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
-import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
-import { ScoreSaberV2PlayerPageToken } from "@ssr/common/types/token/scoresaber/v2/player/players-page";
+import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
+import { ScoreSaberV2PlayerPageToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/players-page";
 import { processInBatches } from "@ssr/common/utils/batch-utils";
 import {
   formatDateMinimal,

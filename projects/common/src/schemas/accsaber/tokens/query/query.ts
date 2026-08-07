@@ -1,7 +1,0 @@
-import { z } from "zod";
-
-export const accSaberScoreSortSchema = z.enum(["date", "ap", "acc", "complexity", "ranking"]);
-export type AccSaberScoreSort = z.infer<typeof accSaberScoreSortSchema>;
-
-export const accSaberScoreTypeSchema = z.enum(["overall", "true", "tech", "speed"]);
-export type AccSaberScoreType = z.infer<typeof accSaberScoreTypeSchema>;

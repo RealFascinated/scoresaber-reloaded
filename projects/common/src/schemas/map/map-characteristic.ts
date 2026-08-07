@@ -1,50 +1,48 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const base = z.enum([
-  "Standard",
-  "OneSaber",
-  "NoArrows",
-  "Lawless",
-  "90Degree",
-  "360Degree",
-  "Lightshow",
-  "Legacy",
-  "MissingCharacteristic",
+export const base = Type.Union([
+  Type.Literal("Standard"),
+  Type.Literal("OneSaber"),
+  Type.Literal("NoArrows"),
+  Type.Literal("Lawless"),
+  Type.Literal("90Degree"),
+  Type.Literal("360Degree"),
+  Type.Literal("Lightshow"),
+  Type.Literal("Legacy"),
+  Type.Literal("MissingCharacteristic"),
 ]);
 
-const mapCharacteristicShape = z
-  .union([
+const mapCharacteristicShape = Type.Union(
+  [
     base,
 
-    z.templateLiteral([z.literal("Generated"), base]),
-    z.templateLiteral([z.literal("Inverse"), base]),
-    z.templateLiteral([z.literal("Inverted"), base]),
-    z.templateLiteral([z.literal("Horizontal"), base]),
-    z.templateLiteral([z.literal("Vertical"), base]),
+    Type.TemplateLiteral([Type.Literal("Generated"), base]),
+    Type.TemplateLiteral([Type.Literal("Inverse"), base]),
+    Type.TemplateLiteral([Type.Literal("Inverted"), base]),
+    Type.TemplateLiteral([Type.Literal("Horizontal"), base]),
+    Type.TemplateLiteral([Type.Literal("Vertical"), base]),
 
-    z.templateLiteral([base, z.literal("OldDots")]),
-    z.templateLiteral([base, z.literal("DM")]),
-    z.templateLiteral([base, z.literal("HD")]),
-    z.templateLiteral([base, z.literal("HM")]),
-    z.templateLiteral([base, z.literal("DMOH")]),
+    Type.TemplateLiteral([base, Type.Literal("OldDots")]),
+    Type.TemplateLiteral([base, Type.Literal("DM")]),
+    Type.TemplateLiteral([base, Type.Literal("HD")]),
+    Type.TemplateLiteral([base, Type.Literal("HM")]),
+    Type.TemplateLiteral([base, Type.Literal("DMOH")]),
 
-    z.templateLiteral([z.literal("RhythmGame"), base]),
+    Type.TemplateLiteral([Type.Literal("RhythmGame"), base]),
 
-    z.templateLiteral([z.literal("ReBeat_"), base]),
+    Type.TemplateLiteral([Type.Literal("ReBeat_"), base]),
 
-    z.templateLiteral([base, z.literal("-PinkPlay_Controllable")]),
-    z.templateLiteral([z.literal("Generated"), base, z.literal("-PinkPlay_Controllable")]),
-    z.templateLiteral([z.literal("Inverse"), base, z.literal("-PinkPlay_Controllable")]),
-    z.templateLiteral([z.literal("Inverted"), base, z.literal("-PinkPlay_Controllable")]),
-    z.templateLiteral([z.literal("Horizontal"), base, z.literal("-PinkPlay_Controllable")]),
-    z.templateLiteral([z.literal("Vertical"), base, z.literal("-PinkPlay_Controllable")]),
-  ])
-  .default("Standard");
+    Type.TemplateLiteral([base, Type.Literal("-PinkPlay_Controllable")]),
+    Type.TemplateLiteral([Type.Literal("Generated"), base, Type.Literal("-PinkPlay_Controllable")]),
+    Type.TemplateLiteral([Type.Literal("Inverse"), base, Type.Literal("-PinkPlay_Controllable")]),
+    Type.TemplateLiteral([Type.Literal("Inverted"), base, Type.Literal("-PinkPlay_Controllable")]),
+    Type.TemplateLiteral([Type.Literal("Horizontal"), base, Type.Literal("-PinkPlay_Controllable")]),
+    Type.TemplateLiteral([Type.Literal("Vertical"), base, Type.Literal("-PinkPlay_Controllable")]),
+  ],
+  { default: "Standard" }
+);
 
-export type MapCharacteristicBase = z.infer<typeof base>;
-export type MapCharacteristic = z.infer<typeof mapCharacteristicShape>;
+export type MapCharacteristicBase = StaticDecode<typeof base>;
+export type MapCharacteristic = StaticDecode<typeof mapCharacteristicShape>;
 
-export const MapCharacteristicSchema = z
-  .string()
-  .default("Standard")
-  .transform((s): MapCharacteristic => s as MapCharacteristic);
+export const MapCharacteristicSchema = Type.Unsafe<MapCharacteristic>(Type.String({ default: "Standard" }));

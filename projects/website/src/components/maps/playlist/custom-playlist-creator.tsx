@@ -9,7 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } 
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { SharedIcons } from "@/shared-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { type Static } from "@sinclair/typebox";
 import { env } from "@ssr/common/env";
 import {
   customRankedPlaylistSchema,
@@ -18,9 +19,8 @@ import {
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 
-type CustomRankedPlaylist = z.infer<typeof customRankedPlaylistSchema>;
+type CustomRankedPlaylist = Static<typeof customRankedPlaylistSchema>;
 
 type CustomPlaylistCreatorProps = {
   trigger: React.ReactNode;
@@ -37,7 +37,7 @@ export default function CustomPlaylistCreator({ trigger }: CustomPlaylistCreator
   const [downloading, setDownloading] = useState(false);
 
   const form = useForm<CustomRankedPlaylist>({
-    resolver: zodResolver(customRankedPlaylistSchema, { reportInput: true }),
+    resolver: typeboxResolver(customRankedPlaylistSchema),
     defaultValues: {
       stars: {
         min: 0,

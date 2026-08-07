@@ -1,6 +1,5 @@
 import { playlistSchema } from "@ssr/common/schemas/ssr/playlist/playlist";
-import { Elysia } from "elysia";
-import { z } from "zod";
+import { Elysia, t } from "elysia";
 import PlaylistService, { PlaylistIdsSchema } from "../../service/playlist/playlist.service";
 
 export default function playlistController(app: Elysia) {
@@ -13,7 +12,7 @@ export default function playlistController(app: Elysia) {
         },
         {
           tags: ["Playlist"],
-          params: z.object({
+          params: t.Object({
             id: PlaylistIdsSchema,
           }),
           response: playlistSchema,
@@ -29,8 +28,8 @@ export default function playlistController(app: Elysia) {
         },
         {
           tags: ["Playlist"],
-          query: z.object({
-            config: z.string(),
+          query: t.Object({
+            config: t.String(),
           }),
           response: playlistSchema,
           detail: {
@@ -45,10 +44,10 @@ export default function playlistController(app: Elysia) {
         },
         {
           tags: ["Playlist"],
-          query: z.object({
-            user: z.string(),
-            toSnipe: z.string(),
-            settings: z.string().optional(),
+          query: t.Object({
+            user: t.String(),
+            toSnipe: t.String(),
+            settings: t.Optional(t.String()),
           }),
           response: playlistSchema,
           detail: {
@@ -63,9 +62,9 @@ export default function playlistController(app: Elysia) {
         },
         {
           tags: ["Playlist"],
-          query: z.object({
-            user: z.string(),
-            settings: z.string().optional(),
+          query: t.Object({
+            user: t.String(),
+            settings: t.Optional(t.String()),
           }),
           response: playlistSchema,
           detail: {

@@ -26,31 +26,31 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 
 ## Recently fixed
 
-| ID  | Finding                                                                 | Fix                         |
-| --- | ----------------------------------------------------------------------- | --------------------------- |
-| C1  | BL historical scores never seeded (`scoreImprovement` null vs schema)   | `30551e95`                  |
-| C2  | Cross-platform realtime pairing dead (NaN timeset) + pending overwrites | `913a2dd8`                  |
-| H2  | Leaderboard marked seeded after skipped/aborted scrape                  | `fe198170`                  |
-| H3  | Player backfill permanently lost on transient failure                   | `1483c066`                  |
-| H4  | BL seed marks player seeded on transient outage (404 vs failure)        | `41ff361e`                  |
-| H5  | Replace-current path non-transactional and race-loses scores            | `91374974`                  |
-| H6  | BL API calls: no retry/backoff/429 handling, no concurrency cap         | `aa318e3f`                  |
-| H7  | BL player mapping only populated by completed seed                      | `3ce71c58`                  |
-| H8  | Global pp-ordering queries seq-scan (partial index)                     | `d580a71c` (migration 0048) |
-| H9  | score-history scoreId lookups seq-scan (index)                          | `60ba2051` (migration 0049) |
-| H10 | getOrCreateAccount wipes country/clears banned without token            | `a5f6e8f7`                  |
-| H11 | Player backfill never early-exits; per-page pre-filter restored | `77ac445f` |
-| H14 | `lookupActivePlayerCount` reads `.count` off a text body — landing "Active Players" frozen | `52c31580` |
-| H17 | Storage cache retains files/replay buffers forever (TTL) | `11c7c290` |
-| M22 | /beatsaver/map/:hash accepts arbitrary strings; no negative cache       | `0147dc70`                  |
-| M23 | /statistics recounts per request (serves samples)                       | `622cdc96`                  |
-| M24 | Empty leaderboards never terminate the seed loop                        | `4b04fb23`                  |
-| M29 | Mini-ranking ~200 queries per request (batched)                         | `d74c750c`                  |
-| M31 | Dead rank-history fallback/seed code                                    | `e063b43a` (+ `dbeafb50`)   |
-| M33 | Bulk history reweight: N UPDATEs → VALUES statement                     | `21f11572`                  |
-| M34 | per-player time-window scans (index)                                    | `e6be9eb7` (migration 0050) |
-| M39 | Row-level table-count triggers serialize writes (statement-level)       | `fd84afef` (migration 0051) |
-| M47 | Crons without error handling; batch notifications lost                  | `f9eb8110`                  |
+| ID  | Finding                                                                                    | Fix                         |
+| --- | ------------------------------------------------------------------------------------------ | --------------------------- |
+| C1  | BL historical scores never seeded (`scoreImprovement` null vs schema)                      | `30551e95`                  |
+| C2  | Cross-platform realtime pairing dead (NaN timeset) + pending overwrites                    | `913a2dd8`                  |
+| H2  | Leaderboard marked seeded after skipped/aborted scrape                                     | `fe198170`                  |
+| H3  | Player backfill permanently lost on transient failure                                      | `1483c066`                  |
+| H4  | BL seed marks player seeded on transient outage (404 vs failure)                           | `41ff361e`                  |
+| H5  | Replace-current path non-transactional and race-loses scores                               | `91374974`                  |
+| H6  | BL API calls: no retry/backoff/429 handling, no concurrency cap                            | `aa318e3f`                  |
+| H7  | BL player mapping only populated by completed seed                                         | `3ce71c58`                  |
+| H8  | Global pp-ordering queries seq-scan (partial index)                                        | `d580a71c` (migration 0048) |
+| H9  | score-history scoreId lookups seq-scan (index)                                             | `60ba2051` (migration 0049) |
+| H10 | getOrCreateAccount wipes country/clears banned without token                               | `a5f6e8f7`                  |
+| H11 | Player backfill never early-exits; per-page pre-filter restored                            | `77ac445f`                  |
+| H14 | `lookupActivePlayerCount` reads `.count` off a text body — landing "Active Players" frozen | `52c31580`                  |
+| H17 | Storage cache retains files/replay buffers forever (TTL)                                   | `11c7c290`                  |
+| M22 | /beatsaver/map/:hash accepts arbitrary strings; no negative cache                          | `0147dc70`                  |
+| M23 | /statistics recounts per request (serves samples)                                          | `622cdc96`                  |
+| M24 | Empty leaderboards never terminate the seed loop                                           | `4b04fb23`                  |
+| M29 | Mini-ranking ~200 queries per request (batched)                                            | `d74c750c`                  |
+| M31 | Dead rank-history fallback/seed code                                                       | `e063b43a` (+ `dbeafb50`)   |
+| M33 | Bulk history reweight: N UPDATEs → VALUES statement                                        | `21f11572`                  |
+| M34 | per-player time-window scans (index)                                                       | `e6be9eb7` (migration 0050) |
+| M39 | Row-level table-count triggers serialize writes (statement-level)                          | `fd84afef` (migration 0051) |
+| M47 | Crons without error handling; batch notifications lost                                     | `f9eb8110`                  |
 
 Note: H8/H9/M34/M39 ship as migrations (0048–0051) and take effect after `bun run db:migrate` on deploy.
 

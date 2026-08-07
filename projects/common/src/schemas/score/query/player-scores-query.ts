@@ -1,15 +1,17 @@
-import z from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { HmdSchema } from "../../../hmds";
 
-const PlayerIdsSchema = z
-  .union([z.string(), z.array(z.string()), z.undefined()])
-  .transform((v): string[] | undefined =>
+const PlayerIdsSchema = Type.Transform(
+  Type.Union([Type.String(), Type.Array(Type.String()), Type.Undefined()])
+)
+  .Decode((v): string[] | undefined =>
     v === undefined ? undefined : typeof v === "string" ? v.split(",") : v
-  );
+  )
+  .Encode(v => v);
 
-export const PlayerScoresQuerySchema = z.object({
-  search: z.string().optional(),
-  hmd: HmdSchema.optional(),
-  playerIds: PlayerIdsSchema.optional(),
+export const PlayerScoresQuerySchema = Type.Object({
+  search: Type.Optional(Type.String()),
+  hmd: Type.Optional(HmdSchema),
+  playerIds: Type.Optional(PlayerIdsSchema),
 });
-export type PlayerScoresQuery = z.infer<typeof PlayerScoresQuerySchema>;
+export type PlayerScoresQuery = StaticDecode<typeof PlayerScoresQuerySchema>;

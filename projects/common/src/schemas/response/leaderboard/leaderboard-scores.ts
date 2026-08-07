@@ -1,26 +1,29 @@
-import { Metadata } from "../../../types/metadata";
-import { BeatSaverMap } from "../../beatsaver/map/map";
-import { ScoreSaberLeaderboard } from "../../scoresaber/leaderboard/leaderboard";
-import { ScoreSaberScore } from "../../scoresaber/score/score";
+import { Type, type StaticDecode } from "@sinclair/typebox";
+import { BeatSaverMapSchema } from "../../beatsaver/map/map";
+import { PaginationMetadataSchema } from "../../pagination";
+import { ScoreSaberLeaderboardSchema } from "../../scoresaber/leaderboard/leaderboard";
+import { ScoreSaberScoreSchema } from "../../scoresaber/score/score";
 
-export default interface LeaderboardScoresResponse {
+export const LeaderboardScoresResponseSchema = Type.Object({
   /**
    * The scores that were set.
    */
-  readonly scores: ScoreSaberScore[];
+  scores: Type.Array(ScoreSaberScoreSchema),
 
   /**
    * The leaderboard that was used.
    */
-  readonly leaderboard: ScoreSaberLeaderboard;
+  leaderboard: ScoreSaberLeaderboardSchema,
 
   /**
    * The beatsaver map for the song.
    */
-  readonly beatSaver?: BeatSaverMap;
+  beatSaver: Type.Optional(BeatSaverMapSchema),
 
   /**
    * The pagination metadata.
    */
-  readonly metadata: Metadata;
-}
+  metadata: PaginationMetadataSchema,
+});
+
+export type LeaderboardScoresResponse = StaticDecode<typeof LeaderboardScoresResponseSchema>;

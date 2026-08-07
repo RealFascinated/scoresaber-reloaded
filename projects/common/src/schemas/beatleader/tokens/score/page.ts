@@ -1,10 +1,10 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { BeatLeaderMetadataSchema } from "../players/metadata";
 import { BeatLeaderScoreSchema } from "./score";
 
-export const BeatLeaderPlayerScoresPageSchema = z.object({
+export const BeatLeaderPlayerScoresPageSchema = Type.Object({
   metadata: BeatLeaderMetadataSchema,
-  data: z.array(BeatLeaderScoreSchema),
+  data: Type.Array(BeatLeaderScoreSchema),
 });
 
-export type BeatLeaderPlayerScoresPageToken = z.infer<typeof BeatLeaderPlayerScoresPageSchema>;
+export type BeatLeaderPlayerScoresPageToken = StaticDecode<typeof BeatLeaderPlayerScoresPageSchema>;

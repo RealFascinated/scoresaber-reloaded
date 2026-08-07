@@ -1,4 +1,8 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const ScoreSaberLeaderboardStatusSchema = z.enum(["Unranked", "Ranked", "Qualified"]);
-export type ScoreSaberLeaderboardStatus = z.infer<typeof ScoreSaberLeaderboardStatusSchema>;
+export const ScoreSaberLeaderboardStatusSchema = Type.Union([
+  Type.Literal("Unranked"),
+  Type.Literal("Ranked"),
+  Type.Literal("Qualified"),
+]);
+export type ScoreSaberLeaderboardStatus = StaticDecode<typeof ScoreSaberLeaderboardStatusSchema>;

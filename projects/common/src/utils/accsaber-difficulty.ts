@@ -1,10 +1,15 @@
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 
 /**
- * Normalizes AccSaber GraphQL difficulty strings to MapDifficulty for BeatLeader lookups.
+ * Normalizes AccSaber REST difficulty strings (serialized `Difficulty` enum names
+ * such as `EXPERT_PLUS`) to MapDifficulty for BeatLeader lookups.
  */
 export function accSaberDifficultyToMapDifficulty(raw: string | undefined | null): MapDifficulty {
-  const n = (raw ?? "").trim().toLowerCase().replace(/\s+/g, "").replace("expert+", "expertplus");
+  const n = (raw ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, "")
+    .replace("expert+", "expertplus");
 
   switch (n) {
     case "easy":

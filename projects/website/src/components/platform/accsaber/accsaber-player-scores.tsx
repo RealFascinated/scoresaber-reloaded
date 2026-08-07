@@ -6,8 +6,8 @@ import { Spinner } from "@/components/spinner";
 import { SharedIcons } from "@/shared-icons";
 import { Pagination } from "@ssr/common/pagination";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/tokens/query/query";
-import type { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
+import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/query/query";
+import type { ScoreResponse } from "@ssr/common/schemas/accsaber/score/score";
 import type { AccSaberScoresPageResponse } from "@ssr/common/schemas/response/score/accsaber-scores-page";
 import type { SortDirection } from "@ssr/common/schemas/score/query/sort/sort-direction";
 import { capitalizeFirstLetter } from "@ssr/common/string-utils";
@@ -68,7 +68,7 @@ export default function AccSaberPlayerScores({ player }: Props) {
     extraKeyParts: [type],
     queryFn: async ({ page, sort, direction }) => {
       const response = await ssrApi.fetchAccSaberPlayerScores(player.id, page, sort, direction, type);
-      return response ?? Pagination.empty<AccSaberScore>();
+      return response ?? Pagination.empty<ScoreResponse>();
     },
     buildUrl: (pageNum, { sort, direction }) => {
       const params = new URLSearchParams();

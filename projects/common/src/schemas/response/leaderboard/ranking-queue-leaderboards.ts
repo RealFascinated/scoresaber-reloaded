@@ -1,15 +1,18 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { ScoreSaberLeaderboardSchema } from "../../scoresaber/leaderboard/leaderboard";
 
-export const RankingQueueLeaderboardSchema = ScoreSaberLeaderboardSchema.extend({
-  difficultyCount: z.number(),
+export const RankingQueueLeaderboardSchema = Type.Composite([
+  ScoreSaberLeaderboardSchema,
+  Type.Object({
+    difficultyCount: Type.Number(),
+  }),
+]);
+
+export const RankingQueueLeaderboardsResponseSchema = Type.Object({
+  nextInQueue: Type.Array(RankingQueueLeaderboardSchema),
+  openRankUnrank: Type.Array(RankingQueueLeaderboardSchema),
+  all: Type.Array(RankingQueueLeaderboardSchema),
 });
 
-export const RankingQueueLeaderboardsResponseSchema = z.object({
-  nextInQueue: z.array(RankingQueueLeaderboardSchema),
-  openRankUnrank: z.array(RankingQueueLeaderboardSchema),
-  all: z.array(RankingQueueLeaderboardSchema),
-});
-
-export type RankingQueueLeaderboard = z.infer<typeof RankingQueueLeaderboardSchema>;
-export type RankingQueueLeaderboardsResponse = z.infer<typeof RankingQueueLeaderboardsResponseSchema>;
+export type RankingQueueLeaderboard = StaticDecode<typeof RankingQueueLeaderboardSchema>;
+export type RankingQueueLeaderboardsResponse = StaticDecode<typeof RankingQueueLeaderboardsResponseSchema>;

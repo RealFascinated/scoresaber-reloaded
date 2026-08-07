@@ -1,14 +1,14 @@
-import { z } from "zod";
+import { Type } from "@sinclair/typebox";
 
-export const BeatSaverAccountSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  hash: z.string(),
-  avatar: z.string(),
-  type: z.string(),
-  admin: z.boolean(),
-  curator: z.boolean(),
-  seniorCurator: z.boolean(),
-  verifiedMapper: z.boolean(),
-  playlistUrl: z.string(),
+export const BeatSaverAccountSchema = Type.Object({
+  id: Type.Number(),
+  name: Type.String(),
+  hash: Type.String(),
+  avatar: Type.String(),
+  type: Type.String(),
+  admin: Type.Boolean(),
+  curator: Type.Boolean(),
+  seniorCurator: Type.Boolean(),
+  verifiedMapper: Type.Boolean(),
+  playlistUrl: Type.String(),
 });

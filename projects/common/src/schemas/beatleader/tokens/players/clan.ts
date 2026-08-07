@@ -1,16 +1,10 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const BeatLeaderClanSchema = z
-  .object({
-    id: z.number(),
-    tag: z.string(),
-    color: z.string().nullable().optional(),
-    name: z.string().nullable(),
-  })
-  .loose();
+export const BeatLeaderClanSchema = Type.Object({
+  id: Type.Number(),
+  tag: Type.String(),
+  color: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  name: Type.Union([Type.String(), Type.Null()]),
+});
 
-export type BeatLeaderClanToken = z.infer<typeof BeatLeaderClanSchema>;
-
-// Backwards-compatible aliases
-export const BeatLeaderPlayerClanSchema = BeatLeaderClanSchema;
-export type BeatLeaderPlayerClan = BeatLeaderClanToken;
+export type BeatLeaderClanToken = StaticDecode<typeof BeatLeaderClanSchema>;

@@ -1,16 +1,17 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { ScoreStatsHeadPositionSchema } from "./head-position";
 
-export const ScoreStatsWinTrackerSchema = z.object({
-  won: z.boolean(),
-  endTime: z.number(),
-  nbOfPause: z.number(),
-  totalPauseDuration: z.number(),
-  jumpDistance: z.number(),
-  averageHeight: z.number(),
+export const ScoreStatsWinTrackerSchema = Type.Object({
+  won: Type.Boolean(),
+  endTime: Type.Number(),
+  failTime: Type.Optional(Type.Number()),
+  nbOfPause: Type.Number(),
+  totalPauseDuration: Type.Number(),
+  jumpDistance: Type.Number(),
+  averageHeight: Type.Number(),
   averageHeadPosition: ScoreStatsHeadPositionSchema,
-  totalScore: z.number(),
-  maxScore: z.number(),
+  totalScore: Type.Number(),
+  maxScore: Type.Number(),
 });
 
-export type ScoreStatsWinTrackerToken = z.infer<typeof ScoreStatsWinTrackerSchema>;
+export type ScoreStatsWinTrackerToken = StaticDecode<typeof ScoreStatsWinTrackerSchema>;

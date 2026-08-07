@@ -1,3 +1,4 @@
+import { Value } from "@sinclair/typebox/value";
 import { SHARED_CONSTS } from "../shared-consts";
 import { SnipeSettings, snipeSettingsSchema } from "./snipe-settings-schema";
 
@@ -5,29 +6,25 @@ import { SnipeSettings, snipeSettingsSchema } from "./snipe-settings-schema";
  * Parses the raw settings into a snipe settings object.
  *
  * @param settingsBase64 the raw settings
- * @param type the legacy type (old playlists)
  */
 export function parseSnipePlaylistSettings(settingsBase64?: string) {
-  return snipeSettingsSchema.parse(
-    {
-      sort: "pp",
-      sortDirection: "desc",
-      rankedStatus: "all",
-      requireBothScores: false,
-      starRange: {
-        min: 0,
-        max: SHARED_CONSTS.maxStars,
-      },
-      accuracyRange: {
-        min: 0,
-        max: 100,
-      },
-      ...(settingsBase64
-        ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
-        : {}),
+  return Value.Parse(snipeSettingsSchema, {
+    sort: "pp",
+    sortDirection: "desc",
+    rankedStatus: "all",
+    requireBothScores: false,
+    starRange: {
+      min: 0,
+      max: SHARED_CONSTS.maxStars,
     },
-    { reportInput: true }
-  );
+    accuracyRange: {
+      min: 0,
+      max: 100,
+    },
+    ...(settingsBase64
+      ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
+      : {}),
+  });
 }
 
 /**

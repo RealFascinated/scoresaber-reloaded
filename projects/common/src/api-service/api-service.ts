@@ -13,11 +13,6 @@ export interface ServiceConfig {
 
 export default class ApiService {
   /**
-   * In-flight GraphQL request coalescing (same URL/query/variables).
-   */
-  private static readonly pendingGqlRequests = new Map<string, Promise<unknown>>();
-
-  /**
    * The cooldown for the service.
    */
   private readonly cooldown: Cooldown;
@@ -173,65 +168,6 @@ export default class ApiService {
    * @param options the fetch options to use
    * @returns the fetched data
    */
-  public async fetchGQL<T>(
-    url: string,
-    query: string,
-    variables: Record<string, unknown>,
-    options?: RequestOptions
-  ): Promise<T | undefined> {
-    const cacheKey = JSON.stringify({
-      url,
-      query: query.trim(),
-      variables: variables ?? {},
-    });
-    const existing = ApiService.pendingGqlRequests.get(cacheKey);
-    if (existing) {
-      return existing as Promise<T | undefined>;
-    }
-
-    const promise = (async (): Promise<T | undefined> => {
-      const startedAt = performance.now();
-      await this.cooldown.waitAndUse();
-
-      if (isServer()) {
-        this.callCount++;
-      }
-
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...((options?.headers as Record<string, string>) || {}),
-          },
-          body: JSON.stringify({
-            query: query.trim(),
-            variables: variables ?? {},
-          }),
-        });
-
-        this.totalLatencyMs += Math.max(0, performance.now() - startedAt);
-        if (!response.ok) {
-          this.failedCallCount++;
-          return undefined;
-        }
-
-        return response.json() as Promise<T>;
-      } catch {
-        this.totalLatencyMs += Math.max(0, performance.now() - startedAt);
-        this.failedCallCount++;
-        return undefined;
-      }
-    })();
-
-    ApiService.pendingGqlRequests.set(cacheKey, promise);
-    promise.finally(() => {
-      ApiService.pendingGqlRequests.delete(cacheKey);
-    });
-
-    return promise;
-  }
-
   /**
    * Gets the total number of server proxies.
    *

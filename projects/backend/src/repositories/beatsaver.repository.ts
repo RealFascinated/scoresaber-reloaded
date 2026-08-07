@@ -1,4 +1,4 @@
-import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
+import { BeatSaverMapToken } from "@ssr/common/schemas/beatsaver/tokens/map";
 import { parseDate } from "@ssr/common/utils/time-utils";
 import { eq, sql } from "drizzle-orm";
 import { db } from "../db";

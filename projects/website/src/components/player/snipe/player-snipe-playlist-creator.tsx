@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { env } from "@ssr/common/env";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
@@ -64,7 +64,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
   const [downloading, setDownloading] = useState(false);
 
   const form = useForm<SnipeSettings>({
-    resolver: zodResolver(snipeSettingsSchema, { reportInput: true }),
+    resolver: typeboxResolver(snipeSettingsSchema),
     defaultValues: {
       sort: "pp",
       sortDirection: "desc",

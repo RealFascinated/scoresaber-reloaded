@@ -1,9 +1,9 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const ScoreStatsHeadPositionSchema = z.object({
-  x: z.number(),
-  y: z.number(),
-  z: z.number(),
+export const ScoreStatsHeadPositionSchema = Type.Object({
+  x: Type.Number(),
+  y: Type.Number(),
+  z: Type.Number(),
 });
 
-export type ScoreStatsHeadPositionToken = z.infer<typeof ScoreStatsHeadPositionSchema>;
+export type ScoreStatsHeadPositionToken = StaticDecode<typeof ScoreStatsHeadPositionSchema>;

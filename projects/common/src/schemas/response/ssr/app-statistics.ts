@@ -1,11 +1,11 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-const AppStatisticSchema = z.object({
-  value: z.number(),
-  velocity: z.number(),
+const AppStatisticSchema = Type.Object({
+  value: Type.Number(),
+  velocity: Type.Number(),
 });
 
-const AppStatisticsResponseSchema = z.object({
+const AppStatisticsResponseSchema = Type.Object({
   leaderboardCount: AppStatisticSchema,
   trackedScores: AppStatisticSchema,
   scoreHistoryScores: AppStatisticSchema,
@@ -14,5 +14,5 @@ const AppStatisticsResponseSchema = z.object({
   activePlayers: AppStatisticSchema,
   uniquePlayersToday: AppStatisticSchema,
 });
-export type AppStatisticsResponse = z.infer<typeof AppStatisticsResponseSchema>;
-export type AppStatistic = z.infer<typeof AppStatisticSchema>;
+export type AppStatisticsResponse = StaticDecode<typeof AppStatisticsResponseSchema>;
+export type AppStatistic = StaticDecode<typeof AppStatisticSchema>;

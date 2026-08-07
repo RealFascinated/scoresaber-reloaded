@@ -1,30 +1,30 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const ScoreSaberPlayerHistorySchema = z.object({
-  rank: z.number().nullable().optional(),
-  countryRank: z.number().nullable().optional(),
-  pp: z.number().nullable().optional(),
-  plusOnePp: z.number().nullable().optional(),
-  totalScore: z.number().nullable().optional(),
-  totalRankedScore: z.number().nullable().optional(),
-  rankedScores: z.number().nullable().optional(),
-  unrankedScores: z.number().nullable().optional(),
-  rankedScoresImproved: z.number().nullable().optional(),
-  unrankedScoresImproved: z.number().nullable().optional(),
-  totalRankedScores: z.number().nullable().optional(),
-  totalUnrankedScores: z.number().nullable().optional(),
-  totalScores: z.number().nullable().optional(),
-  averageRankedAccuracy: z.number().nullable().optional(),
-  averageUnrankedAccuracy: z.number().nullable().optional(),
-  averageAccuracy: z.number().nullable().optional(),
-  medals: z.number().nullable().optional(),
-  aPlays: z.number().nullable().optional(),
-  sPlays: z.number().nullable().optional(),
-  spPlays: z.number().nullable().optional(),
-  ssPlays: z.number().nullable().optional(),
-  sspPlays: z.number().nullable().optional(),
-  godPlays: z.number().nullable().optional(),
+export const ScoreSaberPlayerHistorySchema = Type.Object({
+  rank: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  countryRank: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  pp: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  plusOnePp: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  totalScore: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  totalRankedScore: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  rankedScores: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  unrankedScores: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  rankedScoresImproved: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  unrankedScoresImproved: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  totalRankedScores: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  totalUnrankedScores: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  totalScores: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  averageRankedAccuracy: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  averageUnrankedAccuracy: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  averageAccuracy: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  medals: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  aPlays: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  sPlays: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  spPlays: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  ssPlays: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  sspPlays: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+  godPlays: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
 });
 
-export type ScoreSaberPlayerHistory = z.infer<typeof ScoreSaberPlayerHistorySchema>;
+export type ScoreSaberPlayerHistory = StaticDecode<typeof ScoreSaberPlayerHistorySchema>;
 export type ScoreSaberPlayerHistoryEntries = Record<string, ScoreSaberPlayerHistory>;

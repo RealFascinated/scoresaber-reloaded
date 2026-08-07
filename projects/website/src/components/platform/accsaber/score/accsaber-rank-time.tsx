@@ -4,11 +4,11 @@ import { getRankColor } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
 import { ScoreTimeSet } from "@/components/score/score-time-set";
 import { SharedIcons } from "@/shared-icons";
-import type { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
+import type { ScoreResponse } from "@ssr/common/schemas/accsaber/score/score";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type AccSaberRankTimeProps = {
-  score: AccSaberScore;
+  score: ScoreResponse;
 };
 
 export function AccSaberRankTime({ score }: AccSaberRankTimeProps) {
@@ -18,15 +18,15 @@ export function AccSaberRankTime({ score }: AccSaberRankTimeProps) {
         <SharedIcons.AccSaberGlobalRankIcon className="h-5 w-5" />
         <p
           className={cn(
-            getRankColor(score.score.rank),
+            getRankColor(score.rank),
             "hover:text-primary/80 cursor-pointer font-semibold transition-all"
           )}
         >
-          #{formatNumberWithCommas(score.score.rank)}
+          #{formatNumberWithCommas(score.rank)}
         </p>
       </div>
       <div className="flex items-center gap-2 lg:flex-col lg:gap-0">
-        <ScoreTimeSet timestamp={score.timeSet} />
+        <ScoreTimeSet timestamp={new Date(score.timeSet)} />
       </div>
     </div>
   );

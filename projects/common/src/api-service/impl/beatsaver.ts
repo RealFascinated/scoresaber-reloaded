@@ -1,7 +1,7 @@
 import { Cooldown } from "../../cooldown";
-import { BeatSaverLatestMapsToken } from "../../types/token/beatsaver/api/latest-maps";
-import { BeatSaverMultiMapLookup } from "../../types/token/beatsaver/api/multi-map-lookup";
-import BeatSaverMapToken from "../../types/token/beatsaver/map";
+import { BeatSaverLatestMapsToken } from "../../schemas/beatsaver/tokens/api/latest-maps";
+import { BeatSaverMultiMapLookup } from "../../schemas/beatsaver/tokens/api/multi-map-lookup";
+import { BeatSaverMapToken } from "../../schemas/beatsaver/tokens/map";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
 

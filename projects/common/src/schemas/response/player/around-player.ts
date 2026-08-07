@@ -1,13 +1,16 @@
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import ScoreSaberPlayer from "../../../player/impl/scoresaber-player";
 
-export type MiniRankingResponse = {
+export const MiniRankingResponseSchema = Type.Object({
   /**
    * The global rankings of the player.
    */
-  globalRankings: ScoreSaberPlayer[];
+  globalRankings: Type.Array(Type.Unsafe<ScoreSaberPlayer>(Type.Unknown())),
 
   /**
    * The country rankings of the player.
    */
-  countryRankings: ScoreSaberPlayer[];
-};
+  countryRankings: Type.Array(Type.Unsafe<ScoreSaberPlayer>(Type.Unknown())),
+});
+
+export type MiniRankingResponse = StaticDecode<typeof MiniRankingResponseSchema>;

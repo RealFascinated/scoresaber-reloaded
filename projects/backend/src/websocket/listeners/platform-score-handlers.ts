@@ -1,9 +1,9 @@
 import Logger from "@ssr/common/logger";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
+import { ScoreSaberLeaderboardToken } from "@ssr/common/schemas/scoresaber/tokens/v1/leaderboard";
+import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/schemas/scoresaber/tokens/v1/leaderboard-player-info";
+import { ScoreSaberScoreToken } from "@ssr/common/schemas/scoresaber/tokens/v1/score";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
-import ScoreSaberLeaderboardToken from "@ssr/common/types/token/scoresaber/v1/leaderboard";
-import { ScoreSaberLeaderboardPlayerInfoToken } from "@ssr/common/types/token/scoresaber/v1/leaderboard-player-info";
-import ScoreSaberScoreToken from "@ssr/common/types/token/scoresaber/v1/score";
 import { beatLeaderTimesetToMs } from "@ssr/common/utils/beatleader-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
@@ -171,7 +171,7 @@ export class ScoreWebsockets implements EventListener {
           }
         }
       },
-      TimeUnit.toMillis(TimeUnit.Minute, 1)
+      TimeUnit.toMillis(TimeUnit.Second, 15)
     );
 
     // Connect to websockets

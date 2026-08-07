@@ -1,26 +1,40 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const ScoreSaberLeaderboardQuerySortSchema = z.enum(["asc", "desc"]);
+export const ScoreSaberLeaderboardQuerySortSchema = Type.Union([Type.Literal("asc"), Type.Literal("desc")]);
 
-export const ScoreSaberLeaderboardQueryCategorySchema = z.enum([
-  "date_ranked",
-  "date_created",
-  "star_difficulty",
-  "plays",
-  "daily_plays",
-  "trending",
+export const ScoreSaberLeaderboardQueryCategorySchema = Type.Union([
+  Type.Literal("date_ranked"),
+  Type.Literal("date_created"),
+  Type.Literal("star_difficulty"),
+  Type.Literal("plays"),
+  Type.Literal("daily_plays"),
+  Type.Literal("trending"),
 ]);
 
-export const ScoreSaberLeaderboardQueryFiltersSchema = z.object({
-  ranked: z.coerce.boolean().optional(),
-  qualified: z.coerce.boolean().optional(),
-  category: ScoreSaberLeaderboardQueryCategorySchema.default("trending").optional(),
-  minStars: z.coerce.number().optional(),
-  maxStars: z.coerce.number().optional(),
-  sort: ScoreSaberLeaderboardQuerySortSchema.default("desc").optional(),
-  query: z.string().optional(),
+export const ScoreSaberLeaderboardQueryFiltersSchema = Type.Object({
+  ranked: Type.Optional(Type.Boolean()),
+  qualified: Type.Optional(Type.Boolean()),
+  category: Type.Optional(
+    Type.Union(
+      [
+        Type.Literal("date_ranked"),
+        Type.Literal("date_created"),
+        Type.Literal("star_difficulty"),
+        Type.Literal("plays"),
+        Type.Literal("daily_plays"),
+        Type.Literal("trending"),
+      ],
+      { default: "trending" }
+    )
+  ),
+  minStars: Type.Optional(Type.Number()),
+  maxStars: Type.Optional(Type.Number()),
+  sort: Type.Optional(Type.Union([Type.Literal("asc"), Type.Literal("desc")], { default: "desc" })),
+  query: Type.Optional(Type.String()),
 });
 
-export type ScoreSaberLeaderboardQuerySort = z.infer<typeof ScoreSaberLeaderboardQuerySortSchema>;
-export type ScoreSaberLeaderboardQueryCategory = z.infer<typeof ScoreSaberLeaderboardQueryCategorySchema>;
-export type ScoreSaberLeaderboardQueryFilters = z.infer<typeof ScoreSaberLeaderboardQueryFiltersSchema>;
+export type ScoreSaberLeaderboardQuerySort = StaticDecode<typeof ScoreSaberLeaderboardQuerySortSchema>;
+export type ScoreSaberLeaderboardQueryCategory = StaticDecode<
+  typeof ScoreSaberLeaderboardQueryCategorySchema
+>;
+export type ScoreSaberLeaderboardQueryFilters = StaticDecode<typeof ScoreSaberLeaderboardQueryFiltersSchema>;

@@ -1,10 +1,10 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { PaginationMetadataSchema } from "../../pagination";
 import { ScoreSaberScoreSchema } from "../../scoresaber/score/score";
 
-export const ScoreSaberScoresPageResponseSchema = z.object({
-  items: z.array(ScoreSaberScoreSchema),
+export const ScoreSaberScoresPageResponseSchema = Type.Object({
+  items: Type.Array(ScoreSaberScoreSchema),
   metadata: PaginationMetadataSchema,
 });
 
-export type ScoreSaberScoresPageResponse = z.infer<typeof ScoreSaberScoresPageResponseSchema>;
+export type ScoreSaberScoresPageResponse = StaticDecode<typeof ScoreSaberScoresPageResponseSchema>;

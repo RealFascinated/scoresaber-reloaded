@@ -1,7 +1,6 @@
 import { PlayerRankingsResponseSchema } from "@ssr/common/schemas/response/player/player-rankings";
 import { PlayerMedalRankingsResponseSchema } from "@ssr/common/schemas/response/ranking/medal-rankings";
-import { Elysia } from "elysia";
-import { z } from "zod";
+import { Elysia, t } from "elysia";
 import { PlayerMedalsService } from "../../service/medals/player-medals.service";
 import { PlayerSearchService } from "../../service/player/player-search.service";
 
@@ -19,13 +18,13 @@ export default function playerRankingController(app: Elysia) {
         },
         {
           tags: ["Ranking"],
-          params: z.object({
-            page: z.coerce.number().default(1),
+          params: t.Object({
+            page: t.Number({ default: 1 }),
           }),
-          query: z.object({
-            country: z.string().default("").optional(),
-            search: z.string().default("").optional(),
-            includeInactives: z.coerce.boolean().default(false).optional(),
+          query: t.Object({
+            country: t.Optional(t.String({ default: "" })),
+            search: t.Optional(t.String({ default: "" })),
+            includeInactives: t.Optional(t.BooleanString({ default: false })),
           }),
           response: PlayerRankingsResponseSchema,
           detail: {
@@ -40,11 +39,11 @@ export default function playerRankingController(app: Elysia) {
         },
         {
           tags: ["Ranking"],
-          params: z.object({
-            page: z.coerce.number().default(1),
+          params: t.Object({
+            page: t.Number({ default: 1 }),
           }),
-          query: z.object({
-            country: z.string().optional(),
+          query: t.Object({
+            country: t.Optional(t.String()),
           }),
           response: PlayerMedalRankingsResponseSchema,
           detail: {
