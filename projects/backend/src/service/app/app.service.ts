@@ -22,9 +22,10 @@ export class AppService {
   private static readonly logger: ScopedLogger = Logger.withTopic("App Statistics");
 
   /**
-   * The maximum number of samples kept for velocity calculations.
+   * How long samples are kept for velocity calculations. Velocities are averaged
+   * over this window to stay stable against short-term noise.
    */
-  private static readonly MAX_SAMPLES = 30;
+  private static readonly SAMPLE_RETENTION_MS = TimeUnit.toMillis(TimeUnit.Hour, 1);
 
   /**
    * How often samples are taken when no requests are coming in.
@@ -66,11 +67,20 @@ export class AppService {
     try {
       const values = await AppService.getRawValues();
       AppService.samples.push({ timestamp: Date.now(), values });
-      if (AppService.samples.length > AppService.MAX_SAMPLES) {
-        AppService.samples.shift();
-      }
+      AppService.pruneSamples();
     } catch (error) {
       AppService.logger.error("Failed to sample app statistics:", error);
+    }
+  }
+
+  /**
+   * Drops samples older than the retention window so velocities always reflect
+   * the last hour of statistics.
+   */
+  private static pruneSamples(): void {
+    const cutoff = Date.now() - AppService.SAMPLE_RETENTION_MS;
+    while (AppService.samples.length > 0 && AppService.samples[0].timestamp < cutoff) {
+      AppService.samples.shift();
     }
   }
 
@@ -159,13 +169,6 @@ export class AppService {
    */
   public static async getAppStatistics(): Promise<AppStatisticsResponse> {
     const values = await AppService.getRawValues();
-
-    // Feed the fresh sample into the rolling window so velocities stay up to date
-    // even when there is little traffic.
-    AppService.samples.push({ timestamp: Date.now(), values });
-    if (AppService.samples.length > AppService.MAX_SAMPLES) {
-      AppService.samples.shift();
-    }
 
     const statistics = {} as Record<AppStatKey, AppStatistic>;
     for (const key of Object.keys(values) as AppStatKey[]) {

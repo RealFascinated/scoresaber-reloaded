@@ -1,5 +1,9 @@
 import Logger from "@ssr/common/logger";
 import { BeatLeaderPlayersTotalSchema } from "@ssr/common/schemas/beatleader/tokens/players/page";
+import {
+  BeatLeaderPlayerLookupSchema,
+  type BeatLeaderPlayerLookupToken,
+} from "@ssr/common/schemas/beatleader/tokens/players/player";
 import { ScoreStatsToken } from "@ssr/common/schemas/beatleader/tokens/score-stats/score-stats";
 import {
   BeatLeaderPlayerScoresPageSchema,
@@ -11,6 +15,7 @@ import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 const LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT = "https://cdn.scorestats.beatleader.xyz/:scoreId.json";
 const LOOKUP_PLAYERS_ENDPOINT =
   "https://api.beatleader.com/players?leaderboardContext=general&page=1&count=50&sortBy=pp&mapsType=ranked&ppType=general&order=desc";
+const LOOKUP_PLAYER_ENDPOINT = "https://api.beatleader.com/player/:playerId";
 const LOOKUP_PLAYER_SCORES_ENDPOINT = "https://api.beatleader.com/player/:playerId/scores";
 const beatLeaderApiLog = Logger.withTopic("BeatLeader API");
 
@@ -106,6 +111,37 @@ export class BeatLeaderApiService {
       `Found BeatLeader players total in ${formatDuration(performance.now() - before)}`
     );
     return parsed.data.metadata.total;
+  }
+
+  /**
+   * Looks up a BeatLeader player by any of their known IDs (canonical BeatLeader ID,
+   * Steam ID, Oculus PC ID, Quest ID, ...). Returns `undefined` when the player does
+   * not exist on BeatLeader or the request fails.
+   *
+   * @param playerId the player ID to look up
+   * @returns the player with their linked account IDs, or undefined
+   */
+  public static async lookupPlayer(playerId: string): Promise<BeatLeaderPlayerLookupToken | undefined> {
+    const before = performance.now();
+    BeatLeaderApiService.log(`Looking up BeatLeader player "${playerId}"...`);
+
+    const response = await BeatLeaderApiService.fetch<unknown>(
+      LOOKUP_PLAYER_ENDPOINT.replace(":playerId", playerId)
+    );
+    if (response == undefined) {
+      return undefined;
+    }
+
+    const parsed = BeatLeaderPlayerLookupSchema.safeParse(response, { reportInput: true });
+    if (!parsed.success) {
+      BeatLeaderApiService.log(`Failed to parse BeatLeader player "${playerId}": ${parsed.error.message}`);
+      return undefined;
+    }
+
+    BeatLeaderApiService.log(
+      `Found BeatLeader player "${parsed.data.name}" in ${formatDuration(performance.now() - before)}`
+    );
+    return parsed.data;
   }
 
   public static async lookupPlayerScores(

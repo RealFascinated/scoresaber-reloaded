@@ -377,6 +377,16 @@ export const beatLeaderScoresTable = pgTable(
   ]
 );
 
+export const beatLeaderPlayersTable = pgTable("beatleader-players", {
+  id: text().primaryKey(),
+  name: text().notNull().default(""),
+  platform: text().notNull().default(""),
+  steamId: text(),
+  oculusPCId: text(),
+  questId: text(),
+  lastFetched: timestamp().notNull(),
+});
+
 export const beatSaverUploadersTable = pgTable("beatsaver-uploaders", {
   id: integer().primaryKey(),
   name: text(),
@@ -519,6 +529,7 @@ export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$infe
 export type ScoreSaberLeaderboardRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
 export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;
 export type BeatLeaderScoreRow = typeof beatLeaderScoresTable.$inferSelect;
+export type BeatLeaderPlayerRow = typeof beatLeaderPlayersTable.$inferSelect;
 export type BeatSaverUploaderRow = typeof beatSaverUploadersTable.$inferSelect;
 export type BeatSaverMapRow = typeof beatSaverMapsTable.$inferSelect;
 export type BeatSaverMapVersionRow = typeof beatSaverMapVersionsTable.$inferSelect;

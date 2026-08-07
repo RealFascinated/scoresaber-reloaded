@@ -29,9 +29,13 @@ export class TrackScoreListener implements EventListener {
 
     let beatLeaderScore: BeatLeaderScore | undefined;
     if (beatLeaderScoreToken) {
+      // The paired ScoreSaber score identifies the account that actually set the score;
+      // the BeatLeader player ID can differ from the ScoreSaber account ID.
       beatLeaderScore = await BeatLeaderService.trackBeatLeaderScore(
         beatLeaderScoreToken,
-        isTop50GlobalScore
+        isTop50GlobalScore,
+        true,
+        player.id
       );
     }
 

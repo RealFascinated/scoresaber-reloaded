@@ -148,11 +148,13 @@ export class ScoreSaberLeaderboardsService {
   public static async createLeaderboard(
     id: number,
     token?: ScoreSaberV2LeaderboardPageToken,
-    options?: { skipScoreSeedQueue?: boolean }
+    options?: { skipScoreSeedQueue?: boolean; leaderboard?: ScoreSaberLeaderboard }
   ): Promise<ScoreSaberLeaderboard> {
     const before = performance.now();
     let leaderboard: ScoreSaberLeaderboard;
-    if (token) {
+    if (options?.leaderboard) {
+      leaderboard = options.leaderboard;
+    } else if (token) {
       leaderboard = getScoreSaberLeaderboardFromV2PageToken(token);
     } else {
       const leaderboardToken = await ScoreSaberApiService.lookupLeaderboard(id);

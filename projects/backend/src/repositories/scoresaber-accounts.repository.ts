@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gte, ilike, isNotNull, or, sql } from "drizzle-orm";
+import { and, asc, count, eq, gte, ilike, inArray, isNotNull, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { scoreSaberAccountsTable, type ScoreSaberAccountRow } from "../db/schema";
 import { TableCountsRepository } from "./table-counts.repository";
@@ -9,6 +9,13 @@ export class ScoreSaberAccountsRepository {
   public static async findRowById(id: string): Promise<ScoreSaberAccountRow | undefined> {
     const [row] = await db.select().from(scoreSaberAccountsTable).where(eq(scoreSaberAccountsTable.id, id));
     return row;
+  }
+
+  public static async findManyByIds(ids: string[]): Promise<ScoreSaberAccountRow[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    return db.select().from(scoreSaberAccountsTable).where(inArray(scoreSaberAccountsTable.id, ids));
   }
 
   public static async insert(row: ScoreSaberAccountInsert): Promise<void> {

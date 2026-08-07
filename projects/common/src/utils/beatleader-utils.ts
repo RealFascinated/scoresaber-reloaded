@@ -4,6 +4,19 @@ import { getS3BucketName, StorageBucket } from "../minio-buckets";
 import { BeatLeaderScore } from "../schemas/beatleader/score/score";
 
 /**
+ * Normalizes a BeatLeader timeset to unix milliseconds. BeatLeader timestamps are
+ * unix seconds (e.g. `"1785890742"`); values that already look like milliseconds
+ * (>= 1e12) are returned unchanged.
+ *
+ * @param timeset the BeatLeader timeset (unix seconds or milliseconds)
+ * @returns the timeset in unix milliseconds
+ */
+export function beatLeaderTimesetToMs(timeset: string | number): number {
+  const value = Number(timeset);
+  return Number.isFinite(value) && value < 1e12 ? value * 1000 : value;
+}
+
+/**
  * Get the redirect URL of a BeatLeader replay.
  *
  * @param score the score data

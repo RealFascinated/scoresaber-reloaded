@@ -123,7 +123,8 @@ export class PlayerBeatLeaderScoresService {
         const tracked = await BeatLeaderService.trackBeatLeaderScore(
           scoreToken as BeatLeaderScoreToken,
           false,
-          false
+          false,
+          account.id
         );
         if (tracked) {
           newTracked++;
@@ -134,14 +135,20 @@ export class PlayerBeatLeaderScoresService {
     }
 
     let currentPage = 1;
+    let completed = false;
     while (true) {
       const scoresPage = await getScoresPage(currentPage);
       if (!scoresPage) {
+        // The page fetch failed. If the player definitively does not exist on BeatLeader
+        // (404), there is nothing to seed; otherwise this is a transient failure and we
+        // leave the player unseeded so the queue retries them.
+        completed = currentPage === 1 && !(await BeatLeaderApiService.lookupPlayer(playerId));
         break;
       }
 
       const scores = scoresPage.data ?? [];
       if (scores.length === 0) {
+        completed = true;
         break;
       }
 
@@ -150,11 +157,13 @@ export class PlayerBeatLeaderScoresService {
 
       if (options.mode === "requested" && fullPageAlreadyTracked) {
         result.stoppedBecauseAllTrackedPage = true;
+        completed = true;
         break;
       }
 
       const hasMore = hasMorePages(currentPage, scoresPage);
       if (!hasMore) {
+        completed = true;
         break;
       }
 
@@ -164,7 +173,12 @@ export class PlayerBeatLeaderScoresService {
     result.timeTaken = performance.now() - startTime;
     result.totalPagesFetched = currentPage - 1;
 
-    await PlayerCoreService.updatePlayer(playerId, { seededBeatLeaderScores: true });
+    if (completed) {
+      await PlayerCoreService.updatePlayer(playerId, { seededBeatLeaderScores: true });
+      // Cache the player's linked BeatLeader account IDs so real-time scores can be
+      // attributed to this account even when their BeatLeader player ID differs.
+      await BeatLeaderService.upsertBeatLeaderPlayer(account.id);
+    }
 
     if (currentPage !== 1) {
       PlayerBeatLeaderScoresService.logger.info(

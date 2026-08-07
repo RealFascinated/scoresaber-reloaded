@@ -2,6 +2,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { StorageBucket } from "@ssr/common/minio-buckets";
 import { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
+import type { BeatLeaderPlayerLookupToken } from "@ssr/common/schemas/beatleader/tokens/players/player";
 import { ScoreStatsToken } from "@ssr/common/schemas/beatleader/tokens/score-stats/score-stats";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/schemas/beatleader/tokens/score/score-improvement";
@@ -9,18 +10,26 @@ import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
-import { getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
+import { beatLeaderTimesetToMs, getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import Request from "@ssr/common/utils/request";
-import { formatDuration } from "@ssr/common/utils/time-utils";
+import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { beatLeaderScoreByIdCacheKey, beatLeaderScoreBySongCacheKey } from "../../common/cache-keys";
 import { createGenericEmbed } from "../../common/discord/embed";
 import { beatLeaderScoreRowToType } from "../../db/converter/beatleader-score";
+import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
+import { type BeatLeaderPlayerRow } from "../../db/schema";
+import {
+  type BeatLeaderPlayerInsert,
+  BeatLeaderPlayersRepository,
+} from "../../repositories/beatleader-players.repository";
 import {
   type BeatLeaderScoreInsert,
   BeatLeaderScoresRepository,
 } from "../../repositories/beatleader-scores.repository";
+import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { BeatLeaderApiService } from "../external/beatleader-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 import StorageService from "../infra/storage.service";
@@ -34,21 +43,38 @@ export default class BeatLeaderService {
    *
    * @param scoreToken the BeatLeader API score payload
    * @param isTop50GlobalScore whether the score is a top 50 global score
+   * @param log whether to log the tracked score
+   * @param accountId the SSR account the score should be attributed to. When omitted,
+   *   the score is attributed to the account matching the score's player ID.
    * @returns the BeatLeader score, or undefined if none
    */
   public static async trackBeatLeaderScore(
     scoreToken: BeatLeaderScoreToken,
     isTop50GlobalScore: boolean = false,
-    log: boolean = true
+    log: boolean = true,
+    accountId?: string
   ): Promise<BeatLeaderScore | undefined> {
     const before = performance.now();
-    const { playerId } = scoreToken;
-    const account = await PlayerCoreService.getAccount(playerId);
+    // Prefer the account that actually set the score when known (the paired ScoreSaber
+    // score or the account being seeded); otherwise resolve it from the BeatLeader
+    // player's linked accounts, using the play time to disambiguate.
+    const account = accountId
+      ? await PlayerCoreService.getAccount(accountId)
+      : (await BeatLeaderPlayersRepository.findById(scoreToken.playerId)) != null
+        ? await BeatLeaderService.resolveAccountForBlPlayer(
+            scoreToken.playerId,
+            beatLeaderTimesetToMs(scoreToken.timeset)
+          )
+        : await PlayerCoreService.getAccount(scoreToken.playerId);
 
     // Only track for players that are being tracked
     if (account == null) {
       return undefined;
     }
+
+    // Attribute the score to the SSR account that actually set it. The score's own
+    // player ID can differ (e.g. a player whose BeatLeader ID is not their ScoreSaber ID).
+    const playerId = account.id;
 
     const existing = await BeatLeaderScoresRepository.findRowById(scoreToken.id);
     if (existing) {
@@ -63,13 +89,13 @@ export default class BeatLeaderService {
     const rawScoreImprovement = scoreToken.scoreImprovement;
     const improvement = BeatLeaderService.improvementRowFromToken(rawScoreImprovement, getMisses);
 
-    const pendingBl = BeatLeaderService.beatLeaderScoreFromToken(scoreToken, false, getMisses);
+    const pendingBl = BeatLeaderService.beatLeaderScoreFromToken(scoreToken, false, getMisses, playerId);
     const savedReplay = await this.saveReplay(pendingBl, account, isTop50GlobalScore);
 
     const timestamp = new Date(Number(scoreToken.timeset) * 1000);
     const insertRow: BeatLeaderScoreInsert = {
       id: scoreToken.id,
-      playerId: scoreToken.playerId,
+      playerId,
       songHash: leaderboard.song.hash.toUpperCase(),
       leaderboardId: leaderboard.id,
       songDifficulty: difficulty.difficultyName as MapDifficulty,
@@ -266,6 +292,130 @@ export default class BeatLeaderService {
     return false;
   }
 
+  /**
+   * How long a BeatLeader player mapping (linked account IDs) is considered fresh.
+   */
+  private static readonly BEATLEADER_PLAYER_TTL_MS = TimeUnit.toMillis(TimeUnit.Day, 1);
+
+  /**
+   * Gets a BeatLeader player's mapping from the cache, refreshing it from the API
+   * when it is missing or stale. Falls back to the stale entry when the refresh fails.
+   *
+   * @param blPlayerId the canonical BeatLeader player ID
+   * @returns the player mapping, or undefined if unknown
+   */
+  public static async getBeatLeaderPlayer(blPlayerId: string): Promise<BeatLeaderPlayerRow | undefined> {
+    const cached = await BeatLeaderPlayersRepository.findById(blPlayerId);
+    if (cached && Date.now() - cached.lastFetched.getTime() < BeatLeaderService.BEATLEADER_PLAYER_TTL_MS) {
+      return cached;
+    }
+
+    const token = await BeatLeaderApiService.lookupPlayer(blPlayerId);
+    if (token) {
+      return BeatLeaderPlayersRepository.upsert(BeatLeaderService.playerRowFromToken(token));
+    }
+    return cached;
+  }
+
+  /**
+   * Fetches and caches the BeatLeader player mapping for an SSR account. BeatLeader's
+   * API resolves any linked ID (Steam, Oculus PC, Quest, ...) to the canonical player,
+   * so this works with ScoreSaber account IDs too.
+   *
+   * @param playerId any ID the player is known by
+   * @returns the cached player mapping, or undefined if the player is not on BeatLeader
+   */
+  public static async upsertBeatLeaderPlayer(playerId: string): Promise<BeatLeaderPlayerRow | undefined> {
+    const token = await BeatLeaderApiService.lookupPlayer(playerId);
+    if (!token) {
+      return undefined;
+    }
+    return BeatLeaderPlayersRepository.upsert(BeatLeaderService.playerRowFromToken(token));
+  }
+
+  /**
+   * Whether a BeatLeader player and a ScoreSaber account are the same human, based on
+   * the player's cached linked account IDs. Uses only cached data (never fetches), so
+   * pairing stays cheap; players without a cached entry only pair on identical IDs.
+   *
+   * @param blPlayerId the canonical BeatLeader player ID
+   * @param ssAccountId the ScoreSaber account ID
+   * @returns whether they are the same player
+   */
+  public static async isSamePlayer(blPlayerId: string, ssAccountId: string): Promise<boolean> {
+    if (blPlayerId === ssAccountId) {
+      return true;
+    }
+    const player = await BeatLeaderPlayersRepository.findById(blPlayerId);
+    return (
+      player != null &&
+      (ssAccountId === player.steamId || ssAccountId === player.oculusPCId || ssAccountId === player.questId)
+    );
+  }
+
+  /**
+   * Resolves the SSR account that owns a BeatLeader player, using the player's linked
+   * account IDs. When multiple accounts match (e.g. an old alt and the current main),
+   * the account that actually played around the given time is preferred, falling back
+   * to the most recently active account.
+   *
+   * @param blPlayerId the canonical BeatLeader player ID
+   * @param timesetMs the play time of the score being attributed (unix milliseconds)
+   * @returns the resolved SSR account, or undefined
+   */
+  public static async resolveAccountForBlPlayer(
+    blPlayerId: string,
+    timesetMs?: number
+  ): Promise<ScoreSaberAccount | undefined> {
+    const player = await BeatLeaderService.getBeatLeaderPlayer(blPlayerId);
+    if (!player) {
+      return undefined;
+    }
+
+    const linkedIds = [blPlayerId, player.steamId, player.oculusPCId, player.questId].filter(
+      (id): id is string => id != null && id.length > 0
+    );
+    let candidates = await ScoreSaberAccountsRepository.findManyByIds([...new Set(linkedIds)]);
+    if (candidates.length === 0) {
+      return undefined;
+    }
+
+    if (candidates.length > 1 && timesetMs != null) {
+      // Both platforms timestamp the same play, so the account that actually set this
+      // score is the one that has a ScoreSaber score around that time.
+      const windowMs = TimeUnit.toMillis(TimeUnit.Minute, 5);
+      const played = await ScoreSaberScoresRepository.findPlayerIdsInTimeRange(
+        candidates.map(candidate => candidate.id),
+        new Date(timesetMs - windowMs),
+        new Date(timesetMs + windowMs)
+      );
+      const playedAccounts = candidates.filter(candidate => played.includes(candidate.id));
+      if (playedAccounts.length > 0) {
+        candidates = playedAccounts;
+      }
+    }
+
+    // Prefer the most recently active account (the player's current main).
+    candidates.sort((a, b) => String(b.lastPlayedDate ?? "").localeCompare(String(a.lastPlayedDate ?? "")));
+    return scoreSaberAccountRowToType(candidates[0]);
+  }
+
+  private static playerRowFromToken(token: BeatLeaderPlayerLookupToken): BeatLeaderPlayerInsert {
+    const linked = token.linkedIds;
+    // BeatLeader can return empty strings for unlinked platform IDs; normalize to null.
+    const toId = (id: string | number | null | undefined): string | null =>
+      id == null || id.toString().length === 0 ? null : id.toString();
+    return {
+      id: token.id,
+      name: token.name,
+      platform: token.platform,
+      steamId: toId(linked?.steamId),
+      oculusPCId: toId(linked?.oculusPCId),
+      questId: toId(linked?.questId),
+      lastFetched: new Date(),
+    };
+  }
+
   private static improvementRowFromToken(
     raw: BeatLeaderScoreImprovementToken | null | undefined,
     getMisses: (score: BeatLeaderScoreImprovementToken) => number
@@ -299,7 +449,8 @@ export default class BeatLeaderService {
   private static beatLeaderScoreFromToken(
     scoreToken: BeatLeaderScoreToken,
     savedReplay: boolean,
-    getMisses: (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) => number
+    getMisses: (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) => number,
+    playerId: string
   ): BeatLeaderScore {
     const rawScoreImprovement = scoreToken.scoreImprovement;
     const scoreImprovement =
@@ -333,7 +484,7 @@ export default class BeatLeaderService {
           };
 
     return {
-      playerId: scoreToken.playerId,
+      playerId,
       songHash: scoreToken.leaderboard.song.hash.toUpperCase(),
       leaderboardId: scoreToken.leaderboard.id,
       scoreId: scoreToken.id,

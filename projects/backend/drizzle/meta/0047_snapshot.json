@@ -1,9 +1,66 @@
 {
-  "id": "e17424b1-a36e-44a5-94f9-bc5c615d753d",
-  "prevId": "b9e7d6c5-4a3b-2c1d-0e9f-8a7b6c5d4e3f",
+  "id": "87863115-a708-49ab-8a37-dc59ffe6622e",
+  "prevId": "e17424b1-a36e-44a5-94f9-bc5c615d753d",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.beatleader-players": {
+      "name": "beatleader-players",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "platform": {
+          "name": "platform",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "steamId": {
+          "name": "steamId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "oculusPCId": {
+          "name": "oculusPCId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "questId": {
+          "name": "questId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastFetched": {
+          "name": "lastFetched",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.beatleader-scores": {
       "name": "beatleader-scores",
       "schema": "",

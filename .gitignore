@@ -82,3 +82,4 @@ next-env.d.ts
 *~
 secret.yaml
 scoresaber-api.json
+projects/backend/ssr-backend

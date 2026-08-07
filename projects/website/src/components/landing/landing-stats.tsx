@@ -6,12 +6,20 @@ import { AppStatisticsResponse } from "@ssr/common/schemas/response/ssr/app-stat
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { m, useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 type LandingStat = {
   label: string;
   icon: SharedDecorativeIcon;
   key: keyof AppStatisticsResponse;
+};
+
+type StatKey = keyof AppStatisticsResponse;
+
+type StatBump = {
+  id: number;
+  amount: number;
 };
 
 const STATS: LandingStat[] = [
@@ -25,7 +33,8 @@ const STATS: LandingStat[] = [
 
 /**
  * Live stats for the landing page, fetched from the backend `/statistics` endpoint.
- * Values tick upward client-side at the reported velocity until the next fetch.
+ * Values tick upward client-side at the reported velocity until the next fetch,
+ * with a floating "+N" animation whenever a displayed value increments.
  */
 export function LandingStats() {
   const { data, dataUpdatedAt, isLoading } = useQuery({
@@ -34,22 +43,52 @@ export function LandingStats() {
     refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
   });
 
+  const shouldReduceMotion = useReducedMotion();
+
   // Live values extrapolated from the last fetch, refreshed every second
-  const [liveValues, setLiveValues] = useState<Partial<Record<keyof AppStatisticsResponse, number>>>({});
+  const [liveValues, setLiveValues] = useState<Partial<Record<StatKey, number>>>({});
+
+  // Active "+N" bump per statistic, removed once its animation completes
+  const [bumps, setBumps] = useState<Partial<Record<StatKey, StatBump>>>({});
+  const prevRoundedRef = useRef<Partial<Record<StatKey, number>>>({});
 
   useEffect(() => {
     if (!data) {
       return;
     }
 
+    // Baseline for increment detection resets when fresh data arrives
+    prevRoundedRef.current = Object.fromEntries(STATS.map(({ key }) => [key, Math.round(data[key].value)]));
+
     const interval = setInterval(() => {
       const elapsed = (Date.now() - dataUpdatedAt) / 1000;
-      setLiveValues(
-        Object.fromEntries(STATS.map(({ key }) => [key, data[key].value + data[key].velocity * elapsed]))
-      );
+      const values = {} as Partial<Record<StatKey, number>>;
+      const newBumps = {} as Partial<Record<StatKey, StatBump>>;
+      for (const { key } of STATS) {
+        const value = data[key].value + data[key].velocity * elapsed;
+        values[key] = value;
+
+        const rounded = Math.round(value);
+        const previous = prevRoundedRef.current[key];
+        if (!shouldReduceMotion && previous !== undefined && rounded > previous) {
+          newBumps[key] = { id: Date.now(), amount: rounded - previous };
+        }
+        prevRoundedRef.current[key] = rounded;
+      }
+      setLiveValues(values);
+      setBumps(previousBumps => ({ ...previousBumps, ...newBumps }));
     }, 1000);
+
     return () => clearInterval(interval);
-  }, [data, dataUpdatedAt]);
+  }, [data, dataUpdatedAt, shouldReduceMotion]);
+
+  const removeBump = (key: StatKey) => {
+    setBumps(previousBumps => {
+      const next = { ...previousBumps };
+      delete next[key];
+      return next;
+    });
+  };
 
   if (isLoading) {
     return (
@@ -69,16 +108,29 @@ export function LandingStats() {
     <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3">
       {STATS.map(({ label, icon: Icon, key }) => {
         const liveValue = Math.round(liveValues[key] ?? data[key].value);
+        const bump = bumps[key];
         return (
           <div
             key={label}
-            className="ring-border bg-card flex flex-col items-center gap-1 rounded-xl p-5 text-center ring-1"
+            className="ring-border bg-card relative flex flex-col items-center gap-1 rounded-xl p-5 text-center ring-1"
           >
             <Icon className="text-muted-foreground mb-1 h-5 w-5" />
             <span className="text-foreground text-xl font-bold tabular-nums">
               {formatNumberWithCommas(liveValue)}
             </span>
             <span className="text-muted-foreground text-xs">{label}</span>
+            {bump && (
+              <m.span
+                key={bump.id}
+                initial={{ opacity: 0, y: 0, scale: 0.5 }}
+                animate={{ opacity: [0, 1, 1, 0], y: -28, scale: 1 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                onAnimationComplete={() => removeBump(key)}
+                className="text-primary pointer-events-none absolute top-2 right-2 text-sm font-bold select-none"
+              >
+                +{bump.amount}
+              </m.span>
+            )}
           </div>
         );
       })}

@@ -47,6 +47,32 @@ export const emptyScoreSaberPlayerScoreStatistics = (): ScoreSaberPlayerScoreSta
 });
 
 export class ScoreSaberScoresRepository {
+  /**
+   * Finds which of the given players have a ScoreSaber score within the time range.
+   *
+   * Used to disambiguate which SSR account actually played when multiple accounts are
+   * linked to the same BeatLeader player.
+   *
+   * @param playerIds the candidate player IDs
+   * @param from the start of the time range (inclusive)
+   * @param to the end of the time range (inclusive)
+   * @returns the player IDs that have a score in the range
+   */
+  public static async findPlayerIdsInTimeRange(playerIds: string[], from: Date, to: Date): Promise<string[]> {
+    const rows = await db
+      .select({ playerId: scoreSaberScoresTable.playerId })
+      .from(scoreSaberScoresTable)
+      .where(
+        and(
+          inArray(scoreSaberScoresTable.playerId, playerIds),
+          gte(scoreSaberScoresTable.timestamp, from),
+          lte(scoreSaberScoresTable.timestamp, to)
+        )
+      )
+      .limit(100);
+    return [...new Set(rows.map(row => row.playerId))];
+  }
+
   public static async deleteByScoreId(scoreId: number): Promise<void> {
     await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.scoreId, scoreId));
   }
