@@ -9,7 +9,31 @@ import {
 } from "../db/schema";
 import { TableCountsRepository } from "./table-counts.repository";
 
-type ScoreHistoryAttemptRow = typeof scoreSaberScoresTable.$inferInsert;
+export type ScoreHistoryAttemptRow = typeof scoreSaberScoresTable.$inferInsert;
+
+/** Maps a scores-table row to a score-history insert row (used for snapshots of replaced PBs). */
+export function scoreRowToHistoryInsert(row: ScoreSaberScoreRow): ScoreHistoryAttemptRow {
+  return {
+    scoreId: row.scoreId,
+    playerId: row.playerId,
+    leaderboardId: row.leaderboardId,
+    difficulty: row.difficulty,
+    characteristic: row.characteristic,
+    score: row.score,
+    accuracy: row.accuracy,
+    pp: row.pp,
+    medals: row.medals,
+    missedNotes: row.missedNotes,
+    badCuts: row.badCuts,
+    maxCombo: row.maxCombo,
+    fullCombo: row.fullCombo,
+    modifiers: row.modifiers,
+    hmd: row.hmd,
+    rightController: row.rightController,
+    leftController: row.leftController,
+    timestamp: row.timestamp,
+  };
+}
 
 const scoreCols = getTableColumns(scoreSaberScoresTable);
 const histCols = getTableColumns(scoreSaberScoreHistoryTable);
@@ -33,11 +57,7 @@ function playerMapFilters(playerId: string, leaderboardId: number) {
 
 export class ScoreSaberScoreHistoryRepository {
   /**
-   * Inserts a snapshot of a score into the history table.
-   *
-   * @param previous the previous score to snapshot
-   * @param playerId the player id
-   * @param leaderboardId the leaderboard id
+   * Finds a score-history row by its score id.
    */
   public static async findRowByScoreId(scoreId: number): Promise<ScoreSaberScoreHistoryRow | undefined> {
     const [row] = await db
@@ -53,37 +73,6 @@ export class ScoreSaberScoreHistoryRepository {
       .from(scoreSaberScoreHistoryTable)
       .where(eq(scoreSaberScoreHistoryTable.playerId, playerId));
     return Number(row?.count ?? 0);
-  }
-
-  public static async insertSnapshot(
-    previous: ScoreSaberScoreRow,
-    playerId: string,
-    leaderboardId: number
-  ): Promise<void> {
-    await ScoreSaberScoreHistoryRepository.insertAttempt(
-      {
-        scoreId: previous.scoreId,
-        playerId,
-        leaderboardId,
-        difficulty: previous.difficulty,
-        characteristic: previous.characteristic,
-        score: previous.score,
-        accuracy: previous.accuracy,
-        pp: previous.pp,
-        medals: previous.medals,
-        missedNotes: previous.missedNotes,
-        badCuts: previous.badCuts,
-        maxCombo: previous.maxCombo,
-        fullCombo: previous.fullCombo,
-        modifiers: previous.modifiers,
-        hmd: previous.hmd,
-        rightController: previous.rightController,
-        leftController: previous.leftController,
-        timestamp: previous.timestamp,
-      },
-      playerId,
-      leaderboardId
-    );
   }
 
   public static async insertAttempt(

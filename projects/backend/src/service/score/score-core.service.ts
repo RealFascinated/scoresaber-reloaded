@@ -76,17 +76,28 @@ export class ScoreCoreService {
         newScore || ScoreCoreService.shouldIncomingReplaceCurrent(score, currentRow);
 
       if (shouldReplaceCurrent) {
-        await ScoreSaberScoreHistoryRepository.insertSnapshot(currentRow, playerId, leaderboard.id);
-        await ScoreSaberScoresRepository.deleteByScoreId(currentRow.scoreId);
+        // Atomic replace: snapshots the previous PB to history and upserts the
+        // new row in one transaction, with the newest play winning under
+        // concurrent writes (see ScoreSaberScoresRepository.replaceScore).
+        const inserted = await ScoreSaberScoresRepository.replaceScore(insertRow);
+        if (!inserted) {
+          return { score: undefined, hasPreviousScore, tracked: false };
+        }
       } else {
         await ScoreSaberScoreHistoryRepository.insertAttempt(insertRow, playerId, leaderboard.id);
         return { score: undefined, hasPreviousScore: true, tracked: true };
       }
-    }
-
-    const inserted = await ScoreSaberScoresRepository.insertScore(insertRow);
-    if (!inserted) {
-      return { score: undefined, hasPreviousScore, tracked: false };
+    } else {
+      const inserted = await ScoreSaberScoresRepository.insertScore(insertRow);
+      if (!inserted) {
+        // Either a concurrent writer already recorded this scoreId (fine), or it
+        // took the (playerId, leaderboardId) slot with a different score — keep
+        // this play in history so it is not lost entirely.
+        if (!(await ScoreSaberScoresRepository.rowExistsByScoreId(insertRow.scoreId))) {
+          await ScoreSaberScoreHistoryRepository.insertAttempt(insertRow, playerId, leaderboard.id);
+        }
+        return { score: undefined, hasPreviousScore, tracked: false };
+      }
     }
 
     if (newScore) {

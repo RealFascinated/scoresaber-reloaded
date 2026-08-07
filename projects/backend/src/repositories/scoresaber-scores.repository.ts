@@ -5,9 +5,11 @@ import { db } from "../db";
 import {
   scoreSaberAccountsTable,
   scoreSaberLeaderboardsTable,
+  scoreSaberScoreHistoryTable,
   scoreSaberScoresTable,
   type ScoreSaberScoreRow,
 } from "../db/schema";
+import { scoreRowToHistoryInsert } from "./scoresaber-score-history.repository";
 import { TableCountsRepository } from "./table-counts.repository";
 
 export type ScoreSaberScoreInsertRow = typeof scoreSaberScoresTable.$inferInsert;
@@ -73,10 +75,6 @@ export class ScoreSaberScoresRepository {
     return [...new Set(rows.map(row => row.playerId))];
   }
 
-  public static async deleteByScoreId(scoreId: number): Promise<void> {
-    await db.delete(scoreSaberScoresTable).where(eq(scoreSaberScoresTable.scoreId, scoreId));
-  }
-
   public static async findRowByScoreId(scoreId: number): Promise<ScoreSaberScoreRow | undefined> {
     const [row] = await db
       .select()
@@ -135,9 +133,84 @@ export class ScoreSaberScoresRepository {
     const result = await db
       .insert(scoreSaberScoresTable)
       .values(row)
-      .onConflictDoNothing({ target: scoreSaberScoresTable.scoreId })
+      // Untargeted so conflicts on both the scoreId primary key (same score
+      // re-ingested) and the (playerId, leaderboardId) unique index (a
+      // concurrent play from another ingestion path) are absorbed instead of
+      // raising a unique violation.
+      .onConflictDoNothing()
       .returning({ scoreId: scoreSaberScoresTable.scoreId });
     return result.length > 0;
+  }
+
+  /**
+   * Atomically replaces a player's current score on a leaderboard.
+   *
+   * Snapshots the row currently stored for the player+leaderboard to the
+   * score-history table and upserts the new row in a single transaction, so a
+   * crash can no longer leave the player without a current row (the previous
+   * delete-then-insert sequence had that window). The upsert also handles the
+   * (playerId, leaderboardId) unique constraint for concurrent writers: the
+   * newest play wins, and when this incoming play loses the race nothing is
+   * changed.
+   *
+   * @param insertRow the new score row to store
+   * @returns whether the new row was inserted (false when a concurrent, newer
+   *   row already holds the slot)
+   */
+  public static async replaceScore(insertRow: ScoreSaberScoreInsertRow): Promise<boolean> {
+    return await db.transaction(async tx => {
+      // Re-read the current row inside the transaction so the snapshot reflects
+      // the row actually being replaced (a concurrent writer may have changed
+      // it since the caller read it).
+      const [previousRow] = await tx
+        .select()
+        .from(scoreSaberScoresTable)
+        .where(
+          and(
+            eq(scoreSaberScoresTable.playerId, insertRow.playerId),
+            eq(scoreSaberScoresTable.leaderboardId, insertRow.leaderboardId)
+          )
+        )
+        .limit(1);
+
+      let inserted: { scoreId: number } | undefined;
+      try {
+        const result = await tx
+          .insert(scoreSaberScoresTable)
+          .values(insertRow)
+          .onConflictDoUpdate({
+            target: [scoreSaberScoresTable.playerId, scoreSaberScoresTable.leaderboardId],
+            set: insertRow,
+            // Only overwrite the current row when the incoming play is newer, so
+            // a concurrent (already committed) newer play is never downgraded.
+            setWhere: sql`${scoreSaberScoresTable.timestamp} < excluded."timestamp"`,
+          })
+          .returning({ scoreId: scoreSaberScoresTable.scoreId });
+        inserted = result[0];
+      } catch (error) {
+        // A concurrent writer inserted the same scoreId (primary key) — the play
+        // is already recorded, so nothing to do.
+        if ((error as { code?: string }).code === "23505") {
+          return false;
+        }
+        throw error;
+      }
+
+      if (inserted != null && previousRow != null && previousRow.scoreId !== insertRow.scoreId) {
+        await tx
+          .insert(scoreSaberScoreHistoryTable)
+          .values(scoreRowToHistoryInsert(previousRow))
+          .onConflictDoNothing({
+            target: [
+              scoreSaberScoreHistoryTable.leaderboardId,
+              scoreSaberScoreHistoryTable.playerId,
+              scoreSaberScoreHistoryTable.score,
+            ],
+          });
+      }
+
+      return inserted != null;
+    });
   }
 
   /**
