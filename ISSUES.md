@@ -11,7 +11,7 @@
 | Severity | Count |
 | -------- | ----- |
 | Critical | 0     |
-| High     | 6     |
+| High     | 5     |
 | Medium   | 37    |
 | Low      | 25    |
 | Info     | 7     |
@@ -39,8 +39,9 @@ Other themes: the seed/backfill queues are at-most-once with no retry and mark w
 | H8  | Global pp-ordering queries seq-scan (partial index)                     | `d580a71c` (migration 0048) |
 | H9  | score-history scoreId lookups seq-scan (index)                          | `60ba2051` (migration 0049) |
 | H10 | getOrCreateAccount wipes country/clears banned without token            | `a5f6e8f7`                  |
-| H11 | Player backfill never early-exits; per-page pre-filter restored         | `77ac445f`                  |
-| H17 | Storage cache retains files/replay buffers forever (TTL)                | `11c7c290`                  |
+| H11 | Player backfill never early-exits; per-page pre-filter restored | `77ac445f` |
+| H14 | `lookupActivePlayerCount` reads `.count` off a text body — landing "Active Players" frozen | `52c31580` |
+| H17 | Storage cache retains files/replay buffers forever (TTL) | `11c7c290` |
 | M22 | /beatsaver/map/:hash accepts arbitrary strings; no negative cache       | `0147dc70`                  |
 | M23 | /statistics recounts per request (serves samples)                       | `622cdc96`                  |
 | M24 | Empty leaderboards never terminate the seed loop                        | `4b04fb23`                  |
@@ -75,12 +76,6 @@ Note: H8/H9/M34/M39 ship as migrations (0048–0051) and take effect after `bun 
 - **Category:** Performance | **Files:** `playlist.service.ts:482-517`, `scoresaber-scores.repository.ts:384-398`
 - **Problem:** `/playlist/self` and `/playlist/snipe` run `selectScoresJoinedLeaderboardsWhere` with **no `.limit()`** — tens of thousands of rows for a top player, joined to leaderboards, an `inArray` of ~40k leaderboard ids, an in-memory sort, and a multi-MB playlist response; `/snipe` does this for two players concurrently. Unauthenticated, uncached, unthrottled.
 - **Fix:** Cap scores per request (top-N by PP), cache generated playlists keyed by (user, settings), rate-limit.
-
-### H14. `lookupActivePlayerCount` always returns `undefined` — landing "Active Players" stat stuck at 0 (A5-02)
-
-- **Category:** Bug | **Files:** `scoresaber-api.service.ts:241-249` (+ `:128-134`), `metrics/impl/player/active-accounts.ts:13-16`, `app.service.ts:150`
-- **Problem:** `/v2/players/count` is deliberately read as text (`isJson` excludes `/players/count` — an old workaround for a mislabeled content-type), so `fetch` returns the raw string; `lookupActivePlayerCount` then reads `response.count` off that string → always `undefined`. (Verified live: the endpoint now returns proper JSON `{"count":37598}` with `application/json`.) `ActiveAccountsMetric` never updates, the `active_accounts` gauge stays 0, and the landing page shows 0 active players — one of the recently changed "live app stats" areas.
-- **Fix:** Parse the body (`Number.parseInt` on the text, or parse JSON).
 
 ### H15. SS API failures silently collapse to `undefined` — 429s become 404s and truncated syncs (A5-04, A7-06)
 
