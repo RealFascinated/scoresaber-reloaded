@@ -30,6 +30,7 @@ import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { QueueManager } from "./queue/queue-manager";
 import { ScoreSaberMedalsRepository } from "./repositories/scoresaber-medals.repository";
 import { TableCountsRepository } from "./repositories/table-counts.repository";
+import { AppService } from "./service/app/app.service";
 import CacheService from "./service/infra/cache.service";
 import MetricsService, { prometheusRegistry } from "./service/infra/metrics.service";
 import StorageService from "./service/infra/storage.service";
@@ -62,6 +63,7 @@ try {
 
 new EventsManager();
 new MetricsService();
+AppService.startSampling();
 
 const httpMetricsHooks = createHttpMetricsHooks();
 const appVersion = await getAppVersion();

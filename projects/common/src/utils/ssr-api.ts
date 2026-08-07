@@ -24,6 +24,7 @@ import { PlayerScoresPageResponse } from "../schemas/response/score/player-score
 import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph";
 import { ScoreSaberScoresPageResponse } from "../schemas/response/score/scoresaber-scores-page";
 import { TopScoresPageResponse } from "../schemas/response/score/top-scores";
+import { AppStatisticsResponse } from "../schemas/response/ssr/app-statistics";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
 import type { PlayerScoresQuery } from "../schemas/score/query/player-scores-query";
 import { ScoreSaberMedalScoreSortField } from "../schemas/score/query/sort/scoresaber-medal-scores-sort";
@@ -130,6 +131,15 @@ class SSRApi {
    */
   async getScoreSaberStatistics() {
     return await this.request<StatisticsResponse>(`/statistics/scoresaber`);
+  }
+
+  /**
+   * Gets the app statistics.
+   *
+   * @returns the app statistics
+   */
+  async getAppStatistics() {
+    return await this.request<AppStatisticsResponse>(`/statistics`);
   }
 
   /**

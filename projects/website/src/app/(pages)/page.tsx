@@ -1,4 +1,5 @@
 import { LandingBackground } from "@/components/landing/landing-background";
+import { LandingStats } from "@/components/landing/landing-stats";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import SimpleLink from "@/components/simple-link";
 import { DiscordButton } from "@/components/social/discord-button";
@@ -21,6 +22,11 @@ export default async function LandingPage() {
         <div className="w-full max-w-sm">
           <PlayerAndLeaderboardSearch />
         </div>
+      </section>
+
+      {/* Stats */}
+      <section className="mx-auto w-full max-w-4xl px-6">
+        <LandingStats />
       </section>
 
       {/* Quick links */}
