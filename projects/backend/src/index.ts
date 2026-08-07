@@ -112,10 +112,22 @@ export const app = new Elysia()
       timezone: "UTC",
       protect: true,
       run: async () => {
-        await LeaderboardRankedSyncNotificationsService.handleRankedBatch(
-          await LeaderboardRankedSyncService.refreshRankedLeaderboards()
-        );
-        await LeaderboardRankedSyncService.refreshQualifiedLeaderboards();
+        try {
+          const updates = await LeaderboardRankedSyncService.refreshRankedLeaderboards();
+          // Isolated so a failed Discord batch notification (paste upload,
+          // message or playlist send) is reported but never aborts the rest of
+          // the sync.
+          try {
+            await LeaderboardRankedSyncNotificationsService.handleRankedBatch(updates);
+          } catch (error) {
+            log.error("refresh-leaderboards-cron ranked batch notification failed:", error);
+            reportErrorToDiscord("Cron: refresh-leaderboards (ranked batch notification)", error);
+          }
+          await LeaderboardRankedSyncService.refreshQualifiedLeaderboards();
+        } catch (error) {
+          log.error("refresh-leaderboards-cron failed:", error);
+          reportErrorToDiscord("Cron: refresh-leaderboards", error);
+        }
       },
     })
   )
@@ -144,19 +156,24 @@ export const app = new Elysia()
       protect: true,
       run: async () => {
         const before = Date.now();
-        await sendEmbedToChannel(
-          DiscordChannels.BACKEND_LOGS,
-          new EmbedBuilder()
-            .setTitle("Nightly global medal refresh")
-            .setDescription("Starting full recompute of score medals and account sync…")
-        );
-        await PlayerMedalsService.recomputeMedalsFromScoresAndRefreshAccounts();
-        await sendEmbedToChannel(
-          DiscordChannels.BACKEND_LOGS,
-          new EmbedBuilder()
-            .setTitle("Nightly global medal refresh")
-            .setDescription(`Finished in ${formatDuration(Date.now() - before)}.`)
-        );
+        try {
+          await sendEmbedToChannel(
+            DiscordChannels.BACKEND_LOGS,
+            new EmbedBuilder()
+              .setTitle("Nightly global medal refresh")
+              .setDescription("Starting full recompute of score medals and account sync…")
+          );
+          await PlayerMedalsService.recomputeMedalsFromScoresAndRefreshAccounts();
+          await sendEmbedToChannel(
+            DiscordChannels.BACKEND_LOGS,
+            new EmbedBuilder()
+              .setTitle("Nightly global medal refresh")
+              .setDescription(`Finished in ${formatDuration(Date.now() - before)}.`)
+          );
+        } catch (error) {
+          log.error("nightly-global-medal-refresh cron failed:", error);
+          reportErrorToDiscord("Cron: nightly-global-medal-refresh", error);
+        }
       },
     })
   )
@@ -167,8 +184,13 @@ export const app = new Elysia()
       timezone: "UTC",
       protect: true,
       run: async () => {
-        await ScoreEventService.updateTrendingLeaderboards();
-        await ScoreEventService.updateLeaderboardDailyPlays();
+        try {
+          await ScoreEventService.updateTrendingLeaderboards();
+          await ScoreEventService.updateLeaderboardDailyPlays();
+        } catch (error) {
+          log.error("leaderboard-updates cron failed:", error);
+          reportErrorToDiscord("Cron: leaderboard-updates", error);
+        }
       },
     })
   )
@@ -179,7 +201,12 @@ export const app = new Elysia()
       timezone: "UTC",
       protect: true,
       run: async () => {
-        await TableCountsRepository.reconcile();
+        try {
+          await TableCountsRepository.reconcile();
+        } catch (error) {
+          log.error("reconcile-table-counts cron failed:", error);
+          reportErrorToDiscord("Cron: reconcile-table-counts", error);
+        }
       },
     })
   )
@@ -191,7 +218,12 @@ export const app = new Elysia()
       timezone: "UTC",
       protect: true,
       run: async () => {
-        await PlayerPlayedStreakService.expireBrokenStreaks();
+        try {
+          await PlayerPlayedStreakService.expireBrokenStreaks();
+        } catch (error) {
+          log.error("expire-broken-streaks cron failed:", error);
+          reportErrorToDiscord("Cron: expire-broken-streaks", error);
+        }
       },
     })
   )
