@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, getTableColumns, inArray, lt, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
+import { chunkArray } from "@ssr/common/utils/utils";
 import { db } from "../db";
 import {
   ScoreSaberScoreHistoryRow,
@@ -233,13 +234,15 @@ export class ScoreSaberScoreHistoryRepository {
   /**
    * Bulk upserts the history scores.
    *
+   * Executed as `UPDATE ... FROM (VALUES ...)` statements (one per chunk)
+   * instead of one UPDATE per row, which would otherwise issue tens of
+   * thousands of round trips — serialized on a single pooled connection —
+   * whenever a leaderboard's star rating changes. Chunked to stay within
+   * PostgreSQL's parameter limit.
+   *
    * @param updates the updates to upsert
    */
   public static async bulkUpsetHistoryScores(updates: Partial<ScoreSaberScoreHistoryRow>[]): Promise<void> {
-    if (updates.length === 0) {
-      return;
-    }
-
     const validUpdates = updates.filter(
       (u): u is Partial<ScoreSaberScoreHistoryRow> & { id: number } => u.id !== undefined
     );
@@ -247,12 +250,32 @@ export class ScoreSaberScoreHistoryRepository {
       return;
     }
 
+    // Every row updates the same columns; derive them from the first row. The
+    // keys come from the typed Partial<ScoreSaberScoreHistoryRow> passed by
+    // callers, so only schema column names are ever interpolated.
+    const fields = Object.keys(validUpdates[0]).filter(
+      (key): key is keyof ScoreSaberScoreHistoryRow => key !== "id"
+    );
+    if (fields.length === 0) {
+      return;
+    }
+
+    // 5,000 rows per chunk => 10,000 parameters, comfortably under the limit.
     await db.transaction(async tx => {
-      await Promise.all(
-        validUpdates.map(({ id, ...fields }) =>
-          tx.update(scoreSaberScoreHistoryTable).set(fields).where(eq(scoreSaberScoreHistoryTable.id, id))
-        )
-      );
+      for (const chunk of chunkArray(validUpdates, 5_000)) {
+        await tx.execute(sql`
+          UPDATE ${scoreSaberScoreHistoryTable} AS history
+          SET ${sql.join(
+            fields.map(field => sql`history.${sql.raw(`"${field}"`)} = values_table.${sql.raw(`"${field}"`)}`),
+            sql`, `
+          )}
+          FROM (VALUES ${sql.join(
+            chunk.map(update => sql`(${update.id}, ${sql.join(fields.map(field => sql`${update[field]}`), sql`, `)})`),
+            sql`, `
+          )}) AS values_table("id", ${sql.join(fields.map(field => sql.raw(`"${field}"`)), sql`, `)})
+          WHERE history."id" = values_table."id"
+        `);
+      }
     });
   }
 
