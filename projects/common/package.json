@@ -18,13 +18,13 @@
   "devDependencies": {
     "@types/node": "^26.1.2",
     "@types/ws": "^8.18.1",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "dependencies": {
     "@t3-oss/env-core": "^0.13.11",
     "dayjs": "^1.11.21",
     "devalue": "^5.9.0",
-    "ws": "^8.21.2",
+    "ws": "^8.21.3",
     "zod": "^4.4.3"
   }
 }

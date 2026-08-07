@@ -240,14 +240,16 @@ export class PlayerScoresService {
 
     result.timeTaken = performance.now() - startTime;
     result.totalPagesFetched = pagesFetched;
-    PlayerScoresService.logger.info(
-      `Fetched missing scores for %s, total pages fetched: %s, total scores: %s, missing scores: %s, in %s`,
-      playerId,
-      formatNumberWithCommas(result.totalPagesFetched),
-      formatNumberWithCommas(result.totalScores),
-      formatNumberWithCommas(result.missingScores),
-      formatDuration(result.timeTaken)
-    );
+    if (result.missingScores > 0) {
+      PlayerScoresService.logger.info(
+        `Fetched missing scores for %s, total pages fetched: %s, total scores: %s, missing scores: %s, in %s`,
+        playerId,
+        formatNumberWithCommas(result.totalPagesFetched),
+        formatNumberWithCommas(result.totalScores),
+        formatNumberWithCommas(result.missingScores),
+        formatDuration(result.timeTaken)
+      );
+    }
     return result;
   }
 

@@ -202,7 +202,7 @@ export class PlayerBeatLeaderScoresService {
       }
     }
 
-    if (currentPage !== 1) {
+    if (result.newScoresTracked > 0) {
       PlayerBeatLeaderScoresService.logger.info(
         `Player %s fetched %s page(s), tracked %s new score(s), in %s`,
         playerId,
