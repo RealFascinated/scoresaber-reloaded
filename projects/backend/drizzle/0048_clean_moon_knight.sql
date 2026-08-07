@@ -1,0 +1,1 @@
+CREATE INDEX "scores_pp_desc_scoreid_desc_idx" ON "scoresaber-scores" USING btree ("pp" DESC NULLS LAST,"scoreId" DESC NULLS LAST) WHERE "scoresaber-scores"."pp" > 0;

@@ -174,6 +174,11 @@ export const scoreSaberScoresTable = pgTable(
   table => [
     uniqueIndex("scores_player_leaderboard_unique").on(table.playerId, table.leaderboardId),
     index("scores_player_pp_desc_idx").on(table.playerId, table.pp.desc(), table.scoreId.desc()),
+    // Global pp ordering for selectTopPp / getTopScores (no playerId prefix, so
+    // WHERE pp > 0 ORDER BY pp DESC can be served by an index-ordered scan).
+    index("scores_pp_desc_scoreid_desc_idx")
+      .on(table.pp.desc(), table.scoreId.desc())
+      .where(sql`${table.pp} > 0`),
     index("scores_leaderboard_id_idx").on(table.leaderboardId),
     index("scores_leaderboard_score_scoreid_desc_idx").on(
       table.leaderboardId,
