@@ -3,14 +3,13 @@
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import { SharedIcons } from "@/shared-icons";
-import { AccSaberScore } from "@ssr/common/schemas/accsaber/tokens/score/score";
-import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
-import { getScoreSaberLeaderboardCoverUrl } from "@ssr/common/utils/scoresaber.util";
+import { AccSaberScoreItem } from "@ssr/common/schemas/response/score/accsaber-scores-page";
+import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-difficulty";
 import { AccSaberBadges } from "./accsaber-badges";
 import { AccSaberRankTime } from "./accsaber-rank-time";
 
 type AccSaberScoreProps = {
-  score: AccSaberScore;
+  score: AccSaberScoreItem;
 };
 
 export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
@@ -25,16 +24,16 @@ export default function AccSaberScoreComponent({ score }: AccSaberScoreProps) {
         <div className="flex min-w-0 items-center">
           <ScoreSongInfo
             song={{
-              name: score.leaderboard.song.name,
-              authorName: score.leaderboard.song.author,
-              art: getScoreSaberLeaderboardCoverUrl(score.leaderboard.song.hash),
+              name: score.songName,
+              authorName: score.songAuthor,
+              art: score.coverUrl,
             }}
             level={{
-              authorName: score.leaderboard.song.mapper,
-              difficulty: score.leaderboard.diffInfo.diff as MapDifficulty,
+              authorName: score.mapAuthor,
+              difficulty: accSaberDifficultyToMapDifficulty(score.difficulty),
             }}
             metric={{
-              value: score.leaderboard.complexity,
+              value: score.complexity,
               icon: SharedIcons.AccSaberBadgeIcon,
             }}
           />

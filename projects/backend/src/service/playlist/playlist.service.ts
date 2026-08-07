@@ -1,3 +1,5 @@
+import { Type, type Static } from "@sinclair/typebox";
+import { Value } from "@sinclair/typebox/value";
 import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
@@ -18,7 +20,6 @@ import type { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { eq, gt, gte, isNotNull, lte } from "drizzle-orm";
-import { z } from "zod";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
@@ -30,20 +31,20 @@ function getPlaylistTitleDate(date: Date): string {
   return formatDate(date, "MMM D, YYYY");
 }
 
-const BasePlaylistIds = z.enum([
-  "scoresaber-ranked-maps",
-  "scoresaber-qualified-maps",
-  "scoresaber-ranking-queue-maps",
-  "scoresaber-trending",
+const BasePlaylistIds = Type.Union([
+  Type.Literal("scoresaber-ranked-maps"),
+  Type.Literal("scoresaber-qualified-maps"),
+  Type.Literal("scoresaber-ranking-queue-maps"),
+  Type.Literal("scoresaber-trending"),
 ]);
 
-export const PlaylistIdsSchema = z.union([
+export const PlaylistIdsSchema = Type.Union([
   BasePlaylistIds,
-  z.templateLiteral([BasePlaylistIds, z.literal(".bplist")]),
-  z.templateLiteral([BasePlaylistIds, z.literal(".json")]),
+  Type.TemplateLiteral([BasePlaylistIds, Type.Literal(".bplist")]),
+  Type.TemplateLiteral([BasePlaylistIds, Type.Literal(".json")]),
 ]);
 
-export type PlaylistId = z.infer<typeof PlaylistIdsSchema>;
+export type PlaylistId = Static<typeof PlaylistIdsSchema>;
 
 export default class PlaylistService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Playlists");
@@ -55,7 +56,7 @@ export default class PlaylistService {
    * @returns the playlist
    */
   public static async getPlaylist(id: PlaylistId): Promise<Playlist> {
-    const playlistId = PlaylistIdsSchema.parse(id);
+    const playlistId = Value.Parse(PlaylistIdsSchema, id);
     const parts = playlistId.split(".");
     const normalizedPlaylistId = parts[0];
 

@@ -1,16 +1,35 @@
 import { Cooldown } from "../../cooldown";
 import Logger from "../../logger";
 import { Pagination } from "../../pagination";
-import { type AccSaberScoreSort, type AccSaberScoreType } from "../../schemas/accsaber/tokens/query/query";
-import { type AccSaberScore } from "../../schemas/accsaber/tokens/score/score";
+import { type AccSaberScoreSort, type AccSaberScoreType } from "../../schemas/accsaber/query/query";
+import { type ScoreResponse } from "../../schemas/accsaber/score/score";
+import { type ScorePageResponse } from "../../schemas/accsaber/score/scores-page";
 import type { AccSaberScoresPageResponse } from "../../schemas/response/score/accsaber-scores-page";
 import { SortDirection } from "../../schemas/score/query/sort/sort-direction";
-import { accSaberDifficultyToMapDifficulty } from "../../utils/accsaber-difficulty";
 import ApiService from "../api-service";
 import { ApiServiceName } from "../api-service-registry";
 
-const GQL_BASE = "https://gql.h2.accsaber.com/graphql";
+const API_BASE = "https://api.accsaber.com/v1";
+const USER_ENDPOINT = `${API_BASE}/users/:playerId`;
+const USER_SCORES_ENDPOINT = `${API_BASE}/users/:playerId/scores`;
 const SCORES_PER_PAGE = 8;
+
+/** Maps the app-level sort option to the `ScoreResponse` field the REST API sorts by. */
+const SORT_FIELD: Record<AccSaberScoreSort, string> = {
+  date: "timeSet",
+  ap: "ap",
+  acc: "accuracy",
+  complexity: "complexity",
+  ranking: "rank",
+};
+
+/** Maps the app-level score type to the AccSaber category code. */
+const CATEGORY_CODE: Record<AccSaberScoreType, string> = {
+  overall: "overall",
+  true: "true_acc",
+  tech: "tech_acc",
+  standard: "standard_acc",
+};
 
 export class AccSaberService extends ApiService {
   constructor() {
@@ -22,26 +41,30 @@ export class AccSaberService extends ApiService {
     });
   }
 
+  /**
+   * Checks whether a player exists on AccSaber.
+   *
+   * @param playerId the AccSaber user id
+   * @returns true if the player exists
+   */
   public async checkPlayerExists(playerId: string): Promise<boolean> {
-    const query = `
-      query FindPlayer($playerId: BigInt!) {
-        playerDatum(playerId: $playerId) {
-          playerId
-        }
-      }
-    `;
-
     try {
-      const result = await this.fetchGQL<{ data?: { playerDatum?: { playerId: string } } }>(GQL_BASE, query, {
-        playerId: playerId,
-      });
-
-      return !!result?.data?.playerDatum?.playerId;
+      const user = await this.fetch(USER_ENDPOINT.replace(":playerId", playerId));
+      return user !== undefined;
     } catch (error) {
+      Logger.error("Failed to check AccSaber player existence: ", error);
       return false;
     }
   }
 
+  /**
+   * Gets a page of the player's AccSaber scores.
+   *
+   * @param playerId the AccSaber user id
+   * @param page the 1-indexed page number
+   * @param options the sort, direction and score type
+   * @returns the scores page
+   */
   public async getPlayerScores(
     playerId: string,
     page: number = 1,
@@ -52,158 +75,45 @@ export class AccSaberService extends ApiService {
     } = {}
   ): Promise<AccSaberScoresPageResponse> {
     const { sort = "date", direction = "desc", type = "overall" } = options;
-    if (page < 1) {
-      page = 1;
+    const safePage = page < 1 ? 1 : page;
+
+    const searchParams = new URLSearchParams({
+      page: String(safePage - 1), // REST pages are 0-indexed
+      size: String(SCORES_PER_PAGE),
+      sort: `${SORT_FIELD[sort]},${direction}`,
+    });
+    // The scores endpoint defaults to the overall category when no categoryId is given
+    // ("overall" is not a resolvable category id).
+    if (type !== "overall") {
+      searchParams.set("categoryId", CATEGORY_CODE[type]);
     }
+    const url = `${USER_SCORES_ENDPOINT.replace(":playerId", playerId)}?${searchParams.toString()}`;
 
-    // Automatically generate sort options based on consistent naming pattern
-    const generateSortOption = (sort: AccSaberScoreSort, direction: SortDirection): string => {
-      const sortMapping: Record<AccSaberScoreSort, string> = {
-        date: "TIME_SET",
-        acc: "ACCURACY",
-        ap: "AP",
-        complexity: "COMPLEXITY",
-        ranking: "RANKING",
-      };
-      return `${sortMapping[sort]}_${direction.toUpperCase()}`;
-    };
-
-    const query = `
-      query GetPlayerScores(
-        $playerId: BigInt, 
-        ${type !== "overall" ? "$category: String," : ""}
-        $offset: Int, 
-        $count: Int, 
-        $order: [AccSaberScoresOrderBy!]
-      ) {
-        accSaberScores(
-          condition: { 
-            playerId: $playerId
-            ${type !== "overall" ? ", categoryName: $category" : ""}
-          },
-          orderBy: $order,
-          offset: $offset,
-          first: $count
-        ) {
-          nodes {
-            songHash
-            songName
-            songAuthorName
-            levelAuthorName
-            complexity
-            ranking
-            categoryDisplayName
-            difficulty
-            timeSet
-            leaderboardId
-            accuracy
-            ap
-            weightedAp
-            score
-            beatSaverKey
-            categoryName
-          }
-          totalCount
-        }
-      }
-    `;
+    const before = performance.now();
+    this.log(`Fetching AccSaber scores for "${playerId}" (page ${safePage})...`);
 
     try {
-      const result = await this.fetchGQL<{
-        data?: {
-          accSaberScores: {
-            nodes: Array<{
-              songHash: string;
-              songName: string;
-              songAuthorName: string;
-              levelAuthorName: string;
-              complexity: number;
-              ranking: string;
-              categoryDisplayName: string;
-              difficulty: string;
-              timeSet: string;
-              leaderboardId: string;
-              accuracy: number;
-              ap: number;
-              weightedAp: number;
-              score: number;
-              beatSaverKey: string;
-              categoryName: string;
-            }>;
-            totalCount: number;
-          };
-        };
-      }>(GQL_BASE, query, {
-        playerId,
-        ...(type !== "overall" ? { category: type } : {}),
-        count: SCORES_PER_PAGE,
-        offset: SCORES_PER_PAGE * (page - 1),
-        order: [generateSortOption(sort, direction)],
-      });
-
-      if (!result?.data?.accSaberScores?.nodes?.length) {
-        return Pagination.empty<AccSaberScore>();
+      const result = await this.fetch<ScorePageResponse>(url);
+      if (result === undefined || result.content.length === 0) {
+        return Pagination.empty<ScoreResponse>();
       }
 
-      const scores = result.data.accSaberScores.nodes.map(score => {
-        const acc = score.accuracy * 100;
-        const leaderboardId = parseInt(score.leaderboardId, 10);
-
-        return {
-          id: `${playerId}-${score.leaderboardId}`,
-          playerId,
-          leaderboardId,
-          timeSet: new Date(score.timeSet),
-          ap: score.ap,
-          acc,
-          leaderboard: {
-            leaderboardId,
-            song: {
-              hash: score.songHash,
-              name: score.songName,
-              subName: "",
-              author: score.songAuthorName,
-              mapper: score.levelAuthorName,
-              beatsaverKey: score.beatSaverKey,
-            },
-            diffInfo: {
-              type: "Standard",
-              diff: accSaberDifficultyToMapDifficulty(score.difficulty),
-            },
-            complexity: score.complexity,
-            category: score.categoryName,
-          },
-          score: {
-            ap: score.ap,
-            rank: parseInt(score.ranking),
-            unmodifiedScore: score.score,
-            score: score.score,
-            mods: null,
-            timeSet: new Date(score.timeSet),
-            acc,
-            percentage: acc,
-            weightedAp: score.weightedAp,
-          },
-          fetchedAt: new Date(),
-          lastUpdated: new Date(),
-        };
-      });
-
-      const totalItems = result.data.accSaberScores.totalCount;
-      const totalPages = Math.ceil(totalItems / SCORES_PER_PAGE);
+      this.log(
+        `Found ${result.totalElements} AccSaber scores in ${(performance.now() - before).toFixed(0)}ms`
+      );
 
       return {
-        items: scores,
+        items: result.content,
         metadata: {
-          totalItems,
-          itemsPerPage: SCORES_PER_PAGE,
-          page,
-          totalPages,
+          totalItems: result.totalElements,
+          totalPages: result.totalPages,
+          page: result.number + 1,
+          itemsPerPage: result.size,
         },
       };
     } catch (error) {
       Logger.error("Failed to fetch AccSaber scores: ", error);
-      return Pagination.empty<AccSaberScore>();
+      return Pagination.empty<ScoreResponse>();
     }
   }
 }

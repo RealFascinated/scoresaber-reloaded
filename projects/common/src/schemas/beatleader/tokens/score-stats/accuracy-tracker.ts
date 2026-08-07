@@ -1,19 +1,19 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const ScoreStatsAccuracyTrackerSchema = z.object({
-  accRight: z.number(),
-  accLeft: z.number(),
-  leftPreswing: z.number(),
-  rightPreswing: z.number(),
-  averagePreswing: z.number(),
-  leftPostswing: z.number(),
-  rightPostswing: z.number(),
-  leftTimeDependence: z.number(),
-  rightTimeDependence: z.number(),
-  leftAverageCut: z.array(z.number()),
-  rightAverageCut: z.array(z.number()),
-  gridAcc: z.array(z.number()),
-  fcAcc: z.number(),
+export const ScoreStatsAccuracyTrackerSchema = Type.Object({
+  accRight: Type.Number(),
+  accLeft: Type.Number(),
+  leftPreswing: Type.Number(),
+  rightPreswing: Type.Number(),
+  averagePreswing: Type.Number(),
+  leftPostswing: Type.Number(),
+  rightPostswing: Type.Number(),
+  leftTimeDependence: Type.Number(),
+  rightTimeDependence: Type.Number(),
+  leftAverageCut: Type.Array(Type.Number()),
+  rightAverageCut: Type.Array(Type.Number()),
+  gridAcc: Type.Array(Type.Number()),
+  fcAcc: Type.Number(),
 });
 
-export type ScoreStatsAccuracyTrackerToken = z.infer<typeof ScoreStatsAccuracyTrackerSchema>;
+export type ScoreStatsAccuracyTrackerToken = StaticDecode<typeof ScoreStatsAccuracyTrackerSchema>;

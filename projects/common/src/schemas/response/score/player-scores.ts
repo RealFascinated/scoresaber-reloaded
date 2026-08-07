@@ -1,33 +1,33 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { BeatSaverMapSchema } from "../../beatsaver/map/map";
 import { PaginationMetadataSchema } from "../../pagination";
 import { ScoreSaberLeaderboardSchema } from "../../scoresaber/leaderboard/leaderboard";
 import { ScoreSaberMedalScoreSchema } from "../../scoresaber/score/medal-score";
 import { ScoreSaberScoreSchema } from "../../scoresaber/score/score";
 
-export const PlayerScoreSchema = z.object({
+export const PlayerScoreSchema = Type.Object({
   score: ScoreSaberScoreSchema,
   leaderboard: ScoreSaberLeaderboardSchema,
-  beatSaver: BeatSaverMapSchema.optional(),
+  beatSaver: Type.Optional(BeatSaverMapSchema),
 });
 
-export const PlayerScoresPageResponseSchema = z.object({
-  items: z.array(PlayerScoreSchema),
+export const PlayerScoresPageResponseSchema = Type.Object({
+  items: Type.Array(PlayerScoreSchema),
   metadata: PaginationMetadataSchema,
 });
 
-export const MedalPlayerScoreSchema = z.object({
+export const MedalPlayerScoreSchema = Type.Object({
   score: ScoreSaberMedalScoreSchema,
   leaderboard: ScoreSaberLeaderboardSchema,
-  beatSaver: BeatSaverMapSchema.optional(),
+  beatSaver: Type.Optional(BeatSaverMapSchema),
 });
 
-export const MedalPlayerScoresPageResponseSchema = z.object({
-  items: z.array(MedalPlayerScoreSchema),
+export const MedalPlayerScoresPageResponseSchema = Type.Object({
+  items: Type.Array(MedalPlayerScoreSchema),
   metadata: PaginationMetadataSchema,
 });
 
-export type PlayerScore = z.infer<typeof PlayerScoreSchema>;
-export type PlayerScoresPageResponse = z.infer<typeof PlayerScoresPageResponseSchema>;
-export type MedalPlayerScore = z.infer<typeof MedalPlayerScoreSchema>;
-export type MedalPlayerScoresPageResponse = z.infer<typeof MedalPlayerScoresPageResponseSchema>;
+export type PlayerScore = StaticDecode<typeof PlayerScoreSchema>;
+export type PlayerScoresPageResponse = StaticDecode<typeof PlayerScoresPageResponseSchema>;
+export type MedalPlayerScore = StaticDecode<typeof MedalPlayerScoreSchema>;
+export type MedalPlayerScoresPageResponse = StaticDecode<typeof MedalPlayerScoresPageResponseSchema>;

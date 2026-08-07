@@ -1,43 +1,43 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
 import { MapDifficultySchema } from "../../map/map-difficulty";
 
-export const BeatLeaderMissesSchema = z.object({
-  misses: z.number(),
-  missedNotes: z.number(),
-  bombCuts: z.number(),
-  wallsHit: z.number(),
-  badCuts: z.number(),
+export const BeatLeaderMissesSchema = Type.Object({
+  misses: Type.Number(),
+  missedNotes: Type.Number(),
+  bombCuts: Type.Number(),
+  wallsHit: Type.Number(),
+  badCuts: Type.Number(),
 });
 
-export const BeatLeaderScoreSchema = z.object({
+export const BeatLeaderScoreSchema = Type.Object({
   // Identifiers
-  playerId: z.string(),
-  songHash: z.string(),
-  leaderboardId: z.string(),
-  scoreId: z.number(),
+  playerId: Type.String(),
+  songHash: Type.String(),
+  leaderboardId: Type.String(),
+  scoreId: Type.Number(),
   difficulty: MapDifficultySchema,
   characteristic: MapCharacteristicSchema,
 
-  pauses: z.number(),
-  fcAccuracy: z.number(),
-  fullCombo: z.boolean(),
-  handAccuracy: z.object({
-    left: z.number(),
-    right: z.number(),
+  pauses: Type.Number(),
+  fcAccuracy: Type.Number(),
+  fullCombo: Type.Boolean(),
+  handAccuracy: Type.Object({
+    left: Type.Number(),
+    right: Type.Number(),
   }),
   misses: BeatLeaderMissesSchema,
-  scoreImprovement: z.object({
-    score: z.number(),
-    pauses: z.number(),
+  scoreImprovement: Type.Object({
+    score: Type.Number(),
+    pauses: Type.Number(),
     misses: BeatLeaderMissesSchema,
-    handAccuracy: z.object({
-      left: z.number(),
-      right: z.number(),
+    handAccuracy: Type.Object({
+      left: Type.Number(),
+      right: Type.Number(),
     }),
   }),
-  savedReplay: z.boolean(),
-  timestamp: z.date(),
+  savedReplay: Type.Boolean(),
+  timestamp: Type.Date(),
 });
 
-export type BeatLeaderScore = z.infer<typeof BeatLeaderScoreSchema>;
+export type BeatLeaderScore = StaticDecode<typeof BeatLeaderScoreSchema>;

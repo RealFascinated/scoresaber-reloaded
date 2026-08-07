@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { HMD } from "../../../hmds";
 import { ModifiersSchema } from "../../../score/modifier";
 import { BeatLeaderScoreSchema } from "../../beatleader/score/score";
@@ -8,45 +8,42 @@ import { nullToZeroNumberSchema, numberIncludingInfinitySchema } from "../../num
 import { ScoreSaberLeaderboardPlayerInfoSchema } from "../leaderboard/player-info";
 import { ScoreSaberHistoryScoreSchema } from "./history-score";
 
-export const ScoreSaberScoreSchema = z.object({
+export const ScoreSaberScoreSchema = Type.Object({
   // Identifiers
-  playerId: z.string(),
-  leaderboardId: z.number(),
-  scoreId: z.number(),
+  playerId: Type.String(),
+  leaderboardId: Type.Number(),
+  scoreId: Type.Number(),
 
   // Leaderboard information
-  difficulty: z.string().transform(v => v as MapDifficulty),
-  characteristic: z.string().transform(v => v as MapCharacteristic),
+  difficulty: Type.Unsafe<MapDifficulty>(Type.String()),
+  characteristic: Type.Unsafe<MapCharacteristic>(Type.String()),
 
   // Score information
-  score: z.number(),
+  score: Type.Number(),
   accuracy: numberIncludingInfinitySchema,
   pp: nullToZeroNumberSchema,
   weight: nullToZeroNumberSchema,
-  rank: z.number(),
-  misses: z.number(),
-  missedNotes: z.number(),
-  badCuts: z.number(),
-  maxCombo: z.number(),
-  fullCombo: z.boolean(),
+  rank: Type.Number(),
+  misses: Type.Number(),
+  missedNotes: Type.Number(),
+  badCuts: Type.Number(),
+  maxCombo: Type.Number(),
+  fullCombo: Type.Boolean(),
   modifiers: ModifiersSchema,
 
   // Headset information
-  hmd: z
-    .string()
-    .transform(v => v as HMD)
-    .default("Unknown"),
-  rightController: z.string().nullable(),
-  leftController: z.string().nullable(),
+  hmd: Type.Unsafe<HMD>(Type.Optional(Type.String({ default: "Unknown" }))),
+  rightController: Type.Union([Type.String(), Type.Null()]),
+  leftController: Type.Union([Type.String(), Type.Null()]),
 
   // Player information
-  playerInfo: ScoreSaberLeaderboardPlayerInfoSchema.optional(),
+  playerInfo: Type.Optional(ScoreSaberLeaderboardPlayerInfoSchema),
 
   // Other scores
-  beatLeaderScore: BeatLeaderScoreSchema.optional(),
-  previousScore: ScoreSaberHistoryScoreSchema.optional(),
+  beatLeaderScore: Type.Optional(BeatLeaderScoreSchema),
+  previousScore: Type.Optional(ScoreSaberHistoryScoreSchema),
 
-  timestamp: z.date(),
+  timestamp: Type.Date(),
 });
 
-export type ScoreSaberScore = z.infer<typeof ScoreSaberScoreSchema>;
+export type ScoreSaberScore = StaticDecode<typeof ScoreSaberScoreSchema>;

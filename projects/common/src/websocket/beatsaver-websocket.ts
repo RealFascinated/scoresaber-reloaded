@@ -1,5 +1,5 @@
-import BeatSaverMapToken from "../types/token/beatsaver/map";
-import { BeatSaverWebsocketMessageToken } from "../types/token/beatsaver/websocket/websocket-message";
+import { BeatSaverMapToken } from "../schemas/beatsaver/tokens/map";
+import { BeatSaverWebsocketMessageToken } from "../schemas/beatsaver/tokens/websocket/websocket-message";
 import { connectWebSocket, WebsocketCallbacks } from "./websocket";
 
 type ScoresaberWebsocket = {

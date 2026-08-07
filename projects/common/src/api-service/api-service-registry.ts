@@ -50,5 +50,3 @@ export default class ApiServiceRegistry {
     return ApiServiceRegistry.services.get(ApiServiceName.ACCSABER) as AccSaberService;
   }
 }
-
-new ApiServiceRegistry();

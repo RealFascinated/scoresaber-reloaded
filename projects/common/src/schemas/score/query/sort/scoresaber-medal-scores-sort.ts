@@ -1,11 +1,11 @@
-import z from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const ScoreSaberMedalScoreSortFieldSchema = z.enum([
-  "medals",
-  "misses",
-  "acc",
-  "score",
-  "maxcombo",
-  "date",
+export const ScoreSaberMedalScoreSortFieldSchema = Type.Union([
+  Type.Literal("medals"),
+  Type.Literal("misses"),
+  Type.Literal("acc"),
+  Type.Literal("score"),
+  Type.Literal("maxcombo"),
+  Type.Literal("date"),
 ]);
-export type ScoreSaberMedalScoreSortField = z.infer<typeof ScoreSaberMedalScoreSortFieldSchema>;
+export type ScoreSaberMedalScoreSortField = StaticDecode<typeof ScoreSaberMedalScoreSortFieldSchema>;

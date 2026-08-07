@@ -1,15 +1,20 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { env } from "../../../env";
 
-export const ScoreSaberLeaderboardPlayerInfoSchema = z.object({
-  id: z.string(),
-  name: z.string().optional(),
-  country: z.string().optional(),
-  role: z.string().nullish(),
-  avatar: z
-    .string()
-    .nullish()
-    .transform(avatar => avatar ?? env.NEXT_PUBLIC_WEBSITE_URL + "/assets/unknown.png"),
+export const ScoreSaberLeaderboardPlayerInfoSchema = Type.Object({
+  id: Type.String(),
+  name: Type.Optional(Type.String()),
+  country: Type.Optional(Type.String()),
+  role: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  avatar: Type.Transform(
+    Type.Optional(
+      Type.Union([Type.String(), Type.Null()], {
+        default: env.NEXT_PUBLIC_WEBSITE_URL + "/assets/unknown.png",
+      })
+    )
+  )
+    .Decode(avatar => avatar ?? env.NEXT_PUBLIC_WEBSITE_URL + "/assets/unknown.png")
+    .Encode(avatar => avatar),
 });
 
-export type ScoreSaberLeaderboardPlayerInfo = z.infer<typeof ScoreSaberLeaderboardPlayerInfoSchema>;
+export type ScoreSaberLeaderboardPlayerInfo = StaticDecode<typeof ScoreSaberLeaderboardPlayerInfoSchema>;

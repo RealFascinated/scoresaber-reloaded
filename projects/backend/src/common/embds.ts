@@ -1,4 +1,4 @@
-import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
+import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../bot/bot";

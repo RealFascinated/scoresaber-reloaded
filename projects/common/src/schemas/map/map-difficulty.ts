@@ -1,10 +1,16 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-const mapDifficultyShape = z.enum(["Easy", "Normal", "Hard", "Expert", "ExpertPlus"]).default("Easy");
+const mapDifficultyShape = Type.Union(
+  [
+    Type.Literal("Easy"),
+    Type.Literal("Normal"),
+    Type.Literal("Hard"),
+    Type.Literal("Expert"),
+    Type.Literal("ExpertPlus"),
+  ],
+  { default: "Easy" }
+);
 
-export type MapDifficulty = z.infer<typeof mapDifficultyShape>;
+export type MapDifficulty = StaticDecode<typeof mapDifficultyShape>;
 
-export const MapDifficultySchema = z
-  .string()
-  .default("Easy")
-  .transform((s): MapDifficulty => s as MapDifficulty);
+export const MapDifficultySchema = Type.Unsafe<MapDifficulty>(Type.String({ default: "Easy" }));

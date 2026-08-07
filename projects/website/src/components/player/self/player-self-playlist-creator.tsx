@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { env } from "@ssr/common/env";
 import {
   SelfPlaylistSettings,
@@ -58,7 +58,7 @@ export default function SelfPlaylistCreator() {
   const [downloading, setDownloading] = useState(false);
 
   const form = useForm<SelfPlaylistSettings>({
-    resolver: zodResolver(selfPlaylistSettingsSchema, { reportInput: true }),
+    resolver: typeboxResolver(selfPlaylistSettingsSchema),
     defaultValues: {
       sort: "pp",
       sortDirection: "desc",

@@ -1,20 +1,74 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const BeatLeaderPlayerScoreStatsSchema = z
-  .object({
-    topHMD: z.number(),
-    topPercent: z.number(),
-    topPp: z.number(),
-    totalRankedScore: z.number(),
-    averageRankedAccuracy: z.number(),
-    totalPlayCount: z.number(),
-    rankedPlayCount: z.number(),
-    replaysWatched: z.number(),
-  })
-  .loose();
+/**
+ * Raw `PlayerScoreStats` token mirroring the upstream `PlayerScoreStats` schema.
+ * The fields the app consumes stay required; every other upstream field is optional.
+ */
+export const BeatLeaderPlayerScoreStatsSchema = Type.Object({
+  id: Type.Optional(Type.Number()),
+  totalScore: Type.Optional(Type.Number()),
+  totalUnrankedScore: Type.Optional(Type.Number()),
+  totalRankedScore: Type.Number(),
+  firstScoreTime: Type.Optional(Type.Number()),
+  firstUnrankedScoreTime: Type.Optional(Type.Number()),
+  firstRankedScoreTime: Type.Optional(Type.Number()),
+  lastScoreTime: Type.Optional(Type.Number()),
+  lastUnrankedScoreTime: Type.Optional(Type.Number()),
+  lastRankedScoreTime: Type.Optional(Type.Number()),
+  averageRankedAccuracy: Type.Number(),
+  averageWeightedRankedAccuracy: Type.Optional(Type.Number()),
+  averageUnrankedAccuracy: Type.Optional(Type.Number()),
+  averageAccuracy: Type.Optional(Type.Number()),
+  medianRankedAccuracy: Type.Optional(Type.Number()),
+  medianAccuracy: Type.Optional(Type.Number()),
+  topRankedAccuracy: Type.Optional(Type.Number()),
+  topUnrankedAccuracy: Type.Optional(Type.Number()),
+  topAccuracy: Type.Optional(Type.Number()),
+  topPp: Type.Number(),
+  topBonusPP: Type.Optional(Type.Number()),
+  topPassPP: Type.Optional(Type.Number()),
+  topAccPP: Type.Optional(Type.Number()),
+  topTechPP: Type.Optional(Type.Number()),
+  peakRank: Type.Optional(Type.Number()),
+  rankedMaxStreak: Type.Optional(Type.Number()),
+  unrankedMaxStreak: Type.Optional(Type.Number()),
+  maxStreak: Type.Optional(Type.Number()),
+  averageLeftTiming: Type.Optional(Type.Number()),
+  averageRightTiming: Type.Optional(Type.Number()),
+  steamPlaytime2Weeks: Type.Optional(Type.Number()),
+  steamPlaytimeForever: Type.Optional(Type.Number()),
+  scorePlaytime: Type.Optional(Type.Number()),
+  rankedPlayCount: Type.Number(),
+  unrankedPlayCount: Type.Optional(Type.Number()),
+  totalPlayCount: Type.Number(),
+  rankedImprovementsCount: Type.Optional(Type.Number()),
+  unrankedImprovementsCount: Type.Optional(Type.Number()),
+  totalImprovementsCount: Type.Optional(Type.Number()),
+  rankedTop1Count: Type.Optional(Type.Number()),
+  unrankedTop1Count: Type.Optional(Type.Number()),
+  top1Count: Type.Optional(Type.Number()),
+  rankedTop1Score: Type.Optional(Type.Number()),
+  unrankedTop1Score: Type.Optional(Type.Number()),
+  top1Score: Type.Optional(Type.Number()),
+  averageRankedRank: Type.Optional(Type.Number()),
+  averageWeightedRankedRank: Type.Optional(Type.Number()),
+  averageUnrankedRank: Type.Optional(Type.Number()),
+  averageRank: Type.Optional(Type.Number()),
+  sspPlays: Type.Optional(Type.Number()),
+  ssPlays: Type.Optional(Type.Number()),
+  spPlays: Type.Optional(Type.Number()),
+  sPlays: Type.Optional(Type.Number()),
+  aPlays: Type.Optional(Type.Number()),
+  topPlatform: Type.Optional(Type.String()),
+  topHMD: Type.Number(),
+  allHMDs: Type.Optional(Type.String()),
+  topPercentile: Type.Number(),
+  countryTopPercentile: Type.Optional(Type.Number()),
+  dailyImprovements: Type.Optional(Type.Number()),
+  authorizedReplayWatched: Type.Optional(Type.Number()),
+  anonimusReplayWatched: Type.Optional(Type.Number()),
+  replaysWatched: Type.Number(),
+  watchedReplays: Type.Optional(Type.Number()),
+});
 
-export type BeatLeaderPlayerScoreStatsToken = z.infer<typeof BeatLeaderPlayerScoreStatsSchema>;
-
-// Backwards-compatible aliases
-export const BeatLeaderPlayersScoreStatsSchema = BeatLeaderPlayerScoreStatsSchema;
-export type BeatLeaderPlayersScoreStatsToken = BeatLeaderPlayerScoreStatsToken;
+export type BeatLeaderPlayerScoreStatsToken = StaticDecode<typeof BeatLeaderPlayerScoreStatsSchema>;

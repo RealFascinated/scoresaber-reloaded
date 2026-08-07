@@ -1,14 +1,17 @@
-import { BeatSaverMap } from "../../beatsaver/map/map";
-import { ScoreSaberLeaderboard } from "../../scoresaber/leaderboard/leaderboard";
+import { Type, type StaticDecode } from "@sinclair/typebox";
+import { BeatSaverMapSchema } from "../../beatsaver/map/map";
+import { ScoreSaberLeaderboardSchema } from "../../scoresaber/leaderboard/leaderboard";
 
-export type LeaderboardResponse = {
+export const LeaderboardResponseSchema = Type.Object({
   /**
    * The scoresaber leaderboard.
    */
-  leaderboard: ScoreSaberLeaderboard;
+  leaderboard: ScoreSaberLeaderboardSchema,
 
   /**
    * The beatsaver map associated with this leaderboard.
    */
-  beatsaver?: BeatSaverMap;
-};
+  beatsaver: Type.Optional(BeatSaverMapSchema),
+});
+
+export type LeaderboardResponse = StaticDecode<typeof LeaderboardResponseSchema>;

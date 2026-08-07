@@ -1,33 +1,14 @@
 import { OverlayDataClients } from "@/common/overlay/data-client";
+import { Value } from "@sinclair/typebox/value";
+import { OverlaySettingsSchema, type OverlaySettings } from "@ssr/common/schemas/overlay/overlay-settings";
+
+export type { OverlaySettings } from "@ssr/common/schemas/overlay/overlay-settings";
 
 export enum OverlayViews {
   ScoreInfo = "scoreInfo",
   PlayerInfo = "playerInfo",
   SongInfo = "songInfo",
 }
-
-export type OverlaySettings = {
-  /**
-   * The id of the player that will
-   * be used in the overlay.
-   */
-  playerId: string;
-
-  /**
-   * Whether to get real-time data from the data client.
-   */
-  useRealTimeData: boolean;
-
-  /**
-   * The data client to fetch game data from.
-   */
-  dataClient: OverlayDataClients;
-
-  /**
-   * The state of the overlay views.
-   */
-  views: Record<OverlayViews, boolean>;
-};
 
 /**
  * The default settings for the overlay.
@@ -49,10 +30,10 @@ export const defaultOverlaySettings: OverlaySettings = {
  * @param settingsBase64 the raw settings
  */
 export function parseOverlaySettings(settingsBase64: string) {
-  return {
+  return Value.Parse(OverlaySettingsSchema, {
     ...defaultOverlaySettings, // Default values
-    ...(JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as OverlaySettings), // Override defaults
-  };
+    ...JSON.parse(Buffer.from(settingsBase64, "base64").toString()), // Override defaults
+  });
 }
 
 /**

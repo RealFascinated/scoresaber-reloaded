@@ -2,14 +2,14 @@ import { parse } from "devalue";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
-import type { AccSaberScoreSort, AccSaberScoreType } from "../schemas/accsaber/tokens/query/query";
+import type { AccSaberScoreSort, AccSaberScoreType } from "../schemas/accsaber/query/query";
 import { BeatSaverMap } from "../schemas/beatsaver/map/map";
 import { LeaderboardStarChange } from "../schemas/leaderboard/leaderboard-star-change";
 import { MapCharacteristic } from "../schemas/map/map-characteristic";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
 import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard";
-import LeaderboardScoresResponse from "../schemas/response/leaderboard/leaderboard-scores";
+import { LeaderboardScoresResponse } from "../schemas/response/leaderboard/leaderboard-scores";
 import { LeaderboardsPageResponse } from "../schemas/response/leaderboard/leaderboards-page";
 import { PlaysByHmdResponse } from "../schemas/response/leaderboard/plays-by-hmd";
 import { RankingQueueLeaderboardsResponse } from "../schemas/response/leaderboard/ranking-queue-leaderboards";
@@ -240,7 +240,7 @@ class SSRApi {
   }
 
   /**
-   * Fetches AccSaber player scores from the backend (GraphQL + BeatLeader replay URLs).
+   * Fetches AccSaber player scores from the backend (REST + BeatLeader replay URLs).
    *
    * @param id the player id
    * @param page the page

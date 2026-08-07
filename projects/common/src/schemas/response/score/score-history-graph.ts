@@ -1,9 +1,9 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const ScoreHistoryGraphSchema = z
-  .object({
-    timestamp: z.date(),
-    accuracy: z.number(),
+export const ScoreHistoryGraphSchema = Type.Array(
+  Type.Object({
+    timestamp: Type.Date(),
+    accuracy: Type.Number(),
   })
-  .array();
-export type ScoreHistoryGraph = z.infer<typeof ScoreHistoryGraphSchema>;
+);
+export type ScoreHistoryGraph = StaticDecode<typeof ScoreHistoryGraphSchema>;

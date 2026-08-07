@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { Type } from "@sinclair/typebox";
 
 export enum Modifier {
   NF = "NF",
@@ -46,14 +46,14 @@ const modifierByLabel = Object.freeze(
 ) as Readonly<Record<string, Modifier>>;
 
 /**
- * Zod schema for a single modifier code.
+ * Schema for a single modifier code.
  */
-export const ModifierSchema = z.enum(Modifier);
+export const ModifierSchema = Type.Enum(Modifier);
 
 /**
- * Zod schema for a list of modifier codes.
+ * Schema for a list of modifier codes.
  */
-export const ModifiersSchema = z.array(ModifierSchema);
+export const ModifiersSchema = Type.Array(ModifierSchema);
 
 /**
  * Normalizes a modifier value (code or legacy label) into a modifier code.

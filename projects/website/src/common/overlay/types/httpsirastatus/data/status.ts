@@ -13,14 +13,8 @@ export type HttpSiraStatus_Status = {
    */
   game: HttpSiraStatus_GameData;
 
-  // todo: complete this
-  // mod: string;
-
   /**
    * The current score data.
    */
   performance: HttpSiraStatus_Performance;
-
-  // todo: complete this
-  // playerSettings: string;
 };

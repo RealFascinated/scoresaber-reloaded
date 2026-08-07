@@ -18,12 +18,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { Type, type Static } from "@sinclair/typebox";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 import { Button } from "../ui/button";
 import { Form, FormControl, FormDescription, FormItem, FormLabel } from "../ui/form";
 
@@ -48,11 +48,11 @@ const viewToggles = [
   },
 ];
 
-const formSchema = z.object({
-  playerId: z.string().min(1).max(32),
-  useRealTimeData: z.boolean(),
-  dataClient: z.string().min(1).max(32),
-  views: z.record(z.string(), z.boolean()),
+const formSchema = Type.Object({
+  playerId: Type.String({ minLength: 1, maxLength: 32 }),
+  useRealTimeData: Type.Boolean(),
+  dataClient: Type.String({ minLength: 1, maxLength: 32 }),
+  views: Type.Record(Type.String(), Type.Boolean()),
 });
 
 export default function OverlayBuilder() {
@@ -61,8 +61,8 @@ export default function OverlayBuilder() {
   const [isRealTimeDataEnabled, setIsRealTimeDataEnabled] = useState(true);
   const hasInitialized = useRef(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema, { reportInput: true }),
+  const form = useForm<Static<typeof formSchema>>({
+    resolver: typeboxResolver(formSchema),
     defaultValues: defaultOverlaySettings,
   });
 
@@ -154,7 +154,7 @@ export default function OverlayBuilder() {
    *
    * @param replayViewer the new replay viewer
    */
-  async function onSubmit({ playerId, useRealTimeData, dataClient, views }: z.infer<typeof formSchema>) {
+  async function onSubmit({ playerId, useRealTimeData, dataClient, views }: Static<typeof formSchema>) {
     const player = await ssrApi.getScoreSaberPlayer(playerId, "basic");
     if (!player) {
       toast.error("The player id you entered could not be found.");

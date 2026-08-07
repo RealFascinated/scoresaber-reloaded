@@ -1,11 +1,11 @@
+import { Type } from "@sinclair/typebox";
 import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { PlayerPpsResponseSchema } from "@ssr/common/schemas/response/player/player-pps";
 import { PlayerRefreshResponseSchema } from "@ssr/common/schemas/response/player/player-refresh";
 import { PlayerScoresChartResponseSchema } from "@ssr/common/schemas/response/player/scores-chart";
 import { ScoreSaberScoresPageResponseSchema } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
-import { Elysia } from "elysia";
-import { z } from "zod";
+import { Elysia, t } from "elysia";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
 import { PlayerStatisticsService } from "../../service/player-statistics/player-statistics.service";
 import MiniRankingService from "../../service/player/mini-ranking.service";
@@ -27,11 +27,11 @@ export default function playerController(app: Elysia) {
         },
         {
           tags: ["Player"],
-          params: z.object({
-            playerId: z.string(),
+          params: t.Object({
+            playerId: t.String(),
           }),
-          query: z.object({
-            type: z.optional(DetailTypeSchema),
+          query: t.Object({
+            type: t.Optional(DetailTypeSchema),
           }),
           detail: {
             description: "Fetch ScoreSaber player profile",
@@ -45,8 +45,8 @@ export default function playerController(app: Elysia) {
         },
         {
           tags: ["Player"],
-          params: z.object({
-            playerId: z.string(),
+          params: t.Object({
+            playerId: t.String(),
           }),
           response: PlayerScoresChartResponseSchema,
           detail: {
@@ -61,8 +61,8 @@ export default function playerController(app: Elysia) {
         },
         {
           tags: ["Player"],
-          params: z.object({
-            playerId: z.string(),
+          params: t.Object({
+            playerId: t.String(),
           }),
           response: PlayerPpsResponseSchema,
           detail: {
@@ -77,8 +77,8 @@ export default function playerController(app: Elysia) {
         },
         {
           tags: ["Player"],
-          params: z.object({
-            playerId: z.string(),
+          params: t.Object({
+            playerId: t.String(),
           }),
           response: PlayerRefreshResponseSchema,
           detail: {
@@ -93,8 +93,8 @@ export default function playerController(app: Elysia) {
         },
         {
           tags: ["Player"],
-          params: z.object({
-            playerId: z.string(),
+          params: t.Object({
+            playerId: t.String(),
           }),
           detail: {
             description: "Fetch player mini-ranking",
@@ -111,9 +111,9 @@ export default function playerController(app: Elysia) {
         },
         {
           tags: ["Player"],
-          query: z.object({
+          query: t.Object({
             // Allow empty string searches (`?query=`) but cap length to avoid unbounded query costs.
-            query: z.string().max(64).optional(),
+            query: t.Optional(t.String({ maxLength: 64 })),
           }),
           detail: {
             description: "Search players",
@@ -128,18 +128,25 @@ export default function playerController(app: Elysia) {
             throw new NotFoundError(`Player "${playerId}" not found`);
           }
           const statistics = await PlayerStatisticsService.getStatistics(player);
-          return await PlayerHistoryService.getPlayerStatisticHistories(player, statistics, count);
+          // Elysia types transform properties by their raw input; at runtime count was decoded to a number.
+          return await PlayerHistoryService.getPlayerStatisticHistories(player, statistics, count as number);
         },
         {
           tags: ["Player"],
-          params: z.object({
-            playerId: z.string(),
+          params: t.Object({
+            playerId: t.String(),
           }),
-          query: z.object({
-            count: z.preprocess(
-              v => (v === "" || v === undefined ? 50 : Number(v)),
-              z.union([z.literal(-1), z.number().int().min(1)])
-            ),
+          query: t.Object({
+            count: Type.Transform(
+              Type.Union([Type.String(), Type.Number(), Type.Undefined()], { default: 50 })
+            )
+              .Decode(v => {
+                const n = v === "" || v === undefined ? 50 : Number(v);
+                if (n === -1) return -1;
+                if (!Number.isInteger(n) || n < 1) throw new Error("Expected -1 or an integer >= 1");
+                return n;
+              })
+              .Encode(v => v),
           }),
           detail: {
             description: "Fetch player statistics history",
@@ -153,10 +160,10 @@ export default function playerController(app: Elysia) {
         },
         {
           tags: ["Player"],
-          params: z.object({
-            playerId: z.string(),
-            leaderboardId: z.coerce.number(),
-            page: z.coerce.number(),
+          params: t.Object({
+            playerId: t.String(),
+            leaderboardId: t.Number(),
+            page: t.Number(),
           }),
           response: ScoreSaberScoresPageResponseSchema,
           detail: {

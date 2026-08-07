@@ -5,23 +5,23 @@ import { Form } from "@/components/ui/form";
 import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
 import { SharedIcons, type SharedDecorativeIcon } from "@/shared-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { Type, type Static } from "@sinclair/typebox";
 import { ssrConfig } from "config";
 import { useTheme } from "next-themes";
 import { Path, useForm } from "react-hook-form";
-import { z } from "zod";
 import { Field, SettingSection } from "../setting-section";
 import { SettingsCategorySkeleton } from "../settings-category-skeleton";
 import { getMonotonicTimeMs, showSettingsSavedToast } from "../settings-feedback";
 
-const formSchema = z.object({
-  snowParticles: z.boolean(),
-  showKitty: z.boolean(),
-  websiteLanding: z.nativeEnum(WebsiteLanding),
-  theme: z.string(),
+const formSchema = Type.Object({
+  snowParticles: Type.Boolean(),
+  showKitty: Type.Boolean(),
+  websiteLanding: Type.Enum(WebsiteLanding),
+  theme: Type.String(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = Static<typeof formSchema>;
 
 const settings: {
   id: string;
@@ -87,7 +87,7 @@ const WebsiteSettings = () => {
   const database = useDatabase();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema, { reportInput: true }),
+    resolver: typeboxResolver(formSchema),
     defaultValues: {
       snowParticles: false,
       showKitty: false,

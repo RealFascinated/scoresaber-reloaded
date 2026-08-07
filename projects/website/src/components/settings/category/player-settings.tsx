@@ -4,19 +4,19 @@ import { HistoryMode } from "@/common/player/history-mode";
 import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
 import { SharedIcons } from "@/shared-icons";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { Type, type Static } from "@sinclair/typebox";
 import { Path, useForm } from "react-hook-form";
-import { z } from "zod";
 import { Form } from "../../ui/form";
 import { SettingSection } from "../setting-section";
 import { SettingsCategorySkeleton } from "../settings-category-skeleton";
 import { getMonotonicTimeMs, showSettingsSavedToast } from "../settings-feedback";
 
-const formSchema = z.object({
-  historyMode: z.string().min(1).max(32),
+const formSchema = Type.Object({
+  historyMode: Type.String({ minLength: 1, maxLength: 32 }),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = Static<typeof formSchema>;
 
 const settings = [
   {
@@ -41,8 +41,8 @@ const settings = [
 const PlayerSettings = () => {
   const database = useDatabase();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema, { reportInput: true }),
+  const form = useForm<FormValues>({
+    resolver: typeboxResolver(formSchema),
     defaultValues: {
       historyMode: HistoryMode.SIMPLE,
     },
@@ -53,7 +53,7 @@ const PlayerSettings = () => {
     historyMode: () => database.getHistoryMode(),
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     const before = getMonotonicTimeMs();
     await database.setHistoryMode(values.historyMode as HistoryMode);
     showSettingsSavedToast(before);

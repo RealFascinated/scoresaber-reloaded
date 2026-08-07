@@ -1,21 +1,26 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const SelfPlaylistSortFieldSchema = z.enum(["pp", "date", "acc", "score"]);
-export const SelfPlaylistSortDirectionSchema = z.enum(["asc", "desc"]);
+export const SelfPlaylistSortFieldSchema = Type.Union([
+  Type.Literal("pp"),
+  Type.Literal("date"),
+  Type.Literal("acc"),
+  Type.Literal("score"),
+]);
+export const SelfPlaylistSortDirectionSchema = Type.Union([Type.Literal("asc"), Type.Literal("desc")]);
 
-export const selfPlaylistSettingsSchema = z.object({
+export const selfPlaylistSettingsSchema = Type.Object({
   sort: SelfPlaylistSortFieldSchema,
   sortDirection: SelfPlaylistSortDirectionSchema,
-  rankedStatus: z.enum(["all", "ranked", "unranked"]),
-  starRange: z.object({
-    min: z.number().min(0).max(20),
-    max: z.number().min(0).max(20),
+  rankedStatus: Type.Union([Type.Literal("all"), Type.Literal("ranked"), Type.Literal("unranked")]),
+  starRange: Type.Object({
+    min: Type.Number({ minimum: 0, maximum: 20 }),
+    max: Type.Number({ minimum: 0, maximum: 20 }),
   }),
-  accuracyRange: z.object({
-    min: z.number().min(0).max(100),
-    max: z.number().min(0).max(100),
+  accuracyRange: Type.Object({
+    min: Type.Number({ minimum: 0, maximum: 100 }),
+    max: Type.Number({ minimum: 0, maximum: 100 }),
   }),
-  limit: z.number().int().min(1).max(1000).optional(),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 1000 })),
 });
 
-export type SelfPlaylistSettings = z.infer<typeof selfPlaylistSettingsSchema>;
+export type SelfPlaylistSettings = StaticDecode<typeof selfPlaylistSettingsSchema>;

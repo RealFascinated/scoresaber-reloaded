@@ -8,7 +8,7 @@ import {
   isScoreSaberV2PlayerToken,
   type ScoreSaberPlayerLookupToken,
   type ScoreSaberV2PlayerToken,
-} from "@ssr/common/types/token/scoresaber/v2/player/player";
+} from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { isProduction } from "@ssr/common/utils/utils";
 import { playerCacheKey } from "../../common/cache-keys";
 import { logNewTrackedPlayer } from "../../common/embds";

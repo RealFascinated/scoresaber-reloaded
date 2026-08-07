@@ -21,10 +21,9 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@t3-oss/env-core": "^0.13.11",
+    "@sinclair/typebox": "^0.34.33",
     "dayjs": "^1.11.21",
     "devalue": "^5.9.0",
-    "ws": "^8.21.3",
-    "zod": "^4.4.3"
+    "ws": "^8.21.3"
   }
 }

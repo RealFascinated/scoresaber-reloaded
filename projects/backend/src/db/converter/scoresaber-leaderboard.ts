@@ -1,3 +1,4 @@
+import { Value } from "@sinclair/typebox/value";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import {
@@ -35,29 +36,26 @@ export function leaderboardRowToType(
       ? "Qualified"
       : "Unranked";
 
-  return ScoreSaberLeaderboardSchema.parse(
-    {
-      id: row.id,
-      fullName: `${row.songName} ${row.songSubName}`.trim(),
-      songHash: row.songHash.toUpperCase(),
-      songName: row.songName,
-      songSubName: row.songSubName,
-      songAuthorName: row.songAuthorName,
-      levelAuthorName: row.levelAuthorName,
-      songArt: getScoreSaberLeaderboardCoverUrl(row.songHash),
-      difficulty,
-      difficulties: difficulties ?? [],
-      maxScore: row.maxScore,
-      ranked: row.ranked,
-      qualified: row.qualified,
-      stars: row.stars ?? 0,
-      rankedDate: row.rankedDate ?? undefined,
-      qualifiedDate: row.qualifiedDate ?? undefined,
-      status,
-      plays: row.plays,
-      dailyPlays: row.dailyPlays,
-      timestamp: row.timestamp instanceof Date ? row.timestamp : new Date(row.timestamp),
-    },
-    { reportInput: true }
-  );
+  return Value.Parse(ScoreSaberLeaderboardSchema, {
+    id: row.id,
+    fullName: `${row.songName} ${row.songSubName}`.trim(),
+    songHash: row.songHash.toUpperCase(),
+    songName: row.songName,
+    songSubName: row.songSubName,
+    songAuthorName: row.songAuthorName,
+    levelAuthorName: row.levelAuthorName,
+    songArt: getScoreSaberLeaderboardCoverUrl(row.songHash),
+    difficulty,
+    difficulties: difficulties ?? [],
+    maxScore: row.maxScore,
+    ranked: row.ranked,
+    qualified: row.qualified,
+    stars: row.stars ?? 0,
+    rankedDate: row.rankedDate ?? undefined,
+    qualifiedDate: row.qualifiedDate ?? undefined,
+    status,
+    plays: row.plays,
+    dailyPlays: row.dailyPlays,
+    timestamp: row.timestamp instanceof Date ? row.timestamp : new Date(row.timestamp),
+  });
 }

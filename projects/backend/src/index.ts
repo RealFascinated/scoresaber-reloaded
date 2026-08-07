@@ -12,7 +12,6 @@ import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { helmet } from "elysia-helmet";
-import { z } from "zod";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
 import { registerGlobalErrorHandlers, reportErrorToDiscord } from "./common/discord/error-reporting";
@@ -366,9 +365,6 @@ export const app = new Elysia()
         defaultOpenAllTags: true,
         expandAllModelSections: true,
         expandAllResponses: true,
-      },
-      mapJsonSchema: {
-        zod: z.toJSONSchema,
       },
     })
   );

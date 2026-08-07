@@ -1,10 +1,10 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const PaginationMetadataSchema = z.object({
-  totalPages: z.number(),
-  totalItems: z.number(),
-  page: z.number(),
-  itemsPerPage: z.number(),
+export const PaginationMetadataSchema = Type.Object({
+  totalPages: Type.Number(),
+  totalItems: Type.Number(),
+  page: Type.Number(),
+  itemsPerPage: Type.Number(),
 });
 
-export type PaginationMetadata = z.infer<typeof PaginationMetadataSchema>;
+export type PaginationMetadata = StaticDecode<typeof PaginationMetadataSchema>;

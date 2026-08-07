@@ -1,8 +1,8 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const ScoreSaberPeakRankSchema = z.object({
-  rank: z.number(),
-  timestamp: z.coerce.date(),
+export const ScoreSaberPeakRankSchema = Type.Object({
+  rank: Type.Number(),
+  timestamp: Type.Date(),
 });
 
-export type ScoreSaberPeakRank = z.infer<typeof ScoreSaberPeakRankSchema>;
+export type ScoreSaberPeakRank = StaticDecode<typeof ScoreSaberPeakRankSchema>;

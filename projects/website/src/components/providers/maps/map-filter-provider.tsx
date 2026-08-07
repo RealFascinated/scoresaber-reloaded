@@ -38,11 +38,15 @@ const MapFilterContext = createContext<FilterContextProps | undefined>(undefined
 export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
   const [category, setCategory] = useQueryState<ScoreSaberLeaderboardQueryCategory>(
     "category",
-    parseAsStringLiteral(ScoreSaberLeaderboardQueryCategorySchema.options).withDefault(defaultCategory)
+    parseAsStringLiteral(
+      ScoreSaberLeaderboardQueryCategorySchema.anyOf.map(option => option.const)
+    ).withDefault(defaultCategory)
   );
   const [sort, setSort] = useQueryState<ScoreSaberLeaderboardQuerySort>(
     "sort",
-    parseAsStringLiteral(ScoreSaberLeaderboardQuerySortSchema.options).withDefault(defaultSort)
+    parseAsStringLiteral(ScoreSaberLeaderboardQuerySortSchema.anyOf.map(option => option.const)).withDefault(
+      defaultSort
+    )
   );
   const [starMin, setStarMin] = useQueryState("starMin", parseAsFloat.withDefault(0));
   const [starMax, setStarMax] = useQueryState("starMax", parseAsFloat.withDefault(SHARED_CONSTS.maxStars));

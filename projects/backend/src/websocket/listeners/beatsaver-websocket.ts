@@ -1,5 +1,5 @@
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import BeatSaverMapToken from "@ssr/common/types/token/beatsaver/map";
+import { BeatSaverMapToken } from "@ssr/common/schemas/beatsaver/tokens/map";
 import { connectBeatSaverWebsocket } from "@ssr/common/websocket/beatsaver-websocket";
 import { ButtonBuilder, ButtonStyle, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";

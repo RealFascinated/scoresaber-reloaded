@@ -8,7 +8,7 @@ import {
   ScoreSaberV2PlayerToken,
   isScoreSaberV2PlayerToken,
   type ScoreSaberPlayerLookupToken,
-} from "@ssr/common/types/token/scoresaber/v2/player/player";
+} from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";

@@ -1,16 +1,16 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 
-export const ScoreStatsHitTrackerSchema = z.object({
-  maxCombo: z.number(),
-  maxStreak: z.number(),
-  leftTiming: z.number(),
-  rightTiming: z.number(),
-  leftMiss: z.number(),
-  rightMiss: z.number(),
-  leftBadCuts: z.number(),
-  rightBadCuts: z.number(),
-  leftBombs: z.number(),
-  rightBombs: z.number(),
+export const ScoreStatsHitTrackerSchema = Type.Object({
+  maxCombo: Type.Number(),
+  maxStreak: Type.Union([Type.Number(), Type.Null()]),
+  leftTiming: Type.Number(),
+  rightTiming: Type.Number(),
+  leftMiss: Type.Number(),
+  rightMiss: Type.Number(),
+  leftBadCuts: Type.Number(),
+  rightBadCuts: Type.Number(),
+  leftBombs: Type.Number(),
+  rightBombs: Type.Number(),
 });
 
-export type ScoreStatsHitTrackerToken = z.infer<typeof ScoreStatsHitTrackerSchema>;
+export type ScoreStatsHitTrackerToken = StaticDecode<typeof ScoreStatsHitTrackerSchema>;

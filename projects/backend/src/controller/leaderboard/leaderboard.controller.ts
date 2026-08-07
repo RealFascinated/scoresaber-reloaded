@@ -3,8 +3,7 @@ import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { LeaderboardsPageResponseSchema } from "@ssr/common/schemas/response/leaderboard/leaderboards-page";
 import { ScoreSaberLeaderboardQueryFiltersSchema } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
-import { Elysia } from "elysia";
-import { z } from "zod";
+import { Elysia, t } from "elysia";
 import BeatSaverService from "../../service/external/beatsaver.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 
@@ -20,9 +19,12 @@ export default function leaderboardController(app: Elysia) {
         },
         {
           tags: ["Leaderboard"],
-          query: ScoreSaberLeaderboardQueryFiltersSchema.extend({
-            page: z.coerce.number().default(1),
-          }),
+          query: t.Composite([
+            ScoreSaberLeaderboardQueryFiltersSchema,
+            t.Object({
+              page: t.Number({ default: 1 }),
+            }),
+          ]),
           response: LeaderboardsPageResponseSchema,
           detail: {
             description: "Search ScoreSaber leaderboards",
@@ -49,8 +51,8 @@ export default function leaderboardController(app: Elysia) {
         },
         {
           tags: ["Leaderboard"],
-          params: z.object({
-            leaderboardId: z.coerce.number(),
+          params: t.Object({
+            leaderboardId: t.Number(),
           }),
           detail: {
             description: "Fetch leaderboard star rating change history",
@@ -70,8 +72,8 @@ export default function leaderboardController(app: Elysia) {
         },
         {
           tags: ["Leaderboard"],
-          params: z.object({
-            leaderboardId: z.coerce.number(),
+          params: t.Object({
+            leaderboardId: t.Number(),
           }),
           detail: {
             description: "Fetch leaderboard details",
@@ -89,8 +91,8 @@ export default function leaderboardController(app: Elysia) {
         },
         {
           tags: ["Leaderboard"],
-          params: z.object({
-            hash: z.string(),
+          params: t.Object({
+            hash: t.String(),
             difficulty: MapDifficultySchema,
             characteristic: MapCharacteristicSchema,
           }),

@@ -1,40 +1,40 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { ScoreSaberLeaderboardDifficultySchema } from "./difficulty";
 import { ScoreSaberLeaderboardStatusSchema } from "./status";
 
-export const ScoreSaberLeaderboardSchema = z.object({
-  id: z.number(),
+export const ScoreSaberLeaderboardSchema = Type.Object({
+  id: Type.Number(),
 
   // Song information
-  fullName: z.string(),
-  songHash: z.string(),
-  songName: z.string(),
-  songSubName: z.string(),
-  songAuthorName: z.string(),
+  fullName: Type.String(),
+  songHash: Type.String(),
+  songName: Type.String(),
+  songSubName: Type.String(),
+  songAuthorName: Type.String(),
 
   // Song information
-  songArt: z.string(),
+  songArt: Type.String(),
 
   // Level information
-  levelAuthorName: z.string(),
+  levelAuthorName: Type.String(),
 
   // Difficulty information
   difficulty: ScoreSaberLeaderboardDifficultySchema,
-  difficulties: z.array(ScoreSaberLeaderboardDifficultySchema),
-  maxScore: z.number(),
+  difficulties: Type.Array(ScoreSaberLeaderboardDifficultySchema),
+  maxScore: Type.Number(),
 
   // Ranking information
-  ranked: z.boolean(),
-  qualified: z.boolean(),
-  stars: z.number(),
-  rankedDate: z.date().optional(),
-  qualifiedDate: z.date().optional(),
+  ranked: Type.Boolean(),
+  qualified: Type.Boolean(),
+  stars: Type.Number(),
+  rankedDate: Type.Optional(Type.Date()),
+  qualifiedDate: Type.Optional(Type.Date()),
   status: ScoreSaberLeaderboardStatusSchema,
 
   // Play information
-  plays: z.number(),
-  dailyPlays: z.number(),
+  plays: Type.Number(),
+  dailyPlays: Type.Number(),
 
-  timestamp: z.date(),
+  timestamp: Type.Date(),
 });
-export type ScoreSaberLeaderboard = z.infer<typeof ScoreSaberLeaderboardSchema>;
+export type ScoreSaberLeaderboard = StaticDecode<typeof ScoreSaberLeaderboardSchema>;

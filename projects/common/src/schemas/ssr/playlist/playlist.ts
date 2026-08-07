@@ -1,29 +1,29 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
 import { MapDifficultySchema } from "../../map/map-difficulty";
 
-export const playlistSongSchema = z.object({
-  songName: z.string(),
-  levelAuthorName: z.string(),
-  hash: z.string(),
-  difficulties: z.array(
-    z.object({
+export const playlistSongSchema = Type.Object({
+  songName: Type.String(),
+  levelAuthorName: Type.String(),
+  hash: Type.String(),
+  difficulties: Type.Array(
+    Type.Object({
       difficulty: MapDifficultySchema,
       characteristic: MapCharacteristicSchema,
     })
   ),
 });
 
-export const playlistCustomDataSchema = z.object({
-  syncURL: z.string(),
+export const playlistCustomDataSchema = Type.Object({
+  syncURL: Type.String(),
 });
 
-export const playlistSchema = z.object({
-  playlistTitle: z.string(),
-  playlistAuthor: z.string(),
-  customData: playlistCustomDataSchema.optional(),
-  songs: z.array(playlistSongSchema),
-  image: z.string().optional(),
+export const playlistSchema = Type.Object({
+  playlistTitle: Type.String(),
+  playlistAuthor: Type.String(),
+  customData: Type.Optional(playlistCustomDataSchema),
+  songs: Type.Array(playlistSongSchema),
+  image: Type.Optional(Type.String()),
 });
 
-export type Playlist = z.infer<typeof playlistSchema>;
+export type Playlist = StaticDecode<typeof playlistSchema>;

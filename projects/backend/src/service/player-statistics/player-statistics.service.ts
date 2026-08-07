@@ -1,6 +1,6 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
-import type { ScoreSaberPlayerLookupToken } from "@ssr/common/types/token/scoresaber/v2/player/player";
+import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { eq } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberAccountsTable } from "../../db/schema";

@@ -1,21 +1,21 @@
-import { z } from "zod";
+import { Type, type StaticDecode } from "@sinclair/typebox";
 import { ScoreSaberScoreSortFieldSchema } from "../schemas/score/query/sort/scoresaber-scores-sort";
 import { SortDirectionSchema } from "../schemas/score/query/sort/sort-direction";
 
-export const snipeSettingsSchema = z.object({
+export const snipeSettingsSchema = Type.Object({
   sort: ScoreSaberScoreSortFieldSchema,
   sortDirection: SortDirectionSchema,
-  rankedStatus: z.enum(["all", "ranked", "unranked"]),
-  requireBothScores: z.boolean(),
-  starRange: z.object({
-    min: z.number().min(0).max(20),
-    max: z.number().min(0).max(20),
+  rankedStatus: Type.Union([Type.Literal("all"), Type.Literal("ranked"), Type.Literal("unranked")]),
+  requireBothScores: Type.Boolean(),
+  starRange: Type.Object({
+    min: Type.Number({ minimum: 0, maximum: 20 }),
+    max: Type.Number({ minimum: 0, maximum: 20 }),
   }),
-  accuracyRange: z.object({
-    min: z.number().min(0).max(100),
-    max: z.number().min(0).max(100),
+  accuracyRange: Type.Object({
+    min: Type.Number({ minimum: 0, maximum: 100 }),
+    max: Type.Number({ minimum: 0, maximum: 100 }),
   }),
-  limit: z.number().int().min(1).max(1000).optional(),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 1000 })),
 });
 
-export type SnipeSettings = z.infer<typeof snipeSettingsSchema>;
+export type SnipeSettings = StaticDecode<typeof snipeSettingsSchema>;

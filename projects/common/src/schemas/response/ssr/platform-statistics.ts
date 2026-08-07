@@ -1,8 +1,11 @@
-import { StatisticsType } from "../../ssr/statistics/statistic-type";
+import { Type, type StaticDecode } from "@sinclair/typebox";
+import { StatisticsTypeSchema } from "../../ssr/statistics/statistic-type";
 
-export type StatisticsResponse = {
+export const StatisticsResponseSchema = Type.Object({
   /**
    * The statistics for this platform.
    */
-  statistics: StatisticsType;
-};
+  statistics: StatisticsTypeSchema,
+});
+
+export type StatisticsResponse = StaticDecode<typeof StatisticsResponseSchema>;
