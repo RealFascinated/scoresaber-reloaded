@@ -65,45 +65,44 @@ export default class BeatSaverService {
     }
 
     const result = await CacheService.fetch(CacheId.BEATSAVER_MAP, cacheKey, async () => {
-        let rows = await BeatSaverRepository.findMapBundleByVersionHash(normalizedHash);
+      let rows = await BeatSaverRepository.findMapBundleByVersionHash(normalizedHash);
 
+      if (!rows) {
+        const fetchedToken = await ApiServiceRegistry.getInstance()
+          .getBeatSaverService()
+          .lookupMap(normalizedHash);
+        if (!fetchedToken) {
+          return undefined;
+        }
+        await this.saveMap(fetchedToken);
+        rows = await BeatSaverRepository.findMapBundleByVersionHash(normalizedHash);
         if (!rows) {
-          const fetchedToken = await ApiServiceRegistry.getInstance()
-            .getBeatSaverService()
-            .lookupMap(normalizedHash);
-          if (!fetchedToken) {
-            return undefined;
-          }
-          await this.saveMap(fetchedToken);
-          rows = await BeatSaverRepository.findMapBundleByVersionHash(normalizedHash);
-          if (!rows) {
-            const picked = this.pickVersionForLeaderboard(
-              fetchedToken,
-              normalizedHash,
-              difficulty,
-              characteristic
-            );
-            if (picked != null) {
-              rows = await BeatSaverRepository.findMapBundleByVersionHash(picked.hash.toLowerCase());
-            }
-          }
-          if (!rows) {
-            return undefined;
+          const picked = this.pickVersionForLeaderboard(
+            fetchedToken,
+            normalizedHash,
+            difficulty,
+            characteristic
+          );
+          if (picked != null) {
+            rows = await BeatSaverRepository.findMapBundleByVersionHash(picked.hash.toLowerCase());
           }
         }
-
-        const map = beatSaverRowsToMap({
-          hash: rows.version.hash.toLowerCase(),
-          characteristic,
-          difficulty,
-          map: rows.map,
-          uploader: rows.uploader,
-          version: rows.version,
-          difficulties: rows.difficulties,
-        });
-        return map;
+        if (!rows) {
+          return undefined;
+        }
       }
-    );
+
+      const map = beatSaverRowsToMap({
+        hash: rows.version.hash.toLowerCase(),
+        characteristic,
+        difficulty,
+        map: rows.map,
+        uploader: rows.uploader,
+        version: rows.version,
+        difficulties: rows.difficulties,
+      });
+      return map;
+    });
 
     if (result === undefined) {
       BeatSaverService.recordNegative(cacheKey);

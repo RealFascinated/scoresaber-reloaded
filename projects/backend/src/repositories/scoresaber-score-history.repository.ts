@@ -1,6 +1,6 @@
+import { chunkArray } from "@ssr/common/utils/utils";
 import { and, asc, desc, eq, getTableColumns, inArray, lt, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
-import { chunkArray } from "@ssr/common/utils/utils";
 import { db } from "../db";
 import {
   ScoreSaberScoreHistoryRow,
@@ -266,13 +266,24 @@ export class ScoreSaberScoreHistoryRepository {
         await tx.execute(sql`
           UPDATE ${scoreSaberScoreHistoryTable} AS history
           SET ${sql.join(
-            fields.map(field => sql`history.${sql.raw(`"${field}"`)} = values_table.${sql.raw(`"${field}"`)}`),
+            fields.map(
+              field => sql`history.${sql.raw(`"${field}"`)} = values_table.${sql.raw(`"${field}"`)}`
+            ),
             sql`, `
           )}
           FROM (VALUES ${sql.join(
-            chunk.map(update => sql`(${update.id}, ${sql.join(fields.map(field => sql`${update[field]}`), sql`, `)})`),
+            chunk.map(
+              update =>
+                sql`(${update.id}, ${sql.join(
+                  fields.map(field => sql`${update[field]}`),
+                  sql`, `
+                )})`
+            ),
             sql`, `
-          )}) AS values_table("id", ${sql.join(fields.map(field => sql.raw(`"${field}"`)), sql`, `)})
+          )}) AS values_table("id", ${sql.join(
+            fields.map(field => sql.raw(`"${field}"`)),
+            sql`, `
+          )})
           WHERE history."id" = values_table."id"
         `);
       }

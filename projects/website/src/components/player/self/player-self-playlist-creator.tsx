@@ -9,6 +9,7 @@ import { ButtonGroup, ControlButton } from "@/components/ui/control-panel";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -26,10 +27,10 @@ import { Controller, useForm } from "react-hook-form";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 
 const SORT_OPTIONS = {
-  pp: { name: "PP", defaultOrder: "desc" as const },
-  date: { name: "Date", defaultOrder: "desc" as const },
-  acc: { name: "Accuracy", defaultOrder: "desc" as const },
-  score: { name: "Score", defaultOrder: "desc" as const },
+  pp: { name: "PP", icon: SharedIcons.PerformancePointsSortIcon, defaultOrder: "desc" as const },
+  date: { name: "Date", icon: SharedIcons.DateSortIcon, defaultOrder: "desc" as const },
+  acc: { name: "Accuracy", icon: SharedIcons.AccuracySortIcon, defaultOrder: "desc" as const },
+  score: { name: "Score", icon: SharedIcons.ScoreValueSortIcon, defaultOrder: "desc" as const },
 } as const;
 
 const RANKED_OPTIONS = [
@@ -46,8 +47,9 @@ function generateFilename(playerId: string, data: SelfPlaylistSettings): string 
   const starRange =
     data.rankedStatus === "ranked" && data.starRange ? `-${data.starRange.min}-${data.starRange.max}⭐` : "";
   const accuracyRange = data.accuracyRange ? `-${data.accuracyRange.min}-${data.accuracyRange.max}%` : "";
+  const limit = data.limit ? `-top-${data.limit}` : "";
   const sortInfo = `${data.sort}-${data.sortDirection ?? "desc"}`;
-  return `ssr-self-${playerId}-${scoreType}${starRange}${accuracyRange}-${sortInfo}.bplist`;
+  return `ssr-self-${playerId}-${scoreType}${starRange}${accuracyRange}${limit}-${sortInfo}.bplist`;
 }
 
 export default function SelfPlaylistCreator() {
@@ -144,6 +146,11 @@ export default function SelfPlaylistCreator() {
                   <ButtonGroup className="mb-(--spacing-xl)">
                     {availableSorts.map(([value, opt]) => {
                       const isActive = value === sort;
+                      const Icon = opt.icon;
+                      const DirectionIcon =
+                        isActive && sortDirection === "desc"
+                          ? SharedIcons.SortDescendingIcon
+                          : SharedIcons.SortAscendingIcon;
                       return (
                         <ControlButton
                           key={value}
@@ -151,6 +158,7 @@ export default function SelfPlaylistCreator() {
                           onClick={() => handleSort(value)}
                           type="button"
                         >
+                          {isActive ? <DirectionIcon className="size-4" /> : <Icon className="size-4" />}
                           {opt.name}
                         </ControlButton>
                       );
@@ -244,6 +252,30 @@ export default function SelfPlaylistCreator() {
                           </FormItem>
                         );
                       }}
+                    />
+
+                    <Controller
+                      name="limit"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col gap-2">
+                          <FormLabel className="text-sm font-normal">Score Limit</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={1000}
+                              placeholder="All Scores"
+                              value={field.value ?? ""}
+                              onChange={e => {
+                                const value = e.target.value;
+                                field.onChange(value === "" ? undefined : Number(value));
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
                 </form>

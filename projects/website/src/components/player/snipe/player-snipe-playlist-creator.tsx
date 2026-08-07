@@ -9,6 +9,7 @@ import { ButtonGroup, ControlButton } from "@/components/ui/control-panel";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import useDatabase from "@/hooks/use-database";
@@ -53,7 +54,8 @@ function generateFilename(toSnipeId: string, data: SnipeSettings): string {
     data.rankedStatus === "ranked" && data.starRange ? `-${data.starRange.min}-${data.starRange.max}⭐` : "";
   const sortInfo = `${data.sort}-${data.sortDirection ?? "desc"}`;
   const accuracyRange = data.accuracyRange ? `-${data.accuracyRange.min}-${data.accuracyRange.max}%` : "";
-  return `ssr-snipe-${toSnipeId}-${scoreType}${starRange}${accuracyRange}-${sortInfo}.bplist`;
+  const limit = data.limit ? `-top-${data.limit}` : "";
+  return `ssr-snipe-${toSnipeId}-${scoreType}${starRange}${accuracyRange}${limit}-${sortInfo}.bplist`;
 }
 
 export default function SnipePlaylistCreator({ toSnipe }: Props) {
@@ -269,6 +271,30 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                           </FormItem>
                         );
                       }}
+                    />
+
+                    <Controller
+                      name="limit"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col gap-2">
+                          <FormLabel className="text-sm font-normal">Score Limit</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={1000}
+                              placeholder="All Scores"
+                              value={field.value ?? ""}
+                              onChange={e => {
+                                const value = e.target.value;
+                                field.onChange(value === "" ? undefined : Number(value));
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
 

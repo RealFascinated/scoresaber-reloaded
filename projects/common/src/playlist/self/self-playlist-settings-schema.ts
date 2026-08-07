@@ -15,6 +15,7 @@ export const selfPlaylistSettingsSchema = z.object({
     min: z.number().min(0).max(100),
     max: z.number().min(0).max(100),
   }),
+  limit: z.number().int().min(1).max(1000).optional(),
 });
 
 export type SelfPlaylistSettings = z.infer<typeof selfPlaylistSettingsSchema>;

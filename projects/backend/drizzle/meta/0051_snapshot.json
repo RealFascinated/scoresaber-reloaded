@@ -504,13 +504,9 @@
         "beatsaver-map-difficulties_versionId_beatsaver-map-versions_id_fk": {
           "name": "beatsaver-map-difficulties_versionId_beatsaver-map-versions_id_fk",
           "tableFrom": "beatsaver-map-difficulties",
-          "columnsFrom": [
-            "versionId"
-          ],
+          "columnsFrom": ["versionId"],
           "tableTo": "beatsaver-map-versions",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -616,13 +612,9 @@
         "beatsaver-map-versions_mapId_beatsaver-maps_id_fk": {
           "name": "beatsaver-map-versions_mapId_beatsaver-maps_id_fk",
           "tableFrom": "beatsaver-map-versions",
-          "columnsFrom": [
-            "mapId"
-          ],
+          "columnsFrom": ["mapId"],
           "tableTo": "beatsaver-maps",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -761,13 +753,9 @@
         "beatsaver-maps_uploaderId_beatsaver-uploaders_id_fk": {
           "name": "beatsaver-maps_uploaderId_beatsaver-uploaders_id_fk",
           "tableFrom": "beatsaver-maps",
-          "columnsFrom": [
-            "uploaderId"
-          ],
+          "columnsFrom": ["uploaderId"],
           "tableTo": "beatsaver-uploaders",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1907,26 +1895,18 @@
         "scoresaber-score-events_playerId_scoresaber-accounts_id_fk": {
           "name": "scoresaber-score-events_playerId_scoresaber-accounts_id_fk",
           "tableFrom": "scoresaber-score-events",
-          "columnsFrom": [
-            "playerId"
-          ],
+          "columnsFrom": ["playerId"],
           "tableTo": "scoresaber-accounts",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "scoresaber-score-events_leaderboardId_scoresaber-leaderboards_id_fk": {
           "name": "scoresaber-score-events_leaderboardId_scoresaber-leaderboards_id_fk",
           "tableFrom": "scoresaber-score-events",
-          "columnsFrom": [
-            "leaderboardId"
-          ],
+          "columnsFrom": ["leaderboardId"],
           "tableTo": "scoresaber-leaderboards",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }

@@ -283,21 +283,17 @@ export default class PlaylistService {
 
       PlaylistService.sortPlaylistScoreRows(filtered, settings.sort, settings.sortDirection);
 
+      const songs = PlaylistService.scoreRowsToPlaylistSongs(
+        settings.limit === undefined ? filtered : filtered.slice(0, settings.limit)
+      );
+
       return {
-        playlistTitle: `Self Playlist (${getPlaylistTitleDate(new Date())})  / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
+        playlistTitle: `Self Playlist (${getPlaylistTitleDate(new Date())}) / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%${settings.limit !== undefined ? ` / Top ${settings.limit}` : ""}`,
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
           syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/self?user=${user}&settings=${settingsBase64}`,
         },
-        songs: filtered.map(({ leaderboard }) => ({
-          songName: leaderboard.songName,
-          levelAuthorName: leaderboard.songAuthorName,
-          hash: leaderboard.songHash,
-          difficulties: leaderboard.difficulties.map(difficulty => ({
-            difficulty: difficulty.difficulty,
-            characteristic: difficulty.characteristic,
-          })),
-        })),
+        songs,
       };
     } catch (error) {
       PlaylistService.logger.error("Error creating self playlist", error);
@@ -412,21 +408,17 @@ export default class PlaylistService {
         );
       }
 
+      const songs = PlaylistService.scoreRowsToPlaylistSongs(
+        settings.limit === undefined ? filteredScores : filteredScores.slice(0, settings.limit)
+      );
+
       return {
-        playlistTitle: `${truncateText(player.name ?? "", 16)} (${getPlaylistTitleDate(new Date())}) / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%`,
+        playlistTitle: `${truncateText(player.name ?? "", 16)} (${getPlaylistTitleDate(new Date())}) / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%${settings.limit !== undefined ? ` / Top ${settings.limit}` : ""}`,
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
           syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/snipe?user=${user}&toSnipe=${toSnipe}&settings=${settingsBase64}`,
         },
-        songs: filteredScores.map(({ leaderboard }) => ({
-          songName: leaderboard.songName,
-          levelAuthorName: leaderboard.songAuthorName,
-          hash: leaderboard.songHash,
-          difficulties: leaderboard.difficulties.map(difficulty => ({
-            difficulty: difficulty.difficulty,
-            characteristic: difficulty.characteristic,
-          })),
-        })),
+        songs,
       };
     } catch (error) {
       PlaylistService.logger.error("Error creating snipe playlist", error);
@@ -453,6 +445,43 @@ export default class PlaylistService {
       }
       return (a.score.scoreId - b.score.scoreId) * mult;
     });
+  }
+
+  /**
+   * Builds playlist songs from scored leaderboard rows, selecting only the difficulty each
+   * score was set on (highlighting it in-game) and merging scores on the same song by hash.
+   *
+   * @param rows the scored leaderboard rows
+   * @returns the playlist songs
+   */
+  private static scoreRowsToPlaylistSongs(
+    rows: Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>
+  ): Playlist["songs"] {
+    const songs = new Map<string, Playlist["songs"][number]>();
+    for (const { score, leaderboard } of rows) {
+      const difficulty = {
+        difficulty: score.difficulty,
+        characteristic: score.characteristic,
+      };
+      const song = songs.get(leaderboard.songHash);
+      if (!song) {
+        songs.set(leaderboard.songHash, {
+          songName: leaderboard.songName,
+          levelAuthorName: leaderboard.songAuthorName,
+          hash: leaderboard.songHash,
+          difficulties: [difficulty],
+        });
+        continue;
+      }
+      if (
+        !song.difficulties.some(
+          d => d.difficulty === difficulty.difficulty && d.characteristic === difficulty.characteristic
+        )
+      ) {
+        song.difficulties.push(difficulty);
+      }
+    }
+    return Array.from(songs.values());
   }
 
   private static scoreSortValue(score: ScoreSaberScore, field: string): number {

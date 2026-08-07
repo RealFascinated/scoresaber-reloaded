@@ -1,12 +1,12 @@
 "use client";
 
+import { CountUp } from "@/components/ui/count-up";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SharedIcons, type SharedDecorativeIcon } from "@/shared-icons";
 import { AppStatisticsResponse } from "@ssr/common/schemas/response/ssr/app-statistics";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { animate, m, useReducedMotion } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 type LandingStat = {
@@ -31,63 +31,24 @@ const STATS: LandingStat[] = [
   { label: "Unique Players Today", icon: SharedIcons.ScoreDateIcon, key: "uniquePlayersToday" },
 ];
 
-/**
- * Smoothly animates toward `target` starting from the last displayed value, so
- * stats count up from zero when data first loads and glide between live
- * updates. Jumps straight to the target when reduced motion is requested.
- */
-function useAnimatedValue(target: number, shouldReduceMotion: boolean, duration = 1000) {
-  const [displayed, setDisplayed] = useState(0);
-  const fromRef = useRef(0);
-
-  useEffect(() => {
-    if (shouldReduceMotion) {
-      return;
-    }
-
-    const from = fromRef.current;
-    if (from === target) {
-      return;
-    }
-
-    const controls = animate(from, target, {
-      duration: duration / 1000,
-      ease: "easeOut",
-      onUpdate: value => {
-        fromRef.current = value;
-        setDisplayed(value);
-      },
-    });
-    return () => controls.stop();
-  }, [target, shouldReduceMotion, duration]);
-
-  return shouldReduceMotion ? target : displayed;
-}
-
 function LandingStatCard({
   label,
   icon: Icon,
   value,
   bump,
-  shouldReduceMotion,
   onBumpComplete,
 }: {
   label: string;
   icon: SharedDecorativeIcon;
   value: number;
   bump?: StatBump;
-  shouldReduceMotion: boolean;
   onBumpComplete: () => void;
 }) {
-  const animatedValue = useAnimatedValue(value, shouldReduceMotion);
-
   return (
     <div className="ring-border bg-card flex flex-col items-center gap-1 rounded-xl p-5 text-center ring-1">
       <Icon className="text-muted-foreground mb-1 h-5 w-5" />
       <div className="flex items-center gap-1">
-        <span className="text-foreground text-xl font-bold tabular-nums">
-          {formatNumberWithCommas(Math.round(animatedValue))}
-        </span>
+        <CountUp value={value} className="text-foreground text-xl font-bold" />
         {bump && (
           <m.span
             key={bump.id}
@@ -188,7 +149,6 @@ export function LandingStats() {
           icon={icon}
           value={liveValues[key] ?? data[key].value}
           bump={bumps[key]}
-          shouldReduceMotion={shouldReduceMotion}
           onBumpComplete={() => removeBump(key)}
         />
       ))}
