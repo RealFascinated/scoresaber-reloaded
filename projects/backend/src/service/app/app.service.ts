@@ -165,10 +165,26 @@ export class AppService {
   }
 
   /**
+   * Gets the latest sampled raw values, falling back to a live query when no
+   * sample has been taken yet (e.g. before the sampling warm-up completes).
+   */
+  private static async getLatestValues(): Promise<AppStatValues> {
+    const latest = AppService.samples[AppService.samples.length - 1];
+    if (latest !== undefined) {
+      return latest.values;
+    }
+    return AppService.getRawValues();
+  }
+
+  /**
    * Gets the app statistics, with the change per second for each statistic.
+   *
+   * Values come from the latest minute-by-minute sample rather than re-running
+   * the count queries on every request (the heavy ones scan multi-million-row
+   * tables); velocities are derived from the same rolling window.
    */
   public static async getAppStatistics(): Promise<AppStatisticsResponse> {
-    const values = await AppService.getRawValues();
+    const values = await AppService.getLatestValues();
 
     const statistics = {} as Record<AppStatKey, AppStatistic>;
     for (const key of Object.keys(values) as AppStatKey[]) {
