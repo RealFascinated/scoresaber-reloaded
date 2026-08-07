@@ -1,0 +1,1 @@
+CREATE INDEX "scores_player_id_timestamp_idx" ON "scoresaber-scores" USING btree ("playerId","timestamp");

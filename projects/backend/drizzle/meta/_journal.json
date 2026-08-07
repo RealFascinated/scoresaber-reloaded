@@ -351,6 +351,13 @@
       "when": 1786115713897,
       "tag": "0049_lively_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1786116805167,
+      "tag": "0050_mixed_captain_america",
+      "breakpoints": true
     }
   ]
 }
