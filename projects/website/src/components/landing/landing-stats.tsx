@@ -47,7 +47,7 @@ function LandingStatCard({
   return (
     <div className="ring-border bg-card flex flex-col items-center gap-1 rounded-xl p-5 text-center ring-1">
       <Icon className="text-muted-foreground mb-1 h-5 w-5" />
-      <div className="flex items-center gap-1">
+      <div className="relative">
         <CountUp value={value} className="text-foreground text-xl font-bold" />
         {bump && (
           <m.span
@@ -56,7 +56,7 @@ function LandingStatCard({
             animate={{ opacity: [0, 1, 1, 0], y: -16, scale: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
             onAnimationComplete={onBumpComplete}
-            className="text-primary text-sm font-bold select-none"
+            className="text-primary absolute top-1/2 left-full ml-1 -translate-y-1/2 text-sm font-bold select-none"
           >
             +{bump.amount}
           </m.span>
