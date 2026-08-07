@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gte, ilike, inArray, isNotNull, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { scoreSaberAccountsTable, type ScoreSaberAccountRow } from "../db/schema";
 import { TableCountsRepository } from "./table-counts.repository";
@@ -79,7 +79,8 @@ export class ScoreSaberAccountsRepository {
     const q = db
       .select({ id: scoreSaberAccountsTable.id })
       .from(scoreSaberAccountsTable)
-      .where(and(eq(scoreSaberAccountsTable.seededBeatLeaderScores, false)));
+      .where(and(eq(scoreSaberAccountsTable.seededBeatLeaderScores, false)))
+      .orderBy(desc(scoreSaberAccountsTable.joinedDate));
     return limit != null ? q.limit(limit) : q;
   }
 
