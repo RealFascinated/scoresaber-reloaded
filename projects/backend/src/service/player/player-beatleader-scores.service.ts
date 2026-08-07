@@ -181,10 +181,25 @@ export class PlayerBeatLeaderScoresService {
     result.totalPagesFetched = currentPage - 1;
 
     if (completed) {
-      await PlayerCoreService.updatePlayer(playerId, { seededBeatLeaderScores: true });
       // Cache the player's linked BeatLeader account IDs so real-time scores can be
       // attributed to this account even when their BeatLeader player ID differs.
-      await BeatLeaderService.upsertBeatLeaderPlayer(account.id);
+      // This runs BEFORE marking the player seeded, and the player is only marked
+      // seeded when the mapping is confirmed or they definitively have no BeatLeader
+      // presence, so a transient failure leaves them unseeded for the next retry.
+      const mapping = await BeatLeaderService.upsertBeatLeaderPlayer(account.id);
+      if (mapping) {
+        await PlayerCoreService.updatePlayer(playerId, { seededBeatLeaderScores: true });
+      } else {
+        const exists = await BeatLeaderApiService.playerExists(account.id);
+        if (exists === false) {
+          // No BeatLeader presence — there is nothing to cache, seeding is complete.
+          await PlayerCoreService.updatePlayer(playerId, { seededBeatLeaderScores: true });
+        } else {
+          PlayerBeatLeaderScoresService.logger.warn(
+            `Failed to cache BeatLeader mapping for "${playerId}" (exists=${exists}); leaving the player unseeded for retry`
+          );
+        }
+      }
     }
 
     if (currentPage !== 1) {

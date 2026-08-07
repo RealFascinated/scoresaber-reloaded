@@ -359,6 +359,42 @@ export default class BeatLeaderService {
   }
 
   /**
+   * Fetches a BeatLeader player's mapping and persists it only when the player
+   * is linked to a tracked SSR account.
+   *
+   * Fallback for the real-time path when the mapping cache has not been seeded
+   * yet (the BeatLeader player ID differs from the ScoreSaber account ID).
+   * Mappings for untracked players are never persisted, so the table does not
+   * grow with the whole BeatLeader population.
+   *
+   * @param blPlayerId the canonical BeatLeader player ID
+   * @returns the persisted mapping when the player is tracked, or undefined
+   */
+  public static async fetchMappingIfTracked(blPlayerId: string): Promise<BeatLeaderPlayerRow | undefined> {
+    const token = await BeatLeaderApiService.lookupPlayer(blPlayerId);
+    if (!token) {
+      return undefined;
+    }
+    const linkedIds = [
+      token.id,
+      ...(token.linkedIds
+        ? [token.linkedIds.steamId, token.linkedIds.oculusPCId, token.linkedIds.questId]
+        : []),
+    ]
+      .filter((id): id is string | number => id != null && id.toString().length > 0)
+      .map(id => id.toString());
+    if (linkedIds.length === 0) {
+      return undefined;
+    }
+
+    const accounts = await ScoreSaberAccountsRepository.findManyByIds([...new Set(linkedIds)]);
+    if (accounts.length === 0) {
+      return undefined;
+    }
+    return BeatLeaderPlayersRepository.upsert(BeatLeaderService.playerRowFromToken(token));
+  }
+
+  /**
    * Whether a BeatLeader player and a ScoreSaber account are the same human, based on
    * the player's cached linked account IDs. Uses only cached data (never fetches), so
    * pairing stays cheap; players without a cached entry only pair on identical IDs.

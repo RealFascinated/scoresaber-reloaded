@@ -8,6 +8,7 @@ import { beatLeaderTimesetToMs } from "@ssr/common/utils/beatleader-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { connectBeatLeaderWebsocket } from "@ssr/common/websocket/beatleader-websocket";
 import { connectScoresaberWebsocket } from "@ssr/common/websocket/scoresaber-websocket";
+import { type BeatLeaderPlayerRow } from "../../db/schema";
 import { EventListener } from "../../event/event-listener";
 import { EventsManager } from "../../event/events-manager";
 import BeatLeaderSeenScoresMetric from "../../metrics/impl/player/beatleader-seen-scores";
@@ -52,6 +53,44 @@ export class ScoreWebsockets implements EventListener {
   private static scoresaberTimesetToMs(timeSet: string): number {
     const ms = new Date(timeSet).getTime();
     return Number.isFinite(ms) ? ms : NaN;
+  }
+
+  /** Cooldown between opportunistic BeatLeader mapping lookups per player (ms). */
+  private static readonly BL_MAPPING_LOOKUP_COOLDOWN_MS = TimeUnit.toMillis(TimeUnit.Minute, 30);
+  /** Upper bound on the opportunistic lookup cooldown map (memory guard). */
+  private static readonly BL_MAPPING_LOOKUP_MAX_ENTRIES = 10_000;
+  /** playerId -> last opportunistic mapping lookup time (ms). */
+  private static readonly blMappingLookupTimes = new Map<string, number>();
+
+  private static canLookupBlMapping(playerId: string): boolean {
+    const last = ScoreWebsockets.blMappingLookupTimes.get(playerId);
+    return last == null || Date.now() - last >= ScoreWebsockets.BL_MAPPING_LOOKUP_COOLDOWN_MS;
+  }
+
+  private static recordBlMappingLookup(playerId: string): void {
+    ScoreWebsockets.blMappingLookupTimes.set(playerId, Date.now());
+    if (ScoreWebsockets.blMappingLookupTimes.size > ScoreWebsockets.BL_MAPPING_LOOKUP_MAX_ENTRIES) {
+      // Evict the oldest quarter of entries to bound memory.
+      const oldest = [...ScoreWebsockets.blMappingLookupTimes.entries()]
+        .sort((a, b) => a[1] - b[1])
+        .slice(0, Math.floor(ScoreWebsockets.BL_MAPPING_LOOKUP_MAX_ENTRIES / 4));
+      for (const [key] of oldest) {
+        ScoreWebsockets.blMappingLookupTimes.delete(key);
+      }
+    }
+  }
+
+  /**
+   * Opportunistically fetches a BeatLeader player's mapping, at most once per
+   * player per cooldown window. Returns the mapping only when the player is
+   * linked to a tracked SSR account (see {@link BeatLeaderService.fetchMappingIfTracked}).
+   */
+  private static async fetchBlMappingIfTracked(blPlayerId: string): Promise<BeatLeaderPlayerRow | undefined> {
+    if (!ScoreWebsockets.canLookupBlMapping(blPlayerId)) {
+      return undefined;
+    }
+    ScoreWebsockets.recordBlMappingLookup(blPlayerId);
+    return BeatLeaderService.fetchMappingIfTracked(blPlayerId);
   }
 
   /**
@@ -386,6 +425,17 @@ export class ScoreWebsockets implements EventListener {
       const known =
         (await PlayerCoreService.getAccount(beatLeaderScore.playerId)) != null ||
         (await BeatLeaderPlayersRepository.findById(beatLeaderScore.playerId)) != null;
+      if (!known) {
+        // The mapping cache may simply not have been seeded yet for a tracked
+        // player whose BeatLeader ID differs from their ScoreSaber account ID.
+        // Fetch the mapping once per player per cooldown window; it is only
+        // persisted (and returned) when the player is actually tracked.
+        const mapping = await ScoreWebsockets.fetchBlMappingIfTracked(beatLeaderScore.playerId);
+        if (mapping) {
+          await BeatLeaderService.trackBeatLeaderScore(beatLeaderScore, false);
+          return;
+        }
+      }
       if (known) {
         await BeatLeaderService.trackBeatLeaderScore(beatLeaderScore, false);
       }
