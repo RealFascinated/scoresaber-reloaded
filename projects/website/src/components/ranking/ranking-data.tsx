@@ -137,7 +137,7 @@ export default function RankingData() {
                           )}
                         </TableCell>
                         <TableCell className="py-2">
-                          <AddFriend player={player} className="bg-ssr rounded-full p-1.5" iconOnly />
+                          <AddFriend player={player} iconOnly />
                         </TableCell>
                       </TableRow>
                     ))}
