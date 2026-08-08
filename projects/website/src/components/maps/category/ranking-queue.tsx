@@ -61,7 +61,7 @@ export default function RankingQueue() {
                     />
                   </TableCell>
                   <TableCell className="text-center text-xs">{leaderboard.difficultyCount}</TableCell>
-                  <TableCell className="text-muted-foreground text-center text-xs">
+                  <TableCell className="text-foreground text-center text-xs">
                     <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
                       <p className="inline-flex items-center justify-center gap-1">
                         <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -69,7 +69,7 @@ export default function RankingQueue() {
                       </p>
                     </SimpleTooltip>
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-center text-xs">
+                  <TableCell className="text-foreground text-center text-xs">
                     <SimpleTooltip display="Total plays on this leaderboard">
                       <p className="inline-flex items-center justify-center gap-1">
                         <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -81,7 +81,7 @@ export default function RankingQueue() {
                     <SimpleTooltip
                       display={<p>{formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}</p>}
                     >
-                      <p className="text-muted-foreground">{timeAgo(leaderboard.timestamp)}</p>
+                      <p className="text-foreground">{timeAgo(leaderboard.timestamp)}</p>
                     </SimpleTooltip>
                   </TableCell>
                 </TableRow>

@@ -119,7 +119,7 @@ export default function Leaderboards() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-center text-xs">
+                      <TableCell className="text-foreground text-center text-xs">
                         <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
                           <p className="inline-flex items-center justify-center gap-1">
                             <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -127,7 +127,7 @@ export default function Leaderboards() {
                           </p>
                         </SimpleTooltip>
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-center text-xs">
+                      <TableCell className="text-foreground text-center text-xs">
                         <SimpleTooltip display="Total plays on this leaderboard">
                           <p className="inline-flex items-center justify-center gap-1">
                             <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -139,7 +139,7 @@ export default function Leaderboards() {
                         <SimpleTooltip
                           display={<p>{formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}</p>}
                         >
-                          <p className="text-muted-foreground">{timeAgo(leaderboard.timestamp)}</p>
+                          <p className="text-foreground">{timeAgo(leaderboard.timestamp)}</p>
                         </SimpleTooltip>
                       </TableCell>
                     </TableRow>
