@@ -66,6 +66,17 @@ export class ScoreSaberApiService {
   private static totalRequestLatencyMs: number = 0;
   private static coalescingLoader = new CoalescingLoader<string, SerializableValue | undefined>();
 
+  /** Max attempts per logical request (including the first). */
+  private static readonly MAX_ATTEMPTS = 5;
+  /** Base delay for the exponential backoff (ms). */
+  private static readonly BACKOFF_BASE_MS = 500;
+  /** Upper bound for the exponential backoff delay (ms). */
+  private static readonly BACKOFF_MAX_MS = 10_000;
+  /** Upper bound for honoring a server-provided `Retry-After` (ms). */
+  private static readonly RETRY_AFTER_MAX_MS = 30_000;
+  /** Per-request timeout (ms). */
+  private static readonly REQUEST_TIMEOUT_MS = 15_000;
+
   /**
    * Fetches data from the ScoreSaber API.
    *
@@ -87,47 +98,143 @@ export class ScoreSaberApiService {
       scoreSaberApiResponseCacheKey(cacheHash),
       async () =>
         (await ScoreSaberApiService.coalescingLoader.get(cacheHash, async () => {
-          ScoreSaberApiService.totalRequests++;
-
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 15_000);
-
-          let response: Response | undefined;
-          try {
-            response = await fetch(
-              `${env.PROXY_URL}/${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`,
-              {
-                signal: controller.signal,
-              }
-            );
-          } catch {
-            // Network failures / aborts should be treated as "no result" for callers.
-            ScoreSaberApiService.failedRequests++;
-            return undefined;
-          } finally {
-            clearTimeout(timeoutId);
-          }
-
-          if (!response) {
-            return undefined;
-          }
-
-          if (!response.ok || response.status !== 200) {
-            ScoreSaberApiService.failedRequests++;
-            return undefined;
-          }
-
-          try {
-            return (await response.json()) as SerializableValue;
-          } catch {
-            ScoreSaberApiService.failedRequests++;
-            return undefined;
-          }
+          return await ScoreSaberApiService.request(url, options);
         })) as SerializableValue | undefined
     );
 
     ScoreSaberApiService.totalRequestLatencyMs += Math.max(0, performance.now() - startedAt);
     return data as T;
+  }
+
+  /**
+   * Executes a ScoreSaber API request with retries and returns the parsed JSON.
+   *
+   * Transient failures (network error, timeout, JSON parse failure, 429, 5xx)
+   * are retried up to {@link MAX_ATTEMPTS} times with exponential backoff,
+   * honoring `Retry-After` when present; a definitive non-200 (e.g. 404) is
+   * returned immediately as "no result". Returns undefined only when every
+   * attempt failed.
+   */
+  private static async request(
+    url: string,
+    options?: {
+      searchParams?: Record<string, string>;
+    }
+  ): Promise<SerializableValue | undefined> {
+    ScoreSaberApiService.totalRequests++;
+
+    for (let attempt = 1; attempt <= ScoreSaberApiService.MAX_ATTEMPTS; attempt++) {
+      const result = await ScoreSaberApiService.requestOnce(url, options);
+
+      if (result == undefined) {
+        // Transport failure — retry unless we exhausted the attempts.
+        if (attempt < ScoreSaberApiService.MAX_ATTEMPTS) {
+          await ScoreSaberApiService.backoff(attempt);
+          continue;
+        }
+        ScoreSaberApiService.failedRequests++;
+        return undefined;
+      }
+
+      // 429 / 5xx are transient — retry (honoring Retry-After). Every other
+      // status (2xx, 3xx, 4xx like 404) is a definitive answer.
+      if ((result.status === 429 || result.status >= 500) && attempt < ScoreSaberApiService.MAX_ATTEMPTS) {
+        await ScoreSaberApiService.backoff(attempt, result.retryAfterMs);
+        continue;
+      }
+
+      if (result.status !== 200) {
+        ScoreSaberApiService.failedRequests++;
+        return undefined;
+      }
+
+      return result.data;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Executes a single ScoreSaber API request attempt.
+   *
+   * @returns the response status, parsed JSON and `Retry-After` delay, or
+   *   undefined when the request failed before an HTTP response was received
+   *   (network error, timeout, JSON parse failure)
+   */
+  private static async requestOnce(
+    url: string,
+    options?: {
+      searchParams?: Record<string, string>;
+    }
+  ): Promise<{ status: number; data: SerializableValue | undefined; retryAfterMs?: number } | undefined> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), ScoreSaberApiService.REQUEST_TIMEOUT_MS);
+
+    let response: Response | undefined;
+    try {
+      response = await fetch(
+        `${env.PROXY_URL}/${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`,
+        {
+          signal: controller.signal,
+        }
+      );
+    } catch {
+      return undefined;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if (!response) {
+      return undefined;
+    }
+
+    let data: SerializableValue | undefined;
+    try {
+      data = (await response.json()) as SerializableValue;
+    } catch {
+      // A non-JSON body is still a definitive HTTP status (e.g. an HTML 404
+      // page) — don't treat it as a transport failure and retry.
+      return {
+        status: response.status,
+        data: undefined,
+        retryAfterMs: ScoreSaberApiService.parseRetryAfterMs(response),
+      };
+    }
+
+    return {
+      status: response.status,
+      data,
+      retryAfterMs: ScoreSaberApiService.parseRetryAfterMs(response),
+    };
+  }
+
+  private static parseRetryAfterMs(response: Response): number | undefined {
+    const header = response.headers.get("retry-after");
+    if (!header) {
+      return undefined;
+    }
+    const seconds = Number(header);
+    if (Number.isFinite(seconds)) {
+      return Math.max(0, Math.min(seconds * 1000, ScoreSaberApiService.RETRY_AFTER_MAX_MS));
+    }
+    const date = new Date(header).getTime();
+    return Number.isFinite(date)
+      ? Math.max(0, Math.min(date - Date.now(), ScoreSaberApiService.RETRY_AFTER_MAX_MS))
+      : undefined;
+  }
+
+  private static async backoff(attempt: number, retryAfterMs?: number): Promise<void> {
+    if (retryAfterMs != null) {
+      await new Promise(resolve => setTimeout(resolve, retryAfterMs));
+      return;
+    }
+    const exponentialMs = Math.min(
+      ScoreSaberApiService.BACKOFF_BASE_MS * 2 ** (attempt - 1),
+      ScoreSaberApiService.BACKOFF_MAX_MS
+    );
+    // Full jitter avoids a thundering herd of retries after a shared rate limit.
+    const delayMs = exponentialMs / 2 + Math.random() * (exponentialMs / 2);
+    await new Promise(resolve => setTimeout(resolve, delayMs));
   }
 
   /**

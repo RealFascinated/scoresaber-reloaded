@@ -82,7 +82,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       );
       await Promise.all(
         parsedScores.map(async score => {
-          PlayerCoreService.createIfMissing(score.playerId); // no need to await this
+          // The player's account must exist before their score rows are written,
+          // so wait for creation (a no-op when the account is already tracked).
+          await PlayerCoreService.createIfMissing(score.playerId);
 
           const trackingResult = await ScoreCoreService.trackScoreSaberScore(
             score,

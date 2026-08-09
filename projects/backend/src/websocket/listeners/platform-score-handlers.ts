@@ -367,8 +367,20 @@ export class ScoreWebsockets implements EventListener {
       const score = getScoreSaberScoreFromToken(scoreSaberToken, scoreLeaderboard, player.id);
       const isTop50GlobalScore = await TopScoresService.isTop50GlobalScore(score);
 
-      // Create the player, update their name if they are already being tracked
-      if (!(await PlayerCoreService.createPlayer(player.id)) && player.name) {
+      // The score event row below references the accounts table, so the account
+      // MUST exist before we write anything. Transient API failures are retried
+      // inside ScoreSaberApiService; if creation still fails, skip the score
+      // instead of crashing the insert.
+      const account = await PlayerCoreService.createPlayer(player.id);
+      if (!account) {
+        scoresWsLog.warn(
+          `Skipping score for "${player.id}" on "${scoreLeaderboard.songName}": account could not be created`
+        );
+        return;
+      }
+
+      // Update the player's name if the websocket carried a fresh one
+      if (player.name) {
         void PlayerCoreService.updatePlayer(player.id, { name: player.name }).catch(error => {
           scoresWsLog.warn(`Failed to update name for player "${player.id}":`, error);
         });
