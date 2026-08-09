@@ -1,5 +1,7 @@
 "use client";
 
+import { isBackendUnavailableError } from "@/common/api-error";
+import BackendUnavailable from "@/components/api/backend-unavailable";
 import Avatar from "@/components/avatar";
 import SimpleLink from "@/components/simple-link";
 import useDatabase from "@/hooks/use-database";
@@ -22,15 +24,27 @@ export function FriendScores() {
     data: scoreData,
     isLoading,
     isFetching,
+    isError,
+    error,
+    refetch,
   } = useQuery({
     queryKey: ["friend-scores", friendIds, page, mainPlayerId],
     queryFn: async () =>
       ssrApi.fetchPlayerScoreSaberScores(mainPlayerId!, page, "date", "desc", {
         playerIds: friendIds,
       }),
+    // Fail fast so a backend outage surfaces as an error state instead of an
+    // endless retry spinner (the provider default is infinite retries).
+    retry: false,
     enabled: friendIds !== undefined && friendIds.length > 0 && mainPlayerId !== undefined,
     placeholderData: prev => prev,
   });
+
+  const showBackendUnavailable = !scoreData && isError && isBackendUnavailableError(error);
+
+  if (showBackendUnavailable) {
+    return <BackendUnavailable onRetry={() => refetch()} />;
+  }
 
   return (
     <div className="ring-border bg-card rounded-xl p-5 ring-1">

@@ -14,9 +14,16 @@ export function ApiHealth() {
   useQuery({
     queryKey: ["api-health"],
     queryFn: async () => {
-      const online = await ssrApi.health();
-      setOnline(online);
-      return online;
+      try {
+        const online = await ssrApi.health();
+        setOnline(online);
+        return online;
+      } catch {
+        // Backend is offline/unreachable — surface it so the connectivity
+        // toast fires instead of silently keeping the previous status.
+        setOnline(false);
+        return false;
+      }
     },
     refetchInterval: 1000 * 5,
   });

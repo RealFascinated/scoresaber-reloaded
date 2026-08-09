@@ -1,8 +1,12 @@
+import { isBackendUnavailableError } from "@/common/api-error";
+import BackendUnavailable from "@/components/api/backend-unavailable";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
 import ScoreDetails from "@/components/score/page/components/score-details";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
+import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
+import type { PlayerScore } from "@ssr/common/score/player-score";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -24,15 +28,38 @@ type ScorePageProps = {
   }>;
 };
 
-const getPlayerScore = cache(async (scoreId: string) => {
-  return await ssrApi.getScore(scoreId);
+type ScoreFetchResult =
+  | { status: "found"; score: PlayerScore<ScoreSaberScore> }
+  | { status: "not-found" }
+  | { status: "unavailable" };
+
+const getPlayerScore = cache(async (scoreId: string): Promise<ScoreFetchResult> => {
+  try {
+    const score = await ssrApi.getScore(scoreId);
+    if (score === undefined) {
+      return { status: "not-found" };
+    }
+    return { status: "found", score };
+  } catch (error) {
+    if (isBackendUnavailableError(error)) {
+      return { status: "unavailable" };
+    }
+    throw error;
+  }
 });
 
 export async function generateMetadata(props: ScorePageProps): Promise<Metadata> {
   const { scoreId } = await props.params;
-  const playerScore = await getPlayerScore(scoreId);
+  const result = await getPlayerScore(scoreId);
 
-  if (playerScore === undefined) {
+  if (result.status === "unavailable") {
+    return {
+      title: "Backend Unavailable",
+      description: "The backend is currently offline or unreachable. Please try again later.",
+    };
+  }
+
+  if (result.status === "not-found") {
     return {
       title: UNKNOWN_SCORE.title,
       description: UNKNOWN_SCORE.description,
@@ -45,7 +72,7 @@ export async function generateMetadata(props: ScorePageProps): Promise<Metadata>
     };
   }
 
-  const { score, leaderboard } = playerScore;
+  const { score, leaderboard } = result.score;
   const playerName = score.playerInfo!.name;
   const songTitle = leaderboard.fullName;
   const diffLabel = getDifficultyName(leaderboard.difficulty.difficulty);
@@ -85,15 +112,13 @@ export async function generateMetadata(props: ScorePageProps): Promise<Metadata>
 
 export default async function ScorePage({ params }: ScorePageProps) {
   const { scoreId } = await params;
-  const score = await getPlayerScore(scoreId);
-  const beatLeaderScoreId = score?.score.beatLeaderScore?.scoreId;
+  const result = await getPlayerScore(scoreId);
 
-  const [scoreStats, replay] = await Promise.all([
-    beatLeaderScoreId ? ssrApi.fetchScoreStats(beatLeaderScoreId) : undefined,
-    beatLeaderScoreId ? getDecodedReplay(beatLeaderScoreId.toString()) : undefined,
-  ]);
+  if (result.status === "unavailable") {
+    return <BackendUnavailable />;
+  }
 
-  if (score === undefined) {
+  if (result.status === "not-found") {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <SharedIcons.WarningAlertIcon className="size-16 text-amber-500" />
@@ -103,6 +128,23 @@ export default async function ScorePage({ params }: ScorePageProps) {
     );
   }
 
+  const playerScore = result.score;
+  const beatLeaderScoreId = playerScore.score.beatLeaderScore?.scoreId;
+
+  let scoreStats: Awaited<ReturnType<typeof ssrApi.fetchScoreStats>> | undefined;
+  let replay: Awaited<ReturnType<typeof getDecodedReplay>> | undefined;
+  try {
+    [scoreStats, replay] = await Promise.all([
+      beatLeaderScoreId ? ssrApi.fetchScoreStats(beatLeaderScoreId) : undefined,
+      beatLeaderScoreId ? getDecodedReplay(beatLeaderScoreId.toString()) : undefined,
+    ]);
+  } catch (error) {
+    if (isBackendUnavailableError(error)) {
+      return <BackendUnavailable />;
+    }
+    throw error;
+  }
+
   // Check if we have any additional data to show
   const hasScoreStats = !!scoreStats;
   const hasReplay = !!replay;
@@ -110,7 +152,7 @@ export default async function ScorePage({ params }: ScorePageProps) {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <ScoreDetails score={score} />
+      <ScoreDetails score={playerScore} />
 
       {!hasAnyAdditionalData ? (
         <div className="ring-border bg-card flex flex-col items-center justify-center gap-2 rounded-xl py-8 text-center ring-1">
@@ -123,7 +165,11 @@ export default async function ScorePage({ params }: ScorePageProps) {
       ) : (
         <div className="flex flex-col gap-4">
           {scoreStats && (
-            <ScoreOverview score={score.score} scoreStats={scoreStats} leaderboard={score.leaderboard} />
+            <ScoreOverview
+              score={playerScore.score}
+              scoreStats={scoreStats}
+              leaderboard={playerScore.leaderboard}
+            />
           )}
 
           {replay && (

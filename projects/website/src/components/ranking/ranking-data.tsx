@@ -1,7 +1,9 @@
 "use client";
 
+import { isBackendUnavailableError } from "@/common/api-error";
 import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { cn } from "@/common/utils";
+import BackendUnavailable from "@/components/api/backend-unavailable";
 import CountrySelector from "@/components/country-selector";
 import { PageTitle } from "@/components/page-title";
 import SimpleLink from "@/components/simple-link";
@@ -49,6 +51,8 @@ export default function RankingData() {
     isLoading,
     isRefetching,
     isError,
+    error,
+    refetch,
   } = useQuery({
     queryKey: [
       "rankingData",
@@ -63,9 +67,14 @@ export default function RankingData() {
         search: isValidSearch ? debouncedSearch : undefined,
         includeInactives: includeInactives,
       }),
+    // Fail fast so a backend outage surfaces as an error state instead of an
+    // endless retry spinner (the provider default is infinite retries).
+    retry: false,
     refetchIntervalInBackground: false,
     placeholderData: prev => prev,
   });
+
+  const showBackendUnavailable = !rankingData && isError && isBackendUnavailableError(error);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -76,11 +85,13 @@ export default function RankingData() {
 
       <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
-          {!rankingData && !isError && (
+          {showBackendUnavailable && <BackendUnavailable onRetry={() => refetch()} />}
+
+          {!rankingData && !isError && !showBackendUnavailable && (
             <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
           )}
 
-          {isError && (
+          {isError && !showBackendUnavailable && (
             <div className="flex h-full flex-col items-center justify-center gap-3 py-12">
               <p className="text-lg">No players were found for this country or page.</p>
               <SimpleLink href="/ranking">

@@ -88,6 +88,7 @@ import {
   Search,
   SearchIcon,
   SearchX,
+  ServerCrash,
   Settings,
   ShieldCheck,
   Snowflake,
@@ -316,6 +317,7 @@ export const SharedIcons = {
   WarningAlertIcon: AlertCircle,
   MissingContentIcon: FileX,
   StatsUnavailableIcon: BarChart3,
+  BackendOfflineIcon: ServerCrash,
   SiteNoticeWarningIcon: ExclamationTriangleIcon,
 
   // Footer & misc
