@@ -1,7 +1,11 @@
 import { encodeCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { describe, expect, test } from "bun:test";
+import { ScoreSaberLeaderboardsRepository } from "../../src/repositories/scoresaber-leaderboards.repository";
+import { ScoreSaberScoresRepository } from "../../src/repositories/scoresaber-scores.repository";
 import { expectPlaylistBplistShape, expectPlaylistShape, expectStatus } from "../helpers/assertions";
 import {
+  TEST_LEADERBOARD_ID,
+  TEST_LEADERBOARD_SECOND_ID,
   TEST_PLAYER_ID,
   TEST_PLAYER_TWO_ID,
   TEST_SONG_HASH,
@@ -17,6 +21,57 @@ const playlistIds = [
   "scoresaber-ranking-queue-maps",
   "scoresaber-trending",
 ] as const;
+
+const now = new Date("2024-06-01T12:00:00.000Z");
+
+/**
+ * Seeds an Expert/Standard leaderboard for TEST_SONG_HASH with scores for both
+ * test players, so the song has scores on two difficulties (the seeded
+ * ExpertPlus/Standard leaderboard plus this one).
+ */
+async function seedSecondDifficultyScores(): Promise<void> {
+  const template = await ScoreSaberLeaderboardsRepository.getLeaderboardById(TEST_LEADERBOARD_ID, false);
+  const expertLeaderboard = {
+    ...template!,
+    id: TEST_LEADERBOARD_SECOND_ID,
+    difficulty: { ...template!.difficulty, difficulty: "Expert" },
+  };
+  await ScoreSaberLeaderboardsRepository.insert(TEST_LEADERBOARD_SECOND_ID, expertLeaderboard);
+
+  await ScoreSaberScoresRepository.insertScore({
+    scoreId: 900_010,
+    playerId: TEST_PLAYER_ID,
+    leaderboardId: TEST_LEADERBOARD_SECOND_ID,
+    difficulty: "Expert",
+    characteristic: "Standard",
+    score: 850,
+    accuracy: 0.85,
+    pp: 180,
+    missedNotes: 0,
+    badCuts: 0,
+    maxCombo: 400,
+    fullCombo: false,
+    modifiers: [],
+    timestamp: now,
+  });
+
+  await ScoreSaberScoresRepository.insertScore({
+    scoreId: 900_011,
+    playerId: TEST_PLAYER_TWO_ID,
+    leaderboardId: TEST_LEADERBOARD_SECOND_ID,
+    difficulty: "Expert",
+    characteristic: "Standard",
+    score: 800,
+    accuracy: 0.8,
+    pp: 150,
+    missedNotes: 1,
+    badCuts: 1,
+    maxCombo: 380,
+    fullCombo: false,
+    modifiers: [],
+    timestamp: now,
+  });
+}
 
 describe("Playlist API integration", () => {
   const app = createTestApp();
@@ -176,6 +231,53 @@ describe("Playlist API integration", () => {
       const song = body.songs.find(s => s.hash.toLowerCase() === TEST_SONG_HASH.toLowerCase());
       expect(song).toBeDefined();
       expect(song?.difficulties).toEqual([{ name: "ExpertPlus", characteristic: "Standard" }]);
+    });
+
+    test("self playlist emits every difficulty the player scored on", async () => {
+      await seedSecondDifficultyScores();
+
+      const response = await request(app, `/playlist/self.bplist?user=${TEST_PLAYER_ID}`);
+      expectStatus(response, 200);
+
+      const body = (await response.json()) as {
+        songs: Array<{
+          hash: string;
+          difficulties: Array<{ name: string; characteristic: string }>;
+        }>;
+      };
+      const song = body.songs.find(s => s.hash.toLowerCase() === TEST_SONG_HASH.toLowerCase());
+      expect(song).toBeDefined();
+      // TEST_PLAYER_ID has scores on both the seeded ExpertPlus leaderboard
+      // and the inserted Expert leaderboard, so both must be highlighted.
+      expect(song?.difficulties).toEqual([
+        { name: "ExpertPlus", characteristic: "Standard" },
+        { name: "Expert", characteristic: "Standard" },
+      ]);
+    });
+
+    test("snipe playlist emits every difficulty the sniped player outscored us on", async () => {
+      await seedSecondDifficultyScores();
+
+      // player01 outscored player02 on both difficulties of TEST_SONG_HASH
+      // (950 > 900 ExpertPlus, 850 > 800 Expert), so both are sniped.
+      const response = await request(
+        app,
+        `/playlist/snipe.bplist?user=${TEST_PLAYER_TWO_ID}&toSnipe=${TEST_PLAYER_ID}`
+      );
+      expectStatus(response, 200);
+
+      const body = (await response.json()) as {
+        songs: Array<{
+          hash: string;
+          difficulties: Array<{ name: string; characteristic: string }>;
+        }>;
+      };
+      const song = body.songs.find(s => s.hash.toLowerCase() === TEST_SONG_HASH.toLowerCase());
+      expect(song).toBeDefined();
+      expect(song?.difficulties).toEqual([
+        { name: "ExpertPlus", characteristic: "Standard" },
+        { name: "Expert", characteristic: "Standard" },
+      ]);
     });
 
     test("custom ranked playlist bplist uses named difficulties", async () => {
