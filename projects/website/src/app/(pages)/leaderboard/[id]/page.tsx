@@ -3,6 +3,7 @@ import { ScoreSaberLeaderboardData } from "@/components/platform/scoresaber/lead
 import { env } from "@ssr/common/env";
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import { ssrConfig } from "config";
 import { Metadata } from "next";
 
 export const revalidate = 300; // Revalidate every 5 minutes
@@ -26,9 +27,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: UNKNOWN_LEADERBOARD.title,
       description: UNKNOWN_LEADERBOARD.description,
       openGraph: {
-        siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
+        siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
         title: UNKNOWN_LEADERBOARD.title,
         description: UNKNOWN_LEADERBOARD.description,
+        images: ["/icon-512x512.png"],
       },
     };
   }
@@ -38,7 +40,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
     openGraph: {
-      siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
+      siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
       title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
       description: `Plays: ${leaderboard.plays} (${leaderboard.dailyPlays} Daily)
 Mapped by: ${leaderboard.songAuthorName}

@@ -17,12 +17,16 @@ const siteFont = localFont({
   weight: "100 300",
 });
 
+const siteName = env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName;
+const siteUrl = env.NEXT_PUBLIC_WEBSITE_URL ?? ssrConfig.siteUrl;
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: env.NEXT_PUBLIC_WEBSITE_NAME,
+    default: siteName,
     template: ssrConfig.siteTitleTemplate,
   },
-  applicationName: env.NEXT_PUBLIC_WEBSITE_NAME,
+  applicationName: siteName,
   authors: [
     {
       name: "Fascinated",
@@ -44,14 +48,33 @@ export const metadata: Metadata = {
     "BeatSaber, Overlay, OBS, Twitch, YouTube, BeatSaber Overlay, Github, Beat Saber overlay, ScoreSaber, BeatLeader," +
     "VR gaming, Twitch stream enhancement, Customizable overlay, Real-time scores, Rankings, Leaderboard information," +
     "Stream enhancement, Professional overlay, Easy to use overlay builder.",
+  icons: {
+    icon: "/icon-192x192.png",
+    apple: "/icon-512x512.png",
+  },
   openGraph: {
-    siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
-    title: env.NEXT_PUBLIC_WEBSITE_NAME,
+    siteName,
+    title: siteName,
     description:
       "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
-    url: env.NEXT_PUBLIC_WEBSITE_URL,
+    url: siteUrl,
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/icon-512x512.png",
+        width: 512,
+        height: 512,
+        alt: siteName,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: siteName,
+    description:
+      "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",
+    images: ["/icon-512x512.png"],
   },
   description:
     "ScoreSaber Reloaded is a new way to view your scores and get more stats about you and your plays",

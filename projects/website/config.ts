@@ -11,6 +11,16 @@ type Config = {
   siteTitleTemplate: string;
 
   /**
+   * Name of the website, used as a fallback for embeds
+   */
+  siteName: string;
+
+  /**
+   * URL of the website, used as a fallback for embeds
+   */
+  siteUrl: string;
+
+  /**
    * Twitch accounts for players
    */
   playerTwitchAccounts: Record<string, string>;
@@ -23,6 +33,8 @@ type Config = {
 
 export const ssrConfig: Config = {
   siteTitleTemplate: "%s - ScoreSaber Reloaded",
+  siteName: "ScoreSaber Reloaded",
+  siteUrl: "https://ssr.fascinated.cc",
   playerTwitchAccounts: {
     "76561198449412074": "fascinated_", // ImFascinated
     "76561198827283834": "nonetakenvr", // NoneTaken

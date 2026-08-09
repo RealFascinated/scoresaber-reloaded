@@ -7,6 +7,7 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
+import { ssrConfig } from "config";
 import { Metadata } from "next";
 import { cache } from "react";
 import CutDistributionChart from "../../../../components/score/page/components/charts/cut-distribution-chart";
@@ -36,9 +37,10 @@ export async function generateMetadata(props: ScorePageProps): Promise<Metadata>
       title: UNKNOWN_SCORE.title,
       description: UNKNOWN_SCORE.description,
       openGraph: {
-        siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
+        siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
         title: UNKNOWN_SCORE.title,
         description: UNKNOWN_SCORE.description,
+        images: ["/icon-512x512.png"],
       },
     };
   }
@@ -62,7 +64,7 @@ export async function generateMetadata(props: ScorePageProps): Promise<Metadata>
     title,
     description,
     openGraph: {
-      siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
+      siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
       title,
       description,
       ...(leaderboard.songArt

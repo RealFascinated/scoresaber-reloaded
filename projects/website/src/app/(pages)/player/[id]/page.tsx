@@ -4,6 +4,7 @@ import { env } from "@ssr/common/env";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
+import { ssrConfig } from "config";
 import { Metadata } from "next";
 import { cache } from "react";
 
@@ -31,9 +32,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title: UNKNOWN_PLAYER.title,
       description: UNKNOWN_PLAYER.description,
       openGraph: {
-        siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
+        siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
         title: UNKNOWN_PLAYER.title,
         description: UNKNOWN_PLAYER.description,
+        images: ["/icon-512x512.png"],
       },
     };
   }
@@ -41,7 +43,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   return {
     title: `${player.name}`,
     openGraph: {
-      siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
+      siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
       title: `${player.name}`,
       description: `Rank: #${formatNumberWithCommas(player.rank)}
 Country Rank: #${formatNumberWithCommas(player.countryRank)} (${player.country})
