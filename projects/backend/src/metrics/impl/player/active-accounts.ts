@@ -1,7 +1,7 @@
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { Gauge } from "prom-client";
 import { ScoreSaberApiService } from "../../../service/external/scoresaber-api.service";
-import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
 
 export default class ActiveAccountsMetric extends NumberMetric {

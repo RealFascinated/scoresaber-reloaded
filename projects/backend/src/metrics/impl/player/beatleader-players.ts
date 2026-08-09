@@ -1,6 +1,6 @@
 import { Gauge } from "prom-client";
 import { BeatLeaderApiService } from "../../../service/external/beatleader-api.service";
-import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
 
 export default class BeatLeaderPlayersMetric extends NumberMetric {

@@ -153,7 +153,13 @@ export class BeatLeaderApiService {
     try {
       data = await response.json();
     } catch {
-      return undefined;
+      // A non-JSON body is still a definitive HTTP status (e.g. an HTML 404
+      // page from the CDN) — don't treat it as a transport failure and retry.
+      return {
+        status: response.status,
+        data: undefined,
+        retryAfterMs: BeatLeaderApiService.parseRetryAfterMs(response),
+      };
     }
 
     BeatLeaderApiService.totalRequestLatencyMs += Math.max(0, performance.now() - startedAt);

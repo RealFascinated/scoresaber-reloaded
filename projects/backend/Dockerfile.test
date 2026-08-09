@@ -1,0 +1,27 @@
+# Dedicated test image for the backend test suite.
+#
+# Kept separate from the runtime Dockerfile so the production image stays lean.
+# Built by CI (see .github/workflows/backend-tests.yml); the test suite expects
+# PostgreSQL, Redis and MinIO to be reachable — locally run the suite against
+# the docker-compose services with `--network host`:
+#
+#   docker build -f projects/backend/Dockerfile.test -t ssr-backend-test .
+#   docker run --rm --network host ssr-backend-test
+FROM oven/bun:1.3.14-alpine
+
+WORKDIR /app
+
+COPY package.json bun.lock ./
+COPY projects/common/package.json ./projects/common/
+COPY projects/backend/package.json ./projects/backend/
+COPY projects/website/package.json ./projects/website/
+
+RUN bun install --frozen-lockfile
+
+COPY projects/common ./projects/common
+COPY projects/backend ./projects/backend
+
+RUN cd projects/common && bun run build
+
+WORKDIR /app/projects/backend
+CMD ["bun", "run", "test"]

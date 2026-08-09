@@ -1,7 +1,7 @@
 import { getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
 import { Gauge } from "prom-client";
 import { ScoreSaberAccountsRepository } from "../../../repositories/scoresaber-accounts.repository";
-import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
 
 export default class DailyNewAccountsMetric extends NumberMetric {

@@ -40,6 +40,18 @@ const scoreCols = getTableColumns(scoreSaberScoresTable);
 const histCols = getTableColumns(scoreSaberScoreHistoryTable);
 
 /** History rows projected to match `scoresaber-scores` columns for UNION with current scores. */
+const historyBulkUpdateCasts: Partial<Record<keyof ScoreSaberScoreHistoryRow, string>> = {
+  accuracy: "double precision",
+  pp: "double precision",
+  score: "integer",
+  medals: "integer",
+  missedNotes: "integer",
+  badCuts: "integer",
+  maxCombo: "integer",
+  leaderboardId: "integer",
+  scoreId: "integer",
+};
+
 const histAsScoreCols = Object.fromEntries(
   Object.keys(scoreCols).map(name => [name, histCols[name as keyof typeof histCols]])
 ) as unknown as typeof scoreCols;
@@ -266,9 +278,12 @@ export class ScoreSaberScoreHistoryRepository {
         await tx.execute(sql`
           UPDATE ${scoreSaberScoreHistoryTable} AS history
           SET ${sql.join(
-            fields.map(
-              field => sql`history.${sql.raw(`"${field}"`)} = values_table.${sql.raw(`"${field}"`)}`
-            ),
+            fields.map(field => {
+              const cast = historyBulkUpdateCasts[field];
+              return cast
+                ? sql`"${sql.raw(field)}" = values_table.${sql.raw(`"${field}"`)}::${sql.raw(cast)}`
+                : sql`"${sql.raw(field)}" = values_table.${sql.raw(`"${field}"`)}`;
+            }),
             sql`, `
           )}
           FROM (VALUES ${sql.join(
@@ -284,7 +299,7 @@ export class ScoreSaberScoreHistoryRepository {
             fields.map(field => sql.raw(`"${field}"`)),
             sql`, `
           )})
-          WHERE history."id" = values_table."id"
+          WHERE history."id" = values_table."id"::integer
         `);
       }
     });

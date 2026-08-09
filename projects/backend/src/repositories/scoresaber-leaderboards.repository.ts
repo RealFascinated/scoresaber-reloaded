@@ -8,6 +8,7 @@ import type {
 import type { SQL } from "drizzle-orm";
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import { normalizeSongHash } from "../common/cache-keys";
 import { db } from "../db";
 import { leaderboardRowToType } from "../db/converter/scoresaber-leaderboard";
 import { ScoreSaberLeaderboardRow, scoreSaberLeaderboardsTable } from "../db/schema";
@@ -196,11 +197,12 @@ export class ScoreSaberLeaderboardsRepository {
   }
 
   public static async getLeaderboardByHash(
-    hashNorm: string,
+    hash: string,
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic,
     includeDifficulties: boolean = true
   ): Promise<ScoreSaberLeaderboard | undefined> {
+    const hashNorm = normalizeSongHash(hash);
     const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
     const where = and(
       eq(sql`lower(${mainAlias.songHash})`, hashNorm),

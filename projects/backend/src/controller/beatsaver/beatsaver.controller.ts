@@ -19,10 +19,11 @@ export default function beatsaverController(app: Elysia) {
       {
         tags: ["BeatSaver"],
         params: t.Object({
-          // BeatSaver map hashes are 32-character hex (MD5 of the map zip);
+          // BeatSaver map hashes: legacy 32-char hex (MD5 of the map zip) and
+          // the current 40-char hex (SHA1 of the version zip). Accept both;
           // reject path separators and over-long values that could reach the
           // upstream API or overflow the varchar(64) hash column.
-          hash: t.String({ pattern: "^[0-9a-fA-F]{32}$" }),
+          hash: t.String({ pattern: "^(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{40})$" }),
           difficulty: MapDifficultySchema,
           characteristic: MapCharacteristicSchema,
         }),

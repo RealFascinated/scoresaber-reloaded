@@ -1,0 +1,92 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "projects/backend/**"
+      - "projects/common/**"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/backend-tests.yml"
+      - "projects/backend/Dockerfile.test"
+  pull_request:
+    paths:
+      - "projects/backend/**"
+      - "projects/common/**"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/backend-tests.yml"
+      - "projects/backend/Dockerfile.test"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Backend test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: ssr_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U test -d ssr_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 30
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 30
+      minio:
+        image: minio/minio:RELEASE.2025-01-20T14-49-07Z
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        ports:
+          - 19000:9000
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build test image
+        run: docker build -f projects/backend/Dockerfile.test -t ssr-backend-test .
+
+      # Host networking makes the job's service containers (postgres 5433,
+      # redis 6380, minio 19000) reachable at localhost and gives the test
+      # container internet access for the live API tests. Connection targets
+      # match the defaults in projects/backend/test/env.ts, so no overrides
+      # are needed.
+      - name: Run backend tests
+        run: docker run --rm --network host ssr-backend-test
+
+  # Deploys to Coolify only after the test suite passes. GitHub Actions
+  # automatically skips a `needs` job when its dependency fails, so a red
+  # suite means no deployment. Make sure the Coolify resource has auto-deploy
+  # disabled so this workflow is the only thing that triggers deployments.
+  deploy:
+    name: Deploy to Coolify
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Coolify deployment
+        run: |
+          curl -sS -f -X GET "${{ secrets.COOLIFY_DEPLOY_WEBHOOK_URL }}" \
+            -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
+            -H "Accept: application/json"

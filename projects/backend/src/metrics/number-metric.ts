@@ -1,4 +1,4 @@
-import { MetricType } from "../service/infra/metrics.service";
+import { MetricType } from "./prometheus";
 import Metric, { type MetricOptions } from "./metric";
 
 export default class NumberMetric extends Metric<number> {

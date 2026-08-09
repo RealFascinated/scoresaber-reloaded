@@ -7,7 +7,6 @@ import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
-import { timingSafeEqual } from "crypto";
 import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
@@ -19,6 +18,7 @@ import AppController from "./controller/app/app.controller";
 import BeatLeaderController from "./controller/beatleader/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver/beatsaver.controller";
 import LeaderboardController from "./controller/leaderboard/leaderboard.controller";
+import MetricsController from "./controller/metrics/metrics.controller";
 import PlayerRankingController from "./controller/player/player-ranking.controller";
 import PlayerController from "./controller/player/player.controller";
 import PlaylistController from "./controller/playlist/playlist.controller";
@@ -31,7 +31,7 @@ import { ScoreSaberMedalsRepository } from "./repositories/scoresaber-medals.rep
 import { TableCountsRepository } from "./repositories/table-counts.repository";
 import { AppService } from "./service/app/app.service";
 import CacheService from "./service/infra/cache.service";
-import MetricsService, { prometheusRegistry } from "./service/infra/metrics.service";
+import MetricsService from "./service/infra/metrics.service";
 import StorageService from "./service/infra/storage.service";
 import { LeaderboardRankedSyncNotificationsService } from "./service/leaderboard/leaderboard-ranked-batch-notifications.service";
 import { LeaderboardRankedSyncService } from "./service/leaderboard/leaderboard-ranked-sync.service";
@@ -299,44 +299,6 @@ export const app = new Elysia()
       dnsPrefetchControl: true, // Enable DNS prefetch
     })
   )
-  .get(
-    "/metrics",
-    async ({ headers, set }) => {
-      // Validate Bearer token (skip in development)
-      if (isProduction()) {
-        const authHeader = headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          set.status = 401;
-          return { error: "Unauthorized" };
-        }
-
-        const token = authHeader.substring(7); // Remove "Bearer " prefix
-
-        const expectedToken = env.PROMETHEUS_AUTH_TOKEN;
-        if (typeof expectedToken !== "string") {
-          set.status = 500;
-          return { error: "Server misconfigured" };
-        }
-
-        const tokenBuf = Buffer.from(token);
-        const expectedBuf = Buffer.from(expectedToken);
-        if (tokenBuf.length !== expectedBuf.length || !timingSafeEqual(tokenBuf, expectedBuf)) {
-          set.status = 401;
-          return { error: "Unauthorized" };
-        }
-      }
-
-      // Export Prometheus metrics
-      set.headers["content-type"] = "text/plain; version=0.0.4; charset=utf-8";
-      return await prometheusRegistry.metrics();
-    },
-    {
-      detail: {
-        description: "Prometheus metrics endpoint (requires Bearer token authentication in production)",
-        tags: [],
-      },
-    }
-  )
   .use(AppController)
   .use(PlayerController)
   .use(ScoresController)
@@ -345,6 +307,7 @@ export const app = new Elysia()
   .use(BeatSaverController)
   .use(BeatLeaderController)
   .use(PlayerRankingController)
+  .use(MetricsController)
   .use(
     openapi({
       path: "/swagger",

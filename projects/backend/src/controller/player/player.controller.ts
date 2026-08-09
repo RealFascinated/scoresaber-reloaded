@@ -21,6 +21,26 @@ export default function playerController(app: Elysia) {
   return app.group("/player", app =>
     app
       .get(
+        "/search",
+        async ({ query: { query } }) => {
+          const normalizedQuery = query?.trim();
+          return {
+            players: await PlayerSearchService.searchPlayers(normalizedQuery),
+          };
+        },
+        {
+          tags: ["Player"],
+          query: t.Object({
+            // Allow empty string searches (`?query=`) but cap length to avoid unbounded query costs.
+            query: t.Optional(t.String({ maxLength: 64 })),
+          }),
+          detail: {
+            description: "Search players",
+          },
+        }
+      )
+
+      .get(
         "/:playerId",
         async ({ params: { playerId }, query: { type } }) => {
           return ScoreSaberPlayerService.getPlayer(playerId, type);
@@ -98,25 +118,6 @@ export default function playerController(app: Elysia) {
           }),
           detail: {
             description: "Fetch player mini-ranking",
-          },
-        }
-      )
-      .get(
-        "/search",
-        async ({ query: { query } }) => {
-          const normalizedQuery = query?.trim();
-          return {
-            players: await PlayerSearchService.searchPlayers(normalizedQuery),
-          };
-        },
-        {
-          tags: ["Player"],
-          query: t.Object({
-            // Allow empty string searches (`?query=`) but cap length to avoid unbounded query costs.
-            query: t.Optional(t.String({ maxLength: 64 })),
-          }),
-          detail: {
-            description: "Search players",
           },
         }
       )

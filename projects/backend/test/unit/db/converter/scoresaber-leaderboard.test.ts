@@ -1,0 +1,247 @@
+import { describe, expect, test } from "bun:test";
+import { env } from "@ssr/common/env";
+import { Modifier } from "@ssr/common/score/modifier";
+import { getScoreSaberLeaderboardCoverUrl } from "@ssr/common/utils/scoresaber.util";
+import { leaderboardRowToType } from "../../../../src/db/converter/scoresaber-leaderboard";
+import type { ScoreSaberLeaderboardRow } from "../../../../src/db/schema";
+
+function baseRow(overrides: Partial<ScoreSaberLeaderboardRow> = {}): ScoreSaberLeaderboardRow {
+  return {
+    id: 101,
+    songHash: "abcd1234",
+    songName: "Song",
+    songSubName: "Subtitle",
+    songAuthorName: "Artist",
+    levelAuthorName: "Mapper",
+    difficulty: "Expert",
+    characteristic: "Standard",
+    maxScore: 500_000,
+    ranked: false,
+    qualified: false,
+    stars: 8.5,
+    rankedDate: null,
+    qualifiedDate: null,
+    plays: 1000,
+    dailyPlays: 50,
+    seededScores: true,
+    trendingScore: 0,
+    timestamp: new Date("2024-01-15T00:00:00.000Z"),
+    ...overrides,
+  };
+}
+
+describe("leaderboardRowToType", () => {
+  const cases = [
+    {
+      name: "maps unranked leaderboard with default difficulties",
+      row: baseRow(),
+      difficulties: undefined as
+        | {
+            id: number;
+            stars: number;
+            difficulty: "Expert";
+            characteristic: "Standard";
+          }[]
+        | undefined,
+      expected: {
+        id: 101,
+        fullName: "Song Subtitle",
+        songHash: "ABCD1234",
+        songName: "Song",
+        songSubName: "Subtitle",
+        songAuthorName: "Artist",
+        levelAuthorName: "Mapper",
+        songArt: getScoreSaberLeaderboardCoverUrl("abcd1234"),
+        difficulty: {
+          id: 101,
+          stars: 8.5,
+          difficulty: "Expert",
+          characteristic: "Standard",
+        },
+        difficulties: [],
+        maxScore: 500_000,
+        ranked: false,
+        qualified: false,
+        stars: 8.5,
+        rankedDate: undefined,
+        qualifiedDate: undefined,
+        status: "Unranked",
+        plays: 1000,
+        dailyPlays: 50,
+        timestamp: new Date("2024-01-15T00:00:00.000Z"),
+      },
+    },
+    {
+      name: "maps ranked status",
+      row: baseRow({ ranked: true, qualified: false, rankedDate: new Date("2024-02-01T00:00:00.000Z") }),
+      difficulties: undefined,
+      expected: {
+        id: 101,
+        fullName: "Song Subtitle",
+        songHash: "ABCD1234",
+        songName: "Song",
+        songSubName: "Subtitle",
+        songAuthorName: "Artist",
+        levelAuthorName: "Mapper",
+        songArt: getScoreSaberLeaderboardCoverUrl("abcd1234"),
+        difficulty: {
+          id: 101,
+          stars: 8.5,
+          difficulty: "Expert",
+          characteristic: "Standard",
+        },
+        difficulties: [],
+        maxScore: 500_000,
+        ranked: true,
+        qualified: false,
+        stars: 8.5,
+        rankedDate: new Date("2024-02-01T00:00:00.000Z"),
+        qualifiedDate: undefined,
+        status: "Ranked",
+        plays: 1000,
+        dailyPlays: 50,
+        timestamp: new Date("2024-01-15T00:00:00.000Z"),
+      },
+    },
+    {
+      name: "maps qualified status when not ranked",
+      row: baseRow({
+        ranked: false,
+        qualified: true,
+        qualifiedDate: new Date("2024-02-02T00:00:00.000Z"),
+      }),
+      difficulties: undefined,
+      expected: {
+        id: 101,
+        fullName: "Song Subtitle",
+        songHash: "ABCD1234",
+        songName: "Song",
+        songSubName: "Subtitle",
+        songAuthorName: "Artist",
+        levelAuthorName: "Mapper",
+        songArt: getScoreSaberLeaderboardCoverUrl("abcd1234"),
+        difficulty: {
+          id: 101,
+          stars: 8.5,
+          difficulty: "Expert",
+          characteristic: "Standard",
+        },
+        difficulties: [],
+        maxScore: 500_000,
+        ranked: false,
+        qualified: true,
+        stars: 8.5,
+        rankedDate: undefined,
+        qualifiedDate: new Date("2024-02-02T00:00:00.000Z"),
+        status: "Qualified",
+        plays: 1000,
+        dailyPlays: 50,
+        timestamp: new Date("2024-01-15T00:00:00.000Z"),
+      },
+    },
+    {
+      name: "prefers ranked status when both ranked and qualified",
+      row: baseRow({ ranked: true, qualified: true }),
+      difficulties: undefined,
+      expected: {
+        id: 101,
+        fullName: "Song Subtitle",
+        songHash: "ABCD1234",
+        songName: "Song",
+        songSubName: "Subtitle",
+        songAuthorName: "Artist",
+        levelAuthorName: "Mapper",
+        songArt: getScoreSaberLeaderboardCoverUrl("abcd1234"),
+        difficulty: {
+          id: 101,
+          stars: 8.5,
+          difficulty: "Expert",
+          characteristic: "Standard",
+        },
+        difficulties: [],
+        maxScore: 500_000,
+        ranked: true,
+        qualified: true,
+        stars: 8.5,
+        rankedDate: undefined,
+        qualifiedDate: undefined,
+        status: "Ranked",
+        plays: 1000,
+        dailyPlays: 50,
+        timestamp: new Date("2024-01-15T00:00:00.000Z"),
+      },
+    },
+    {
+      name: "trims full name when subtitle is empty",
+      row: baseRow({ songSubName: "   " }),
+      difficulties: undefined,
+      expected: {
+        id: 101,
+        fullName: "Song",
+        songHash: "ABCD1234",
+        songName: "Song",
+        songSubName: "   ",
+        songAuthorName: "Artist",
+        levelAuthorName: "Mapper",
+        songArt: getScoreSaberLeaderboardCoverUrl("abcd1234"),
+        difficulty: {
+          id: 101,
+          stars: 8.5,
+          difficulty: "Expert",
+          characteristic: "Standard",
+        },
+        difficulties: [],
+        maxScore: 500_000,
+        ranked: false,
+        qualified: false,
+        stars: 8.5,
+        rankedDate: undefined,
+        qualifiedDate: undefined,
+        status: "Unranked",
+        plays: 1000,
+        dailyPlays: 50,
+        timestamp: new Date("2024-01-15T00:00:00.000Z"),
+      },
+    },
+    {
+      name: "parses string timestamp and uses provided difficulties",
+      row: baseRow({ timestamp: "2024-03-01T00:00:00.000Z" as unknown as Date }),
+      difficulties: [
+        { id: 202, stars: 9, difficulty: "ExpertPlus", characteristic: "OneSaber" },
+      ],
+      expected: {
+        id: 101,
+        fullName: "Song Subtitle",
+        songHash: "ABCD1234",
+        songName: "Song",
+        songSubName: "Subtitle",
+        songAuthorName: "Artist",
+        levelAuthorName: "Mapper",
+        songArt: getScoreSaberLeaderboardCoverUrl("abcd1234"),
+        difficulty: {
+          id: 101,
+          stars: 8.5,
+          difficulty: "Expert",
+          characteristic: "Standard",
+        },
+        difficulties: [{ id: 202, stars: 9, difficulty: "ExpertPlus", characteristic: "OneSaber" }],
+        maxScore: 500_000,
+        ranked: false,
+        qualified: false,
+        stars: 8.5,
+        rankedDate: undefined,
+        qualifiedDate: undefined,
+        status: "Unranked",
+        plays: 1000,
+        dailyPlays: 50,
+        timestamp: new Date("2024-03-01T00:00:00.000Z"),
+      },
+    },
+  ] as const;
+
+  for (const { name, row, difficulties, expected } of cases) {
+    test(name, () => {
+      expect(leaderboardRowToType(row, difficulties)).toEqual(expected);
+    });
+  }
+});

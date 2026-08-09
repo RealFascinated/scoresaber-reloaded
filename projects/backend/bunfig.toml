@@ -1,0 +1,4 @@
+[test]
+preload = ["./test/env.ts"]
+timeout = 60000
+hookTimeout = 120000

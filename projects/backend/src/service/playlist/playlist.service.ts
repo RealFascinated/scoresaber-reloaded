@@ -297,7 +297,7 @@ export default class PlaylistService {
       };
     } catch (error) {
       PlaylistService.logger.error("Error creating self playlist", error);
-      throw new InternalServerError((error as Error).message);
+      throw error;
     }
   }
 
@@ -420,7 +420,7 @@ export default class PlaylistService {
       };
     } catch (error) {
       PlaylistService.logger.error("Error creating snipe playlist", error);
-      throw new InternalServerError((error as Error).message);
+      throw error;
     }
   }
 

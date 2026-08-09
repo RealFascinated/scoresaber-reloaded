@@ -1,4 +1,4 @@
-import { MetricType } from "../service/infra/metrics.service";
+import { MetricType } from "./prometheus";
 
 export type MetricOptions = {
   /**

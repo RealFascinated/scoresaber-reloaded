@@ -13,4 +13,4 @@ const mapDifficultyShape = Type.Union(
 
 export type MapDifficulty = StaticDecode<typeof mapDifficultyShape>;
 
-export const MapDifficultySchema = Type.Unsafe<MapDifficulty>(Type.String({ default: "Easy" }));
+export const MapDifficultySchema = mapDifficultyShape;

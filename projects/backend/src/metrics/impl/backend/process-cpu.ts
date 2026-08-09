@@ -1,6 +1,6 @@
 import os from "node:os";
 import { Gauge } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
 
 export default class ProcessCpuMetric extends NumberMetric {

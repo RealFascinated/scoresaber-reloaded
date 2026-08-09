@@ -1,7 +1,7 @@
 import { Gauge } from "prom-client";
 import { ScoreSaberScoreHistoryRepository } from "../../../repositories/scoresaber-score-history.repository";
 import { ScoreSaberScoresRepository } from "../../../repositories/scoresaber-scores.repository";
-import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
 
 export default class TotalTrackedScoresMetric extends NumberMetric {

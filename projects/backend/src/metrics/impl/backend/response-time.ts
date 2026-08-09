@@ -1,5 +1,5 @@
 import { Histogram } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../../service/infra/metrics.service";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 import Metric from "../../metric";
 
 export default class ResponseTimeHistogramMetric extends Metric<number> {
