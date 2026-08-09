@@ -28,7 +28,7 @@ interface PlayerDataProps {
 }
 
 export default function PlayerData({ player }: PlayerDataProps) {
-  const isMobile = useIsMobile("md");
+  const isMobile = useIsMobile("xl");
 
   const { value: selectedPlatform, setValue: setSelectedPlatform } = useQueryParamSelector({
     param: "platform",
@@ -82,7 +82,7 @@ export default function PlayerData({ player }: PlayerDataProps) {
 
   const showRankings = !isMobile && !player.inactive && !player.banned;
   return (
-    <div className="flex w-full flex-col gap-4 md:flex-row md:gap-6">
+    <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <PlayerHeader player={player} />
 
@@ -99,7 +99,7 @@ export default function PlayerData({ player }: PlayerDataProps) {
         )}
 
         <div className="flex flex-col">
-          <div className="flex">
+          <div className="flex flex-wrap">
             {availablePlatforms.map(platform => (
               <Button
                 key={platform.getDisplayName()}
@@ -117,7 +117,7 @@ export default function PlayerData({ player }: PlayerDataProps) {
       </div>
 
       {showRankings && (
-        <aside className="w-full shrink-0 md:w-96">
+        <aside className="w-full shrink-0 xl:w-96">
           <PlayerMiniRankings player={player} />
         </aside>
       )}

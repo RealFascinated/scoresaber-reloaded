@@ -45,7 +45,7 @@ export default function MedalsData() {
     <div className="flex w-full flex-col gap-4">
       <PageTitle title="Medals" description="Track medal rankings and compare players by medal count" />
 
-      <div className="flex w-full flex-col gap-4 md:flex-row md:gap-6">
+      <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           {!rankingData && !isError && (
             <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
@@ -123,7 +123,7 @@ export default function MedalsData() {
           )}
         </div>
 
-        <div className="flex w-full shrink-0 flex-col gap-4 md:w-96">
+        <div className="flex w-full shrink-0 flex-col gap-4 xl:w-96">
           <FilterSection
             title="Filters"
             hasActiveFilters={Boolean(currentCountry)}

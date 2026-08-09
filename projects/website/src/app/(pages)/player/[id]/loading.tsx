@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function Loading() {
   return (
     <section className="w-full">
-      <div className="flex w-full flex-col gap-4 md:flex-row md:gap-6">
+      <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           {/* Player header */}
           <Card className="flex flex-col gap-6">
@@ -91,7 +91,7 @@ export default function Loading() {
 
           {/* Platform scores */}
           <div className="flex flex-col">
-            <div className="flex">
+            <div className="flex flex-wrap">
               {Array.from({ length: 4 }).map((_, index) => (
                 <Skeleton key={index} className="h-9 w-32 rounded-b-none" />
               ))}
@@ -136,7 +136,7 @@ export default function Loading() {
         </div>
 
         {/* Mini rankings sidebar */}
-        <aside className="hidden w-full shrink-0 md:block md:w-96">
+        <aside className="hidden w-full shrink-0 xl:block xl:w-96">
           <div className="sticky top-4 flex flex-col gap-4">
             {Array.from({ length: 2 }).map((_, cardIndex) => (
               <div

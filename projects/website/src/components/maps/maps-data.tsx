@@ -57,9 +57,9 @@ export function MapsData({ type }: MapsDataProps) {
           title={selectedCategory.name}
           description="Browse ScoreSaber leaderboards and ranking queue requests"
         />
-        <div className="flex w-full flex-col gap-4 md:flex-row md:gap-6">
+        <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
           <div className="flex min-w-0 flex-1 flex-col gap-4">{selectedCategory.render()}</div>
-          <div className="flex w-full shrink-0 flex-col gap-4 md:w-96">
+          <div className="flex w-full shrink-0 flex-col gap-4 xl:w-96">
             {selectedCategory.showFilter && <MapFilters />}
             {selectedCategory.id === "ranking-queue" && (
               <Card>

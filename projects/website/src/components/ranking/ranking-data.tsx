@@ -74,7 +74,7 @@ export default function RankingData() {
         description="View players ranked by performance points globally or by country"
       />
 
-      <div className="flex w-full flex-col gap-4 md:flex-row md:gap-6">
+      <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           {!rankingData && !isError && (
             <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
@@ -164,7 +164,7 @@ export default function RankingData() {
           )}
         </div>
 
-        <div className="w-full shrink-0 md:w-96">
+        <div className="w-full shrink-0 xl:w-96">
           <FilterSection
             title="Filters"
             hasActiveFilters={Boolean(currentCountry || currentSearch)}
