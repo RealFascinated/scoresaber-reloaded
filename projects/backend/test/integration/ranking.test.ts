@@ -1,12 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { createTestApp } from "../helpers/create-test-app";
 import { expectPaginationMetadata, expectStatus } from "../helpers/assertions";
 import {
   TEST_AVATAR,
+  TEST_INACTIVE_PLAYER_ID,
   TEST_PLAYER_ID,
   TEST_PLAYER_NAME,
   TEST_PLAYER_TWO_ID,
 } from "../helpers/constants";
+import { createTestApp } from "../helpers/create-test-app";
 import { request } from "../helpers/request";
 
 describe("Ranking API integration", () => {
@@ -19,6 +20,8 @@ describe("Ranking API integration", () => {
 
       const body = (await response.json()) as { items: Array<{ id: string }>; metadata: unknown };
       expect(body.items.some(player => player.id === TEST_PLAYER_ID)).toBe(true);
+      // Inactive players are excluded by default.
+      expect(body.items.some(player => player.id === TEST_INACTIVE_PLAYER_ID)).toBe(false);
       expectPaginationMetadata(body.metadata, 1);
     });
 
@@ -37,6 +40,17 @@ describe("Ranking API integration", () => {
       const body = (await response.json()) as { items: Array<{ id: string }> };
       expect(body.items.some(player => player.id === TEST_PLAYER_ID)).toBe(true);
       expect(body.items.some(player => player.id === TEST_PLAYER_TWO_ID)).toBe(true);
+      // The flag is what brings the inactive fixture player into the results.
+      expect(body.items.some(player => player.id === TEST_INACTIVE_PLAYER_ID)).toBe(true);
+    });
+
+    test("returns empty items for an unmatched country filter", async () => {
+      const response = await request(app, "/ranking/1?country=ZZ");
+      expectStatus(response, 200);
+
+      const body = (await response.json()) as { items: unknown[]; metadata: unknown };
+      expect(body.items).toEqual([]);
+      expectPaginationMetadata(body.metadata, 1);
     });
 
     test("returns empty items for short search queries", async () => {

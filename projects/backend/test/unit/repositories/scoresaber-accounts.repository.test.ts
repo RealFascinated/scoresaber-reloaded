@@ -2,12 +2,12 @@ import { describe, expect, test } from "bun:test";
 import { ScoreSaberAccountsRepository } from "../../../src/repositories/scoresaber-accounts.repository";
 import { TableCountsRepository } from "../../../src/repositories/table-counts.repository";
 import {
+  INSERT_ACCOUNT_ID,
   TEST_AVATAR,
   TEST_INACTIVE_PLAYER_ID,
   TEST_PLAYER_ID,
   TEST_PLAYER_NAME,
   TEST_PLAYER_TWO_ID,
-  INSERT_ACCOUNT_ID,
   UNKNOWN_PLAYER_ID,
 } from "../../helpers/constants";
 import { buildAccountRow } from "../../helpers/fixtures";
@@ -122,7 +122,9 @@ describe("ScoreSaberAccountsRepository", () => {
 
     test("updates values and returns true when changed", async () => {
       const before = await ScoreSaberAccountsRepository.findRowById(TEST_PLAYER_ID);
-      const updated = await ScoreSaberAccountsRepository.updateAccount(TEST_PLAYER_ID, { pp: (before?.pp ?? 0) + 1 });
+      const updated = await ScoreSaberAccountsRepository.updateAccount(TEST_PLAYER_ID, {
+        pp: (before?.pp ?? 0) + 1,
+      });
       expect(updated).toBe(true);
       const after = await ScoreSaberAccountsRepository.findRowById(TEST_PLAYER_ID);
       expect(after?.pp).toBe((before?.pp ?? 0) + 1);
@@ -182,8 +184,12 @@ describe("ScoreSaberAccountsRepository", () => {
       await ScoreSaberAccountsRepository.markInactiveWhereIdNotIn([TEST_PLAYER_ID]);
       const inactive = await ScoreSaberAccountsRepository.findRowById(TEST_INACTIVE_PLAYER_ID);
       const active = await ScoreSaberAccountsRepository.findRowById(TEST_PLAYER_ID);
+      const transitioned = await ScoreSaberAccountsRepository.findRowById(TEST_PLAYER_TWO_ID);
       expect(inactive?.inactive).toBe(true);
       expect(active?.inactive).toBe(false);
+      // TEST_PLAYER_TWO_ID is the only active account outside the keep-list,
+      // so it must transition active -> inactive.
+      expect(transitioned?.inactive).toBe(true);
     });
   });
 
