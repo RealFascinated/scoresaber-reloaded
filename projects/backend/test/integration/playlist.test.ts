@@ -1,6 +1,6 @@
 import { encodeCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { describe, expect, test } from "bun:test";
-import { expectPlaylistShape, expectStatus } from "../helpers/assertions";
+import { expectPlaylistBplistShape, expectPlaylistShape, expectStatus } from "../helpers/assertions";
 import {
   TEST_PLAYER_ID,
   TEST_PLAYER_TWO_ID,
@@ -35,7 +35,12 @@ describe("Playlist API integration", () => {
         test(`returns playlist for ${id}${suffix}`, async () => {
           const response = await request(app, `/playlist/${id}${suffix}`);
           expectStatus(response, 200);
-          expectPlaylistShape(await response.json());
+          const body = await response.json();
+          if (suffix === ".bplist") {
+            expectPlaylistBplistShape(body);
+          } else {
+            expectPlaylistShape(body);
+          }
         });
       }
     }
@@ -133,6 +138,62 @@ describe("Playlist API integration", () => {
     test("returns 404 when player is not tracked", async () => {
       const response = await request(app, `/playlist/self?user=${UNKNOWN_PLAYER_ID}`);
       expectStatus(response, 404);
+    });
+  });
+
+  describe("BPLIST highlighting", () => {
+    test("self playlist emits the score's difficulty as a named entry for in-game highlighting", async () => {
+      const response = await request(app, `/playlist/self.bplist?user=${TEST_PLAYER_ID}`);
+      expectStatus(response, 200);
+
+      const body = (await response.json()) as {
+        songs: Array<{
+          hash: string;
+          difficulties: Array<{ name: string; characteristic: string }>;
+        }>;
+      };
+      const song = body.songs.find(s => s.hash.toLowerCase() === TEST_SONG_HASH.toLowerCase());
+      expect(song).toBeDefined();
+      // TEST_SCORE_ID was set on leaderboard 900001 (ExpertPlus/Standard).
+      expect(song?.difficulties).toEqual([{ name: "ExpertPlus", characteristic: "Standard" }]);
+    });
+
+    test("snipe playlist emits the sniped score's difficulty as a named entry", async () => {
+      // player01 (950) outscored player02 (900) on the seeded leaderboard, so
+      // sniping player01's scores from player02 includes the 900001 score.
+      const response = await request(
+        app,
+        `/playlist/snipe.bplist?user=${TEST_PLAYER_TWO_ID}&toSnipe=${TEST_PLAYER_ID}`
+      );
+      expectStatus(response, 200);
+
+      const body = (await response.json()) as {
+        songs: Array<{
+          hash: string;
+          difficulties: Array<{ name: string; characteristic: string }>;
+        }>;
+      };
+      const song = body.songs.find(s => s.hash.toLowerCase() === TEST_SONG_HASH.toLowerCase());
+      expect(song).toBeDefined();
+      expect(song?.difficulties).toEqual([{ name: "ExpertPlus", characteristic: "Standard" }]);
+    });
+
+    test("custom ranked playlist bplist uses named difficulties", async () => {
+      const config = encodeCustomRankedPlaylistSettings({
+        stars: { min: 0, max: 15 },
+        sort: "stars",
+      });
+      const response = await request(app, `/playlist/scoresaber-custom-ranked-maps.bplist?config=${config}`);
+      expectStatus(response, 200);
+
+      const body = (await response.json()) as {
+        songs: Array<{ difficulties: Array<{ name: string; characteristic: string }> }>;
+      };
+      const song = body.songs.find(s =>
+        // Custom ranked playlists emit every difficulty of the seeded ranked leaderboard.
+        s.difficulties.some(d => d.name === "ExpertPlus" && d.characteristic === "Standard")
+      );
+      expect(song).toBeDefined();
     });
   });
 });

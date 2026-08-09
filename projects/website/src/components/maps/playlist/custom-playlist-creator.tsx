@@ -53,7 +53,7 @@ export default function CustomPlaylistCreator({ trigger }: CustomPlaylistCreator
     setDownloading(true);
     try {
       await downloadFile(
-        `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-custom-ranked-maps?config=${encodeCustomRankedPlaylistSettings(data)}`,
+        `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-custom-ranked-maps.bplist?config=${encodeCustomRankedPlaylistSettings(data)}`,
         `ssr-custom-ranked-${data.sort}-${data.stars.min}-${data.stars.max}-stars.bplist`
       );
     } finally {

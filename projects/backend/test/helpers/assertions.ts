@@ -40,6 +40,33 @@ export function expectPlaylistShape(body: unknown): asserts body is Playlist {
   expect(Array.isArray(playlist.songs)).toBe(true);
 }
 
+/**
+ * Asserts a Beat Saber BPLIST response: `songs[].difficulties` entries are
+ * `{ name, characteristic }` (the game parser's shape), not the SSR
+ * `{ difficulty, characteristic }` shape.
+ */
+export function expectPlaylistBplistShape(body: unknown): void {
+  const playlist = body as {
+    playlistTitle: string;
+    songs: Array<{
+      songName: string;
+      hash: string;
+      difficulties: Array<{ name: string; characteristic: string }>;
+    }>;
+  };
+  expect(typeof playlist.playlistTitle).toBe("string");
+  expect(Array.isArray(playlist.songs)).toBe(true);
+  for (const song of playlist.songs) {
+    expect(typeof song.songName).toBe("string");
+    expect(typeof song.hash).toBe("string");
+    expect(Array.isArray(song.difficulties)).toBe(true);
+    for (const difficulty of song.difficulties) {
+      expect(typeof difficulty.name).toBe("string");
+      expect(typeof difficulty.characteristic).toBe("string");
+    }
+  }
+}
+
 export function expectPaginationMetadata(metadata: unknown, page: number): void {
   const meta = metadata as {
     totalPages: number;

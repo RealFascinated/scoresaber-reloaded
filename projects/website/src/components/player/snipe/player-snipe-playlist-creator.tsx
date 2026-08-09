@@ -105,7 +105,7 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
       try {
         const encoded = encodeSnipePlaylistSettings(data);
         const filename = generateFilename(toSnipe.id, data);
-        const url = `${env.NEXT_PUBLIC_API_URL}/playlist/snipe?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encoded}`;
+        const url = `${env.NEXT_PUBLIC_API_URL}/playlist/snipe.bplist?user=${playerId}&toSnipe=${toSnipe.id}&settings=${encoded}`;
         await downloadFile(url, filename);
       } finally {
         setDownloading(false);

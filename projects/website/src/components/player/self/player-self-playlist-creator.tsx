@@ -95,7 +95,7 @@ export default function SelfPlaylistCreator() {
       try {
         const encoded = encodeSelfPlaylistSettings(data);
         const filename = generateFilename(playerId, data);
-        const url = `${env.NEXT_PUBLIC_API_URL}/playlist/self?user=${playerId}&settings=${encoded}`;
+        const url = `${env.NEXT_PUBLIC_API_URL}/playlist/self.bplist?user=${playerId}&settings=${encoded}`;
         await downloadFile(url, filename);
       } finally {
         setDownloading(false);

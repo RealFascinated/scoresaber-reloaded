@@ -227,15 +227,26 @@ export default class PlaylistService {
       category: sort[parsedConfig.sort] ?? "date_ranked",
     });
 
+    // `getLeaderboards` returns each leaderboard without its `difficulties`
+    // array populated — group by song hash and collect the difficulties so
+    // songs actually carry the diffs to highlight in-game.
+    const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
+    for (const leaderboard of rankedLeaderboards) {
+      if (!leaderboards.has(leaderboard.songHash)) {
+        leaderboards.set(leaderboard.songHash, leaderboard);
+      }
+      leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
+    }
+
     const title = `Custom Ranked (${getPlaylistTitleDate(new Date())})`;
 
     return {
       playlistTitle: title,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
       customData: {
-        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/custom-ranked-maps?settings=${settingsBase64}`,
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-custom-ranked-maps.bplist?config=${settingsBase64}`,
       },
-      songs: rankedLeaderboards.map(leaderboard => ({
+      songs: Array.from(leaderboards.values()).map(leaderboard => ({
         songName: leaderboard.songName,
         levelAuthorName: leaderboard.songAuthorName,
         hash: leaderboard.songHash,
@@ -291,7 +302,7 @@ export default class PlaylistService {
         playlistTitle: `Self Playlist (${getPlaylistTitleDate(new Date())}) / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%${settings.limit !== undefined ? ` / Top ${settings.limit}` : ""}`,
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
-          syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/self?user=${user}&settings=${settingsBase64}`,
+          syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/self.bplist?user=${user}&settings=${settingsBase64}`,
         },
         songs,
       };
@@ -414,7 +425,7 @@ export default class PlaylistService {
         playlistTitle: `${truncateText(player.name ?? "", 16)} (${getPlaylistTitleDate(new Date())}) / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%${settings.limit !== undefined ? ` / Top ${settings.limit}` : ""}`,
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
-          syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/snipe?user=${user}&toSnipe=${toSnipe}&settings=${settingsBase64}`,
+          syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/snipe.bplist?user=${user}&toSnipe=${toSnipe}&settings=${settingsBase64}`,
         },
         songs,
       };
