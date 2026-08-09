@@ -26,6 +26,7 @@ import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
+import { scoreRowsToPlaylistSongs, takeTopUniqueSongRows } from "./playlist-song-utils";
 
 function getPlaylistTitleDate(date: Date): string {
   return formatDate(date, "MMM D, YYYY");
@@ -284,9 +285,7 @@ export default class PlaylistService {
 
       PlaylistService.sortPlaylistScoreRows(filtered, settings.sort, settings.sortDirection);
 
-      const songs = PlaylistService.scoreRowsToPlaylistSongs(
-        settings.limit === undefined ? filtered : filtered.slice(0, settings.limit)
-      );
+      const songs = scoreRowsToPlaylistSongs(takeTopUniqueSongRows(filtered, settings.limit));
 
       return {
         playlistTitle: `Self Playlist (${getPlaylistTitleDate(new Date())}) / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%${settings.limit !== undefined ? ` / Top ${settings.limit}` : ""}`,
@@ -409,9 +408,7 @@ export default class PlaylistService {
         );
       }
 
-      const songs = PlaylistService.scoreRowsToPlaylistSongs(
-        settings.limit === undefined ? filteredScores : filteredScores.slice(0, settings.limit)
-      );
+      const songs = scoreRowsToPlaylistSongs(takeTopUniqueSongRows(filteredScores, settings.limit));
 
       return {
         playlistTitle: `${truncateText(player.name ?? "", 16)} (${getPlaylistTitleDate(new Date())}) / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%${settings.limit !== undefined ? ` / Top ${settings.limit}` : ""}`,
@@ -446,43 +443,6 @@ export default class PlaylistService {
       }
       return (a.score.scoreId - b.score.scoreId) * mult;
     });
-  }
-
-  /**
-   * Builds playlist songs from scored leaderboard rows, selecting only the difficulty each
-   * score was set on (highlighting it in-game) and merging scores on the same song by hash.
-   *
-   * @param rows the scored leaderboard rows
-   * @returns the playlist songs
-   */
-  private static scoreRowsToPlaylistSongs(
-    rows: Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>
-  ): Playlist["songs"] {
-    const songs = new Map<string, Playlist["songs"][number]>();
-    for (const { score, leaderboard } of rows) {
-      const difficulty = {
-        difficulty: score.difficulty,
-        characteristic: score.characteristic,
-      };
-      const song = songs.get(leaderboard.songHash);
-      if (!song) {
-        songs.set(leaderboard.songHash, {
-          songName: leaderboard.songName,
-          levelAuthorName: leaderboard.songAuthorName,
-          hash: leaderboard.songHash,
-          difficulties: [difficulty],
-        });
-        continue;
-      }
-      if (
-        !song.difficulties.some(
-          d => d.difficulty === difficulty.difficulty && d.characteristic === difficulty.characteristic
-        )
-      ) {
-        song.difficulties.push(difficulty);
-      }
-    }
-    return Array.from(songs.values());
   }
 
   private static scoreSortValue(score: ScoreSaberScore, field: string): number {
