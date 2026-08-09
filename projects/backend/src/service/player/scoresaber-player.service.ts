@@ -58,6 +58,16 @@ export default class ScoreSaberPlayerService {
       throw new NotFoundError(`Player "${id}" not found`);
     }
 
+    // A token passed in (e.g. from the token cache) can predate the v2 shape and
+    // lack `stats`; re-resolve from the API instead of crashing on it below.
+    if (!player.stats) {
+      const freshPlayer = await ScoreSaberApiService.lookupPlayer(id);
+      if (!freshPlayer?.stats) {
+        throw new NotFoundError(`Player "${id}" not found`);
+      }
+      player = freshPlayer;
+    }
+
     const rank = player.stats.rank;
     const countryRank = player.stats.countryRank;
 
@@ -186,11 +196,45 @@ export default class ScoreSaberPlayerService {
   }
 
   /**
-   * Gets a cached ScoreSaber player token. The short cache uses a seperate redis
-   * key so the long-lived cache is not affected.
+   * Parses and validates a cached player token against the v2 schema. Entries
+   * written by older code (pre-v2 shape, missing `stats`) fail validation and
+   * are removed from the cache so callers re-fetch a fresh token instead of
+   * consuming malformed data.
+   *
+   * @param cachedData the raw cached value
+   * @param id the player's id
+   * @returns the valid token, or undefined if the entry was unusable
+   */
+  private static async parseCachedPlayerToken(
+    cachedData: string,
+    id: string
+  ): Promise<ScoreSaberV2PlayerToken | undefined> {
+    let token: ScoreSaberV2PlayerToken;
+    try {
+      token = parse(cachedData) as ScoreSaberV2PlayerToken;
+    } catch {
+      ScoreSaberPlayerService.logger.warn(
+        `Failed to parse cached player data for ${id}, removing from cache`
+      );
+      await redisClient.del(cachedPlayerTokenCacheKey(id));
+      return undefined;
+    }
+
+    if (!isScoreSaberV2PlayerToken(token)) {
+      ScoreSaberPlayerService.logger.warn(
+        `Cached player data for ${id} does not match the v2 player schema, removing from cache`
+      );
+      await redisClient.del(cachedPlayerTokenCacheKey(id));
+      return undefined;
+    }
+
+    return token;
+  }
+
+  /**
+   * Gets a cached ScoreSaber player token.
    *
    * @param id the player's id
-   * @param useShortCache whether to use the short cache
    * @returns the player token
    */
   public static async getCachedPlayer(id: string): Promise<ScoreSaberV2PlayerToken> {
@@ -198,13 +242,9 @@ export default class ScoreSaberPlayerService {
 
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
-      try {
-        return parse(cachedData) as ScoreSaberV2PlayerToken;
-      } catch {
-        ScoreSaberPlayerService.logger.warn(
-          `Failed to parse cached player data for ${id}, removing from cache`
-        );
-        await redisClient.del(cacheKey);
+      const cachedToken = await ScoreSaberPlayerService.parseCachedPlayerToken(cachedData, id);
+      if (cachedToken) {
+        return cachedToken;
       }
     }
 
@@ -244,15 +284,13 @@ export default class ScoreSaberPlayerService {
         continue;
       }
 
-      try {
-        players.set(id, parse(cachedValue) as ScoreSaberV2PlayerToken);
-      } catch {
-        ScoreSaberPlayerService.logger.warn(
-          `Failed to parse cached player data for ${id} in bulk lookup, removing from cache`
-        );
-        await redisClient.del(key);
+      const cachedToken = await ScoreSaberPlayerService.parseCachedPlayerToken(cachedValue, id);
+      if (!cachedToken) {
         missingIds.push(id);
+        continue;
       }
+
+      players.set(id, cachedToken);
     }
 
     if (missingIds.length > 0) {

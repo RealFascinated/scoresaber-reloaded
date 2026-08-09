@@ -1,14 +1,8 @@
-import { SHARED_CONSTS } from "@ssr/common/shared-consts";
+import { isScoreSaberV2PlayerToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { describe, expect, test } from "bun:test";
-import { createTestApp } from "../helpers/create-test-app";
-import {
-  TEST_LEADERBOARD_ID,
-  TEST_PLAYER_ID,
-  TEST_PLAYER_NAME,
-  UNKNOWN_LEADERBOARD_ID,
-  UNKNOWN_PLAYER_ID,
-} from "../helpers/constants";
-import { request } from "../helpers/request";
+import { parse, stringify } from "devalue";
+import { cachedPlayerTokenCacheKey } from "../../src/common/cache-keys";
+import { redisClient } from "../../src/common/redis";
 import {
   expectBasicPlayerShape,
   expectMiniRankingResponse,
@@ -22,6 +16,16 @@ import {
   expectStatus,
   expectValidationError,
 } from "../helpers/assertions";
+import {
+  TEST_AVATAR,
+  TEST_LEADERBOARD_ID,
+  TEST_PLAYER_ID,
+  TEST_PLAYER_NAME,
+  UNKNOWN_LEADERBOARD_ID,
+  UNKNOWN_PLAYER_ID,
+} from "../helpers/constants";
+import { createTestApp } from "../helpers/create-test-app";
+import { request } from "../helpers/request";
 
 describe("GET /player/search", () => {
   const app = createTestApp();
@@ -43,6 +47,42 @@ describe("GET /player/search", () => {
     expectPlayerSearchResponse(body);
     const players = (body as { players: Array<{ id: string }> }).players;
     expect(players.some(player => player.id === TEST_PLAYER_ID)).toBe(true);
+  });
+
+  test("recovers from a stale (pre-v2) cached player token", async () => {
+    // A v1-shaped token (flat rank/countryRank, no `stats`) — what older code
+    // cached under this key before the v2 player migration.
+    const staleToken = {
+      id: TEST_PLAYER_ID,
+      name: TEST_PLAYER_NAME,
+      playerNameInGame: TEST_PLAYER_NAME,
+      country: "US",
+      role: null,
+      avatar: TEST_AVATAR,
+      avatarVersion: 1,
+      permissions: 0,
+      banned: false,
+      silenced: false,
+      inactive: false,
+      rank: 100,
+      countryRank: 10,
+      pp: 100,
+      scoreStats: {},
+    };
+    await redisClient.set(cachedPlayerTokenCacheKey(TEST_PLAYER_ID), stringify(staleToken), "EX", 60 * 60);
+
+    const response = await request(app, `/player/search?query=${TEST_PLAYER_NAME}`);
+    expectStatus(response, 200);
+
+    const body = await response.json();
+    expectPlayerSearchResponse(body);
+    const players = (body as { players: Array<{ id: string }> }).players;
+    expect(players.some(player => player.id === TEST_PLAYER_ID)).toBe(true);
+
+    // The stale entry was removed and replaced with a valid v2 token.
+    const healed = await redisClient.get(cachedPlayerTokenCacheKey(TEST_PLAYER_ID));
+    expect(healed).not.toBeNull();
+    expect(isScoreSaberV2PlayerToken(parse(healed!))).toBe(true);
   });
 
   test("rejects overly long query", async () => {
@@ -192,7 +232,10 @@ describe("GET /player/score-history/:playerId/:leaderboardId/:page", () => {
   });
 
   test("returns 404 for unknown leaderboard", async () => {
-    const response = await request(app, `/player/score-history/${TEST_PLAYER_ID}/${UNKNOWN_LEADERBOARD_ID}/1`);
+    const response = await request(
+      app,
+      `/player/score-history/${TEST_PLAYER_ID}/${UNKNOWN_LEADERBOARD_ID}/1`
+    );
     await expectNotFound(response);
   });
 });
