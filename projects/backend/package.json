@@ -26,7 +26,7 @@
     "@elysiajs/openapi": "^1.4.15",
     "@elysiajs/server-timing": "^1.4.1",
     "@eslint/eslintrc": "^3.3.6",
-    "@eslint/js": "^9.39.5",
+    "@eslint/js": "^10.0.1",
     "@sinclair/typebox": "^0.34.33",
     "@ssr/common": "workspace:common",
     "@tqman/nice-logger": "^1.1.1",
