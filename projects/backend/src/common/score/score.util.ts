@@ -14,6 +14,7 @@ import { format, pluralize } from "@ssr/common/utils/string.util";
 import { formatChange } from "@ssr/common/utils/utils";
 import { ButtonBuilder, ButtonStyle, Colors, EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import BeatLeaderService from "../../service/beatleader/beatleader.service";
 import BeatSaverService from "../../service/external/beatsaver.service";
 import { PlayerCoreService } from "../../service/player/player-core.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
@@ -32,13 +33,24 @@ export async function sendScoreNotification(
   beatLeaderScore: BeatLeaderScore | undefined,
   title: string
 ) {
-  const [beatSaver, previousScore] = await Promise.all([
+  // The real-time websocket pairing may have missed the BeatLeader event; fall
+  // back to the same read-time lookup the website uses so the replay button
+  // matches what the score page shows.
+  const [beatSaver, previousScore, resolvedBeatLeaderScore] = await Promise.all([
     BeatSaverService.getMap(
       leaderboard.songHash,
       leaderboard.difficulty.difficulty,
       leaderboard.difficulty.characteristic
     ),
     PlayerScoreHistoryService.getPlayerPreviousScore(score, leaderboard),
+    beatLeaderScore ??
+      BeatLeaderService.getBeatLeaderScoreFromSong(
+        score.playerId,
+        leaderboard.songHash,
+        leaderboard.difficulty.difficulty,
+        leaderboard.difficulty.characteristic,
+        score.score
+      ),
   ]);
   const change = previousScore &&
     previousScore.change && {
@@ -51,7 +63,7 @@ export async function sendScoreNotification(
 
   const accuracy =
     leaderboard.maxScore > 0
-      ? `${formatScoreAccuracy(score.accuracy)} ${change ? change.accuracy : ""}${beatLeaderScore && !score.fullCombo ? ` (FC: ${formatScoreAccuracy(beatLeaderScore.fcAccuracy)})` : ""}`
+      ? `${formatScoreAccuracy(score.accuracy)} ${change ? change.accuracy : ""}${resolvedBeatLeaderScore && !score.fullCombo ? ` (FC: ${formatScoreAccuracy(resolvedBeatLeaderScore.fcAccuracy)})` : ""}`
       : "N/A%";
 
   const message = await sendEmbedToChannel(
@@ -86,10 +98,10 @@ export async function sendScoreNotification(
             `**Misses:** ${formatNumberWithCommas(score.missedNotes)} ${change ? change.misses : ""}`,
             `**Bad Cuts:** ${formatNumberWithCommas(score.badCuts)} ${change ? change.badCuts : ""}`,
             `**Max Combo:** ${formatNumberWithCommas(score.maxCombo)} ${score.fullCombo ? " (FC)" : ""} ${change ? change.maxCombo : ""}`,
-            ...(beatLeaderScore
+            ...(resolvedBeatLeaderScore
               ? [
-                  `**Bomb Cuts**: ${beatLeaderScore.misses.bombCuts}`,
-                  `**Wall Hits**: ${beatLeaderScore.misses.wallsHit}`,
+                  `**Bomb Cuts**: ${resolvedBeatLeaderScore.misses.bombCuts}`,
+                  `**Wall Hits**: ${resolvedBeatLeaderScore.misses.wallsHit}`,
                 ]
               : []),
           ].join("\n"),
@@ -102,7 +114,7 @@ export async function sendScoreNotification(
         text: `Powered by ${env.NEXT_PUBLIC_WEBSITE_URL}`,
       })
       .setColor(score.pp && score.pp > 0 ? "#d4af37" : "#808080"),
-    getScoreButtons(score, leaderboard, beatSaver, beatLeaderScore)
+    getScoreButtons(score, leaderboard, beatSaver, resolvedBeatLeaderScore)
   );
 
   return message;
@@ -121,11 +133,23 @@ export async function sendMedalScoreNotification(
   beatLeaderScore: BeatLeaderScore | undefined,
   changes: Map<string, MedalChange>
 ) {
-  const beatSaver = await BeatSaverService.getMap(
-    leaderboard.songHash,
-    leaderboard.difficulty.difficulty,
-    leaderboard.difficulty.characteristic
-  );
+  // Fall back to the read-time lookup so the replay button matches the website
+  // even when the real-time websocket pairing missed the BeatLeader event.
+  const [beatSaver, resolvedBeatLeaderScore] = await Promise.all([
+    BeatSaverService.getMap(
+      leaderboard.songHash,
+      leaderboard.difficulty.difficulty,
+      leaderboard.difficulty.characteristic
+    ),
+    beatLeaderScore ??
+      BeatLeaderService.getBeatLeaderScoreFromSong(
+        score.playerId,
+        leaderboard.songHash,
+        leaderboard.difficulty.difficulty,
+        leaderboard.difficulty.characteristic,
+        score.score
+      ),
+  ]);
   const description = [
     `**${leaderboard.fullName}**`,
     `${getDifficultyName(leaderboard.difficulty.difficulty)} / ${leaderboard.difficulty.characteristic}${leaderboard.stars > 0 ? ` • ${leaderboard.stars.toFixed(2)}★` : ""}`,
@@ -204,7 +228,7 @@ export async function sendMedalScoreNotification(
       .setFooter({
         text: `Powered by ${env.NEXT_PUBLIC_WEBSITE_URL}`,
       }),
-    getScoreButtons(score, leaderboard, beatSaver, beatLeaderScore)
+    getScoreButtons(score, leaderboard, beatSaver, resolvedBeatLeaderScore)
   );
 }
 
@@ -229,19 +253,16 @@ function getScoreButtons(
       components: [
         new ButtonBuilder()
           .setLabel("Player")
-          .setEmoji("👤")
           .setStyle(ButtonStyle.Link)
           .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${score.playerId}`),
         new ButtonBuilder()
           .setLabel("Leaderboard")
-          .setEmoji("🏆")
           .setStyle(ButtonStyle.Link)
           .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/leaderboard/${leaderboard.id}`),
         ...(beatSaver
           ? [
               new ButtonBuilder()
                 .setLabel("Map")
-                .setEmoji("🗺️")
                 .setStyle(ButtonStyle.Link)
                 .setURL(`https://beatsaver.com/maps/${beatSaver.bsr}`),
             ]
@@ -249,8 +270,7 @@ function getScoreButtons(
         ...(beatLeaderScore
           ? [
               new ButtonBuilder()
-                .setLabel("Replay")
-                .setEmoji("🎥")
+                .setLabel("Watch Replay")
                 .setStyle(ButtonStyle.Link)
                 .setURL(
                   ReplayViewers.chroviewer.generateUrl(

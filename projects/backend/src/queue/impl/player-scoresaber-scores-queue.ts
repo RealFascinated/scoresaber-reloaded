@@ -42,10 +42,10 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
       DiscordChannels.PLAYER_SCORE_REFRESH_LOGS,
       new EmbedBuilder()
         .setTitle("Player Score Refresh Complete")
-        .setDescription(`🎯 **${account.name}**'s scores have been fetched`)
+        .setDescription(`**${account.name}**'s scores have been fetched`)
         .addFields([
           {
-            name: "📊 Statistics",
+            name: "Statistics",
             value: [
               `**Total Scores:** ${formatNumberWithCommas(totalScores)}`,
               `**Missing Scores:** ${formatNumberWithCommas(missingScores)}`,
@@ -63,7 +63,6 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
           components: [
             new ButtonBuilder()
               .setLabel("Player Profile")
-              .setEmoji("👤")
               .setStyle(ButtonStyle.Link)
               .setURL(`${env.NEXT_PUBLIC_WEBSITE_URL}/player/${account.id}`),
           ],

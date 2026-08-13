@@ -44,7 +44,6 @@ export class BeatSaverWebsocket {
             components: [
               new ButtonBuilder()
                 .setLabel("Map")
-                .setEmoji("🗺️")
                 .setStyle(ButtonStyle.Link)
                 .setURL(`https://beatsaver.com/maps/${map.id}`),
             ],
