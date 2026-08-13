@@ -1,5 +1,6 @@
 "use client";
 
+import { isBackendUnavailableError } from "@/common/api-error";
 import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { isPlayerSearchQueryTooShort, PLAYER_SEARCH_TOO_SHORT_MESSAGE } from "@/common/search-query-utils";
 import Avatar from "@/components/avatar";
@@ -26,7 +27,12 @@ export default function PlayerAndLeaderboardSearch() {
   const trimmedQuery = debouncedQuery.trim();
   const isQueryTooShort = isPlayerSearchQueryTooShort(query);
 
-  const { data: results, isLoading } = useQuery({
+  const {
+    data: results,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["playerAndLeaderboardSearch", trimmedQuery],
     queryFn: async (): Promise<{
       players: ScoreSaberPlayer[];
@@ -65,6 +71,9 @@ export default function PlayerAndLeaderboardSearch() {
           }) ?? [],
       };
     },
+    // Fail fast so a backend outage surfaces as an error state instead of an
+    // endless retry spinner (the provider default is infinite retries).
+    retry: false,
     refetchInterval: false,
     enabled: isOpen,
   });
@@ -119,6 +128,14 @@ export default function PlayerAndLeaderboardSearch() {
           <div className="flex flex-col items-center justify-center py-12">
             <SharedIcons.SearchLoadingIcon className="text-muted-foreground mb-3 size-6 animate-spin" />
             <p className="text-muted-foreground text-sm">Searching...</p>
+          </div>
+        ) : isError && isBackendUnavailableError(error) ? (
+          <div className="flex flex-col items-center justify-center px-4 py-12">
+            <SharedIcons.WarningAlertIcon className="mb-3 size-10 text-red-400" />
+            <p className="text-muted-foreground mb-1 text-sm font-medium">Backend unavailable</p>
+            <p className="text-muted-foreground/70 text-center text-xs">
+              The backend is currently offline or unreachable. Please try again later.
+            </p>
           </div>
         ) : !results?.players.length && !results?.leaderboards.length ? (
           <div className="flex flex-col items-center justify-center px-4 py-12">

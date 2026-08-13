@@ -1,5 +1,7 @@
 "use client";
 
+import { isBackendUnavailableError } from "@/common/api-error";
+import BackendUnavailable from "@/components/api/backend-unavailable";
 import Card from "@/components/card";
 import { FancyLoader } from "@/components/fancy-loader";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
@@ -45,9 +47,14 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
     data: score,
     isLoading,
     isError,
+    error,
+    refetch,
   } = useQuery({
     queryKey: ["score", scoreId],
     queryFn: () => ssrApi.getScore(scoreId),
+    // Fail fast so a backend outage surfaces as an error state instead of an
+    // endless retry spinner (the provider default is infinite retries).
+    retry: false,
     ...(hasServerScore ? { initialData: initialScore, staleTime: 60_000, refetchOnMount: false } : {}),
   });
 
@@ -64,6 +71,12 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
     queryFn: () => getDecodedReplay(beatLeaderScoreId!.toString()),
     enabled: beatLeaderScoreId != null,
   });
+
+  const showBackendUnavailable = !score && isError && isBackendUnavailableError(error);
+
+  if (showBackendUnavailable) {
+    return <BackendUnavailable onRetry={() => refetch()} />;
+  }
 
   if (isError) {
     return (

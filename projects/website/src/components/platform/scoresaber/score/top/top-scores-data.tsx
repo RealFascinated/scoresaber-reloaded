@@ -1,5 +1,7 @@
 "use client";
 
+import { isBackendUnavailableError } from "@/common/api-error";
+import BackendUnavailable from "@/components/api/backend-unavailable";
 import Avatar from "@/components/avatar";
 import { PageTitle } from "@/components/page-title";
 import SimpleLink from "@/components/simple-link";
@@ -17,12 +19,24 @@ export function TopScoresData() {
     data: scores,
     isLoading,
     isRefetching,
+    isError,
+    error,
+    refetch,
   } = useQuery({
     queryKey: ["top-scores", page],
     queryFn: () => ssrApi.fetchTopScores(page),
+    // Fail fast so a backend outage surfaces as an error state instead of an
+    // endless retry spinner (the provider default is infinite retries).
+    retry: false,
     refetchInterval: false,
     placeholderData: data => data,
   });
+
+  const showBackendUnavailable = !scores && isError && isBackendUnavailableError(error);
+
+  if (showBackendUnavailable) {
+    return <BackendUnavailable onRetry={() => refetch()} />;
+  }
 
   return (
     <div className="flex w-full flex-col gap-4">

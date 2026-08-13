@@ -1,5 +1,7 @@
 "use client";
 
+import { isBackendUnavailableError } from "@/common/api-error";
+import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/ui/count-up";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SharedIcons, type SharedDecorativeIcon } from "@/shared-icons";
@@ -73,11 +75,16 @@ function LandingStatCard({
  * with a floating "+N" animation whenever a displayed value increments.
  */
 export function LandingStats() {
-  const { data, dataUpdatedAt, isLoading } = useQuery({
+  const { data, dataUpdatedAt, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["app-statistics"],
     queryFn: () => ssrApi.getAppStatistics(),
+    // Fail fast so a backend outage surfaces as an error state instead of an
+    // endless retry spinner (the provider default is infinite retries).
+    retry: false,
     refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
   });
+
+  const showBackendUnavailable = isError && isBackendUnavailableError(error);
 
   const shouldReduceMotion = useReducedMotion();
 
@@ -132,6 +139,20 @@ export function LandingStats() {
         {Array.from({ length: STATS.length }).map((_, index) => (
           <Skeleton key={index} className="h-28 rounded-xl" />
         ))}
+      </div>
+    );
+  }
+
+  if (showBackendUnavailable) {
+    return (
+      <div className="flex w-full flex-col items-center gap-2 py-8 text-center">
+        <SharedIcons.StatsUnavailableIcon className="text-muted-foreground size-10" />
+        <p className="text-muted-foreground text-sm">
+          Statistics are unavailable because the backend is offline.
+        </p>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
+          Try Again
+        </Button>
       </div>
     );
   }

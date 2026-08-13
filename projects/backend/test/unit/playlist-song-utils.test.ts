@@ -1,6 +1,6 @@
-import { describe, expect, test } from "bun:test";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
+import { describe, expect, test } from "bun:test";
 import {
   scoreRowsToPlaylistSongs,
   takeTopUniqueSongRows,
@@ -34,15 +34,16 @@ function makeRow(
 }
 
 describe("takeTopUniqueSongRows", () => {
-  test("keeps the first row per song hash in sort order", () => {
+  test("keeps every row per song hash in sort order", () => {
     const rows = [
       makeRow("AAA", "ExpertPlus", 300),
       makeRow("AAA", "Expert", 250),
       makeRow("BBB", "Expert", 200),
     ];
 
-    expect(takeTopUniqueSongRows(rows)).toHaveLength(2);
+    expect(takeTopUniqueSongRows(rows)).toHaveLength(3);
     expect(takeTopUniqueSongRows(rows)[0]?.leaderboard.difficulty.difficulty).toBe("ExpertPlus");
+    expect(takeTopUniqueSongRows(rows)[1]?.leaderboard.difficulty.difficulty).toBe("Expert");
   });
 
   test("applies limit to unique songs instead of raw score rows", () => {
@@ -53,19 +54,24 @@ describe("takeTopUniqueSongRows", () => {
       makeRow("CCC", "Hard", 100),
     ];
 
-    expect(takeTopUniqueSongRows(rows, 2)).toEqual([rows[0], rows[2]]);
+    expect(takeTopUniqueSongRows(rows, 2)).toEqual([rows[0], rows[1], rows[2]]);
   });
 });
 
 describe("scoreRowsToPlaylistSongs", () => {
-  test("emits exactly one difficulty per song for in-game highlighting", () => {
-    const rows = [makeRow("AAA", "ExpertPlus", 300), makeRow("BBB", "Expert", 200)];
+  test("emits every difficulty per song for in-game highlighting", () => {
+    const rows = [
+      makeRow("AAA", "ExpertPlus", 300),
+      makeRow("AAA", "Expert", 250),
+      makeRow("BBB", "Expert", 200),
+    ];
 
     const songs = scoreRowsToPlaylistSongs(rows);
 
     expect(songs).toHaveLength(2);
     expect(songs[0]?.difficulties).toEqual([
       { difficulty: "ExpertPlus", characteristic: "Standard" },
+      { difficulty: "Expert", characteristic: "Standard" },
     ]);
     expect(songs[1]?.difficulties).toEqual([{ difficulty: "Expert", characteristic: "Standard" }]);
   });

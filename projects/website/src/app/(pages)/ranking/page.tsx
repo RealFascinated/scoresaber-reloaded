@@ -1,6 +1,7 @@
 import RankingData from "@/components/ranking/ranking-data";
 import { env } from "@ssr/common/env";
 import { countryFilter } from "@ssr/common/utils/country.util";
+import { ssrConfig } from "config";
 import { Metadata } from "next";
 
 export const revalidate = 300; // Revalidate every 5 minutes
@@ -21,9 +22,10 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   return {
     title: title,
     openGraph: {
-      siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
+      siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
       title: title,
       description: `View the players from ${fullCountry === "Global" ? "all over the world" : fullCountry}!`,
+      images: ["/icon-512x512.png"],
     },
   };
 }

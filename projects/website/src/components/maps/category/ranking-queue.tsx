@@ -1,4 +1,6 @@
+import { isBackendUnavailableError } from "@/common/api-error";
 import { cn } from "@/common/utils";
+import BackendUnavailable from "@/components/api/backend-unavailable";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
@@ -14,12 +16,23 @@ import SimpleTooltip from "../../simple-tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
 
 export default function RankingQueue() {
-  const { data: rankingRequests, isLoading } = useQuery({
+  const {
+    data: rankingRequests,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["ranking-queue"],
     queryFn: async () => ssrApi.fetchRankingQueue(),
+    // Fail fast so a backend outage surfaces as an error state instead of an
+    // endless retry spinner (the provider default is infinite retries).
+    retry: false,
   });
   const [showOpenRankUnrank, setShowOpenRankUnrank] = useState(false);
   const router = useRouter();
+
+  const showBackendUnavailable = !rankingRequests && isError && isBackendUnavailableError(error);
 
   const renderRequests = (name: string, requests: RankingQueueLeaderboard[]) => {
     return (
@@ -92,6 +105,10 @@ export default function RankingQueue() {
       </div>
     );
   };
+
+  if (showBackendUnavailable) {
+    return <BackendUnavailable onRetry={() => refetch()} />;
+  }
 
   if (isLoading) {
     return (

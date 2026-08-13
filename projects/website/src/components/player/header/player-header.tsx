@@ -1,5 +1,8 @@
+"use client";
+
 import AddFriend from "@/components/friend/add-friend";
 import SimpleLink from "@/components/simple-link";
+import { useIsMobile } from "@/contexts/viewport-context";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import Card from "../../card";
@@ -19,6 +22,8 @@ type PlayerHeaderProps = {
 };
 
 export default function PlayerHeader({ player }: PlayerHeaderProps) {
+  const isMobile = useIsMobile("lg");
+
   return (
     <Card className="flex flex-col gap-6">
       <div className="relative flex flex-col items-center gap-6 text-center select-none lg:flex-row lg:items-start lg:text-start">
@@ -65,7 +70,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
           </div>
 
           <div className="absolute top-0 right-0 flex flex-col gap-2 lg:flex-row">
-            <AddFriend player={player} />
+            <AddFriend player={player} iconOnly={isMobile} />
             <ClaimProfile playerId={player.id} />
           </div>
         </div>

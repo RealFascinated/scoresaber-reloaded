@@ -1,5 +1,6 @@
 import { MapsData } from "@/components/maps/maps-data";
 import { env } from "@ssr/common/env";
+import { ssrConfig } from "config";
 import { Metadata } from "next";
 
 type MapsPageProps = {
@@ -33,10 +34,11 @@ export async function generateMetadata({ params }: MapsPageProps): Promise<Metad
       canonical: `/maps/${type}`,
     },
     openGraph: {
-      siteName: env.NEXT_PUBLIC_WEBSITE_NAME,
+      siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
       title: metadataForType.title,
       description: metadataForType.description,
-      url: `${env.NEXT_PUBLIC_WEBSITE_URL}/maps/${type}`,
+      url: `${env.NEXT_PUBLIC_WEBSITE_URL ?? ssrConfig.siteUrl}/maps/${type}`,
+      images: ["/icon-512x512.png"],
     },
   };
 }

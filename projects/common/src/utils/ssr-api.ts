@@ -1,6 +1,7 @@
 import { parse } from "devalue";
 import { DetailType } from "../detail-type";
 import { env } from "../env";
+import { BackendUnavailableError } from "../error/backend-unavailable-error";
 import ScoreSaberPlayer from "../player/impl/scoresaber-player";
 import type { AccSaberScoreSort, AccSaberScoreType } from "../schemas/accsaber/query/query";
 import { BeatSaverMap } from "../schemas/beatsaver/map/map";
@@ -48,26 +49,52 @@ class SSRApi {
    */
   async request<T>(url: string, queryParams?: Record<string, string>, body?: Record<string, unknown>) {
     const queryString = getQueryParamsFromObject(queryParams || {});
-    const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${url}${queryString}`, {
-      method: body ? "POST" : "GET",
-      headers: {
-        Accept: "application/devalue",
-        ...(body && { "Content-Type": "application/json" }),
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
+
+    let response: Response;
+    try {
+      response = await fetch(`${env.NEXT_PUBLIC_API_URL}${url}${queryString}`, {
+        method: body ? "POST" : "GET",
+        headers: {
+          Accept: "application/devalue",
+          ...(body && { "Content-Type": "application/json" }),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    } catch (error) {
+      // Backend is offline/unreachable (connection refused, DNS, timeout, TLS, ...).
+      throw new BackendUnavailableError(undefined, { cause: error });
+    }
+
     const responseText = await response.text();
 
-    if (response.status === 500) {
-      throw new Error(`Failed to get ${url}${queryString}: ${response.statusText}`);
-    }
+    // A genuine "not found" from the backend is a devalue-serialized error
+    // object with a matching content type. A 404 served by a proxy/CDN when the
+    // backend is offline is HTML or plain text — treat that as unavailable, not
+    // as "not found".
     if (response.status === 404) {
-      return undefined;
+      if (response.headers.get("content-type")?.includes("application/devalue")) {
+        return undefined;
+      }
+      throw new BackendUnavailableError(undefined, { cause: response });
     }
+
     if (!response.ok) {
+      // 5xx (including 502/503/504 from a gateway) means the backend is down
+      // or failing — surface a friendly error instead of a generic message.
+      if (response.status >= 500) {
+        throw new BackendUnavailableError(
+          `The backend is currently unavailable (HTTP ${response.status}). Please try again later.`
+        );
+      }
       throw new Error(`Request failed with status ${response.status}: ${responseText}`);
     }
-    return parse(responseText) as T;
+
+    try {
+      return parse(responseText) as T;
+    } catch (error) {
+      // Not a valid devalue response — the backend isn't serving our API.
+      throw new BackendUnavailableError(undefined, { cause: error });
+    }
   }
 
   /**

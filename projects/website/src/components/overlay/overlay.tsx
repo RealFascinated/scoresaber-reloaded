@@ -1,5 +1,6 @@
 "use client";
 
+import { isBackendUnavailableError } from "@/common/api-error";
 import { OverlayDataClients } from "@/common/overlay/data-client";
 import BeatSaberPlusClient from "@/common/overlay/impl/beatsaberplus";
 import HTTPSiraStatusClient from "@/common/overlay/impl/httpsirastatus";
@@ -23,11 +24,21 @@ type OverlayProps = {
 };
 
 export default function Overlay({ settings }: OverlayProps) {
-  const { data: player, isLoading } = useQuery({
+  const {
+    data: player,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["player", settings.playerId],
     queryFn: () => ssrApi.getScoreSaberPlayer(settings.playerId, "full"),
+    // Fail fast so a backend outage surfaces as an error state instead of an
+    // endless retry spinner (the provider default is infinite retries).
+    retry: false,
     refetchInterval: 1000 * 30,
   });
+
+  const showBackendUnavailable = !player && isError && isBackendUnavailableError(error);
 
   const overlayData = useOverlayDataStore();
   const clientRef = useRef<HTTPSiraStatusClient | null>(null);
@@ -61,6 +72,19 @@ export default function Overlay({ settings }: OverlayProps) {
   useEffect(() => {
     Logger.info("Overlay settings", JSON.stringify(settings, null, 2));
   }, []);
+
+  if (showBackendUnavailable) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <div className="flex flex-col items-center gap-1 text-center">
+          <p className="text-red-400">Backend unavailable</p>
+          <p className="text-muted-foreground text-sm">
+            The backend is currently offline. Please try again later.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading || !player) {
     return (
