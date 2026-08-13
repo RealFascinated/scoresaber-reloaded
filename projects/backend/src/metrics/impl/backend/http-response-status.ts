@@ -1,6 +1,6 @@
 import { Counter } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import Metric from "../../metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class HttpResponseStatusMetric extends Metric<null> {
   private readonly counter: Counter<"route" | "status_class">;

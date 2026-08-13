@@ -17,7 +17,10 @@ describe("BeatLeaderScoresRepository", () => {
 
   test("rowExistsById and findExistingIds", async () => {
     expect(await BeatLeaderScoresRepository.rowExistsById(TEST_BEATLEADER_SCORE_ID)).toBe(true);
-    const set = await BeatLeaderScoresRepository.findExistingIds([TEST_BEATLEADER_SCORE_ID, UNKNOWN_SCORE_ID]);
+    const set = await BeatLeaderScoresRepository.findExistingIds([
+      TEST_BEATLEADER_SCORE_ID,
+      UNKNOWN_SCORE_ID,
+    ]);
     expect(set.has(TEST_BEATLEADER_SCORE_ID)).toBe(true);
   });
 

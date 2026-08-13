@@ -3,7 +3,6 @@ import {
   ScoreSaberScoreHistoryRepository,
   scoreRowToHistoryInsert,
 } from "../../../src/repositories/scoresaber-score-history.repository";
-import { ScoreSaberScoresRepository } from "../../../src/repositories/scoresaber-scores.repository";
 import { TableCountsRepository } from "../../../src/repositories/table-counts.repository";
 import {
   TEST_LEADERBOARD_ID,
@@ -159,7 +158,9 @@ describe("ScoreSaberScoreHistoryRepository", () => {
     });
 
     test("returns an empty array for a leaderboard without history", async () => {
-      expect(await ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(UNKNOWN_LEADERBOARD_ID)).toEqual([]);
+      expect(
+        await ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(UNKNOWN_LEADERBOARD_ID)
+      ).toEqual([]);
     });
   });
 

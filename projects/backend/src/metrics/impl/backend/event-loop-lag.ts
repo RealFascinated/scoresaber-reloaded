@@ -1,6 +1,6 @@
 import { Gauge } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import Metric from "../../metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class EventLoopLagMetric extends Metric<number> {
   private lastCheck: number;

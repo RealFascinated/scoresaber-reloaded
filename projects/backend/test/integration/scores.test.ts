@@ -1,15 +1,5 @@
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { describe, expect, test } from "bun:test";
-import { createTestApp } from "../helpers/create-test-app";
-import {
-  TEST_LEADERBOARD_ID,
-  TEST_PLAYER_ID,
-  TEST_SCORE_ID,
-  UNKNOWN_LEADERBOARD_ID,
-  UNKNOWN_PLAYER_ID,
-  UNKNOWN_SCORE_ID,
-} from "../helpers/constants";
-import { request } from "../helpers/request";
 import {
   expectAccSaberScoresPage,
   expectLeaderboardScoresResponse,
@@ -21,6 +11,16 @@ import {
   expectStatus,
   expectValidationError,
 } from "../helpers/assertions";
+import {
+  TEST_LEADERBOARD_ID,
+  TEST_PLAYER_ID,
+  TEST_SCORE_ID,
+  UNKNOWN_LEADERBOARD_ID,
+  UNKNOWN_PLAYER_ID,
+  UNKNOWN_SCORE_ID,
+} from "../helpers/constants";
+import { createTestApp } from "../helpers/create-test-app";
+import { request } from "../helpers/request";
 
 describe("GET /scores/:scoreId", () => {
   const app = createTestApp();

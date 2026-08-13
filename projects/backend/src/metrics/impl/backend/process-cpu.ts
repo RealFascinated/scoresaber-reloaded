@@ -1,7 +1,7 @@
 import os from "node:os";
 import { Gauge } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class ProcessCpuMetric extends NumberMetric {
   private lastCpuUsage = process.cpuUsage();

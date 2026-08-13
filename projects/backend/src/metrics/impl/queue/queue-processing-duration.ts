@@ -1,7 +1,7 @@
 import { Counter, Histogram } from "prom-client";
 import { Queue, QueueProcessEvent } from "../../../queue/queue";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import Metric from "../../metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class QueueProcessingDurationMetric extends Metric<null> {
   private readonly durationHistogram: Histogram<"queue">;

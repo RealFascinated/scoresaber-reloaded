@@ -1,5 +1,5 @@
-import { describe, expect, test } from "bun:test";
 import { DetailType } from "@ssr/common/detail-type";
+import { describe, expect, test } from "bun:test";
 import {
   beatLeaderScoreByIdCacheKey,
   beatLeaderScoreBySongCacheKey,

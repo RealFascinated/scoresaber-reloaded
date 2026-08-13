@@ -12,7 +12,6 @@ import {
   TEST_PLAYER_ID,
   TEST_PLAYER_TWO_ID,
   TEST_SCORE_ID,
-  TEST_SCORE_TWO_ID,
   UNKNOWN_LEADERBOARD_ID,
   UNKNOWN_PLAYER_ID,
   UNKNOWN_SCORE_ID,
@@ -89,7 +88,10 @@ describe("ScoreSaberScoresRepository", () => {
 
   describe("findByPlayerAndLeaderboard", () => {
     test("returns the current personal best row", async () => {
-      const row = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(TEST_PLAYER_ID, TEST_LEADERBOARD_ID);
+      const row = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
+        TEST_PLAYER_ID,
+        TEST_LEADERBOARD_ID
+      );
       expect(row?.scoreId).toBe(TEST_SCORE_ID);
     });
 
@@ -137,7 +139,10 @@ describe("ScoreSaberScoresRepository", () => {
         timestamp: new Date(original!.timestamp.getTime() + 60_000),
       });
       expect(replaced).toBe(true);
-      const current = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(TEST_PLAYER_ID, TEST_LEADERBOARD_ID);
+      const current = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
+        TEST_PLAYER_ID,
+        TEST_LEADERBOARD_ID
+      );
       expect(current?.scoreId).toBe(replacementId);
     });
   });

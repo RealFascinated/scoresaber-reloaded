@@ -1,5 +1,5 @@
-import { describe, expect, test } from "bun:test";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { describe, expect, test } from "bun:test";
 import { ScoreSaberAccountsRepository } from "../../src/repositories/scoresaber-accounts.repository";
 import { PlayerCoreService } from "../../src/service/player/player-core.service";
 import { INSERT_ACCOUNT_ID, TEST_PLAYER_ID, UNKNOWN_PLAYER_ID } from "../helpers/constants";
@@ -15,7 +15,9 @@ describe("PlayerCoreService", () => {
     });
 
     test("throws when throwIfNotFound is true and player is missing", async () => {
-      await expect(PlayerCoreService.playerExists(UNKNOWN_PLAYER_ID, true)).rejects.toBeInstanceOf(NotFoundError);
+      await expect(PlayerCoreService.playerExists(UNKNOWN_PLAYER_ID, true)).rejects.toBeInstanceOf(
+        NotFoundError
+      );
     });
   });
 

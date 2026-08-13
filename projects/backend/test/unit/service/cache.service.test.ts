@@ -32,7 +32,9 @@ describe("CacheService", () => {
     });
 
     test("insert is a no-op", async () => {
-      await expect(CacheService.insert(CacheId.BEATSAVER_MAP, "test-key", { ok: true })).resolves.toBeUndefined();
+      await expect(
+        CacheService.insert(CacheId.BEATSAVER_MAP, "test-key", { ok: true })
+      ).resolves.toBeUndefined();
     });
 
     test("fetch delegates directly to fetchFn", async () => {

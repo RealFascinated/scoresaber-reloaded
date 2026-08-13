@@ -74,9 +74,9 @@ describe("BeatSaver API integration", () => {
       expectStatus(response, 422);
     });
 
-    test("returns 422 for invalid characteristic", async () => {
+    test("returns 404 for unknown characteristic", async () => {
       const response = await request(app, `/beatsaver/map/${TEST_SONG_HASH}/ExpertPlus/NotACharacteristic`);
-      expectStatus(response, 422);
+      expectStatus(response, 404);
     });
   });
 });

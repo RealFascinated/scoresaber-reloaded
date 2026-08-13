@@ -1,7 +1,7 @@
 import { Gauge } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import { PlayerHmdService } from "../../../service/player/player-hmd.service";
 import NumberMetric from "../../number-metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class ActivePlayerHmdStatisticMetric extends NumberMetric {
   constructor() {

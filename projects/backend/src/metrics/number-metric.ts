@@ -1,5 +1,5 @@
-import { MetricType } from "./prometheus";
 import Metric, { type MetricOptions } from "./metric";
+import { MetricType } from "./prometheus";
 
 export default class NumberMetric extends Metric<number> {
   constructor(id: MetricType, defaultValue: number, options?: MetricOptions) {

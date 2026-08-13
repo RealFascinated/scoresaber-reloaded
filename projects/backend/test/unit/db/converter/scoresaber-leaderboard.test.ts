@@ -1,7 +1,5 @@
-import { describe, expect, test } from "bun:test";
-import { env } from "@ssr/common/env";
-import { Modifier } from "@ssr/common/score/modifier";
 import { getScoreSaberLeaderboardCoverUrl } from "@ssr/common/utils/scoresaber.util";
+import { describe, expect, test } from "bun:test";
 import { leaderboardRowToType } from "../../../../src/db/converter/scoresaber-leaderboard";
 import type { ScoreSaberLeaderboardRow } from "../../../../src/db/schema";
 
@@ -206,9 +204,7 @@ describe("leaderboardRowToType", () => {
     {
       name: "parses string timestamp and uses provided difficulties",
       row: baseRow({ timestamp: "2024-03-01T00:00:00.000Z" as unknown as Date }),
-      difficulties: [
-        { id: 202, stars: 9, difficulty: "ExpertPlus", characteristic: "OneSaber" },
-      ],
+      difficulties: [{ id: 202, stars: 9, difficulty: "ExpertPlus", characteristic: "OneSaber" }],
       expected: {
         id: 101,
         fullName: "Song Subtitle",

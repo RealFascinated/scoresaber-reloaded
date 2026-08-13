@@ -1,6 +1,6 @@
 import { Gauge } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class ProcessUptimeMetric extends NumberMetric {
   constructor() {

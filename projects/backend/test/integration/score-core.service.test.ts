@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { scoreSaberScoreRowToType } from "../../src/db/converter/scoresaber-score";
 import { leaderboardRowToType } from "../../src/db/converter/scoresaber-leaderboard";
+import { scoreSaberScoreRowToType } from "../../src/db/converter/scoresaber-score";
 import { ScoreSaberScoresRepository } from "../../src/repositories/scoresaber-scores.repository";
 import { ScoreCoreService } from "../../src/service/score/score-core.service";
 import {

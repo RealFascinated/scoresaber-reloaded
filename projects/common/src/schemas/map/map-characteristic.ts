@@ -45,4 +45,4 @@ const mapCharacteristicShape = Type.Union(
 export type MapCharacteristicBase = StaticDecode<typeof base>;
 export type MapCharacteristic = StaticDecode<typeof mapCharacteristicShape>;
 
-export const MapCharacteristicSchema = mapCharacteristicShape;
+export const MapCharacteristicSchema = Type.Unsafe<MapCharacteristic>(Type.String({ default: "Standard" }));

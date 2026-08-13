@@ -1,7 +1,7 @@
 import { Gauge } from "prom-client";
 import { ScoreSaberAccountsRepository } from "../../../repositories/scoresaber-accounts.repository";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class TrackedPlayersMetric extends NumberMetric {
   constructor() {

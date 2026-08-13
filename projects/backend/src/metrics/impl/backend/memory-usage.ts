@@ -1,7 +1,7 @@
 import { heapStats } from "bun:jsc";
 import { Gauge } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class MemoryUsageMetric extends NumberMetric {
   constructor() {

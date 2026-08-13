@@ -1,6 +1,6 @@
 import { Counter, Gauge } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class CachePerformanceMetric extends NumberMetric {
   private static readonly cacheHitsByNamespace = new Map<string, number>();

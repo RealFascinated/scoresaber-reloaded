@@ -1,5 +1,4 @@
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import { isProduction } from "@ssr/common/utils/utils";
 import { ApiServicesMetric } from "../../metrics/impl/backend/api-services";
 import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
 import EventLoopLagMetric from "../../metrics/impl/backend/event-loop-lag";

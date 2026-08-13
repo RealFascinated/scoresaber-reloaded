@@ -2,8 +2,8 @@ import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { sql } from "drizzle-orm";
 import { Gauge } from "prom-client";
 import { db } from "../../../db";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 type TableSizeRow = {
   tableName: string;

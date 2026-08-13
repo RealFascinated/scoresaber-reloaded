@@ -7,11 +7,7 @@ export type TestResponse = {
   text: () => Promise<string>;
 };
 
-export async function request(
-  app: Elysia,
-  path: string,
-  init: RequestInit = {}
-): Promise<TestResponse> {
+export async function request(app: Elysia, path: string, init: RequestInit = {}): Promise<TestResponse> {
   const url = path.startsWith("http") ? path : `http://localhost${path.startsWith("/") ? path : `/${path}`}`;
   const response = await app.handle(
     new Request(url, {

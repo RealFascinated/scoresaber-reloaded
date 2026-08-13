@@ -1,16 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { ScoreSaberLeaderboardsRepository } from "../../src/repositories/scoresaber-leaderboards.repository";
 import { PlayerMedalsService } from "../../src/service/medals/player-medals.service";
-import {
-  TEST_LEADERBOARD_ID,
-  TEST_LEADERBOARD_QUALIFIED_ID,
-  TEST_PLAYER_ID,
-} from "../helpers/constants";
+import { TEST_LEADERBOARD_ID, TEST_LEADERBOARD_QUALIFIED_ID, TEST_PLAYER_ID } from "../helpers/constants";
 
 describe("PlayerMedalsService", () => {
   describe("refreshLeaderboardMedals", () => {
     test("no-ops for an unranked qualified leaderboard", async () => {
-      const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(TEST_LEADERBOARD_QUALIFIED_ID);
+      const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
+        TEST_LEADERBOARD_QUALIFIED_ID
+      );
       expect(leaderboard).toBeDefined();
 
       const changes = await PlayerMedalsService.refreshLeaderboardMedals(leaderboard!);

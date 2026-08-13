@@ -2,8 +2,8 @@ import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
 import { Gauge } from "prom-client";
 import { redisClient } from "../../../common/redis";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import Metric from "../../metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class BeatLeaderUniqueDailyPlayersMetric extends Metric<null> {
   private static readonly logger: ScopedLogger = Logger.withTopic("Metric: BeatLeader Unique Daily Players");

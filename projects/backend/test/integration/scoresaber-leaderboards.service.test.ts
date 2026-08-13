@@ -1,11 +1,7 @@
-import { describe, expect, test } from "bun:test";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { describe, expect, test } from "bun:test";
 import { ScoreSaberLeaderboardsService } from "../../src/service/leaderboard/scoresaber-leaderboards.service";
-import {
-  TEST_LEADERBOARD_ID,
-  TEST_SONG_HASH,
-  UNKNOWN_LEADERBOARD_ID,
-} from "../helpers/constants";
+import { TEST_LEADERBOARD_ID, TEST_SONG_HASH, UNKNOWN_LEADERBOARD_ID } from "../helpers/constants";
 
 describe("ScoreSaberLeaderboardsService", () => {
   describe("getLeaderboard", () => {
@@ -17,9 +13,9 @@ describe("ScoreSaberLeaderboardsService", () => {
     });
 
     test("throws NotFoundError for an unknown id", async () => {
-      await expect(ScoreSaberLeaderboardsService.getLeaderboard(UNKNOWN_LEADERBOARD_ID)).rejects.toBeInstanceOf(
-        NotFoundError
-      );
+      await expect(
+        ScoreSaberLeaderboardsService.getLeaderboard(UNKNOWN_LEADERBOARD_ID)
+      ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 

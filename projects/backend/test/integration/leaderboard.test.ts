@@ -164,12 +164,12 @@ describe("Leaderboard API integration", () => {
       expectStatus(response, 422);
     });
 
-    test("returns 422 for invalid characteristic", async () => {
+    test("returns 404 for unknown characteristic", async () => {
       const response = await request(
         app,
         `/leaderboard/by-hash/${TEST_SONG_HASH}/ExpertPlus/NotACharacteristic`
       );
-      expectStatus(response, 422);
+      expectStatus(response, 404);
     });
   });
 });

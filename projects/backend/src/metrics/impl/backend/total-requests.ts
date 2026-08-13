@@ -1,6 +1,6 @@
 import { Counter } from "prom-client";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class TotalRequestsMetric extends NumberMetric {
   private counter: Counter;

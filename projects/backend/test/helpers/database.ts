@@ -72,10 +72,9 @@ export async function acquireTestSuiteLock(): Promise<void> {
   const deadline = Date.now() + SUITE_LOCK_TIMEOUT_MS;
 
   while (Date.now() < deadline) {
-    const result = await client.query<{ acquired: boolean }>(
-      "SELECT pg_try_advisory_lock($1) AS acquired",
-      [ADVISORY_LOCK_ID]
-    );
+    const result = await client.query<{ acquired: boolean }>("SELECT pg_try_advisory_lock($1) AS acquired", [
+      ADVISORY_LOCK_ID,
+    ]);
     if (result.rows[0]?.acquired === true) {
       suiteLockHeld = true;
       return;

@@ -1,6 +1,6 @@
-import { describe, expect, test } from "bun:test";
-import { Modifier } from "@ssr/common/score/modifier";
 import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
+import { Modifier } from "@ssr/common/score/modifier";
+import { describe, expect, test } from "bun:test";
 import {
   scoreSaberMedalScoreRowToType,
   scoreSaberScoreToMedalScore,

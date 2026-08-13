@@ -1,7 +1,7 @@
 import { Gauge } from "prom-client";
 import { QueueManager } from "../../../queue/queue-manager";
-import { MetricType, prometheusRegistry } from "../../prometheus";
 import NumberMetric from "../../number-metric";
+import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class QueueSizesMetric extends NumberMetric {
   constructor() {

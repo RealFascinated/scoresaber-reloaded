@@ -1,6 +1,6 @@
-import { describe, expect, test } from "bun:test";
 import { env } from "@ssr/common/env";
 import { Modifier } from "@ssr/common/score/modifier";
+import { describe, expect, test } from "bun:test";
 import { scoreSaberScoreRowToType } from "../../../../src/db/converter/scoresaber-score";
 import type { ScoreSaberScoreHistoryRow, ScoreSaberScoreRow } from "../../../../src/db/schema";
 
@@ -185,7 +185,7 @@ describe("scoreSaberScoreRowToType", () => {
         timestamp: new Date("2024-05-01T00:00:00.000Z"),
       },
     },
-        {
+    {
       name: "treats undefined modifiers as empty",
       row: baseScoreRow({ modifiers: undefined as unknown as string[] }),
       expected: {
