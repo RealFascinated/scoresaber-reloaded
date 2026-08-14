@@ -21,7 +21,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.34.33",
+    "@sinclair/typebox": "^0.34.52",
     "dayjs": "^1.11.21",
     "devalue": "^5.9.0",
     "ws": "^8.21.3"
