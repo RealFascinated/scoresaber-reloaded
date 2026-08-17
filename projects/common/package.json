@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@sinclair/typebox": "^0.34.52",
-    "dayjs": "^1.11.21",
+    "dayjs": "^1.11.22",
     "devalue": "^5.9.0",
     "ws": "^8.21.3"
   }
