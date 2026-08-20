@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.14-alpine AS base
+FROM oven/bun:1.4-alpine AS base
 
 # Full dependency install (lint, build)
 FROM base AS depends-dev
