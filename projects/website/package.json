@@ -76,7 +76,7 @@
     "@types/react-dom": "19.2.4",
     "baseline-browser-mapping": "^2.11.18",
     "eslint": "^9.39.5",
-    "eslint-config-next": "16.3.1",
+    "eslint-config-next": "16.3.2",
     "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3"
