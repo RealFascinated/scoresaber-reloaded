@@ -73,16 +73,16 @@
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^26.2.0",
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
+    "@types/react-dom": "19.2.5",
     "baseline-browser-mapping": "^2.11.18",
     "eslint": "^9.39.5",
-    "eslint-config-next": "16.3.1",
+    "eslint-config-next": "16.3.2",
     "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3"
   },
   "overrides": {
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4"
+    "@types/react-dom": "19.2.5"
   }
 }
