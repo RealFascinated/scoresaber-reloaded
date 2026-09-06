@@ -1,3 +1,4 @@
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
 import { ScoreSaberLeaderboardToken } from "@ssr/common/schemas/scoresaber/tokens/v1/leaderboard";
@@ -362,6 +363,10 @@ export class ScoreWebsockets implements EventListener {
     player?: ScoreSaberLeaderboardPlayerInfoToken,
     beatLeaderScore?: BeatLeaderScoreToken
   ) {
+    if (env.IGNORE_WEBSOCKET_SCORES) {
+      scoresWsLog.debug("Ignoring websocket score: IGNORE_WEBSOCKET_SCORES is enabled");
+      return;
+    }
     if (scoreSaberToken && leaderboardToken && player) {
       const scoreLeaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
       const score = getScoreSaberScoreFromToken(scoreSaberToken, scoreLeaderboard, player.id);

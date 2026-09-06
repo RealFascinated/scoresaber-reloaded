@@ -14,6 +14,7 @@ const serverSchema = Type.Object({
   ),
 
   ENABLE_QUEUES: Type.Boolean(),
+  IGNORE_WEBSOCKET_SCORES: Type.Optional(Type.Boolean()),
 
   S3_ENDPOINT: Type.String(),
   S3_ACCESS_KEY: Type.String(),
@@ -65,6 +66,7 @@ export const env = {
   NEXT_PUBLIC_APPLICATION_NAME: process.env.NEXT_PUBLIC_APPLICATION_NAME,
 
   ENABLE_QUEUES: process.env.ENABLE_QUEUES === "true",
+  IGNORE_WEBSOCKET_SCORES: process.env.IGNORE_WEBSOCKET_SCORES === "true",
 
   // PostgreSQL
   DATABASE_URL: process.env.DATABASE_URL,
