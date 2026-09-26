@@ -32,6 +32,27 @@ function getPlaylistTitleDate(date: Date): string {
   return formatDate(date, "MMM D, YYYY");
 }
 
+function getSelfSnipePlaylistTitle({
+  name,
+  settings,
+  date = new Date(),
+}: {
+  name: string;
+  settings: SelfPlaylistSettings | SnipeSettings;
+  date?: Date;
+}): string {
+  const parts = [
+    `${capitalizeFirstLetter(settings.sort || "pp")} (${settings.sortDirection || "desc"})`,
+    `${settings.starRange?.min} - ${settings.starRange?.max} stars`,
+    `${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}% accuracy`,
+  ];
+  if (settings.limit !== undefined) {
+    parts.push(`Top ${settings.limit}`);
+  }
+  parts.push(getPlaylistTitleDate(date));
+  return `${name} (${parts.join(", ")})`;
+}
+
 const customRankedSortLabels: Record<CustomRankedPlaylist["sort"], string> = {
   stars: "by stars",
   dateRanked: "by date ranked",
@@ -247,7 +268,7 @@ export default class PlaylistService {
 
     return {
       playlistTitle: `ScoreSaber Custom (${parsedConfig.stars.min} - ${parsedConfig.stars.max} stars, ${customRankedSortLabels[parsedConfig.sort]
-        })`,
+        }, ${getPlaylistTitleDate(new Date())})`,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
       customData: {
         syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-custom-ranked-maps.bplist?config=${settingsBase64}`,
@@ -305,7 +326,7 @@ export default class PlaylistService {
       const songs = scoreRowsToPlaylistSongs(takeTopUniqueSongRows(filtered, settings.limit));
 
       return {
-        playlistTitle: `Self Playlist (${getPlaylistTitleDate(new Date())}) / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%${settings.limit !== undefined ? ` / Top ${settings.limit}` : ""}`,
+        playlistTitle: getSelfSnipePlaylistTitle({ name: "Self Playlist", settings }),
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
           syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/self.bplist?user=${user}&settings=${settingsBase64}`,
@@ -428,7 +449,7 @@ export default class PlaylistService {
       const songs = scoreRowsToPlaylistSongs(takeTopUniqueSongRows(filteredScores, settings.limit));
 
       return {
-        playlistTitle: `${truncateText(player.name ?? "", 16)} (${getPlaylistTitleDate(new Date())}) / ${capitalizeFirstLetter(settings.sort || "pp")} / ${settings.starRange?.min} - ${settings.starRange?.max} stars / ${settings.accuracyRange?.min} - ${settings.accuracyRange?.max}%${settings.limit !== undefined ? ` / Top ${settings.limit}` : ""}`,
+        playlistTitle: getSelfSnipePlaylistTitle({ name: truncateText(player.name ?? "", 16) ?? "", settings }),
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
           syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/snipe.bplist?user=${user}&toSnipe=${toSnipe}&settings=${settingsBase64}`,
