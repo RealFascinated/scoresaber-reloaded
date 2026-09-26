@@ -32,6 +32,13 @@ function getPlaylistTitleDate(date: Date): string {
   return formatDate(date, "MMM D, YYYY");
 }
 
+const customRankedSortLabels: Record<CustomRankedPlaylist["sort"], string> = {
+  stars: "by stars",
+  dateRanked: "by date ranked",
+  plays: "by plays",
+  dailyPlays: "by daily plays",
+};
+
 const BasePlaylistIds = Type.Union([
   Type.Literal("scoresaber-ranked-maps"),
   Type.Literal("scoresaber-qualified-maps"),
@@ -238,10 +245,9 @@ export default class PlaylistService {
       leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
     }
 
-    const title = `Custom Ranked (${getPlaylistTitleDate(new Date())})`;
-
     return {
-      playlistTitle: title,
+      playlistTitle: `ScoreSaber Custom (${parsedConfig.stars.min} - ${parsedConfig.stars.max} stars, ${customRankedSortLabels[parsedConfig.sort]
+        })`,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
       customData: {
         syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-custom-ranked-maps.bplist?config=${settingsBase64}`,
