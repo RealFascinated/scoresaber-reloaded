@@ -57,7 +57,7 @@ const DEFAULT_PLAYER_CACHE_TTL: number = 60 * 60 * 6;
 const DEFAULT_CHART_LEGEND_STATE: boolean = false;
 const DEFAULT_SHOW_KITTY: boolean = false;
 const DEFAULT_SNOW_PARTICLES: boolean = false;
-const DEFAULT_REPLAY_VIEWER: string = "beatleader";
+const DEFAULT_REPLAY_VIEWER: string = "chroviewer";
 const DEFAULT_PLUS_PP_DEFAULT_ACCURACY: number = 95;
 
 export enum WebsiteLanding {
