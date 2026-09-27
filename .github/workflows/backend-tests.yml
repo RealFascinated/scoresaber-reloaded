@@ -52,17 +52,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # MinIO needs a positional `server /data` command, which GitHub Actions
-      # service containers can't provide — run it as a step instead.
-      - name: Start MinIO
+      # MinIO has been removed from Docker Hub / ghcr.io. VersityGW (S3
+      # gateway, posix filesystem backend) is a drop-in replacement that must
+      # run with a positional root-dir argument, so — like MinIO — it can't be
+      # a GitHub Actions service container; it's run as a step instead.
+      # Bucket names are directories under /data, so the two buckets are
+      # pre-created in the command (VersityGW does not auto-create on first PUT).
+      - name: Start S3 (VersityGW)
         run: |
-          docker run -d --name minio \
+          docker run -d --name s3 \
+            --entrypoint sh \
             -p 19000:9000 \
-            -e MINIO_ROOT_USER=minioadmin \
-            -e MINIO_ROOT_PASSWORD=minioadmin \
-            minio/minio:RELEASE.2025-01-20T14-49-07Z server /data --console-address ":9001"
+            -e ROOT_ACCESS_KEY_ID=minioadmin \
+            -e ROOT_SECRET_ACCESS_KEY=minioadmin \
+            -e VGW_PORT=:9000 \
+            versity/versitygw:v1.8.0 \
+            -c "mkdir -p /data/ssr-beatleader-replays /data/ssr-beatleader-score-stats && exec versitygw posix /data"
+          # VersityGW has no dedicated /minio/health endpoint and the S3 root
+          # returns 403, so a non-000 HTTP code is treated as "alive".
           for _ in $(seq 1 30); do
-            curl -sf http://localhost:19000/minio/health/live && exit 0
+            http_code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:19000/)
+            if [ "$http_code" != "000" ]; then
+              exit 0
+            fi
             sleep 1
           done
           exit 1

@@ -2,8 +2,8 @@
 #
 # Kept separate from the runtime Dockerfile so the production image stays lean.
 # Built by CI (see .github/workflows/backend-tests.yml); the test suite expects
-# PostgreSQL, Redis and MinIO to be reachable — locally run the suite against
-# the docker-compose services with `--network host`:
+# PostgreSQL, Redis and an S3 object store (VersityGW) to be reachable —
+# locally run the suite against the docker-compose services with `--network host`:
 #
 #   docker build -f projects/backend/Dockerfile.test -t ssr-backend-test .
 #   docker run --rm --network host ssr-backend-test
