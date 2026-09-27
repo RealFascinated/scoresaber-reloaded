@@ -69,9 +69,11 @@ jobs:
             versity/versitygw:v1.8.0 \
             -c "mkdir -p /data/ssr-beatleader-replays /data/ssr-beatleader-score-stats && exec versitygw posix /data"
           # VersityGW has no dedicated /minio/health endpoint and the S3 root
-          # returns 403, so a non-000 HTTP code is treated as "alive".
+          # returns 403, so any successful HTTP exchange counts as "alive" —
+          # but `bash -e` (used by the Actions runner) would abort the whole
+          # script on a failed `curl`, so guard it with `|| true`.
           for _ in $(seq 1 30); do
-            http_code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:19000/)
+            http_code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:19000/ || true)
             if [ "$http_code" != "000" ]; then
               exit 0
             fi
