@@ -23,7 +23,7 @@ import { encodeSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-ut
 import { SnipeSettings, snipeSettingsSchema } from "@ssr/common/snipe/snipe-settings-schema";
 import { truncateText } from "@ssr/common/string-utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 
 const SORT_OPTIONS = {
@@ -75,9 +75,9 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
     },
   });
 
-  const rankedStatus = form.watch("rankedStatus");
-  const sort = form.watch("sort");
-  const sortDirection = form.watch("sortDirection");
+  const rankedStatus = useWatch({ control: form.control, name: "rankedStatus" });
+  const sort = useWatch({ control: form.control, name: "sort" });
+  const sortDirection = useWatch({ control: form.control, name: "sortDirection" });
 
   const availableSorts = useMemo(() => {
     const all = Object.entries(SORT_OPTIONS).map(([value, opt]) => ({

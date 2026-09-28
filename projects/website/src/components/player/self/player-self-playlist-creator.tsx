@@ -23,7 +23,7 @@ import {
 import { encodeSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { useCallback, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 
 const SORT_OPTIONS = {
@@ -68,9 +68,9 @@ export default function SelfPlaylistCreator() {
     },
   });
 
-  const rankedStatus = form.watch("rankedStatus");
-  const sort = form.watch("sort");
-  const sortDirection = form.watch("sortDirection");
+  const rankedStatus = useWatch({ control: form.control, name: "rankedStatus" });
+  const sort = useWatch({ control: form.control, name: "sort" });
+  const sortDirection = useWatch({ control: form.control, name: "sortDirection" });
 
   const availableSorts = useMemo(
     () => Object.entries(SORT_OPTIONS) as Array<[SortOption, (typeof SORT_OPTIONS)[SortOption]]>,

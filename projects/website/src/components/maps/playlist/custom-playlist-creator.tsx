@@ -18,7 +18,7 @@ import {
 } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { useCallback, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 type CustomRankedPlaylist = Static<typeof customRankedPlaylistSchema>;
 
@@ -47,7 +47,7 @@ export default function CustomPlaylistCreator({ trigger }: CustomPlaylistCreator
     },
   });
 
-  const sort = form.watch("sort");
+  const sort = useWatch({ control: form.control, name: "sort" });
 
   const onSubmit = useCallback(async (data: CustomRankedPlaylist) => {
     setDownloading(true);
