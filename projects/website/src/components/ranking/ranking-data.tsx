@@ -17,7 +17,6 @@ import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useRouter } from "next/navigation";
 import { parseAsBoolean, parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
@@ -28,7 +27,6 @@ import { Input } from "../ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
 export default function RankingData() {
-  const router = useRouter();
   const database = useDatabase();
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
 
@@ -125,9 +123,8 @@ export default function RankingData() {
                         className={cn(
                           mainPlayer?.id === player.id ? "bg-primary/5" : "",
                           player.inactive && "bg-inactive-account/10",
-                          "cursor-pointer"
+                          "relative cursor-pointer"
                         )}
-                        onClick={() => router.push(`/player/${player.id}`)}
                       >
                         <TableCell className="py-2">
                           <span className="font-mono text-sm font-semibold">#{player.rank}</span>
@@ -147,7 +144,7 @@ export default function RankingData() {
                             <PlayerPpDifference pp={player.pp} mainPp={mainPlayer.pp} />
                           )}
                         </TableCell>
-                        <TableCell className="py-2">
+                        <TableCell className="relative z-10 py-2">
                           <AddFriend player={player} iconOnly />
                         </TableCell>
                       </TableRow>
@@ -204,7 +201,10 @@ export default function RankingData() {
                 <Input
                   placeholder="Search for players..."
                   value={currentSearch ?? ""}
-                  onChange={e => setCurrentSearch(e.target.value)}
+                  onChange={e => {
+                    setCurrentSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="h-10"
                 />
               </FilterRow>
@@ -212,14 +212,23 @@ export default function RankingData() {
 
             <FilterRow className="justify-between">
               <span className="text-foreground text-sm font-medium">Include Inactives</span>
-              <Switch checked={includeInactives} onCheckedChange={setIncludeInactives} />
+              <Switch
+                checked={includeInactives}
+                onCheckedChange={value => {
+                  setIncludeInactives(value);
+                  setCurrentPage(1);
+                }}
+              />
             </FilterRow>
 
             <FilterRow className="justify-between">
               <span className="text-foreground text-sm font-medium">Relative PP</span>
               <Switch
                 checked={showRelativePp}
-                onCheckedChange={setShowRelativePp}
+                onCheckedChange={value => {
+                  setShowRelativePp(value);
+                  setCurrentPage(1);
+                }}
                 disabled={mainPlayer == undefined}
               />
             </FilterRow>
@@ -267,7 +276,10 @@ function PlayerTableName({
   inactive: boolean;
 }) {
   return (
-    <SimpleLink href={`/player/${player.id}`} className="flex items-center gap-2.5">
+    <SimpleLink
+      href={`/player/${player.id}`}
+      className="flex items-center gap-2.5 after:absolute after:inset-0"
+    >
       <PlayerAvatar
         profilePicture={player.avatar}
         name={player.name}

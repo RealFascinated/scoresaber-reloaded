@@ -11,7 +11,6 @@ import { SharedIcons } from "@/shared-icons";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import Card from "../card";
 import { FancyLoader } from "../fancy-loader";
@@ -23,8 +22,6 @@ import MedalsInfo from "./medals-info";
 import { MedalsRanking } from "./medals-ranking";
 
 export default function MedalsData() {
-  const router = useRouter();
-
   const [currentPage, setCurrentPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [countryQuery, setCountryQuery] = useQueryState("country", parseAsString);
   const currentCountry = countryQuery?.toUpperCase() ?? undefined;
@@ -89,11 +86,7 @@ export default function MedalsData() {
                   </TableHeader>
                   <TableBody>
                     {rankingData.items.map(player => (
-                      <TableRow
-                        key={player.id}
-                        className="cursor-pointer"
-                        onClick={() => router.push(`/player/${player.id}`)}
-                      >
+                      <TableRow key={player.id} className="relative cursor-pointer">
                         <TableCell className="py-2">
                           <span className="font-mono text-sm font-semibold">#{player.medalsRank}</span>
                         </TableCell>
@@ -113,7 +106,7 @@ export default function MedalsData() {
                             {formatNumberWithCommas(player.medals)}
                           </span>
                         </TableCell>
-                        <TableCell className="py-2">
+                        <TableCell className="relative z-10 py-2">
                           <AddFriend player={player} iconOnly />
                         </TableCell>
                       </TableRow>
