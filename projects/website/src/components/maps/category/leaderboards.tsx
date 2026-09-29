@@ -17,7 +17,6 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useRouter } from "next/navigation";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
 
@@ -56,7 +55,6 @@ export default function Leaderboards() {
   const showBackendUnavailable = !leaderboardResponse && isError && isBackendUnavailableError(error);
 
   const leaderboards = leaderboardResponse?.items;
-  const router = useRouter();
 
   return (
     <div className="flex flex-col gap-4">
@@ -99,11 +97,7 @@ export default function Leaderboards() {
                     </TableHeader>
                     <TableBody>
                       {leaderboards.map(leaderboard => (
-                        <TableRow
-                          key={leaderboard.id}
-                          className="cursor-pointer"
-                          onClick={() => router.push(`/leaderboard/${leaderboard.id}`)}
-                        >
+                        <TableRow key={leaderboard.id} className="relative cursor-pointer">
                           <TableCell className="py-1.5">
                             <ScoreSongInfo
                               song={{
@@ -116,7 +110,8 @@ export default function Leaderboards() {
                                 difficulty: leaderboard.difficulty.difficulty,
                               }}
                               imageSize={42}
-                              clickableSongName={false}
+                              leaderboardId={leaderboard.id}
+                              stretchSongNameLink
                               shortDiffNames
                               className="line-clamp-1"
                             />
@@ -133,7 +128,7 @@ export default function Leaderboards() {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="text-foreground text-center text-xs">
+                          <TableCell className="text-foreground relative z-10 text-center text-xs">
                             <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
                               <p className="inline-flex items-center justify-center gap-1">
                                 <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -141,7 +136,7 @@ export default function Leaderboards() {
                               </p>
                             </SimpleTooltip>
                           </TableCell>
-                          <TableCell className="text-foreground text-center text-xs">
+                          <TableCell className="text-foreground relative z-10 text-center text-xs">
                             <SimpleTooltip display="Total plays on this leaderboard">
                               <p className="inline-flex items-center justify-center gap-1">
                                 <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -149,7 +144,7 @@ export default function Leaderboards() {
                               </p>
                             </SimpleTooltip>
                           </TableCell>
-                          <TableCell className="text-center text-xs">
+                          <TableCell className="relative z-10 text-center text-xs">
                             <SimpleTooltip
                               display={<p>{formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}</p>}
                             >

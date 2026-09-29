@@ -5,17 +5,26 @@ export default function LeaderboardSongName({
   leaderboardName,
   leaderboardId,
   clickableSongName,
+  stretchSongNameLink,
   className,
 }: {
   leaderboardName: string;
   leaderboardId?: number;
   clickableSongName: boolean;
+  /**
+   * Stretch the link over its nearest positioned ancestor (e.g. a table row), making
+   * the whole row clickable. The ancestor must be positioned (`relative`).
+   */
+  stretchSongNameLink?: boolean;
   className?: string;
 }) {
   return clickableSongName && leaderboardId != undefined ? (
     <SimpleLink
       href={`/leaderboard/${leaderboardId}`}
-      className="group w-fit cursor-pointer text-left transition-all"
+      className={cn(
+        "group w-fit cursor-pointer text-left transition-all",
+        stretchSongNameLink && "after:absolute after:inset-0"
+      )}
     >
       <p
         className={cn(

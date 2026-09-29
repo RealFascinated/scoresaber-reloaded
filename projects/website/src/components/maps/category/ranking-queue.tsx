@@ -10,7 +10,6 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import SimpleTooltip from "../../simple-tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
@@ -30,7 +29,6 @@ export default function RankingQueue() {
     retry: false,
   });
   const [showOpenRankUnrank, setShowOpenRankUnrank] = useState(false);
-  const router = useRouter();
 
   const showBackendUnavailable = !rankingRequests && isError && isBackendUnavailableError(error);
 
@@ -52,11 +50,7 @@ export default function RankingQueue() {
             </TableHeader>
             <TableBody>
               {requests.map(leaderboard => (
-                <TableRow
-                  key={leaderboard.id}
-                  className="cursor-pointer"
-                  onClick={() => router.push(`/leaderboard/${leaderboard.id}`)}
-                >
+                <TableRow key={leaderboard.id} className="relative cursor-pointer">
                   <TableCell className="py-1.5">
                     <ScoreSongInfo
                       song={{
@@ -69,12 +63,13 @@ export default function RankingQueue() {
                         difficulty: leaderboard.difficulty.difficulty,
                       }}
                       imageSize={42}
-                      clickableSongName={false}
+                      leaderboardId={leaderboard.id}
+                      stretchSongNameLink
                       shortDiffNames
                     />
                   </TableCell>
                   <TableCell className="text-center text-xs">{leaderboard.difficultyCount}</TableCell>
-                  <TableCell className="text-foreground text-center text-xs">
+                  <TableCell className="text-foreground relative z-10 text-center text-xs">
                     <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
                       <p className="inline-flex items-center justify-center gap-1">
                         <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -82,7 +77,7 @@ export default function RankingQueue() {
                       </p>
                     </SimpleTooltip>
                   </TableCell>
-                  <TableCell className="text-foreground text-center text-xs">
+                  <TableCell className="text-foreground relative z-10 text-center text-xs">
                     <SimpleTooltip display="Total plays on this leaderboard">
                       <p className="inline-flex items-center justify-center gap-1">
                         <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -90,7 +85,7 @@ export default function RankingQueue() {
                       </p>
                     </SimpleTooltip>
                   </TableCell>
-                  <TableCell className="text-center text-xs">
+                  <TableCell className="relative z-10 text-center text-xs">
                     <SimpleTooltip
                       display={<p>{formatDate(leaderboard.timestamp, "Do MMMM, YYYY HH:mm a")}</p>}
                     >

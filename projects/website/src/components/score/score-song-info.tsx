@@ -23,6 +23,11 @@ interface ScoreSongInfoProps {
   beatSaverMap?: BeatSaverMap;
   clickableSongName?: boolean;
   leaderboardId?: number;
+  /**
+   * Stretch the song name link over its nearest positioned ancestor (e.g. a table row),
+   * making the whole row clickable.
+   */
+  stretchSongNameLink?: boolean;
   imageSize?: number;
   shortDiffNames?: boolean;
   className?: string;
@@ -35,6 +40,7 @@ export default function ScoreSongInfo({
   beatSaverMap,
   clickableSongName = true,
   leaderboardId,
+  stretchSongNameLink = false,
   shortDiffNames = false,
   imageSize = 64,
   className,
@@ -85,6 +91,7 @@ export default function ScoreSongInfo({
             leaderboardName={song.name}
             leaderboardId={leaderboardId}
             clickableSongName={clickableSongName}
+            stretchSongNameLink={stretchSongNameLink}
             className={className}
           />
 
