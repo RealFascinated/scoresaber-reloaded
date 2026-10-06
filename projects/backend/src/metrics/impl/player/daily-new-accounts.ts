@@ -1,5 +1,5 @@
+import { Gauge } from "@prometheus-io/client";
 import { getMidnightAlignedDate } from "@ssr/common/utils/time-utils";
-import { Gauge } from "prom-client";
 import { ScoreSaberAccountsRepository } from "../../../repositories/scoresaber-accounts.repository";
 import NumberMetric from "../../number-metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";

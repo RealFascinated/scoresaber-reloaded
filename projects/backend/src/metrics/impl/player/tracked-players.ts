@@ -1,4 +1,4 @@
-import { Gauge } from "prom-client";
+import { Gauge } from "@prometheus-io/client";
 import { ScoreSaberAccountsRepository } from "../../../repositories/scoresaber-accounts.repository";
 import NumberMetric from "../../number-metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";

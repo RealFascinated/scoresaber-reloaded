@@ -1,4 +1,4 @@
-import { Gauge } from "prom-client";
+import { Gauge } from "@prometheus-io/client";
 import { QueueManager } from "../../../queue/queue-manager";
 import NumberMetric from "../../number-metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";

@@ -1,5 +1,5 @@
+import { Gauge } from "@prometheus-io/client";
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { Gauge } from "prom-client";
 import { BeatLeaderApiService } from "../../../service/external/beatleader-api.service";
 import { ScoreSaberApiService } from "../../../service/external/scoresaber-api.service";
 import NumberMetric from "../../number-metric";

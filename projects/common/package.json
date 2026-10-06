@@ -16,14 +16,15 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^26.4.0",
-    "@types/ws": "^8.18.1",
-    "typescript": "^6.0.3"
+    "@types/node": "^26.6.4",
+    "@types/ws": "^8.18.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "dependencies": {
     "@sinclair/typebox": "^0.34.52",
     "dayjs": "^1.11.23",
-    "devalue": "^5.9.2",
-    "ws": "^8.21.3"
+    "devalue": "^6.0.2",
+    "ws": "^8.22.0"
   }
 }

@@ -1,5 +1,5 @@
+import { Gauge } from "@prometheus-io/client";
 import os from "node:os";
-import { Gauge } from "prom-client";
 import NumberMetric from "../../number-metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";
 

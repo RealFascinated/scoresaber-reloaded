@@ -1,4 +1,4 @@
-import { Histogram } from "prom-client";
+import { Histogram } from "@prometheus-io/client";
 import Metric from "../../metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";
 

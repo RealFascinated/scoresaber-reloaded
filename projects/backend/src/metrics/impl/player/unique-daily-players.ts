@@ -1,6 +1,6 @@
+import { Gauge } from "@prometheus-io/client";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { getMidnightAlignedDate, TimeUnit } from "@ssr/common/utils/time-utils";
-import { Gauge } from "prom-client";
 import { redisClient } from "../../../common/redis";
 import Metric from "../../metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";

@@ -1,5 +1,5 @@
+import { Gauge } from "@prometheus-io/client";
 import { heapStats } from "bun:jsc";
-import { Gauge } from "prom-client";
 import NumberMetric from "../../number-metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";
 

@@ -1,5 +1,5 @@
+import { Registry } from "@prometheus-io/client";
 import { isProduction } from "@ssr/common/utils/utils";
-import { Registry } from "prom-client";
 
 export const prometheusRegistry = new Registry();
 prometheusRegistry.setDefaultLabels({

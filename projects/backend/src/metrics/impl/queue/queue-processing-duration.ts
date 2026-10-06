@@ -1,4 +1,4 @@
-import { Counter, Histogram } from "prom-client";
+import { Counter, Histogram } from "@prometheus-io/client";
 import { Queue, QueueProcessEvent } from "../../../queue/queue";
 import Metric from "../../metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";

@@ -1,5 +1,5 @@
+import { Gauge } from "@prometheus-io/client";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
-import { Gauge } from "prom-client";
 import { ScoreSaberApiService } from "../../../service/external/scoresaber-api.service";
 import NumberMetric from "../../number-metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";
