@@ -1,3 +1,4 @@
+import Announcements from "@/components/announcements/announcements";
 import { ApiHealth } from "@/components/api/api-health";
 import { SnowBackground } from "@/components/effects/snow-background";
 import { AppSidebar } from "@/components/layout/app-sidebar";
@@ -28,6 +29,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <SearchProvider>
               <AppSidebar />
               <SidebarInset className="text-white">
+                <Announcements />
                 <header className="border-border/80 bg-background flex h-14 shrink-0 items-center gap-2 border-b px-4">
                   <SidebarTrigger className="-ml-1" />
                 </header>

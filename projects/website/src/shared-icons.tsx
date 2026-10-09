@@ -74,6 +74,7 @@ import {
   Loader2,
   LoaderCircle,
   Medal,
+  MegaphoneIcon,
   Monitor,
   Move,
   Music,
@@ -319,6 +320,10 @@ export const SharedIcons = {
   StatsUnavailableIcon: BarChart3,
   BackendOfflineIcon: ServerCrash,
   SiteNoticeWarningIcon: ExclamationTriangleIcon,
+
+  // Announcements
+  AnnouncementIcon: MegaphoneIcon,
+  AnnouncementCloseIcon: XIcon,
 
   // Footer & misc
   ExternalNavigationIcon: ExternalLink,
