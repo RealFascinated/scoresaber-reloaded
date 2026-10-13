@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "cross-env": "^10.1.0",
-    "prettier": "^3.9.9",
+    "prettier": "^3.9.10",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-tailwindcss": "^0.8.1"
   },

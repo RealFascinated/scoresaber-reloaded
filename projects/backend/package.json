@@ -20,7 +20,7 @@
   "dependencies": {
     "@discordx/importer": "^1.3.3",
     "@discordx/utilities": "^8.0.0",
-    "@dotenvx/dotenvx": "^2.33.0",
+    "@dotenvx/dotenvx": "^2.34.2",
     "@elysiajs/cors": "^1.4.2",
     "@elysiajs/cron": "^1.4.2",
     "@elysiajs/openapi": "^1.4.16",
@@ -33,8 +33,8 @@
     "devalue": "^6.0.2",
     "discord.js": "^14.27.0",
     "discordx": "^11.13.3",
-    "dotenv": "^18.0.5",
-    "drizzle-orm": "^0.45.3",
+    "dotenv": "^18.0.7",
+    "drizzle-orm": "^0.45.4",
     "elysia": "^1.4.30",
     "elysia-helmet": "^3.1.0",
     "eslint": "^10.12.0",
@@ -42,10 +42,10 @@
     "ioredis": "^6.0.0",
     "pg": "^8.23.1",
     "systeminformation": "^5.33.15",
-    "typescript-eslint": "^8.71.1"
+    "typescript-eslint": "^8.71.2"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.2",
+    "@types/bun": "^1.4.3",
     "@types/pg": "^8.23.1",
     "@typescript/native": "npm:typescript@^7.0.2",
     "drizzle-kit": "^0.31.11",
