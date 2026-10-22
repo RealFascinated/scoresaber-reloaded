@@ -47,10 +47,10 @@
     "date-fns": "^4.4.0",
     "dexie": "^4.4.6",
     "dexie-react-hooks": "^4.4.0",
-    "framer-motion": "^14.4.0",
+    "framer-motion": "^14.5.0",
     "globals": "^17.13.0",
     "js-cookie": "^3.0.8",
-    "lucide-react": "^1.60.0",
+    "lucide-react": "^1.61.0",
     "next": "^16.4.2",
     "next-themes": "^0.4.6",
     "nuqs": "^2.10.2",
@@ -66,7 +66,7 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript-eslint": "^8.72.0",
     "websocket": "^1.0.35",
-    "zustand": "^5.0.15"
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
