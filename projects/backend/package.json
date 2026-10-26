@@ -33,7 +33,7 @@
     "devalue": "^6.0.3",
     "discord.js": "^14.27.0",
     "discordx": "^11.13.3",
-    "dotenv": "^18.0.8",
+    "dotenv": "^18.0.9",
     "drizzle-orm": "^0.45.4",
     "elysia": "^1.4.30",
     "elysia-helmet": "^3.1.0",
@@ -45,7 +45,7 @@
     "typescript-eslint": "^8.72.0"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.3",
+    "@types/bun": "^1.4.4",
     "@types/pg": "^8.23.1",
     "@typescript/native": "npm:typescript@^7.0.2",
     "drizzle-kit": "^0.31.11",
