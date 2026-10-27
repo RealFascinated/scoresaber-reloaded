@@ -42,7 +42,7 @@
     "ioredis": "^6.0.0",
     "pg": "^8.23.1",
     "systeminformation": "^5.33.16",
-    "typescript-eslint": "^8.72.0"
+    "typescript-eslint": "^8.72.1"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4",
