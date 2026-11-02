@@ -38,7 +38,7 @@
     "elysia": "^1.4.30",
     "elysia-helmet": "^3.1.0",
     "eslint": "^10.14.0",
-    "globals": "^17.13.0",
+    "globals": "^17.14.0",
     "ioredis": "^6.0.0",
     "pg": "^8.23.1",
     "systeminformation": "^5.33.19",
