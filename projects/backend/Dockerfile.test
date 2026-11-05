@@ -7,7 +7,7 @@
 #
 #   docker build -f projects/backend/Dockerfile.test -t ssr-backend-test .
 #   docker run --rm --network host ssr-backend-test
-FROM oven/bun:1.4.2-alpine
+FROM oven/bun:1.4.4-alpine
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY projects/common/package.json ./projects/common/
 COPY projects/backend/package.json ./projects/backend/
 COPY projects/website/package.json ./projects/website/
 
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY projects/common ./projects/common
 COPY projects/backend ./projects/backend

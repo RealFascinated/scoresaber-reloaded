@@ -1,4 +1,4 @@
-FROM oven/bun:1.4.2-debian AS base
+FROM oven/bun:1.4.4-debian AS base
 
 # Set the environment
 ENV NEXT_PUBLIC_APP_ENV=production
@@ -19,7 +19,7 @@ COPY projects/website/package.json ./projects/website/
 COPY projects/backend/package.json ./projects/backend/
 
 # Install dependencies (including dev dependencies for build)
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 # Copy source code after dependencies are installed
 COPY projects/common ./projects/common

@@ -1,4 +1,4 @@
-FROM oven/bun:1.4.2-alpine AS base
+FROM oven/bun:1.4.4-alpine AS base
 
 # Full dependency install (lint, build)
 FROM base AS depends-dev
@@ -9,7 +9,7 @@ COPY projects/common/package.json ./projects/common/
 COPY projects/backend/package.json ./projects/backend/
 COPY projects/website/package.json ./projects/website/
 
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY projects/common ./projects/common
 COPY projects/backend ./projects/backend
@@ -23,7 +23,7 @@ COPY projects/common/package.json ./projects/common/
 COPY projects/backend/package.json ./projects/backend/
 COPY projects/website/package.json ./projects/website/
 
-RUN bun install --frozen-lockfile --production
+RUN bun install --frozen-lockfile --production --ignore-scripts
 
 COPY projects/common ./projects/common
 COPY projects/backend ./projects/backend
