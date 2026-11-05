@@ -20,6 +20,15 @@ const LOOKUP_PLAYER_ENDPOINT = "https://api.beatleader.com/player/:playerId";
 const LOOKUP_PLAYER_SCORES_ENDPOINT = "https://api.beatleader.com/player/:playerId/scores";
 const beatLeaderApiLog = Logger.withTopic("BeatLeader API");
 
+/**
+ * A player scores page request: the HTTP status BeatLeader answered with, plus the
+ * parsed page when the response was a 200 this app could validate.
+ */
+export type BeatLeaderPlayerScoresPageResult = {
+  status: number;
+  page: BeatLeaderPlayerScoresPageToken | undefined;
+};
+
 export class BeatLeaderApiService {
   public static totalRequests: number = 0;
   public static failedRequests: number = 0;
@@ -286,30 +295,20 @@ export class BeatLeaderApiService {
   }
 
   /**
-   * Whether a BeatLeader player exists, distinguishing a definitive "not found"
-   * (404) from a failed request.
+   * Fetches one page of a player's BeatLeader scores, keeping the HTTP status so the
+   * caller can tell a page that does not exist (404: the player has no scores, or the
+   * history ends here) from a failure worth retrying (429, 5xx, or a body this app
+   * cannot validate). Collapsing both into `undefined` left players without BeatLeader
+   * scores permanently unseeded, because "not found" could not be told apart from
+   * "try again later".
    *
-   * @param playerId the player ID to check
-   * @returns `true` when the player exists, `false` when the API reports 404,
-   *   or `undefined` when the request failed (network error, timeout, 429/5xx,
-   *   parse failure) and the answer is unknown
+   * @param playerId the player ID to look up
+   * @param page the page to fetch
+   * @param options the query options
+   * @returns the status with the parsed page when it parsed, or `undefined` when no
+   *   HTTP response was received at all
    */
-  public static async playerExists(playerId: string): Promise<boolean | undefined> {
-    const result = await BeatLeaderApiService.request(LOOKUP_PLAYER_ENDPOINT.replace(":playerId", playerId));
-    if (result == undefined) {
-      return undefined;
-    }
-    if (result.status === 404) {
-      return false;
-    }
-    if (result.status !== 200) {
-      BeatLeaderApiService.failedRequests++;
-      return undefined;
-    }
-    return true;
-  }
-
-  public static async lookupPlayerScores(
+  public static async requestPlayerScoresPage(
     playerId: string,
     page: number,
     options?: {
@@ -332,12 +331,12 @@ export class BeatLeaderApiService {
       stars_to?: string;
       eventId?: string;
     }
-  ): Promise<BeatLeaderPlayerScoresPageToken | undefined> {
+  ): Promise<BeatLeaderPlayerScoresPageResult | undefined> {
     const before = performance.now();
     BeatLeaderApiService.log(`Looking up BeatLeader scores page ${page} for "${playerId}"...`);
 
     const o = options ?? {};
-    const response = await BeatLeaderApiService.fetch<unknown>(
+    const result = await BeatLeaderApiService.request(
       LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":playerId", playerId),
       {
         searchParams: {
@@ -363,22 +362,27 @@ export class BeatLeaderApiService {
         },
       }
     );
-    if (response == undefined) {
+    if (result == undefined) {
       return undefined;
     }
 
-    if (!Value.Check(BeatLeaderPlayerScoresPageSchema, response)) {
+    if (result.status !== 200) {
+      BeatLeaderApiService.failedRequests++;
+      return { status: result.status, page: undefined };
+    }
+
+    if (!Value.Check(BeatLeaderPlayerScoresPageSchema, result.data)) {
       BeatLeaderApiService.log(
-        `Failed to parse BeatLeader scores page ${page} for "${playerId}": ${Value.Errors(BeatLeaderPlayerScoresPageSchema, response).First()?.message}`
+        `Failed to parse BeatLeader scores page ${page} for "${playerId}": ${Value.Errors(BeatLeaderPlayerScoresPageSchema, result.data).First()?.message}`
       );
-      return undefined;
+      return { status: result.status, page: undefined };
     }
 
-    const parsed = Value.Parse(BeatLeaderPlayerScoresPageSchema, response);
+    const parsed = Value.Parse(BeatLeaderPlayerScoresPageSchema, result.data);
     BeatLeaderApiService.log(
       `Found BeatLeader scores page ${page} for "${playerId}" in ${formatDuration(performance.now() - before)}`
     );
-    return parsed;
+    return { status: result.status, page: parsed };
   }
 
   private static log(message: string): void {

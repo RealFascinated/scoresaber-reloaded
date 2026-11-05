@@ -36,19 +36,16 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
     }
     try {
       const players = await ScoreSaberAccountsRepository.selectIdsNeedingBeatLeaderSeed();
-      const playerIds = players.map(p => p.id);
-      if (playerIds.length === 0) {
+      if (players.length === 0) {
         PlayerBeatLeaderScoreSeedQueue.logger.info("No players to seed BeatLeader scores for");
         return;
       }
 
-      for (const id of playerIds) {
-        await this.add({ id, data: id });
-      }
+      await this.addAll(players.map(player => ({ id: player.id, data: player.id })));
 
       await this.processQueue();
       PlayerBeatLeaderScoreSeedQueue.logger.info(
-        `Added ${playerIds.length} players to BeatLeader score seed queue`
+        `Added ${players.length} players to BeatLeader score seed queue`
       );
     } catch (error) {
       PlayerBeatLeaderScoreSeedQueue.logger.error("Failed to load players for BeatLeader score seed:", error);

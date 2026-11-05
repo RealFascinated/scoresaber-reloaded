@@ -33,6 +33,14 @@ export const scoreSaberAccountsTable = pgTable(
     seededScores: boolean().notNull(),
     seededBeatLeaderScores: boolean().notNull(),
 
+    // BeatLeader backfill progress. `beatLeaderSeedPage` is how many score pages
+    // were processed on the last attempt and is where the next attempt resumes;
+    // the attempt counter and timestamp drive the retry backoff so a player that
+    // cannot be seeded is not retried on every 10-minute queue cycle forever.
+    beatLeaderSeedPage: integer().notNull().default(0),
+    beatLeaderSeedAttempts: integer().notNull().default(0),
+    beatLeaderSeedLastAttempt: timestamp(),
+
     trackReplays: boolean().notNull(),
 
     inactive: boolean().notNull(),

@@ -75,13 +75,53 @@ export class ScoreSaberAccountsRepository {
       .groupBy(scoreSaberAccountsTable.hmd);
   }
 
+  /**
+   * Selects the players whose BeatLeader scores still need seeding, skipping the ones
+   * that failed an attempt recently. The backoff grows with the attempt count (2, 4,
+   * 8 ... minutes, capped at a day) so a player that can never be seeded settles into
+   * a daily retry instead of being queued again on every 10-minute cycle, which kept
+   * the queue from ever draining.
+   *
+   * @returns the ids to queue
+   */
   public static async selectIdsNeedingBeatLeaderSeed(limit?: number): Promise<{ id: string }[]> {
     const q = db
       .select({ id: scoreSaberAccountsTable.id })
       .from(scoreSaberAccountsTable)
-      .where(and(eq(scoreSaberAccountsTable.seededBeatLeaderScores, false)))
+      .where(
+        and(
+          eq(scoreSaberAccountsTable.seededBeatLeaderScores, false),
+          sql`(
+            ${scoreSaberAccountsTable.beatLeaderSeedLastAttempt} IS NULL
+            OR ${scoreSaberAccountsTable.beatLeaderSeedLastAttempt} < (now() AT TIME ZONE 'UTC') - least(
+              power(2, least(${scoreSaberAccountsTable.beatLeaderSeedAttempts}, 10)) * interval '1 minute',
+              interval '1 day'
+            )
+          )`
+        )
+      )
       .orderBy(desc(scoreSaberAccountsTable.joinedDate));
     return limit != null ? q.limit(limit) : q;
+  }
+
+  /**
+   * Gets how far the BeatLeader backfill got for a player, so a retry resumes where
+   * the last attempt stopped instead of starting the score history over.
+   *
+   * @param id the player's id
+   * @returns the processed page count and attempt count, or undefined if not tracked
+   */
+  public static async findBeatLeaderSeedProgress(
+    id: string
+  ): Promise<{ page: number; attempts: number } | undefined> {
+    const [row] = await db
+      .select({
+        page: scoreSaberAccountsTable.beatLeaderSeedPage,
+        attempts: scoreSaberAccountsTable.beatLeaderSeedAttempts,
+      })
+      .from(scoreSaberAccountsTable)
+      .where(eq(scoreSaberAccountsTable.id, id));
+    return row;
   }
 
   public static async selectIdsNeedingScoreSeed(limit?: number): Promise<{ id: string }[]> {

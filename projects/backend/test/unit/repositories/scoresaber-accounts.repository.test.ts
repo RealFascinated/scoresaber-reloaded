@@ -165,6 +165,50 @@ describe("ScoreSaberAccountsRepository", () => {
       const ids = await ScoreSaberAccountsRepository.selectIdsNeedingBeatLeaderSeed(1);
       expect(ids.length).toBeLessThanOrEqual(1);
     });
+
+    test("skips a player whose last attempt failed moments ago", async () => {
+      await ScoreSaberAccountsRepository.updateAccount(TEST_PLAYER_ID, {
+        seededBeatLeaderScores: false,
+        beatLeaderSeedAttempts: 1,
+        beatLeaderSeedLastAttempt: new Date(),
+      });
+
+      const ids = await ScoreSaberAccountsRepository.selectIdsNeedingBeatLeaderSeed();
+
+      expect(ids.some(row => row.id === TEST_PLAYER_ID)).toBe(false);
+    });
+
+    test("includes a player once the retry backoff has passed", async () => {
+      await ScoreSaberAccountsRepository.updateAccount(TEST_PLAYER_ID, {
+        seededBeatLeaderScores: false,
+        beatLeaderSeedAttempts: 1,
+        beatLeaderSeedLastAttempt: new Date(Date.now() - 10 * 60_000),
+      });
+
+      const ids = await ScoreSaberAccountsRepository.selectIdsNeedingBeatLeaderSeed();
+
+      expect(ids.some(row => row.id === TEST_PLAYER_ID)).toBe(true);
+    });
+  });
+
+  describe("findBeatLeaderSeedProgress", () => {
+    test("returns the stored backfill progress", async () => {
+      await ScoreSaberAccountsRepository.updateAccount(TEST_PLAYER_ID, {
+        beatLeaderSeedPage: 3,
+        beatLeaderSeedAttempts: 2,
+      });
+
+      expect(await ScoreSaberAccountsRepository.findBeatLeaderSeedProgress(TEST_PLAYER_ID)).toEqual({
+        page: 3,
+        attempts: 2,
+      });
+    });
+
+    test("returns undefined for an unknown account", async () => {
+      expect(
+        await ScoreSaberAccountsRepository.findBeatLeaderSeedProgress(UNKNOWN_PLAYER_ID)
+      ).toBeUndefined();
+    });
   });
 
   describe("selectIdsNeedingScoreSeed", () => {

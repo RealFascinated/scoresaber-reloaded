@@ -81,6 +81,32 @@ describe("BeatSaver API integration", () => {
   });
 });
 
+/**
+ * Score stats only exist upstream, so this file's live test depends on
+ * BeatLeader's CDN. A non-200 answer (outage, rate limit, or a Cloudflare block
+ * on the runner's IP) is reported to clients as "not found", which would fail
+ * the test on an unrelated upstream problem — so probe the CDN first and skip
+ * the test with the upstream status logged.
+ */
+const SCORE_STATS_CDN_URL = `https://cdn.scorestats.beatleader.xyz/${TEST_BEATLEADER_SCORE_ID}.json`;
+
+async function fetchScoreStatsCdnStatus(): Promise<number> {
+  try {
+    const response = await fetch(SCORE_STATS_CDN_URL);
+    return response.status;
+  } catch {
+    return 0;
+  }
+}
+
+const scoreStatsCdnStatus = await fetchScoreStatsCdnStatus();
+if (scoreStatsCdnStatus !== 200) {
+  console.warn(
+    `BeatLeader score stats CDN answered ${scoreStatsCdnStatus === 0 ? "no response" : scoreStatsCdnStatus}` +
+      ` for score ${TEST_BEATLEADER_SCORE_ID} (${SCORE_STATS_CDN_URL}), skipping the live score stats test`
+  );
+}
+
 describe("BeatLeader API integration", () => {
   const app = createTestApp();
 
@@ -90,7 +116,7 @@ describe("BeatLeader API integration", () => {
       expectStatus(response, 422);
     });
 
-    test("returns live score stats for the seeded score", async () => {
+    test.skipIf(scoreStatsCdnStatus !== 200)("returns live score stats for the seeded score", async () => {
       const response = await request(app, `/beatleader/scorestats/${TEST_BEATLEADER_SCORE_ID}`);
       expectStatus(response, 200);
 

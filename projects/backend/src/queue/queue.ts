@@ -34,6 +34,9 @@ export abstract class Queue<T> {
    */
   public readonly concurrency: number;
 
+  /** Max items pushed to Redis per command when adding a batch. */
+  private static readonly ADD_BATCH_SIZE = 1_000;
+
   /**
    * Number of in-flight item processors
    */
@@ -75,11 +78,17 @@ export abstract class Queue<T> {
    * @param items the items to add
    */
   public async addAll(items: T[]) {
-    if (this.isStopped) {
+    if (this.isStopped || items.length === 0) {
       return;
     }
 
-    await redisClient.lpush(`queue::${this.id}`, stringify(items));
+    // Pushed in batches: a seed queue takes hundreds of thousands of ids, and a round
+    // trip per item kept it filling for longer than a processing cycle.
+    for (let i = 0; i < items.length; i += Queue.ADD_BATCH_SIZE) {
+      const entries = items.slice(i, i + Queue.ADD_BATCH_SIZE).map(item => stringify(item));
+      await redisClient.lpush(`queue::${this.id}`, ...entries);
+    }
+
     // Use setImmediate to ensure the items are committed before processing
     setImmediate(() => this.processQueue());
   }
