@@ -887,7 +887,7 @@
 
     "duplexer": ["duplexer@0.1.2", "", {}, "sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg=="],
 
-    "electron-to-chromium": ["electron-to-chromium@1.5.477", "", {}, "sha512-PN++F4zWZoVDGWinxMnSCpVqKhqFOJfLXxdU8bYJKudAEsHL/XKVITOKWVbfMt1r276Mi9RDLU9VHx9uKJ4RMQ=="],
+    "electron-to-chromium": ["electron-to-chromium@1.5.478", "", {}, "sha512-pftG+ma5Lm8O6/p45bhYT6StBN5ziQymaRzmCZwFl8DwWHKPPD93FdOmP1aqftcepolQYvrcyTLa17kE8Yf+jg=="],
 
     "elysia": ["elysia@1.4.31", "", { "dependencies": { "cookie": "^1.1.1", "exact-mirror": "^0.2.9", "fast-decode-uri-component": "^1.0.1", "memoirist": "^0.4.0" }, "peerDependencies": { "@sinclair/typebox": ">= 0.34.0 < 1", "@types/bun": ">= 1.2.0", "file-type": ">= 20.0.0", "openapi-types": ">= 12.0.0", "typescript": ">= 5.0.0" }, "optionalPeers": ["@types/bun", "typescript"] }, "sha512-8Dt6PcIvdPWe/9Nj1gpmdRy7z8y5JoPKP0yjtpmbF1bLa8MTbNvS0Xu+0kdC58L05Qp/2bzUjqdid0CJB4cLeQ=="],
 
