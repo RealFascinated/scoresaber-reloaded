@@ -13,8 +13,10 @@ export default function leaderboardController(app: Elysia) {
       .get(
         "/search",
         async ({ query: { page, ...filters } }) => {
-          return await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(page, {
+          return await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(page ?? 1, {
             ...filters,
+            category: filters.category ?? "trending",
+            sort: filters.sort ?? "desc",
           });
         },
         {
@@ -22,7 +24,7 @@ export default function leaderboardController(app: Elysia) {
           query: t.Composite([
             ScoreSaberLeaderboardQueryFiltersSchema,
             t.Object({
-              page: t.Number({ default: 1 }),
+              page: t.Optional(t.Number()),
             }),
           ]),
           response: LeaderboardsPageResponseSchema,

@@ -11,20 +11,20 @@ export default function playerRankingController(app: Elysia) {
         "/:page",
         async ({ params: { page }, query: { country, search, includeInactives } }) => {
           return await PlayerSearchService.getPlayerRanking(page, {
-            country: country,
-            search: search,
-            includeInactives: includeInactives,
+            country: country ?? "",
+            search: search ?? "",
+            includeInactives: includeInactives ?? false,
           });
         },
         {
           tags: ["Ranking"],
           params: t.Object({
-            page: t.Number({ default: 1 }),
+            page: t.Number(),
           }),
           query: t.Object({
-            country: t.Optional(t.String({ default: "" })),
-            search: t.Optional(t.String({ default: "" })),
-            includeInactives: t.Optional(t.BooleanString({ default: false })),
+            country: t.Optional(t.String()),
+            search: t.Optional(t.String()),
+            includeInactives: t.Optional(t.BooleanString()),
           }),
           response: PlayerRankingsResponseSchema,
           detail: {
@@ -40,7 +40,7 @@ export default function playerRankingController(app: Elysia) {
         {
           tags: ["Ranking"],
           params: t.Object({
-            page: t.Number({ default: 1 }),
+            page: t.Number(),
           }),
           query: t.Object({
             country: t.Optional(t.String()),

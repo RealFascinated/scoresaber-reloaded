@@ -130,7 +130,11 @@ export default function playerController(app: Elysia) {
           }
           const statistics = await PlayerStatisticsService.getStatistics(player);
           // Elysia types transform properties by their raw input; at runtime count was decoded to a number.
-          return await PlayerHistoryService.getPlayerStatisticHistories(player, statistics, count as number);
+          return await PlayerHistoryService.getPlayerStatisticHistories(
+            player,
+            statistics,
+            (count ?? 50) as number
+          );
         },
         {
           tags: ["Player"],
@@ -138,16 +142,16 @@ export default function playerController(app: Elysia) {
             playerId: t.String(),
           }),
           query: t.Object({
-            count: Type.Transform(
-              Type.Union([Type.String(), Type.Number(), Type.Undefined()], { default: 50 })
-            )
-              .Decode(v => {
-                const n = v === "" || v === undefined ? 50 : Number(v);
-                if (n === -1) return -1;
-                if (!Number.isInteger(n) || n < 1) throw new Error("Expected -1 or an integer >= 1");
-                return n;
-              })
-              .Encode(v => v),
+            count: Type.Optional(
+              Type.Transform(Type.Union([Type.String(), Type.Number(), Type.Undefined()]))
+                .Decode(v => {
+                  const n = v === "" || v === undefined ? 50 : Number(v);
+                  if (n === -1) return -1;
+                  if (!Number.isInteger(n) || n < 1) throw new Error("Expected -1 or an integer >= 1");
+                  return n;
+                })
+                .Encode(v => v)
+            ),
           }),
           detail: {
             description: "Fetch player statistics history",

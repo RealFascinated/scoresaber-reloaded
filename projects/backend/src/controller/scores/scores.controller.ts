@@ -53,7 +53,7 @@ export default function scoresController(app: Elysia) {
           tags: ["Scores"],
           params: t.Object({
             playerId: t.String(),
-            page: t.Number({ default: 1 }),
+            page: t.Number(),
             sort: ScoreSaberScoreSortSchema,
           }),
           query: t.Object({
@@ -68,18 +68,24 @@ export default function scoresController(app: Elysia) {
       .get(
         "/player/accsaber/:playerId/:page",
         async ({ params: { playerId, page }, query: { sort, direction, type } }) => {
-          return await PlayerScoresService.getPlayerAccSaberScores(playerId, page, sort, direction, type);
+          return await PlayerScoresService.getPlayerAccSaberScores(
+            playerId,
+            page,
+            sort ?? "date",
+            direction ?? "desc",
+            type ?? "overall"
+          );
         },
         {
           tags: ["Scores"],
           params: t.Object({
             playerId: t.String(),
-            page: t.Number({ default: 1 }),
+            page: t.Number(),
           }),
           query: t.Object({
-            sort: t.Union(accSaberScoreSortSchema.anyOf, { default: "date" }),
-            direction: t.Union(SortDirectionSchema.anyOf, { default: "desc" }),
-            type: t.Union(accSaberScoreTypeSchema.anyOf, { default: "overall" }),
+            sort: t.Optional(t.Union(accSaberScoreSortSchema.anyOf)),
+            direction: t.Optional(t.Union(SortDirectionSchema.anyOf)),
+            type: t.Optional(t.Union(accSaberScoreTypeSchema.anyOf)),
           }),
           response: AccSaberScoresPageResponseSchema,
           detail: {
@@ -105,7 +111,7 @@ export default function scoresController(app: Elysia) {
             playerId: t.String(),
             field: ScoreSaberScoreSortFieldSchema,
             direction: SortDirectionSchema,
-            page: t.Number({ default: 1 }),
+            page: t.Number(),
           }),
           query: PlayerScoresQuerySchema,
           response: PlayerScoresPageResponseSchema,
@@ -131,7 +137,7 @@ export default function scoresController(app: Elysia) {
             playerId: t.String(),
             field: ScoreSaberMedalScoreSortFieldSchema,
             direction: SortDirectionSchema,
-            page: t.Number({ default: 1 }),
+            page: t.Number(),
           }),
           query: PlayerScoresQuerySchema,
           response: MedalPlayerScoresPageResponseSchema,
@@ -204,8 +210,8 @@ export default function scoresController(app: Elysia) {
         {
           tags: ["Scores"],
           params: t.Object({
-            page: t.Number({ default: 1 }),
-            limit: t.Number({ minimum: 1, maximum: 50, default: 25 }),
+            page: t.Number(),
+            limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
           }),
           response: TopScoresPageResponseSchema,
           detail: {

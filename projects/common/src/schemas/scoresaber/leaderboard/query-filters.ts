@@ -15,21 +15,18 @@ export const ScoreSaberLeaderboardQueryFiltersSchema = Type.Object({
   ranked: Type.Optional(Type.Boolean()),
   qualified: Type.Optional(Type.Boolean()),
   category: Type.Optional(
-    Type.Union(
-      [
-        Type.Literal("date_ranked"),
-        Type.Literal("date_created"),
-        Type.Literal("star_difficulty"),
-        Type.Literal("plays"),
-        Type.Literal("daily_plays"),
-        Type.Literal("trending"),
-      ],
-      { default: "trending" }
-    )
+    Type.Union([
+      Type.Literal("date_ranked"),
+      Type.Literal("date_created"),
+      Type.Literal("star_difficulty"),
+      Type.Literal("plays"),
+      Type.Literal("daily_plays"),
+      Type.Literal("trending"),
+    ])
   ),
   minStars: Type.Optional(Type.Number()),
   maxStars: Type.Optional(Type.Number()),
-  sort: Type.Optional(Type.Union([Type.Literal("asc"), Type.Literal("desc")], { default: "desc" })),
+  sort: Type.Optional(Type.Union([Type.Literal("asc"), Type.Literal("desc")])),
   query: Type.Optional(Type.String()),
 });
 
