@@ -14,7 +14,7 @@
   "dependencies": {
     "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.1",
-    "@formkit/tempo": "^1.1.0",
+    "@formkit/tempo": "^1.1.1",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.9.2",
     "@next/bundle-analyzer": "^16.4.5",
