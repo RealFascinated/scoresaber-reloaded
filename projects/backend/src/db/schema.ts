@@ -527,6 +527,7 @@ export const scoreSaberScoreEventTable = pgTable(
   table => [
     index("score_events_leaderboard_timestamp_idx").on(table.leaderboardId, table.timestamp),
     index("score_events_timestamp_idx").on(table.timestamp),
+    index("score_events_player_id_idx").on(table.playerId),
   ]
 );
 

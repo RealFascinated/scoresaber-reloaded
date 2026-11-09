@@ -1,0 +1,1 @@
+CREATE INDEX "score_events_player_id_idx" ON "scoresaber-score-events" USING btree ("playerId");
