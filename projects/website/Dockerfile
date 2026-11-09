@@ -35,10 +35,10 @@ RUN cd projects/website && bun run lint
 RUN cd projects/website && bun run build
 
 # Run the app
-FROM node:alpine3.22 AS runner
+FROM base AS runner
 WORKDIR /app
 
-RUN apk add --no-cache curl
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 # -----------------------------------
 
@@ -58,4 +58,4 @@ ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
 
 # Use the correct path to server.js
-CMD ["node", "server.js"]
+CMD ["bun", "server.js"]
