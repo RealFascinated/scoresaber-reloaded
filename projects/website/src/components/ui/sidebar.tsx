@@ -189,12 +189,13 @@ const Sidebar = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "bg-sidebar text-sidebar-foreground fixed inset-y-0 z-10 flex h-svh w-72 flex-col",
+          // Hidden below md in CSS (not via isMobile) so SSR/first paint never shows it on mobile,
+          // since useIsMobile reports false during SSR and hydration.
+          "bg-sidebar text-sidebar-foreground fixed inset-y-0 z-10 hidden h-svh w-72 flex-col md:flex",
           side === "left" ? "left-0" : "right-0",
           state === "collapsed" && side === "left" && "-translate-x-full",
           state === "collapsed" && side === "right" && "translate-x-full",
           "transition-transform duration-200 ease-linear",
-          isMobile && "hidden",
           className
         )}
         data-sidebar="sidebar"
