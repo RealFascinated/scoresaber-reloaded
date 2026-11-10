@@ -8,6 +8,7 @@ COPY package.json bun.lock ./
 COPY projects/common/package.json ./projects/common/
 COPY projects/backend/package.json ./projects/backend/
 COPY projects/website/package.json ./projects/website/
+COPY vendor ./vendor
 
 RUN bun install --frozen-lockfile --ignore-scripts
 
@@ -22,6 +23,7 @@ COPY package.json bun.lock ./
 COPY projects/common/package.json ./projects/common/
 COPY projects/backend/package.json ./projects/backend/
 COPY projects/website/package.json ./projects/website/
+COPY vendor ./vendor
 
 RUN bun install --frozen-lockfile --production --ignore-scripts
 
