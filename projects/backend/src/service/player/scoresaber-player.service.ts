@@ -6,16 +6,12 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import {
-  ScoreSaberV2PlayerToken,
   isScoreSaberV2PlayerToken,
   type ScoreSaberPlayerLookupToken,
 } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { getPlayerStatisticChanges } from "@ssr/common/utils/player-utils";
-import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import { parse, stringify } from "devalue";
-import { cachedPlayerTokenCacheKey, playerCacheKey } from "../../common/cache-keys";
-import { redisClient } from "../../common/redis";
+import { playerCacheKey } from "../../common/cache-keys";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
@@ -26,8 +22,6 @@ import { PlayerStatisticsService } from "../player-statistics/player-statistics.
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerHistoryService } from "./player-history.service";
 import { PlayerHmdService } from "./player-hmd.service";
-
-const CACHED_PLAYER_EXPIRY = TimeUnit.toSeconds(TimeUnit.Month, 3);
 
 function computeHmdUsagePercentages(hmdUsage: Record<HMD, number>): Record<HMD, number> {
   const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, c) => sum + c, 0);
@@ -45,9 +39,13 @@ export default class ScoreSaberPlayerService {
   /**
    * Gets a ScoreSaber player using their account id.
    *
+   * The built player is cached "live-ish": a cache hit never calls ScoreSaber, and the entry only
+   * goes away through {@link PlayerCoreService.invalidatePlayerCaches}.
+   *
    * @param id the player's account id
    * @param type how much detail to include
-   * @param player an already looked up token; it must be resolved for the realm
+   * @param player a token freshly looked up from ScoreSaber (e.g. from a ranking page); it must be
+   * resolved for the realm. The player is rebuilt from it and the cache refreshed, never served from cache.
    * @param realmId the realm to resolve the player's rank, pp and statistics for
    * @returns the player
    */
@@ -57,13 +55,43 @@ export default class ScoreSaberPlayerService {
     player?: ScoreSaberPlayerLookupToken,
     realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberPlayer> {
-    player ??= await ScoreSaberApiService.lookupPlayer(id, realmId);
-    if (!player) {
-      throw new NotFoundError(`Player "${id}" not found`);
+    const cacheKey = playerCacheKey(id, type, realmId);
+
+    if (player !== undefined) {
+      const built = await ScoreSaberPlayerService.buildPlayer(id, type, player, realmId);
+      try {
+        await CacheService.insert(CacheId.SCORESABER_PLAYER, cacheKey, built);
+      } catch (error) {
+        ScoreSaberPlayerService.logger.warn(`Failed to cache player "${id}":`, error);
+      }
+      return built;
     }
 
-    // A token passed in (e.g. from the token cache) can predate the v2 shape and
-    // lack `stats`; re-resolve from the API instead of crashing on it below.
+    return CacheService.fetch(CacheId.SCORESABER_PLAYER, cacheKey, async () => {
+      const token = await ScoreSaberApiService.lookupPlayer(id, realmId);
+      if (!token) {
+        throw new NotFoundError(`Player "${id}" not found`);
+      }
+      return ScoreSaberPlayerService.buildPlayer(id, type, token, realmId);
+    });
+  }
+
+  /**
+   * Builds a player from a ScoreSaber token and the tracked data.
+   *
+   * @param id the player's account id
+   * @param type how much detail to include
+   * @param player the token to build from
+   * @param realmId the realm to resolve the player's rank, pp and statistics for
+   */
+  private static async buildPlayer(
+    id: string,
+    type: DetailType,
+    player: ScoreSaberPlayerLookupToken,
+    realmId: number
+  ): Promise<ScoreSaberPlayer> {
+    // A token passed in can predate the v2 shape and lack `stats`; re-resolve from the API
+    // instead of crashing on it below.
     if (!player.stats) {
       const freshPlayer = await ScoreSaberApiService.lookupPlayer(id, realmId);
       if (!freshPlayer?.stats) {
@@ -75,65 +103,81 @@ export default class ScoreSaberPlayerService {
     const rank = player.stats.rank;
     const countryRank = player.stats.countryRank;
 
-    return CacheService.fetch(CacheId.SCORESABER_PLAYER, playerCacheKey(id, type, realmId), async () => {
-      const account = await PlayerCoreService.getOrCreateAccount(id, player).catch(() => undefined);
-      if (!account) {
-        throw new NotFoundError(`Player account "${id}" not found`);
-      }
+    const account = await PlayerCoreService.getOrCreateAccount(id, player).catch(() => undefined);
+    if (!account) {
+      throw new NotFoundError(`Player account "${id}" not found`);
+    }
 
-      const basePlayer = ScoreSaberPlayerService.buildBasePlayer(player, account);
+    const basePlayer = ScoreSaberPlayerService.buildBasePlayer(player, account);
 
-      if (type === "basic") {
-        return basePlayer;
-      }
+    if (type === "basic") {
+      return basePlayer;
+    }
 
-      const statistics = await PlayerStatisticsService.getStatistics(player, realmId);
-      const [hmdBreakdown, history] = await Promise.all([
-        account && player !== undefined
-          ? PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages)
-          : undefined,
-        PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30, realmId),
-      ]);
+    const statistics = await PlayerStatisticsService.getStatistics(player, realmId);
+    const [hmdBreakdown, history] = await Promise.all([
+      PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages),
+      PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30, realmId),
+    ]);
 
-      let rankPercentile =
-        (rank / (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1)) *
-        100;
-      if (isNaN(rankPercentile)) {
-        rankPercentile = 0;
-      }
+    let rankPercentile =
+      (rank / (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1)) * 100;
+    if (isNaN(rankPercentile)) {
+      rankPercentile = 0;
+    }
 
-      return {
-        ...basePlayer,
-        badges:
-          ("badges" in player && player.badges
-            ? player.badges.map(badge => ({
-                url: badge.image,
-                description: badge.description,
-              }))
-            : []) || [],
-        statisticChange: {
-          daily: getPlayerStatisticChanges(history, 1),
-          weekly: getPlayerStatisticChanges(history, 7),
-          monthly: getPlayerStatisticChanges(history, 30),
-        },
-        plusOnePp: statistics.plusOnePp,
-        // The peak rank is only tracked for the default realm.
-        peakRank: realmId === DEFAULT_REALM_ID ? account.peakRank : undefined,
-        hmdBreakdown: hmdBreakdown,
-        rankPages: {
-          global: getPageFromRank(rank, 50),
-          country: getPageFromRank(countryRank, 50),
-          medals:
-            account?.medalsRank && account.medalsRank > 0
-              ? getPageFromRank(account.medalsRank, 50)
-              : undefined,
-        },
-        rankPercentile: rankPercentile,
-        currentStreak: account.currentStreak,
-        longestStreak: account.longestStreak,
-        statistics: statistics,
-      } as ScoreSaberPlayer;
-    });
+    return {
+      ...basePlayer,
+      badges:
+        ("badges" in player && player.badges
+          ? player.badges.map(badge => ({
+              url: badge.image,
+              description: badge.description,
+            }))
+          : []) || [],
+      statisticChange: {
+        daily: getPlayerStatisticChanges(history, 1),
+        weekly: getPlayerStatisticChanges(history, 7),
+        monthly: getPlayerStatisticChanges(history, 30),
+      },
+      plusOnePp: statistics.plusOnePp,
+      // The peak rank is only tracked for the default realm.
+      peakRank: realmId === DEFAULT_REALM_ID ? account.peakRank : undefined,
+      hmdBreakdown: hmdBreakdown,
+      rankPages: {
+        global: getPageFromRank(rank, 50),
+        country: getPageFromRank(countryRank, 50),
+        medals:
+          account.medalsRank && account.medalsRank > 0 ? getPageFromRank(account.medalsRank, 50) : undefined,
+      },
+      rankPercentile: rankPercentile,
+      currentStreak: account.currentStreak,
+      longestStreak: account.longestStreak,
+      statistics: statistics,
+    } as ScoreSaberPlayer;
+  }
+
+  /**
+   * Caches the basic player built from a fresh token, so profiles stay live without a ScoreSaber call.
+   *
+   * @param token a token freshly looked up from ScoreSaber, resolved for the realm
+   * @param account the up-to-date tracked account of the player
+   * @param realmId the realm the token was resolved for
+   */
+  public static async cacheBasicPlayer(
+    token: ScoreSaberPlayerLookupToken,
+    account: ScoreSaberAccount,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<void> {
+    try {
+      await CacheService.insert(
+        CacheId.SCORESABER_PLAYER,
+        playerCacheKey(token.id, "basic", realmId),
+        ScoreSaberPlayerService.buildBasePlayer(token, account)
+      );
+    } catch (error) {
+      ScoreSaberPlayerService.logger.warn(`Failed to cache player "${token.id}":`, error);
+    }
   }
 
   /**
@@ -161,7 +205,8 @@ export default class ScoreSaberPlayerService {
       banned: player.banned,
       inactive: player.inactive,
       trackedSince: account.trackedSince,
-      joinedDate: "createdAt" in player ? new Date(player.createdAt) : new Date(),
+      // Page tokens carry no creation date, so fall back to the tracked one
+      joinedDate: "createdAt" in player ? new Date(player.createdAt) : account.joinedDate,
     } as ScoreSaberPlayer;
   }
 
@@ -198,126 +243,5 @@ export default class ScoreSaberPlayerService {
       result.push(ScoreSaberPlayerService.buildBasePlayer(player, account));
     }
     return result;
-  }
-
-  /**
-   * Parses and validates a cached player token against the v2 schema. Entries
-   * written by older code (pre-v2 shape, missing `stats`) fail validation and
-   * are removed from the cache so callers re-fetch a fresh token instead of
-   * consuming malformed data.
-   *
-   * @param cachedData the raw cached value
-   * @param id the player's id
-   * @returns the valid token, or undefined if the entry was unusable
-   */
-  private static async parseCachedPlayerToken(
-    cachedData: string,
-    id: string
-  ): Promise<ScoreSaberV2PlayerToken | undefined> {
-    let token: ScoreSaberV2PlayerToken;
-    try {
-      token = parse(cachedData) as ScoreSaberV2PlayerToken;
-    } catch {
-      ScoreSaberPlayerService.logger.warn(
-        `Failed to parse cached player data for ${id}, removing from cache`
-      );
-      await redisClient.del(cachedPlayerTokenCacheKey(id));
-      return undefined;
-    }
-
-    if (!isScoreSaberV2PlayerToken(token)) {
-      ScoreSaberPlayerService.logger.warn(
-        `Cached player data for ${id} does not match the v2 player schema, removing from cache`
-      );
-      await redisClient.del(cachedPlayerTokenCacheKey(id));
-      return undefined;
-    }
-
-    return token;
-  }
-
-  /**
-   * Gets a cached ScoreSaber player token.
-   *
-   * @param id the player's id
-   * @returns the player token
-   */
-  public static async getCachedPlayer(id: string): Promise<ScoreSaberV2PlayerToken> {
-    const cacheKey = cachedPlayerTokenCacheKey(id);
-
-    const cachedData = await redisClient.get(cacheKey);
-    if (cachedData) {
-      const cachedToken = await ScoreSaberPlayerService.parseCachedPlayerToken(cachedData, id);
-      if (cachedToken) {
-        return cachedToken;
-      }
-    }
-
-    const player = await ScoreSaberApiService.lookupPlayer(id);
-    if (!player) {
-      throw new NotFoundError(`Player "${id}" not found`);
-    }
-
-    await redisClient.set(cacheKey, stringify(player), "EX", CACHED_PLAYER_EXPIRY);
-    return player;
-  }
-
-  public static async getCachedPlayers(ids: string[]): Promise<Map<string, ScoreSaberV2PlayerToken>> {
-    const uniqueIds = [...new Set(ids)];
-    if (uniqueIds.length === 0) {
-      return new Map();
-    }
-
-    const keyToId = new Map<string, string>(
-      uniqueIds.map(id => [cachedPlayerTokenCacheKey(id), id] as const)
-    );
-    const keys = [...keyToId.keys()];
-    const cachedValues = await redisClient.mget(keys);
-    const players = new Map<string, ScoreSaberV2PlayerToken>();
-    const missingIds: string[] = [];
-
-    for (let index = 0; index < keys.length; index++) {
-      const key = keys[index];
-      const cachedValue = cachedValues[index];
-      const id = keyToId.get(key);
-      if (!id) {
-        continue;
-      }
-
-      if (!cachedValue) {
-        missingIds.push(id);
-        continue;
-      }
-
-      const cachedToken = await ScoreSaberPlayerService.parseCachedPlayerToken(cachedValue, id);
-      if (!cachedToken) {
-        missingIds.push(id);
-        continue;
-      }
-
-      players.set(id, cachedToken);
-    }
-
-    if (missingIds.length > 0) {
-      const lookedUpPlayers = await Promise.all(
-        missingIds.map(async id => {
-          const player = await ScoreSaberApiService.lookupPlayer(id);
-          return { id, player };
-        })
-      );
-
-      await Promise.all(
-        lookedUpPlayers.map(async ({ id, player }) => {
-          if (!player) {
-            return;
-          }
-
-          players.set(id, player);
-          await redisClient.set(cachedPlayerTokenCacheKey(id), stringify(player), "EX", CACHED_PLAYER_EXPIRY);
-        })
-      );
-    }
-
-    return players;
   }
 }

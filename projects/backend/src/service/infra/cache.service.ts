@@ -13,7 +13,7 @@ export enum CacheId {
   PLAYER_SCORE_STATISTICS = "player_score_statistics",
   BEATSAVER_MAP = "beatsaver_map",
   SCORESABER_PLAYER = "scoresaber_player",
-  SCORESABER_PLAYER_EXISTS = "scoresaber_player_exists",
+  SCORESABER_MINI_RANKING = "scoresaber_mini_ranking",
   SCORESABER_API_RESPONSE = "scoresaber_api_response",
   SCORESABER_LEADERBOARD_STAR_CHANGE = "scoresaber_leaderboard_star_change",
   SCORESABER_RANKING_QUEUE_LEADERBOARDS = "scoresaber_ranking_queue_leaderboards",
@@ -48,12 +48,8 @@ export default class CacheService {
       ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
       mode: "MEMORY",
     },
-    [CacheId.SCORESABER_PLAYER]: {
+    [CacheId.SCORESABER_MINI_RANKING]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_PLAYER_EXISTS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 6),
       mode: "MEMORY",
     },
     [CacheId.SCORESABER_API_RESPONSE]: {
@@ -79,6 +75,12 @@ export default class CacheService {
     },
 
     // Redis caches
+    // Live-ish: entries are dropped by events (see PlayerCoreService.invalidatePlayerCaches), so the
+    // TTL is only a safety net that heals an invalidation that was missed.
+    [CacheId.SCORESABER_PLAYER]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
+      mode: "REDIS",
+    },
     [CacheId.BEATSAVER_MAP]: {
       ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
       mode: "REDIS",
@@ -261,6 +263,28 @@ export default class CacheService {
     for (const cache of this.memoryCaches.values()) {
       cache.remove(cacheKey);
     }
+  }
+
+  /**
+   * Invalidates every entry, in memory or in Redis, whose key starts with the prefix.
+   *
+   * @param prefix the key prefix to invalidate
+   */
+  public static async invalidatePrefix(prefix: string): Promise<void> {
+    for (const cache of this.memoryCaches.values()) {
+      cache.removeMatching(key => key.startsWith(prefix));
+    }
+
+    // SCAN walks the keyspace in pages, so it never blocks Redis the way KEYS does
+    const globPrefix = prefix.replace(/[*?[\]\\]/g, "\\$&");
+    let cursor = "0";
+    do {
+      const [nextCursor, keys] = await redisClient.scan(cursor, "MATCH", `${globPrefix}*`, "COUNT", 500);
+      if (keys.length > 0) {
+        await redisClient.del(...keys);
+      }
+      cursor = nextCursor;
+    } while (cursor !== "0");
   }
 
   private static getMemoryCache(cacheId: CacheId): SSRCache {

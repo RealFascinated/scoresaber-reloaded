@@ -749,6 +749,22 @@ export class ScoreSaberScoresRepository {
   }
 
   /**
+   * Gets the ids of every player that has a score on any of the leaderboards.
+   *
+   * @param leaderboardIds the leaderboards to look at
+   */
+  public static async selectDistinctPlayerIdsByLeaderboardIds(leaderboardIds: number[]): Promise<string[]> {
+    if (leaderboardIds.length === 0) {
+      return [];
+    }
+    const rows = await db
+      .selectDistinct({ playerId: scoreSaberScoresTable.playerId })
+      .from(scoreSaberScoresTable)
+      .where(inArray(scoreSaberScoresTable.leaderboardId, leaderboardIds));
+    return rows.map(r => r.playerId);
+  }
+
+  /**
    * Counts the scores that have pp in a realm.
    *
    * @param realmId the realm to count ranked scores for

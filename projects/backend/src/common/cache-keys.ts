@@ -19,33 +19,38 @@ function realmKeySuffix(realmId: number): string {
   return realmId === DEFAULT_REALM_ID ? "" : `:realm:${realmId}`;
 }
 
+/**
+ * Every player-derived cache key starts with this prefix, whatever the realm or detail type,
+ * so one prefix removes all of them.
+ */
+export function playerCacheKeyPrefix(id: string): string {
+  return `scoresaber:player:${id}:`;
+}
+
+/** Matches every player cache key, whatever the player, realm or detail type. */
+export const playerCacheKeysPattern = "scoresaber:player:*";
+
 export function playerCacheKey(id: string, type: DetailType, realmId: number = DEFAULT_REALM_ID): string {
-  return `scoresaber:player:${id}:${type}${realmKeySuffix(realmId)}`;
-}
-
-export function playerExistsCacheKey(id: string): string {
-  return `scoresaber:player:${id}:exists`;
-}
-
-export function cachedPlayerTokenCacheKey(id: string): string {
-  return `scoresaber:cached-player:${id}`;
+  return `${playerCacheKeyPrefix(id)}${type}${realmKeySuffix(realmId)}`;
 }
 
 export function scoreSaberApiResponseCacheKey(cacheHash: string): string {
   return `scoresaber:api-cache:${cacheHash}`;
 }
 
+export function miniRankingCacheKeyPrefix(playerId: string): string {
+  return `scoresaber:mini-ranking:${playerId}:`;
+}
+
 export function miniRankingCacheKey(
   playerId: string,
-  type: "global" | "country" | "medals",
+  type: "global" | "country",
   page: number,
   country?: string,
   realmId: number = DEFAULT_REALM_ID
 ): string {
-  if (type === "medals") {
-    return `scoresaber:mini-ranking:${playerId}:medals:${page}`;
-  }
-  return `scoresaber:mini-ranking:${playerId}:${type}${type === "country" ? `:${country ?? ""}` : ""}:${page}${realmKeySuffix(realmId)}`;
+  const scope = type === "country" ? `country:${country ?? ""}` : type;
+  return `${miniRankingCacheKeyPrefix(playerId)}${scope}:${page}${realmKeySuffix(realmId)}`;
 }
 
 // BeatSaver

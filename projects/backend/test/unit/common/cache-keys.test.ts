@@ -4,11 +4,11 @@ import {
   beatLeaderScoreByIdCacheKey,
   beatLeaderScoreBySongCacheKey,
   beatSaverMapCacheKey,
-  cachedPlayerTokenCacheKey,
   miniRankingCacheKey,
   normalizeSongHash,
   playerCacheKey,
-  playerExistsCacheKey,
+  playerCacheKeyPrefix,
+  playerCacheKeysPattern,
   rankingQueueLeaderboardsCacheKey,
   scoreHistoryGraphCacheKey,
   scoreSaberApiResponseCacheKey,
@@ -49,30 +49,29 @@ describe("playerCacheKey", () => {
   }
 });
 
-describe("playerExistsCacheKey", () => {
-  const cases = [
-    { name: "normal id", id: "abc123", expected: "scoresaber:player:abc123:exists" },
-    { name: "empty id", id: "", expected: "scoresaber:player::exists" },
-  ] as const;
+describe("playerCacheKeyPrefix", () => {
+  test("covers every realm and detail type of the same player", () => {
+    const prefix = playerCacheKeyPrefix("player-1");
+    expect(playerCacheKey("player-1", "basic").startsWith(prefix)).toBe(true);
+    expect(playerCacheKey("player-1", "full", 2).startsWith(prefix)).toBe(true);
+  });
 
-  for (const { name, id, expected } of cases) {
-    test(name, () => {
-      expect(playerExistsCacheKey(id)).toBe(expected);
-    });
-  }
+  test("does not cover a different player whose id starts with the same characters", () => {
+    expect(playerCacheKey("player-10", "basic").startsWith(playerCacheKeyPrefix("player-1"))).toBe(false);
+  });
 });
 
-describe("cachedPlayerTokenCacheKey", () => {
-  const cases = [
-    { name: "normal id", id: "token-player", expected: "scoresaber:cached-player:token-player" },
-    { name: "empty id", id: "", expected: "scoresaber:cached-player:" },
-  ] as const;
+describe("playerCacheKeysPattern", () => {
+  test("matches every player cache key", () => {
+    const prefix = playerCacheKeysPattern.slice(0, -1);
+    expect(playerCacheKey("player-1", "basic").startsWith(prefix)).toBe(true);
+    expect(playerCacheKey("player-2", "full", 2).startsWith(prefix)).toBe(true);
+  });
 
-  for (const { name, id, expected } of cases) {
-    test(name, () => {
-      expect(cachedPlayerTokenCacheKey(id)).toBe(expected);
-    });
-  }
+  test("does not match mini-ranking keys", () => {
+    const prefix = playerCacheKeysPattern.slice(0, -1);
+    expect(miniRankingCacheKey("player-1", "global", 1).startsWith(prefix)).toBe(false);
+  });
 });
 
 describe("scoreSaberApiResponseCacheKey", () => {
@@ -121,14 +120,6 @@ describe("miniRankingCacheKey", () => {
       page: 2,
       country: "",
       expected: "scoresaber:mini-ranking:p4:country::2",
-    },
-    {
-      name: "medals ranking",
-      playerId: "p5",
-      type: "medals" as const,
-      page: 5,
-      country: "ignored",
-      expected: "scoresaber:mini-ranking:p5:medals:5",
     },
   ] as const;
 

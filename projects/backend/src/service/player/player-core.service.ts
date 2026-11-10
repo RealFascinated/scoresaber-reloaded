@@ -1,3 +1,4 @@
+import { DetailType } from "@ssr/common/detail-type";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
@@ -9,9 +10,10 @@ import {
   type ScoreSaberPlayerLookupToken,
   type ScoreSaberV2PlayerToken,
 } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
-import { isProduction } from "@ssr/common/utils/utils";
-import { playerCacheKey } from "../../common/cache-keys";
+import { chunkArray, isProduction } from "@ssr/common/utils/utils";
+import { miniRankingCacheKeyPrefix, playerCacheKey } from "../../common/cache-keys";
 import { logNewTrackedPlayer } from "../../common/embds";
+import { redisClient } from "../../common/redis";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
 import { type ScoreSaberAccountRow } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/player-scoresaber-scores-queue";
@@ -20,6 +22,7 @@ import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-acco
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService from "../infra/cache.service";
+import { RealmService } from "../realm/realm.service";
 
 export const accountCreationLock: Record<string, Promise<ScoreSaberAccount | undefined>> = {};
 
@@ -231,6 +234,43 @@ export class PlayerCoreService {
   }
 
   /**
+   * Drops every cached view of a player: profiles in every realm and detail type, and mini-rankings.
+   *
+   * The player cache has no short TTL, so anything that changes what a profile shows must call this.
+   *
+   * @param playerId the player's id
+   */
+  public static async invalidatePlayerCaches(playerId: string): Promise<void> {
+    await CacheService.invalidatePrefix(miniRankingCacheKeyPrefix(playerId));
+    await PlayerCoreService.invalidatePlayersCaches([playerId]);
+  }
+
+  /**
+   * Drops the cached profiles of many players, e.g. every player affected by a map reweight.
+   *
+   * @param playerIds the players' ids
+   * @param scope limits what is dropped to some detail types and/or realms (everything when omitted)
+   */
+  public static async invalidatePlayersCaches(
+    playerIds: string[],
+    scope?: { detailTypes?: DetailType[]; realmIds?: number[] }
+  ): Promise<void> {
+    if (playerIds.length === 0) {
+      return;
+    }
+
+    const realmIds = scope?.realmIds ?? (await RealmService.getRealmIds());
+    const detailTypes: DetailType[] = scope?.detailTypes ?? ["basic", "full"];
+    const keys = playerIds.flatMap(playerId =>
+      realmIds.flatMap(realmId => detailTypes.map(type => playerCacheKey(playerId, type, realmId)))
+    );
+
+    for (const batch of chunkArray(keys, 1000)) {
+      await redisClient.del(...batch);
+    }
+  }
+
+  /**
    * Refreshes a player.
    *
    * @param id the player's id
@@ -239,10 +279,7 @@ export class PlayerCoreService {
   public static async refreshPlayer(id: string): Promise<PlayerRefreshResponse> {
     const response = await ScoreSaberApiService.refreshPlayer(id);
     if (response !== undefined) {
-      await Promise.all([
-        CacheService.invalidate(playerCacheKey(id, "basic")),
-        CacheService.invalidate(playerCacheKey(id, "full")),
-      ]);
+      await PlayerCoreService.invalidatePlayerCaches(id);
       return response;
     }
     return { result: false };
@@ -271,10 +308,7 @@ export class PlayerCoreService {
     }
 
     if (options?.invalidateCache !== false) {
-      await Promise.all([
-        CacheService.invalidate(playerCacheKey(playerId, "basic")),
-        CacheService.invalidate(playerCacheKey(playerId, "full")),
-      ]);
+      await PlayerCoreService.invalidatePlayerCaches(playerId);
     }
   }
 

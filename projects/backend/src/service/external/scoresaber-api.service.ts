@@ -122,10 +122,22 @@ export class ScoreSaberApiService {
     url: string,
     options?: {
       searchParams?: Record<string, string>;
+      /** Skips the short-lived response cache; concurrent identical requests still coalesce. */
+      skipCache?: boolean;
     }
   ): Promise<T | undefined> {
     const startedAt = performance.now();
+    const { skipCache, ...requestOptions } = options ?? {};
+    options = Object.keys(requestOptions).length > 0 ? requestOptions : undefined;
     const cacheHash = Bun.hash(JSON.stringify({ url, options })).toString();
+
+    if (skipCache) {
+      const fresh = (await ScoreSaberApiService.coalescingLoader.get(cacheHash, async () => {
+        return await ScoreSaberApiService.request(url, options);
+      })) as SerializableValue | undefined;
+      ScoreSaberApiService.totalRequestLatencyMs += Math.max(0, performance.now() - startedAt);
+      return fresh as T;
+    }
 
     const data = await CacheService.fetch<SerializableValue | undefined>(
       CacheId.SCORESABER_API_RESPONSE,
@@ -315,7 +327,8 @@ export class ScoreSaberApiService {
     ScoreSaberApiService.log(`Looking up player "${playerId}"...`);
     const token = await ScoreSaberApiService.fetch<ScoreSaberV2PlayerToken>(
       fillEndpoint(LOOKUP_PLAYER_V2_ENDPOINT, { id: playerId }),
-      realmId != null ? { searchParams: { realmId: realmId.toString() } } : undefined
+      // Player profiles are cached for long by the player cache, which must never pin a stale response.
+      { skipCache: true, ...(realmId != null ? { searchParams: { realmId: realmId.toString() } } : {}) }
     );
     if (token === undefined) {
       return undefined;

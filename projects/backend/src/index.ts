@@ -45,6 +45,7 @@ import StorageService from "./service/infra/storage.service";
 import { LeaderboardRankedSyncNotificationsService } from "./service/leaderboard/leaderboard-ranked-batch-notifications.service";
 import { LeaderboardRankedSyncService } from "./service/leaderboard/leaderboard-ranked-sync.service";
 import { PlayerMedalsService } from "./service/medals/player-medals.service";
+import { PlayerCacheLivenessService } from "./service/player/player-cache-liveness.service";
 import { PlayerHistoryService } from "./service/player/player-history.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { ScoreEventService } from "./service/score-event/score-event.service";
@@ -356,6 +357,9 @@ app.onStart(async () => {
     listener.onStart?.();
   });
 
+  // Before the score websockets start, so a stale cache is dropped before it can be served
+  await PlayerCacheLivenessService.start();
+
   log.info("Listening on port http://localhost:8080");
   try {
     await initDiscordBot();
@@ -414,6 +418,7 @@ const gracefulShutdown = async (signal: string) => {
 
     log.info("Stopping all services...");
     MetricsService.cleanup();
+    await PlayerCacheLivenessService.stop();
     for (const listener of EventsManager.getListeners()) {
       try {
         await listener.onStop?.();

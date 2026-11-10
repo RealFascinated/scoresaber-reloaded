@@ -1,8 +1,5 @@
 import type { ScoreSaberV2PlayerToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import type { ScoreSaberV2PlayerPageToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/players-page";
-import { parse } from "devalue";
-import { cachedPlayerTokenCacheKey } from "../../src/common/cache-keys";
-import { redisClient } from "../../src/common/redis";
 import { ScoreSaberApiService } from "../../src/service/external/scoresaber-api.service";
 import {
   INSERT_ACCOUNT_ID,
@@ -108,17 +105,17 @@ function toPageToken(token: ScoreSaberV2PlayerToken): ScoreSaberV2PlayerPageToke
   };
 }
 
-async function lookupCachedPlayer(playerId: string): Promise<ScoreSaberV2PlayerToken | undefined> {
-  const cached = await redisClient.get(cachedPlayerTokenCacheKey(playerId));
-  if (!cached) {
-    return TEST_PLAYER_TOKENS.find(token => token.id === playerId);
-  }
+const seededPlayerTokens = new Map<string, ScoreSaberV2PlayerToken>();
 
-  try {
-    return parse(cached) as ScoreSaberV2PlayerToken;
-  } catch {
-    return TEST_PLAYER_TOKENS.find(token => token.id === playerId);
+/** Registers the tokens the stubbed ScoreSaber player lookup returns. */
+export function registerTestPlayerTokens(tokens: ScoreSaberV2PlayerToken[]): void {
+  for (const token of tokens) {
+    seededPlayerTokens.set(token.id, token);
   }
+}
+
+async function lookupCachedPlayer(playerId: string): Promise<ScoreSaberV2PlayerToken | undefined> {
+  return seededPlayerTokens.get(playerId) ?? TEST_PLAYER_TOKENS.find(token => token.id === playerId);
 }
 
 /** Stubs ScoreSaber HTTP lookups so integration tests stay offline and deterministic. */

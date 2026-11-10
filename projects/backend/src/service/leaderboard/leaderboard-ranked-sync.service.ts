@@ -7,8 +7,10 @@ import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerMedalsService } from "../medals/player-medals.service";
+import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import { RealmScoreSyncService } from "../realm/realm-score-sync.service";
 import { RealmService } from "../realm/realm.service";
@@ -68,6 +70,8 @@ export class LeaderboardRankedSyncService {
 
     const leaderboardsToUpsert: ScoreSaberLeaderboard[] = [];
     const updatedLeaderboards: LeaderboardUpdate[] = [];
+    // Leaderboards whose weight changed, so every player's pp on them changed with it
+    const reweightedLeaderboardIds: number[] = [];
 
     let checked = 0;
     for (const apiLeaderboard of leaderboards) {
@@ -86,6 +90,13 @@ export class LeaderboardRankedSyncService {
 
       if (!dbLeaderboard || statusChanged) {
         leaderboardsToUpsert.push(apiLeaderboard);
+      }
+
+      if (
+        dbLeaderboard &&
+        (dbLeaderboard.stars !== apiLeaderboard.stars || dbLeaderboard.ranked !== apiLeaderboard.ranked)
+      ) {
+        reweightedLeaderboardIds.push(apiLeaderboard.id);
       }
 
       if (statusChanged) {
@@ -136,6 +147,16 @@ export class LeaderboardRankedSyncService {
         LeaderboardRankedSyncService.logger.info(`Updated batch of ${batch.length} leaderboards!`);
       }
     }
+    // Cached profiles show pp and statistics derived from these leaderboards, so they are stale now
+    if (reweightedLeaderboardIds.length > 0) {
+      const playerIds =
+        await ScoreSaberScoresRepository.selectDistinctPlayerIdsByLeaderboardIds(reweightedLeaderboardIds);
+      await PlayerCoreService.invalidatePlayersCaches(playerIds);
+      LeaderboardRankedSyncService.logger.info(
+        `Invalidated ${playerIds.length} cached players after ${reweightedLeaderboardIds.length} reweighted leaderboards.`
+      );
+    }
+
     const duration = formatDuration(performance.now() - before);
     LeaderboardRankedSyncService.logger.info(
       `Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`

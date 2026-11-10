@@ -130,6 +130,19 @@ export class SSRCache {
   }
 
   /**
+   * Removes every object whose key matches the predicate
+   *
+   * @param predicate decides which keys to remove
+   */
+  public removeMatching(predicate: (key: string) => boolean): void {
+    for (const key of this.cache.keys()) {
+      if (predicate(key)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
+  /**
    * Cleans up the cache
    */
   public cleanup() {

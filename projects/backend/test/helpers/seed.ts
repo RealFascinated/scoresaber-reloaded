@@ -1,8 +1,5 @@
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import { stringify } from "devalue";
 import { sql } from "drizzle-orm";
-import { cachedPlayerTokenCacheKey } from "../../src/common/cache-keys";
-import { redisClient } from "../../src/common/redis";
 import { db } from "../../src/db/index";
 import {
   beatLeaderPlayersTable,
@@ -38,6 +35,7 @@ import {
   TEST_SONG_HASH_TWO,
 } from "./constants";
 import { buildScoreSaberV2PlayerToken } from "./fixtures";
+import { registerTestPlayerTokens } from "./scoresaber-api-test-patches";
 
 const seededTables = [
   "scoresaber-player-history",
@@ -491,7 +489,5 @@ export async function seedCachedScoreSaberPlayerTokens(): Promise<void> {
     }),
   ];
 
-  await Promise.all(
-    tokens.map(token => redisClient.set(cachedPlayerTokenCacheKey(token.id), stringify(token), "EX", 60 * 60))
-  );
+  registerTestPlayerTokens(tokens);
 }

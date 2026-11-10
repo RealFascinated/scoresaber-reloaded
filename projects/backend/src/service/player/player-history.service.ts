@@ -18,8 +18,6 @@ import {
 } from "@ssr/common/utils/time-utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
-import { cachedPlayerTokenCacheKey } from "../../common/cache-keys";
-import { redisClient } from "../../common/redis";
 import { playerHistoryRowToType } from "../../db/converter/player-history";
 import { type PlayerHistoryRow } from "../../db/schema";
 import { PlayerBeatLeaderScoreSeedQueue } from "../../queue/impl/player-beatleader-score-seed-queue";
@@ -35,6 +33,7 @@ import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { RealmService } from "../realm/realm.service";
 import { PlayerCoreService } from "./player-core.service";
+import ScoreSaberPlayerService from "./scoresaber-player.service";
 
 export class PlayerHistoryService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player History");
@@ -63,6 +62,7 @@ export class PlayerHistoryService {
     PlayerHistoryService.logger.info(`Found ${players.length} active players from ScoreSaber API`);
 
     const batchSize = Math.max(1, env.DATABASE_POOL_MAX - 10);
+    const refreshedPlayerIds: string[] = [];
 
     await processInBatches(players, batchSize, async player => {
       const playerId = String(player.id);
@@ -74,8 +74,12 @@ export class PlayerHistoryService {
         // Update the player's inactive status if it has changed
         if (account.inactive !== player.inactive) {
           await PlayerCoreService.updatePlayer(account.id, { inactive: player.inactive });
-          await redisClient.del(cachedPlayerTokenCacheKey(account.id));
+          account.inactive = player.inactive;
         }
+
+        // Ranks shift without the player doing anything, so the nightly tokens keep cached profiles live
+        await ScoreSaberPlayerService.cacheBasicPlayer(player, account);
+        refreshedPlayerIds.push(playerId);
 
         // If the player has fewer recorded plays (current rows + archived attempts)
         // than their total play count, add them to the refresh queue. Replays are
@@ -112,6 +116,12 @@ export class PlayerHistoryService {
         errorCount++;
         PlayerHistoryService.logger.error(`Failed to track player "${playerId}"`, err);
       }
+    });
+
+    // Full profiles hold statistics built from the old ranks and pp, so they are rebuilt on demand
+    await PlayerCoreService.invalidatePlayersCaches(refreshedPlayerIds, {
+      detailTypes: ["full"],
+      realmIds: [DEFAULT_REALM_ID],
     });
 
     for (const realmId of (await RealmService.getRealmIds()).filter(id => id !== DEFAULT_REALM_ID)) {
@@ -208,14 +218,21 @@ export class PlayerHistoryService {
 
     const batchSize = Math.max(1, env.DATABASE_POOL_MAX - 10);
     let trackedCount = 0;
+    const refreshedPlayerIds: string[] = [];
     await processInBatches(fetched.players, batchSize, async player => {
       try {
         const account = await PlayerCoreService.getOrCreateAccount(String(player.id), player);
         await PlayerHistoryService.trackPlayerHistory(account, trackTime, player, realmId);
+        await ScoreSaberPlayerService.cacheBasicPlayer(player, account, realmId);
+        refreshedPlayerIds.push(String(player.id));
         trackedCount++;
       } catch (err) {
         PlayerHistoryService.logger.error(`Failed to track player "${player.id}" in realm "${realmId}"`, err);
       }
+    });
+    await PlayerCoreService.invalidatePlayersCaches(refreshedPlayerIds, {
+      detailTypes: ["full"],
+      realmIds: [realmId],
     });
     PlayerHistoryService.logger.info(
       `Tracked ${trackedCount}/${fetched.players.length} players in realm "${realmId}"`

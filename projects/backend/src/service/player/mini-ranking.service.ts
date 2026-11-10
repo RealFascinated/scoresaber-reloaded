@@ -79,7 +79,7 @@ export default class MiniRankingService {
     const pageResponses = await Promise.all(
       Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
         CacheService.fetch(
-          CacheId.SCORESABER_PLAYER,
+          CacheId.SCORESABER_MINI_RANKING,
           miniRankingCacheKey(player.id, type, page, player.country, realmId),
           async () =>
             ScoreSaberApiService.lookupPlayers(page, {

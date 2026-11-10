@@ -34,19 +34,11 @@ export class PlayerSearchService {
     const uniquePlayerIds = [
       ...new Set(localMatches.map(p => p.id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])),
     ];
-    const cachedTokens = await ScoreSaberPlayerService.getCachedPlayers(
-      uniquePlayerIds.filter(id => !scoreSaberPlayerTokenMap.has(id))
-    );
-
     // Get players from ScoreSaber
     return (
       await Promise.all(
         uniquePlayerIds.map(async id =>
-          ScoreSaberPlayerService.getPlayer(
-            id,
-            "basic",
-            scoreSaberPlayerTokenMap.get(id) || cachedTokens.get(id)
-          )
+          ScoreSaberPlayerService.getPlayer(id, "basic", scoreSaberPlayerTokenMap.get(id))
         )
       )
     ).sort((a, b) => {
