@@ -158,7 +158,13 @@ const Sidebar = React.forwardRef<
         <SheetContent
           data-sidebar="sidebar"
           data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-[--sidebar-width] max-w-none border-r-0 p-0 [&>button]:hidden"
+          className={cn(
+            "bg-sidebar text-sidebar-foreground w-[--sidebar-width] max-w-none border-r-0 p-0 [&>button]:hidden",
+            // The default sheet slide is 500ms in / 300ms out with a blanket `transition`, which feels
+            // sluggish for a full-width nav panel. The slide is a keyframe animation, so drop the
+            // transition and shorten it, and promote the panel to its own layer.
+            "transition-none will-change-transform data-[state=closed]:duration-150 data-[state=open]:duration-200"
+          )}
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
