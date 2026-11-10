@@ -107,7 +107,7 @@ export default function AccSaberPlayerScores({ player }: Props) {
                     query.handleFilterChange(() => setType(typeOption.value as AccSaberScoreType))
                   }
                 >
-                  {typeOption.icon}
+                  <span className="hidden sm:inline-flex">{typeOption.icon}</span>
                   {typeOption.name}
                 </SegmentedOption>
               ))}
