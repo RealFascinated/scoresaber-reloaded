@@ -1,6 +1,7 @@
 import { CooldownPriority } from "@ssr/common/cooldown";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberRankingRequestsResponse } from "@ssr/common/schemas/response/scoresaber/ranking-requests";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
@@ -59,6 +60,17 @@ const LOOKUP_LEADERBOARDS_V2_ENDPOINT = `${API_BASE}/v2/leaderboards`;
 const LOOKUP_LEADERBOARD_SCORES_V2_ENDPOINT = `${API_BASE}/v2/leaderboards/:id/scores`;
 const LOOKUP_REALMS_V2_ENDPOINT = `${API_BASE}/v2/realms`;
 const LOOKUP_REALM_PP_CURVE_V2_ENDPOINT = `${API_BASE}/v2/realms/:id/pp-curve`;
+
+/**
+ * ScoreSaber's v2 list endpoints currently reject `realmId` ("expected number, received string"),
+ * so it is only sent for non-default realms; the default realm is what they return when it is omitted.
+ *
+ * @param realmId the realm to resolve, if any
+ * @returns the search params to spread into a request
+ */
+function realmSearchParam(realmId?: number): { realmId?: string } {
+  return realmId != null && realmId !== DEFAULT_REALM_ID ? { realmId: realmId.toString() } : {};
+}
 
 type SerializableValue =
   | string
@@ -338,7 +350,7 @@ export class ScoreSaberApiService {
           ...(options?.search ? { search: options.search } : {}),
           ...(options?.country ? { countries: options.country } : {}),
           ...(options?.includeInactives ? { includeInactive: options.includeInactives.toString() } : {}),
-          ...(options?.realmId != null ? { realmId: options.realmId.toString() } : {}),
+          ...realmSearchParam(options?.realmId),
         },
       }
     );
@@ -498,7 +510,7 @@ export class ScoreSaberApiService {
           ...(options?.search ? { search: options.search } : {}),
           ...(options?.sortBy ? { sortBy: options.sortBy } : {}),
           ...(options?.sortDirection ? { sortDirection: options.sortDirection } : {}),
-          ...(options?.realmId != null ? { realmId: options.realmId.toString() } : {}),
+          ...realmSearchParam(options?.realmId),
         },
       }
     );
@@ -566,7 +578,7 @@ export class ScoreSaberApiService {
         searchParams: {
           page: page.toString(),
           limit: "100",
-          realmId: realmId.toString(),
+          ...realmSearchParam(realmId),
         },
       }
     );
