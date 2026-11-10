@@ -1,5 +1,6 @@
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
@@ -72,9 +73,10 @@ export class PlayerSearchService {
       country?: string;
       search?: string;
       includeInactives?: boolean;
+      realmId?: number;
     }
   ): Promise<PlayerRankingsResponse> {
-    const { country, search, includeInactives } = options ?? {};
+    const { country, search, includeInactives, realmId = DEFAULT_REALM_ID } = options ?? {};
     if (search && search.length < 3) {
       return Pagination.empty<ScoreSaberPlayer>();
     }
@@ -83,6 +85,7 @@ export class PlayerSearchService {
       country,
       search,
       includeInactives,
+      realmId,
     });
 
     if (!foundPlayers) {
@@ -92,7 +95,7 @@ export class PlayerSearchService {
     const tokens = foundPlayers.data;
     const items = await Promise.all(
       tokens.map(async token => {
-        const player = await ScoreSaberPlayerService.getPlayer(token.id, "basic", token);
+        const player = await ScoreSaberPlayerService.getPlayer(token.id, "basic", token, realmId);
         return {
           ...player,
           contextualRank: token.stats.rank,

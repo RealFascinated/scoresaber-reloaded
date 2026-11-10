@@ -3,6 +3,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import {
   ScoreSaberV2PlayerToken,
@@ -45,15 +46,18 @@ export default class ScoreSaberPlayerService {
    * Gets a ScoreSaber player using their account id.
    *
    * @param id the player's account id
-   * @param createIfMissing creates the player if they don't have an account with us
+   * @param type how much detail to include
+   * @param player an already looked up token; it must be resolved for the realm
+   * @param realmId the realm to resolve the player's rank, pp and statistics for
    * @returns the player
    */
   public static async getPlayer(
     id: string,
     type: DetailType = "basic",
-    player?: ScoreSaberPlayerLookupToken
+    player?: ScoreSaberPlayerLookupToken,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberPlayer> {
-    player ??= await ScoreSaberApiService.lookupPlayer(id);
+    player ??= await ScoreSaberApiService.lookupPlayer(id, realmId);
     if (!player) {
       throw new NotFoundError(`Player "${id}" not found`);
     }
@@ -61,7 +65,7 @@ export default class ScoreSaberPlayerService {
     // A token passed in (e.g. from the token cache) can predate the v2 shape and
     // lack `stats`; re-resolve from the API instead of crashing on it below.
     if (!player.stats) {
-      const freshPlayer = await ScoreSaberApiService.lookupPlayer(id);
+      const freshPlayer = await ScoreSaberApiService.lookupPlayer(id, realmId);
       if (!freshPlayer?.stats) {
         throw new NotFoundError(`Player "${id}" not found`);
       }
@@ -71,7 +75,7 @@ export default class ScoreSaberPlayerService {
     const rank = player.stats.rank;
     const countryRank = player.stats.countryRank;
 
-    return CacheService.fetch(CacheId.SCORESABER_PLAYER, playerCacheKey(id, type), async () => {
+    return CacheService.fetch(CacheId.SCORESABER_PLAYER, playerCacheKey(id, type, realmId), async () => {
       const account = await PlayerCoreService.getOrCreateAccount(id, player).catch(() => undefined);
       if (!account) {
         throw new NotFoundError(`Player account "${id}" not found`);
@@ -83,12 +87,12 @@ export default class ScoreSaberPlayerService {
         return basePlayer;
       }
 
-      const statistics = await PlayerStatisticsService.getStatistics(player);
+      const statistics = await PlayerStatisticsService.getStatistics(player, realmId);
       const [hmdBreakdown, history] = await Promise.all([
         account && player !== undefined
           ? PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages)
           : undefined,
-        PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30),
+        PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30, realmId),
       ]);
 
       let rankPercentile =
@@ -113,7 +117,8 @@ export default class ScoreSaberPlayerService {
           monthly: getPlayerStatisticChanges(history, 30),
         },
         plusOnePp: statistics.plusOnePp,
-        peakRank: account.peakRank,
+        // The peak rank is only tracked for the default realm.
+        peakRank: realmId === DEFAULT_REALM_ID ? account.peakRank : undefined,
         hmdBreakdown: hmdBreakdown,
         rankPages: {
           global: getPageFromRank(rank, 50),

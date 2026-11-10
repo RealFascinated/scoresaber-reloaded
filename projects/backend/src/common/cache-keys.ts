@@ -1,4 +1,5 @@
 import { DetailType } from "@ssr/common/detail-type";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 
@@ -10,8 +11,16 @@ export function normalizeSongHash(hash: string): string {
 export const rankingQueueLeaderboardsCacheKey = "leaderboard:ranking-queue-maps";
 
 // ScoreSaber
-export function playerCacheKey(id: string, type: DetailType): string {
-  return `scoresaber:player:${id}:${type}`;
+/**
+ * The suffix that scopes a cache key to a realm. The default realm has none so its keys stay
+ * identical to the pre-realm ones.
+ */
+function realmKeySuffix(realmId: number): string {
+  return realmId === DEFAULT_REALM_ID ? "" : `:realm:${realmId}`;
+}
+
+export function playerCacheKey(id: string, type: DetailType, realmId: number = DEFAULT_REALM_ID): string {
+  return `scoresaber:player:${id}:${type}${realmKeySuffix(realmId)}`;
 }
 
 export function playerExistsCacheKey(id: string): string {
@@ -30,12 +39,13 @@ export function miniRankingCacheKey(
   playerId: string,
   type: "global" | "country" | "medals",
   page: number,
-  country?: string
+  country?: string,
+  realmId: number = DEFAULT_REALM_ID
 ): string {
   if (type === "medals") {
     return `scoresaber:mini-ranking:${playerId}:medals:${page}`;
   }
-  return `scoresaber:mini-ranking:${playerId}:${type}${type === "country" ? `:${country ?? ""}` : ""}:${page}`;
+  return `scoresaber:mini-ranking:${playerId}:${type}${type === "country" ? `:${country ?? ""}` : ""}:${page}${realmKeySuffix(realmId)}`;
 }
 
 // BeatSaver

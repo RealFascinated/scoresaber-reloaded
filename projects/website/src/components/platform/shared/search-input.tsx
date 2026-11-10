@@ -18,7 +18,7 @@ export default function SearchInput({
       <SharedIcons.SearchFieldIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
       <Input
         type="search"
-        placeholder="Query..."
+        placeholder="Search scores..."
         className={cn("h-8 w-full pr-3 pl-8 text-xs sm:w-64", invalidSearch && "border-red-500")}
         value={search || ""}
         onChange={e => onSearchChange(e.target.value)}

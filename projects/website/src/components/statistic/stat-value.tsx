@@ -64,7 +64,7 @@ export default function StatValue({
   return (
     <dl
       className={clsx(
-        "border-border bg-background/90 ring-border m-0 flex min-w-16 cursor-default items-center justify-center rounded-xl ring-1",
+        "border-border bg-background/90 ring-border m-0 flex min-w-16 cursor-default items-center justify-center rounded-lg ring-1",
         sizeClasses[size],
         className
       )}
@@ -83,7 +83,7 @@ export default function StatValue({
           {name}
         </dt>
         <dd
-          className={clsx("m-0 flex items-center gap-1 font-semibold", valueColor)}
+          className={clsx("m-0 flex items-center gap-1 font-semibold tabular-nums", valueColor)}
           style={{ color: valueColor }}
           aria-labelledby={name !== undefined ? termId : undefined}
         >

@@ -1,3 +1,4 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { and, asc, desc, eq, getTableColumns, inArray, lt, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
@@ -5,14 +6,20 @@ import { db } from "../db";
 import {
   ScoreSaberScoreHistoryRow,
   scoreSaberScoreHistoryTable,
+  scoreSaberScoreRealmsTable,
   scoreSaberScoresTable,
   type ScoreSaberScoreRow,
 } from "../db/schema";
+import { resolvedScoreColumns, scoreRealmJoinOn } from "./realm-columns";
 import { TableCountsRepository } from "./table-counts.repository";
 
-export type ScoreHistoryAttemptRow = typeof scoreSaberScoresTable.$inferInsert;
+export type ScoreHistoryAttemptRow = typeof scoreSaberScoreHistoryTable.$inferInsert;
 
-/** Maps a scores-table row to a score-history insert row (used for snapshots of replaced PBs). */
+/**
+ * Maps a scores-table row to a score-history insert row (used for snapshots of replaced PBs).
+ * History rows keep a single `pp` snapshot, taken from the row's resolved realm (the default realm
+ * for replaced personal bests).
+ */
 export function scoreRowToHistoryInsert(row: ScoreSaberScoreRow): ScoreHistoryAttemptRow {
   return {
     scoreId: row.scoreId,
@@ -36,7 +43,10 @@ export function scoreRowToHistoryInsert(row: ScoreSaberScoreRow): ScoreHistoryAt
   };
 }
 
-const scoreCols = getTableColumns(scoreSaberScoresTable);
+const scoreCols = {
+  ...getTableColumns(scoreSaberScoresTable),
+  pp: getTableColumns(scoreSaberScoreHistoryTable).pp,
+};
 const histCols = getTableColumns(scoreSaberScoreHistoryTable);
 
 /** History rows projected to match `scoresaber-scores` columns for UNION with current scores. */
@@ -184,11 +194,16 @@ export class ScoreSaberScoreHistoryRepository {
     playerId: string,
     leaderboardId: number,
     limit: number,
-    offset: number
+    offset: number,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberScoreRow[]> {
     const { onScores, onHistory } = playerMapFilters(playerId, leaderboardId);
     const fullRowsUnion = unionAll(
-      db.select(scoreCols).from(scoreSaberScoresTable).where(onScores),
+      db
+        .select(resolvedScoreColumns())
+        .from(scoreSaberScoresTable)
+        .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
+        .where(onScores),
       db.select(histAsScoreCols).from(scoreSaberScoreHistoryTable).where(onHistory)
     );
     const combined = fullRowsUnion.as("combined");

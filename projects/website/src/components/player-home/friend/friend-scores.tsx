@@ -3,6 +3,7 @@
 import { isBackendUnavailableError } from "@/common/api-error";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import Avatar from "@/components/avatar";
+import { useRealm } from "@/components/providers/realm-provider";
 import SimpleLink from "@/components/simple-link";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
@@ -14,6 +15,7 @@ import SimplePagination from "../../simple-pagination";
 import { Spinner } from "../../spinner";
 
 export function FriendScores() {
+  const { realmId } = useRealm();
   const database = useDatabase();
   const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
   const friendIds = useStableLiveQuery(async () => database.getFriendIds(true));
@@ -28,10 +30,11 @@ export function FriendScores() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["friend-scores", friendIds, page, mainPlayerId],
+    queryKey: ["friend-scores", friendIds, page, mainPlayerId, realmId],
     queryFn: async () =>
       ssrApi.fetchPlayerScoreSaberScores(mainPlayerId!, page, "date", "desc", {
         playerIds: friendIds,
+        realmId,
       }),
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).

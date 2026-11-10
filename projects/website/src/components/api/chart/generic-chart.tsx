@@ -3,6 +3,7 @@
 import { ChartConfig } from "@/common/chart/types";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
+import { SharedIcons } from "@/shared-icons";
 import {
   formatChartDate,
   formatDate,
@@ -273,11 +274,33 @@ const GenericChart = ({ config, labels }: Props) => {
         legend: {
           position: "top" as const,
           labels: {
-            color: "white",
-            filter: (legendItem: any, chartData: any) => {
-              const dataset = chartData.datasets[legendItem.datasetIndex];
-              return dataset.showLegend !== false;
-            },
+            color: "#d4d4d4",
+            usePointStyle: true,
+            pointStyle: "circle",
+            boxWidth: 6,
+            boxHeight: 6,
+            padding: 14,
+            font: { size: 11 },
+            // Series without any data are left out; hidden ones stay toggleable but are
+            // dimmed instead of struck through
+            generateLabels: (chart: Chart) =>
+              Chart.defaults.plugins.legend.labels
+                .generateLabels(chart)
+                .filter(item => {
+                  const data = chart.data.datasets[item.datasetIndex ?? 0]?.data ?? [];
+                  return data.some(value => value !== null && value !== undefined);
+                })
+                .map(item =>
+                  item.hidden
+                    ? {
+                        ...item,
+                        hidden: false,
+                        fontColor: "#5f5f5f",
+                        fillStyle: "transparent",
+                        strokeStyle: "#5f5f5f",
+                      }
+                    : item
+                ),
           },
           onClick: (_: any, legendItem: any, legend: any) => {
             const index = legendItem.datasetIndex;
@@ -340,13 +363,17 @@ const GenericChart = ({ config, labels }: Props) => {
 
   const showNoData = !datasets.some(dataset => dataset.data.some(value => value !== null));
 
+  if (showNoData) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-center">
+        <SharedIcons.NoChartDataIcon className="text-muted-foreground/60 size-8" />
+        <p className="text-muted-foreground text-sm">No data for this period yet</p>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex h-full w-full">
-      {showNoData && (
-        <div className="bg-muted/90 border-border absolute top-1/2 left-1/2 z-9999 -translate-x-1/2 -translate-y-1/2 rounded-md border p-4 text-center">
-          <p className="text-muted-foreground text-sm">No data available</p>
-        </div>
-      )}
       <div className="relative block h-full w-full">
         <Line
           className="h-full max-w-full"

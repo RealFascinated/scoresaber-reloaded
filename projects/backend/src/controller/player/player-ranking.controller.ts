@@ -1,3 +1,4 @@
+import { RealmQuerySchema } from "@ssr/common/schemas/realm/realm-query";
 import { PlayerRankingsResponseSchema } from "@ssr/common/schemas/response/player/player-rankings";
 import { PlayerMedalRankingsResponseSchema } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { Elysia, t } from "elysia";
@@ -9,11 +10,12 @@ export default function playerRankingController(app: Elysia) {
     app
       .get(
         "/:page",
-        async ({ params: { page }, query: { country, search, includeInactives } }) => {
+        async ({ params: { page }, query: { country, search, includeInactives, realmId } }) => {
           return await PlayerSearchService.getPlayerRanking(page, {
             country: country ?? "",
             search: search ?? "",
             includeInactives: includeInactives ?? false,
+            realmId,
           });
         },
         {
@@ -21,11 +23,14 @@ export default function playerRankingController(app: Elysia) {
           params: t.Object({
             page: t.Integer({ minimum: 1 }),
           }),
-          query: t.Object({
-            country: t.Optional(t.String()),
-            search: t.Optional(t.String()),
-            includeInactives: t.Optional(t.BooleanString()),
-          }),
+          query: t.Composite([
+            RealmQuerySchema,
+            t.Object({
+              country: t.Optional(t.String()),
+              search: t.Optional(t.String()),
+              includeInactives: t.Optional(t.BooleanString()),
+            }),
+          ]),
           response: PlayerRankingsResponseSchema,
           detail: {
             description: "Fetch player ranking",

@@ -21,7 +21,8 @@ import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { eq, gt, gte, isNotNull, lte } from "drizzle-orm";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
-import { scoreSaberLeaderboardsTable, scoreSaberScoresTable } from "../../db/schema";
+import { scoreSaberLeaderboardRealmsTable, scoreSaberScoresTable } from "../../db/schema";
+import { scorePpExpr } from "../../repositories/realm-columns";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
@@ -519,15 +520,15 @@ export default class PlaylistService {
     const conditions = [eq(scoreSaberScoresTable.playerId, playerId)];
 
     if (rankedStatus === "ranked") {
-      conditions.push(gt(scoreSaberScoresTable.pp, 0));
+      conditions.push(gt(scorePpExpr, 0));
     } else if (rankedStatus === "unranked") {
-      conditions.push(lte(scoreSaberScoresTable.pp, 0));
+      conditions.push(lte(scorePpExpr, 0));
     }
 
     if (rankedStatus === "ranked" && starRange.min !== undefined && starRange.max !== undefined) {
-      conditions.push(isNotNull(scoreSaberLeaderboardsTable.stars));
-      conditions.push(gte(scoreSaberLeaderboardsTable.stars, starRange.min));
-      conditions.push(lte(scoreSaberLeaderboardsTable.stars, starRange.max));
+      conditions.push(isNotNull(scoreSaberLeaderboardRealmsTable.stars));
+      conditions.push(gte(scoreSaberLeaderboardRealmsTable.stars, starRange.min));
+      conditions.push(lte(scoreSaberLeaderboardRealmsTable.stars, starRange.max));
     }
 
     const rows = await ScoreSaberScoresRepository.selectScoresJoinedLeaderboardsWhere(conditions);

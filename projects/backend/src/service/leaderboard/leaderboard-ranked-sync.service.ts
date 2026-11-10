@@ -1,4 +1,5 @@
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { chunkArray } from "@ssr/common/utils/utils";
@@ -9,6 +10,8 @@ import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
+import { RealmScoreSyncService } from "../realm/realm-score-sync.service";
+import { RealmService } from "../realm/realm.service";
 
 export type LeaderboardUpdate = {
   previousLeaderboard?: Pick<ScoreSaberLeaderboard, "ranked" | "qualified" | "stars">;
@@ -19,18 +22,48 @@ export class LeaderboardRankedSyncService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Ranked Leaderboard Sync");
 
   /**
-   * Refreshes the ranked leaderboards.
+   * Refreshes the ranked leaderboards of every realm.
    *
-   * @returns leaderboards whose ranked/qualified/stars status changed.
+   * @returns the default realm's leaderboards whose ranked/qualified/stars status changed.
    */
   public static async refreshRankedLeaderboards(): Promise<LeaderboardUpdate[]> {
+    const realmIds = await RealmService.getRealmIds();
+    const defaultUpdates =
+      await LeaderboardRankedSyncService.refreshRealmRankedLeaderboards(DEFAULT_REALM_ID);
+
+    for (const realmId of realmIds.filter(id => id !== DEFAULT_REALM_ID)) {
+      try {
+        const updates = await LeaderboardRankedSyncService.refreshRealmRankedLeaderboards(realmId);
+        const rankedIds = updates
+          .filter(update => update.newLeaderboard.ranked)
+          .map(u => u.newLeaderboard.id);
+        await RealmScoreSyncService.syncLeaderboards(rankedIds, realmId);
+      } catch (error) {
+        LeaderboardRankedSyncService.logger.error(
+          `Failed to refresh realm "${realmId}" leaderboards:`,
+          error
+        );
+      }
+    }
+
+    return defaultUpdates;
+  }
+
+  /**
+   * Refreshes the ranked leaderboards of a single realm.
+   *
+   * @param realmId the realm to refresh
+   * @returns leaderboards whose ranked/qualified/stars status changed in the realm.
+   */
+  private static async refreshRealmRankedLeaderboards(realmId: number): Promise<LeaderboardUpdate[]> {
+    const isDefaultRealm = realmId === DEFAULT_REALM_ID;
     const before = performance.now();
 
-    LeaderboardRankedSyncService.logger.info(`Refreshing ranked leaderboards...`);
-    const { leaderboards } = await ScoreSaberApiService.getAllLeaderboards("ranked", true);
+    LeaderboardRankedSyncService.logger.info(`Refreshing ranked leaderboards for realm "${realmId}"...`);
+    const { leaderboards } = await ScoreSaberApiService.getAllLeaderboards("ranked", true, realmId);
     LeaderboardRankedSyncService.logger.info(`Found ${leaderboards.length} ranked leaderboards.`);
 
-    const dbRankedRows = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
+    const dbRankedRows = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(realmId);
     const rankedLeaderboards = new Map(dbRankedRows.map(r => [r.id, r]));
 
     const leaderboardsToUpsert: ScoreSaberLeaderboard[] = [];
@@ -69,16 +102,20 @@ export class LeaderboardRankedSyncService {
 
         // Stars count has changed
         if (dbLeaderboard && dbLeaderboard.stars !== apiLeaderboard.stars) {
-          await PlayerScoreHistoryService.reweightHistoryScoresForLeaderboard(apiLeaderboard);
+          // History pp is a default realm snapshot, so only that realm reweights it.
+          if (isDefaultRealm) {
+            await PlayerScoreHistoryService.reweightHistoryScoresForLeaderboard(apiLeaderboard);
+          }
           await ScoreSaberLeaderboardStarChangeRepository.insertRow({
             leaderboardId: apiLeaderboard.id,
+            realmId,
             previousStars: dbLeaderboard.stars ?? 0,
             newStars: apiLeaderboard.stars,
             timestamp: new Date(),
           });
         }
 
-        if (!dbLeaderboard?.ranked && apiLeaderboard.ranked) {
+        if (isDefaultRealm && !dbLeaderboard?.ranked && apiLeaderboard.ranked) {
           await ScoreSaberLeaderboardsRepository.updateLeaderboard(apiLeaderboard.id, {
             seededScores: false,
           });
@@ -95,7 +132,7 @@ export class LeaderboardRankedSyncService {
       LeaderboardRankedSyncService.logger.info(`Updating ${leaderboardsToUpsert.length} leaderboards...`);
 
       for (const batch of chunkArray(leaderboardsToUpsert, 250)) {
-        await ScoreSaberLeaderboardsRepository.upsertLeaderboards(batch);
+        await ScoreSaberLeaderboardsRepository.upsertLeaderboards(batch, realmId);
         LeaderboardRankedSyncService.logger.info(`Updated batch of ${batch.length} leaderboards!`);
       }
     }
@@ -107,15 +144,16 @@ export class LeaderboardRankedSyncService {
     sendEmbedToChannel(
       DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder()
-        .setTitle("Ranked Leaderboards Updated")
+        .setTitle(`Ranked Leaderboards Updated (realm ${realmId})`)
         .setDescription(
           `Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`
         )
         .setColor("#00ff00")
     );
 
+    // Medals are awarded in the default realm only.
     const medalRefreshSeen = new Set<number>();
-    for (const leaderboard of updatedLeaderboards) {
+    for (const leaderboard of isDefaultRealm ? updatedLeaderboards : []) {
       if (!leaderboard.newLeaderboard.ranked || medalRefreshSeen.has(leaderboard.newLeaderboard.id)) {
         continue;
       }
@@ -127,16 +165,34 @@ export class LeaderboardRankedSyncService {
   }
 
   /**
-   * Refreshes the qualified leaderboards.
+   * Refreshes the qualified leaderboards of every realm.
    */
   public static async refreshQualifiedLeaderboards() {
+    for (const realmId of await RealmService.getRealmIds()) {
+      try {
+        await LeaderboardRankedSyncService.refreshRealmQualifiedLeaderboards(realmId);
+      } catch (error) {
+        LeaderboardRankedSyncService.logger.error(
+          `Failed to refresh realm "${realmId}" qualified leaderboards:`,
+          error
+        );
+      }
+    }
+  }
+
+  /**
+   * Refreshes the qualified leaderboards of a single realm.
+   *
+   * @param realmId the realm to refresh
+   */
+  private static async refreshRealmQualifiedLeaderboards(realmId: number) {
     const before = performance.now();
 
-    LeaderboardRankedSyncService.logger.info(`Refreshing qualified leaderboards...`);
-    const { leaderboards } = await ScoreSaberApiService.getAllLeaderboards("qualified", true);
+    LeaderboardRankedSyncService.logger.info(`Refreshing qualified leaderboards for realm "${realmId}"...`);
+    const { leaderboards } = await ScoreSaberApiService.getAllLeaderboards("qualified", true, realmId);
     LeaderboardRankedSyncService.logger.info(`Found ${leaderboards.length} qualified leaderboards.`);
 
-    const dbQualifiedRows = await ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();
+    const dbQualifiedRows = await ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards(realmId);
     const qualifiedLeaderboards = new Map(dbQualifiedRows.map(r => [r.id, r]));
 
     const leaderboardsToUpsert = leaderboards.filter(apiLeaderboard => {
@@ -151,7 +207,7 @@ export class LeaderboardRankedSyncService {
 
     if (leaderboardsToUpsert.length > 0) {
       LeaderboardRankedSyncService.logger.info(`Updating ${leaderboardsToUpsert.length} leaderboards...`);
-      await ScoreSaberLeaderboardsRepository.upsertLeaderboards(leaderboardsToUpsert);
+      await ScoreSaberLeaderboardsRepository.upsertLeaderboards(leaderboardsToUpsert, realmId);
     }
     const duration = formatDuration(performance.now() - before);
     LeaderboardRankedSyncService.logger.info(
@@ -161,7 +217,7 @@ export class LeaderboardRankedSyncService {
     sendEmbedToChannel(
       DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder()
-        .setTitle("Qualified Leaderboards Updated")
+        .setTitle(`Qualified Leaderboards Updated (realm ${realmId})`)
         .setDescription(
           `Updated ${leaderboardsToUpsert.length}/${leaderboards.length} leaderboards in ${duration}`
         )

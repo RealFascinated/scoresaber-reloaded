@@ -35,11 +35,7 @@ export default function PlayerStreak({ player }: PlayerStreakProps) {
       side="bottom"
       showOnMobile
     >
-      <div className="bg-background/85 border-border relative w-[132px] rounded-xl border px-3 py-2 shadow-xs">
-        {currentStreak > 0 && (
-          <div className="absolute inset-0 rounded-xl bg-linear-to-r from-orange-500/8 via-amber-500/6 to-transparent" />
-        )}
-
+      <div className="bg-background/90 ring-border relative w-[132px] rounded-lg px-3 py-2 ring-1">
         <div className="relative flex items-center justify-between">
           <span className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
             Streak
@@ -48,7 +44,7 @@ export default function PlayerStreak({ player }: PlayerStreakProps) {
         </div>
 
         <div className="relative mt-0.5 flex items-end gap-1">
-          <span className="text-base leading-none font-semibold">
+          <span className="text-base leading-none font-semibold tabular-nums">
             {formatNumberWithCommas(currentStreak)}
           </span>
           <span className="text-muted-foreground text-[11px] leading-none">
@@ -57,10 +53,7 @@ export default function PlayerStreak({ player }: PlayerStreakProps) {
         </div>
 
         <div className="relative mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/8">
-          <div
-            className="h-full rounded-full bg-linear-to-r from-orange-400 to-amber-300"
-            style={{ width: `${progress}%` }}
-          />
+          <div className="h-full rounded-full bg-orange-400" style={{ width: `${progress}%` }} />
         </div>
 
         <div className="text-muted-foreground relative mt-1 text-[10px]">

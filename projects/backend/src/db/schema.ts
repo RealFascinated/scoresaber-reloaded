@@ -1,7 +1,7 @@
 import { HMD } from "@ssr/common/hmds";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
-import { isNotNull, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -11,6 +11,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   serial,
   text,
   timestamp,
@@ -110,6 +111,7 @@ export const playerHistoryTable = pgTable(
     id: serial().primaryKey(),
     playerId: varchar({ length: 32 }).notNull(),
     date: timestamp().notNull(),
+    realmId: integer().notNull().default(1),
 
     // Rank stats
     rank: integer(),
@@ -146,7 +148,13 @@ export const playerHistoryTable = pgTable(
     sspPlays: integer(),
     godPlays: integer(),
   },
-  table => [uniqueIndex("scoresaber_player_history_player_id_date_unique").on(table.playerId, table.date)]
+  table => [
+    uniqueIndex("scoresaber_player_history_player_id_date_realm_unique").on(
+      table.playerId,
+      table.date,
+      table.realmId
+    ),
+  ]
 );
 
 export const scoreSaberScoresTable = pgTable(
@@ -164,7 +172,6 @@ export const scoreSaberScoresTable = pgTable(
     // Score information
     score: integer().notNull(),
     accuracy: doublePrecision().notNull(),
-    pp: doublePrecision().notNull().default(0),
     medals: integer().notNull().default(0),
     missedNotes: integer().notNull(),
     badCuts: integer().notNull(),
@@ -181,16 +188,10 @@ export const scoreSaberScoresTable = pgTable(
   },
   table => [
     uniqueIndex("scores_player_leaderboard_unique").on(table.playerId, table.leaderboardId),
-    index("scores_player_pp_desc_idx").on(table.playerId, table.pp.desc(), table.scoreId.desc()),
     // Time-window lookups per player (BL account resolution, score charts):
     // playerId IN (...) AND timestamp BETWEEN ... would otherwise scan every
     // row of each candidate player.
     index("scores_player_id_timestamp_idx").on(table.playerId, table.timestamp),
-    // Global pp ordering for selectTopPp / getTopScores (no playerId prefix, so
-    // WHERE pp > 0 ORDER BY pp DESC can be served by an index-ordered scan).
-    index("scores_pp_desc_scoreid_desc_idx")
-      .on(table.pp.desc(), table.scoreId.desc())
-      .where(sql`${table.pp} > 0`),
     index("scores_leaderboard_id_idx").on(table.leaderboardId),
     index("scores_leaderboard_score_scoreid_desc_idx").on(
       table.leaderboardId,
@@ -274,13 +275,6 @@ export const scoreSaberLeaderboardsTable = pgTable(
     characteristic: text().$type<MapCharacteristic>().notNull(),
     maxScore: integer().notNull(),
 
-    // Ranking information
-    ranked: boolean().notNull(),
-    qualified: boolean().notNull(),
-    stars: doublePrecision().notNull().default(0),
-    rankedDate: timestamp(),
-    qualifiedDate: timestamp(),
-
     // Play information
     plays: integer().notNull(),
     dailyPlays: integer().notNull(),
@@ -305,18 +299,60 @@ export const scoreSaberLeaderboardsTable = pgTable(
     index("leaderboards_seeded_scores_false_idx")
       .on(table.seededScores)
       .where(sql`${table.seededScores} = false`),
-    index("leaderboards_ranked_true_idx")
-      .on(table.ranked)
-      .where(sql`${table.ranked} = true`),
-    index("leaderboards_qualified_true_idx")
-      .on(table.qualified)
-      .where(sql`${table.qualified} = true`),
-    index("leaderboards_ranked_date_desc_idx").on(table.rankedDate.desc()),
     index("leaderboards_timestamp_desc_idx").on(table.timestamp.desc()),
     index("leaderboards_plays_desc_idx").on(table.plays.desc()),
     index("leaderboards_daily_plays_desc_idx").on(table.dailyPlays.desc()),
-    index("leaderboards_stars_not_null_idx").on(table.stars).where(isNotNull(table.stars)),
     index("leaderboards_trending_score_desc_idx").on(table.trendingScore.desc()),
+  ]
+);
+
+/**
+ * Per-realm ranking state of a leaderboard. Sparse: a row exists only while the
+ * leaderboard is ranked or qualified in that realm; no row means unranked (0 stars).
+ */
+export const scoreSaberLeaderboardRealmsTable = pgTable(
+  "scoresaber-leaderboard-realms",
+  {
+    leaderboardId: integer().notNull(),
+    realmId: integer().notNull(),
+    ranked: boolean().notNull(),
+    qualified: boolean().notNull(),
+    stars: doublePrecision().notNull().default(0),
+    rankedDate: timestamp(),
+    qualifiedDate: timestamp(),
+  },
+  table => [
+    primaryKey({ columns: [table.leaderboardId, table.realmId] }),
+    index("leaderboard_realms_ranked_true_idx")
+      .on(table.realmId, table.leaderboardId)
+      .where(sql`${table.ranked} = true`),
+    index("leaderboard_realms_qualified_true_idx")
+      .on(table.realmId, table.leaderboardId)
+      .where(sql`${table.qualified} = true`),
+    index("leaderboard_realms_ranked_date_desc_idx").on(table.realmId, table.rankedDate.desc()),
+    index("leaderboard_realms_stars_idx").on(table.realmId, table.stars),
+  ]
+);
+
+/**
+ * Per-realm pp of a score. Sparse: a row exists only for scores worth pp (> 0) in
+ * that realm. `playerId` and `leaderboardId` are denormalised from the score row so
+ * per-player and per-leaderboard pp lookups never need to join the scores table.
+ */
+export const scoreSaberScoreRealmsTable = pgTable(
+  "scoresaber-score-realms",
+  {
+    scoreId: integer().notNull(),
+    realmId: integer().notNull(),
+    playerId: varchar({ length: 32 }).notNull(),
+    leaderboardId: integer().notNull(),
+    pp: doublePrecision().notNull(),
+  },
+  table => [
+    primaryKey({ columns: [table.scoreId, table.realmId] }),
+    index("score_realms_player_pp_desc_idx").on(table.realmId, table.playerId, table.pp.desc()),
+    index("score_realms_pp_desc_scoreid_desc_idx").on(table.realmId, table.pp.desc(), table.scoreId.desc()),
+    index("score_realms_leaderboard_idx").on(table.realmId, table.leaderboardId),
   ]
 );
 
@@ -325,6 +361,7 @@ export const scoreSaberLeaderboardStarChangeTable = pgTable(
   {
     id: serial().primaryKey(),
     leaderboardId: integer().notNull(),
+    realmId: integer().notNull().default(1),
     previousStars: doublePrecision().notNull(),
     newStars: doublePrecision().notNull(),
     timestamp: timestamp().notNull(),
@@ -545,9 +582,16 @@ export type TableCountsTableRow = typeof tableCountsTable.$inferSelect;
 
 export type ScoreSaberAccountRow = typeof scoreSaberAccountsTable.$inferSelect;
 export type PlayerHistoryRow = typeof playerHistoryTable.$inferSelect;
-export type ScoreSaberScoreRow = typeof scoreSaberScoresTable.$inferSelect;
+export type ScoreSaberScoreBaseRow = typeof scoreSaberScoresTable.$inferSelect;
+export type ScoreSaberScoreRealmRow = typeof scoreSaberScoreRealmsTable.$inferSelect;
+/** A score row resolved for one realm: the base row plus that realm's pp (0 when unranked). */
+export type ScoreSaberScoreRow = ScoreSaberScoreBaseRow & { pp: number };
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
-export type ScoreSaberLeaderboardRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
+export type ScoreSaberLeaderboardBaseRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
+export type ScoreSaberLeaderboardRealmRow = typeof scoreSaberLeaderboardRealmsTable.$inferSelect;
+/** A leaderboard row resolved for one realm: the base row plus that realm's ranking state. */
+export type ScoreSaberLeaderboardRow = ScoreSaberLeaderboardBaseRow &
+  Pick<ScoreSaberLeaderboardRealmRow, "ranked" | "qualified" | "stars" | "rankedDate" | "qualifiedDate">;
 export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;
 export type BeatLeaderScoreRow = typeof beatLeaderScoresTable.$inferSelect;
 export type BeatLeaderPlayerRow = typeof beatLeaderPlayersTable.$inferSelect;

@@ -20,6 +20,8 @@ import { PlayerRankingsResponse } from "../schemas/response/player/player-rankin
 import { PlayerSearchResponse } from "../schemas/response/player/player-search";
 import { PlayerScoresChartResponse } from "../schemas/response/player/scores-chart";
 import { PlayerMedalRankingsResponse } from "../schemas/response/ranking/medal-rankings";
+import { RealmPpCurveResponse } from "../schemas/response/realm/realm-pp-curve";
+import { RealmsResponse } from "../schemas/response/realm/realms";
 import { AccSaberScoresPageResponse } from "../schemas/response/score/accsaber-scores-page";
 import { PlayerScoresPageResponse } from "../schemas/response/score/player-scores";
 import { ScoreHistoryGraph } from "../schemas/response/score/score-history-graph";
@@ -37,6 +39,16 @@ import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
 import { getQueryParamsFromObject } from "./utils";
+
+/**
+ * Builds the query parameter that selects a realm. Omitted when no realm is given so the backend
+ * falls back to the default realm.
+ *
+ * @param realmId the realm to select
+ */
+function realmParam(realmId?: number): Record<string, string> {
+  return realmId === undefined ? {} : { realmId: realmId.toString() };
+}
 
 class SSRApi {
   /**
@@ -124,10 +136,17 @@ class SSRApi {
    * @param hash the leaderboard hash
    * @param difficulty the difficulty to get
    * @param characteristic the characteristic to get
+   * @param realmId the realm to resolve ranking state for
    */
-  async fetchLeaderboardByHash(hash: string, difficulty: MapDifficulty, characteristic: MapCharacteristic) {
+  async fetchLeaderboardByHash(
+    hash: string,
+    difficulty: MapDifficulty,
+    characteristic: MapCharacteristic,
+    realmId?: number
+  ) {
     return await this.request<LeaderboardResponse>(
-      `/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`
+      `/leaderboard/by-hash/${hash}/${difficulty}/${characteristic}`,
+      realmParam(realmId)
     );
   }
 
@@ -135,19 +154,25 @@ class SSRApi {
    * Fetches star rating change history for a leaderboard (by id).
    *
    * @param leaderboardId the ScoreSaber leaderboard id
+   * @param realmId the realm to get the history for
    */
-  async getLeaderboardStarHistory(leaderboardId: number) {
-    return await this.request<LeaderboardStarChange[]>(`/leaderboard/by-id/${leaderboardId}/star-history`);
+  async getLeaderboardStarHistory(leaderboardId: number, realmId?: number) {
+    return await this.request<LeaderboardStarChange[]>(
+      `/leaderboard/by-id/${leaderboardId}/star-history`,
+      realmParam(realmId)
+    );
   }
 
   /**
    * Fetches a ScoreSaber leaderboard using its id.
    *
    * @param id the id for the leaderboard
+   * @param realmId the realm to resolve ranking state for
    */
-  async fetchLeaderboard(id: number, type: DetailType = "basic") {
+  async fetchLeaderboard(id: number, type: DetailType = "basic", realmId?: number) {
     return await this.request<LeaderboardResponse>(`/leaderboard/by-id/${id}`, {
       type: type,
+      ...realmParam(realmId),
     });
   }
 
@@ -158,6 +183,25 @@ class SSRApi {
    */
   async getScoreSaberStatistics() {
     return await this.request<StatisticsResponse>(`/statistics/scoresaber`);
+  }
+
+  /**
+   * Gets all of the realms.
+   *
+   * @returns the realms
+   */
+  async getRealms() {
+    return await this.request<RealmsResponse>(`/realms`);
+  }
+
+  /**
+   * Gets the pp curve of a realm.
+   *
+   * @param realmId the ID of the realm
+   * @returns the pp curve of the realm
+   */
+  async getRealmPpCurve(realmId: number) {
+    return await this.request<RealmPpCurveResponse>(`/realms/${realmId}/pp-curve`);
   }
 
   /**
@@ -173,9 +217,10 @@ class SSRApi {
    * Gets the players around a player.
    *
    * @param playerId the player to get around
+   * @param realmId the realm to rank within
    */
-  async getPlayerMiniRanking(playerId: string) {
-    return await this.request<MiniRankingResponse>(`/player/mini-ranking/${playerId}`);
+  async getPlayerMiniRanking(playerId: string, realmId?: number) {
+    return await this.request<MiniRankingResponse>(`/player/mini-ranking/${playerId}`, realmParam(realmId));
   }
 
   /**
@@ -184,11 +229,17 @@ class SSRApi {
    * @param friendIds the friends to lookup
    * @param leaderboardId the leaderboard to lookup
    * @param page the page
+   * @param realmId the realm to resolve pp for
    */
-  async getFriendLeaderboardScores(friendIds: string[], leaderboardId: string, page: number) {
+  async getFriendLeaderboardScores(
+    friendIds: string[],
+    leaderboardId: string,
+    page: number,
+    realmId?: number
+  ) {
     return await this.request<ScoreSaberScoresPageResponse>(
       `/scores/friend/leaderboard/${leaderboardId}/${page}`,
-      undefined,
+      realmParam(realmId),
       {
         friendIds: friendIds,
       }
@@ -199,12 +250,14 @@ class SSRApi {
    * Looks up a ScoreSaber player
    *
    * @param playerId the player to lookup
-   * @param options the fetch options
+   * @param type how much detail to include
+   * @param realmId the realm to resolve rank, pp and statistics for
    * @returns the player
    */
-  async getScoreSaberPlayer(playerId: string, type: DetailType = "basic") {
+  async getScoreSaberPlayer(playerId: string, type: DetailType = "basic", realmId?: number) {
     return await this.request<ScoreSaberPlayer>(`/player/${playerId}`, {
       type: type,
+      ...realmParam(realmId),
     });
   }
 
@@ -212,10 +265,14 @@ class SSRApi {
    * Gets the player's scores chart data.
    *
    * @param playerId the player to get the score chart data for
+   * @param realmId the realm to resolve pp and stars for
    * @returns the score chart data
    */
-  async getPlayerScoresChart(playerId: string) {
-    return await this.request<PlayerScoresChartResponse>(`/player/scores-chart/${playerId}`);
+  async getPlayerScoresChart(playerId: string, realmId?: number) {
+    return await this.request<PlayerScoresChartResponse>(
+      `/player/scores-chart/${playerId}`,
+      realmParam(realmId)
+    );
   }
 
   /**
@@ -224,10 +281,17 @@ class SSRApi {
    * @param playerId the id of the player
    * @param leaderboardId the id of the leaderboard
    * @param page the page
+   * @param realmId the realm to show pp for
    */
-  async fetchPlayerScoreSaberScoresHistory(playerId: string, leaderboardId: string, page: number) {
+  async fetchPlayerScoreSaberScoresHistory(
+    playerId: string,
+    leaderboardId: string,
+    page: number,
+    realmId?: number
+  ) {
     return await this.request<ScoreSaberScoresPageResponse>(
-      `/player/score-history/${playerId}/${leaderboardId}/${page}`
+      `/player/score-history/${playerId}/${leaderboardId}/${page}`,
+      realmParam(realmId)
     );
   }
 
@@ -317,6 +381,9 @@ class SSRApi {
     if (filters.playerIds && filters.playerIds.length > 0) {
       queryParams.playerIds = filters.playerIds.join(",");
     }
+    if (filters.realmId !== undefined) {
+      queryParams.realmId = filters.realmId.toString();
+    }
     return await this.request<PlayerScoresPageResponse>(
       `/scores/player/ssr/${id}/${sort}/${direction}/${page}`,
       queryParams
@@ -362,10 +429,12 @@ class SSRApi {
    * @param leaderboardId the id of the leaderboard
    * @param page the page to lookup
    * @param country the country to get scores in
+   * @param realmId the realm to show pp for
    */
-  async fetchLeaderboardScores(leaderboardId: string, page: number, country?: string) {
+  async fetchLeaderboardScores(leaderboardId: string, page: number, country?: string, realmId?: number) {
     return await this.request<LeaderboardScoresResponse>(`/scores/leaderboard/${leaderboardId}/${page}`, {
       ...(country ? { country: country } : {}),
+      ...realmParam(realmId),
     });
   }
 
@@ -374,11 +443,13 @@ class SSRApi {
    *
    * @param playerId the id of the player
    * @param count the number of days to get the statistic history for
+   * @param realmId the realm to get the history for
    * @returns the statistic history
    */
-  async getPlayerStatisticHistory(playerId: string, count: number) {
+  async getPlayerStatisticHistory(playerId: string, count: number, realmId?: number) {
     return await this.request<ScoreSaberPlayerHistoryEntries>(`/player/history/${playerId}`, {
       count: count.toString(),
+      ...realmParam(realmId),
     });
   }
 
@@ -386,9 +457,10 @@ class SSRApi {
    * Gets the pp values for a player's scores.
    *
    * @param playerId the player id
+   * @param realmId the realm to get pp values for
    */
-  async getPlayerPps(playerId: string) {
-    return await this.request<PlayerPpsResponse>(`/player/pps/${playerId}`);
+  async getPlayerPps(playerId: string, realmId?: number) {
+    return await this.request<PlayerPpsResponse>(`/player/pps/${playerId}`, realmParam(realmId));
   }
 
   /**
@@ -426,9 +498,11 @@ class SSRApi {
       country?: string;
       search?: string;
       includeInactives?: boolean;
+      realmId?: number;
     }
   ) {
     return await this.request<PlayerRankingsResponse>(`/ranking/${page}`, {
+      ...realmParam(options?.realmId),
       ...(options?.country ? { country: options.country } : {}),
       ...(options?.search ? { search: options.search } : {}),
       ...(options?.includeInactives ? { includeInactives: options.includeInactives.toString() } : {}),
@@ -452,10 +526,11 @@ class SSRApi {
    * Gets a score by its ID.
    *
    * @param scoreId the id of the score
+   * @param realmId the realm to resolve pp for
    * @returns the score
    */
-  async getScore(scoreId: string) {
-    return await this.request<PlayerScore<ScoreSaberScore>>(`/scores/${scoreId}`);
+  async getScore(scoreId: string, realmId?: number) {
+    return await this.request<PlayerScore<ScoreSaberScore>>(`/scores/${scoreId}`, realmParam(realmId));
   }
 
   /**
@@ -463,11 +538,13 @@ class SSRApi {
    *
    * @param page the page
    * @param options the options
+   * @param realmId the realm to search ranking state in
    * @returns the leaderboards
    */
-  async searchLeaderboards(page: number, options?: ScoreSaberLeaderboardQueryFilters) {
+  async searchLeaderboards(page: number, options?: ScoreSaberLeaderboardQueryFilters, realmId?: number) {
     return await this.request<LeaderboardsPageResponse>(`/leaderboard/search`, {
       page: page.toString(),
+      ...realmParam(realmId),
       ...(options?.ranked ? { ranked: options.ranked.toString() } : {}),
       ...(options?.qualified ? { qualified: options.qualified.toString() } : {}),
       ...(options?.category ? { category: options.category.toString() } : {}),
@@ -491,10 +568,11 @@ class SSRApi {
    * Fetches the top scores.
    *
    * @param page the page
+   * @param realmId the realm to rank scores in
    * @returns the top scores
    */
-  async fetchTopScores(page: number) {
-    return await this.request<TopScoresPageResponse>(`/scores/top/${page}`);
+  async fetchTopScores(page: number, realmId?: number) {
+    return await this.request<TopScoresPageResponse>(`/scores/top/${page}`, realmParam(realmId));
   }
 }
 

@@ -1,36 +1,36 @@
 :root {
-  --background: hsl(0, 0%, 6%);
+  --background: hsl(240 6% 4.5%);
   --foreground: hsl(60 9.1% 97.8%);
-  --card: hsl(0, 0%, 10%);
-  --chart-card: hsl(0, 0%, 8.5%);
+  --card: hsl(240 5% 8%);
+  --chart-card: hsl(240 5% 6.5%);
   --card-foreground: hsl(60 9.1% 97.8%);
-  --popover: hsl(0, 0%, 10%);
+  --popover: hsl(240 5% 9%);
   --popover-foreground: hsl(60 9.1% 97.8%);
   --primary: hsl(216 100% 58%);
   --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(0, 0%, 12%);
+  --secondary: hsl(240 4% 12%);
   --secondary-foreground: hsl(60 9.1% 97.8%);
-  --muted: hsl(0, 0%, 14%);
-  --muted-foreground: hsl(0, 0%, 55%);
-  --accent: hsl(0, 0%, 15%);
+  --muted: hsl(240 4% 13%);
+  --muted-foreground: hsl(240 5% 62%);
+  --accent: hsl(240 4% 14%);
   --accent-foreground: hsl(60 9.1% 97.8%);
-  --accent-deep: hsl(0, 0%, 11%);
+  --accent-deep: hsl(240 5% 10.5%);
   --accent-deep-foreground: hsl(60 9.1% 97.8%);
   --accent-secondary: hsl(270 100% 60%);
   --destructive: hsl(0 62.8% 30.6%);
   --destructive-foreground: hsl(60 9.1% 97.8%);
-  --border: hsl(0, 0%, 18%);
-  --input: hsl(0, 0%, 25%);
+  --border: hsl(240 4% 15%);
+  --input: hsl(240 4% 20%);
   --ring: hsl(0, 0%, 60%);
 
   /* Sidebar Colors */
-  --sidebar-background: hsl(0, 0%, 8.5%);
+  --sidebar-background: hsl(240 6% 6%);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: hsl(0, 0%, 14%);
+  --sidebar-accent: hsl(240 4% 12%);
   --sidebar-accent-foreground: var(--accent-foreground);
-  --sidebar-border: hsl(0, 0%, 16%);
+  --sidebar-border: hsl(240 4% 12%);
   --sidebar-ring: var(--ring);
 
   /* SSR Colors */
@@ -51,11 +51,6 @@
   --hard: #ff6347;
   --expert: #bf2a42;
   --expertPlus: #8f48db;
-
-  /* Leaderboard Status Colors */
-  --ranked: #23d160;
-  --unranked: #8b949e;
-  --qualified: #ffde1a;
 
   /* Leaderboard Status Colors */
   --ranked: #23d160;
@@ -91,9 +86,9 @@
   --spacing-3xl: 3rem; /* 48px - very spacious */
 
   /* Scrollbar Colors */
-  --scrollbar-track: hsl(12 6.5% 9.5%);
-  --scrollbar-thumb: hsl(12 6.5% 20%);
-  --scrollbar-thumb-hover: hsl(12 6.5% 25%);
+  --scrollbar-track: hsl(240 5% 7%);
+  --scrollbar-thumb: hsl(240 4% 20%);
+  --scrollbar-thumb-hover: hsl(240 4% 26%);
 }
 
 .purple {
@@ -127,6 +122,9 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
   --breakpoint-*: initial;
   --breakpoint-xxs: 320px;
   --breakpoint-xs: 475px;

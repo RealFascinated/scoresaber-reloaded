@@ -8,7 +8,7 @@ import SimpleLink from "@/components/simple-link";
 export default function Announcements() {
   return (
     <AnnouncementBanner id="arona-discord-bot">
-      Hello everyone! Please check out my Discord Bot -{" "}
+      Check out my Discord bot,{" "}
       <SimpleLink
         className="text-discord-blue font-semibold transition-opacity hover:opacity-80"
         href="https://discord.com/oauth2/authorize?client_id=879163534871789619&scope=bot%20applications.commands&permissions=8"
@@ -17,7 +17,6 @@ export default function Announcements() {
       >
         Arona
       </SimpleLink>
-      {" :)"}
     </AnnouncementBanner>
   );
 }

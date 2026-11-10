@@ -117,7 +117,7 @@ export default function PlayerData({ player: playerProp }: PlayerDataProps) {
       </div>
 
       {showRankings && (
-        <aside className="w-full shrink-0 xl:w-96">
+        <aside className="w-full shrink-0 xl:w-80 2xl:w-96">
           <PlayerMiniRankings player={player} />
         </aside>
       )}

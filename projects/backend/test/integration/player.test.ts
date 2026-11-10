@@ -178,6 +178,16 @@ describe("GET /player/refresh/:playerId", () => {
 describe("GET /player/mini-ranking/:playerId", () => {
   const app = createTestApp();
 
+  test("accepts the realmId query as sent over HTTP (a string)", async () => {
+    const response = await request(app, `/player/mini-ranking/${TEST_PLAYER_ID}?realmId=1`);
+    expectStatus(response, 200);
+  });
+
+  test("rejects an invalid realmId", async () => {
+    const response = await request(app, `/player/mini-ranking/${TEST_PLAYER_ID}?realmId=abc`);
+    await expectValidationError(response);
+  });
+
   test("returns mini ranking payload for seeded player", async () => {
     const response = await request(app, `/player/mini-ranking/${TEST_PLAYER_ID}`);
     expectStatus(response, 200);

@@ -4,6 +4,7 @@ import HmdFilter from "@/components/platform/shared/hmd-filter";
 import ScoresListPanel from "@/components/platform/shared/scores-list-panel";
 import SearchInput from "@/components/platform/shared/search-input";
 import { usePlayerScoresQuery, type SortOption } from "@/components/platform/shared/use-player-scores-query";
+import { useRealm } from "@/components/providers/realm-provider";
 import { Spinner } from "@/components/spinner";
 import { SharedIcons } from "@/shared-icons";
 import { HMD } from "@ssr/common/hmds";
@@ -61,6 +62,7 @@ const SORT_OPTIONS: SortOption<ScoreSaberScoreSortField>[] = [
 ];
 
 export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSaberPlayer }) {
+  const { realmId } = useRealm();
   const [hmdFilter, setHmdFilter] = useQueryState("hmd", parseAsString) as [
     HMD | null,
     (value: HMD | null) => void,
@@ -74,11 +76,12 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
     defaultSort: DEFAULT_SORT,
     sortOptions: SORT_OPTIONS,
     hasDirection: true,
-    extraKeyParts: [hmdFilter],
+    extraKeyParts: [hmdFilter, realmId],
     queryFn: async ({ page, sort, direction, search }) => {
       const response = await ssrApi.fetchPlayerScoreSaberScores(player.id, page, sort, direction, {
         ...(search ? { search } : {}),
         ...(hmdFilter ? { hmd: hmdFilter } : {}),
+        realmId,
       });
       return response || Pagination.empty();
     },

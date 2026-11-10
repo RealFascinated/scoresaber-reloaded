@@ -85,15 +85,22 @@ export default function MedalsData() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    {rankingData.items.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-muted-foreground py-10 text-center">
+                          No players found
+                        </TableCell>
+                      </TableRow>
+                    )}
                     {rankingData.items.map(player => (
                       <TableRow key={player.id} className="relative cursor-pointer">
                         <TableCell className="py-2">
-                          <span className="font-mono text-sm font-semibold">#{player.medalsRank}</span>
+                          <span className="text-sm font-semibold tabular-nums">#{player.medalsRank}</span>
                         </TableCell>
                         <TableCell className="py-2">
                           <div className="flex items-center gap-2">
                             <CountryFlag code={player.country ?? ""} size={14} />
-                            <span className="text-foreground font-mono text-sm">
+                            <span className="text-foreground text-sm tabular-nums">
                               #{player.medalsCountryRank}
                             </span>
                           </div>
@@ -102,7 +109,7 @@ export default function MedalsData() {
                           <MedalsRanking player={player} />
                         </TableCell>
                         <TableCell className="py-2 text-right">
-                          <span className="text-primary font-semibold">
+                          <span className="text-medals font-semibold tabular-nums">
                             {formatNumberWithCommas(player.medals)}
                           </span>
                         </TableCell>

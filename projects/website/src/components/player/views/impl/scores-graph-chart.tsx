@@ -1,4 +1,5 @@
 import { openInNewTab } from "@/common/browser-utils";
+import { useRealm } from "@/components/providers/realm-provider";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -67,6 +68,7 @@ type LineDataset = {
 };
 
 export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer }) {
+  const { realmId } = useRealm();
   const isMobile = useIsMobile();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -74,20 +76,20 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
   const [showTop, setShowTop] = useState(false);
 
   const { data: dataPoints, isError } = useQuery({
-    queryKey: ["player-scores-chart", player.id],
+    queryKey: ["player-scores-chart", player.id, realmId],
     queryFn: async () => {
-      const scoreChartData = await ssrApi.getPlayerScoresChart(player.id);
+      const scoreChartData = await ssrApi.getPlayerScoresChart(player.id, realmId);
       return scoreChartData?.data || [];
     },
     placeholderData: prev => prev,
   });
 
   const { data: comparisonData } = useQuery({
-    queryKey: ["player-scores-chart-comparison", comparisonPlayers.map(p => p.id)],
+    queryKey: ["player-scores-chart-comparison", comparisonPlayers.map(p => p.id), realmId],
     queryFn: async () => {
       const results = await Promise.all(
         comparisonPlayers.map(async p => {
-          const scoreChartData = await ssrApi.getPlayerScoresChart(p.id);
+          const scoreChartData = await ssrApi.getPlayerScoresChart(p.id, realmId);
           return { id: p.id, data: scoreChartData?.data || [] };
         })
       );

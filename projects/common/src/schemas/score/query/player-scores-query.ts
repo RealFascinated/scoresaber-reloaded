@@ -1,6 +1,7 @@
 import { Type, type StaticDecode } from "@sinclair/typebox";
 import { HmdSchema } from "../../../hmds";
 import { SHARED_CONSTS } from "../../../shared-consts";
+import { RealmIdSchema } from "../../realm/realm-query";
 
 const PlayerIdsSchema = Type.Transform(
   Type.Union([Type.String(), Type.Array(Type.String()), Type.Undefined()])
@@ -18,5 +19,6 @@ export const PlayerScoresQuerySchema = Type.Object({
   search: Type.Optional(Type.String()),
   hmd: Type.Optional(HmdSchema),
   playerIds: Type.Optional(PlayerIdsSchema),
+  realmId: Type.Optional(RealmIdSchema),
 });
 export type PlayerScoresQuery = StaticDecode<typeof PlayerScoresQuerySchema>;

@@ -1,3 +1,4 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { stringify } from "devalue";
 import { sql } from "drizzle-orm";
 import { cachedPlayerTokenCacheKey } from "../../src/common/cache-keys";
@@ -12,9 +13,11 @@ import {
   beatSaverUploadersTable,
   playerHistoryTable,
   scoreSaberAccountsTable,
+  scoreSaberLeaderboardRealmsTable,
   scoreSaberLeaderboardsTable,
   scoreSaberLeaderboardStarChangeTable,
   scoreSaberScoreHistoryTable,
+  scoreSaberScoreRealmsTable,
   scoreSaberScoresTable,
 } from "../../src/db/schema";
 import {
@@ -40,7 +43,9 @@ const seededTables = [
   "scoresaber-player-history",
   "scoresaber-score-history",
   "scoresaber-leaderboard-star-change",
+  "scoresaber-score-realms",
   "scoresaber-scores",
+  "scoresaber-leaderboard-realms",
   "scoresaber-leaderboards",
   "scoresaber-accounts",
   "beatleader-scores",
@@ -118,10 +123,6 @@ export async function seedTestDatabase(): Promise<void> {
       difficulty: "ExpertPlus",
       characteristic: "Standard",
       maxScore: 1000,
-      ranked: true,
-      qualified: false,
-      stars: 8.5,
-      rankedDate: now,
       plays: 100,
       dailyPlays: 10,
       seededScores: true,
@@ -138,15 +139,30 @@ export async function seedTestDatabase(): Promise<void> {
       difficulty: "Expert",
       characteristic: "Standard",
       maxScore: 900,
-      ranked: false,
-      qualified: true,
-      stars: 6.5,
-      qualifiedDate: now,
       plays: 50,
       dailyPlays: 5,
       seededScores: true,
       trendingScore: 2,
       timestamp: now,
+    },
+  ]);
+
+  await db.insert(scoreSaberLeaderboardRealmsTable).values([
+    {
+      leaderboardId: TEST_LEADERBOARD_ID,
+      realmId: DEFAULT_REALM_ID,
+      ranked: true,
+      qualified: false,
+      stars: 8.5,
+      rankedDate: now,
+    },
+    {
+      leaderboardId: TEST_LEADERBOARD_QUALIFIED_ID,
+      realmId: DEFAULT_REALM_ID,
+      ranked: false,
+      qualified: true,
+      stars: 6.5,
+      qualifiedDate: now,
     },
   ]);
 
@@ -159,7 +175,6 @@ export async function seedTestDatabase(): Promise<void> {
       characteristic: "Standard",
       score: 950,
       accuracy: 0.95,
-      pp: 250,
       medals: 1,
       missedNotes: 0,
       badCuts: 1,
@@ -176,7 +191,6 @@ export async function seedTestDatabase(): Promise<void> {
       characteristic: "Standard",
       score: 900,
       accuracy: 0.9,
-      pp: 200,
       medals: 1,
       missedNotes: 1,
       badCuts: 2,
@@ -184,6 +198,23 @@ export async function seedTestDatabase(): Promise<void> {
       fullCombo: false,
       modifiers: [],
       timestamp: now,
+    },
+  ]);
+
+  await db.insert(scoreSaberScoreRealmsTable).values([
+    {
+      scoreId: TEST_SCORE_ID,
+      realmId: DEFAULT_REALM_ID,
+      playerId: TEST_PLAYER_ID,
+      leaderboardId: TEST_LEADERBOARD_ID,
+      pp: 250,
+    },
+    {
+      scoreId: TEST_SCORE_TWO_ID,
+      realmId: DEFAULT_REALM_ID,
+      playerId: TEST_PLAYER_TWO_ID,
+      leaderboardId: TEST_LEADERBOARD_ID,
+      pp: 200,
     },
   ]);
 

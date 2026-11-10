@@ -249,7 +249,7 @@ export default function PlayerStats({ player }: Props) {
           aria-expanded={showMore}
           aria-controls="player-stats"
           onClick={() => setShowMore(current => !current)}
-          className="border-border bg-background/90 text-muted-foreground hover:border-primary/50 hover:text-foreground ring-border flex cursor-pointer items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-medium ring-1 transition-colors"
+          className="border-border bg-background/90 text-muted-foreground hover:border-primary/50 hover:text-foreground ring-border flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium ring-1 transition-colors"
         >
           {showMore ? "Show less" : `Show ${hiddenStatCount} more`}
           {showMore ? (

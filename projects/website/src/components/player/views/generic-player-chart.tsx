@@ -56,7 +56,10 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     } else {
       // Find the latest date from available data
       const dates = Array.from(dataMap.keys()).map(parseDate);
-      const latestDate = dates.reduce((latest, current) => (current > latest ? current : latest));
+      const latestDate = dates.reduce(
+        (latest, current) => (current > latest ? current : latest),
+        dates[0] ?? today
+      );
       endDate = getMidnightAlignedDate(latestDate);
     }
 
@@ -96,8 +99,8 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
   // Check if player statistics are available
   if (!statisticHistory || Object.keys(statisticHistory).length === 0) {
     return (
-      <div className="flex justify-center">
-        <p>No data available for chart...</p>
+      <div className="flex h-[400px] items-center justify-center">
+        <p className="text-muted-foreground text-sm">No data for this period yet</p>
       </div>
     );
   }

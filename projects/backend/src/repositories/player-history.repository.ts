@@ -1,3 +1,4 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ScoreSaberPlayerHistory } from "@ssr/common/schemas/scoresaber/player/history";
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "../db";
@@ -9,25 +10,33 @@ export type DailyScoreCounterKey =
 export class PlayerHistoryRepository {
   public static async findByPlayerAndDate(
     playerId: string,
-    date: Date
+    date: Date,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<PlayerHistoryRow | undefined> {
     const [row] = await db
       .select()
       .from(playerHistoryTable)
-      .where(and(eq(playerHistoryTable.playerId, playerId), eq(playerHistoryTable.date, date)));
+      .where(
+        and(
+          eq(playerHistoryTable.playerId, playerId),
+          eq(playerHistoryTable.date, date),
+          eq(playerHistoryTable.realmId, realmId)
+        )
+      );
     return row;
   }
 
   public static async upsertByPlayerAndDate(
     playerId: string,
     date: Date,
-    data: ScoreSaberPlayerHistory
+    data: ScoreSaberPlayerHistory,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<void> {
     await db
       .insert(playerHistoryTable)
-      .values({ playerId, date, ...data })
+      .values({ playerId, date, realmId, ...data })
       .onConflictDoUpdate({
-        target: [playerHistoryTable.playerId, playerHistoryTable.date],
+        target: [playerHistoryTable.playerId, playerHistoryTable.date, playerHistoryTable.realmId],
         set: {
           rank: sql`excluded."rank"`,
           countryRank: sql`excluded."countryRank"`,
@@ -58,7 +67,8 @@ export class PlayerHistoryRepository {
 
   public static async getByPlayerOrderedByDateDesc(
     playerId: string,
-    options: { count: number; alignedStart: Date; today: Date }
+    options: { count: number; alignedStart: Date; today: Date },
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<PlayerHistoryRow[]> {
     const { count: dayCount, alignedStart, today } = options;
     const base = db
@@ -68,21 +78,27 @@ export class PlayerHistoryRepository {
         dayCount > 0
           ? and(
               eq(playerHistoryTable.playerId, playerId),
+              eq(playerHistoryTable.realmId, realmId),
               gte(playerHistoryTable.date, alignedStart),
               lte(playerHistoryTable.date, today)
             )
-          : eq(playerHistoryTable.playerId, playerId)
+          : and(eq(playerHistoryTable.playerId, playerId), eq(playerHistoryTable.realmId, realmId))
       )
       .orderBy(desc(playerHistoryTable.date));
     return await (dayCount > 0 ? base.limit(dayCount) : base);
   }
 
-  public static async upsertRank(playerId: string, date: Date, rank: number): Promise<void> {
+  public static async upsertRank(
+    playerId: string,
+    date: Date,
+    rank: number,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<void> {
     await db
       .insert(playerHistoryTable)
-      .values({ playerId, date, rank })
+      .values({ playerId, date, realmId, rank })
       .onConflictDoUpdate({
-        target: [playerHistoryTable.playerId, playerHistoryTable.date],
+        target: [playerHistoryTable.playerId, playerHistoryTable.date, playerHistoryTable.realmId],
         set: { rank },
       });
   }
@@ -90,7 +106,8 @@ export class PlayerHistoryRepository {
   public static async incrementDailyCounter(
     playerId: string,
     date: Date,
-    counterKey: DailyScoreCounterKey
+    counterKey: DailyScoreCounterKey,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<void> {
     const incrementSet = (() => {
       switch (counterKey) {
@@ -112,10 +129,11 @@ export class PlayerHistoryRepository {
       .values({
         playerId,
         date,
+        realmId,
         [counterKey]: 1,
       })
       .onConflictDoUpdate({
-        target: [playerHistoryTable.playerId, playerHistoryTable.date],
+        target: [playerHistoryTable.playerId, playerHistoryTable.date, playerHistoryTable.realmId],
         set: incrementSet,
       });
   }

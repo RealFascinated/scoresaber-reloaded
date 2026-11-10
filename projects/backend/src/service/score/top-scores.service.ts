@@ -1,4 +1,5 @@
 import { Pagination } from "@ssr/common/pagination";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { TopScoresPageResponse } from "@ssr/common/schemas/response/score/top-scores";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -13,17 +14,24 @@ export class TopScoresService {
    * Gets the top tracked scores.
    *
    * @param page the page number
+   * @param limit the page size
+   * @param realmId the realm to rank scores in
    * @returns the top scores with pagination metadata
    */
-  public static async getTopScores(page: number = 1, limit: number = 25): Promise<TopScoresPageResponse> {
+  public static async getTopScores(
+    page: number = 1,
+    limit: number = 25,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<TopScoresPageResponse> {
     const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
       .setItemsPerPage(limit)
-      .setTotalItems(Math.min(50_000, await ScoreSaberScoresRepository.countTotal())); // allow up to 50,000 scores to be displayed
+      .setTotalItems(Math.min(50_000, await ScoreSaberScoresRepository.countRealmScores(realmId))); // allow up to 50,000 scores to be displayed
 
     return pagination.getPage(page, async fetchItems => {
       const scoresRows = await ScoreSaberScoresRepository.getTopScores(
         fetchItems.end - fetchItems.start,
-        fetchItems.start
+        fetchItems.start,
+        realmId
       );
 
       if (!scoresRows.length) {
@@ -32,7 +40,8 @@ export class TopScoresService {
 
       const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(
         scoresRows.map(scoreRow => scoreRow.leaderboardId),
-        false
+        false,
+        realmId
       );
       const leaderboardMap = new Map(leaderboards.map(leaderboard => [leaderboard.id, leaderboard]));
 

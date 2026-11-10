@@ -7,14 +7,21 @@ import { env } from "@ssr/common/env";
 import { ssrConfig } from "config";
 import { domAnimation, LazyMotion } from "framer-motion";
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import Script from "next/script";
 import { ReactNode } from "react";
 import "./styles/globals.css";
 
-const siteFont = localFont({
+const sansFont = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const monoFont = localFont({
   src: "./fonts/JetBrainsMono.ttf",
   weight: "100 300",
+  variable: "--font-jetbrains",
 });
 
 const siteName = env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName;
@@ -91,7 +98,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${siteFont.className} h-full w-full antialiased`}>
+      <body className={`${sansFont.variable} ${monoFont.variable} h-full w-full font-sans antialiased`}>
         {env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID && env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL && (
           <Script
             strategy="afterInteractive"

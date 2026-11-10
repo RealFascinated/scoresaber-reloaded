@@ -1,4 +1,5 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { eq } from "drizzle-orm";
@@ -11,11 +12,13 @@ export class PlayerStatisticsService {
   /**
    * Inserts a new player statistics entry into the database.
    *
-   * @param playerId the ID of the player to insert the statistics for
-   * @returns the inserted statistics
+   * @param playerToken the player token to build the statistics from, resolved for the realm
+   * @param realmId the realm the token's stats and the scores belong to
+   * @returns the statistics
    */
   public static async getStatistics(
-    playerToken: ScoreSaberPlayerLookupToken
+    playerToken: ScoreSaberPlayerLookupToken,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberPlayerStatistics> {
     const playerId = String(playerToken.id);
     const [account] = await db
@@ -28,7 +31,7 @@ export class PlayerStatisticsService {
       throw new NotFoundError(`Account "${playerId}" not found`);
     }
 
-    const scoreStats = await PlayerStatisticsService.getScoreStats(playerId);
+    const scoreStats = await PlayerStatisticsService.getScoreStats(playerId, realmId);
 
     return {
       // Rank stats
@@ -67,9 +70,9 @@ export class PlayerStatisticsService {
     };
   }
 
-  private static async getScoreStats(playerId: string) {
-    return CacheService.fetch(CacheId.PLAYER_SCORE_STATISTICS, playerId, async () => {
-      return ScoreSaberScoresRepository.getPlayerScoreStatistics(playerId);
+  private static async getScoreStats(playerId: string, realmId: number) {
+    return CacheService.fetch(CacheId.PLAYER_SCORE_STATISTICS, `${playerId}:${realmId}`, async () => {
+      return ScoreSaberScoresRepository.getPlayerScoreStatistics(playerId, realmId);
     });
   }
 }

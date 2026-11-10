@@ -5,7 +5,9 @@ import { DEBOUNCE_MS_SEARCH } from "@/common/debounce";
 import { isPlayerSearchQueryTooShort, PLAYER_SEARCH_TOO_SHORT_MESSAGE } from "@/common/search-query-utils";
 import Avatar from "@/components/avatar";
 import PlayerSearchResultItem from "@/components/player/player-search-result-item";
+import { useRealm } from "@/components/providers/realm-provider";
 import { useSearch } from "@/components/providers/search-provider";
+import { Button } from "@/components/ui/button";
 import SearchDialog from "@/components/ui/search-dialog";
 import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -18,8 +20,45 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function PlayerAndLeaderboardSearch() {
+/**
+ * Button that opens the global player & leaderboard search.
+ */
+export default function PlayerAndLeaderboardSearch({ variant = "field" }: { variant?: "field" | "icon" }) {
+  const { openSearch } = useSearch();
+
+  if (variant === "icon") {
+    return (
+      <Button variant="ghost" size="icon" aria-label="Search players and maps" onClick={openSearch}>
+        <SharedIcons.SearchLeaderboardsPlayersIcon className="size-5" />
+      </Button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-start gap-2 rounded-xl border px-2 transition-all duration-200 select-none"
+      onClick={openSearch}
+    >
+      <SharedIcons.SearchLeaderboardsPlayersIcon className="text-muted-foreground size-5" />
+
+      <span className="text-muted-foreground group-hover:text-foreground flex-1 text-left text-sm transition-colors duration-200">
+        Search players & maps
+      </span>
+
+      <kbd className="bg-muted/80 text-muted-foreground pointer-events-none inline-flex h-6 shrink-0 items-center gap-1 rounded-md px-2 text-xs font-medium shadow-xs select-none">
+        <span className="text-xs">⌘</span>K
+      </kbd>
+    </button>
+  );
+}
+
+/**
+ * The search dialog itself. Rendered once in the app layout so every trigger shares it.
+ */
+export function PlayerAndLeaderboardSearchDialog() {
   const router = useRouter();
+  const { realmId } = useRealm();
   const { isOpen, openSearch, closeSearch } = useSearch();
 
   const [query, setQuery] = useState<string>("");
@@ -33,7 +72,7 @@ export default function PlayerAndLeaderboardSearch() {
     isError,
     error,
   } = useQuery({
-    queryKey: ["playerAndLeaderboardSearch", trimmedQuery],
+    queryKey: ["playerAndLeaderboardSearch", trimmedQuery, realmId],
     queryFn: async (): Promise<{
       players: ScoreSaberPlayer[];
       leaderboards: ScoreSaberLeaderboard[];
@@ -42,9 +81,7 @@ export default function PlayerAndLeaderboardSearch() {
         return { players: [], leaderboards: [] };
       }
       const playerPromise = ssrApi.searchPlayers(trimmedQuery);
-      const leaderboardPromise = ssrApi.searchLeaderboards(1, {
-        query: trimmedQuery,
-      });
+      const leaderboardPromise = ssrApi.searchLeaderboards(1, { query: trimmedQuery }, realmId);
 
       const [playerResults, leaderboardResults] = await Promise.all([playerPromise, leaderboardPromise]);
 
@@ -95,23 +132,6 @@ export default function PlayerAndLeaderboardSearch() {
 
   return (
     <>
-      <div
-        className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-start gap-2 rounded-xl border px-2 transition-all duration-200 select-none"
-        onClick={openSearch}
-      >
-        <SharedIcons.SearchLeaderboardsPlayersIcon className="text-muted-foreground size-5" />
-
-        <p className="text-muted-foreground group-hover:text-foreground flex-1 text-sm transition-colors duration-200">
-          Query...
-        </p>
-
-        <div className="shrink-0">
-          <kbd className="bg-muted/80 text-muted-foreground pointer-events-none inline-flex h-6 items-center gap-1 rounded-md px-2 text-xs font-medium shadow-xs select-none">
-            <span className="text-xs">⌘</span>K
-          </kbd>
-        </div>
-      </div>
-
       <SearchDialog
         isOpen={isOpen}
         onOpenChange={closeSearch}

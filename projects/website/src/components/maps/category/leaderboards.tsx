@@ -4,6 +4,7 @@ import { isBackendUnavailableError } from "@/common/api-error";
 import { DEBOUNCE_MS_FILTER } from "@/common/debounce";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import { useMapFilter } from "@/components/providers/maps/map-filter-provider";
+import { useRealm } from "@/components/providers/realm-provider";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import SimplePagination from "@/components/simple-pagination";
 import SimpleTooltip from "@/components/simple-tooltip";
@@ -22,6 +23,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 
 export default function Leaderboards() {
   const filter = useMapFilter();
+  const { realmId } = useRealm();
   const filterDebounced = useDebounce(filter, DEBOUNCE_MS_FILTER);
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
@@ -33,17 +35,21 @@ export default function Leaderboards() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["maps", filterDebounced, page],
+    queryKey: ["maps", filterDebounced, page, realmId],
     queryFn: async () => {
-      const response = await ssrApi.searchLeaderboards(page, {
-        category: filterDebounced.category,
-        sort: filterDebounced.sort,
-        minStars: filterDebounced.starMin,
-        maxStars: filterDebounced.starMax,
-        ranked: filterDebounced.ranked,
-        qualified: filterDebounced.qualified,
-        query: filterDebounced.search.length > 3 ? filterDebounced.search : undefined,
-      });
+      const response = await ssrApi.searchLeaderboards(
+        page,
+        {
+          category: filterDebounced.category,
+          sort: filterDebounced.sort,
+          minStars: filterDebounced.starMin,
+          maxStars: filterDebounced.starMax,
+          ranked: filterDebounced.ranked,
+          qualified: filterDebounced.qualified,
+          query: filterDebounced.search.length > 3 ? filterDebounced.search : undefined,
+        },
+        realmId
+      );
       return response ?? Pagination.empty<ScoreSaberLeaderboard>();
     },
     // Fail fast so a backend outage surfaces as an error state instead of an

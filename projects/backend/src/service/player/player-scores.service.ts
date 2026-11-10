@@ -3,6 +3,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination, type Page } from "@ssr/common/pagination";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/query/query";
 import { ScoreResponse } from "@ssr/common/schemas/accsaber/score/score";
 import { PlayerScoresChartResponse } from "@ssr/common/schemas/response/player/scores-chart";
@@ -29,6 +30,7 @@ import { SQL, asc, desc, eq, gt, gte, inArray, isNotNull, sql, type AnyColumn } 
 import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberScoresTable } from "../../db/schema";
+import { scorePpExpr } from "../../repositories/realm-columns";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
@@ -46,9 +48,15 @@ import { PlayerCoreService } from "./player-core.service";
  */
 type ScoreTableConfig<TRow, TScore, TContext = undefined> = {
   buildConditions: (playerIds: string[], leaderboardIds: number[] | null, hmd?: HMD) => SQL[];
-  countRows: (conditions: SQL[]) => Promise<number>;
+  countRows: (conditions: SQL[], realmId: number) => Promise<number>;
   resolveOrderColumn: (sort: string) => AnyColumn | SQL;
-  fetchRows: (conditions: SQL[], orderBy: SQL, limit: number, offset: number) => Promise<TRow[]>;
+  fetchRows: (
+    conditions: SQL[],
+    orderBy: SQL,
+    limit: number,
+    offset: number,
+    realmId: number
+  ) => Promise<TRow[]>;
   getLeaderboardId: (row: TRow) => number;
   prepareContext?: (rows: TRow[]) => Promise<TContext>;
   enrichRow: (
@@ -256,9 +264,13 @@ export class PlayerScoresService {
    * Gets the player's score chart data.
    *
    * @param playerId the player's id
+   * @param realmId the realm to resolve pp and stars for
    */
-  public static async getPlayerScoreChart(playerId: string): Promise<PlayerScoresChartResponse> {
-    const rows = await ScoreSaberScoresRepository.getChartRowsByPlayer(playerId);
+  public static async getPlayerScoreChart(
+    playerId: string,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<PlayerScoresChartResponse> {
+    const rows = await ScoreSaberScoresRepository.getChartRowsByPlayer(playerId, realmId);
 
     if (!rows.length) {
       return { data: [] };
@@ -281,17 +293,21 @@ export class PlayerScoresService {
    * Gets a score by its ID.
    *
    * @param scoreId the id of the score
+   * @param realmId the realm to resolve pp and leaderboard ranking for
    * @returns the score
    */
-  public static async getScore(scoreId: number): Promise<PlayerScore<ScoreSaberScore>> {
+  public static async getScore(
+    scoreId: number,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<PlayerScore<ScoreSaberScore>> {
     const scoreRow =
-      (await ScoreSaberScoresRepository.findRowByScoreId(scoreId)) ??
+      (await ScoreSaberScoresRepository.findRowByScoreId(scoreId, realmId)) ??
       (await ScoreSaberScoreHistoryRepository.findRowByScoreId(scoreId));
     if (!scoreRow) {
       throw new NotFoundError("Score not found");
     }
 
-    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(scoreRow.leaderboardId);
+    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(scoreRow.leaderboardId, realmId);
     const [score, beatSaver] = await Promise.all([
       ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(scoreRow), leaderboard),
       BeatSaverService.getMap(
@@ -416,8 +432,9 @@ export class PlayerScoresService {
       leaderboardIds = ids;
     }
 
+    const realmId = query.realmId ?? DEFAULT_REALM_ID;
     const conditions = config.buildConditions(uniquePlayerIds, leaderboardIds, query.hmd);
-    const total = await config.countRows(conditions);
+    const total = await config.countRows(conditions, realmId);
     const pagination = new Pagination<PlayerScore<TScore>>().setItemsPerPage(limit).setTotalItems(total);
 
     return pagination.getPage(page, async () => {
@@ -426,14 +443,17 @@ export class PlayerScoresService {
         conditions,
         sortOrder(config.resolveOrderColumn(sort)),
         limit,
-        offset
+        offset,
+        realmId
       );
       if (!rows.length) {
         return [];
       }
 
       const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(
-        rows.map(config.getLeaderboardId)
+        rows.map(config.getLeaderboardId),
+        true,
+        realmId
       );
       const leaderboardMap = new Map(leaderboards.map(lb => [lb.id, lb]));
       const context = config.prepareContext ? await config.prepareContext(rows) : (undefined as TContext);
@@ -479,14 +499,14 @@ export class PlayerScoresService {
         return conditions;
       },
 
-      async countRows(conditions) {
-        return ScoreSaberScoresRepository.countByConditions(conditions);
+      async countRows(conditions, realmId) {
+        return ScoreSaberScoresRepository.countByConditions(conditions, realmId);
       },
 
       resolveOrderColumn(sort) {
         switch (sort as ScoreSaberScoreSortField) {
           case "pp":
-            return scoreSaberScoresTable.pp;
+            return scorePpExpr;
           case "acc":
             return scoreSaberScoresTable.accuracy;
           case "score":
@@ -504,8 +524,8 @@ export class PlayerScoresService {
         }
       },
 
-      async fetchRows(conditions, orderBy, limit, offset) {
-        return ScoreSaberScoresRepository.findRowsByConditions(conditions, orderBy, limit, offset);
+      async fetchRows(conditions, orderBy, limit, offset, realmId) {
+        return ScoreSaberScoresRepository.findRowsByConditions(conditions, orderBy, limit, offset, realmId);
       },
 
       getLeaderboardId: row => row.leaderboardId,
@@ -535,82 +555,92 @@ export class PlayerScoresService {
     direction: SortDirection,
     query: PlayerScoresQuery
   ) {
-    return PlayerScoresService.getPaginatedPlayerScores(playerId, page, sort, direction, query, {
-      buildConditions(playerIds, leaderboardIds, hmd) {
-        const conditions: SQL[] = [
-          inArray(scoreSaberScoresTable.playerId, playerIds),
-          gt(scoreSaberScoresTable.medals, 0),
-        ];
+    return PlayerScoresService.getPaginatedPlayerScores(
+      playerId,
+      page,
+      sort,
+      direction,
+      { ...query, realmId: undefined },
+      {
+        buildConditions(playerIds, leaderboardIds, hmd) {
+          const conditions: SQL[] = [
+            inArray(scoreSaberScoresTable.playerId, playerIds),
+            gt(scoreSaberScoresTable.medals, 0),
+          ];
 
-        if (sort === "acc") {
-          conditions.push(isNotNull(scoreSaberScoresTable.accuracy), gte(scoreSaberScoresTable.accuracy, 0));
-        }
-        if (leaderboardIds && leaderboardIds.length > 0) {
-          conditions.push(inArray(scoreSaberScoresTable.leaderboardId, leaderboardIds));
-        }
-        if (hmd) {
-          conditions.push(eq(scoreSaberScoresTable.hmd, hmd));
-        }
-
-        return conditions;
-      },
-
-      async countRows(conditions) {
-        return ScoreSaberScoresRepository.countByConditions(conditions);
-      },
-
-      resolveOrderColumn(sort) {
-        switch (sort as ScoreSaberMedalScoreSortField) {
-          case "medals":
-            return scoreSaberScoresTable.medals;
-          case "acc":
-            return scoreSaberScoresTable.accuracy;
-          case "score":
-            return scoreSaberScoresTable.score;
-          case "misses":
-            return sql`${scoreSaberScoresTable.missedNotes} + ${scoreSaberScoresTable.badCuts}`;
-          case "maxcombo":
-            return scoreSaberScoresTable.maxCombo;
-          case "date":
-            return scoreSaberScoresTable.timestamp;
-          default: {
-            const _exhaustive: never = sort as never;
-            return _exhaustive;
+          if (sort === "acc") {
+            conditions.push(
+              isNotNull(scoreSaberScoresTable.accuracy),
+              gte(scoreSaberScoresTable.accuracy, 0)
+            );
           }
-        }
-      },
+          if (leaderboardIds && leaderboardIds.length > 0) {
+            conditions.push(inArray(scoreSaberScoresTable.leaderboardId, leaderboardIds));
+          }
+          if (hmd) {
+            conditions.push(eq(scoreSaberScoresTable.hmd, hmd));
+          }
 
-      async fetchRows(conditions, orderBy, limit, offset) {
-        return ScoreSaberScoresRepository.findRowsByConditions(conditions, orderBy, limit, offset);
-      },
+          return conditions;
+        },
 
-      getLeaderboardId: row => row.leaderboardId,
+        async countRows(conditions, realmId) {
+          return ScoreSaberScoresRepository.countByConditions(conditions, realmId);
+        },
 
-      async prepareContext(rows) {
-        return ScoreSaberMedalsRepository.getMedalTableScoreRanksForScores(
-          rows.map(row => ({
-            scoreId: row.scoreId,
-            leaderboardId: row.leaderboardId,
-          }))
-        );
-      },
+        resolveOrderColumn(sort) {
+          switch (sort as ScoreSaberMedalScoreSortField) {
+            case "medals":
+              return scoreSaberScoresTable.medals;
+            case "acc":
+              return scoreSaberScoresTable.accuracy;
+            case "score":
+              return scoreSaberScoresTable.score;
+            case "misses":
+              return sql`${scoreSaberScoresTable.missedNotes} + ${scoreSaberScoresTable.badCuts}`;
+            case "maxcombo":
+              return scoreSaberScoresTable.maxCombo;
+            case "date":
+              return scoreSaberScoresTable.timestamp;
+            default: {
+              const _exhaustive: never = sort as never;
+              return _exhaustive;
+            }
+          }
+        },
 
-      async enrichRow(row, leaderboard, context) {
-        const medalScore: ScoreSaberMedalScore = {
-          ...scoreSaberMedalScoreRowToType(row),
-          rank: context.get(row.scoreId) ?? 0,
-        };
+        async fetchRows(conditions, orderBy, limit, offset, realmId) {
+          return ScoreSaberScoresRepository.findRowsByConditions(conditions, orderBy, limit, offset, realmId);
+        },
 
-        const [enrichedScore, beatSaver] = await Promise.all([
-          ScoreCoreService.insertScoreData(medalScore, leaderboard),
-          BeatSaverService.getMap(
-            leaderboard.songHash,
-            leaderboard.difficulty.difficulty,
-            leaderboard.difficulty.characteristic
-          ),
-        ]);
-        return { score: enrichedScore, leaderboard, beatSaver };
-      },
-    });
+        getLeaderboardId: row => row.leaderboardId,
+
+        async prepareContext(rows) {
+          return ScoreSaberMedalsRepository.getMedalTableScoreRanksForScores(
+            rows.map(row => ({
+              scoreId: row.scoreId,
+              leaderboardId: row.leaderboardId,
+            }))
+          );
+        },
+
+        async enrichRow(row, leaderboard, context) {
+          const medalScore: ScoreSaberMedalScore = {
+            ...scoreSaberMedalScoreRowToType(row),
+            rank: context.get(row.scoreId) ?? 0,
+          };
+
+          const [enrichedScore, beatSaver] = await Promise.all([
+            ScoreCoreService.insertScoreData(medalScore, leaderboard),
+            BeatSaverService.getMap(
+              leaderboard.songHash,
+              leaderboard.difficulty.difficulty,
+              leaderboard.difficulty.characteristic
+            ),
+          ]);
+          return { score: enrichedScore, leaderboard, beatSaver };
+        },
+      }
+    );
   }
 }

@@ -2,6 +2,7 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger, { ScopedLogger } from "@ssr/common/logger";
 import { Pagination } from "@ssr/common/pagination";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-history-graph";
 import type { ScoreSaberScoresPageResponse } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
@@ -14,6 +15,7 @@ import { ScoreSaberScoreHistoryRow } from "../../db/schema";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import CacheService, { CacheId } from "../infra/cache.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
+import { RealmService } from "../realm/realm.service";
 import { ScoreCoreService } from "../score/score-core.service";
 
 export class PlayerScoreHistoryService {
@@ -29,11 +31,14 @@ export class PlayerScoreHistoryService {
       `Reweighting history scores for leaderboard "${leaderboard.id}"...`
     );
 
-    const rows = await ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(leaderboard.id);
+    const [rows, curve] = await Promise.all([
+      ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(leaderboard.id),
+      RealmService.getCalculationCurve(),
+    ]);
     const updates: Partial<ScoreSaberScoreHistoryRow>[] = [];
 
     for (const row of rows) {
-      const newPp = ScoreSaberCurve.getPp(leaderboard.stars, row.accuracy);
+      const newPp = ScoreSaberCurve.getPp(leaderboard.stars, row.accuracy, curve);
       if (row.pp !== newPp) {
         updates.push({ id: row.id, pp: newPp });
       }
@@ -55,13 +60,16 @@ export class PlayerScoreHistoryService {
    * @param playerId the player's id to get the previous scores for
    * @param leaderboardId the leaderboard to get the previous scores on
    * @param page the page to get
+   * @param realmId the realm to show pp for. Archived plays only store the default realm's pp, so
+   *   other realms recompute it from the accuracy using the realm's stars and curve.
    */
   public static async getPlayerScoreHistory(
     playerId: string,
     leaderboardId: number,
-    page: number
+    page: number,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberScoresPageResponse> {
-    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
+    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
     if (!leaderboard) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }
@@ -85,12 +93,21 @@ export class PlayerScoreHistoryService {
         playerId,
         leaderboardId,
         limit,
-        offset
+        offset,
+        realmId
       );
+      const curve =
+        realmId !== DEFAULT_REALM_ID && leaderboard.ranked
+          ? await RealmService.getCalculationCurve(realmId)
+          : undefined;
 
       return Promise.all(
         rawScores.map(async row => {
-          const scoreRow = scoreSaberScoreRowToType(row);
+          const scoreRow = scoreSaberScoreRowToType(
+            realmId === DEFAULT_REALM_ID
+              ? row
+              : { ...row, pp: curve ? ScoreSaberCurve.getPp(leaderboard.stars, row.accuracy, curve) : 0 }
+          );
           const enriched = await ScoreCoreService.insertScoreData(scoreRow, leaderboard, {
             insertPreviousScore: false,
           });

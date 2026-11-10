@@ -1,4 +1,5 @@
 import { accSaberScoreSortSchema, accSaberScoreTypeSchema } from "@ssr/common/schemas/accsaber/query/query";
+import { RealmQuerySchema } from "@ssr/common/schemas/realm/realm-query";
 import { AccSaberScoresPageResponseSchema } from "@ssr/common/schemas/response/score/accsaber-scores-page";
 import {
   MedalPlayerScoresPageResponseSchema,
@@ -29,14 +30,15 @@ export default function scoresController(app: Elysia) {
     app
       .get(
         "/:scoreId",
-        async ({ params: { scoreId } }) => {
-          return PlayerScoresService.getScore(scoreId);
+        async ({ params: { scoreId }, query: { realmId } }) => {
+          return PlayerScoresService.getScore(scoreId, realmId);
         },
         {
           tags: ["Scores"],
           params: t.Object({
             scoreId: t.Integer({ minimum: 1 }),
           }),
+          query: RealmQuerySchema,
           response: PlayerScoreSchema,
 
           detail: {
@@ -165,8 +167,13 @@ export default function scoresController(app: Elysia) {
       )
       .get(
         "/leaderboard/:leaderboardId/:page",
-        async ({ params: { leaderboardId, page }, query: { country } }) => {
-          return await ScoreSaberLeaderboardScoresService.getLeaderboardScores(leaderboardId, page, country);
+        async ({ params: { leaderboardId, page }, query: { country, realmId } }) => {
+          return await ScoreSaberLeaderboardScoresService.getLeaderboardScores(
+            leaderboardId,
+            page,
+            country,
+            realmId
+          );
         },
         {
           tags: ["Scores"],
@@ -174,9 +181,12 @@ export default function scoresController(app: Elysia) {
             leaderboardId: t.Integer({ minimum: 1 }),
             page: t.Integer({ minimum: 1 }),
           }),
-          query: t.Object({
-            country: t.Optional(t.String()),
-          }),
+          query: t.Composite([
+            RealmQuerySchema,
+            t.Object({
+              country: t.Optional(t.String()),
+            }),
+          ]),
           detail: {
             description: "Fetch leaderboard scores",
           },
@@ -184,8 +194,13 @@ export default function scoresController(app: Elysia) {
       )
       .post(
         "/friend/leaderboard/:leaderboardId/:page",
-        async ({ params: { leaderboardId, page }, body: { friendIds } }) => {
-          return await PlayerFriendScoresService.getFriendLeaderboardScores(friendIds, leaderboardId, page);
+        async ({ params: { leaderboardId, page }, body: { friendIds }, query: { realmId } }) => {
+          return await PlayerFriendScoresService.getFriendLeaderboardScores(
+            friendIds,
+            leaderboardId,
+            page,
+            realmId
+          );
         },
         {
           tags: ["Scores"],
@@ -193,6 +208,7 @@ export default function scoresController(app: Elysia) {
             leaderboardId: t.Integer({ minimum: 1 }),
             page: t.Integer({ minimum: 1 }),
           }),
+          query: RealmQuerySchema,
           body: t.Object({
             friendIds: t.Array(t.String(), { minItems: 1, maxItems: SHARED_CONSTS.maxFriends + 1 }),
           }),
@@ -204,17 +220,20 @@ export default function scoresController(app: Elysia) {
       )
       .get(
         "/top/:page",
-        async ({ params: { page }, query: { limit } }) => {
-          return await TopScoresService.getTopScores(page, limit);
+        async ({ params: { page }, query: { limit, realmId } }) => {
+          return await TopScoresService.getTopScores(page, limit, realmId);
         },
         {
           tags: ["Scores"],
           params: t.Object({
             page: t.Integer({ minimum: 1 }),
           }),
-          query: t.Object({
-            limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
-          }),
+          query: t.Composite([
+            RealmQuerySchema,
+            t.Object({
+              limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
+            }),
+          ]),
           response: TopScoresPageResponseSchema,
           detail: {
             description: "Fetch top scores",

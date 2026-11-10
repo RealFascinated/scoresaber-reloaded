@@ -1,3 +1,4 @@
+import { useRealm } from "@/components/providers/realm-provider";
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { Pagination } from "@ssr/common/pagination";
@@ -15,6 +16,7 @@ export const useLeaderboardScores = (
   country?: string
 ) => {
   const database = useDatabase();
+  const { realmId } = useRealm();
   const friendIds = useStableLiveQuery(() => database.getFriendIds());
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
 
@@ -22,6 +24,7 @@ export const useLeaderboardScores = (
     queryKey: [
       "leaderboardScores",
       leaderboardId,
+      realmId,
       historyPlayerId,
       page,
       mode,
@@ -32,7 +35,12 @@ export const useLeaderboardScores = (
     queryFn: async () => {
       switch (mode) {
         case ScoreModeEnum.Global: {
-          const response = await ssrApi.fetchLeaderboardScores(leaderboardId.toString(), page, country);
+          const response = await ssrApi.fetchLeaderboardScores(
+            leaderboardId.toString(),
+            page,
+            country,
+            realmId
+          );
 
           if (response) {
             return {
@@ -48,7 +56,8 @@ export const useLeaderboardScores = (
             const response = await ssrApi.getFriendLeaderboardScores(
               [...friendIds, mainPlayer.id],
               leaderboardId.toString(),
-              page
+              page,
+              realmId
             );
 
             if (response) {
@@ -63,7 +72,8 @@ export const useLeaderboardScores = (
             const response = await ssrApi.fetchPlayerScoreSaberScoresHistory(
               historyPlayerId,
               leaderboardId.toString(),
-              page
+              page,
+              realmId
             );
 
             if (response) {

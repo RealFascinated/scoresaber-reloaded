@@ -104,15 +104,15 @@ export default function Settings() {
 
         {/* Content area */}
         <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <div className="ring-border bg-card rounded-xl p-5 ring-1">
+          <div className="ring-border bg-card rounded-xl p-4 ring-1">
             <h2 className="mb-4 text-lg font-semibold">{selectedCategory.name}</h2>
             {selectedCategory.component}
           </div>
 
           <div className="ring-border bg-card flex items-center justify-between rounded-xl p-4 ring-1">
             <div>
-              <p className="text-sm font-medium">Reset Settings</p>
-              <p className="text-muted-foreground mt-0.5 text-xs">
+              <p className="text-sm font-semibold">Reset Settings</p>
+              <p className="text-muted-foreground mt-0.5 text-sm">
                 Restore all settings to their default values
               </p>
             </div>

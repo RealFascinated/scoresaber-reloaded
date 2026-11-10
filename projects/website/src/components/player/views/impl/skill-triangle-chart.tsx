@@ -1,5 +1,6 @@
 "use client";
 
+import { useRealm } from "@/components/providers/realm-provider";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Slider } from "@/components/ui/slider";
@@ -287,14 +288,15 @@ function TimelineSlider({
 }
 
 export default function SkillTriangleChart({ player }: { player: ScoreSaberPlayer }) {
+  const { realmId } = useRealm();
   const {
     data: chartData,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["player-scores-chart", player.id],
+    queryKey: ["player-scores-chart", player.id, realmId],
     queryFn: async () => {
-      const response = await ssrApi.getPlayerScoresChart(player.id);
+      const response = await ssrApi.getPlayerScoresChart(player.id, realmId);
       return response?.data || [];
     },
   });

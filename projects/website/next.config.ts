@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../../"),
   reactCompiler: true,
+  // Keep the dev indicator clear of the sidebar footer links
+  devIndicators: { position: "bottom-right" },
   experimental: {
     optimizePackageImports: [
       "@ssr/common",

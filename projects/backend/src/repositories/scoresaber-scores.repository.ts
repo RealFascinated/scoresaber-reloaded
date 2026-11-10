@@ -1,18 +1,78 @@
 import { HMD } from "@ssr/common/hmds";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { AnyColumn, SQL } from "drizzle-orm";
-import { and, count, desc, eq, getTableColumns, gt, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "../db";
 import {
   scoreSaberAccountsTable,
+  scoreSaberLeaderboardRealmsTable,
   scoreSaberLeaderboardsTable,
   scoreSaberScoreHistoryTable,
+  scoreSaberScoreRealmsTable,
   scoreSaberScoresTable,
+  type ScoreSaberLeaderboardRow,
   type ScoreSaberScoreRow,
 } from "../db/schema";
+import {
+  leaderboardRealmJoinOn,
+  resolvedLeaderboardColumns,
+  resolvedScoreColumns,
+  scorePpExpr,
+  scoreRealmJoinOn,
+} from "./realm-columns";
 import { scoreRowToHistoryInsert } from "./scoresaber-score-history.repository";
 import { TableCountsRepository } from "./table-counts.repository";
 
-export type ScoreSaberScoreInsertRow = typeof scoreSaberScoresTable.$inferInsert;
+/**
+ * A score to store. `pp` is the score's pp in the realm the row is written for
+ * (see the `realmId` argument of the write methods); it lives in the score-realms table.
+ */
+export type ScoreSaberScoreInsertRow = typeof scoreSaberScoresTable.$inferInsert & { pp: number };
+
+type ScoreBaseInsertRow = typeof scoreSaberScoresTable.$inferInsert;
+
+function splitInsertRow(row: ScoreSaberScoreInsertRow): { base: ScoreBaseInsertRow; pp: number } {
+  const { pp, ...base } = row;
+  return { base, pp };
+}
+
+type Executor = Pick<typeof db, "insert" | "delete">;
+
+/**
+ * Writes the realm pp rows for the given scores: positive pp is upserted, anything else removes
+ * the row so the table stays sparse.
+ */
+async function writeRealmPp(
+  executor: Executor,
+  realmId: number,
+  entries: { scoreId: number; playerId: string; leaderboardId: number; pp: number }[]
+): Promise<void> {
+  const ranked = entries.filter(entry => entry.pp > 0);
+  const unranked = entries.filter(entry => !(entry.pp > 0));
+
+  if (unranked.length > 0) {
+    await executor.delete(scoreSaberScoreRealmsTable).where(
+      and(
+        eq(scoreSaberScoreRealmsTable.realmId, realmId),
+        inArray(
+          scoreSaberScoreRealmsTable.scoreId,
+          unranked.map(entry => entry.scoreId)
+        )
+      )
+    );
+  }
+
+  if (ranked.length > 0) {
+    await executor
+      .insert(scoreSaberScoreRealmsTable)
+      .values(ranked.map(entry => ({ ...entry, realmId })))
+      .onConflictDoUpdate({
+        target: [scoreSaberScoreRealmsTable.scoreId, scoreSaberScoreRealmsTable.realmId],
+        set: { pp: sql`excluded."pp"` },
+        setWhere: sql`${scoreSaberScoreRealmsTable.pp} is distinct from excluded."pp"`,
+      });
+  }
+}
 
 export type ScoreSaberPlayerScoreStatistics = {
   totalScore: number;
@@ -75,10 +135,14 @@ export class ScoreSaberScoresRepository {
     return [...new Set(rows.map(row => row.playerId))];
   }
 
-  public static async findRowByScoreId(scoreId: number): Promise<ScoreSaberScoreRow | undefined> {
+  public static async findRowByScoreId(
+    scoreId: number,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<ScoreSaberScoreRow | undefined> {
     const [row] = await db
-      .select()
+      .select(resolvedScoreColumns())
       .from(scoreSaberScoresTable)
+      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
       .where(eq(scoreSaberScoresTable.scoreId, scoreId));
     return row;
   }
@@ -113,11 +177,13 @@ export class ScoreSaberScoresRepository {
 
   public static async findByPlayerAndLeaderboard(
     playerId: string,
-    leaderboardId: number
+    leaderboardId: number,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberScoreRow | undefined> {
     const [row] = await db
-      .select()
+      .select(resolvedScoreColumns())
       .from(scoreSaberScoresTable)
+      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
       .where(
         and(
           eq(scoreSaberScoresTable.playerId, playerId),
@@ -129,17 +195,30 @@ export class ScoreSaberScoresRepository {
     return row;
   }
 
-  public static async insertScore(row: ScoreSaberScoreInsertRow): Promise<boolean> {
-    const result = await db
-      .insert(scoreSaberScoresTable)
-      .values(row)
-      // Untargeted so conflicts on both the scoreId primary key (same score
-      // re-ingested) and the (playerId, leaderboardId) unique index (a
-      // concurrent play from another ingestion path) are absorbed instead of
-      // raising a unique violation.
-      .onConflictDoNothing()
-      .returning({ scoreId: scoreSaberScoresTable.scoreId });
-    return result.length > 0;
+  public static async insertScore(
+    row: ScoreSaberScoreInsertRow,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<boolean> {
+    const { base, pp } = splitInsertRow(row);
+    return await db.transaction(async tx => {
+      const result = await tx
+        .insert(scoreSaberScoresTable)
+        .values(base)
+        // Untargeted so conflicts on both the scoreId primary key (same score
+        // re-ingested) and the (playerId, leaderboardId) unique index (a
+        // concurrent play from another ingestion path) are absorbed instead of
+        // raising a unique violation.
+        .onConflictDoNothing()
+        .returning({ scoreId: scoreSaberScoresTable.scoreId });
+      if (result.length === 0) {
+        return false;
+      }
+
+      await writeRealmPp(tx, realmId, [
+        { scoreId: base.scoreId, playerId: base.playerId, leaderboardId: base.leaderboardId, pp },
+      ]);
+      return true;
+    });
   }
 
   /**
@@ -153,18 +232,24 @@ export class ScoreSaberScoresRepository {
    * newest play wins, and when this incoming play loses the race nothing is
    * changed.
    *
-   * @param insertRow the new score row to store
+   * @param row the new score row to store
+   * @param realmId the realm the row's pp belongs to; the replaced score's pp rows are removed for every realm
    * @returns whether the new row was inserted (false when a concurrent, newer
    *   row already holds the slot)
    */
-  public static async replaceScore(insertRow: ScoreSaberScoreInsertRow): Promise<boolean> {
+  public static async replaceScore(
+    row: ScoreSaberScoreInsertRow,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<boolean> {
+    const { base: insertRow, pp } = splitInsertRow(row);
     return await db.transaction(async tx => {
       // Re-read the current row inside the transaction so the snapshot reflects
       // the row actually being replaced (a concurrent writer may have changed
       // it since the caller read it).
       const [previousRow] = await tx
-        .select()
+        .select(resolvedScoreColumns())
         .from(scoreSaberScoresTable)
+        .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(DEFAULT_REALM_ID))
         .where(
           and(
             eq(scoreSaberScoresTable.playerId, insertRow.playerId),
@@ -197,6 +282,10 @@ export class ScoreSaberScoresRepository {
       }
 
       if (inserted != null && previousRow != null && previousRow.scoreId !== insertRow.scoreId) {
+        // The replaced score leaves the current table, so its per-realm pp goes with it.
+        await tx
+          .delete(scoreSaberScoreRealmsTable)
+          .where(eq(scoreSaberScoreRealmsTable.scoreId, previousRow.scoreId));
         await tx
           .insert(scoreSaberScoreHistoryTable)
           .values(scoreRowToHistoryInsert(previousRow))
@@ -209,33 +298,71 @@ export class ScoreSaberScoresRepository {
           });
       }
 
-      return inserted != null;
+      if (inserted == null) {
+        return false;
+      }
+
+      await writeRealmPp(tx, realmId, [
+        {
+          scoreId: insertRow.scoreId,
+          playerId: insertRow.playerId,
+          leaderboardId: insertRow.leaderboardId,
+          pp,
+        },
+      ]);
+      return true;
     });
   }
 
   /**
    * Upserts scores into the scores table in a single statement.
    *
-   * New scores are inserted. Scores that already exist (same scoreId) only have
-   * their `pp` updated, and only when the value actually differs.
+   * New scores are inserted. Scores that already exist (same scoreId) keep their row; only
+   * the realm's pp is updated, and only when the value actually differs.
    *
    * @param rows the score rows to upsert
+   * @param realmId the realm the rows' pp belongs to
    */
-  public static async upsertScores(rows: ScoreSaberScoreInsertRow[]): Promise<void> {
+  public static async upsertScores(
+    rows: ScoreSaberScoreInsertRow[],
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<void> {
     if (rows.length === 0) {
       return;
     }
 
-    await db
-      .insert(scoreSaberScoresTable)
-      .values(rows)
-      .onConflictDoUpdate({
-        target: scoreSaberScoresTable.scoreId,
-        set: {
-          pp: sql`excluded."pp"`,
-        },
-        setWhere: sql`${scoreSaberScoresTable.pp} is distinct from excluded."pp"`,
-      });
+    const split = rows.map(splitInsertRow);
+    await db.transaction(async tx => {
+      await tx
+        .insert(scoreSaberScoresTable)
+        .values(split.map(({ base }) => base))
+        .onConflictDoNothing({ target: scoreSaberScoresTable.scoreId });
+
+      // A conflicting (playerId, leaderboardId) row holds a different scoreId, so only write pp for
+      // scores that now exist under the id we were given.
+      const stored = await tx
+        .select({ scoreId: scoreSaberScoresTable.scoreId })
+        .from(scoreSaberScoresTable)
+        .where(
+          inArray(
+            scoreSaberScoresTable.scoreId,
+            split.map(({ base }) => base.scoreId)
+          )
+        );
+      const storedIds = new Set(stored.map(row => row.scoreId));
+      await writeRealmPp(
+        tx,
+        realmId,
+        split
+          .filter(({ base }) => storedIds.has(base.scoreId))
+          .map(({ base, pp }) => ({
+            scoreId: base.scoreId,
+            playerId: base.playerId,
+            leaderboardId: base.leaderboardId,
+            pp,
+          }))
+      );
+    });
   }
 
   public static async countByPlayerId(playerId: string): Promise<number> {
@@ -254,10 +381,18 @@ export class ScoreSaberScoresRepository {
     return row?.count ?? 0;
   }
 
-  public static async countByConditions(conditions: SQL[]): Promise<number> {
+  /**
+   * Counts scores matching the conditions. Conditions may reference {@link scorePpExpr}; pp is
+   * resolved for `realmId`.
+   */
+  public static async countByConditions(
+    conditions: SQL[],
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<number> {
     const [row] = await db
       .select({ count: sql<number>`cast(count(*) as integer)` })
       .from(scoreSaberScoresTable)
+      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
       .where(and(...conditions));
     return Number(row?.count ?? 0);
   }
@@ -266,75 +401,120 @@ export class ScoreSaberScoresRepository {
     conditions: SQL[],
     orderBy: SQL | AnyColumn,
     limit: number,
-    offset: number
+    offset: number,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberScoreRow[]> {
     return db
-      .select()
+      .select(resolvedScoreColumns())
       .from(scoreSaberScoresTable)
+      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
       .where(and(...conditions))
       .orderBy(orderBy as SQL)
       .limit(limit)
       .offset(offset);
   }
 
-  public static async getTopScores(limit: number, offset: number): Promise<ScoreSaberScoreRow[]> {
+  public static async getTopScores(
+    limit: number,
+    offset: number,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<ScoreSaberScoreRow[]> {
     return db
-      .select(getTableColumns(scoreSaberScoresTable))
-      .from(scoreSaberScoresTable)
+      .select({ ...resolvedScoreColumns(), pp: scoreSaberScoreRealmsTable.pp })
+      .from(scoreSaberScoreRealmsTable)
+      .innerJoin(scoreSaberScoresTable, eq(scoreSaberScoresTable.scoreId, scoreSaberScoreRealmsTable.scoreId))
       .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoresTable.playerId, scoreSaberAccountsTable.id))
-      .where(and(gt(scoreSaberScoresTable.pp, 0), eq(scoreSaberAccountsTable.banned, false)))
-      .orderBy(desc(scoreSaberScoresTable.pp))
+      .where(
+        and(
+          eq(scoreSaberScoreRealmsTable.realmId, realmId),
+          gt(scoreSaberScoreRealmsTable.pp, 0),
+          eq(scoreSaberAccountsTable.banned, false)
+        )
+      )
+      .orderBy(desc(scoreSaberScoreRealmsTable.pp), desc(scoreSaberScoreRealmsTable.scoreId))
       .limit(limit)
       .offset(offset);
   }
 
-  public static async selectTopPp(limit: number = 50): Promise<{ pp: number }[]> {
+  public static async selectTopPp(
+    limit: number = 50,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<{ pp: number }[]> {
     return db
-      .select({ pp: scoreSaberScoresTable.pp })
-      .from(scoreSaberScoresTable)
-      .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoresTable.playerId, scoreSaberAccountsTable.id))
-      .where(and(gt(scoreSaberScoresTable.pp, 0), eq(scoreSaberAccountsTable.banned, false)))
-      .orderBy(desc(scoreSaberScoresTable.pp))
+      .select({ pp: scoreSaberScoreRealmsTable.pp })
+      .from(scoreSaberScoreRealmsTable)
+      .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoreRealmsTable.playerId, scoreSaberAccountsTable.id))
+      .where(
+        and(
+          eq(scoreSaberScoreRealmsTable.realmId, realmId),
+          gt(scoreSaberScoreRealmsTable.pp, 0),
+          eq(scoreSaberAccountsTable.banned, false)
+        )
+      )
+      .orderBy(desc(scoreSaberScoreRealmsTable.pp))
       .limit(limit);
   }
 
-  public static async getPpAndScoreIdByPlayer(playerId: string): Promise<{ pp: number; scoreId: number }[]> {
+  public static async getPpAndScoreIdByPlayer(
+    playerId: string,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<{ pp: number; scoreId: number }[]> {
     return db
       .select({
-        pp: scoreSaberScoresTable.pp,
-        scoreId: scoreSaberScoresTable.scoreId,
+        pp: scoreSaberScoreRealmsTable.pp,
+        scoreId: scoreSaberScoreRealmsTable.scoreId,
       })
-      .from(scoreSaberScoresTable)
-      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)))
-      .orderBy(desc(scoreSaberScoresTable.pp));
+      .from(scoreSaberScoreRealmsTable)
+      .where(
+        and(
+          eq(scoreSaberScoreRealmsTable.realmId, realmId),
+          eq(scoreSaberScoreRealmsTable.playerId, playerId),
+          gt(scoreSaberScoreRealmsTable.pp, 0)
+        )
+      )
+      .orderBy(desc(scoreSaberScoreRealmsTable.pp));
   }
 
-  public static async getRankedRowsByPlayerId(playerId: string): Promise<ScoreSaberScoreRow[]> {
+  public static async getRankedRowsByPlayerId(
+    playerId: string,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<ScoreSaberScoreRow[]> {
     return db
-      .select()
-      .from(scoreSaberScoresTable)
-      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)));
+      .select({ ...resolvedScoreColumns(), pp: scoreSaberScoreRealmsTable.pp })
+      .from(scoreSaberScoreRealmsTable)
+      .innerJoin(scoreSaberScoresTable, eq(scoreSaberScoresTable.scoreId, scoreSaberScoreRealmsTable.scoreId))
+      .where(
+        and(
+          eq(scoreSaberScoreRealmsTable.realmId, realmId),
+          eq(scoreSaberScoreRealmsTable.playerId, playerId),
+          gt(scoreSaberScoreRealmsTable.pp, 0)
+        )
+      );
   }
 
-  public static async getPlayerScoreStatistics(playerId: string): Promise<ScoreSaberPlayerScoreStatistics> {
+  public static async getPlayerScoreStatistics(
+    playerId: string,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<ScoreSaberPlayerScoreStatistics> {
     const [scoreStats] = await db
       .select({
         totalScore: sql<number>`(coalesce(sum(${scoreSaberScoresTable.score}), 0))::double precision`,
-        totalRankedScore: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 then ${scoreSaberScoresTable.score} else 0 end), 0))::double precision`,
-        totalRankedScores: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 then 1 else 0 end), 0))::double precision`,
-        totalUnrankedScores: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} = 0 then 1 else 0 end), 0))::double precision`,
+        totalRankedScore: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 then ${scoreSaberScoresTable.score} else 0 end), 0))::double precision`,
+        totalRankedScores: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 then 1 else 0 end), 0))::double precision`,
+        totalUnrankedScores: sql<number>`(coalesce(sum(case when ${scorePpExpr} = 0 then 1 else 0 end), 0))::double precision`,
         totalScores: sql<number>`(coalesce(count(*), 0))::double precision`,
-        averageRankedAccuracy: sql<number>`coalesce(avg(case when ${scoreSaberScoresTable.pp} > 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
-        averageUnrankedAccuracy: sql<number>`coalesce(avg(case when ${scoreSaberScoresTable.pp} = 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
+        averageRankedAccuracy: sql<number>`coalesce(avg(case when ${scorePpExpr} > 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
+        averageUnrankedAccuracy: sql<number>`coalesce(avg(case when ${scorePpExpr} = 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
         averageAccuracy: sql<number>`coalesce(avg(${scoreSaberScoresTable.accuracy}), 0)`,
-        aPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 70 and ${scoreSaberScoresTable.accuracy} < 80 then 1 else 0 end), 0))::double precision`,
-        sPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 80 and ${scoreSaberScoresTable.accuracy} < 85 then 1 else 0 end), 0))::double precision`,
-        spPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 85 and ${scoreSaberScoresTable.accuracy} < 90 then 1 else 0 end), 0))::double precision`,
-        ssPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 90 and ${scoreSaberScoresTable.accuracy} < 95 then 1 else 0 end), 0))::double precision`,
-        sspPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 95 and ${scoreSaberScoresTable.accuracy} < 98 then 1 else 0 end), 0))::double precision`,
-        godPlays: sql<number>`(coalesce(sum(case when ${scoreSaberScoresTable.pp} > 0 and ${scoreSaberScoresTable.accuracy} >= 98 then 1 else 0 end), 0))::double precision`,
+        aPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 70 and ${scoreSaberScoresTable.accuracy} < 80 then 1 else 0 end), 0))::double precision`,
+        sPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 80 and ${scoreSaberScoresTable.accuracy} < 85 then 1 else 0 end), 0))::double precision`,
+        spPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 85 and ${scoreSaberScoresTable.accuracy} < 90 then 1 else 0 end), 0))::double precision`,
+        ssPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 90 and ${scoreSaberScoresTable.accuracy} < 95 then 1 else 0 end), 0))::double precision`,
+        sspPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 95 and ${scoreSaberScoresTable.accuracy} < 98 then 1 else 0 end), 0))::double precision`,
+        godPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 98 then 1 else 0 end), 0))::double precision`,
       })
       .from(scoreSaberScoresTable)
+      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
       .where(and(eq(scoreSaberScoresTable.playerId, playerId), gte(scoreSaberScoresTable.accuracy, 0)));
 
     if (!scoreStats) {
@@ -359,16 +539,20 @@ export class ScoreSaberScoresRepository {
     };
   }
 
-  public static async getAverageAccuracies(playerId: string): Promise<{
+  public static async getAverageAccuracies(
+    playerId: string,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<{
     averageAccuracy: number;
     unrankedAccuracy: number;
   }> {
     const [result] = await db
       .select({
         averageAccuracy: sql<number>`coalesce(avg(${scoreSaberScoresTable.accuracy}), 0)`,
-        unrankedAccuracy: sql<number>`coalesce(avg(case when ${scoreSaberScoresTable.pp} = 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
+        unrankedAccuracy: sql<number>`coalesce(avg(case when ${scorePpExpr} = 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
       })
       .from(scoreSaberScoresTable)
+      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
       .where(
         and(
           eq(scoreSaberScoresTable.playerId, playerId),
@@ -402,15 +586,17 @@ export class ScoreSaberScoresRepository {
     friendIds: string[],
     leaderboardId: number,
     limit: number,
-    offset: number
+    offset: number,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberScoreRow[]> {
     const conditions = and(
       inArray(scoreSaberScoresTable.playerId, friendIds),
       eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
     );
     return db
-      .select()
+      .select(resolvedScoreColumns())
       .from(scoreSaberScoresTable)
+      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
       .where(conditions)
       .orderBy(desc(scoreSaberScoresTable.score))
       .limit(limit)
@@ -425,7 +611,10 @@ export class ScoreSaberScoresRepository {
     return limit != null ? q.limit(limit) : q;
   }
 
-  public static async getChartRowsByPlayer(playerId: string): Promise<
+  public static async getChartRowsByPlayer(
+    playerId: string,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<
     {
       accuracy: number;
       pp: number;
@@ -439,34 +628,92 @@ export class ScoreSaberScoresRepository {
     return db
       .select({
         accuracy: scoreSaberScoresTable.accuracy,
-        pp: scoreSaberScoresTable.pp,
+        pp: scoreSaberScoreRealmsTable.pp,
         timestamp: scoreSaberScoresTable.timestamp,
         leaderboardId: scoreSaberLeaderboardsTable.id,
         difficulty: scoreSaberLeaderboardsTable.difficulty,
         songName: scoreSaberLeaderboardsTable.songName,
-        stars: scoreSaberLeaderboardsTable.stars,
+        stars: scoreSaberLeaderboardRealmsTable.stars,
       })
-      .from(scoreSaberScoresTable)
+      .from(scoreSaberScoreRealmsTable)
+      .innerJoin(scoreSaberScoresTable, eq(scoreSaberScoresTable.scoreId, scoreSaberScoreRealmsTable.scoreId))
       .innerJoin(
         scoreSaberLeaderboardsTable,
         eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
       )
-      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gt(scoreSaberScoresTable.pp, 0)))
+      .leftJoin(
+        scoreSaberLeaderboardRealmsTable,
+        leaderboardRealmJoinOn(scoreSaberLeaderboardsTable, scoreSaberLeaderboardRealmsTable, realmId)
+      )
+      .where(
+        and(
+          eq(scoreSaberScoreRealmsTable.realmId, realmId),
+          eq(scoreSaberScoreRealmsTable.playerId, playerId),
+          gt(scoreSaberScoreRealmsTable.pp, 0)
+        )
+      )
       .orderBy(desc(scoreSaberScoresTable.timestamp));
   }
 
-  public static async selectScoresJoinedLeaderboardsWhere(
-    conditions: SQL[]
-  ): Promise<{ scoreRow: ScoreSaberScoreRow; lbRow: typeof scoreSaberLeaderboardsTable.$inferSelect }[]> {
-    return db
+  /**
+   * Sets a realm's pp for scores that are already stored; scores missing from the scores table are
+   * skipped. Positive pp is upserted and anything else removes the realm row.
+   *
+   * @param realmId the realm the pp belongs to
+   * @param entries the scores and their pp in the realm
+   * @returns the number of scores that existed and were written
+   */
+  public static async setRealmPpForExistingScores(
+    realmId: number,
+    entries: { scoreId: number; pp: number }[]
+  ): Promise<number> {
+    if (entries.length === 0) {
+      return 0;
+    }
+    const existing = await db
       .select({
-        scoreRow: scoreSaberScoresTable,
-        lbRow: scoreSaberLeaderboardsTable,
+        scoreId: scoreSaberScoresTable.scoreId,
+        playerId: scoreSaberScoresTable.playerId,
+        leaderboardId: scoreSaberScoresTable.leaderboardId,
       })
       .from(scoreSaberScoresTable)
+      .where(
+        inArray(
+          scoreSaberScoresTable.scoreId,
+          entries.map(entry => entry.scoreId)
+        )
+      );
+    const ppByScoreId = new Map(entries.map(entry => [entry.scoreId, entry.pp]));
+    await writeRealmPp(
+      db,
+      realmId,
+      existing.map(row => ({ ...row, pp: ppByScoreId.get(row.scoreId) ?? 0 }))
+    );
+    return existing.length;
+  }
+
+  /**
+   * Selects scores joined to their leaderboards, both resolved for `realmId`. Conditions may
+   * reference {@link scorePpExpr}.
+   */
+  public static async selectScoresJoinedLeaderboardsWhere(
+    conditions: SQL[],
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<{ scoreRow: ScoreSaberScoreRow; lbRow: ScoreSaberLeaderboardRow }[]> {
+    return db
+      .select({
+        scoreRow: resolvedScoreColumns(),
+        lbRow: resolvedLeaderboardColumns(),
+      })
+      .from(scoreSaberScoresTable)
+      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
       .innerJoin(
         scoreSaberLeaderboardsTable,
         eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
+      )
+      .leftJoin(
+        scoreSaberLeaderboardRealmsTable,
+        leaderboardRealmJoinOn(scoreSaberLeaderboardsTable, scoreSaberLeaderboardRealmsTable, realmId)
       )
       .where(and(...conditions));
   }
@@ -478,6 +725,19 @@ export class ScoreSaberScoresRepository {
       .where(eq(scoreSaberScoresTable.playerId, playerId))
       .groupBy(scoreSaberScoresTable.leaderboardId);
     return rows.map(r => r.leaderboardId);
+  }
+
+  /**
+   * Counts the scores that have pp in a realm.
+   *
+   * @param realmId the realm to count ranked scores for
+   */
+  public static async countRealmScores(realmId: number = DEFAULT_REALM_ID): Promise<number> {
+    const [row] = await db
+      .select({ count: sql<number>`cast(count(*) as integer)` })
+      .from(scoreSaberScoreRealmsTable)
+      .where(and(eq(scoreSaberScoreRealmsTable.realmId, realmId), gt(scoreSaberScoreRealmsTable.pp, 0)));
+    return Number(row?.count ?? 0);
   }
 
   public static async countTotal(): Promise<number> {

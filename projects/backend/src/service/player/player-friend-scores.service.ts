@@ -1,5 +1,6 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { Pagination } from "@ssr/common/pagination";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { ScoreSaberScoresPageResponse } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
@@ -14,13 +15,15 @@ export class PlayerFriendScoresService {
    * @param friendIds the friend ids
    * @param leaderboardId the leaderboard id
    * @param page the page to fetch
+   * @param realmId the realm to resolve pp for
    */
   public static async getFriendLeaderboardScores(
     friendIds: string[],
     leaderboardId: number,
-    page: number
+    page: number,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberScoresPageResponse> {
-    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
+    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
     if (!leaderboard) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }
@@ -42,7 +45,8 @@ export class PlayerFriendScoresService {
         friendIds,
         leaderboardId,
         limit,
-        offset
+        offset,
+        realmId
       );
 
       if (!rawScores.length) {

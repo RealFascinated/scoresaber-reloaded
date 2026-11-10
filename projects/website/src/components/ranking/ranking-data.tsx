@@ -6,6 +6,7 @@ import { cn } from "@/common/utils";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import CountrySelector from "@/components/country-selector";
 import { PageTitle } from "@/components/page-title";
+import { useRealm } from "@/components/providers/realm-provider";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
@@ -28,6 +29,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 
 export default function RankingData() {
   const database = useDatabase();
+  const { realmId } = useRealm();
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
 
   const [currentPage, setCurrentPage] = useQueryState("page", parseAsInteger.withDefault(1));
@@ -54,6 +56,7 @@ export default function RankingData() {
   } = useQuery({
     queryKey: [
       "rankingData",
+      realmId,
       currentPage,
       currentCountry,
       isValidSearch ? debouncedSearch : undefined,
@@ -64,6 +67,7 @@ export default function RankingData() {
         country: currentCountry,
         search: isValidSearch ? debouncedSearch : undefined,
         includeInactives: includeInactives,
+        realmId,
       }),
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
@@ -117,6 +121,13 @@ export default function RankingData() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
+                    {rankingData.items.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-muted-foreground py-10 text-center">
+                          No players found
+                        </TableCell>
+                      </TableRow>
+                    )}
                     {rankingData.items.map(player => (
                       <TableRow
                         key={player.id}
@@ -127,19 +138,21 @@ export default function RankingData() {
                         )}
                       >
                         <TableCell className="py-2">
-                          <span className="font-mono text-sm font-semibold">#{player.rank}</span>
+                          <span className="text-sm font-semibold tabular-nums">#{player.rank}</span>
                         </TableCell>
                         <TableCell className="py-2">
                           <div className="flex items-center gap-2">
                             <CountryFlag code={player.country} size={14} />
-                            <span className="text-foreground font-mono text-sm">#{player.countryRank}</span>
+                            <span className="text-foreground text-sm tabular-nums">
+                              #{player.countryRank}
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell className="py-2">
                           <PlayerTableName player={player} inactive={player.inactive} />
                         </TableCell>
                         <TableCell className="py-2 text-right whitespace-nowrap">
-                          <span className="text-primary font-semibold">{formatPp(player.pp)}</span>
+                          <span className="text-pp font-semibold tabular-nums">{formatPp(player.pp)}pp</span>
                           {showRelativePp && mainPlayer && (
                             <PlayerPpDifference pp={player.pp} mainPp={mainPlayer.pp} />
                           )}

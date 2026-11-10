@@ -1,3 +1,4 @@
+import { useRealm } from "@/components/providers/realm-provider";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -31,6 +32,7 @@ export default function ScoreSaberScoreEditorButton({
   updateScore,
 }: ScoreEditorButtonProps) {
   const isMobile = useIsMobile();
+  const { getPp, realmId } = useRealm();
   const [open, setOpen] = useState(false);
 
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
@@ -40,8 +42,8 @@ export default function ScoreSaberScoreEditorButton({
   const [decimalValue, setDecimalValue] = useState(accuracy - Math.floor(accuracy)); // 0.0, 0.1, 0.2, etc.
 
   const { data: rankedPps } = useQuery({
-    queryKey: ["ranked-pps", score.playerId],
-    queryFn: () => ssrApi.getPlayerPps(score.playerId),
+    queryKey: ["ranked-pps", score.playerId, realmId],
+    queryFn: () => ssrApi.getPlayerPps(score.playerId, realmId),
     enabled: open,
   });
 
@@ -61,7 +63,7 @@ export default function ScoreSaberScoreEditorButton({
         if (score.scoreId == modifiedScore.scoreId) {
           newModifiedScores[i] = {
             ...modifiedScore,
-            pp: ScoreSaberCurve.getPp(leaderboard.stars, accuracy),
+            pp: getPp(leaderboard.stars, accuracy),
           };
         }
       }

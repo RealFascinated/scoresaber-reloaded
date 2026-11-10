@@ -22,6 +22,7 @@ import MetricsController from "./controller/metrics/metrics.controller";
 import PlayerRankingController from "./controller/player/player-ranking.controller";
 import PlayerController from "./controller/player/player.controller";
 import PlaylistController from "./controller/playlist/playlist.controller";
+import RealmController from "./controller/realm/realm.controller";
 import ScoresController from "./controller/scores/scores.controller";
 import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
@@ -322,6 +323,7 @@ export const app = new Elysia()
   .use(BeatLeaderController)
   .use(PlayerRankingController)
   .use(MetricsController)
+  .use(RealmController)
   .use(
     openapi({
       path: "/swagger",

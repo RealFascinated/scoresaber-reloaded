@@ -4,6 +4,7 @@ import { isBackendUnavailableError } from "@/common/api-error";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import Avatar from "@/components/avatar";
 import { PageTitle } from "@/components/page-title";
+import { useRealm } from "@/components/providers/realm-provider";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
@@ -13,6 +14,7 @@ import { parseAsInteger, useQueryState } from "nuqs";
 import ScoreSaberScoreDisplay from "../scoresaber-score";
 
 export function TopScoresData() {
+  const { realmId } = useRealm();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
 
   const {
@@ -23,8 +25,8 @@ export function TopScoresData() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["top-scores", page],
-    queryFn: () => ssrApi.fetchTopScores(page),
+    queryKey: ["top-scores", page, realmId],
+    queryFn: () => ssrApi.fetchTopScores(page, realmId),
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
     retry: false,

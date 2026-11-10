@@ -11,6 +11,7 @@ export default function PlaylistDownloadButton({ name, url }: { name: string; ur
         onClick={() => {
           downloadFile(url, `${name}.bplist`);
         }}
+        variant="outline"
         className="flex w-full items-center"
       >
         {name}

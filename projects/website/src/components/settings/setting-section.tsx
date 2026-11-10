@@ -293,8 +293,8 @@ export function SettingSection<TFormValues extends FieldValues>({
 }: SettingSectionProps<TFormValues>) {
   return (
     <section className="flex flex-col">
-      <h3 className="text-foreground flex items-center gap-2 pb-2 text-lg font-semibold tracking-tight">
-        <Icon className="text-muted-foreground size-5 shrink-0" aria-hidden />
+      <h3 className="text-foreground flex items-center gap-2 pb-2 text-sm font-semibold">
+        <Icon className="text-muted-foreground size-4 shrink-0" aria-hidden />
         {title}
       </h3>
       <div className="divide-border/80 border-border/80 divide-y border-t">

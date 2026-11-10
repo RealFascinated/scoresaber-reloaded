@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { desc, eq } from "drizzle-orm";
 import { scoreSaberScoresTable } from "../../../src/db/schema";
+import { scorePpExpr } from "../../../src/repositories/realm-columns";
 import {
   emptyScoreSaberPlayerScoreStatistics,
   ScoreSaberScoresRepository,
@@ -269,7 +270,7 @@ describe("ScoreSaberScoresRepository", () => {
       expect(await ScoreSaberScoresRepository.countByConditions(conditions)).toBe(1);
       const rows = await ScoreSaberScoresRepository.findRowsByConditions(
         conditions,
-        desc(scoreSaberScoresTable.pp),
+        desc(scorePpExpr),
         10,
         0
       );

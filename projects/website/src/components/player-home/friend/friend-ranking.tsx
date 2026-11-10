@@ -69,7 +69,7 @@ export function FriendRanking() {
               href={`/player/${player.id}`}
               className="bg-card ring-border hover:bg-muted/20 flex items-center gap-4 rounded-xl p-4 ring-1 transition-colors"
             >
-              <span className="text-muted-foreground w-8 shrink-0 text-right font-mono text-sm font-semibold">
+              <span className="text-muted-foreground w-8 shrink-0 text-right text-sm font-semibold tabular-nums">
                 #{player.rank}
               </span>
               <Avatar

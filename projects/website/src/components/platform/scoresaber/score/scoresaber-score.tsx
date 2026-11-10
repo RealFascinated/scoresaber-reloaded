@@ -9,11 +9,11 @@ import FallbackLink from "@/components/fallback-link";
 import ScoreSaberScoreButtons from "@/components/platform/scoresaber/score/buttons/score-buttons";
 import ScoreSaberScoreInfo from "@/components/platform/scoresaber/score/score-info";
 import ScoreSaberScoreStats from "@/components/platform/scoresaber/score/score-stats";
+import { useRealm } from "@/components/providers/realm-provider";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { SharedIcons } from "@/shared-icons";
-import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardPlayerInfo } from "@ssr/common/schemas/scoresaber/leaderboard/player-info";
@@ -40,6 +40,7 @@ export default function ScoreSaberScoreDisplay({
   };
 }) {
   const isMobile = useIsMobile("2xl");
+  const { getPp } = useRealm();
   const [baseScore, setBaseScore] = useState(score.score);
 
   const [detailsExpanded, setDetailsExpanded] = useState(false);
@@ -58,7 +59,7 @@ export default function ScoreSaberScoreDisplay({
   }
 
   const accuracy = (baseScore / leaderboard.maxScore) * 100;
-  const pp = baseScore === score.score ? score.pp : ScoreSaberCurve.getPp(leaderboard.stars, accuracy);
+  const pp = baseScore === score.score ? score.pp : getPp(leaderboard.stars, accuracy);
 
   const isTracked = score.beatLeaderScore != undefined;
 
@@ -68,7 +69,7 @@ export default function ScoreSaberScoreDisplay({
         <div
           className={cn(
             "grid w-full gap-2 lg:gap-0",
-            "grid-cols-[20px 1fr_1fr] lg:grid-cols-[0.5fr_4fr_1fr_350px]"
+            "grid-cols-[20px 1fr_1fr] lg:grid-cols-[120px_minmax(120px,1fr)_auto_minmax(240px,300px)]"
           )}
         >
           <ScoreSaberScoreInfo score={score} leaderboard={leaderboard} />

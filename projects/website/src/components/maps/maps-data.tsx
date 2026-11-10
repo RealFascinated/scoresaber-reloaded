@@ -15,6 +15,7 @@ import Card from "../card";
 
 type Category = {
   name: string;
+  description: string;
   icon: ElementType;
   id: string;
   showFilter: boolean;
@@ -25,6 +26,7 @@ type Category = {
 const categories: Category[] = [
   {
     name: "Leaderboards",
+    description: "Browse and filter ScoreSaber leaderboards",
     icon: SharedIcons.MapsLeaderboardsTabIcon,
     id: "leaderboards",
     showFilter: true,
@@ -33,6 +35,7 @@ const categories: Category[] = [
   },
   {
     name: "Ranking Queue",
+    description: "Maps currently up for rank or unrank on ScoreSaber",
     icon: SharedIcons.MapsRankingQueueTabIcon,
     id: "ranking-queue",
     showFilter: false,
@@ -53,10 +56,7 @@ export function MapsData({ type }: MapsDataProps) {
   return (
     <MapFilterProvider>
       <div className="flex w-full flex-col gap-4">
-        <PageTitle
-          title={selectedCategory.name}
-          description="Browse ScoreSaber leaderboards and ranking queue requests"
-        />
+        <PageTitle title={selectedCategory.name} description={selectedCategory.description} />
         <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
           <div className="flex min-w-0 flex-1 flex-col gap-4">{selectedCategory.render()}</div>
           <div className="flex w-full shrink-0 flex-col gap-4 xl:w-96">

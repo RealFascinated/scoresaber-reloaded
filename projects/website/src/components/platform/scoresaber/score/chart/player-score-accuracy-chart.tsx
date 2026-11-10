@@ -5,7 +5,7 @@ import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import Card from "@/components/card";
-import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
+import { useRealm } from "@/components/providers/realm-provider";
 import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { formatTime } from "@ssr/common/utils/time-utils";
@@ -23,6 +23,7 @@ type Props = {
 };
 
 export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Props) {
+  const { getPp } = useRealm();
   const currentGraph = scoreStats.current.scoreGraphTracker.graph;
   const previousGraph = scoreStats.previous?.scoreGraphTracker.graph;
 
@@ -42,7 +43,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
     }
 
     if (leaderboard.ranked) {
-      histories["pp"].push(ScoreSaberCurve.getPp(leaderboard.stars, acc));
+      histories["pp"].push(getPp(leaderboard.stars, acc));
     }
   }
 

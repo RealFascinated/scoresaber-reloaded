@@ -26,16 +26,20 @@ function getScoreId(score: ScoreSaberScore) {
 
 function LeaderboardDifficultySelect({
   difficulties,
-  currentId,
+  current,
 }: {
   difficulties: ScoreSaberLeaderboardDifficulty[];
-  currentId: number;
+  current: ScoreSaberLeaderboardDifficulty;
 }) {
   const router = useRouter();
+  const currentId = current.id;
 
-  // Group difficulties by characteristic
+  // Group difficulties by characteristic, making sure the current one is always present
+  const allDifficulties = difficulties.some(d => d.id === currentId)
+    ? difficulties
+    : [current, ...difficulties];
   const groups = new Map<string, ScoreSaberLeaderboardDifficulty[]>();
-  for (const d of difficulties) {
+  for (const d of allDifficulties) {
     const group = groups.get(d.characteristic) ?? [];
     group.push(d);
     groups.set(d.characteristic, group);
@@ -54,8 +58,6 @@ function LeaderboardDifficultySelect({
   const sortedGroups = [...groups.entries()].sort(
     (a, b) => characteristicOrder.indexOf(a[0]) - characteristicOrder.indexOf(b[0])
   );
-
-  const current = difficulties.find(d => d.id === currentId)!;
 
   return (
     <Select value={String(currentId)} onValueChange={value => router.push(`/leaderboard/${value}`)}>
@@ -188,7 +190,7 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
       <div className="flex w-full flex-wrap items-center gap-2 sm:flex-nowrap">
         <LeaderboardDifficultySelect
           difficulties={leaderboard.difficulties}
-          currentId={leaderboard.difficulty.id}
+          current={leaderboard.difficulty}
         />
         <LeaderboardModeSelect mode={mode} onModeChange={setMode} />
         <div className="min-w-0 flex-1 sm:max-w-56">

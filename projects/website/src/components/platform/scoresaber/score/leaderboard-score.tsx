@@ -53,11 +53,9 @@ export default function ScoreSaberLeaderboardScore({
         </TableCell>
 
         {/* Player */}
-        <TableCell
-          className={cn(TABLE_CELL_WIDTH, "flex w-full min-w-[300px] items-center gap-2 whitespace-nowrap")}
-        >
+        <TableCell className={cn(TABLE_CELL_WIDTH, "w-full min-w-[300px] whitespace-nowrap")}>
           {scorePlayer ? (
-            <>
+            <div className="flex items-center gap-2">
               <ScoreSaberScoreHMD score={score}>
                 <span className="flex items-center">
                   <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd as HMD)} />
@@ -69,9 +67,9 @@ export default function ScoreSaberLeaderboardScore({
                 useLink
                 className="w-full"
               />
-            </>
+            </div>
           ) : (
-            <p className="text-gray-500">Unknown Player</p>
+            <p className="text-muted-foreground">Unknown Player</p>
           )}
         </TableCell>
 
@@ -82,7 +80,7 @@ export default function ScoreSaberLeaderboardScore({
 
         {/* Score Accuracy */}
         <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
-          {formatScoreAccuracy(score.accuracy)}
+          <span className="tabular-nums">{formatScoreAccuracy(score.accuracy)}</span>
         </TableCell>
 
         {/* Score Misses */}
@@ -137,8 +135,8 @@ export default function ScoreSaberLeaderboardScore({
           )}
         </TableCell>
 
-        {score.beatLeaderScore && (
-          <TableCell className={cn(TABLE_CELL_WIDTH_SMALL, "w-[45px] pr-3")}>
+        <TableCell className={cn(TABLE_CELL_WIDTH_SMALL, "w-[45px] pr-3")}>
+          {score.beatLeaderScore && (
             <SimpleTooltip display="View score details">
               <button className="size-6 cursor-pointer" onClick={() => setDetailsExpanded(!detailsExpanded)}>
                 {isDetailsLoading ? (
@@ -153,8 +151,8 @@ export default function ScoreSaberLeaderboardScore({
                 )}
               </button>
             </SimpleTooltip>
-          </TableCell>
-        )}
+          )}
+        </TableCell>
       </TableRow>
 
       {/* Dropdown row - appears directly below the clicked row */}

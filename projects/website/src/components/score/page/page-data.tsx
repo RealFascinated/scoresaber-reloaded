@@ -5,7 +5,9 @@ import BackendUnavailable from "@/components/api/backend-unavailable";
 import Card from "@/components/card";
 import { FancyLoader } from "@/components/fancy-loader";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
+import { useRealm } from "@/components/providers/realm-provider";
 import { SharedIcons } from "@/shared-icons";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
@@ -41,7 +43,9 @@ type ScorePageDataProps = {
 };
 
 export default function ScorePageData({ scoreId, initialScore }: ScorePageDataProps) {
-  const hasServerScore = initialScore !== undefined;
+  const { realmId } = useRealm();
+  // The server renders the default realm only
+  const hasServerScore = initialScore !== undefined && realmId === DEFAULT_REALM_ID;
 
   const {
     data: score,
@@ -50,8 +54,8 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
     error,
     refetch,
   } = useQuery({
-    queryKey: ["score", scoreId],
-    queryFn: () => ssrApi.getScore(scoreId),
+    queryKey: ["score", scoreId, realmId],
+    queryFn: () => ssrApi.getScore(scoreId, realmId),
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
     retry: false,

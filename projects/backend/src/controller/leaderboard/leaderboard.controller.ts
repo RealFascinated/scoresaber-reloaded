@@ -1,5 +1,6 @@
 import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
+import { RealmQuerySchema } from "@ssr/common/schemas/realm/realm-query";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { LeaderboardsPageResponseSchema } from "@ssr/common/schemas/response/leaderboard/leaderboards-page";
 import { ScoreSaberLeaderboardQueryFiltersSchema } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
@@ -12,17 +13,22 @@ export default function leaderboardController(app: Elysia) {
     app
       .get(
         "/search",
-        async ({ query: { page, ...filters } }) => {
-          return await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(page ?? 1, {
-            ...filters,
-            category: filters.category ?? "trending",
-            sort: filters.sort ?? "desc",
-          });
+        async ({ query: { page, realmId, ...filters } }) => {
+          return await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(
+            page ?? 1,
+            {
+              ...filters,
+              category: filters.category ?? "trending",
+              sort: filters.sort ?? "desc",
+            },
+            realmId
+          );
         },
         {
           tags: ["Leaderboard"],
           query: t.Composite([
             ScoreSaberLeaderboardQueryFiltersSchema,
+            RealmQuerySchema,
             t.Object({
               page: t.Optional(t.Integer({ minimum: 1 })),
             }),
@@ -47,15 +53,16 @@ export default function leaderboardController(app: Elysia) {
       )
       .get(
         "/by-id/:leaderboardId/star-history",
-        async ({ params: { leaderboardId } }) => {
-          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
-          return await ScoreSaberLeaderboardsService.getStarChangeHistory(leaderboard);
+        async ({ params: { leaderboardId }, query: { realmId } }) => {
+          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
+          return await ScoreSaberLeaderboardsService.getStarChangeHistory(leaderboard, realmId);
         },
         {
           tags: ["Leaderboard"],
           params: t.Object({
             leaderboardId: t.Integer({ minimum: 1 }),
           }),
+          query: RealmQuerySchema,
           detail: {
             description: "Fetch leaderboard star rating change history",
           },
@@ -63,8 +70,8 @@ export default function leaderboardController(app: Elysia) {
       )
       .get(
         "/by-id/:leaderboardId",
-        async ({ params: { leaderboardId } }) => {
-          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
+        async ({ params: { leaderboardId }, query: { realmId } }) => {
+          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
           const beatsaver = await BeatSaverService.getMap(
             leaderboard.songHash,
             leaderboard.difficulty.difficulty,
@@ -77,6 +84,7 @@ export default function leaderboardController(app: Elysia) {
           params: t.Object({
             leaderboardId: t.Integer({ minimum: 1 }),
           }),
+          query: RealmQuerySchema,
           detail: {
             description: "Fetch leaderboard details",
           },
@@ -84,9 +92,9 @@ export default function leaderboardController(app: Elysia) {
       )
       .get(
         "/by-hash/:hash/:difficulty/:characteristic",
-        async ({ params: { hash, difficulty, characteristic } }) => {
+        async ({ params: { hash, difficulty, characteristic }, query: { realmId } }) => {
           const [leaderboard, beatsaver] = await Promise.all([
-            ScoreSaberLeaderboardsService.getLeaderboardByHash(hash, difficulty, characteristic),
+            ScoreSaberLeaderboardsService.getLeaderboardByHash(hash, difficulty, characteristic, realmId),
             BeatSaverService.getMap(hash, difficulty, characteristic),
           ]);
           return { leaderboard, beatsaver } as LeaderboardResponse;
@@ -98,6 +106,7 @@ export default function leaderboardController(app: Elysia) {
             difficulty: MapDifficultySchema,
             characteristic: MapCharacteristicSchema,
           }),
+          query: RealmQuerySchema,
           detail: {
             description: "Fetch leaderboard details",
           },

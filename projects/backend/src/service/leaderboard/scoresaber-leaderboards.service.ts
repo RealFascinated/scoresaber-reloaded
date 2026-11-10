@@ -1,6 +1,7 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination } from "@ssr/common/pagination";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
@@ -23,9 +24,10 @@ import { count } from "drizzle-orm";
 import { normalizeSongHash, rankingQueueLeaderboardsCacheKey } from "../../common/cache-keys";
 import { db } from "../../db";
 import { leaderboardRowToType } from "../../db/converter/scoresaber-leaderboard";
-import { scoreSaberLeaderboardsTable } from "../../db/schema";
+import { scoreSaberLeaderboardRealmsTable, scoreSaberLeaderboardsTable } from "../../db/schema";
 import { LeaderboardScoreSeedQueue } from "../../queue/impl/leaderboard-score-seed-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
+import { leaderboardRealmJoinOn } from "../../repositories/realm-columns";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import {
   LEADERBOARD_SEARCH_PAGE_SIZE,
@@ -42,10 +44,14 @@ export class ScoreSaberLeaderboardsService {
    * Gets a leaderboard by its ID.
    *
    * @param id the ID of the leaderboard to get
+   * @param realmId the realm to resolve ranking state (ranked, stars, ...) for
    * @returns the leaderboard
    */
-  public static async getLeaderboard(id: number): Promise<ScoreSaberLeaderboard> {
-    const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(id);
+  public static async getLeaderboard(
+    id: number,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<ScoreSaberLeaderboard> {
+    const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(id, true, realmId);
     if (leaderboard !== undefined) {
       return leaderboard;
     }
@@ -58,18 +64,22 @@ export class ScoreSaberLeaderboardsService {
    * @param hash the hash of the leaderboard to get
    * @param difficulty the difficulty of the leaderboard to get
    * @param characteristic the characteristic of the leaderboard to get
+   * @param realmId the realm to resolve ranking state for
    * @returns the leaderboard
    */
   public static async getLeaderboardByHash(
     hash: string,
     difficulty: MapDifficulty,
-    characteristic: MapCharacteristic
+    characteristic: MapCharacteristic,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberLeaderboard> {
     const hashNorm = normalizeSongHash(hash);
     const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardByHash(
       hashNorm,
       difficulty,
-      characteristic
+      characteristic,
+      true,
+      realmId
     );
 
     if (leaderboard !== undefined) {
@@ -106,17 +116,23 @@ export class ScoreSaberLeaderboardsService {
    *
    * @param page the page to get
    * @param filters the filters to apply
+   * @param realmId the realm whose ranking state is filtered, sorted and returned
    * @returns the paginated list of leaderboards
    */
   public static async getLeaderboardsPaginated(
     page: number,
-    filters?: ScoreSaberLeaderboardQueryFilters
+    filters?: ScoreSaberLeaderboardQueryFilters,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<LeaderboardsPageResponse> {
     const { whereClause, orderParts } = buildLeaderboardQuery(filters);
 
     const [countRow] = await db
       .select({ total: count() })
       .from(scoreSaberLeaderboardsTable)
+      .leftJoin(
+        scoreSaberLeaderboardRealmsTable,
+        leaderboardRealmJoinOn(scoreSaberLeaderboardsTable, scoreSaberLeaderboardRealmsTable, realmId)
+      )
       .where(whereClause);
     const total = Number(countRow?.total ?? 0);
 
@@ -125,9 +141,7 @@ export class ScoreSaberLeaderboardsService {
       .setTotalItems(total);
 
     return await pagination.getPage(page, async fetchItems => {
-      const rows = await db
-        .select()
-        .from(scoreSaberLeaderboardsTable)
+      const rows = await ScoreSaberLeaderboardsRepository.selectResolved(realmId)
         .where(whereClause)
         .orderBy(...orderParts)
         .limit(fetchItems.end - fetchItems.start)
@@ -182,13 +196,16 @@ export class ScoreSaberLeaderboardsService {
    * Fetches the star change history for a given leaderboard.
    *
    * @param leaderboard the leaderboard to fetch the star change history for
+   * @param realmId the realm whose star changes to fetch
    * @returns the star change history
    */
   public static async getStarChangeHistory(
-    leaderboard: ScoreSaberLeaderboard
+    leaderboard: ScoreSaberLeaderboard,
+    realmId: number = DEFAULT_REALM_ID
   ): Promise<LeaderboardStarChange[]> {
     const rows = await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
-      leaderboard.id
+      leaderboard.id,
+      realmId
     );
 
     return rows.map(starChange => ({

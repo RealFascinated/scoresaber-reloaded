@@ -6,6 +6,7 @@ import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import { useSearch } from "@/components/providers/search-provider";
+import RealmSelector from "@/components/realm-selector";
 import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -15,6 +16,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -86,20 +88,52 @@ const socialLinks: SocialLinkType[] = [
   },
 ];
 
-const navItems = [
-  { id: "ranking", name: "Ranking", icon: SharedIcons.RankingNavIcon, href: "/ranking" },
-  { id: "medals", name: "Medals", icon: SharedIcons.MedalsNavIcon, href: "/medals" },
-  { id: "maps", name: "Leaderboards", icon: SharedIcons.MapsLeaderboardsTabIcon, href: "/maps/leaderboards" },
+type NavItem = {
+  id: string;
+  name: string;
+  icon: React.ComponentType<{ className?: string }>;
+  href: string;
+};
+
+const navGroups: { label: string; items: NavItem[] }[] = [
   {
-    id: "ranking-queue",
-    name: "Ranking Queue",
-    icon: SharedIcons.MapsRankingQueueTabIcon,
-    href: "/maps/ranking-queue",
+    label: "Players",
+    items: [
+      { id: "ranking", name: "Ranking", icon: SharedIcons.RankingNavIcon, href: "/ranking" },
+      { id: "medals", name: "Medals", icon: SharedIcons.MedalsNavIcon, href: "/medals" },
+    ],
   },
-  { id: "overlay", name: "Overlay", icon: SharedIcons.OverlayNavIcon, href: "/overlay/builder" },
-  { id: "top-scores", name: "Top Scores", icon: SharedIcons.TopScoresNavIcon, href: "/scores/top" },
-  { id: "score-feed", name: "Live Scores", icon: SharedIcons.GlobalScoresModeIcon, href: "/scores/live" },
-  { id: "settings", name: "Settings", icon: SharedIcons.SettingsNavIcon, href: "/settings" },
+  {
+    label: "Maps",
+    items: [
+      {
+        id: "maps",
+        name: "Leaderboards",
+        icon: SharedIcons.MapsLeaderboardsTabIcon,
+        href: "/maps/leaderboards",
+      },
+      {
+        id: "ranking-queue",
+        name: "Ranking Queue",
+        icon: SharedIcons.MapsRankingQueueTabIcon,
+        href: "/maps/ranking-queue",
+      },
+    ],
+  },
+  {
+    label: "Scores",
+    items: [
+      { id: "top-scores", name: "Top Scores", icon: SharedIcons.TopScoresNavIcon, href: "/scores/top" },
+      { id: "score-feed", name: "Live Scores", icon: SharedIcons.GlobalScoresModeIcon, href: "/scores/live" },
+    ],
+  },
+  {
+    label: "Tools",
+    items: [
+      { id: "overlay", name: "Overlay", icon: SharedIcons.OverlayNavIcon, href: "/overlay/builder" },
+      { id: "settings", name: "Settings", icon: SharedIcons.SettingsNavIcon, href: "/settings" },
+    ],
+  },
 ];
 
 function FriendsPopover() {
@@ -266,7 +300,7 @@ export function AppSidebar() {
     <Sidebar collapsible="offcanvas">
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem>
+          <SidebarMenuItem className="flex items-center gap-1">
             <SidebarMenuButton size="lg" asChild>
               <SimpleLink href="/" draggable={false}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
@@ -284,6 +318,7 @@ export function AppSidebar() {
                 </div>
               </SimpleLink>
             </SidebarMenuButton>
+            <RealmSelector />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -312,26 +347,27 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <hr className="border-sidebar-border mx-3" />
-
         {/* Navigation */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map(item => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarNavLink href={item.href} icon={item.icon}>
-                    {item.name}
-                  </SidebarNavLink>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {navGroups.map(group => (
+          <SidebarGroup key={group.label} className="py-1">
+            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map(item => (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarNavLink href={item.href} icon={item.icon}>
+                      {item.name}
+                    </SidebarNavLink>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
-      <div className="px-2 pb-2">
-        <SidebarMenu>
+      <div className="border-sidebar-border border-t px-2 py-2">
+        <SidebarMenu className="gap-0">
           {resourceLinks.map(link => (
             <SidebarMenuItem key={link.name}>
               <SidebarExternalLink href={link.href}>{link.name}</SidebarExternalLink>
@@ -389,7 +425,7 @@ function SidebarNavLink({
 function SidebarExternalLink({ href, children }: { href: string; children: React.ReactNode }) {
   const external = !href.startsWith("/");
   return (
-    <SidebarMenuButton asChild>
+    <SidebarMenuButton asChild size="sm" className="text-muted-foreground hover:text-foreground">
       <SimpleLink href={href} target={external ? "_blank" : undefined} draggable={false}>
         <span>{children}</span>
         {external && <SharedIcons.ExternalNavigationIcon className="ml-auto h-3.5 w-3.5 shrink-0" />}

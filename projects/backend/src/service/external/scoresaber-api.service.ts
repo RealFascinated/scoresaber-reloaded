@@ -9,10 +9,13 @@ import { ScoreSaberLeaderboardToken } from "@ssr/common/schemas/scoresaber/token
 import { ScoreSaberLeaderboardScoresPageToken } from "@ssr/common/schemas/scoresaber/tokens/v1/leaderboard-scores-page";
 import { ScoreSaberPlayerScoresPageToken } from "@ssr/common/schemas/scoresaber/tokens/v1/player-scores-page";
 import { RankingRequestToken } from "@ssr/common/schemas/scoresaber/tokens/v1/ranking-request-token";
+import { ScoreSaberV2LeaderboardScoresPageToken } from "@ssr/common/schemas/scoresaber/tokens/v2/leaderboard/leaderboard-scores-page";
 import { ScoreSaberV2LeaderboardStatusToken } from "@ssr/common/schemas/scoresaber/tokens/v2/leaderboard/leaderboard-status";
 import { ScoreSaberV2LeaderboardsPageToken } from "@ssr/common/schemas/scoresaber/tokens/v2/leaderboard/leaderboards-page";
 import { ScoreSaberV2PlayerToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { ScoreSaberV2PlayersPageToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/players-page";
+import { ScoreSaberV2RealmToken } from "@ssr/common/schemas/scoresaber/tokens/v2/realm/realm";
+import { ScoreSaberV2RealmPpCurveToken } from "@ssr/common/schemas/scoresaber/tokens/v2/realm/realm-pp-curve";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromV2PageToken } from "@ssr/common/token-creators";
 import { CoalescingLoader } from "@ssr/common/utils/coalescing-loader";
@@ -49,6 +52,13 @@ const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
  * v2 endpoints
  */
 const LOOKUP_LEADERBOARDS_V2_ENDPOINT = `${API_BASE}/v2/leaderboards`;
+
+/**
+ * Realms
+ */
+const LOOKUP_LEADERBOARD_SCORES_V2_ENDPOINT = `${API_BASE}/v2/leaderboards/:id/scores`;
+const LOOKUP_REALMS_V2_ENDPOINT = `${API_BASE}/v2/realms`;
+const LOOKUP_REALM_PP_CURVE_V2_ENDPOINT = `${API_BASE}/v2/realms/:id/pp-curve`;
 
 type SerializableValue =
   | string
@@ -282,13 +292,18 @@ export class ScoreSaberApiService {
    * Looks up a player by their ID.
    *
    * @param playerId the ID of the player to look up
+   * @param realmId the realm to resolve the player's stats for (the default realm when omitted)
    * @returns the player that matches the ID, or undefined
    */
-  public static async lookupPlayer(playerId: string): Promise<ScoreSaberV2PlayerToken | undefined> {
+  public static async lookupPlayer(
+    playerId: string,
+    realmId?: number
+  ): Promise<ScoreSaberV2PlayerToken | undefined> {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up player "${playerId}"...`);
     const token = await ScoreSaberApiService.fetch<ScoreSaberV2PlayerToken>(
-      fillEndpoint(LOOKUP_PLAYER_V2_ENDPOINT, { id: playerId })
+      fillEndpoint(LOOKUP_PLAYER_V2_ENDPOINT, { id: playerId }),
+      realmId != null ? { searchParams: { realmId: realmId.toString() } } : undefined
     );
     if (token === undefined) {
       return undefined;
@@ -310,6 +325,7 @@ export class ScoreSaberApiService {
       search?: string;
       country?: string;
       includeInactives?: boolean;
+      realmId?: number;
     }
   ): Promise<ScoreSaberV2PlayersPageToken | undefined> {
     const before = performance.now();
@@ -322,6 +338,7 @@ export class ScoreSaberApiService {
           ...(options?.search ? { search: options.search } : {}),
           ...(options?.country ? { countries: options.country } : {}),
           ...(options?.includeInactives ? { includeInactive: options.includeInactives.toString() } : {}),
+          ...(options?.realmId != null ? { realmId: options.realmId.toString() } : {}),
         },
       }
     );
@@ -527,6 +544,83 @@ export class ScoreSaberApiService {
   }
 
   /**
+   * Looks up a page of a leaderboard's scores as seen by a realm (v2), which carries the realm's own pp.
+   *
+   * @param leaderboardId the ID of the leaderboard to look up
+   * @param page the page to get scores for
+   * @param realmId the realm to resolve pp for
+   * @returns the scores of the leaderboard in the realm, or undefined
+   */
+  public static async lookupLeaderboardRealmScores(
+    leaderboardId: number,
+    page: number,
+    realmId: number
+  ): Promise<ScoreSaberV2LeaderboardScoresPageToken | undefined> {
+    const before = performance.now();
+    ScoreSaberApiService.log(
+      `Looking up realm "${realmId}" scores for leaderboard "${leaderboardId}", page "${page}"...`
+    );
+    const response = await ScoreSaberApiService.fetch<ScoreSaberV2LeaderboardScoresPageToken>(
+      LOOKUP_LEADERBOARD_SCORES_V2_ENDPOINT.replace(":id", leaderboardId.toString()),
+      {
+        searchParams: {
+          page: page.toString(),
+          limit: "100",
+          realmId: realmId.toString(),
+        },
+      }
+    );
+    if (response === undefined) {
+      return undefined;
+    }
+    ScoreSaberApiService.log(
+      `Found ${response.data.length} realm "${realmId}" scores for leaderboard "${leaderboardId}" in ${formatDuration(performance.now() - before)}`
+    );
+    return response;
+  }
+
+  /**
+   * Looks up all of the realms.
+   *
+   * @returns the realms, or undefined
+   */
+  public static async lookupRealms(): Promise<ScoreSaberV2RealmToken[] | undefined> {
+    const before = performance.now();
+    ScoreSaberApiService.log(`Looking up realms...`);
+    const response = await ScoreSaberApiService.fetch<ScoreSaberV2RealmToken[]>(LOOKUP_REALMS_V2_ENDPOINT);
+    if (response === undefined) {
+      return undefined;
+    }
+    ScoreSaberApiService.log(
+      `Found ${response.length} realms in ${formatDuration(performance.now() - before)}`
+    );
+    return response;
+  }
+
+  /**
+   * Looks up the pp curve of a realm.
+   *
+   * @param realmId the ID of the realm
+   * @returns the pp curve of the realm, or undefined
+   */
+  public static async lookupRealmPpCurve(
+    realmId: number
+  ): Promise<ScoreSaberV2RealmPpCurveToken | undefined> {
+    const before = performance.now();
+    ScoreSaberApiService.log(`Looking up pp curve for realm "${realmId}"...`);
+    const response = await ScoreSaberApiService.fetch<ScoreSaberV2RealmPpCurveToken>(
+      LOOKUP_REALM_PP_CURVE_V2_ENDPOINT.replace(":id", realmId.toString())
+    );
+    if (response === undefined) {
+      return undefined;
+    }
+    ScoreSaberApiService.log(
+      `Found pp curve for realm "${realmId}" in ${formatDuration(performance.now() - before)}`
+    );
+    return response;
+  }
+
+  /**
    * Gets the ranking requests.
    *
    * @returns the ranking requests
@@ -579,7 +673,8 @@ export class ScoreSaberApiService {
    */
   public static async getAllLeaderboards(
     status: "ranked" | "qualified",
-    logProgress: boolean = false
+    logProgress: boolean = false,
+    realmId?: number
   ): Promise<{
     leaderboards: ScoreSaberLeaderboard[];
     leaderboardDifficulties: Map<string, ScoreSaberLeaderboardDifficulty[]>;
@@ -594,6 +689,7 @@ export class ScoreSaberApiService {
       const response = await ScoreSaberApiService.lookupLeaderboards(page, {
         status: status === "ranked" ? "RANKED" : "QUALIFIED",
         limit: 100,
+        realmId,
       });
       if (!response) {
         hasMorePages = false;
@@ -620,7 +716,7 @@ export class ScoreSaberApiService {
       }
 
       page++;
-      hasMorePages = page < totalPages;
+      hasMorePages = page <= totalPages;
     }
 
     return { leaderboards, leaderboardDifficulties };

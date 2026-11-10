@@ -1,4 +1,6 @@
+import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { BeatLeaderScore } from "@ssr/common/schemas/beatleader/score/score";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
@@ -19,6 +21,7 @@ import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderb
 import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
+import { RealmService } from "../realm/realm.service";
 
 type InsertScoreDataOptions = {
   insertBeatLeaderScore?: boolean;
@@ -100,6 +103,8 @@ export class ScoreCoreService {
       }
     }
 
+    await ScoreCoreService.trackRealmPp(score);
+
     if (newScore) {
       await PlayerCoreService.updatePlayer(playerId, { hmd: score.hmd });
     }
@@ -124,6 +129,37 @@ export class ScoreCoreService {
       );
     }
     return { score: score, hasPreviousScore, tracked: true };
+  }
+
+  /**
+   * Stores the score's pp in every non-default realm where its leaderboard is ranked. ScoreSaber's
+   * websocket and v1 APIs only carry the default realm's pp, so the other realms are computed from
+   * the realm's stars and pp curve (and later corrected by the realm score sync).
+   *
+   * @param score the score that was just stored
+   */
+  private static async trackRealmPp(score: ScoreSaberScore): Promise<void> {
+    try {
+      const realmIds = (await RealmService.getRealmIds()).filter(id => id !== DEFAULT_REALM_ID);
+      await Promise.all(
+        realmIds.map(async realmId => {
+          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(
+            score.leaderboardId,
+            realmId
+          );
+          if (!leaderboard.ranked) {
+            return;
+          }
+          const curve = await RealmService.getCalculationCurve(realmId);
+          const pp = ScoreSaberCurve.getPp(leaderboard.stars, score.accuracy, curve);
+          await ScoreSaberScoresRepository.setRealmPpForExistingScores(realmId, [
+            { scoreId: score.scoreId, pp },
+          ]);
+        })
+      );
+    } catch (error) {
+      ScoreCoreService.logger.warn(`Failed to track realm pp for score "${score.scoreId}":`, error);
+    }
   }
 
   /**
