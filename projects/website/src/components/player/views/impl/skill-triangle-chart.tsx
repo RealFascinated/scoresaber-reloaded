@@ -274,7 +274,7 @@ function TimelineSlider({
                 className={`cursor-pointer touch-manipulation rounded-md px-3 py-2.5 text-left text-sm transition-colors md:px-2 md:py-0.5 md:text-xs ${
                   isSelected
                     ? "bg-primary/20 text-primary font-semibold"
-                    : "text-muted-foreground active:bg-muted/70 hover:text-foreground hover:bg-muted/50"
+                    : "text-muted-foreground active:bg-muted/70 hover:text-foreground hover:bg-hover"
                 }`}
               >
                 {idx === timeline.length - 1 ? "Today" : entry.label}

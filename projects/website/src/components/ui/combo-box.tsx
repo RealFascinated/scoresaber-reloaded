@@ -115,8 +115,8 @@ const Combobox = <T,>({
           <PopoverTrigger asChild>
             <Button
               className={cn(
-                "border-border/70 bg-muted/40 hover:bg-muted/55 h-10 w-full min-w-0 justify-between gap-2 rounded-lg px-3 font-normal shadow-none hover:shadow-xs",
-                "data-[state=open]:border-primary/40 data-[state=open]:bg-muted/50"
+                "border-border bg-muted h-10 w-full min-w-0 justify-between gap-2 px-3 font-normal shadow-none hover:shadow-xs",
+                "data-[state=open]:border-primary/40"
               )}
               variant="outline"
               size="lg"
@@ -178,7 +178,7 @@ const Combobox = <T,>({
           type="button"
           variant="outline"
           size="icon"
-          className="border-border/70 bg-muted/40 hover:bg-muted/55 size-10 shrink-0 shadow-none"
+          className="border-border bg-muted size-10 shrink-0 shadow-none"
           aria-label="Clear selection"
           onClick={() => handleValueChange(undefined)}
         >

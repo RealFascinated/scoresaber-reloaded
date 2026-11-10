@@ -14,7 +14,7 @@ import ScoreSaberPlayerScoresLive from "../platform/scoresaber/scoresaber-player
 import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-scores-medals";
 import ScoreSaberPlayerScoresSSR from "../platform/scoresaber/scoresaber-player-scores-ssr";
 import { ScoresToolbarLeadingProvider } from "../score/scores-toolbar";
-import { Tab, TabGroup } from "../ui/control-panel";
+import { UnderlineTab, UnderlineTabs } from "../ui/underline-tabs";
 import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
 
@@ -81,18 +81,18 @@ export default function PlayerData({ player: playerProp }: PlayerDataProps) {
 
   const platformSelector =
     availablePlatforms.length > 1 ? (
-      <TabGroup className="mr-1">
+      <UnderlineTabs>
         {availablePlatforms.map(platform => (
-          <Tab
+          <UnderlineTab
             key={platform.getDisplayName()}
             isActive={selectedPlatform === platform.getType()}
             onClick={() => setSelectedPlatform(platform.getType())}
           >
             {platform.getLogo()}
-            <span className="hidden md:block">{platform.getDisplayName()}</span>
-          </Tab>
+            <span className="hidden sm:block">{platform.getDisplayName()}</span>
+          </UnderlineTab>
         ))}
-      </TabGroup>
+      </UnderlineTabs>
     ) : undefined;
 
   const showRankings = !player.inactive && !player.banned;

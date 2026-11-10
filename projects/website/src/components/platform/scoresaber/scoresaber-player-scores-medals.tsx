@@ -1,10 +1,10 @@
 "use client";
 
 import HmdFilter from "@/components/platform/shared/hmd-filter";
+import ScoreSortControl from "@/components/platform/shared/score-sort-control";
 import ScoresListPanel from "@/components/platform/shared/scores-list-panel";
 import SearchInput from "@/components/platform/shared/search-input";
 import { usePlayerScoresQuery, type SortOption } from "@/components/platform/shared/use-player-scores-query";
-import { Spinner } from "@/components/spinner";
 import { SharedIcons } from "@/shared-icons";
 import { HMD } from "@ssr/common/hmds";
 import { Pagination } from "@ssr/common/pagination";
@@ -16,7 +16,6 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { parseAsString, useQueryState } from "nuqs";
 import ScoresCard from "../../score/scores-card";
 import { ScoresToolbar } from "../../score/scores-toolbar";
-import { ButtonGroup, ControlButton } from "../../ui/control-panel";
 import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 
 const DEFAULT_SORT: ScoreSaberMedalScoreSortField = "date";
@@ -108,45 +107,32 @@ export default function ScoreSaberPlayerMedalScores({ player }: { player: ScoreS
   return (
     <ScoresCard>
       <div className="flex w-full flex-col gap-3">
-        <ScoresToolbar>
-          <ButtonGroup>
-            {SORT_OPTIONS.map(sortOption => (
-              <ControlButton
-                key={sortOption.value}
-                isActive={sortOption.value === query.sort}
-                onClick={() => query.handleSortChange(sortOption.value, sortOption.defaultOrder ?? "desc")}
-              >
-                {sortOption.value === query.sort ? (
-                  query.isLoading || query.isRefetching ? (
-                    <Spinner size="sm" className="size-4" />
-                  ) : query.direction === "desc" ? (
-                    <SharedIcons.SortDescendingIcon className="size-4" />
-                  ) : (
-                    <SharedIcons.SortAscendingIcon className="size-4" />
-                  )
-                ) : (
-                  sortOption.icon
-                )}
-                {sortOption.name}
-              </ControlButton>
-            ))}
-          </ButtonGroup>
-
-          <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
-            <SearchInput
-              search={query.search}
-              invalidSearch={query.invalidSearch}
-              onSearchChange={query.handleSearchChange}
-            />
-
-            <HmdFilter
-              player={player}
-              hmdFilter={hmdFilter}
-              onHmdFilterChange={value =>
-                query.handleFilterChange(() => setHmdFilter(value === "All Hmds" ? null : (value as HMD)))
-              }
-            />
-          </div>
+        <ScoresToolbar
+          actions={
+            <>
+              <SearchInput
+                search={query.search}
+                invalidSearch={query.invalidSearch}
+                onSearchChange={query.handleSearchChange}
+              />
+              <HmdFilter
+                player={player}
+                hmdFilter={hmdFilter}
+                onHmdFilterChange={value =>
+                  query.handleFilterChange(() => setHmdFilter(value === "All Hmds" ? null : (value as HMD)))
+                }
+              />
+            </>
+          }
+        >
+          <ScoreSortControl
+            options={SORT_OPTIONS}
+            activeSort={query.sort}
+            direction={query.direction}
+            hasDirection
+            isBusy={query.isLoading || query.isRefetching}
+            onSortChange={query.handleSortChange}
+          />
         </ScoresToolbar>
 
         <ScoresListPanel

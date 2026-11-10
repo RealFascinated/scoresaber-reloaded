@@ -42,7 +42,7 @@ function CoverOption({
       onClick={onSelect}
       className={cn(
         "group flex cursor-pointer flex-col gap-1.5 rounded-lg p-1 text-left transition-colors",
-        selected ? "bg-primary/10" : "hover:bg-muted/30"
+        selected ? "bg-primary/10" : "hover:bg-hover"
       )}
     >
       <div

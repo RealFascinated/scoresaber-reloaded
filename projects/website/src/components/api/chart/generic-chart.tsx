@@ -3,6 +3,7 @@
 import { applyChartTheme, CHART_THEME, chartTitle } from "@/common/chart/chart-theme";
 import { ChartConfig } from "@/common/chart/types";
 import { useIsMobile } from "@/contexts/viewport-context";
+import { useCanvasColors } from "@/hooks/use-canvas-colors";
 import useDatabase from "@/hooks/use-database";
 import { SharedIcons } from "@/shared-icons";
 import {
@@ -54,6 +55,7 @@ const GenericChart = ({ config, labels }: Props) => {
   const { id, datasets, axes, options: customOptions } = config;
   const isMobile = useIsMobile();
   const database = useDatabase();
+  const { resolve: resolveColor } = useCanvasColors();
 
   const isXAxisLinear = customOptions?.scales?.x?.type === "linear";
   const isNumericLabels = labels.length > 0 && typeof labels[0] === "number";
@@ -79,8 +81,9 @@ const GenericChart = ({ config, labels }: Props) => {
       const baseConfig = {
         label: dataset.label,
         data: transformedData,
-        borderColor: dataset.color,
-        backgroundColor: dataset.type === "bar" || dataset.type === "point" ? dataset.color : undefined,
+        borderColor: resolveColor(dataset.color),
+        backgroundColor:
+          dataset.type === "bar" || dataset.type === "point" ? resolveColor(dataset.color) : undefined,
         fill: false,
         lineTension: 0.4,
         spanGaps: true,
@@ -107,7 +110,7 @@ const GenericChart = ({ config, labels }: Props) => {
 
       return { ...baseConfig, type: "line" as const };
     });
-  }, [datasets, database, id, labels, isXAxisLinear, isNumericLabels]);
+  }, [datasets, database, id, labels, isXAxisLinear, isNumericLabels, resolveColor]);
 
   const chartAxes = useMemo(() => {
     const generatedAxes: Record<string, any> = {

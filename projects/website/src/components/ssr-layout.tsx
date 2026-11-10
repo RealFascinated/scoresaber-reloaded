@@ -11,14 +11,12 @@ type SSRLayoutProps = {
 
 export default function SSRLayout({ children, className }: SSRLayoutProps) {
   const path = usePathname();
-  // The player page keeps its cards directly on the background cover, every other page sits on the sheet
-  const usesPageSheet = !path.startsWith("/player/");
 
   return (
     <div
       className={cn(
         "z-1 flex w-full grow flex-col",
-        path !== "/" && cn("mx-auto w-full max-w-[1632px]", usesPageSheet && "page-sheet", className)
+        path !== "/" ? "mx-auto w-full max-w-[1632px] " + className : ""
       )}
     >
       {children}

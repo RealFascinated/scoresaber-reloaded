@@ -125,7 +125,7 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
                 {leaderboard.difficulty.characteristic}
               </span>
               {isRanked && (
-                <span className="bg-background/90 ring-border text-warning inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold ring-1">
+                <span className="bg-control ring-border text-warning inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold ring-1">
                   <SharedIcons.DifficultyStarIcon className="size-3" />
                   {leaderboard.stars.toFixed(2)}
                 </span>
@@ -178,7 +178,7 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
                   </div>
                 }
               >
-                <div className="border-border bg-background/90 ring-border mt-0.5 inline-flex cursor-default items-center gap-1.5 rounded-md px-2 py-1 text-[11px] ring-1">
+                <div className="bg-control ring-border mt-0.5 inline-flex cursor-default items-center gap-1.5 rounded-md px-2 py-1 text-[11px] ring-1">
                   <span className="text-muted-foreground">Mods</span>
                   <span className="font-medium">
                     <ScoreSaberScoreModifiers type="simple" score={score} />

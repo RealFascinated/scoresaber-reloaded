@@ -64,7 +64,7 @@ export default function StatValue({
   return (
     <dl
       className={clsx(
-        "border-border bg-background/90 ring-border m-0 flex min-w-16 cursor-default items-center justify-center rounded-lg ring-1",
+        "bg-control ring-border m-0 flex min-w-16 cursor-default items-center justify-center rounded-lg ring-1",
         sizeClasses[size],
         className
       )}

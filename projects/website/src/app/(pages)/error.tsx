@@ -43,7 +43,7 @@ export default function Error(props: ErrorProps) {
               {error.stack && (
                 <div>
                   <span className="text-muted-foreground text-sm font-semibold">Stack Trace:</span>
-                  <pre className="text-muted-foreground bg-background/50 mt-2 max-h-64 overflow-auto rounded-sm p-2 text-xs">
+                  <pre className="text-muted-foreground bg-background/50 mt-2 max-h-64 overflow-auto rounded-md p-2 text-xs">
                     {error.stack}
                   </pre>
                 </div>

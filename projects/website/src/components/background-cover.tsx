@@ -86,20 +86,6 @@ export default function BackgroundCover() {
     return () => clearTimeout(timeout);
   }, [layers, currentKey]);
 
-  // Lets the theme switch its large surfaces to translucent while a cover is shown (see themes.css)
-  const hasCover = targetKey !== undefined;
-  useEffect(() => {
-    const root = document.documentElement;
-    if (hasCover) {
-      root.dataset.backgroundCover = "";
-    } else {
-      delete root.dataset.backgroundCover;
-    }
-    return () => {
-      delete root.dataset.backgroundCover;
-    };
-  }, [hasCover]);
-
   const showLayer = useCallback((key: string) => {
     setLayers(prev =>
       prev.some(layer => layer.key === key && !layer.visible)
@@ -113,6 +99,7 @@ export default function BackgroundCover() {
   }
 
   return (
+    // Fixed to the viewport so it stays put while scrolling; cards and tables are solid and sit on top of it
     <div className="pointer-events-none fixed inset-0 -z-50 overflow-hidden select-none">
       {layers.map(layer => (
         <div
@@ -142,11 +129,8 @@ export default function BackgroundCover() {
           )}
         </div>
       ))}
-      {/*
-       * Scrim: guarantees contrast for text drawn straight onto the cover (page titles, the leaderboard
-       * header, breadcrumbs) no matter how bright the image is, darkest at the top where that text sits.
-       */}
-      <div className="from-background/45 via-background/10 to-background/25 absolute inset-0 bg-linear-to-b" />
+      {/* Scrim: keeps text drawn straight onto the cover (page titles, breadcrumbs) readable on bright images */}
+      <div className="from-background/50 to-background/20 absolute inset-0 bg-linear-to-b" />
     </div>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
+import ScoreSortControl from "@/components/platform/shared/score-sort-control";
 import ScoresListPanel from "@/components/platform/shared/scores-list-panel";
 import SearchInput from "@/components/platform/shared/search-input";
 import { usePlayerScoresQuery, type SortOption } from "@/components/platform/shared/use-player-scores-query";
-import { Spinner } from "@/components/spinner";
 import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
@@ -14,7 +14,6 @@ import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import ScoresCard from "../../score/scores-card";
 import { ScoresToolbar } from "../../score/scores-toolbar";
-import { ButtonGroup, ControlButton } from "../../ui/control-panel";
 import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 
 const DEFAULT_SORT: ScoreSaberScoreSort = "recent";
@@ -64,31 +63,23 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
   return (
     <ScoresCard>
       <div className="flex w-full flex-col gap-3">
-        <ScoresToolbar>
-          <ButtonGroup>
-            {SORT_OPTIONS.map(sortOption => (
-              <ControlButton
-                key={sortOption.value}
-                isActive={sortOption.value === query.sort}
-                onClick={() => query.handleSortChange(sortOption.value)}
-              >
-                {sortOption.value === query.sort && (query.isLoading || query.isRefetching) ? (
-                  <Spinner size="sm" className="size-4" />
-                ) : (
-                  sortOption.icon
-                )}
-                {sortOption.name}
-              </ControlButton>
-            ))}
-          </ButtonGroup>
-
-          <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
+        <ScoresToolbar
+          actions={
             <SearchInput
               search={query.search}
               invalidSearch={query.invalidSearch}
               onSearchChange={query.handleSearchChange}
             />
-          </div>
+          }
+        >
+          <ScoreSortControl
+            options={SORT_OPTIONS}
+            activeSort={query.sort}
+            direction={query.direction}
+            hasDirection={false}
+            isBusy={query.isLoading || query.isRefetching}
+            onSortChange={query.handleSortChange}
+          />
         </ScoresToolbar>
 
         <ScoresListPanel

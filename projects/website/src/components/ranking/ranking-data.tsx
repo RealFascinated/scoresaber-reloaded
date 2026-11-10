@@ -307,7 +307,7 @@ function PlayerTableName({
 function PlayerPpDifference({ pp, mainPp }: { pp: number; mainPp: number }) {
   const difference = pp - mainPp;
   const colorClass =
-    difference > 0 ? "text-green-400" : difference < 0 ? "text-red-400" : "text-muted-foreground";
+    difference > 0 ? "text-success" : difference < 0 ? "text-danger" : "text-muted-foreground";
 
   return (
     <span className={cn("ml-1 font-semibold", colorClass)}>

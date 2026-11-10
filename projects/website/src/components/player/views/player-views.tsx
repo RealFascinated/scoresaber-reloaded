@@ -164,7 +164,7 @@ function ViewSelector({
 }) {
   return (
     <div className="-mx-1 min-w-0 [scrollbar-width:none] overflow-x-auto px-1">
-      <div className="bg-muted/50 flex w-max gap-1 rounded-lg p-1">
+      <div className="bg-muted/50 flex h-8 w-max gap-1 rounded-lg p-0.5">
         {views.map(view => {
           const isActive = view.index === selectedView.index;
           return (
@@ -174,7 +174,7 @@ function ViewSelector({
               onClick={() => onViewSelect(view)}
               aria-pressed={isActive}
               className={cn(
-                "flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
+                "flex h-full cursor-pointer items-center gap-1.5 rounded-md border px-3 text-xs font-medium whitespace-nowrap transition-colors",
                 isActive
                   ? "bg-primary/40 border-primary text-primary-foreground"
                   : "text-foreground/70 hover:bg-accent hover:text-accent-foreground border-transparent"
@@ -236,7 +236,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
           selectedView={selectedView}
           onViewSelect={view => setSelectedViewIndex(view.index)}
         />
-        <div className="flex w-full shrink-0 items-center justify-between gap-2 sm:w-auto">
+        <div className="flex w-full shrink-0 items-center justify-between gap-2 sm:ml-auto sm:w-auto">
           {selectedView.showDateRangeSelector && (
             <DateRangeSelector daysAgo={daysAgo} onDaysChange={days => setDaysAgo(days)} />
           )}

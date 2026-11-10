@@ -15,7 +15,7 @@ const badges: Partial<Record<keyof ScoreSaberPlayerStatistics, string>> = {
 
 export default function PlayerAccBadges({ statistics }: { statistics: ScoreSaberPlayerStatistics }) {
   return (
-    <div className="bg-background/60 ring-border divide-border/60 flex divide-x overflow-hidden rounded-lg ring-1">
+    <div className="bg-control ring-border divide-border/60 flex divide-x overflow-hidden rounded-lg ring-1">
       {Object.entries(badges).map(([name, displayName]) => {
         const badge = getScoreBadgeFromName(displayName.replace("Plus", "+"));
         const count = statistics[name as keyof ScoreSaberPlayerStatistics] ?? 0;

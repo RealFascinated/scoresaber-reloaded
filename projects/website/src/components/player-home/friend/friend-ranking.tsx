@@ -67,7 +67,7 @@ export function FriendRanking() {
             <SimpleLink
               key={player.id}
               href={`/player/${player.id}`}
-              className="bg-card ring-border hover:bg-muted/20 flex items-center gap-4 rounded-xl p-4 ring-1 transition-colors"
+              className="bg-card ring-border hover:bg-hover flex items-center gap-4 rounded-xl p-4 ring-1 transition-colors"
             >
               <span className="text-muted-foreground w-8 shrink-0 text-right text-sm font-semibold tabular-nums">
                 #{player.rank}

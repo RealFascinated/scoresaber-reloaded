@@ -18,7 +18,7 @@ export default function OverlayPlayerMedals({ player }: OverlayPlayerMedalsProps
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-3">
         <div className="flex w-6 justify-center">
-          <SharedIcons.OverlayPlayerMedalsIcon className="h-6 w-6 text-slate-300" />
+          <SharedIcons.OverlayPlayerMedalsIcon className="text-foreground/80 h-6 w-6" />
         </div>
         <p className="text-2xl font-bold">{formatNumberWithCommas(medals)}</p>
       </div>

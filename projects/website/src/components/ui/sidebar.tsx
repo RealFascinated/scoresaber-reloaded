@@ -158,7 +158,7 @@ const Sidebar = React.forwardRef<
         <SheetContent
           data-sidebar="sidebar"
           data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-[--sidebar-width] max-w-none border-r-0 p-0 backdrop-blur-xl [&>button]:hidden"
+          className="bg-sidebar text-sidebar-foreground w-[--sidebar-width] max-w-none border-r-0 p-0 [&>button]:hidden"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -191,8 +191,7 @@ const Sidebar = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          // The blur only shows when a background cover makes --sidebar-background translucent
-          "bg-sidebar text-sidebar-foreground fixed inset-y-0 z-10 flex h-svh w-72 flex-col backdrop-blur-xl",
+          "bg-sidebar text-sidebar-foreground fixed inset-y-0 z-10 flex h-svh w-72 flex-col",
           side === "left" ? "left-0" : "right-0",
           state === "collapsed" && side === "left" && "-translate-x-full",
           state === "collapsed" && side === "right" && "translate-x-full",

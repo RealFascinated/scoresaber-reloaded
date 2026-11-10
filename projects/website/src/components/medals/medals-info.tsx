@@ -12,7 +12,7 @@ export default function MedalsInfo() {
         {Object.entries(MEDAL_COUNTS).map(([rank, count]) => (
           <div
             key={rank}
-            className="bg-background/50 flex items-center justify-between gap-2 rounded-md px-2.5 py-2"
+            className="bg-control flex items-center justify-between gap-2 rounded-md px-2.5 py-2"
           >
             <div className="flex items-center gap-1">
               <SharedIcons.MedalsInfoIcon className="text-medals size-3" />

@@ -1,8 +1,8 @@
 "use client";
 
+import ScoreSortControl from "@/components/platform/shared/score-sort-control";
 import ScoresListPanel from "@/components/platform/shared/scores-list-panel";
 import { usePlayerScoresQuery, type SortOption } from "@/components/platform/shared/use-player-scores-query";
-import { Spinner } from "@/components/spinner";
 import { SharedIcons } from "@/shared-icons";
 import { Pagination } from "@ssr/common/pagination";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -15,7 +15,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { parseAsString, useQueryState } from "nuqs";
 import ScoresCard from "../../score/scores-card";
 import { ScoresToolbar } from "../../score/scores-toolbar";
-import { ButtonGroup, ControlButton, Tab, TabGroup } from "../../ui/control-panel";
+import { SegmentedControl, SegmentedOption } from "../../ui/segmented-control";
 import AccSaberScoreComponent from "./score/accsaber-score";
 
 const DEFAULT_SORT: AccSaberScoreSort = "date";
@@ -95,41 +95,27 @@ export default function AccSaberPlayerScores({ player }: Props) {
     <ScoresCard>
       <div className="flex w-full flex-col gap-3">
         <ScoresToolbar>
-          <TabGroup>
+          <SegmentedControl>
             {scoreTypes.map(typeOption => (
-              <Tab
+              <SegmentedOption
                 key={typeOption.value}
                 isActive={typeOption.value === type}
                 onClick={() => query.handleFilterChange(() => setType(typeOption.value as AccSaberScoreType))}
               >
                 {typeOption.icon}
                 {typeOption.name}
-              </Tab>
+              </SegmentedOption>
             ))}
-          </TabGroup>
+          </SegmentedControl>
 
-          <ButtonGroup>
-            {scoreSort.map(sortOption => (
-              <ControlButton
-                key={sortOption.value}
-                isActive={sortOption.value === query.sort}
-                onClick={() => query.handleSortChange(sortOption.value, sortOption.defaultOrder ?? "desc")}
-              >
-                {sortOption.value === query.sort ? (
-                  query.isLoading || query.isRefetching ? (
-                    <Spinner size="sm" className="size-4" />
-                  ) : query.direction === "desc" ? (
-                    <SharedIcons.SortDescendingIcon className="size-4" />
-                  ) : (
-                    <SharedIcons.SortAscendingIcon className="size-4" />
-                  )
-                ) : (
-                  sortOption.icon
-                )}
-                {sortOption.name}
-              </ControlButton>
-            ))}
-          </ButtonGroup>
+          <ScoreSortControl
+            options={scoreSort}
+            activeSort={query.sort}
+            direction={query.direction}
+            hasDirection
+            isBusy={query.isLoading || query.isRefetching}
+            onSortChange={query.handleSortChange}
+          />
         </ScoresToolbar>
 
         {/* Scores List */}

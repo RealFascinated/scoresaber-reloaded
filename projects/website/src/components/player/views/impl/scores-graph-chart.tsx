@@ -6,6 +6,7 @@ import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/contexts/viewport-context";
+import { useCanvasColors } from "@/hooks/use-canvas-colors";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -104,6 +105,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
 
   // Transform raw API data into chart data points (memoized — the dataset pipeline is the
   // most expensive part of this component and only depends on the query results)
+  const { resolve: resolveColor } = useCanvasColors();
   const { hasData, minStar, maxStar, minAccuracy, maxAccuracy, datasets } = useMemo(() => {
     const transformToDataPoints = (rawData: PlayerScoreChartDataPoint[]): DataPoint[] => {
       const transformed = rawData.map(point => ({
@@ -231,8 +233,8 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
           type: "line",
           label: "Average",
           data: averageLineData,
-          borderColor: Colors.pp,
-          backgroundColor: `${Colors.pp}1a`,
+          borderColor: resolveColor(Colors.pp),
+          backgroundColor: resolveColor(Colors.pp, 0.1),
           borderWidth: 3,
           fill: false,
           pointRadius: 0,
@@ -251,7 +253,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
         datasets: [...lineDatasets, ...scatterDatasets],
       },
     };
-  }, [dataPoints, comparisonData, comparisonPlayers, showTop, player.name]);
+  }, [dataPoints, comparisonData, comparisonPlayers, showTop, player.name, resolveColor]);
 
   const scales = useMemo(
     () => ({

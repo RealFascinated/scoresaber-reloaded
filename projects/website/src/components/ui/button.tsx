@@ -11,15 +11,15 @@ const buttonVariants = cva(
       variant: {
         primary: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-xs",
         default:
-          "border border-primary bg-background/95 relative before:absolute before:inset-0 before:bg-primary/10 before:rounded-(--radius-md) text-brand hover:before:bg-primary/20 hover:shadow-xs",
+          "border border-primary bg-control relative before:absolute before:inset-0 before:bg-primary/10 before:rounded-(--radius-md) text-brand hover:before:bg-primary/20 hover:shadow-xs",
         destructive:
           "bg-destructive/10 border border-destructive/50 text-destructive hover:bg-destructive/20 hover:border-destructive hover:shadow-xs",
         outline:
-          "border border-border bg-background/95 text-foreground hover:text-accent-foreground hover:border-primary/50 hover:shadow-xs",
+          "border border-border bg-control text-foreground hover:text-accent-foreground hover:border-primary/50 hover:shadow-xs",
         secondary:
-          "border border-border bg-background/95 relative before:absolute before:inset-0 before:bg-secondary/10 before:rounded-(--radius-md) text-secondary-foreground hover:before:bg-secondary/20 hover:border-primary/50 hover:shadow-xs",
+          "border border-border bg-control relative before:absolute before:inset-0 before:bg-secondary/10 before:rounded-(--radius-md) text-secondary-foreground hover:before:bg-secondary/20 hover:border-primary/50 hover:shadow-xs",
         ghost:
-          "border border-border bg-background/95 text-foreground hover:text-accent-foreground hover:border-primary/50",
+          "border border-border bg-control text-foreground hover:text-accent-foreground hover:border-primary/50",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

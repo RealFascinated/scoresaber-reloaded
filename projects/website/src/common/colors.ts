@@ -2,13 +2,12 @@
  * Hex mirrors of the tokens in `app/styles/themes.css`, for places that can't read CSS variables
  * (Chart.js draws to a canvas, and the viewport theme color is a meta tag).
  *
- * Keep these in sync with the OKLCH values in themes.css.
+ * Keep these in sync with the OKLCH values in themes.css. Colors that change with the color theme are
+ * kept as `var(--token)` instead; charts resolve those with `useCanvasColors`.
  */
 export const Colors = {
-  primary: "#4264e6", // --primary
   secondary: "#0b0c0f", // --background
-  ssr: "#8eadff", // --brand
-  pp: "#8eadff", // --pp
+  pp: "var(--pp)",
   rankedLight: "#59c5f5", // --info
   medal: "#f0a556", // --medals
   hands: {

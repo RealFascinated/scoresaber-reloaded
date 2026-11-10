@@ -12,7 +12,7 @@ import { ScoreMedalsBadge } from "../badges/score-medals";
 const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   {
     name: "PP",
-    color: (_, __, medalsMode?: boolean) => {
+    textColor: (_, __, medalsMode?: boolean) => {
       return medalsMode ? "var(--medals)" : "var(--statistic)";
     },
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard, medalsMode?: boolean) => {
@@ -44,7 +44,7 @@ const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   },
   {
     name: "Left Hand Accuracy",
-    color: () => "var(--hands-left)",
+    textColor: () => "var(--hands-left)",
     create: (score: ScoreSaberScore) => {
       const beatLeaderScore = score.beatLeaderScore;
       if (!beatLeaderScore) {
@@ -55,7 +55,7 @@ const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   },
   {
     name: "Right Hand Accuracy",
-    color: () => "var(--hands-right)",
+    textColor: () => "var(--hands-right)",
     create: (score: ScoreSaberScore) => {
       const beatLeaderScore = score.beatLeaderScore;
       if (!beatLeaderScore) {

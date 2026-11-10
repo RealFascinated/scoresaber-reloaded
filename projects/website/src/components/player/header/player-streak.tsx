@@ -35,7 +35,7 @@ export default function PlayerStreak({ player }: PlayerStreakProps) {
       side="bottom"
       showOnMobile
     >
-      <div className="bg-background/90 ring-border relative w-[132px] rounded-lg px-3 py-2 ring-1">
+      <div className="bg-control ring-border relative w-[132px] rounded-lg px-3 py-2 ring-1">
         <div className="relative flex items-center justify-between">
           <span className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
             Streak

@@ -83,7 +83,7 @@ export function PlayerRanking<T extends PlayerRankingRow>({
       {/* Desktop Layout */}
       <div
         className={cn(
-          "hover:bg-muted/30 flex items-center gap-3 rounded-lg px-2 py-2 transition-colors",
+          "hover:bg-hover flex items-center gap-3 rounded-lg px-2 py-2 transition-colors",
           mainPlayer?.id === player.id ? "bg-primary/5" : "",
           inactive && "opacity-50 grayscale-20"
         )}
@@ -153,7 +153,7 @@ function RankDisplay({ rank, activeRank }: { rank: number; activeRank?: number }
   const pill = (
     <div
       className={cn(
-        "flex h-[24px] w-fit items-center justify-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold",
+        "flex h-[24px] w-fit items-center justify-center gap-1 rounded-md px-1.5 py-1 text-xs font-semibold",
         getRankPillClass(rank)
       )}
     >
@@ -181,7 +181,7 @@ function CountryRankDisplay({
     <div className="flex items-center">
       <div
         className={cn(
-          "flex h-[24px] items-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold",
+          "flex h-[24px] items-center gap-1 rounded-md px-1.5 py-1 text-xs font-semibold",
           getRankPillClass(countryRank)
         )}
       >

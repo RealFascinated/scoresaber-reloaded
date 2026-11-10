@@ -19,7 +19,7 @@ export default function HmdFilter({
   return (
     <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
       <Select value={hmdFilter || ALL_HMDS} onValueChange={onHmdFilterChange}>
-        <SelectTrigger className="h-8 w-full text-xs sm:w-42">
+        <SelectTrigger className="h-9 w-full text-sm sm:w-44">
           <SelectValue placeholder="HMD Filter" />
         </SelectTrigger>
         <SelectContent>

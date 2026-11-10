@@ -24,12 +24,14 @@ export function Tab({
   onClick,
   tooltip,
   activeClassName,
+  className,
 }: {
   children: ReactNode;
   isActive: boolean;
   onClick: () => void;
   tooltip?: string;
   activeClassName?: string;
+  className?: string;
 }) {
   const button = (
     <button
@@ -38,7 +40,8 @@ export function Tab({
         "focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
         isActive
           ? (activeClassName ?? "bg-primary/40 border-primary text-primary-foreground")
-          : "text-foreground/70 hover:bg-accent hover:text-accent-foreground"
+          : "text-foreground/70 hover:bg-accent hover:text-accent-foreground",
+        className
       )}
       onClick={onClick}
     >
@@ -62,20 +65,23 @@ export function ControlButton({
   isActive,
   onClick,
   type = "button",
+  className,
   ...props
 }: {
   children: ReactNode;
   isActive: boolean;
   onClick: () => void;
   type?: "button" | "submit" | "reset";
+  className?: string;
 }) {
   return (
     <button
       className={cn(
-        "flex cursor-pointer items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-all",
+        "flex h-9 cursor-pointer items-center gap-2 rounded-md border px-3.5 text-sm transition-all",
         isActive
           ? "bg-primary/40 text-primary-foreground border-primary"
-          : "bg-background text-muted-foreground border-border hover:bg-muted"
+          : "bg-control text-muted-foreground border-border hover:bg-accent",
+        className
       )}
       onClick={onClick}
       type={type}

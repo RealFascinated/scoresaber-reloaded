@@ -17,6 +17,12 @@
   --background: oklch(0.155 0.006 270);
   --foreground: oklch(0.965 0.004 270);
   --card: oklch(0.195 0.008 270);
+  --card-inset: oklch(0.165 0.006 270);
+  --card-raised: oklch(0.225 0.009 270);
+  /* Small surfaces on a card (buttons, chips, stat boxes): darker than the card they sit on */
+  --control: var(--background);
+  /* Hover highlight for rows and list items: a translucent lift that works on any surface */
+  --hover: oklch(1 0 0 / 0.05);
   --chart-card: oklch(0.175 0.007 270);
   --card-foreground: var(--foreground);
   --popover: oklch(0.225 0.009 270);
@@ -149,26 +155,25 @@
 }
 
 /*
- * A background cover is active (set on <html> by BackgroundCover). Instead of every card floating on the
- * image, the page content sits on one translucent sheet and the cards stay solid on top of it; the cover only
- * shows around the sheet and through the sidebar.
+ * Nested cards: a card inside a card steps to a different surface so the two never blend together.
+ * Level 2 sinks (darker), level 3 rises (lighter), level 4 sinks again. Only the variables are swapped, so
+ * hover and other background utilities on the element keep working. Controls on a sunken card would match
+ * it, so there they lift above the card instead.
  */
-:root[data-background-cover] {
-  --sidebar-background: oklch(0.155 0.006 270 / 0.72);
-  --sidebar-border: oklch(0.285 0.01 270 / 0.6);
+.bg-card .bg-card,
+.bg-card .bg-card .bg-card .bg-card {
+  --card: var(--card-inset);
+  --control: var(--card-raised);
 }
 
-:root[data-background-cover] .page-sheet {
-  background-color: oklch(0.155 0.006 270 / 0.85);
-  border: 1px solid oklch(0.285 0.01 270 / 0.6);
-  border-radius: 0.75rem;
-  padding: 0.75rem;
+.bg-card .bg-card .bg-card {
+  --card: var(--card-raised);
+  --control: var(--background);
 }
 
-@media (min-width: 640px) {
-  :root[data-background-cover] .page-sheet {
-    padding: 1.25rem;
-  }
+/* Corners step down with nesting too: cards are xl, anything inside a card is lg */
+.bg-card .bg-card.rounded-xl {
+  border-radius: var(--radius-lg);
 }
 
 @theme inline {
@@ -236,6 +241,8 @@
   --color-foreground: var(--foreground);
 
   --color-card: var(--card);
+  --color-control: var(--control);
+  --color-hover: var(--hover);
   --color-chart-card: var(--chart-card);
   --color-card-foreground: var(--card-foreground);
 
