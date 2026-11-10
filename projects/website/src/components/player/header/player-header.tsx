@@ -23,16 +23,16 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
   const isMobile = useIsMobile("lg");
 
   return (
-    <Card className="flex flex-col gap-5">
-      <div className="flex flex-col items-center gap-6 text-center select-none lg:flex-row lg:items-start lg:text-start">
+    <Card className="flex flex-col gap-4 lg:gap-5">
+      <div className="flex flex-col items-center gap-4 text-center select-none lg:flex-row lg:items-start lg:gap-6 lg:text-start">
         <div className="flex flex-col items-center gap-2">
-          <PlayerAvatar player={player} />
+          <PlayerAvatar player={player} size={isMobile ? 88 : 128} />
           <div className="hidden lg:flex">
             <PlayerStreak player={player} />
           </div>
         </div>
-        <div className="flex w-full min-w-0 flex-col items-center gap-4 lg:items-start">
-          <div className="flex w-full flex-col gap-2">
+        <div className="flex w-full min-w-0 flex-col items-center gap-3 lg:items-start lg:gap-4">
+          <div className="flex w-full flex-col gap-2 lg:gap-3">
             <div className="flex w-full flex-wrap items-center justify-center gap-3 lg:justify-between">
               <div className="flex min-w-0 flex-wrap items-center justify-center gap-2 lg:justify-start">
                 <SimpleLink
@@ -60,14 +60,14 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 <FollowButton player={player} iconOnly={isMobile} />
               </div>
             </div>
-            <PlayerOverview player={player} />
             <div className="flex justify-center lg:justify-start">
               <PlayerFollows player={player} />
             </div>
+            <PlayerOverview player={player} />
           </div>
 
           <PlayerStats player={player} />
-          <div className="flex lg:hidden">
+          <div className="w-full lg:hidden">
             <PlayerStreak player={player} />
           </div>
 

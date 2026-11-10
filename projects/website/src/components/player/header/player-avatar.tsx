@@ -9,9 +9,10 @@ import { toast } from "sonner";
 
 type PlayerAvatarProps = {
   player: ScoreSaberPlayer;
+  size?: number;
 };
 
-export default function PlayerAvatar({ player }: PlayerAvatarProps) {
+export default function PlayerAvatar({ player, size = 128 }: PlayerAvatarProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -38,7 +39,7 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
     <div className="relative">
       <Avatar
         src={player.avatar}
-        size={128}
+        size={size}
         className="border-border pointer-events-none border-2"
         alt={`${player.name}'s Profile Picture`}
         priority

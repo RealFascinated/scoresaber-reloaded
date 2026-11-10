@@ -12,7 +12,7 @@ import CountryFlag from "../../ui/country-flag";
 
 function PlayerOverviewItem({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-control ring-border flex items-center gap-2 rounded-lg px-4 py-2 ring-1">
+    <div className="bg-control ring-border flex items-center gap-2 rounded-lg px-3 py-1.5 ring-1 lg:px-4 lg:py-2">
       {children}
     </div>
   );
@@ -148,7 +148,7 @@ type PlayerOverviewProps = {
 
 export default function PlayerOverview({ player }: PlayerOverviewProps) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2 lg:items-start lg:justify-start">
+    <div className="flex flex-wrap items-center justify-center gap-1.5 lg:items-start lg:justify-start lg:gap-2">
       {playerData.map((subName, index) => {
         if (!subName.showWhenInactiveOrBanned && (player.inactive || player.banned)) {
           return null;

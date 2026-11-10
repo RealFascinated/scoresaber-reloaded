@@ -31,28 +31,28 @@ const RANKED_VALUE_COLOR = "text-pp";
 
 const playerStats: Stat[] = [
   {
-    name: "Ranked Play Count",
+    name: "Ranked Plays",
     create: player => ({
       value: formatNumberWithCommas(player.statistics.totalRankedScores),
       valueClassName: RANKED_VALUE_COLOR,
     }),
   },
   {
-    name: "Total Ranked Score",
+    name: "Ranked Score",
     create: player => ({
       value: formatNumberWithCommas(player.statistics.totalRankedScore),
       valueClassName: RANKED_VALUE_COLOR,
     }),
   },
   {
-    name: "Average Ranked Accuracy",
+    name: "Avg Ranked Acc",
     create: player => ({
       value: `${player.statistics.averageRankedAccuracy.toFixed(2)}%`,
       valueClassName: RANKED_VALUE_COLOR,
     }),
   },
   {
-    name: "Total Play Count",
+    name: "Total Plays",
     create: player => ({ value: formatNumberWithCommas(player.statistics.totalScores) }),
   },
   {
@@ -60,7 +60,7 @@ const playerStats: Stat[] = [
     create: player => ({ value: formatNumberWithCommas(player.statistics.totalScore) }),
   },
   {
-    name: "Joined Date",
+    name: "Joined",
     create: player => ({
       value: formatDate(player.joinedDate),
       tooltip: (
@@ -171,16 +171,13 @@ const playerStats: Stat[] = [
 
 function PlayerStat({ name, content }: { name: string; content: StatContent }) {
   return (
-    <div className="flex min-w-0 flex-col gap-0.5">
-      <dt className="text-muted-foreground truncate text-xs">{name}</dt>
+    <div className="bg-control ring-border flex min-w-0 flex-col gap-0.5 rounded-lg px-2.5 py-1.5 ring-1 lg:gap-1 lg:px-3 lg:py-2">
+      <dt className="text-muted-foreground truncate text-[11px] font-medium tracking-wide uppercase">
+        {name}
+      </dt>
       <dd className={cn("m-0 truncate text-sm font-semibold tabular-nums", content.valueClassName)}>
         {content.tooltip ? (
-          <SimpleTooltip
-            display={content.tooltip}
-            side="bottom"
-            showOnMobile
-            className="mx-auto w-fit max-w-full lg:mx-0"
-          >
+          <SimpleTooltip display={content.tooltip} side="bottom" showOnMobile className="w-fit max-w-full">
             {content.value}
           </SimpleTooltip>
         ) : (
@@ -210,7 +207,7 @@ export default function PlayerStats({ player }: Props) {
     <div className="flex w-full flex-col items-center gap-2 lg:items-start">
       <dl
         id="player-stats"
-        className="m-0 grid w-full grid-cols-2 gap-x-6 gap-y-3 text-center sm:grid-cols-3 lg:text-left 2xl:grid-cols-4"
+        className="m-0 grid w-full grid-cols-3 gap-1.5 text-left lg:gap-2 2xl:grid-cols-4"
       >
         {visibleStats.map(({ stat, content }) =>
           content ? <PlayerStat key={`player-stat-${stat.name}`} name={stat.name} content={content} /> : null
