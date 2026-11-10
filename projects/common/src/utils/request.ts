@@ -42,7 +42,6 @@ class Request {
     if (rateLimit) {
       const remaining = Number(rateLimit);
 
-      // Update rate limit info
       this.rateLimitInfo.set(url, {
         remaining,
         resetTime: resetTime ? Number(resetTime) : Date.now() + 60_000,
@@ -80,7 +79,6 @@ class Request {
     const fullUrl = this.buildUrl(url, searchParams);
     const cacheKey = this.getCacheKey(fullUrl, method, options);
 
-    // Check if there's a pending request for this URL
     const pendingRequest = this.pendingRequests.get(cacheKey);
     if (pendingRequest) {
       const cachedResponse = (await pendingRequest) as Response | undefined;
@@ -88,7 +86,6 @@ class Request {
       return cachedResponse ? cachedResponse.clone() : undefined;
     }
 
-    // Create new request
     const requestPromise = (async () => {
       try {
         const response = await fetch(fullUrl, {
@@ -96,7 +93,6 @@ class Request {
           ...fetchOptions,
         });
 
-        // Handle rate limits
         await this.handleRateLimit(url, response);
 
         if (!response.ok) {
@@ -118,13 +114,6 @@ class Request {
     return requestPromise;
   }
 
-  /**
-   * Handles the response from the request.
-   *
-   * @param response the response from the request
-   * @param returns the returns type
-   * @returns the response
-   */
   private static handleResponse<T>(
     response: Response | undefined,
     returns: RequestReturns
@@ -165,7 +154,6 @@ class Request {
   }
 }
 
-// Export the public API
 export default {
   get: Request.get.bind(Request),
   post: Request.post.bind(Request),

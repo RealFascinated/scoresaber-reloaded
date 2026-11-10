@@ -19,18 +19,11 @@ export class BeatSaverService extends ApiService {
     });
   }
 
-  /**
-   * Gets the map that match the query.
-   *
-   * @param hash the query to search for
-   * @returns the map that match the query, or undefined if no map were found
-   */
   async lookupMap(hash: string): Promise<BeatSaverMapToken | undefined> {
     const before = performance.now();
     this.log(`Looking up map "${hash}"...`);
 
     const response = await this.fetch<BeatSaverMapToken>(LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", hash));
-    // Map not found
     if (response == undefined) {
       return undefined;
     }
@@ -41,9 +34,6 @@ export class BeatSaverService extends ApiService {
 
   /**
    * Gets the map that match the query.
-   *
-   * @param hashes the hashes to search for
-   * @returns the map that match the query, or undefined if no map were found
    */
   async lookupMaps(hashes: string[]): Promise<BeatSaverMultiMapLookup | undefined> {
     if (hashes.length > 50) {
@@ -56,7 +46,6 @@ export class BeatSaverService extends ApiService {
     const response = await this.fetch<BeatSaverMultiMapLookup>(
       LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", hashes.join(","))
     );
-    // Map not found
     if (response == undefined) {
       return undefined;
     }
@@ -67,11 +56,6 @@ export class BeatSaverService extends ApiService {
 
   /**
    * Gets the latest maps.
-   *
-   * @param automapper the automapper to get the maps from
-   * @param pageSize the page size to get the maps from
-   * @param sort the sort to get the maps from
-   * @returns the latest maps
    */
   async lookupLatestMaps(
     automapper: boolean,

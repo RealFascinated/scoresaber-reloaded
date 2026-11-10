@@ -44,7 +44,6 @@ export default function MapFilters() {
       hasActiveFilters={hasActiveFilters}
       onClear={() => filter.clearFilters()}
     >
-      {/* Status Filters */}
       <FilterField>
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
@@ -74,7 +73,6 @@ export default function MapFilters() {
         </div>
       </FilterField>
 
-      {/* Search */}
       <FilterField label="Search">
         <Input
           value={filter.search}
@@ -84,7 +82,6 @@ export default function MapFilters() {
         />
       </FilterField>
 
-      {/* Category */}
       <FilterField label="Category">
         <Select
           value={filter.category !== undefined ? String(filter.category) : undefined}
@@ -107,7 +104,6 @@ export default function MapFilters() {
         </Select>
       </FilterField>
 
-      {/* Sort */}
       <FilterField label="Sort">
         <Select
           value={String(filter.sort)}
@@ -130,7 +126,6 @@ export default function MapFilters() {
         </Select>
       </FilterField>
 
-      {/* Star Range */}
       <FilterField label="Star Range">
         <DualRangeSlider
           label={value => <span className="text-xs">{value}</span>}

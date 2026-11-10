@@ -3,14 +3,8 @@ import { ScoreSaberLeaderboardTokenSchema } from "./leaderboard";
 import { ScoreSaberScoreTokenSchema } from "./score";
 
 export const ScoreSaberPlayerScoreTokenSchema = Type.Object({
-  /**
-   * The score of the player score.
-   */
   score: ScoreSaberScoreTokenSchema,
 
-  /**
-   * The leaderboard the score was set on.
-   */
   leaderboard: ScoreSaberLeaderboardTokenSchema,
 });
 

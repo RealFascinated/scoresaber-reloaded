@@ -108,7 +108,6 @@ export default function ScoreSaberScoreDisplay({
               </div>
             )}
 
-            {/* View Leaderboard button */}
             {detailsExpanded != undefined &&
               setDetailsExpanded != undefined &&
               !settings?.hideDetailsDropdown && (
@@ -139,7 +138,6 @@ export default function ScoreSaberScoreDisplay({
           />
         </div>
 
-        {/* Score Page */}
         {!isMobile && (
           <FallbackLink href={isTracked ? `/score/${score.scoreId}` : undefined}>
             <SimpleTooltip display={isTracked ? "Open score page" : "No score data found"} className="pl-1">

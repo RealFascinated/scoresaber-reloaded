@@ -33,7 +33,7 @@ export type ChartConfig = {
   id?: string;
   datasets: ChartDataset[];
   axes: Record<string, ChartAxis>;
-  options?: ChartOptions; // Allow custom options to be passed through
+  options?: ChartOptions;
 };
 
 export type DatasetConfig = {

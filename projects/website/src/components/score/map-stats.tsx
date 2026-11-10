@@ -4,9 +4,6 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatTime } from "@ssr/common/utils/time-utils";
 
 type MapAndScoreData = {
-  /**
-   * The map that the score was set on.
-   */
   beatSaver: BeatSaverMap;
 };
 

@@ -17,8 +17,6 @@ import { parseDate } from "./utils/time-utils";
 
 /**
  * Parses a {@link ScoreSaberV2LeaderboardPageToken} into a {@link ScoreSaberLeaderboard}.
- *
- * @param token the v2 token to parse
  */
 export function getScoreSaberLeaderboardFromV2PageToken(
   token: ScoreSaberV2LeaderboardPageToken
@@ -67,8 +65,6 @@ export function getScoreSaberLeaderboardFromV2PageToken(
 
 /**
  * Parses a {@link ScoreSaberLeaderboardToken} into a {@link ScoreSaberLeaderboard}.
- *
- * @param token the token to parse
  */
 export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardToken): ScoreSaberLeaderboard {
   const characteristic = token.difficulty.gameMode.replace("Solo", "");
@@ -115,10 +111,6 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
 
 /**
  * Gets a {@link ScoreSaberScore} from a {@link ScoreSaberScoreToken}.
- *
- * @param token the token to convert
- * @param playerId the id of the player who set the score
- * @param leaderboard the leaderboard the score was set on
  */
 export function getScoreSaberScoreFromToken(
   token: ScoreSaberScoreToken,

@@ -5,9 +5,6 @@ import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 
 type HandAccuracyProps = {
   beatLeaderScore: BeatLeaderScore;
-  /**
-   * The hand to get the hand accuracy from
-   */
   hand: "left" | "right";
 };
 

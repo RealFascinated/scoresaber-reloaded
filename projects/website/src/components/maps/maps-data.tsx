@@ -42,9 +42,6 @@ const categories: Category[] = [
 ];
 
 type MapsDataProps = {
-  /**
-   * The selected category.
-   */
   type?: string;
 };
 

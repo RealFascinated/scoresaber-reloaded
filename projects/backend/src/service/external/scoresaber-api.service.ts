@@ -24,6 +24,7 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import { scoreSaberApiResponseCacheKey } from "../../common/cache-keys";
 import CacheService, { CacheId } from "../infra/cache.service";
+import { backoff, parseRetryAfterMs } from "./http-retry";
 
 const scoreSaberApiLog = Logger.withTopic("ScoreSaber API");
 
@@ -102,12 +103,6 @@ export class ScoreSaberApiService {
 
   /** Max attempts per logical request (including the first). */
   private static readonly MAX_ATTEMPTS = 5;
-  /** Base delay for the exponential backoff (ms). */
-  private static readonly BACKOFF_BASE_MS = 500;
-  /** Upper bound for the exponential backoff delay (ms). */
-  private static readonly BACKOFF_MAX_MS = 10_000;
-  /** Upper bound for honoring a server-provided `Retry-After` (ms). */
-  private static readonly RETRY_AFTER_MAX_MS = 30_000;
   /** Per-request timeout (ms). */
   private static readonly REQUEST_TIMEOUT_MS = 15_000;
 
@@ -175,7 +170,7 @@ export class ScoreSaberApiService {
       if (result == undefined) {
         // Transport failure — retry unless we exhausted the attempts.
         if (attempt < ScoreSaberApiService.MAX_ATTEMPTS) {
-          await ScoreSaberApiService.backoff(attempt);
+          await backoff(attempt);
           continue;
         }
         ScoreSaberApiService.failedRequests++;
@@ -185,7 +180,7 @@ export class ScoreSaberApiService {
       // 429 / 5xx are transient — retry (honoring Retry-After). Every other
       // status (2xx, 3xx, 4xx like 404) is a definitive answer.
       if ((result.status === 429 || result.status >= 500) && attempt < ScoreSaberApiService.MAX_ATTEMPTS) {
-        await ScoreSaberApiService.backoff(attempt, result.retryAfterMs);
+        await backoff(attempt, result.retryAfterMs);
         continue;
       }
 
@@ -243,44 +238,15 @@ export class ScoreSaberApiService {
       return {
         status: response.status,
         data: undefined,
-        retryAfterMs: ScoreSaberApiService.parseRetryAfterMs(response),
+        retryAfterMs: parseRetryAfterMs(response),
       };
     }
 
     return {
       status: response.status,
       data,
-      retryAfterMs: ScoreSaberApiService.parseRetryAfterMs(response),
+      retryAfterMs: parseRetryAfterMs(response),
     };
-  }
-
-  private static parseRetryAfterMs(response: Response): number | undefined {
-    const header = response.headers.get("retry-after");
-    if (!header) {
-      return undefined;
-    }
-    const seconds = Number(header);
-    if (Number.isFinite(seconds)) {
-      return Math.max(0, Math.min(seconds * 1000, ScoreSaberApiService.RETRY_AFTER_MAX_MS));
-    }
-    const date = new Date(header).getTime();
-    return Number.isFinite(date)
-      ? Math.max(0, Math.min(date - Date.now(), ScoreSaberApiService.RETRY_AFTER_MAX_MS))
-      : undefined;
-  }
-
-  private static async backoff(attempt: number, retryAfterMs?: number): Promise<void> {
-    if (retryAfterMs != null) {
-      await new Promise(resolve => setTimeout(resolve, retryAfterMs));
-      return;
-    }
-    const exponentialMs = Math.min(
-      ScoreSaberApiService.BACKOFF_BASE_MS * 2 ** (attempt - 1),
-      ScoreSaberApiService.BACKOFF_MAX_MS
-    );
-    // Full jitter avoids a thundering herd of retries after a shared rate limit.
-    const delayMs = exponentialMs / 2 + Math.random() * (exponentialMs / 2);
-    await new Promise(resolve => setTimeout(resolve, delayMs));
   }
 
   /**
@@ -317,18 +283,22 @@ export class ScoreSaberApiService {
    *
    * @param playerId the ID of the player to look up
    * @param realmId the realm to resolve the player's stats for (the default realm when omitted)
+   * @param options `fresh` skips the 2 minute response cache, for callers that cache the result for long
    * @returns the player that matches the ID, or undefined
    */
   public static async lookupPlayer(
     playerId: string,
-    realmId?: number
+    realmId?: number,
+    options?: { fresh?: boolean }
   ): Promise<ScoreSaberV2PlayerToken | undefined> {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up player "${playerId}"...`);
     const token = await ScoreSaberApiService.fetch<ScoreSaberV2PlayerToken>(
       fillEndpoint(LOOKUP_PLAYER_V2_ENDPOINT, { id: playerId }),
-      // Player profiles are cached for long by the player cache, which must never pin a stale response.
-      { skipCache: true, ...(realmId != null ? { searchParams: { realmId: realmId.toString() } } : {}) }
+      {
+        skipCache: options?.fresh,
+        ...(realmId != null ? { searchParams: { realmId: realmId.toString() } } : {}),
+      }
     );
     if (token === undefined) {
       return undefined;

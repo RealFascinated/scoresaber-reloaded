@@ -180,7 +180,6 @@ const GenericChart = ({ config, labels }: Props) => {
           ? previousAxis.ticks
           : {
               callback: (value: number) => {
-                // Format the value to avoid excessive decimal places
                 const formattedValue = Number(Number(value).toFixed(4));
                 return axis.valueFormatter?.(formattedValue) ?? formattedValue.toString();
               },

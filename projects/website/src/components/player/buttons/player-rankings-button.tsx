@@ -11,7 +11,6 @@ interface PlayerRankingsButtonProps {
 }
 
 export default function PlayerRankingsButton({ player }: PlayerRankingsButtonProps) {
-  // Don't show for inactive or banned players
   if (player.inactive || player.banned) {
     return null;
   }

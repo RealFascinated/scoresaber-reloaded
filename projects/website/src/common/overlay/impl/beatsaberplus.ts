@@ -86,12 +86,6 @@ export default class BeatSaberPlusClient extends OverlayDataClient {
   }
 }
 
-/**
- * Checks if the event is a valid EventName
- *
- * @param event the event to check
- * @returns whether the event is a valid EventName
- */
 function isValidEventName(event: unknown): event is EventName {
   return typeof event === "string" && event in handlers;
 }

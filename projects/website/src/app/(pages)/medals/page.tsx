@@ -3,7 +3,7 @@ import { env } from "@ssr/common/env";
 import { ssrConfig } from "config";
 import { Metadata } from "next";
 
-export const revalidate = 300; // Revalidate every 5 minutes
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Medals Ranking",

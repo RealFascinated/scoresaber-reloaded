@@ -8,9 +8,6 @@ import { formatScoreAccuracy } from "@ssr/common/utils/score.util";
 import { getAccDetails, getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 
 type ScoreAccuracyBadgeProps = ScoreBadgeProps & {
-  /**
-   * Whether to show the difference between the score and the previous score.
-   */
   showDifference?: boolean;
 };
 

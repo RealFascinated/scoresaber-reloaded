@@ -9,7 +9,6 @@ dayjs.extend(relativeTime);
 dayjs.extend(duration);
 dayjs.extend(localeData);
 
-// Configure ordinal numbers
 const locale = dayjs.localeData();
 locale.ordinal = (n: number) => {
   const s = ["th", "st", "nd", "rd"];
@@ -68,28 +67,22 @@ export const Months = [
   },
 ];
 
-/**
- * This function returns the time ago of the input date
- *
- * @param input Date | number (timestamp)
- * @returns the format of the time ago
- */
 export function timeAgo(input: Date, maxUnits: number = 2) {
-  const inputDate = new Date(input).getTime(); // Convert input to a Date object if it's not already
+  const inputDate = new Date(input).getTime();
   const now = new Date().getTime();
-  const deltaSeconds = Math.floor((now - inputDate) / 1000); // Get time difference in seconds
+  const deltaSeconds = Math.floor((now - inputDate) / 1000);
 
   if (deltaSeconds <= 5) {
     return "just now";
   }
 
   const timeUnits = [
-    { unit: "y", seconds: 60 * 60 * 24 * 365 }, // years
-    { unit: "mo", seconds: 60 * 60 * 24 * 30 }, // months
-    { unit: "d", seconds: 60 * 60 * 24 }, // days
-    { unit: "h", seconds: 60 * 60 }, // hours
-    { unit: "m", seconds: 60 }, // minutes
-    { unit: "s", seconds: 1 }, // seconds
+    { unit: "y", seconds: 60 * 60 * 24 * 365 },
+    { unit: "mo", seconds: 60 * 60 * 24 * 30 },
+    { unit: "d", seconds: 60 * 60 * 24 },
+    { unit: "h", seconds: 60 * 60 },
+    { unit: "m", seconds: 60 },
+    { unit: "s", seconds: 1 },
   ];
 
   const result = [];
@@ -101,42 +94,24 @@ export function timeAgo(input: Date, maxUnits: number = 2) {
       result.push(`${count}${unit}`);
       remainingSeconds -= count * seconds;
     }
-    // Stop after two units have been added
     if (result.length === maxUnits) {
       break;
     }
   }
 
-  // Return formatted result with at most two units
   return result.join(" ") + " ago";
 }
 
-/**
- * Gets the amount of milliseconds ago a date was
- *
- * @param input the date
- * @returns the amount of milliseconds ago
- */
 export function getMsAgo(input: Date) {
-  const inputDate = new Date(input).getTime(); // Convert input to a Date object if it's not already
+  const inputDate = new Date(input).getTime();
   const now = new Date().getTime();
   return now - inputDate;
 }
 
-/**
- * Formats the date in the format "MMM D, YYYY"
- *
- * @param date the date
- */
 export function formatDateMinimal(date: Date) {
   return dayjs(date).utc().format("MMM D, YYYY");
 }
 
-/**
- * Formats the date in the format "DD MMMM YYYY"
- *
- * @param date the date
- */
 export function formatChartDate(date: Date) {
   const currentYear = dayjs().utc().year();
   const year = dayjs(date).utc().year();
@@ -159,13 +134,6 @@ function getOrdinalSuffix(day: number): string {
   }
 }
 
-/**
- * Formats the date
- *
- * @param date the date to format
- * @param format the format to return
- * @returns the formatted date
- */
 export function formatDate(
   date: Date,
   format:
@@ -210,40 +178,23 @@ export function formatDate(
   return formatted;
 }
 
-/**
- * Gets the midnight aligned date
- *
- * @param date the date
- */
 export function getMidnightAlignedDate(date: Date) {
   return dayjs(date).utc().startOf("day").toDate();
 }
 
 /**
  * Gets the date X days ago in UTC
- *
- * @param days the number of days to go back
- * @returns {Date} A Date object representing the date X days ago in UTC
  */
 export function getDaysAgoDate(days: number): Date {
   return dayjs().utc().subtract(days, "day").toDate();
 }
 
-/**
- * Gets the amount of days ago a date was
- *
- * @param date the date
- * @returns the amount of days
- */
 export function getDaysAgo(date: Date): number {
   return dayjs().diff(dayjs(date).utc(), "day");
 }
 
 /**
  * Parses a date from a string and ensures it is in UTC
- *
- * @param date the date string in various formats
- * @returns {Date} A Date object representing the parsed date in UTC
  */
 export function parseDate(date: string | undefined): Date {
   if (date == undefined) {
@@ -261,7 +212,6 @@ export function parseDate(date: string | undefined): Date {
  * Formats the time in the format "MM:SS"
  *
  * @param seconds the time to format in seconds
- * @returns the formatted time in "MM:SS" format
  */
 export function formatTime(seconds: number): string {
   return dayjs.utc(seconds * 1000).format("mm:ss");
@@ -272,7 +222,6 @@ export function formatTime(seconds: number): string {
  * showing at most two units for simplicity.
  *
  * @param ms - Duration in milliseconds
- * @returns The formatted duration
  */
 export function formatDuration(ms: number, long: boolean = false): string {
   if (ms < 0) {
@@ -296,22 +245,10 @@ export function formatDuration(ms: number, long: boolean = false): string {
   return result.join(", ") || (long ? "0 Seconds" : "0s");
 }
 
-/**
- * Gets the amount of days in a month
- *
- * @param month the month
- * @param year the year
- */
 export function getDaysInMonth(month: number, year: number) {
   return dayjs(`${year}-${month}-01`).utc().daysInMonth();
 }
 
-/**
- * Forces the date to be in UTC
- *
- * @param date the date
- * @returns the date in UTC
- */
 export function forceUTC(date: Date) {
   return dayjs(date).utc().toDate();
 }
@@ -321,9 +258,6 @@ export type TimeUnitValue = {
   value: number;
 };
 
-/**
- * Enum representing different time units
- */
 export enum TimeUnit {
   Millisecond = "millisecond",
   Second = "second",
@@ -335,9 +269,6 @@ export enum TimeUnit {
   Year = "year",
 }
 
-/**
- * Namespace for TimeUnit methods
- */
 export namespace TimeUnit {
   export function toMillis(unit: TimeUnit, value: number): number {
     const multipliers: Record<TimeUnit, number> = {
@@ -358,12 +289,6 @@ export namespace TimeUnit {
   }
 }
 
-/**
- * Checks if a date is today
- *
- * @param date the date
- * @returns true if the date is today, false otherwise
- */
 export function isToday(date: Date) {
   return dayjs(date).isSame(dayjs().utc(), "day");
 }

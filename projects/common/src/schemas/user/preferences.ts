@@ -1,11 +1,11 @@
 import { Type, type StaticDecode } from "typebox";
 import { OverlaySettingsSchema } from "../overlay/overlay-settings";
+import { ReplayViewerIdSchema } from "../replay-viewer/replay-viewer-id";
 import { HistoryMode, HistoryModeSchema } from "./history-mode";
 import { WebsiteLanding, WebsiteLandingSchema } from "./website-landing";
 
 export const BACKGROUND_COVER_NONE = "none";
 export const BACKGROUND_COVER_CUSTOM = "custom";
-
 
 const AccuracySchema = Type.Number({ minimum: 0, maximum: 100 });
 
@@ -20,11 +20,7 @@ export const UserPreferencesSchema = Type.Object(
     whatIfRange: Type.Tuple([AccuracySchema, AccuracySchema]),
     plusPpDefaultAccuracy: AccuracySchema,
     historyMode: HistoryModeSchema,
-    replayViewer: Type.Union([
-      Type.Literal("beatleader"),
-      Type.Literal("arcviewer"),
-      Type.Literal("chroviewer"),
-    ]),
+    replayViewer: ReplayViewerIdSchema,
     websiteLanding: WebsiteLandingSchema,
     /** A 2 letter country code, or null for global. */
     defaultLeaderboardCountry: Type.Union([Type.String({ minLength: 2, maxLength: 2 }), Type.Null()]),

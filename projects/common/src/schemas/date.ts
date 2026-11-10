@@ -3,7 +3,6 @@ import { Type } from "typebox";
 /**
  * Checks whether a value can be turned into a valid {@link Date}.
  *
- * @param value the value to check
  * @returns true if the value is a valid Date, or an ISO string / timestamp that parses to one
  */
 function isDateInput<TValue>(value: TValue): boolean {

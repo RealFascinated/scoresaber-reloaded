@@ -17,9 +17,6 @@ import { useEffect, useRef } from "react";
 import OverlayView, { OverlayViewPosition } from "./views/view";
 
 type OverlayProps = {
-  /**
-   * The overlay settings.
-   */
   settings: OverlaySettings;
 };
 
@@ -44,7 +41,6 @@ export default function Overlay({ settings }: OverlayProps) {
   const clientRef = useRef<HTTPSiraStatusClient | null>(null);
 
   useEffect(() => {
-    // Only use the data client if it's enabled
     if (!settings.useRealTimeData) {
       return;
     }
@@ -61,7 +57,6 @@ export default function Overlay({ settings }: OverlayProps) {
     }
 
     return () => {
-      // Cleanup the client
       if (clientRef.current) {
         clientRef.current.disconnect?.();
         clientRef.current = null;

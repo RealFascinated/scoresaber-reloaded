@@ -3,37 +3,13 @@ import { SharedIcons } from "@/shared-icons";
 import { ReactNode } from "react";
 
 type SearchDialogProps = {
-  /**
-   * Whether the search dialog is open.
-   */
   isOpen: boolean;
-  /**
-   * Callback for when the search dialog open state changes.
-   */
   onOpenChange: (open: boolean) => void;
-  /**
-   * The current search query.
-   */
   query: string;
-  /**
-   * Callback for when the search query changes.
-   */
   onQueryChange: (query: string) => void;
-  /**
-   * Whether the search is currently loading.
-   */
   isLoading: boolean;
-  /**
-   * The content to display in the search results.
-   */
   children: ReactNode;
-  /**
-   * Placeholder text for the search input.
-   */
   placeholder?: string;
-  /**
-   * Maximum length for the search input.
-   */
   maxLength?: number;
 };
 

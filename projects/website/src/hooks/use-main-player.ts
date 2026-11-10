@@ -2,7 +2,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import useMe from "./use-me";
 
-const PLAYER_STALE_TIME = 1000 * 60 * 60 * 6; // 6 hours
+const PLAYER_STALE_TIME = 1000 * 60 * 60 * 6;
 
 export function playerQuery(id: string) {
   return {
@@ -31,8 +31,6 @@ export function useMainPlayer() {
 
 /**
  * Gets players by id, sorted by rank (cached for 6 hours). Players that couldn't be loaded are left out.
- *
- * @param ids the ids of the players to get
  */
 export function usePlayers(ids: string[]) {
   return useQueries({

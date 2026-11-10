@@ -102,9 +102,6 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-/**
- * Use the map filter context.
- */
 export const useMapFilter = (): FilterContextProps => {
   const context = useContext(MapFilterContext);
   if (!context) {

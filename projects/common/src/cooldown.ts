@@ -8,7 +8,6 @@ export enum CooldownPriority {
  * Calculates the cooldown in milliseconds for a given number of requests per minute.
  *
  * @param requestsPerMinute the number of requests per minute (must be > 0)
- * @returns the cooldown in milliseconds
  * @throws {Error} if requestsPerMinute is not positive
  */
 export function cooldownRequestsPerMinute(requestsPerMinute: number): number {
@@ -16,10 +15,8 @@ export function cooldownRequestsPerMinute(requestsPerMinute: number): number {
     throw new Error(`requestsPerMinute must be positive, got: ${requestsPerMinute}`);
   }
 
-  // Ensure we don't get extremely small values that could cause timing issues
   const cooldownMs = 60_000 / requestsPerMinute;
 
-  // Cap at a reasonable minimum (e.g., 1ms) to prevent timing issues
   return Math.max(1, Math.round(cooldownMs));
 }
 
@@ -28,7 +25,6 @@ export class Cooldown {
   private lastRefresh: number;
   private remainingBursts: number;
 
-  // Separate burst buckets for different priorities
   private backgroundBursts: number;
   private backgroundLastRefresh: number;
 
@@ -43,7 +39,6 @@ export class Cooldown {
     this.lastRefresh = now;
     this.remainingBursts = maxBursts;
 
-    // Background cooldown defaults to 10x slower if not specified
     this.backgroundCooldownMs = backgroundCooldownMs || cooldownMs * 10;
     this.backgroundLastRefresh = now;
     this.backgroundBursts = maxBackgroundBursts;
@@ -63,7 +58,7 @@ export class Cooldown {
 
     if (this.remainingBursts > 0) {
       this.remainingBursts--;
-      this.lastUsed = Date.now(); // Update global lastUsed
+      this.lastUsed = Date.now();
       return true;
     }
 
@@ -80,7 +75,7 @@ export class Cooldown {
 
     if (this.backgroundBursts > 0) {
       this.backgroundBursts--;
-      this.lastUsed = Date.now(); // Update global lastUsed
+      this.lastUsed = Date.now();
       return true;
     }
 
@@ -99,10 +94,8 @@ export class Cooldown {
     if (timeSinceRefresh >= this.cooldownMs) {
       const newTokens = Math.floor(timeSinceRefresh / this.cooldownMs);
 
-      // Update the refresh timestamp to account for the tokens we're adding
       this.lastRefresh += newTokens * this.cooldownMs;
 
-      // Add new tokens, up to maxBursts
       this.remainingBursts = Math.min(this.maxBursts, this.remainingBursts + newTokens);
     }
   }
@@ -114,17 +107,12 @@ export class Cooldown {
     if (timeSinceRefresh >= this.backgroundCooldownMs!) {
       const newTokens = Math.floor(timeSinceRefresh / this.backgroundCooldownMs!);
 
-      // Update the refresh timestamp to account for the tokens we're adding
       this.backgroundLastRefresh += newTokens * this.backgroundCooldownMs!;
 
-      // Add new tokens, up to maxBackgroundBursts
       this.backgroundBursts = Math.min(this.maxBackgroundBursts, this.backgroundBursts + newTokens);
     }
   }
 
-  /**
-   * Check if the cooldown is ready
-   */
   isReady(priority: CooldownPriority = CooldownPriority.NORMAL): boolean {
     if (priority === CooldownPriority.BACKGROUND) {
       this.refreshBackgroundBursts();
@@ -135,9 +123,6 @@ export class Cooldown {
     return this.remainingBursts > 0 || Date.now() - this.lastUsed >= this.cooldownMs;
   }
 
-  /**
-   * Get the remaining time until next available use
-   */
   getRemainingTime(priority: CooldownPriority = CooldownPriority.NORMAL): number {
     if (priority === CooldownPriority.BACKGROUND) {
       this.refreshBackgroundBursts();
@@ -162,8 +147,6 @@ export class Cooldown {
 
   /**
    * Wait for the cooldown to be ready and consume it
-   *
-   * @param priority the priority to wait for
    */
   async waitAndUse(priority: CooldownPriority = CooldownPriority.NORMAL): Promise<void> {
     while (!this.use(priority)) {
@@ -173,9 +156,6 @@ export class Cooldown {
 
   /**
    * Wait for the cooldown to be ready
-   *
-   * @param priority the priority to wait for
-   * @returns promise that resolves when the cooldown is ready
    */
   async awaitCooldown(priority: CooldownPriority = CooldownPriority.NORMAL): Promise<void> {
     const remainingTime = this.getRemainingTime(priority) * this.getCooldownMultiplier(priority);
@@ -193,14 +173,7 @@ export class Cooldown {
     }
   }
 
-  /**
-   * Get the cooldown multiplier for a given priority
-   *
-   * @param priority the priority to get the cooldown multiplier for
-   * @returns the cooldown multiplier
-   */
   public getCooldownMultiplier(priority: CooldownPriority): number {
-    // Adjust cooldown based on priority
     let cooldownMultiplier = 1;
     if (priority === CooldownPriority.LOW) {
       cooldownMultiplier = 2;
@@ -209,9 +182,6 @@ export class Cooldown {
     return cooldownMultiplier;
   }
 
-  /**
-   * Reset the cooldown and restore all bursts
-   */
   reset(): void {
     const now = Date.now();
     this.lastUsed = now;
@@ -220,10 +190,6 @@ export class Cooldown {
     this.backgroundBursts = this.maxBackgroundBursts;
   }
 
-  /**
-   * Get the number of remaining burst tokens available
-   * @returns number of burst tokens that can be used immediately
-   */
   getRemainingBursts(priority: CooldownPriority = CooldownPriority.NORMAL): number {
     if (priority === CooldownPriority.BACKGROUND) {
       this.refreshBackgroundBursts();

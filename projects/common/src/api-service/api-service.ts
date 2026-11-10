@@ -12,19 +12,10 @@ export interface ServiceConfig {
 }
 
 export default class ApiService {
-  /**
-   * The cooldown for the service.
-   */
   private readonly cooldown: Cooldown;
 
-  /**
-   * The name of the service.
-   */
   private readonly name: ApiServiceName;
 
-  /**
-   * The configuration for the service.
-   */
   private readonly config: ServiceConfig;
 
   /**
@@ -35,14 +26,8 @@ export default class ApiService {
   private failedCallCount: number = 0;
   private totalLatencyMs: number = 0;
 
-  /**
-   * The current proxy to use.
-   */
   private currentProxy: string = ""; // No proxy by default
 
-  /**
-   * The last rate limit seen.
-   */
   private lastRateLimitSeen: number | undefined = undefined;
 
   constructor(cooldown: Cooldown, name: ApiServiceName, config: ServiceConfig) {
@@ -57,7 +42,6 @@ export default class ApiService {
           this.lastRateLimitSeen > config.proxyResetThreshold &&
           this.currentProxy !== "" // Already not using a proxy
         ) {
-          // Reset to no proxy
           this.currentProxy = "";
           Logger.info("Switched back to no proxy for api service requests");
         }
@@ -65,18 +49,10 @@ export default class ApiService {
     }
   }
 
-  /**
-   * Gets the name of the service.
-   *
-   * @returns the name of the service
-   */
   public getName(): ApiServiceName {
     return this.name;
   }
 
-  /**
-   * Gets the current call count.
-   */
   public getCallCount(): number {
     return this.callCount;
   }
@@ -92,32 +68,14 @@ export default class ApiService {
     return this.totalLatencyMs / this.callCount;
   }
 
-  /**
-   * Logs a message to the console.
-   *
-   * @param data the data to log
-   */
   public log(data: unknown) {
     Logger.debug(`[${this.name.toUpperCase()}] ${data}`);
   }
 
-  /**
-   * Builds a request url.
-   *
-   * @param url the url to fetch
-   * @returns the request url
-   */
   private buildRequestUrl(url: string): string {
     return (isServer() ? (this.config.useProxy ? this.currentProxy : "") : CLIENT_PROXY) + url;
   }
 
-  /**
-   * Fetches data from the given url.
-   *
-   * @param url the url to fetch
-   * @param options the fetch options to use
-   * @returns the fetched data
-   */
   public async fetch<T>(
     url: string,
     options?: RequestOptions & { priority?: CooldownPriority }
@@ -125,7 +83,6 @@ export default class ApiService {
     const startedAt = performance.now();
     await this.cooldown.waitAndUse(options?.priority || CooldownPriority.NORMAL);
 
-    // Increment the call count if we're on the server
     if (isServer()) {
       this.callCount++;
     }
@@ -135,11 +92,9 @@ export default class ApiService {
     });
     this.totalLatencyMs += Math.max(0, performance.now() - startedAt);
 
-    // Handle rate limit errors
     const remaining = response?.headers.get("x-ratelimit-remaining");
     if (isServer() && this.config.useProxy) {
       if (remaining && Number(remaining) <= this.config.proxySwitchThreshold) {
-        // Get the next proxy in the list (circular)
         const currentIndex = SERVER_PROXIES.indexOf(this.currentProxy);
         const nextIndex = (currentIndex + 1) % SERVER_PROXIES.length;
         const nextProxy = SERVER_PROXIES[nextIndex];
@@ -149,7 +104,6 @@ export default class ApiService {
         );
       }
 
-      // Update the last rate limit seen
       this.lastRateLimitSeen = Number(remaining);
     }
 
@@ -161,18 +115,6 @@ export default class ApiService {
     return response.json() as Promise<T>;
   }
 
-  /**
-   * Fetches data from the given url.
-   *
-   * @param url the url to fetch
-   * @param options the fetch options to use
-   * @returns the fetched data
-   */
-  /**
-   * Gets the total number of server proxies.
-   *
-   * @returns the total number of server proxies
-   */
   public static getTotalServerProxies(): number {
     return SERVER_PROXIES.length;
   }

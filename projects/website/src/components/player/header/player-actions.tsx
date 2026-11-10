@@ -63,7 +63,6 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
 
   return (
     <div className="flex gap-2">
-      {/* ScoreSaber Profile */}
       <PlayerLink
         playerName={player.name}
         name="ScoreSaber"
@@ -83,7 +82,6 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
         icon={<AccSaberLogo size={20} className="select-none" />}
       />
 
-      {/* Social Links */}
       {twitchName && (
         <PlayerLink
           playerName={player.name}
@@ -93,7 +91,6 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
         />
       )}
 
-      {/* Divider */}
       {mainPlayerId && player.id !== mainPlayerId && (
         <>
           <div className="flex items-center">

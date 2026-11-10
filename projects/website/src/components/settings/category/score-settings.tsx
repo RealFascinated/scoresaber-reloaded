@@ -5,7 +5,7 @@ import { useUpdateUserPreferences } from "@/hooks/use-user-preferences";
 import { SharedIcons } from "@/shared-icons";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { ReplayViewers } from "@ssr/common/replay-viewer";
-import type { UserPreferences } from "@ssr/common/schemas/user/preferences";
+import { DEFAULT_USER_PREFERENCES, UserPreferencesSchema } from "@ssr/common/schemas/user/preferences";
 import { useForm } from "react-hook-form";
 import { Type, type Static } from "typebox";
 import { Form } from "../../ui/form";
@@ -13,11 +13,7 @@ import { SettingSection } from "../setting-section";
 import { SettingsCategorySkeleton } from "../settings-category-skeleton";
 import { showSettingsSavedToast } from "../settings-feedback";
 
-type ReplayViewerId = UserPreferences["replayViewer"];
-
-const formSchema = Type.Object({
-  replayViewer: Type.String({ minLength: 1, maxLength: 32 }),
-});
+const formSchema = Type.Pick(UserPreferencesSchema, ["replayViewer"]);
 
 const settings = [
   {
@@ -45,18 +41,17 @@ const ScoreSettings = () => {
   const form = useForm<Static<typeof formSchema>>({
     resolver: typeboxResolver(formSchema),
     defaultValues: {
-      replayViewer: "",
+      replayViewer: DEFAULT_USER_PREFERENCES.replayViewer,
     },
   });
 
-  // Sync form with database settings
   const { isLoading } = useSettingsForm(form, preferences => ({
     replayViewer: preferences.replayViewer,
   }));
 
   async function onSubmit(values: Static<typeof formSchema>) {
     const before = performance.now();
-    await updateAsync({ replayViewer: values.replayViewer as ReplayViewerId });
+    await updateAsync({ replayViewer: values.replayViewer });
 
     showSettingsSavedToast(before);
   }

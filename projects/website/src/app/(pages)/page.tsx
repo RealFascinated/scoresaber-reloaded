@@ -10,7 +10,6 @@ export default async function LandingPage() {
   return (
     <div className="flex w-full flex-col items-center">
       <LandingBackground />
-      {/* Hero */}
       <section className="flex w-full flex-col items-center px-6 py-20 text-center">
         <h1 className="text-foreground mb-4 text-5xl font-bold tracking-tight sm:text-6xl">
           ScoreSaber Reloaded
@@ -24,12 +23,10 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Stats */}
       <section className="mx-auto w-full max-w-4xl px-6">
         <LandingStats />
       </section>
 
-      {/* Quick links */}
       <section className="mx-auto mt-16 grid w-full max-w-4xl grid-cols-2 gap-4 px-6 sm:grid-cols-4 md:hidden">
         {[
           {
@@ -69,7 +66,6 @@ export default async function LandingPage() {
         ))}
       </section>
 
-      {/* Features */}
       <section className="mx-auto mt-16 grid w-full max-w-4xl gap-4 px-6 sm:grid-cols-2">
         {[
           {
@@ -105,7 +101,6 @@ export default async function LandingPage() {
         ))}
       </section>
 
-      {/* Get started */}
       <section className="mt-20 mb-20 flex flex-col items-center gap-6 px-6 text-center">
         <h2 className="text-foreground text-3xl font-bold tracking-tight">Ready to dive in?</h2>
         <p className="text-muted-foreground max-w-lg text-balance">

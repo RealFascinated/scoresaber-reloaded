@@ -10,7 +10,7 @@ import { ssrConfig } from "config";
 import { Metadata } from "next";
 import { cache } from "react";
 
-export const revalidate = 300; // Revalidate every 5 minutes
+export const revalidate = 300;
 
 const UNKNOWN_LEADERBOARD = {
   title: "Unknown Leaderboard",

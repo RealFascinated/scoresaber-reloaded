@@ -14,34 +14,16 @@ export type BeatSaverMapStatsSentiment = StaticDecode<typeof BeatSaverMapStatsSe
 
 /** Shapes `MapStats` (BeatSaver Swagger). */
 export const BeatSaverMapStatsTokenSchema = Type.Object({
-  /**
-   * The amount of time the map has been played.
-   */
   plays: Type.Number(),
 
-  /**
-   * The amount of times the map has been downloaded.
-   */
   downloads: Type.Number(),
 
-  /**
-   * The amount of times the map has been upvoted.
-   */
   upvotes: Type.Number(),
 
-  /**
-   * The amount of times the map has been downvoted.
-   */
   downvotes: Type.Number(),
 
-  /**
-   * The score for the map
-   */
   score: Type.Number(),
 
-  /**
-   * The amount of reviews for the map.
-   */
   reviews: Type.Number(),
 
   scoreOneDP: Type.Optional(Type.Number()),

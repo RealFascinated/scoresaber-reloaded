@@ -12,19 +12,10 @@ import { formatDateMinimal, getMidnightAlignedDate, parseDate } from "@ssr/commo
 import { useMemo } from "react";
 
 type Props = {
-  /**
-   * The id of the chart
-   */
   id: string;
 
-  /**
-   * The player the chart is for
-   */
   statisticHistory: ScoreSaberPlayerHistoryEntries;
 
-  /**
-   * The data to render.
-   */
   datasetConfig: DatasetConfig[];
 
   /**
@@ -37,7 +28,6 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
   const { labels, histories } = useMemo(() => {
     const histories: Record<string, (number | null)[]> = {};
 
-    // Create a map of available data for O(1) lookup
     const dataMap = new Map<string, ScoreSaberPlayerHistory>();
     Object.entries(statisticHistory).forEach(([dateString, history]) => {
       dataMap.set(dateString, history);
@@ -54,7 +44,6 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     if (hasTodayData) {
       endDate = new Date(today);
     } else {
-      // Find the latest date from available data
       const dates = Array.from(dataMap.keys()).map(parseDate);
       const latestDate = dates.reduce(
         (latest, current) => (current > latest ? current : latest),
@@ -96,7 +85,6 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     return { labels: labelsResult, histories };
   }, [statisticHistory, datasetConfig, daysAmount]);
 
-  // Check if player statistics are available
   if (!statisticHistory || Object.keys(statisticHistory).length === 0) {
     return (
       <div className="flex h-[400px] items-center justify-center">

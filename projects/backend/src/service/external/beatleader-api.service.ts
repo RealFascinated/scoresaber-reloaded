@@ -13,6 +13,7 @@ import { parseSchema } from "@ssr/common/schemas/parse";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import { Value } from "typebox/value";
+import { backoff, parseRetryAfterMs } from "./http-retry";
 
 const LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT = "https://cdn.scorestats.beatleader.xyz/:scoreId.json";
 const LOOKUP_PLAYERS_ENDPOINT =
@@ -42,12 +43,6 @@ export class BeatLeaderApiService {
 
   /** Max attempts per logical request (including the first). */
   private static readonly MAX_ATTEMPTS = 5;
-  /** Base delay for the exponential backoff (ms). */
-  private static readonly BACKOFF_BASE_MS = 500;
-  /** Upper bound for the exponential backoff delay (ms). */
-  private static readonly BACKOFF_MAX_MS = 10_000;
-  /** Upper bound for honoring a server-provided `Retry-After` (ms). */
-  private static readonly RETRY_AFTER_MAX_MS = 30_000;
   /** Per-request timeout (ms). */
   private static readonly REQUEST_TIMEOUT_MS = 15_000;
 
@@ -96,7 +91,7 @@ export class BeatLeaderApiService {
         if (result == undefined) {
           // Transport failure — retry unless we exhausted the attempts.
           if (attempt < BeatLeaderApiService.MAX_ATTEMPTS) {
-            await BeatLeaderApiService.backoff(attempt);
+            await backoff(attempt);
             continue;
           }
           BeatLeaderApiService.failedRequests++;
@@ -106,7 +101,7 @@ export class BeatLeaderApiService {
         // 429 / 5xx are transient — retry (honoring Retry-After). Every other
         // status (2xx, 3xx, 4xx like 404) is a definitive answer.
         if ((result.status === 429 || result.status >= 500) && attempt < BeatLeaderApiService.MAX_ATTEMPTS) {
-          await BeatLeaderApiService.backoff(attempt, result.retryAfterMs);
+          await backoff(attempt, result.retryAfterMs);
           continue;
         }
         return result;
@@ -159,50 +154,17 @@ export class BeatLeaderApiService {
       return undefined;
     }
 
+    // A non-JSON body is still a definitive HTTP status (e.g. an HTML 404
+    // page from the CDN) — don't treat it as a transport failure and retry.
     let data: unknown;
     try {
       data = await response.json();
     } catch {
-      // A non-JSON body is still a definitive HTTP status (e.g. an HTML 404
-      // page from the CDN) — don't treat it as a transport failure and retry.
-      return {
-        status: response.status,
-        data: undefined,
-        retryAfterMs: BeatLeaderApiService.parseRetryAfterMs(response),
-      };
+      data = undefined;
     }
 
     BeatLeaderApiService.totalRequestLatencyMs += Math.max(0, performance.now() - startedAt);
-    return { status: response.status, data, retryAfterMs: BeatLeaderApiService.parseRetryAfterMs(response) };
-  }
-
-  private static parseRetryAfterMs(response: Response): number | undefined {
-    const header = response.headers.get("retry-after");
-    if (!header) {
-      return undefined;
-    }
-    const seconds = Number(header);
-    if (Number.isFinite(seconds)) {
-      return Math.max(0, Math.min(seconds * 1000, BeatLeaderApiService.RETRY_AFTER_MAX_MS));
-    }
-    const date = new Date(header).getTime();
-    return Number.isFinite(date)
-      ? Math.max(0, Math.min(date - Date.now(), BeatLeaderApiService.RETRY_AFTER_MAX_MS))
-      : undefined;
-  }
-
-  private static async backoff(attempt: number, retryAfterMs?: number): Promise<void> {
-    if (retryAfterMs != null) {
-      await new Promise(resolve => setTimeout(resolve, retryAfterMs));
-      return;
-    }
-    const exponentialMs = Math.min(
-      BeatLeaderApiService.BACKOFF_BASE_MS * 2 ** (attempt - 1),
-      BeatLeaderApiService.BACKOFF_MAX_MS
-    );
-    // Full jitter avoids a thundering herd of retries after a shared rate limit.
-    const delayMs = exponentialMs / 2 + Math.random() * (exponentialMs / 2);
-    await new Promise(resolve => setTimeout(resolve, delayMs));
+    return { status: response.status, data, retryAfterMs: parseRetryAfterMs(response) };
   }
 
   private static async fetch<T>(

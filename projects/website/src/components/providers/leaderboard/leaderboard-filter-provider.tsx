@@ -46,9 +46,6 @@ export const LeaderboardFilterProvider = ({ children }: { children: ReactNode })
   );
 };
 
-/**
- * Use the leaderboard filter context.
- */
 export const useLeaderboardFilter = (initialCountry?: string): FilterContextProps => {
   const context = useContext(LeaderboardFilterContext);
   if (!context) {

@@ -3,21 +3,9 @@ import { BeatSaverWebsocketMessageToken } from "../schemas/beatsaver/tokens/webs
 import { connectWebSocket, WebsocketCallbacks } from "./websocket";
 
 type ScoresaberWebsocket = {
-  /**
-   * Invoked when a map update message is received.
-   *
-   * @param map the received map update data.
-   */
   onMapUpdate?: (map: BeatSaverMapToken) => void;
 } & WebsocketCallbacks;
 
-/**
- * Connects to the Scoresaber websocket and handles incoming messages.
- *
- * @param onMessage the onMessage callback
- * @param onScore the onScore callback
- * @param onDisconnect the onDisconnect callback
- */
 export function connectBeatSaverWebsocket({ onMessage, onDisconnect, onMapUpdate }: ScoresaberWebsocket) {
   return connectWebSocket({
     name: "BeatSaver",
@@ -28,7 +16,6 @@ export function connectBeatSaverWebsocket({ onMessage, onDisconnect, onMapUpdate
         return;
       }
 
-      // Handle map update messages
       if (command.type === "MAP_UPDATE") {
         onMapUpdate && onMapUpdate(command.msg as BeatSaverMapToken);
       } else {

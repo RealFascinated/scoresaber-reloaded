@@ -110,22 +110,6 @@ export default class StorageService {
     }
   }
 
-  /**
-   * Checks if a file exists in Minio.
-   *
-   * @param bucket the bucket to check in
-   * @param filename the filename to check
-   * @returns true if the file exists, false otherwise
-   */
-  public static async fileExists(bucket: StorageBucket, filename: string): Promise<boolean> {
-    try {
-      const s3file = StorageService.getFileRef(bucket, filename);
-      return await s3file.exists();
-    } catch {
-      return false;
-    }
-  }
-
   public async initBuckets() {
     for (const bucket of Object.values(StorageBucket)) {
       try {

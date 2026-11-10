@@ -45,14 +45,12 @@ export default function ScoreSaberLeaderboardScore({
           detailsExpanded ? "border-b border-transparent" : "border-border/50 border-b"
         )}
       >
-        {/* Score Rank */}
         <TableCell className={cn(TABLE_CELL_WIDTH, "pr-1 pl-3 whitespace-nowrap")}>
           <p className={cn("font-medium tabular-nums", getRankColor(score.rank))}>
             {score.rank !== -1 ? `#${formatNumberWithCommas(score.rank)}` : "-"}
           </p>
         </TableCell>
 
-        {/* Player */}
         <TableCell className={cn(TABLE_CELL_WIDTH, "w-full min-w-[300px] whitespace-nowrap")}>
           {scorePlayer ? (
             <div className="flex items-center gap-2">
@@ -73,17 +71,14 @@ export default function ScoreSaberLeaderboardScore({
           )}
         </TableCell>
 
-        {/* Time Set */}
         <TableCell className={cn(TABLE_CELL_WIDTH, "text-muted-foreground text-center whitespace-nowrap")}>
           <ScoreTimeSet timestamp={score.timestamp} />
         </TableCell>
 
-        {/* Score Accuracy */}
         <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
           <span className="font-medium tabular-nums">{formatScoreAccuracy(score.accuracy)}</span>
         </TableCell>
 
-        {/* Score Misses */}
         <TableCell
           className={cn(
             TABLE_CELL_WIDTH,
@@ -94,7 +89,6 @@ export default function ScoreSaberLeaderboardScore({
           <ScoreMissesAndPausesBadge score={score} hideXMark hidePreviousScore />
         </TableCell>
 
-        {/* PP / Score */}
         {leaderboard.stars > 0 ? (
           <TableCell className={cn(TABLE_CELL_WIDTH, "text-pp font-medium whitespace-nowrap tabular-nums")}>
             <ScorePpBadge score={score} leaderboard={leaderboard} />
@@ -105,7 +99,6 @@ export default function ScoreSaberLeaderboardScore({
           </TableCell>
         )}
 
-        {/* Score Modifiers */}
         <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
           {score.modifiers.length > 0 ? (
             <SimpleTooltip
@@ -126,7 +119,6 @@ export default function ScoreSaberLeaderboardScore({
           )}
         </TableCell>
 
-        {/* Score Replay */}
         <TableCell className={cn(TABLE_CELL_WIDTH_SMALL, "w-[37px]")}>
           {score.beatLeaderScore && (
             <div className="flex justify-center">
@@ -155,7 +147,6 @@ export default function ScoreSaberLeaderboardScore({
         </TableCell>
       </TableRow>
 
-      {/* Dropdown row - appears directly below the clicked row */}
       {detailsExpanded && (
         <TableRow className="border-border/50 border-b">
           <TableCell colSpan={10} className="p-(--spacing-md)">

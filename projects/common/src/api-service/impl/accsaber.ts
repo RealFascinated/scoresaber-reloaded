@@ -45,7 +45,6 @@ export class AccSaberService extends ApiService {
    * Checks whether a player exists on AccSaber.
    *
    * @param playerId the AccSaber user id
-   * @returns true if the player exists
    */
   public async checkPlayerExists(playerId: string): Promise<boolean> {
     try {
@@ -63,7 +62,6 @@ export class AccSaberService extends ApiService {
    * @param playerId the AccSaber user id
    * @param page the 1-indexed page number
    * @param options the sort, direction and score type
-   * @returns the scores page
    */
   public async getPlayerScores(
     playerId: string,

@@ -207,7 +207,6 @@ function FollowingPopover() {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Header */}
         <div className="border-border/50 flex items-center justify-between border-b px-3 py-2.5">
           <div className="flex items-center gap-2">
             <SharedIcons.FollowingNavIcon className="text-muted-foreground size-4" />
@@ -220,7 +219,6 @@ function FollowingPopover() {
           )}
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-2">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
@@ -370,7 +368,6 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Search */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -381,14 +378,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Profile */}
         <SidebarGroup className="pt-0 pb-2">
           <SidebarGroupContent>
             <ProfileSection />
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Navigation */}
         <SidebarGroup className="py-0">
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">

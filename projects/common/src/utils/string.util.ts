@@ -1,9 +1,3 @@
-/**
- * Generates a random string
- *
- * @param length the length of the string
- * @returns the random string
- */
 export function randomString(length: number) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
@@ -13,24 +7,10 @@ export function randomString(length: number) {
   return result;
 }
 
-/**
- * Pluralizes a string.
- *
- * @param count the count of the string
- * @param word the word to pluralize
- * @returns the pluralized string
- */
 export function pluralize(count: number, word: string) {
   return count === 1 ? word : `${word}s`;
 }
 
-/**
- * Formats a string with a variable number of arguments.
- *
- * @param template the template string
- * @param args the arguments to format the string with
- * @returns the formatted string
- */
 export function format(template: string, ...args: unknown[]) {
   let argIndex = 0;
   return template.replace(/%s/g, () => args[argIndex++]?.toString() || "%s");

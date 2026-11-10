@@ -16,19 +16,10 @@ export default function FollowButton({
   iconOnly,
   className,
 }: {
-  /**
-   * The player to follow or unfollow.
-   */
   player: ScoreSaberPlayer | MedalRankingPlayer | { id: string; name: string };
 
-  /**
-   * Whether to show the icon only.
-   */
   iconOnly?: boolean;
 
-  /**
-   * The class name to apply to the button.
-   */
   className?: string;
 }) {
   const { id, name } = player;
@@ -37,9 +28,6 @@ export default function FollowButton({
   const isFollowing = useFollowingIds().includes(id);
   const mainPlayerId = useMainPlayerId();
 
-  /**
-   * Follows or unfollows this player
-   */
   function toggleFollowing() {
     if (isFollowing) {
       unfollow(id);
@@ -67,7 +55,6 @@ export default function FollowButton({
     return null;
   }
 
-  // Don't show the button for the current user
   if (mainPlayerId == id) {
     return null;
   }

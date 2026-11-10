@@ -4,9 +4,6 @@ import { formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 
 type OverlayScoreDataProps = {
-  /**
-   * The data for the current score.
-   */
   overlayData: OverlayData;
 };
 
@@ -18,17 +15,14 @@ export default function OverlayScoreDataView({ overlayData }: OverlayScoreDataPr
       ? undefined
       : ScoreSaberCurve.getPp(leaderboard.stars, scoreData.accuracy);
 
-  // No score data, nothing to display
   if (!scoreData) {
     return null;
   }
 
   return (
     <div className="flex flex-col text-xl">
-      {/* PP */}
       {!!leaderboard && pp && <b className="text-pp">{formatPp(pp)}pp</b>}
 
-      {/* Accuracy */}
       <b
         style={{
           color: getScoreBadgeFromAccuracy(scoreData.accuracy).textColor,
@@ -37,7 +31,6 @@ export default function OverlayScoreDataView({ overlayData }: OverlayScoreDataPr
         {scoreData.accuracy.toFixed(2)}%
       </b>
 
-      {/* Paused */}
       {overlayData.paused && <p className="text-md text-danger italic">Currently Paused</p>}
     </div>
   );

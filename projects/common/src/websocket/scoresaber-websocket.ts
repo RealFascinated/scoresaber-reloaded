@@ -3,21 +3,9 @@ import { ScoreSaberWebsocketMessageToken } from "../schemas/scoresaber/tokens/we
 import { connectWebSocket, WebsocketCallbacks } from "./websocket";
 
 type ScoresaberWebsocket = {
-  /**
-   * Invoked when a score message is received.
-   *
-   * @param score the received score data.
-   */
   onScore?: (score: ScoreSaberPlayerScoreToken) => void;
 } & WebsocketCallbacks;
 
-/**
- * Connects to the Scoresaber websocket and handles incoming messages.
- *
- * @param onMessage the onMessage callback
- * @param onScore the onScore callback
- * @param onDisconnect the onDisconnect callback
- */
 export function connectScoresaberWebsocket({ onMessage, onScore, onDisconnect }: ScoresaberWebsocket) {
   return connectWebSocket({
     name: "Scoresaber",

@@ -9,19 +9,10 @@ interface EmptyStateProps {
    */
   icon?: ReactNode;
 
-  /**
-   * The title of the empty state.
-   */
   title: string;
 
-  /**
-   * The description of the empty state.
-   */
   description: string;
 
-  /**
-   * Optional className to extend the styling.
-   */
   className?: string;
 }
 

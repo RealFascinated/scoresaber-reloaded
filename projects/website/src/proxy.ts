@@ -8,7 +8,7 @@ export async function proxy(request: NextRequest) {
   // The session is the only source of who is signed in, so only the pages that depend on it
   // pay for asking the backend
   if (pathname === "/" || pathname.startsWith("/home")) {
-    const session = await getServerSession(request.headers.get("cookie") ?? "", true);
+    const session = await getServerSession(request.headers.get("cookie") ?? "");
 
     // Signed-in visitors land where they asked to
     if (pathname === "/" && session.status === "signed-in" && session.me.playerId) {
@@ -31,7 +31,6 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Log requests in production
   if (process.env.NEXT_PUBLIC_APP_ENV === "production") {
     console.log(`${request.method} ${pathname}${request.nextUrl.search}`);
   }

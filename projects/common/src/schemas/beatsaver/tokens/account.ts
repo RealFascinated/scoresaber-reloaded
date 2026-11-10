@@ -89,24 +89,12 @@ export type BeatSaverUserStats = StaticDecode<typeof BeatSaverUserStatsSchema>;
 
 /** Shapes `UserDetail` where we use uploader / author in-app (BeatSaver Swagger). */
 export const BeatSaverAccountTokenSchema = Type.Object({
-  /**
-   * The id of the mapper
-   */
   id: Type.Number(),
 
-  /**
-   * The name of the mapper.
-   */
   name: Type.String(),
 
-  /**
-   * The account hash of the mapper.
-   */
   hash: Type.String(),
 
-  /**
-   * The avatar url for the mapper.
-   */
   avatar: Type.String(),
 
   /**
@@ -114,29 +102,14 @@ export const BeatSaverAccountTokenSchema = Type.Object({
    */
   type: BeatSaverAccountTypeSchema,
 
-  /**
-   * Whether the account is an admin or not.
-   */
   admin: Type.Boolean(),
 
-  /**
-   * Whether the account is a curator or not.
-   */
   curator: Type.Boolean(),
 
-  /**
-   * Whether the account is a senior curator or not.
-   */
   seniorCurator: Type.Boolean(),
 
-  /**
-   * Whether the account is a verified mapper or not.
-   */
   verifiedMapper: Type.Boolean(),
 
-  /**
-   * The playlist for the mappers songs.
-   */
   playlistUrl: Type.String(),
 
   blurnsfw: Type.Optional(Type.Boolean()),

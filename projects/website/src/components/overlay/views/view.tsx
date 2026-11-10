@@ -10,28 +10,13 @@ export enum OverlayViewPosition {
 }
 
 type OverlayViewProps = {
-  /**
-   * The position of the view in the grid.
-   */
   position: OverlayViewPosition;
 
-  /**
-   * The class name of the view.
-   */
   className?: string;
 
-  /**
-   * The children of the view.
-   */
   children: ReactNode;
 };
 
-/**
- * Gets the classes for the position of the view.
- *
- * @param pos the position of the view
- * @returns the classes for the position of the view
- */
 const getPositionClasses = (pos: OverlayViewPosition): string => {
   switch (pos) {
     case OverlayViewPosition.TOP_LEFT:

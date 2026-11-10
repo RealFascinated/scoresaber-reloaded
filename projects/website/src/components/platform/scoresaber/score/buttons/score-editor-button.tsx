@@ -38,9 +38,8 @@ export default function ScoreSaberScoreEditorButton({
   const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
   const accuracy = (score.score / maxScore) * 100 * (hasModifier(score.modifiers, Modifier.NF) ? 0.5 : 1);
 
-  const [baseValue, setBaseValue] = useState(Math.max(MIN_ACCURACY, Math.floor(accuracy))); // 1, 2, 3, etc.
-  const [decimalValue, setDecimalValue] = useState(accuracy - Math.floor(accuracy)); // 0.0, 0.1, 0.2, etc.
-
+  const [baseValue, setBaseValue] = useState(Math.max(MIN_ACCURACY, Math.floor(accuracy)));
+  const [decimalValue, setDecimalValue] = useState(accuracy - Math.floor(accuracy));
   const { data: rankedPps } = useQuery({
     queryKey: ["ranked-pps", score.playerId, realmId],
     queryFn: () => ssrApi.getPlayerPps(score.playerId, realmId),
@@ -123,7 +122,6 @@ export default function ScoreSaberScoreEditorButton({
         open={open}
         onOpenChange={open => {
           if (!open) {
-            // Reset when closing
             handleSliderReset();
             setModifiedScores(undefined);
           }
@@ -139,13 +137,11 @@ export default function ScoreSaberScoreEditorButton({
 
         <PopoverContent className="p-0" side={isMobile ? "top" : "left"}>
           <div className="flex flex-col gap-4 p-3">
-            {/* Accuracy Changer */}
             <div className="flex w-full flex-col gap-(--spacing-lg)">
               <div className="flex items-center justify-between">
                 <p>Accuracy Changer</p>
 
                 <div className="flex items-center gap-2">
-                  {/* Set to FC Button */}
                   {score.beatLeaderScore !== undefined && !score.fullCombo && (
                     <SimpleTooltip
                       display={
@@ -161,7 +157,6 @@ export default function ScoreSaberScoreEditorButton({
                     </SimpleTooltip>
                   )}
 
-                  {/* Reset Button */}
                   <SimpleTooltip display={<p>Set accuracy to score accuracy</p>}>
                     <Button onClick={handleSliderReset} className="h-fit p-1.5" variant="ghost">
                       <SharedIcons.UndoScoreEditIcon className="size-3.5" />
@@ -171,7 +166,6 @@ export default function ScoreSaberScoreEditorButton({
               </div>
 
               <div className="flex w-full flex-col gap-(--spacing-md)">
-                {/* Base Slider */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <label className="text-muted-foreground text-sm">Base</label>
@@ -187,7 +181,6 @@ export default function ScoreSaberScoreEditorButton({
                   />
                 </div>
 
-                {/* Decimal Slider */}
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <label className="text-muted-foreground text-sm">Decimal</label>
@@ -205,7 +198,6 @@ export default function ScoreSaberScoreEditorButton({
               </div>
             </div>
 
-            {/* PP Gain */}
             {rankedPps && leaderboard.ranked && (
               <p className="text-muted-foreground text-sm">
                 Weighted PP Gain: <b className="text-pp">{ppGain > 0.1 ? ppGain.toFixed(2) : 0}pp</b>

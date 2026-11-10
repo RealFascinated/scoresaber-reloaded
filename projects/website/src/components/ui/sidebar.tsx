@@ -178,7 +178,6 @@ const Sidebar = React.forwardRef<
 
   return (
     <>
-      {/* Spacer that pushes content */}
       <div
         className={cn(
           "hidden shrink-0 md:block",
@@ -187,7 +186,6 @@ const Sidebar = React.forwardRef<
           "transition-[width] duration-200 ease-linear"
         )}
       />
-      {/* Fixed sidebar */}
       <div
         ref={ref}
         className={cn(

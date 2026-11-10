@@ -17,9 +17,6 @@ export enum Modifier {
   NA = "NA",
 }
 
-/**
- * Maps a modifier code to its human-readable label.
- */
 export const ModifierLabels: Readonly<Record<Modifier, string>> = {
   [Modifier.NF]: "No Fail",
   [Modifier.PM]: "Pro Mode",
@@ -45,14 +42,8 @@ const modifierByLabel = Object.freeze(
   )
 ) as Readonly<Record<string, Modifier>>;
 
-/**
- * Schema for a single modifier code.
- */
 export const ModifierSchema = Type.Enum(Modifier);
 
-/**
- * Schema for a list of modifier codes.
- */
 export const ModifiersSchema = Type.Array(ModifierSchema);
 
 /**

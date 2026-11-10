@@ -145,7 +145,6 @@ export default async function ScorePage({ params }: ScorePageProps) {
     throw error;
   }
 
-  // Check if we have any additional data to show
   const hasScoreStats = !!scoreStats;
   const hasReplay = !!replay;
   const hasAnyAdditionalData = hasScoreStats || hasReplay;

@@ -62,8 +62,6 @@ export default function BackgroundCover() {
   const [layers, setLayers] = useState<Layer[]>([]);
   const [currentKey, setCurrentKey] = useState<string | undefined>(undefined);
 
-  // When the target changes, stack a new hidden layer on top (it fades in once loaded),
-  // or fade every layer out when there's no background anymore
   if (targetKey !== currentKey) {
     setCurrentKey(targetKey);
     setLayers(prev =>
@@ -73,7 +71,6 @@ export default function BackgroundCover() {
     );
   }
 
-  // Remove layers once they've finished fading out / been covered
   useEffect(() => {
     if (pruneLayers(layers, currentKey).length === layers.length) {
       return;

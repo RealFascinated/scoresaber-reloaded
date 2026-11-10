@@ -5,8 +5,6 @@ import { SelfPlaylistSettings, selfPlaylistSettingsSchema } from "./self-playlis
 
 /**
  * Parses the raw settings into a self playlist settings object.
- *
- * @param settingsBase64 the raw settings
  */
 export function parseSelfPlaylistSettings(settingsBase64?: string) {
   const defaults = {
@@ -40,9 +38,6 @@ export function parseSelfPlaylistSettings(settingsBase64?: string) {
 
 /**
  * Encodes the self playlist settings into a base64 string
- *
- * @param settings the self playlist settings
- * @returns the base64 encoded settings
  */
 export function encodeSelfPlaylistSettings(settings: SelfPlaylistSettings) {
   return Buffer.from(JSON.stringify(settings)).toString("base64");

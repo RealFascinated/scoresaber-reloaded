@@ -29,9 +29,7 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
 
   return (
     <section className="bg-card ring-border flex w-full flex-col gap-5 rounded-xl p-4 ring-1 sm:p-5">
-      {/* Song header */}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
-        {/* Album Art */}
         <NextImage
           src={leaderboardData.songArt}
           alt={`${leaderboardData.songName} cover`}
@@ -40,14 +38,11 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
           height={160}
         />
 
-        {/* Song info */}
         <div className="flex min-w-0 flex-1 flex-col items-center gap-2.5 text-center sm:items-start sm:text-left">
-          {/* Status Badge */}
           <div className="sm:mx-0">
             <LeaderboardStatus leaderboard={leaderboardData} />
           </div>
 
-          {/* Song Name */}
           <FallbackLink
             href={beatsaver ? `https://beatsaver.com/maps/${beatsaver.bsr}` : undefined}
             className="hover:text-primary/80 transition-all sm:w-fit"
@@ -55,7 +50,6 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
             <h1 className="text-2xl leading-tight font-bold sm:text-3xl">{leaderboardData.fullName}</h1>
           </FallbackLink>
 
-          {/* Author and Mapper */}
           <p className="text-muted-foreground text-sm">
             by <span className="text-foreground font-medium">{leaderboardData.songAuthorName}</span>
             {" · "}
@@ -68,7 +62,6 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
             </FallbackLink>
           </p>
 
-          {/* Map action buttons */}
           {(beatsaver || showStarHistory) && (
             <div className="flex items-center justify-center gap-1 sm:justify-start">
               {beatsaver && (
@@ -97,7 +90,6 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
         </div>
       </div>
 
-      {/* BeatSaver stats */}
       {beatsaver && (
         <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-xs sm:justify-start">
           <span className="flex items-center gap-1.5">

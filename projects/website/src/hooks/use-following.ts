@@ -18,8 +18,6 @@ const NOT_FOLLOWING: string[] = [];
 /**
  * Gets the ids of the players the signed-in user follows (cached). It only changes through
  * `useFollowActions`, which keeps the cache current, so it is never refetched on its own.
- *
- * @param includeSelf whether to also include the signed-in user's own id
  */
 export function useFollowingIds(includeSelf?: boolean): string[] {
   const { data } = useQuery({
@@ -37,8 +35,6 @@ export function useFollowingIds(includeSelf?: boolean): string[] {
 
 /**
  * Gets the players the signed-in user follows, sorted by rank.
- *
- * @param includeSelf whether to also include the signed-in user
  */
 export function useFollowing(includeSelf?: boolean) {
   return usePlayers(useFollowingIds(includeSelf));
@@ -119,8 +115,6 @@ export function useFollowActions() {
 
 /**
  * Gets how many users follow a player and how many players they follow.
- *
- * @param playerId the player to look up
  */
 export function usePlayerFollows(playerId: string) {
   return useQuery({
@@ -133,8 +127,6 @@ export function usePlayerFollows(playerId: string) {
 /**
  * Gets the players that follow a player, or that a player follows, sorted by rank.
  *
- * @param playerId the player to look up
- * @param list which list to get
  * @param enabled whether to load it yet, so lists are only fetched once opened
  */
 export function usePlayerFollowList(playerId: string, list: "followers" | "following", enabled: boolean) {

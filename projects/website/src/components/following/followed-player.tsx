@@ -12,14 +12,8 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { toast } from "sonner";
 
 type FollowedPlayerProps = {
-  /**
-   * The followed player to display.
-   */
   player: ScoreSaberPlayer;
 
-  /**
-   * When the player is clicked
-   */
   onClick?: () => void;
 };
 

@@ -8,9 +8,6 @@ import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import CountryFlag from "../../ui/country-flag";
 
 type PlayerPreviewHeaderProps = {
-  /**
-   * The player to display.
-   */
   player: ScoreSaberPlayer;
 };
 
@@ -20,7 +17,6 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
 
   return (
     <div className="flex flex-col items-center gap-6 text-center select-none lg:flex-row lg:text-start">
-      {/* Avatar with subtle glow */}
       <div className="relative shrink-0">
         <div className="bg-primary/10 absolute inset-0 scale-110 rounded-full blur-3xl" />
         <Avatar
@@ -31,9 +27,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
         />
       </div>
 
-      {/* Name + Stats */}
       <div className="flex flex-col items-center gap-2 lg:items-start">
-        {/* Name */}
         <SimpleLink
           href={`/player/${player.id}`}
           className="hover:text-primary/80 text-3xl leading-tight font-bold tracking-tight transition-all"
@@ -44,11 +38,9 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
           {player.name}
         </SimpleLink>
 
-        {/* Key stats */}
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm lg:justify-start">
           {isActive && (
             <>
-              {/* Global rank */}
               <SimpleTooltip display={<span>Global Rank</span>} side="bottom">
                 <span className="flex items-center gap-1.5 font-medium text-white/85">
                   <SharedIcons.GlobalRankIcon className="size-3.5 text-white/50" />#
@@ -58,7 +50,6 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
 
               <span className="hidden text-white/15 sm:inline">|</span>
 
-              {/* Country rank */}
               <SimpleTooltip display={<span>Country Rank</span>} side="bottom">
                 <span className="flex items-center gap-1.5 font-medium text-white/85">
                   <CountryFlag code={player.country} size={9} className="rounded-xs" />#
@@ -70,7 +61,6 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
             </>
           )}
 
-          {/* PP */}
           <SimpleTooltip display={<span>Performance Points</span>} side="bottom">
             <span className="text-pp flex items-center gap-1.5 font-semibold">
               <SharedIcons.PerformancePointsIcon className="size-3.5" />
@@ -80,7 +70,6 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
 
           <span className="hidden text-white/15 sm:inline">|</span>
 
-          {/* Medals */}
           <SimpleTooltip display={<span>Medals</span>} side="bottom">
             <span className="flex items-center gap-1.5 font-medium text-white/85">
               <SharedIcons.MedalsIcon className="size-3.5 text-white/50" />
@@ -88,7 +77,6 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
             </span>
           </SimpleTooltip>
 
-          {/* Compact inline streak */}
           <span className="hidden text-white/15 sm:inline">|</span>
           <SimpleTooltip
             display={

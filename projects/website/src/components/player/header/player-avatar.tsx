@@ -8,9 +8,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 type PlayerAvatarProps = {
-  /**
-   * The player to display.
-   */
   player: ScoreSaberPlayer;
 };
 

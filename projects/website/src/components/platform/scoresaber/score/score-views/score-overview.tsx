@@ -8,19 +8,10 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 
 type ScoreOverviewProps = {
-  /**
-   * The score to display.
-   */
   score: ScoreSaberScore;
 
-  /**
-   * The score stats for this score.
-   */
   scoreStats?: ScoreStatsResponse;
 
-  /**
-   * The leaderboard the score was set on.
-   */
   leaderboard: ScoreSaberLeaderboard;
 };
 
@@ -31,7 +22,6 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
 
   return (
     <div className="flex w-full flex-col gap-2 md:flex-row">
-      {/* Stats */}
       <Card className="flex w-full flex-col items-center justify-center gap-3 rounded-xl md:mb-0 md:max-w-[360px]">
         <div className="flex w-full flex-row flex-wrap items-center justify-center gap-2">
           {score.beatLeaderScore && (
@@ -57,13 +47,11 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
           )}
         </div>
 
-        {/* Accuracy Stats */}
         <div className="bg-card border-border flex w-full flex-col items-center justify-center gap-3 rounded-lg border p-3">
           <ScoreAccuracyStats scoreStats={scoreStats} />
         </div>
       </Card>
 
-      {/* Accuracy Chart */}
       <div className="flex h-full w-full items-center justify-center md:min-h-[320px]">
         <PlayerScoreAccuracyChart scoreStats={scoreStats} leaderboard={leaderboard} />
       </div>

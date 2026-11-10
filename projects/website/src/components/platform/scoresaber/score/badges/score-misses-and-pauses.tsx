@@ -3,19 +3,10 @@ import { ScoreMissesTooltip } from "@/components/score/score-misses-tooltip";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type ScoreMissesBadgeProps = ScoreBadgeProps & {
-  /**
-   * Hide the "X" mark for misses.
-   */
   hideXMark?: boolean;
 
-  /**
-   * Hide the "vs" text for previous score.
-   */
   hidePreviousScore?: boolean;
 
-  /**
-   * Whether to show the difference between the score and the previous score.
-   */
   showDifference?: boolean;
 };
 

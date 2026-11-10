@@ -10,14 +10,8 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { formatTime } from "@ssr/common/utils/time-utils";
 
 type Props = {
-  /**
-   * The score stats to use in the chart.
-   */
   scoreStats: ScoreStatsResponse;
 
-  /**
-   * The leaderboard to the score was set on.
-   */
   leaderboard: ScoreSaberLeaderboard;
 };
 

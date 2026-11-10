@@ -85,7 +85,7 @@ export function ConfirmationDialog({
       <DialogContent
         className="sm:max-w-md"
         onClick={e => e.stopPropagation()} // Prevent backdrop clicks from closing parent modals
-        onMouseDown={e => e.stopPropagation()} // Prevent mousedown events too
+        onMouseDown={e => e.stopPropagation()}
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

@@ -125,19 +125,15 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
       return transformed;
     };
 
-    // Get main player's data points
     const mainPlayerDataPoints = transformToDataPoints(dataPoints || []);
 
-    // Get comparison players' data points
     const comparisonDataPoints = comparisonPlayers.flatMap(comparisonPlayer => {
       const playerData = comparisonData?.find(d => d.id === comparisonPlayer.id)?.data || [];
       return transformToDataPoints(playerData);
     });
 
-    // Combine all data points for scale calculation
     const allDataPoints = [...mainPlayerDataPoints, ...comparisonDataPoints];
 
-    // Calculate axis bounds
     const starValues = allDataPoints.map(point => point.x);
     const accuracyValues = allDataPoints.map(point => point.y);
 
@@ -154,7 +150,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
         ? 0
         : Math.ceil(Math.max(...accuracyValues) / ACCURACY_TICK_SIZE) * ACCURACY_TICK_SIZE;
 
-    // Build scatter datasets for main player and comparison players
     const scatterDatasets: ScatterDataset[] = [
       {
         type: "scatter",
@@ -188,7 +183,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
     // Build best/average line datasets (only when not comparing with other players)
     let lineDatasets: LineDataset[] = [];
     if (comparisonPlayers.length === 0) {
-      // Group data points by star rating
       const groupedByStarRating: Record<number, number[]> = {};
       for (const point of mainPlayerDataPoints) {
         const starGroup = Math.round(point.x / STAR_TICK_SIZE) * STAR_TICK_SIZE;
@@ -198,7 +192,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
         groupedByStarRating[starGroup].push(point.y);
       }
 
-      // Create best line data (max accuracy per star rating)
       const bestLineData = Object.entries(groupedByStarRating)
         .map(([stars, accuracies]) => ({
           x: parseFloat(stars),
@@ -206,7 +199,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
         }))
         .sort((a, b) => a.x - b.x);
 
-      // Create average line data (average accuracy per star rating)
       const averageLineData = Object.entries(groupedByStarRating)
         .map(([stars, accuracies]) => {
           const sum = accuracies.reduce((total, acc) => total + acc, 0);
@@ -295,22 +287,18 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
               const point = context.raw;
               const tooltipLines: string[] = [];
 
-              // Map name and difficulty
               const mapName = point.leaderboardName || "N/A";
               const difficulty = point.leaderboardDifficulty || "N/A";
               tooltipLines.push(`${mapName} [${difficulty}]`);
 
-              // Star rating and accuracy
               const stars = point.x.toFixed(2);
               const accuracy = point.y.toFixed(2);
               tooltipLines.push(`${stars} ⭐ - ${accuracy}%`);
 
-              // PP value
               if (point.pp !== undefined) {
                 tooltipLines.push(`PP: ${formatPp(point.pp)}pp`);
               }
 
-              // Timestamp
               if (point.timestamp) {
                 const dateStr = formatDate(point.timestamp, "Do MMMM, YYYY HH:mm");
                 tooltipLines.push(`Played on ${dateStr}`);
@@ -389,7 +377,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
         <Line data={datasets as any} options={chartOptions as any} />
       </div>
 
-      {/* Comparison Players */}
       <div className="flex flex-col justify-center gap-2 pt-2">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
@@ -443,7 +430,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
           </div>
         </div>
 
-        {/* Player Search */}
         <PlayerSearch
           isOpen={isSearchOpen}
           onOpenChange={setIsSearchOpen}

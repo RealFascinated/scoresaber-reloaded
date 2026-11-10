@@ -1,7 +1,8 @@
 import { env } from "@ssr/common/env";
-import type { AuthMeResponse } from "@ssr/common/schemas/response/auth/me";
-import type { PlayerIdListResponse } from "@ssr/common/schemas/response/user/following";
-import { DEFAULT_USER_PREFERENCES, type UserPreferences } from "@ssr/common/schemas/user/preferences";
+import { parseSchema } from "@ssr/common/schemas/parse";
+import { AuthMeResponseSchema, type AuthMeResponse } from "@ssr/common/schemas/response/auth/me";
+import { PlayerIdListResponseSchema } from "@ssr/common/schemas/response/user/following";
+import { type UserPreferences } from "@ssr/common/schemas/user/preferences";
 import { assertUserPreferences } from "../preferences/preferences-api";
 
 const SESSION_REQUEST_TIMEOUT_MS = 3000;
@@ -22,11 +23,9 @@ async function backendGet(path: string, cookie: string): Promise<Response> {
 
 /**
  * Resolves the session of a request on the server by forwarding its cookies to the backend.
- *
- * @param cookie the raw `cookie` header of the incoming request
- * @param withUserData whether to also fetch the user's preferences and who they follow
+ * A body that does not match its schema counts as the backend being unavailable.
  */
-export async function getServerSession(cookie: string, withUserData: boolean): Promise<ServerSession> {
+export async function getServerSession(cookie: string): Promise<ServerSession> {
   if (!cookie) {
     return { status: "anonymous" };
   }
@@ -34,28 +33,20 @@ export async function getServerSession(cookie: string, withUserData: boolean): P
   try {
     const [meResponse, preferencesResponse, followingResponse] = await Promise.all([
       backendGet("/me", cookie),
-      withUserData ? backendGet("/user/preferences", cookie) : Promise.resolve(undefined),
-      withUserData ? backendGet("/user/following", cookie) : Promise.resolve(undefined),
+      backendGet("/user/preferences", cookie),
+      backendGet("/user/following", cookie),
     ]);
     if (meResponse.status === 401) {
       return { status: "anonymous" };
     }
-    if (
-      !meResponse.ok ||
-      (preferencesResponse && !preferencesResponse.ok) ||
-      (followingResponse && !followingResponse.ok)
-    ) {
+    if (!meResponse.ok || !preferencesResponse.ok || !followingResponse.ok) {
       return { status: "unavailable" };
     }
 
-    const me = (await meResponse.json()) as AuthMeResponse;
-    const preferences = preferencesResponse
-      ? assertUserPreferences((await preferencesResponse.json()) as UserPreferences)
-      : DEFAULT_USER_PREFERENCES;
-    const following = followingResponse
-      ? ((await followingResponse.json()) as PlayerIdListResponse).playerIds
-      : [];
-    return { status: "signed-in", me, preferences, following };
+    const me = parseSchema(AuthMeResponseSchema, await meResponse.json());
+    const preferences = assertUserPreferences(await preferencesResponse.json());
+    const following = parseSchema(PlayerIdListResponseSchema, await followingResponse.json());
+    return { status: "signed-in", me, preferences, following: following.playerIds };
   } catch {
     return { status: "unavailable" };
   }

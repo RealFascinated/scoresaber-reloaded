@@ -1,34 +1,16 @@
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 
 export type Difficulty = {
-  /**
-   * The id of the difficulty
-   */
   id: string;
 
-  /**
-   * The name of the difficulty
-   */
   mapDifficulty: MapDifficulty;
 
-  /**
-   * The display name of the difficulty
-   */
   displayName?: string;
 
-  /**
-   * The short name of the difficulty
-   */
   shortName: string;
 
-  /**
-   * The color of the difficulty
-   */
   color: string;
 
-  /**
-   * The difficulty id of the difficulty
-   */
   scoresaberDiffId: number;
 };
 
@@ -67,14 +49,7 @@ const scoreBadges: ScoreBadge[] = [
   { name: "-", min: null, max: 70, color: "var(--acc-none)", textColor: "var(--acc-none)" },
 ];
 
-/**
- * Returns the color based on the accuracy provided.
- *
- * @param acc - The accuracy for the score
- * @returns The corresponding color for the accuracy.
- */
 export function getScoreBadgeFromAccuracy(acc: number): ScoreBadge {
-  // Iterate through all badges in order
   for (const badge of scoreBadges) {
     // Badge with no upper limit (SS++, SS+)
     if (badge.max === null && badge.min !== null) {
@@ -100,32 +75,15 @@ export function getScoreBadgeFromAccuracy(acc: number): ScoreBadge {
   return scoreBadges[scoreBadges.length - 1];
 }
 
-/**
- * Gets a score badge from its name.
- *
- * @param name the name of the badge
- * @returns the badge
- */
 export function getScoreBadgeFromName(name: string): ScoreBadge {
   return scoreBadges.find(badge => badge.name === name)!;
 }
 
-/**
- * Gets the name of the difficulty
- *
- * @param diff the difficulty
- */
 export function getDifficultyName(diff: Difficulty | MapDifficulty) {
   const difficulty = getDifficulty(diff);
   return difficulty.displayName ?? difficulty.mapDifficulty;
 }
 
-/**
- * Gets a {@link Difficulty} from its name
- *
- * @param diff the name of the difficulty
- * @returns the difficulty
- */
 export function getDifficulty(diff: Difficulty | MapDifficulty) {
   const difficulty = difficulties.find(
     d => d.id === (typeof diff === "string" ? diff.toLowerCase() : diff.mapDifficulty.toLowerCase())
@@ -138,12 +96,6 @@ export function getDifficulty(diff: Difficulty | MapDifficulty) {
   return difficulty;
 }
 
-/**
- * Gets the acc details for a badge.
- *
- * @param badge the badge
- * @returns the acc details
- */
 export function getAccDetails(badge: ScoreBadge) {
   let accDetails = `${badge.name != "-" ? badge.name : ""}`;
   if (badge.max == null) {

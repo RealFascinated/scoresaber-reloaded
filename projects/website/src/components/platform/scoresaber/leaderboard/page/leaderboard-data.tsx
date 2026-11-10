@@ -12,13 +12,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 
 type LeaderboardDataProps = {
-  /**
-   * The initial leaderboard data.
-   */
   leaderboardData: LeaderboardResponse;
-  /**
-   * The star rating change history for the leaderboard.
-   */
   starChangeHistory: LeaderboardStarChange[];
 };
 

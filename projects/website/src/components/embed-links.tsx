@@ -5,10 +5,8 @@ type EmbedLinksProps = {
 };
 
 export default function EmbedLinks({ text }: EmbedLinksProps) {
-  // Regular expression to match URLs (simple version)
   const urlRegex = /(https?:\/\/\S+)/g;
 
-  // Split the text by URLs and insert <a> tags for matching URLs
   const parts = text.split(urlRegex);
 
   const isUrl = (s: string) => s.startsWith("http://") || s.startsWith("https://");

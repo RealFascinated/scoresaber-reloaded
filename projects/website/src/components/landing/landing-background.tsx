@@ -27,7 +27,6 @@ export function LandingBackground() {
     resize();
     window.addEventListener("resize", resize);
 
-    // Create particles
     const particleCount = 60;
     for (let i = 0; i < particleCount; i++) {
       particles.push({
@@ -78,7 +77,6 @@ export function LandingBackground() {
 
   return (
     <>
-      {/* Radial gradient background */}
       <div
         className="pointer-events-none fixed inset-0 -z-50 select-none"
         style={{
@@ -89,7 +87,6 @@ export function LandingBackground() {
           `,
         }}
       />
-      {/* Particles canvas */}
       <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 -z-40 select-none" />
     </>
   );

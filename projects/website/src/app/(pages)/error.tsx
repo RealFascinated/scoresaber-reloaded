@@ -30,7 +30,6 @@ export default function Error(props: ErrorProps) {
           <p className="text-muted-foreground text-lg">{errorMessage}</p>
         </div>
 
-        {/* Error Details */}
         <div className="w-full">
           <div className="border-border bg-muted/50 ring-border mt-2 rounded-xl p-4 text-left ring-1">
             <div className="flex flex-col gap-2">
@@ -52,7 +51,6 @@ export default function Error(props: ErrorProps) {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex flex-col gap-3 sm:flex-row">
           <SimpleLink href="/">
             <Button variant="outline" className="gap-2">
@@ -62,7 +60,6 @@ export default function Error(props: ErrorProps) {
           </SimpleLink>
         </div>
 
-        {/* Discord Support */}
         <div className="border-border flex flex-col items-center gap-2 border-t pt-3">
           <p className="text-muted-foreground text-sm">Need help? Join our Discord community!</p>
           <DiscordButton />

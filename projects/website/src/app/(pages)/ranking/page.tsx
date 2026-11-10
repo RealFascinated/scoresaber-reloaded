@@ -4,7 +4,7 @@ import { countryFilter } from "@ssr/common/utils/country.util";
 import { ssrConfig } from "config";
 import { Metadata } from "next";
 
-export const revalidate = 300; // Revalidate every 5 minutes
+export const revalidate = 300;
 
 type Props = {
   searchParams: Promise<{

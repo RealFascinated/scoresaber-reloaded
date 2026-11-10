@@ -34,7 +34,6 @@ export const LOGIN_PATH = "/login";
 /**
  * Only allows redirecting to a path on this site, so a login link can't send users elsewhere.
  *
- * @param redirect the requested redirect path
  * @returns the redirect path, or "/" when it is missing or not a local path
  */
 export function getSafeRedirectPath(redirect: string | null | undefined): string {
@@ -47,8 +46,6 @@ export function getSafeRedirectPath(redirect: string | null | undefined): string
 /**
  * Starts the Steam sign-in by sending the browser to Steam. Steam returns to the backend,
  * which then redirects to the given path (or back to the login page with an `error` on failure).
- *
- * @param redirectPath the local path to open once signed in
  */
 export async function signInWithSteam(redirectPath: string = "/"): Promise<void> {
   const response = await authFetch("/auth/sign-in/social", {
@@ -68,9 +65,6 @@ export async function signInWithSteam(redirectPath: string = "/"): Promise<void>
   window.location.assign(url);
 }
 
-/**
- * Signs the current user out.
- */
 export async function signOut(): Promise<void> {
   const response = await authFetch("/auth/sign-out", {
     method: "POST",

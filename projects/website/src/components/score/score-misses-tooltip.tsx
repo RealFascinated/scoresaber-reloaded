@@ -3,39 +3,18 @@ import { ensurePositiveNumber, formatNumberWithCommas } from "@ssr/common/utils/
 import { ReactNode } from "react";
 
 type ScoreMissesTooltipProps = {
-  /**
-   * The amount of missed notes.
-   */
   missedNotes: number;
 
-  /**
-   * The amount of bad cuts.
-   */
   badCuts: number;
 
-  /**
-   * The amount of bomb cuts.
-   */
   bombCuts?: number;
 
-  /**
-   * The amount of walls hit.
-   */
   wallsHit?: number;
 
-  /**
-   * The amount of pauses.
-   */
   pauses?: number;
 
-  /**
-   * Whether the play was a full combo.
-   */
   fullCombo?: boolean;
 
-  /**
-   * The tooltip children
-   */
   children: ReactNode;
 };
 

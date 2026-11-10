@@ -4,10 +4,6 @@ import { useUserPreferences } from "./use-user-preferences";
 
 /**
  * Hook to sync form values with the saved user preferences
- *
- * @param form - The react-hook-form instance
- * @param getValues - Maps the saved preferences to the form values
- * @param excludeFromSync - Optional array of field names to exclude from automatic syncing
  */
 export function useSettingsForm<T extends FieldValues>(
   form: UseFormReturn<T>,

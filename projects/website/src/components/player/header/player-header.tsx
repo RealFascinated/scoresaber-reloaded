@@ -16,9 +16,6 @@ import PlayerStats from "./player-stats";
 import PlayerStreak from "./player-streak";
 
 type PlayerHeaderProps = {
-  /**
-   * The player to display.
-   */
   player: ScoreSaberPlayer;
 };
 
@@ -78,7 +75,6 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
         </div>
       </div>
 
-      {/* Player Footer */}
       <div className="border-border/50 flex flex-col-reverse items-center gap-4 border-t pt-4 md:flex-row md:justify-between">
         <PlayerActions player={player} />
         <PlayerAccBadges statistics={player.statistics} />

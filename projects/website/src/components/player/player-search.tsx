@@ -11,25 +11,10 @@ import { useState } from "react";
 import PlayerSearchResultItem from "./player-search-result-item";
 
 type PlayerSearchProps = {
-  /**
-   * Whether the search dialog is open.
-   */
   isOpen: boolean;
-  /**
-   * Callback for when the search dialog open state changes.
-   */
   onOpenChange: (open: boolean) => void;
-  /**
-   * Callback for when a player is selected.
-   */
   onPlayerSelect: (player: ScoreSaberPlayer) => void;
-  /**
-   * Placeholder text for the search input.
-   */
   placeholder?: string;
-  /**
-   * Player IDs to exclude from search results.
-   */
   excludePlayerIds?: string[];
 };
 

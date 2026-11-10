@@ -25,7 +25,7 @@ export function useLeaderboardDropdownData(
 
     const timer = setTimeout(() => {
       setShouldFetch(true);
-    }, 50); // Small delay to allow UI updates
+    }, 50);
 
     return () => clearTimeout(timer);
   }, [isExpanded]);

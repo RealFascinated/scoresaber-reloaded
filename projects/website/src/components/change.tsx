@@ -2,30 +2,14 @@ import { formatChange } from "@ssr/common/utils/utils";
 import clsx from "clsx";
 
 type ChangeProps = {
-  /**
-   * The amount the value changed
-   */
   change: number | undefined;
 
-  /**
-   * The function to format the value
-   * @param value
-   */
   formatValue?: (value: number) => string;
 
-  /**
-   * The additional class names
-   */
   className?: string;
 
-  /**
-   * Whether the number is a pp number
-   */
   isPp?: boolean;
 
-  /**
-   * Should we use colors?
-   */
   showColors?: boolean;
 };
 

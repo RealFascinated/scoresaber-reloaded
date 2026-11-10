@@ -84,7 +84,6 @@ export default function OverlayBuilder() {
     form.setValue("useRealTimeData", overlaySettings.useRealTimeData);
     form.setValue("dataClient", overlaySettings.dataClient || "");
 
-    // Ensure views object has the correct structure
     const normalizedViews = {
       [OverlayViews.PlayerInfo]: overlaySettings.views?.[OverlayViews.PlayerInfo] ?? true,
       [OverlayViews.ScoreInfo]: overlaySettings.views?.[OverlayViews.ScoreInfo] ?? true,
@@ -96,7 +95,6 @@ export default function OverlayBuilder() {
     hasInitialized.current = true;
   }, [overlaySettings]);
 
-  // Auto-save settings to database when form values change
   useEffect(() => {
     // Don't save on initial load
     if (!overlaySettings || !hasInitialized.current) {
@@ -111,7 +109,6 @@ export default function OverlayBuilder() {
       views: currentValues.views as Record<OverlayViews, boolean>,
     };
 
-    // Only save if values have actually changed
     const getStoredView = (view: OverlayViews) => overlaySettings.views?.[view] ?? true;
     const hasChanged =
       settingsToSave.playerId !== overlaySettings.playerId ||
@@ -154,11 +151,6 @@ export default function OverlayBuilder() {
     }
   };
 
-  /**
-   * Handles the form submission
-   *
-   * @param replayViewer the new replay viewer
-   */
   async function onSubmit({ playerId, useRealTimeData, dataClient, views }: Static<typeof formSchema>) {
     const player = await ssrApi.getScoreSaberPlayer(playerId, "basic");
     if (!player) {
@@ -166,7 +158,6 @@ export default function OverlayBuilder() {
       return;
     }
 
-    // Update the settings
     const overlaySettings = {
       playerId: playerId,
       useRealTimeData: useRealTimeData,
@@ -179,7 +170,6 @@ export default function OverlayBuilder() {
 
   return (
     <Card className="flex h-fit w-full flex-col gap-4 2xl:w-[75%]">
-      {/* Streamer Warning */}
       <Notice>You must use a resolution of 1920x1080 in OBS (or similar) to use this overlay.</Notice>
 
       <p className="text-muted-foreground text-sm">
@@ -187,7 +177,6 @@ export default function OverlayBuilder() {
         in.
       </p>
 
-      {/* Overlay Settings */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <FormField
@@ -226,7 +215,6 @@ export default function OverlayBuilder() {
             )}
           />
 
-          {/* Data Clients */}
           {isRealTimeDataEnabled && (
             <FormField
               control={form.control}
@@ -261,7 +249,6 @@ export default function OverlayBuilder() {
             />
           )}
 
-          {/* Views Section */}
           <div className="flex flex-col gap-3">
             <div>
               <FormLabel className="text-sm">Enabled Views</FormLabel>
@@ -303,7 +290,6 @@ export default function OverlayBuilder() {
             })}
           </div>
 
-          {/* Action Buttons */}
           <div className="border-border border-t pt-4">
             <Button type="submit" className="w-full">
               Open Overlay

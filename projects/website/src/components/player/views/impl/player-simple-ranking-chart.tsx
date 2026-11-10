@@ -11,7 +11,6 @@ type Props = {
   daysAmount: number;
 };
 
-// Dataset configuration for the chart
 const datasetConfig: DatasetConfig[] = [
   {
     title: "Rank",

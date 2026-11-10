@@ -2,14 +2,8 @@ import ScoreSaberPlayer from "./impl/scoresaber-player";
 import { StatisticRange } from "./player";
 
 export type PlayerStatValue = {
-  /**
-   * The type of the stat.
-   */
   type: string;
 
-  /**
-   * The value of the stat.
-   */
   value: (player: ScoreSaberPlayer, range: StatisticRange) => number | undefined;
 };
 

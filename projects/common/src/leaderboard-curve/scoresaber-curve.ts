@@ -50,12 +50,10 @@ const DEFAULT_CURVE: PpCurvePoint[] = [
 /**
  * Gets the modifier for the given accuracy.
  *
- * @param accuracy The accuracy.
  * @param curve The curve to use (sorted by ascending accuracy), defaults to the realm 1 curve.
- * @return The modifier.
  */
 function getModifier(accuracy: number, curve: PpCurvePoint[] = DEFAULT_CURVE): number {
-  accuracy = clamp(accuracy, 0, 100) / 100; // Normalize accuracy to a range of [0, 1]
+  accuracy = clamp(accuracy, 0, 100) / 100;
 
   if (accuracy <= 0) {
     return 0;
@@ -78,11 +76,6 @@ function getModifier(accuracy: number, curve: PpCurvePoint[] = DEFAULT_CURVE): n
 
 /**
  * Ngl i have no idea what this does.
- *
- * @param bottomScores
- * @param idx
- * @param expected
- * @private
  */
 function calcRawPpAtIdx(bottomScores: Array<any>, idx: number, expected: number) {
   const oldBottomPp = getTotalWeightedPp(bottomScores, idx);
@@ -97,11 +90,7 @@ function calcRawPpAtIdx(bottomScores: Array<any>, idx: number, expected: number)
  * Gets the total amount of weighted pp from
  * the sorted pp array
  *
- * @param ppArray the sorted pp array
- * @param startIdx the index to start from
  * @param weightCoefficient the realm's per-rank weight decay
- * @returns the total amount of weighted pp
- * @private
  */
 function getTotalWeightedPp(ppArray: Array<number>, startIdx = 0, weightCoefficient = WEIGHT_COEFFICIENT) {
   return ppArray.reduce(
@@ -113,26 +102,20 @@ function getTotalWeightedPp(ppArray: Array<number>, startIdx = 0, weightCoeffici
 /**
  * Gets the performance points (PP) based on stars and accuracy.
  *
- * @param stars The star count.
- * @param accuracy The accuracy.
  * @param curve The curve to use (sorted by ascending accuracy), defaults to the realm 1 curve.
- * @returns The calculated PP.
  */
 function getPp(stars: number, accuracy: number, curve: PpCurvePoint[] = DEFAULT_CURVE): number {
   if (accuracy <= 1) {
-    accuracy *= 100; // Convert the accuracy to a percentage
+    accuracy *= 100;
   }
-  const pp = stars * STAR_MULTIPLIER; // Calculate base PP value
-  return getModifier(accuracy, curve) * pp; // Calculate and return final PP value
+  const pp = stars * STAR_MULTIPLIER;
+  return getModifier(accuracy, curve) * pp;
 }
 
 /**
  * Gets the amount of raw pp you need
  * to gain the expected pp
  *
- * @param scoresPps the sorted pp array
- * @param expectedPp the expected pp gain
- * @returns the amount of raw pp
  */
 function calcRawPpForExpectedPp(scoresPps: number[], expectedPp = 1) {
   let left = 0;
@@ -164,33 +147,24 @@ function calcRawPpForExpectedPp(scoresPps: number[], expectedPp = 1) {
 /**
  * Gets the amount of raw pp needed to gain the expected weighted pp.
  *
- * @param scoresPps The sorted scores PP array.
- * @param expectedPp The expected weighted pp gain.
- * @returns The amount of raw pp needed to gain the expected weighted pp.
  */
 function getRawPpForWeightedPpGain(scoresPps: number[], expectedPp: number): number {
-  // If there are no existing scores, the amount of raw pp needed is just the expected weighted pp
   if (!scoresPps.length) {
     return expectedPp;
   }
 
-  // Create a copy of scores and find where the expected weighted pp would fit
   const newScores = [...scoresPps];
   let insertIndex = newScores.findIndex(pp => expectedPp > pp);
 
-  // If the expected weighted pp is smaller than all existing scores, add it to the end
   if (insertIndex === -1) {
     insertIndex = newScores.length;
   }
 
-  // Insert the expected weighted pp value at the correct position
   newScores.splice(insertIndex, 0, expectedPp);
 
-  // Calculate the total weighted PP before and after insertion
   const oldTotal = getTotalWeightedPp(scoresPps);
   const newTotal = getTotalWeightedPp(newScores);
 
-  // The boundary is the difference between the new and old totals
   return newTotal - oldTotal;
 }
 

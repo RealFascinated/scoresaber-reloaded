@@ -11,14 +11,8 @@ import { usePathname } from "next/navigation";
 import { ReactElement } from "react";
 
 type FooterLink = {
-  /**
-   * The name of this link.
-   */
   name: string;
 
-  /**
-   * The href for this link.
-   */
   href: string;
 
   /**
@@ -29,19 +23,10 @@ type FooterLink = {
 };
 
 type SocialLinkType = {
-  /**
-   * The name of this social link.
-   */
   name: string;
 
-  /**
-   * The logo for this social link.
-   */
   logo: ReactElement<any>;
 
-  /**
-   * The href for this social link.
-   */
   href: string;
 };
 
@@ -118,12 +103,9 @@ export default function Footer({
         isHome ? "bg-secondary" : "bg-secondary/60 mt-5"
       )}
     >
-      {/* Top Section */}
       <div className="flex justify-center">
-        {/* Branding & Social Links */}
         <div className="flex w-full max-w-(--breakpoint-2xl) flex-col items-center justify-between gap-7 lg:flex-row lg:items-start">
           <div className="flex flex-col gap-5">
-            {/* Branding */}
             <div className="flex flex-col items-center gap-2 text-center lg:items-start lg:text-left">
               <SimpleLink
                 className="flex items-center gap-3 transition-all hover:opacity-75"
@@ -139,7 +121,6 @@ export default function Footer({
               </p>
             </div>
 
-            {/* Social Links */}
             <div className="flex items-center justify-center gap-4 lg:justify-start">
               {socialLinks.map(link => (
                 <SimpleLink
@@ -155,7 +136,6 @@ export default function Footer({
             </div>
           </div>
 
-          {/* Links */}
           <div className="flex gap-20 transition-all md:gap-32">
             {Object.entries(links).map(([title, links]) => (
               <div key={title} className="flex flex-col gap-0.5">
@@ -182,9 +162,7 @@ export default function Footer({
         </div>
       </div>
 
-      {/* Bottom Section */}
       <div className="flex justify-center">
-        {/* Build Ifo */}
         <SimpleLink
           className="text-sm opacity-50"
           href={`https://github.com/RealFascinated/scoresaber-reloaded/commit/${buildId}`}

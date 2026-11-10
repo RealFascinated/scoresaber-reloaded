@@ -25,9 +25,6 @@ export default class ApiServiceRegistry {
 
   /**
    * Registers a service with the registry.
-   *
-   * @param name the name of the service
-   * @param service the service to register
    */
   public registerService(service: ApiService) {
     ApiServiceRegistry.services.set(service.getName(), service);
@@ -35,8 +32,6 @@ export default class ApiServiceRegistry {
 
   /**
    * Gets all registered services.
-   *
-   * @returns all registered services
    */
   public getAllServices(): Map<ApiServiceName, ApiService> {
     return ApiServiceRegistry.services;

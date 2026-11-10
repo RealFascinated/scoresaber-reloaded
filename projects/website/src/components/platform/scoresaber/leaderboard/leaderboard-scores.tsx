@@ -184,7 +184,6 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
 
   return (
     <div className="flex w-full flex-col gap-4">
-      {/* Difficulty / mode / country filter bar */}
       <div className="flex w-full flex-wrap items-center gap-2 sm:flex-nowrap">
         <LeaderboardDifficultySelect
           difficulties={leaderboard.difficulties}
@@ -205,7 +204,6 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
         </div>
       </div>
 
-      {/* Scores */}
       {isLoading && !scores ? (
         <div className="flex items-center justify-center py-12">
           <Spinner size="lg" />

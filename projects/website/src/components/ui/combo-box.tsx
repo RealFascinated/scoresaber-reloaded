@@ -14,35 +14,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { SharedIcons } from "@/shared-icons";
 import { ReactElement, ReactNode, useId, useState } from "react";
 
-/**
- * The props for this combobox.
- */
 type ComboboxProps<T> = {
-  /**
-   * The placeholder for the combobox.
-   */
   placeholder?: string;
 
-  /**
-   * The items within the combobox.
-   */
   items: ComboboxItem<T>[];
 
-  /**
-   * The controlled value of this combobox.
-   */
   value?: T | undefined;
 
-  /**
-   * The function invoked when the value of this combobox changes.
-   *
-   * @param value the new value
-   */
   onValueChange?: (value: T | undefined) => void;
 
-  /**
-   * The class name of this combobox.
-   */
   className?: string;
 
   /**
@@ -52,19 +32,10 @@ type ComboboxProps<T> = {
 };
 
 export type ComboboxItem<T> = {
-  /**
-   * The value of this item.
-   */
   value: T;
 
-  /**
-   * The icon to display next to the value.
-   */
   icon?: ReactNode;
 
-  /**
-   * The name of this item.
-   */
   name: string | ReactNode;
 
   /**
@@ -72,9 +43,6 @@ export type ComboboxItem<T> = {
    */
   displayName?: string;
 
-  /**
-   * The class name of this item.
-   */
   className?: string;
 };
 

@@ -8,14 +8,8 @@ import { Button } from "../../ui/button";
 import CustomPlaylistCreator from "./custom-playlist-creator";
 
 type Playlist = {
-  /**
-   * The name of the playlist
-   */
   name: string;
 
-  /**
-   * The id of the playlist
-   */
   id: string;
 };
 

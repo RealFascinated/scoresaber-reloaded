@@ -93,9 +93,6 @@ function deleteLegacyDatabase(): Promise<void> {
  * Builds the patch that moves the old browser settings into the account. Only valid values are
  * kept, and only for preferences the account hasn't changed yet, so an old browser never
  * overwrites settings made elsewhere.
- *
- * @param rows the rows of the old settings database
- * @param current the preferences stored on the account
  */
 export function buildLegacyImportPatch(
   rows: LegacySettingRow[],
@@ -123,8 +120,6 @@ export function buildLegacyImportPatch(
  * Gets the players to follow from the old browser "friends". Nothing is imported when the account
  * already follows someone, so an old browser never changes who you follow elsewhere.
  *
- * @param rows the rows of the old settings database
- * @param followingIds the players the account already follows
  * @param ownPlayerId the player id of the account, which can't be followed
  */
 export function buildLegacyFollowingIds(
@@ -158,8 +153,6 @@ type LegacyImportTarget = {
 
 /**
  * Moves the old browser settings and friends into the account, once.
- *
- * @param target the account to move them into
  */
 export async function importLegacySettings(target: LegacyImportTarget): Promise<void> {
   const rows = await readLegacySettings();

@@ -37,7 +37,6 @@ export default function Login() {
   // Set by the backend when a sign-in fails
   const error = searchParams.get("error");
 
-  // Nothing to do here when already signed in
   useEffect(() => {
     if (me) {
       router.replace(redirectPath);

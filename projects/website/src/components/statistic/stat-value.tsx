@@ -18,24 +18,12 @@ type Props = {
    */
   icon: React.ReactNode;
 
-  /**
-   * The additional classes for the stat.
-   */
   className?: string;
 
-  /**
-   * The text color of the stat.
-   */
   textColor?: string;
 
-  /**
-   * The value color of the stat.
-   */
   valueColor?: string;
 
-  /**
-   * The value of the stat.
-   */
   value: React.ReactNode;
 
   /**

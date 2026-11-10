@@ -5,9 +5,6 @@ import { PlayerStatChange } from "@ssr/common/player/player-stat-change";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 
 type OverlayPlayerMedalsProps = {
-  /**
-   * The player to display information for.
-   */
   player: ScoreSaberPlayer;
 };
 

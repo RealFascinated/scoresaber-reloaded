@@ -91,8 +91,6 @@ export function applyChartTheme() {
 
 /**
  * Builds an axis (or chart) title in the shared style.
- *
- * @param text the title text
  */
 export function chartTitle(text: string | undefined) {
   return {

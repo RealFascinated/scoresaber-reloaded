@@ -118,7 +118,6 @@ export default function AccSaberPlayerScores({ player }: Props) {
           />
         </ScoresToolbar>
 
-        {/* Scores List */}
         <ScoresListPanel
           page={query.page}
           data={query.data}

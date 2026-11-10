@@ -14,7 +14,7 @@ import { ReactNode } from "react";
  * When the backend can't answer nothing is hydrated and the client fetches them itself.
  */
 export default async function SessionHydration({ children }: { children: ReactNode }) {
-  const session = await getServerSession((await cookies()).toString(), true);
+  const session = await getServerSession((await cookies()).toString());
 
   const queryClient = new QueryClient();
   if (session.status === "signed-in") {

@@ -19,9 +19,6 @@ export type CustomRankedPlaylist = StaticDecode<typeof customRankedPlaylistSchem
 
 /**
  * Parses the raw settings into a custom ranked playlist settings object.
- *
- * @param settingsBase64 the raw settings
- * @returns the custom ranked playlist settings
  */
 export function parseCustomRankedPlaylistSettings(settingsBase64?: string) {
   let settings: CustomRankedPlaylist;
@@ -58,9 +55,6 @@ export function parseCustomRankedPlaylistSettings(settingsBase64?: string) {
 
 /**
  * Encodes the custom ranked playlist settings into a base64 string
- *
- * @param settings the custom ranked playlist settings
- * @returns the base64 encoded settings
  */
 
 export function encodeCustomRankedPlaylistSettings(settings: CustomRankedPlaylist) {

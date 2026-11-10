@@ -10,8 +10,6 @@ import { Value } from "typebox/value";
 /**
  * Validates a response of the preferences routes.
  *
- * @param value the parsed response body
- * @returns the preferences
  * @throws when the response does not match the preferences schema
  */
 export function assertUserPreferences(value: UserPreferences): UserPreferences {
@@ -41,7 +39,6 @@ export async function fetchUserPreferences(): Promise<UserPreferences> {
 /**
  * Replaces one or more preferences of the signed-in user.
  *
- * @param patch the preferences to replace
  * @returns all the preferences after the update
  * @throws when the update was rejected or the backend could not be reached
  */

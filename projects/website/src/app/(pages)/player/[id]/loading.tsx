@@ -6,10 +6,8 @@ export default function Loading() {
     <section className="w-full">
       <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
-          {/* Player header */}
           <Card className="flex flex-col gap-6">
             <div className="relative flex flex-col items-center gap-6 text-center select-none lg:flex-row lg:items-start lg:text-start">
-              {/* Avatar + streak (lg) */}
               <div className="flex flex-col items-center gap-2">
                 <Skeleton className="size-32 rounded-full border-2" />
                 <div className="hidden lg:flex">
@@ -17,7 +15,6 @@ export default function Loading() {
                 </div>
               </div>
 
-              {/* Name + overview + stats + actions */}
               <div className="flex w-full flex-col items-center justify-center gap-3 lg:items-start lg:justify-start">
                 <div className="flex w-full flex-col">
                   <div className="flex items-center justify-center gap-3 lg:justify-start">
@@ -46,7 +43,6 @@ export default function Loading() {
               </div>
             </div>
 
-            {/* Player footer: actions + acc badges */}
             <div className="border-border/50 flex flex-col-reverse items-center gap-4 border-t pt-6 md:flex-row md:justify-between md:pt-4">
               <div className="flex gap-2">
                 {Array.from({ length: 3 }).map((_, index) => (
@@ -61,7 +57,6 @@ export default function Loading() {
             </div>
           </Card>
 
-          {/* Player badges */}
           <div className="ring-border bg-card rounded-xl p-4 ring-1">
             <div className="flex w-full flex-wrap items-center justify-center gap-2">
               {Array.from({ length: 4 }).map((_, index) => (
@@ -70,7 +65,6 @@ export default function Loading() {
             </div>
           </div>
 
-          {/* Player views / charts */}
           <div className="ring-border bg-card rounded-xl p-4 ring-1">
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center justify-center gap-1">
@@ -89,10 +83,8 @@ export default function Loading() {
             </div>
           </div>
 
-          {/* Platform scores */}
           <div className="ring-border bg-card flex flex-col gap-1 rounded-xl p-4 ring-1">
             <div className="flex w-full flex-col gap-3">
-              {/* Toolbar */}
               <div className="border-border/50 flex flex-wrap items-center gap-2 border-b pb-3">
                 <Skeleton className="h-9 w-72 rounded-lg" />
                 {Array.from({ length: 2 }).map((_, index) => (
@@ -101,14 +93,12 @@ export default function Loading() {
                 <Skeleton className="h-8 w-full sm:ml-auto sm:w-64" />
               </div>
 
-              {/* Scores list */}
               <div className="flex flex-col">
                 {Array.from({ length: 4 }).map((_, index) => (
                   <Skeleton key={index} className="h-16 w-full" />
                 ))}
               </div>
 
-              {/* Pagination */}
               <div className="flex w-full justify-center">
                 <div className="flex items-center gap-1.5">
                   {Array.from({ length: 7 }).map((_, index) => (
@@ -120,7 +110,6 @@ export default function Loading() {
           </div>
         </div>
 
-        {/* Mini rankings sidebar */}
         <aside className="hidden w-full shrink-0 xl:block xl:w-96">
           <div className="sticky top-16 flex flex-col gap-4">
             {Array.from({ length: 2 }).map((_, cardIndex) => (

@@ -97,7 +97,6 @@ export default function ScoreSongInfo({
             className={className}
           />
 
-          {/* Author Info */}
           <div className="flex flex-row items-end gap-1.5 text-[12.5px] leading-none">
             <p className={cn("text-muted-foreground line-clamp-2", className)}>
               {song.authorName}

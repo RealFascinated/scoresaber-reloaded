@@ -8,9 +8,6 @@ import { Value } from "typebox/value";
  * validates (it returns an already valid value untouched, so extra properties are not stripped and
  * defaults are not applied) and never runs codec decode callbacks (e.g. `Type.Codec` fields).
  *
- * @param schema the schema to parse with
- * @param value the raw value to parse
- * @returns the decoded value
  * @throws if the value does not match the schema
  */
 export function parseSchema<const Schema extends TSchema, Input>(

@@ -16,8 +16,6 @@ const NOTHING_PINNED: number[] = [];
 
 /**
  * Gets the scores a player pinned to the top of their profile.
- *
- * @param playerId the player to get the pinned scores of
  */
 export function usePlayerPinnedScores(playerId: string) {
   const { realmId } = useRealm();

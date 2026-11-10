@@ -147,7 +147,6 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
           Generate a new snipe playlist for {truncateText(toSnipe.name, 16)}!
         </DialogDescription>
         <Card className="relative m-0 flex h-full max-h-[85vh] flex-col rounded-lg">
-          {/* Header */}
           <div className="border-border border-b px-(--spacing-lg) py-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
             <h1 className="text-xl font-semibold md:text-2xl">Create Snipe Playlist</h1>
             <p className="text-muted-foreground mt-1 text-sm">
@@ -155,7 +154,6 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
             </p>
           </div>
 
-          {/* Content */}
           <div className="flex-1 overflow-x-hidden overflow-y-auto">
             <div className="p-(--spacing-lg) md:p-(--spacing-xl) lg:p-(--spacing-2xl)">
               <Form {...form}>
@@ -182,7 +180,6 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
                     })}
                   </ButtonGroup>
 
-                  {/* Filters */}
                   <div className="flex flex-col gap-6">
                     <Controller
                       name="rankedStatus"
@@ -315,7 +312,6 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
             <Button type="submit" form="snipe-playlist-form" className="gap-2" disabled={downloading}>
               {downloading ? (

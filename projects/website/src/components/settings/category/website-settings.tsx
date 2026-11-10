@@ -6,7 +6,7 @@ import { useSettingsForm } from "@/hooks/use-settings-form";
 import { useUpdateUserPreferences } from "@/hooks/use-user-preferences";
 import { SharedIcons, type SharedDecorativeIcon } from "@/shared-icons";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
-import { BACKGROUND_COVER_NONE } from "@ssr/common/schemas/user/preferences";
+import { BACKGROUND_COVER_NONE, UserPreferencesSchema } from "@ssr/common/schemas/user/preferences";
 import { WebsiteLanding } from "@ssr/common/schemas/user/website-landing";
 import { ssrConfig } from "config";
 import { useTheme } from "next-themes";
@@ -17,12 +17,14 @@ import { SettingsCategorySkeleton } from "../settings-category-skeleton";
 import { getMonotonicTimeMs, showSettingsSavedToast } from "../settings-feedback";
 
 const formSchema = Type.Object({
-  backgroundCover: Type.String({ maxLength: 128 }),
-  backgroundCoverBrightness: Type.Number({ minimum: 0, maximum: 100 }),
-  backgroundCoverBlur: Type.Number({ minimum: 0, maximum: 20 }),
-  snowParticles: Type.Boolean(),
-  showKitty: Type.Boolean(),
-  websiteLanding: Type.Enum(WebsiteLanding),
+  ...Type.Pick(UserPreferencesSchema, [
+    "backgroundCover",
+    "backgroundCoverBrightness",
+    "backgroundCoverBlur",
+    "snowParticles",
+    "showKitty",
+    "websiteLanding",
+  ]).properties,
   theme: Type.String(),
 });
 

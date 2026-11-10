@@ -31,7 +31,6 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
 
   return (
     <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
-      {/* Player bar */}
       <div className="border-border/50 flex flex-wrap items-center gap-3 border-b px-4 py-2.5">
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
           <FallbackLink href={`/player/${playerInfo.id}`}>
@@ -70,11 +69,8 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
         </div>
       </div>
 
-      {/* Main content — leaderboard-page style */}
       <div className="flex flex-col gap-5 p-4">
-        {/* Song header row */}
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
-          {/* Album art */}
           <Image
             src={leaderboard.songArt}
             alt={`${leaderboard.fullName} cover`}
@@ -83,9 +79,7 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
             height={96}
           />
 
-          {/* Song info */}
           <div className="flex min-w-0 flex-1 flex-col items-center gap-2.5 text-center sm:items-start sm:text-left">
-            {/* Song name */}
             <FallbackLink
               href={`/leaderboard/${leaderboard.id}`}
               className="hover:text-primary/80 transition-all sm:w-fit"
@@ -93,7 +87,6 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
               <h2 className="text-xl leading-tight font-bold sm:text-2xl">{leaderboard.fullName}</h2>
             </FallbackLink>
 
-            {/* Author and mapper */}
             <p className="text-muted-foreground text-sm">
               by <span className="text-foreground font-medium">{leaderboard.songAuthorName}</span>
               {beatSaver?.author.name && (
@@ -110,7 +103,6 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
               )}
             </p>
 
-            {/* Difficulty + Characteristic + Stars */}
             <div className="flex flex-wrap items-center gap-2">
               <span
                 className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold"
@@ -133,7 +125,6 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
             </div>
           </div>
 
-          {/* Hero score stats */}
           <div className="flex shrink-0 flex-col items-center gap-1 sm:items-end">
             {isRanked && score.pp > 0 ? (
               <span className="text-pp text-3xl leading-none font-extrabold tabular-nums">

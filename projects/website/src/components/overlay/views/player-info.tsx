@@ -8,9 +8,6 @@ import OverlayPlayerMedals from "../components/player-medals";
 import OverlayPlayerRank from "../components/player-rank";
 
 type OverlayPlayerInfoProps = {
-  /**
-   * The player to display information for.
-   */
   player: ScoreSaberPlayer;
 };
 
@@ -25,7 +22,6 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
         height={200}
       />
       <div className="flex flex-col gap-2">
-        {/* Player Info */}
         <div>
           <p className="text-4xl font-bold">{player.name}</p>
           <p className="text-pp flex items-center gap-2">
@@ -42,7 +38,6 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
           </p>
         </div>
 
-        {/* Stats */}
         <div className="flex flex-col gap-0.5">
           <OverlayPlayerRank player={player} />
           <OverlayPlayerCountryRank player={player} />

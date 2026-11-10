@@ -1,13 +1,6 @@
 import { ScoreSaberPlayerHistory } from "../schemas/scoresaber/player/history";
 import { formatDateMinimal, getDaysAgoDate, getMidnightAlignedDate } from "./time-utils";
 
-/**
- * Gets a value from an {@link ScoreSaberPlayerHistory}
- * based on the field
- *
- * @param history the history to get the value from
- * @param field the field to get
- */
 export function getValueFromHistory(
   history: ScoreSaberPlayerHistory,
   field: keyof ScoreSaberPlayerHistory
@@ -18,16 +11,6 @@ export function getValueFromHistory(
   return undefined;
 }
 
-/**
- * Gets the statistic change of a player
- *
- * @param history the player's history
- * @param statType the statistic type
- * @param isNegativeChange whether the change should be negative
- * @param daysAgo the amount of days to look back
- * @returns the statistic change
- * @private
- */
 export function getPlayerStatisticChange(
   history: Record<string, ScoreSaberPlayerHistory>,
   statType: keyof ScoreSaberPlayerHistory,
@@ -47,7 +30,6 @@ export function getPlayerStatisticChange(
   const previousStats = history[previousDateKey];
   const previousStat = previousStats ? getValueFromHistory(previousStats, statType) : undefined;
 
-  // No previous stats found
   if (previousStat === undefined) {
     return 0;
   }
@@ -55,14 +37,6 @@ export function getPlayerStatisticChange(
   return ((statToday ?? 0) - (previousStat ?? 0)) * (isNegativeChange ? -1 : 1);
 }
 
-/**
- * Gets the changes in the players statistic history
- *
- * @param history the player's history
- * @param daysAgo the amount of days to look back
- * @returns the statistic changes
- * @private
- */
 export function getPlayerStatisticChanges(
   history: Record<string, ScoreSaberPlayerHistory>,
   daysAgo: number = 1

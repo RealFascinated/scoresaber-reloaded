@@ -1,8 +1,6 @@
 /**
  * Uploads a paste to paste.fascinated.cc
  *
- * @param content the content of the paste
- * @returns the paste URL
  * @throws an error if the paste fails to upload
  */
 export async function uploadPaste(content: string): Promise<string> {

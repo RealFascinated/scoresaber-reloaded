@@ -150,7 +150,6 @@ export default function PlayerOverview({ player }: PlayerOverviewProps) {
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 lg:items-start lg:justify-start">
       {playerData.map((subName, index) => {
-        // Check if the player is inactive or banned and if the data should be shown
         if (!subName.showWhenInactiveOrBanned && (player.inactive || player.banned)) {
           return null;
         }

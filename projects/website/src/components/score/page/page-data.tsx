@@ -96,7 +96,6 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
     return <FancyLoader title="Loading..." description="Loading score data..." />;
   }
 
-  // Check if we have any additional data to show
   const hasScoreStats = !!scoreStats;
   const hasReplay = !!replay;
   const hasAnyAdditionalData = hasScoreStats || hasReplay;

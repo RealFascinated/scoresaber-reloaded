@@ -90,13 +90,11 @@ function PlayerMiniRanking({
 
   return (
     <Card className="flex w-full flex-col gap-2 p-3 text-xs select-none">
-      {/* Header */}
       <div className="flex items-center gap-2">
         {icon}
         <p className="font-bold">{type} Ranking</p>
       </div>
 
-      {/* Players List */}
       <div className="divide-border bg-accent/50 divide-y rounded-md">
         {players.length > 0 ? (
           players.map(playerRanking => {
@@ -114,12 +112,10 @@ function PlayerMiniRanking({
                     : `${playerRankWidth}px minmax(0,1fr) auto`,
                 }}
               >
-                {/* Rank */}
                 <p className={cn("text-muted-foreground", playerRanking.id === player.id ? "font-bold" : "")}>
                   #{formatNumberWithCommas(rank)}
                 </p>
 
-                {/* Player */}
                 <div className="flex min-w-0 items-center gap-2">
                   <Avatar
                     src={playerRanking.avatar}
@@ -140,7 +136,6 @@ function PlayerMiniRanking({
                   </p>
                 </div>
 
-                {/* PP */}
                 <div
                   className="grid w-fit items-center gap-1.5"
                   style={{

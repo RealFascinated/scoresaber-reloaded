@@ -6,14 +6,8 @@ import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils
 import React from "react";
 
 interface DailyChangeProps {
-  /**
-   * The type of change
-   */
   type: PlayerStatValue;
 
-  /**
-   * The player to get the change for
-   */
   player?: ScoreSaberPlayer | undefined;
 
   /**
@@ -21,19 +15,10 @@ interface DailyChangeProps {
    */
   change?: number;
 
-  /**
-   * The tooltip to display
-   */
   tooltip?: React.ReactElement<any> | string;
 
-  /**
-   * The class name
-   */
   className?: string;
 
-  /**
-   * Whether to use the tooltip
-   */
   useTooltip?: boolean;
 }
 

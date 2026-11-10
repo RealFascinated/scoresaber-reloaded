@@ -2,26 +2,14 @@ import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 
 export type OverlayScoreData = {
-  /**
-   * The current combo.
-   */
   combo: number;
 
-  /**
-   * The current score.
-   */
   score: number;
 
-  /**
-   * The current accuracy.
-   */
   accuracy: number;
 };
 
 export type OverlayMapData = {
-  /**
-   * The current BeatSaver map data.
-   */
   beatSaverMap?: BeatSaverMap;
 
   /**
@@ -41,8 +29,5 @@ export type OverlayData = {
    */
   map?: OverlayMapData;
 
-  /**
-   * Whether the song is paused.
-   */
   paused?: boolean;
 };

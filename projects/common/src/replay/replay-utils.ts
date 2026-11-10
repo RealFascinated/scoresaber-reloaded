@@ -79,9 +79,6 @@ function computeReplayDerivedData(replay: Replay): {
 
 /**
  * Gets the decoded replay for a given query
- *
- * @param query the query to get the replay for
- * @returns the decoded replay
  */
 export async function getDecodedReplay(query: string): Promise<DecodedReplayResponse> {
   const replay = await ReplayDecoder.decodeReplay(query);
@@ -96,9 +93,6 @@ export async function getDecodedReplay(query: string): Promise<DecodedReplayResp
 
 /**
  * Calculates the cut score for a given note cut info
- *
- * @param cutInfo the note cut info to calculate the cut score for
- * @returns the calculated cut score
  */
 export function getCutScore(cutInfo: NoteCutInfo): number {
   // According to BSOR documentation:
@@ -117,8 +111,6 @@ export function getCutScore(cutInfo: NoteCutInfo): number {
 
 /**
  * Calculates only the distance to center score for a given note cut info
- *
- * @param cutInfo the note cut info to calculate the distance to center score for
  * @returns the calculated distance to center score (0-15)
  */
 export function getDistanceToCenterScore(cutInfo: NoteCutInfo): number {

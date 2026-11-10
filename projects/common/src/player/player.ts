@@ -1,44 +1,20 @@
 import { ScoreSaberPlayerHistory } from "../schemas/scoresaber/player/history";
 
 export default class Player {
-  /**
-   * The ID of this player.
-   */
   id: string;
 
-  /**
-   * The name of this player.
-   */
   name: string;
 
-  /**
-   * The avatar url for this player.
-   */
   avatar: string;
 
-  /**
-   * The country of this player.
-   */
   country: string;
 
-  /**
-   * The rank of the player.
-   */
   rank: number;
 
-  /**
-   * The rank the player has in their country.
-   */
   countryRank: number;
 
-  /**
-   * The player's hmd.
-   */
   hmd?: string;
 
-  /**
-   * The date the player joined the playform.
-   */
   joinedDate: Date;
 
   constructor(

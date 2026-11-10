@@ -12,9 +12,6 @@ export type BeatSaverLatestMapsSearchInfo = StaticDecode<typeof BeatSaverLatestM
 
 /** BeatSaver `SearchResponse` for `/maps/latest` (Swagger). */
 export const BeatSaverLatestMapsTokenSchema = Type.Object({
-  /**
-   * The maps.
-   */
   docs: Type.Array(BeatSaverMapTokenSchema),
 
   info: Type.Optional(BeatSaverLatestMapsSearchInfoSchema),

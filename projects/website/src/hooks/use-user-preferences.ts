@@ -33,8 +33,6 @@ export function useUserPreferences() {
 
 /**
  * Gets a single preference. The component only re-renders when that preference changes.
- *
- * @param key the preference to get
  */
 export function useUserPreference<Key extends UserPreferenceKey>(key: Key): UserPreferences[Key] {
   const { data } = useQuery({

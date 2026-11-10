@@ -22,9 +22,6 @@ const HEX_COLOR_REGEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/
 
 /**
  * Parses a user-entered custom background (a hex color or an http(s) image url).
- *
- * @param value the raw custom background value
- * @returns the resolved background, or undefined if the value is invalid
  */
 export function parseCustomBackground(value: string): ResolvedBackgroundCover | undefined {
   const trimmed = value.trim();
@@ -45,10 +42,6 @@ export function parseCustomBackground(value: string): ResolvedBackgroundCover | 
 
 /**
  * Resolves the selected background cover into something renderable.
- *
- * @param cover the selected cover id
- * @param custom the custom background value
- * @returns the resolved background, or undefined for no background
  */
 export function resolveBackgroundCover(cover: string, custom: string): ResolvedBackgroundCover | undefined {
   if (cover === BACKGROUND_COVER_CUSTOM) {

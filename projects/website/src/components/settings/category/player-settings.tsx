@@ -5,6 +5,7 @@ import { useUpdateUserPreferences } from "@/hooks/use-user-preferences";
 import { SharedIcons } from "@/shared-icons";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { HistoryMode } from "@ssr/common/schemas/user/history-mode";
+import { UserPreferencesSchema } from "@ssr/common/schemas/user/preferences";
 import { Path, useForm } from "react-hook-form";
 import { Type, type Static } from "typebox";
 import { Form } from "../../ui/form";
@@ -12,9 +13,7 @@ import { SettingSection } from "../setting-section";
 import { SettingsCategorySkeleton } from "../settings-category-skeleton";
 import { getMonotonicTimeMs, showSettingsSavedToast } from "../settings-feedback";
 
-const formSchema = Type.Object({
-  historyMode: Type.String({ minLength: 1, maxLength: 32 }),
-});
+const formSchema = Type.Pick(UserPreferencesSchema, ["historyMode"]);
 
 type FormValues = Static<typeof formSchema>;
 
@@ -48,7 +47,6 @@ const PlayerSettings = () => {
     },
   });
 
-  // Sync form with database settings
   const { isLoading } = useSettingsForm(form, preferences => ({
     historyMode: preferences.historyMode,
   }));

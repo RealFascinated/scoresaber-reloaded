@@ -92,7 +92,6 @@ export default function MeowMeow() {
   const animationFrameRef = useRef<number | null>(null);
   const mouseMoveListenerRef = useRef<((event: MouseEvent) => void) | null>(null);
 
-  // State refs to avoid re-renders
   const stateRef = useRef({
     lastFrameTimestamp: null as number | null,
     idleTime: 0,
@@ -256,7 +255,6 @@ export default function MeowMeow() {
 
     document.body.appendChild(nekoEl);
 
-    // Create mouse move listener
     const mouseMoveListener = (event: MouseEvent) => {
       stateRef.current.mousePosX = event.clientX;
       stateRef.current.mousePosY = event.clientY;
@@ -268,25 +266,21 @@ export default function MeowMeow() {
   }, [onAnimationFrame]);
 
   const cleanup = useCallback(() => {
-    // Clean up animation frame
     if (animationFrameRef.current) {
       window.cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
 
-    // Clean up mouse move listener
     if (mouseMoveListenerRef.current) {
       document.removeEventListener("mousemove", mouseMoveListenerRef.current);
       mouseMoveListenerRef.current = null;
     }
 
-    // Clean up DOM element
     if (nekoElRef.current && nekoElRef.current.isConnected) {
       document.body.removeChild(nekoElRef.current);
     }
     nekoElRef.current = null;
 
-    // Reset state
     stateRef.current = {
       lastFrameTimestamp: null,
       idleTime: 0,
@@ -311,6 +305,5 @@ export default function MeowMeow() {
     return cleanup;
   }, [showKitty, init, cleanup]);
 
-  // Return null to avoid rendering anything in the DOM
   return null;
 }

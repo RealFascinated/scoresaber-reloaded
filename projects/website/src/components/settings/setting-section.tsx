@@ -196,13 +196,11 @@ function FormFieldComponent<TFormValues extends FieldValues, TName extends Path<
       // For text and slider inputs, we'll let the debounced effect handle the save
       return;
     }
-    // For other inputs, save immediately
     if (onFormSubmit) {
       form.handleSubmit(onFormSubmit)();
     }
   };
 
-  // Effect to handle debounced saves for text and slider inputs
   useEffect(() => {
     if (!hasChanged) {
       return;

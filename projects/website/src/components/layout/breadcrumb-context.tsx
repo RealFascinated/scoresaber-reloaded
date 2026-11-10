@@ -27,8 +27,6 @@ export function useBreadcrumbPageTitle(): string | undefined {
 
 /**
  * Sets the last crumb of the breadcrumb bar while the calling component is mounted.
- *
- * @param title the label of the current page
  */
 export function useBreadcrumbTitle(title: string | undefined) {
   const setTitle = useContext(BreadcrumbContext)?.setTitle;

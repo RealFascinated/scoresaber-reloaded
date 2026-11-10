@@ -59,21 +59,10 @@ export default class HTTPSiraStatusClient extends OverlayDataClient {
   }
 }
 
-/**
- * Checks if the event is a valid EventName
- *
- * @param event the event to check
- * @returns whether the event is a valid EventName
- */
 function isValidEventName(event: unknown): event is EventName {
   return typeof event === "string" && event in handlers;
 }
 
-/**
- * Loads the status data into the overlay data.
- *
- * @param status the status data
- */
 async function loadStatusData(status: HttpSiraStatus_Status) {
   const performance = status.performance;
   if (!performance) {
@@ -82,7 +71,6 @@ async function loadStatusData(status: HttpSiraStatus_Status) {
 
   const previousState = useOverlayDataStore.getState();
 
-  // Initialize the map data if it's not set
   if (previousState && !previousState.map) {
     const beatmap = status.beatmap;
     if (!beatmap || !beatmap.songHash || !beatmap.difficultyEnum || !beatmap.characteristic) {

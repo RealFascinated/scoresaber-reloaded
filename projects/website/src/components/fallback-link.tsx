@@ -2,19 +2,10 @@ import { clsx } from "clsx";
 import SimpleLink from "./simple-link";
 
 type Props = {
-  /**
-   * The link to open in a new tab.
-   */
   href?: string;
 
-  /**
-   * The class name to apply to the link.
-   */
   className?: string;
 
-  /**
-   * The children to render.
-   */
   children: React.ReactNode;
 };
 

@@ -201,9 +201,6 @@ const DEFAULT_HMD_INFO = HMD_DEFINITIONS[0].info;
 
 /**
  * Gets the HMD info for a HMD.
- *
- * @param hmd the HMD to get the info for
- * @returns the HMD info
  */
 export const getHMDInfo = (hmd: HMD | string | undefined | null): HMDInfo => {
   const key = String(hmd ?? "Unknown").toLowerCase();

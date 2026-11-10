@@ -11,14 +11,8 @@ import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { ReactNode, useState } from "react";
 
 type StatContent = {
-  /**
-   * The value shown under the stat name.
-   */
   value: ReactNode;
 
-  /**
-   * Optional tooltip shown when hovering the value.
-   */
   tooltip?: ReactNode;
 
   /**

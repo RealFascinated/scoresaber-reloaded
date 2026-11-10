@@ -73,13 +73,10 @@ export default function ScoreDetailsDropdown({
             !isLeaderboardScore ? "mt-(--spacing-md)" : ""
           )}
         >
-          {/* Map Stats */}
           {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
 
-          {/* Main Card Content */}
           <ScoreOverview score={score} leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
 
-          {/* Leaderboard Scores */}
           {showLeaderboardScores && (
             <LeaderboardScoresDropdown
               initialPage={scoresPage}

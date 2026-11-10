@@ -10,13 +10,7 @@ type ScorePpProps = {
    * Ranked score with PP/weight (medal scores have no PP).
    */
   score: ScoreSaberScore;
-  /**
-   * The leaderboard the score was set on.
-   */
   leaderboard: ScoreSaberLeaderboard;
-  /**
-   * Whether to show the difference between the score and the previous score.
-   */
   showDifference?: boolean;
 };
 

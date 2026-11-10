@@ -81,7 +81,7 @@ export function LandingStats() {
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
     retry: false,
-    refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+    refetchInterval: 5 * 60 * 1000,
   });
 
   const showBackendUnavailable = isError && isBackendUnavailableError(error);

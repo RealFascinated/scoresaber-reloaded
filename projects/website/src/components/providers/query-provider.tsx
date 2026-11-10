@@ -10,9 +10,9 @@ type Props = {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 30, // 30 seconds
+      staleTime: 1000 * 30,
       retry: true,
-      retryDelay: 1000 * 5, // 5 seconds
+      retryDelay: 1000 * 5,
     },
   },
 });

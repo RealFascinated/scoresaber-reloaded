@@ -1,8 +1,5 @@
 /**
  * Gets the text color class for a rank (gold, silver and bronze for the podium).
- *
- * @param rank the rank of the score
- * @returns the text color class for the rank
  */
 export function getRankColor(rank: number) {
   switch (rank) {
@@ -20,9 +17,6 @@ export function getRankColor(rank: number) {
 /**
  * Gets the classes for a rank pill: podium ranks are tinted with their medal color, everything else
  * uses the neutral muted surface.
- *
- * @param rank the rank of the player
- * @returns the background, ring and text classes for the pill
  */
 export function getRankPillClass(rank: number) {
   switch (rank) {

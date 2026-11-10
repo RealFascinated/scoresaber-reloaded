@@ -4,24 +4,12 @@ import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
 
 export type ScoreSaberRole = {
-  /**
-   * The name of the role.
-   */
   name: string;
 
-  /**
-   * The short name of the role.
-   */
   shortName?: string;
 
-  /**
-   * The ScoreSaber role id for this role.
-   */
   roleId: string;
 
-  /**
-   * The color of the role.
-   */
   color: string;
 };
 
@@ -92,12 +80,6 @@ export const ScoreSaberHMDs: Record<number, HMD> = {
   128: "Vive Cosmos",
 };
 
-/**
- * Gets the role for a player.
- *
- * @param player the player
- * @returns the role
- */
 export function getScoreSaberRoles(player: { role?: string | null }): ScoreSaberRole[] {
   const toReturn: ScoreSaberRole[] = [];
   if ("role" in player) {
@@ -112,11 +94,6 @@ export function getScoreSaberRoles(player: { role?: string | null }): ScoreSaber
   return toReturn;
 }
 
-/**
- * Formats the ScoreSaber difficulty number
- *
- * @param ssDifficultyNumber the difficulty number
- */
 export function getDifficultyFromScoreSaberDifficulty(ssDifficultyNumber: number): MapDifficulty {
   switch (ssDifficultyNumber) {
     case 1: {
@@ -140,12 +117,6 @@ export function getDifficultyFromScoreSaberDifficulty(ssDifficultyNumber: number
   }
 }
 
-/**
- * Gets the ScoreSaber difficulty from a difficulty.
- *
- * @param difficulty the difficulty
- * @returns the ScoreSaber difficulty
- */
 export function getScoreSaberDifficultyFromDifficulty(difficulty: MapDifficulty): number {
   switch (difficulty) {
     case "Easy":
@@ -163,22 +134,12 @@ export function getScoreSaberDifficultyFromDifficulty(difficulty: MapDifficulty)
   }
 }
 
-/**
- * Updates the weights of the scores
- *
- * @param scores the scores
- */
 export function updateScoreWeights(scores: PlayerPpsResponse["scores"]) {
   for (let i = 0; i < scores.length; i++) {
     scores[i].weight = Math.pow(ScoreSaberCurve.WEIGHT_COEFFICIENT, i);
   }
 }
 
-/**
- * Gets the ScoreSaber CDN cover URL for a song hash.
- *
- * @param songHash the song hash
- */
 export function getScoreSaberLeaderboardCoverUrl(songHash: string): string {
   return `https://cdn.scoresaber.com/covers/${songHash.toUpperCase()}.png`;
 }

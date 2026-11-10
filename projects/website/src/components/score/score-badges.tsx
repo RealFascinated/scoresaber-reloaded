@@ -1,9 +1,6 @@
 import clsx from "clsx";
 import React from "react";
 
-/**
- * A badge to display in the score stats.
- */
 export type ScoreBadge<TScore, TLeaderboard> = {
   name: string;
   /**
@@ -17,9 +14,6 @@ export type ScoreBadge<TScore, TLeaderboard> = {
   create: (score: TScore, leaderboard: TLeaderboard, medalsMode?: boolean) => React.ReactNode | undefined;
 };
 
-/**
- * The badges to display in the score stats.
- */
 type ScoreBadgeProps<TScore, TLeaderboard> = {
   badges: ScoreBadge<TScore, TLeaderboard>[];
   score: TScore;

@@ -68,7 +68,7 @@ export default class ScoreSaberPlayerService {
     }
 
     return CacheService.fetch(CacheId.SCORESABER_PLAYER, cacheKey, async () => {
-      const token = await ScoreSaberApiService.lookupPlayer(id, realmId);
+      const token = await ScoreSaberApiService.lookupPlayer(id, realmId, { fresh: true });
       if (!token) {
         throw new NotFoundError(`Player "${id}" not found`);
       }
@@ -93,7 +93,7 @@ export default class ScoreSaberPlayerService {
     // A token passed in can predate the v2 shape and lack `stats`; re-resolve from the API
     // instead of crashing on it below.
     if (!player.stats) {
-      const freshPlayer = await ScoreSaberApiService.lookupPlayer(id, realmId);
+      const freshPlayer = await ScoreSaberApiService.lookupPlayer(id, realmId, { fresh: true });
       if (!freshPlayer?.stats) {
         throw new NotFoundError(`Player "${id}" not found`);
       }

@@ -3,9 +3,6 @@ import { ScoreSaberPeakRank } from "../../schemas/scoresaber/player/peak-rank";
 import { ScoreSaberPlayerStatistics } from "../../schemas/scoresaber/player/statistics";
 import Player, { StatisticChange } from "../player";
 
-/**
- * A ScoreSaber player.
- */
 export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   /**
    * The contextual rank for this player
@@ -22,9 +19,6 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    */
   statisticChange: StatisticChange | undefined;
 
-  /**
-   * The statistics for this player.
-   */
   statistics: ScoreSaberPlayerStatistics;
 
   /**
@@ -47,19 +41,10 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    */
   trackedSince: Date;
 
-  /**
-   * The amount of global medals the player has.
-   */
   medals: number;
 
-  /**
-   * The player's medal rank.
-   */
   medalsRank: number;
 
-  /**
-   * The player's country medal rank.
-   */
   medalsCountryRank: number;
 
   /**
@@ -73,61 +58,28 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
    */
   rankPercentile: number;
 
-  /**
-   * The player's current streak.
-   */
   currentStreak: number;
 
-  /**
-   * The player's longest streak.
-   */
   longestStreak: number;
 }
 
 export interface ScoreSaberPlayerBase extends Player {
-  /**
-   * The amount of pp the player has.
-   */
   pp: number;
 
-  /**
-   * The role the player has.
-   */
   role: string | undefined;
 
-  /**
-   * The badges the player has.
-   */
   badges: ScoreSaberBadge[];
 
-  /**
-   * The permissions the player has.
-   */
   permissions: number;
 
-  /**
-   * Whether the player is banned or not.
-   */
   banned: boolean;
 
-  /**
-   * Whether the player is inactive or not.
-   */
   inactive: boolean;
 }
 
-/**
- * A badge for a player.
- */
 export type ScoreSaberBadge = {
-  /**
-   * The URL to the badge.
-   */
   url: string;
 
-  /**
-   * The description of the badge.
-   */
   description: string;
 };
 

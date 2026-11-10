@@ -11,32 +11,20 @@ export type WebsocketDisconnectContext = {
 };
 
 export type WebsocketCallbacks = {
-  /**
-   * Invoked when a general message is received.
-   *
-   * @param message the received message.
-   */
   onMessage?: (message: unknown) => void;
 
   /**
    * Invoked once when the connection closes (after `error`, if any, on the same socket).
    * This is only called from the `close` handler so it never runs twice for one disconnect.
    *
-   * @param close the WebSocket close event.
    * @param context when present, `precedingSocketError` was set by a prior `error` on this socket.
    */
   onDisconnect?: (close: WebSocket.CloseEvent, context?: WebsocketDisconnectContext) => void;
 };
 
 type Websocket = {
-  /**
-   * The name of the service we're connecting to.
-   */
   name: string;
 
-  /**
-   * The url of the service we're connecting to.
-   */
   url: string;
 } & WebsocketCallbacks;
 
@@ -175,5 +163,5 @@ export function connectWebSocket({ name, url, onMessage, onDisconnect }: Websock
     };
   }
 
-  connectWs(); // Initiate the first connection
+  connectWs();
 }

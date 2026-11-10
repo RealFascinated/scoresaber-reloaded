@@ -78,7 +78,6 @@ export function PlayerRanking<T extends PlayerRankingRow>({
 
   return (
     <SimpleLink href={`/player/${player.id}`}>
-      {/* Desktop Layout */}
       <div
         className={cn(
           "hover:bg-hover flex items-center gap-3 rounded-lg px-2 py-2 transition-colors",
@@ -86,7 +85,6 @@ export function PlayerRanking<T extends PlayerRankingRow>({
           inactive && "opacity-50 grayscale-20"
         )}
       >
-        {/* Rank, Weekly Change, and Country Rank */}
         <div
           className={cn("flex items-center gap-2", inactive && showAccountInactive ? "flex" : "")}
           style={{
@@ -102,17 +100,14 @@ export function PlayerRanking<T extends PlayerRankingRow>({
           />
         </div>
 
-        {/* Avatar and Name */}
         <div className="flex min-w-0 flex-1 items-center gap-2.5">
           <PlayerAvatar profilePicture={player.avatar} name={player.name} />
           <PlayerNameDisplay player={player} />
         </div>
 
-        {/* Worth */}
         {worth}
       </div>
 
-      {/* Mobile Layout */}
       <div className="block lg:hidden">
         <div
           className={cn(
@@ -120,14 +115,12 @@ export function PlayerRanking<T extends PlayerRankingRow>({
             mainPlayer?.id == player.id ? "bg-primary/10" : ""
           )}
         >
-          {/* Top row: Rank, Country Rank, and Weekly Change */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <PlayerRanks rank={rank} countryRank={countryRank} country={country} />
             </div>
           </div>
 
-          {/* Bottom row: Avatar, Name, PP, and Action Button */}
           <div className="flex items-center gap-2">
             <PlayerAvatar
               profilePicture={player.avatar}
@@ -138,7 +131,6 @@ export function PlayerRanking<T extends PlayerRankingRow>({
               player={player}
               className="flex max-w-[140px] min-w-[90px] flex-1 items-center overflow-hidden"
             />
-            {/* Worth */}
             {worth}
           </div>
         </div>

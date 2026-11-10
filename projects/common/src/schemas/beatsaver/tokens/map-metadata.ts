@@ -1,29 +1,14 @@
 import { Type, type StaticDecode } from "typebox";
 
 export const BeatSaverMapMetadataTokenSchema = Type.Object({
-  /**
-   * The bpm of the song.
-   */
   bpm: Type.Number(),
 
-  /**
-   * The song's length in seconds.
-   */
   duration: Type.Number(),
 
-  /**
-   * The song's name.
-   */
   songName: Type.String(),
 
-  /**
-   * The songs sub name.
-   */
   songSubName: Type.String(),
 
-  /**
-   * The artist(s) name.
-   */
   songAuthorName: Type.String(),
 
   /**
@@ -32,9 +17,6 @@ export const BeatSaverMapMetadataTokenSchema = Type.Object({
    */
   songAuthorUrl: Type.Optional(Type.String()),
 
-  /**
-   * The level mapper(s) name.
-   */
   levelAuthorName: Type.String(),
 });
 

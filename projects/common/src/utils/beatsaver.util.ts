@@ -4,24 +4,10 @@ import { BeatSaverMapDifficultyToken } from "../schemas/beatsaver/tokens/map-dif
 import { MapCharacteristic } from "../schemas/map/map-characteristic";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 
-/**
- * Gets the BeatSaver mapper profile url.
- *
- * @param map the beatsaver map
- * @returns the beatsaver mapper profile url
- */
 export function getBeatSaverMapperProfileUrl(map?: BeatSaverMap) {
   return map != undefined ? `https://beatsaver.com/profile/${map?.author.id}` : undefined;
 }
 
-/**
- * Gets a BeatSaver difficulty from a map.
- *
- * @param map the map to get the difficulty from
- * @param hash the hash of the map
- * @param difficulty the difficulty to get
- * @param characteristic the characteristic to get
- */
 export function getBeatSaverDifficulty(
   map: BeatSaverMapToken,
   hash: string,
@@ -30,7 +16,6 @@ export function getBeatSaverDifficulty(
 ): BeatSaverMapDifficultyToken | undefined {
   const version = map.versions.find(v => v.hash === hash);
 
-  // Fallback to the latest version if the version is undefined
   return (
     version ??
     map.versions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]

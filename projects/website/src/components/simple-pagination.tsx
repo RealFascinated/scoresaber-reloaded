@@ -171,7 +171,6 @@ export default function SimplePagination({
   // Empty result sets can report 0 items per page, which would make this NaN
   const totalPages = itemsPerPage > 0 ? Math.max(1, Math.ceil(totalItems / itemsPerPage)) : 1;
 
-  // Calculate loading state once and ensure it's consistent
   const isLoading = Boolean(loadingPage);
   const loadingState = isLoading
     ? { isLoading: true, loadingPage }
@@ -231,7 +230,6 @@ export default function SimplePagination({
     return pageNumbers;
   }, [page, totalPages, loadingState, handleLinkClick, generatePageUrl]);
 
-  // Calculate page numbers before render to ensure consistent timing (desktop only)
   const pageNumbers = isMobile ? null : renderPageNumbers();
 
   return (

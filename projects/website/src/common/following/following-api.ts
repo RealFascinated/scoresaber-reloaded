@@ -28,8 +28,6 @@ export async function fetchFollowing(): Promise<string[]> {
 /**
  * Follows or unfollows a player as the signed-in user.
  *
- * @param playerId the player to follow or unfollow
- * @param action what to do
  * @returns everyone the user follows afterwards
  * @throws with the backend's message when it was refused
  */
@@ -47,8 +45,6 @@ export async function changeFollowing(playerId: string, action: "follow" | "unfo
 
 /**
  * Fetches how many users follow a player and how many players they follow.
- *
- * @param playerId the player to look up
  */
 export async function fetchPlayerFollows(playerId: string): Promise<PlayerFollowsResponse> {
   const response = await followingRequest(`/player/${encodeURIComponent(playerId)}/follows`);
@@ -60,9 +56,6 @@ export async function fetchPlayerFollows(playerId: string): Promise<PlayerFollow
 
 /**
  * Fetches the ids of the players that follow a player, or that a player follows.
- *
- * @param playerId the player to look up
- * @param list which list to fetch
  */
 export async function fetchPlayerFollowList(
   playerId: string,

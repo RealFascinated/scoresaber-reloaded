@@ -17,7 +17,6 @@ export default function CutDistributionChart({ cutDistribution }: Props) {
       return { chartData: { datasets: [] }, labels: [] };
     }
 
-    // Create bins for each score from 0 to 15 (distance to center only)
     const bins = new Array(16).fill(0);
     cutDistribution.forEach(cut => {
       // The score is already the distance to center score (0-15)

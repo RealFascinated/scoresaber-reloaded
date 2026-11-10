@@ -28,8 +28,6 @@ export async function fetchPinnedScoreIds(): Promise<number[]> {
 /**
  * Pins or unpins one of the signed-in user's scores.
  *
- * @param scoreId the score
- * @param action what to do
  * @returns the ids of every score the user pinned afterwards
  * @throws with the backend's message when it was refused
  */
@@ -45,7 +43,6 @@ export async function changePinnedScore(scoreId: number, action: "pin" | "unpin"
 /**
  * Fetches the scores a player pinned to the top of their profile.
  *
- * @param playerId the player to look up
  * @param realmId the realm to show pp for
  */
 export async function fetchPlayerPinnedScores(

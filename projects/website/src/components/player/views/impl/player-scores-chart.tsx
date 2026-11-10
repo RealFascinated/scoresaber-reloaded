@@ -78,7 +78,6 @@ export const scoreBarsDataset: DatasetConfig[] = [
   },
 ];
 
-// Dataset configuration for the chart
 const datasetConfig: DatasetConfig[] = [
   {
     title: "Total Scores",

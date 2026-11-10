@@ -1,27 +1,14 @@
+import type { ReplayViewerId } from "./schemas/replay-viewer/replay-viewer-id";
+
 export type ReplayViewer = {
-  /**
-   * The id of the replay viewer.
-   */
   id: string;
 
-  /**
-   * The name of the replay viewer.
-   */
   name: string;
 
-  /**
-   * Gets the URL for a replay.
-   *
-   * @param id the id of the replay
-   * @returns the URL
-   */
   generateUrl: (id: number, customParams?: string) => string;
 };
 
-/**
- * The replay viewers.
- */
-export const ReplayViewers: Record<string, ReplayViewer> = {
+export const ReplayViewers: Record<ReplayViewerId, ReplayViewer> = {
   beatleader: {
     id: "beatleader",
     name: "BeatLeader",
@@ -40,5 +27,3 @@ export const ReplayViewers: Record<string, ReplayViewer> = {
     generateUrl: id => `https://replay.fascinated.cc/?scoreIdBL=${id}&autoplay=true`,
   },
 };
-
-export type ReplayViewerTypes = keyof typeof ReplayViewers;
