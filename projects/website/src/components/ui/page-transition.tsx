@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useState } from "react";
 import { usePageTransition } from "../../contexts/page-transition-context";
 
 const containerVariants = {
@@ -43,34 +43,23 @@ const itemVariants = {
 export default function PageTransition({ children, className }: { children: ReactNode; className?: string }) {
   const { currentPage, direction, isLoading } = usePageTransition();
   const shouldReduceMotion = useReducedMotion();
-  const [stablePage, setStablePage] = useState(currentPage);
-  const [stableChildren, setStableChildren] = useState<ReactNode>(children);
-  const prevIsLoadingRef = useRef(isLoading);
-  const prevRenderedPageRef = useRef(currentPage);
-  const prevRenderedChildrenRef = useRef<ReactNode>(children);
   const transitionDuration = shouldReduceMotion ? 0 : 0.2;
   const filterDuration = shouldReduceMotion ? 0 : 0.15;
 
-  // Keep track of what was last rendered while not loading.
-  // This lets us freeze the outgoing view if loading starts in the same update as a page change.
-  useEffect(() => {
-    if (!isLoading) {
-      prevRenderedPageRef.current = currentPage;
-      prevRenderedChildrenRef.current = children;
-    }
-  }, [isLoading, currentPage, children]);
+  // The last view rendered while not loading. While loading we keep showing this, so the outgoing
+  // view stays put (and keeps its key) until the new data is ready, even when loading starts in the
+  // same update as a page change. It's updated during render (not in an effect) so the very first
+  // loading render already sees the right snapshot instead of a stale one from the previous load.
+  const [idleView, setIdleView] = useState<{ page: number; children: ReactNode }>({
+    page: currentPage,
+    children,
+  });
+  if (!isLoading && (idleView.page !== currentPage || idleView.children !== children)) {
+    setIdleView({ page: currentPage, children });
+  }
 
-  // Capture the previous rendered page/children when loading starts.
-  useEffect(() => {
-    if (isLoading && !prevIsLoadingRef.current) {
-      setStablePage(prevRenderedPageRef.current);
-      setStableChildren(prevRenderedChildrenRef.current);
-    }
-    prevIsLoadingRef.current = isLoading;
-  }, [isLoading]);
-
-  const transitionKey = isLoading ? stablePage : currentPage;
-  const displayChildren = isLoading ? stableChildren : children;
+  const transitionKey = isLoading ? idleView.page : currentPage;
+  const displayChildren = isLoading ? idleView.children : children;
 
   return (
     <AnimatePresence mode="wait">
