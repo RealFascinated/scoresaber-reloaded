@@ -145,7 +145,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
   {
     label: "Tools",
     items: [
-      { id: "overlay", name: "Overlay", icon: SharedIcons.OverlayNavIcon, href: "/overlay/builder" },
+      { id: "overlay", name: "Overlay", icon: SharedIcons.OverlayNavIcon, href: "/overlay/editor" },
       { id: "settings", name: "Settings", icon: SharedIcons.SettingsNavIcon, href: "/settings" },
     ],
   },

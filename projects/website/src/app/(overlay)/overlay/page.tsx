@@ -1,26 +1,44 @@
+import { fetchOverlayContent } from "@/common/overlay/overlay-api";
 import { parseOverlaySettings } from "@/common/overlay/overlay-settings";
-import Overlay from "@/components/overlay/overlay";
-import { redirect } from "next/navigation";
+import OverlayLegacy from "@/components/overlay-legacy/overlay-legacy";
+import OverlayViewer from "@/components/overlay/overlay-viewer";
+import { notFound, redirect } from "next/navigation";
 
 type OverlayPageProps = {
   searchParams: Promise<{
     /**
-     * The raw settings for the overlay as base64.
+     * The id of a saved overlay.
      */
-    settings: string;
+    id?: string;
+    /**
+     * The raw settings for the legacy overlay as base64.
+     */
+    settings?: string;
   }>;
 };
 
 export default async function OverlayPage({ searchParams }: OverlayPageProps) {
   const params = await searchParams;
 
+  if (params.id) {
+    const content = await fetchOverlayContent(params.id).catch(() => undefined);
+    if (!content) {
+      return notFound();
+    }
+    return (
+      <section className="size-full">
+        <OverlayViewer overlayId={params.id} initial={content} />
+      </section>
+    );
+  }
+
   if (!params.settings) {
-    return redirect("/overlay/builder");
+    return redirect("/overlay/editor");
   }
 
   return (
-    <section className="h-screen w-screen">
-      <Overlay settings={parseOverlaySettings(params.settings)} />
+    <section className="size-full">
+      <OverlayLegacy settings={parseOverlaySettings(params.settings)} />
     </section>
   );
 }

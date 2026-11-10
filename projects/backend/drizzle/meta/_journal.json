@@ -421,6 +421,20 @@
       "when": 1794319861798,
       "tag": "0059_pin_exact_scores",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1794327524118,
+      "tag": "0060_add_user_overlays_and_pbot",
+      "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1794327524799,
+      "tag": "0061_remove_overlay_settings_preference",
+      "breakpoints": true
     }
   ]
 }

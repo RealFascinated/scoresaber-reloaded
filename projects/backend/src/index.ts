@@ -33,6 +33,7 @@ import PlaylistController from "./controller/playlist/playlist.controller";
 import RealmController from "./controller/realm/realm.controller";
 import ScoresController from "./controller/scores/scores.controller";
 import UserFollowingController from "./controller/user/user-following.controller";
+import UserOverlaysController from "./controller/user/user-overlays.controller";
 import UserPinnedScoresController from "./controller/user/user-pinned-scores.controller";
 import UserPreferencesController from "./controller/user/user-preferences.controller";
 import UserController from "./controller/user/user.controller";
@@ -336,6 +337,7 @@ export const app = new Elysia()
   .use(UserController)
   .use(UserFollowingController)
   .use(UserPinnedScoresController)
+  .use(UserOverlaysController)
   .use(PlayerController)
   .use(ScoresController)
   .use(LeaderboardController)

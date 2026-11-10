@@ -1,5 +1,9 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
+import {
+  BeatLeaderLeaderboardsByHashSchema,
+  type BeatLeaderLeaderboardsByHashToken,
+} from "@ssr/common/schemas/beatleader/tokens/leaderboards/leaderboards-by-hash";
 import { BeatLeaderPlayersTotalSchema } from "@ssr/common/schemas/beatleader/tokens/players/page";
 import {
   BeatLeaderPlayerLookupSchema,
@@ -20,6 +24,7 @@ const LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT = "https://cdn.scorestats.beatleader
 const LOOKUP_PLAYERS_ENDPOINT =
   "https://api.beatleader.com/players?leaderboardContext=general&page=1&count=50&sortBy=pp&mapsType=ranked&ppType=general&order=desc";
 const LOOKUP_PLAYER_ENDPOINT = "https://api.beatleader.com/player/:playerId";
+const LOOKUP_LEADERBOARDS_BY_HASH_ENDPOINT = "https://api.beatleader.com/leaderboards/hash/:hash";
 const LOOKUP_PLAYER_SCORES_ENDPOINT = "https://api.beatleader.com/player/:playerId/scores";
 const beatLeaderApiLog = Logger.withTopic("BeatLeader API");
 
@@ -256,6 +261,33 @@ export class BeatLeaderApiService {
       `Found BeatLeader player "${parsed.name}" in ${formatDuration(performance.now() - before)}`
     );
     return parsed;
+  }
+
+  /**
+   * Looks up the leaderboards (one per difficulty) of a map by its hash.
+   *
+   * @param hash the hash of the map
+   * @returns the leaderboards, or undefined when the map is unknown to BeatLeader or the request fails
+   */
+  public static async lookupLeaderboardsByHash(
+    hash: string
+  ): Promise<BeatLeaderLeaderboardsByHashToken | undefined> {
+    BeatLeaderApiService.log(`Looking up BeatLeader leaderboards for "${hash}"...`);
+
+    const response = await BeatLeaderApiService.fetch<unknown>(
+      LOOKUP_LEADERBOARDS_BY_HASH_ENDPOINT.replace(":hash", encodeURIComponent(hash))
+    );
+    if (response == undefined) {
+      return undefined;
+    }
+
+    if (!Value.Check(BeatLeaderLeaderboardsByHashSchema, response)) {
+      BeatLeaderApiService.log(
+        `Failed to parse BeatLeader leaderboards for "${hash}": ${Value.Errors(BeatLeaderLeaderboardsByHashSchema, response)[0]?.message}`
+      );
+      return undefined;
+    }
+    return parseSchema(BeatLeaderLeaderboardsByHashSchema, response);
   }
 
   /**

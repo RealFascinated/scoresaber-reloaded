@@ -24,7 +24,3 @@ export function parseOverlaySettings(settingsBase64: string) {
     ...JSON.parse(Buffer.from(settingsBase64, "base64").toString()),
   });
 }
-
-export function encodeOverlaySettings(settings: OverlaySettings) {
-  return Buffer.from(JSON.stringify(settings)).toString("base64");
-}

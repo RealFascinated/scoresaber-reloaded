@@ -6,9 +6,9 @@ import BeatSaberPlusClient from "@/common/overlay/impl/beatsaberplus";
 import HTTPSiraStatusClient from "@/common/overlay/impl/httpsirastatus";
 import { useOverlayDataStore } from "@/common/overlay/overlay-data-store";
 import { OverlaySettings, OverlayViews } from "@/common/overlay/overlay-settings";
-import OverlayPlayerInfoView from "@/components/overlay/views/player-info";
-import OverlayScoreDataView from "@/components/overlay/views/score-data";
-import OverlaySongInfoView from "@/components/overlay/views/song-info";
+import OverlayPlayerInfoView from "@/components/overlay-legacy/views/player-info";
+import OverlayScoreDataView from "@/components/overlay-legacy/views/score-data";
+import OverlaySongInfoView from "@/components/overlay-legacy/views/song-info";
 import { Spinner } from "@/components/spinner";
 import Logger from "@ssr/common/logger";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -16,11 +16,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import OverlayView, { OverlayViewPosition } from "./views/view";
 
-type OverlayProps = {
+type OverlayLegacyProps = {
   settings: OverlaySettings;
 };
 
-export default function Overlay({ settings }: OverlayProps) {
+export default function OverlayLegacy({ settings }: OverlayLegacyProps) {
   const {
     data: player,
     isLoading,

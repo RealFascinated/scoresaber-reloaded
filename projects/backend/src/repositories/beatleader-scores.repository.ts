@@ -46,6 +46,35 @@ export class BeatLeaderScoresRepository {
     return rows[0];
   }
 
+  /**
+   * Gets the best score of a player on a map, preferring scores with a saved replay on ties.
+   */
+  public static async findBestBySong(
+    playerId: string,
+    songHashUpper: string,
+    songDifficulty: MapDifficulty,
+    songCharacteristic: MapCharacteristic
+  ): Promise<BeatLeaderScoreRow | undefined> {
+    const rows = await db
+      .select()
+      .from(beatLeaderScoresTable)
+      .where(
+        and(
+          eq(beatLeaderScoresTable.playerId, playerId),
+          eq(beatLeaderScoresTable.songHash, songHashUpper),
+          eq(beatLeaderScoresTable.songDifficulty, songDifficulty),
+          eq(beatLeaderScoresTable.songCharacteristic, songCharacteristic)
+        )
+      )
+      .orderBy(
+        desc(beatLeaderScoresTable.songScore),
+        desc(beatLeaderScoresTable.savedReplay),
+        desc(beatLeaderScoresTable.timestamp)
+      )
+      .limit(1);
+    return rows[0];
+  }
+
   public static async rowExistsById(scoreId: number): Promise<boolean> {
     const rows = await db
       .select({ exists: sql`1` })

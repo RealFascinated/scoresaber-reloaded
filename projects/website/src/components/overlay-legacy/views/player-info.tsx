@@ -1,4 +1,4 @@
-import OverlayPlayerCountryRank from "@/components/overlay/components/player-country-rank";
+import OverlayPlayerCountryRank from "@/components/overlay-legacy/components/player-country-rank";
 import { DailyChange } from "@/components/statistic/daily-change";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { PlayerStatChange } from "@ssr/common/player/player-stat-change";

@@ -6,6 +6,9 @@ export type OverlayScoreData = {
 
   score: number;
 
+  /**
+   * The running accuracy in percent.
+   */
   accuracy: number;
 };
 
@@ -30,4 +33,19 @@ export type OverlayData = {
   map?: OverlayMapData;
 
   paused?: boolean;
+
+  /**
+   * The song time in seconds at the moment it was last reported by the game, undefined if not in a song.
+   */
+  songTime?: number;
+
+  /**
+   * The length of the song in seconds, undefined if not in a song.
+   */
+  songLength?: number;
+
+  /**
+   * When `songTime` was reported, as epoch ms. Used to interpolate the time between messages.
+   */
+  songTimeSyncedAt?: number;
 };

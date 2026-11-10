@@ -19,10 +19,11 @@ type EventHandlers = {
 
 const handlers: EventHandlers = {
   mapInfo: async ({ mapInfoChanged }: BeatSaberPlus_MapInfoEvent) => {
-    const { difficulty, characteristic, level_id: levelId } = mapInfoChanged;
+    const { difficulty, characteristic, level_id: levelId, duration } = mapInfoChanged;
     const mapHash = levelId.split("custom_level_")[1].toUpperCase();
 
     const previousState = useOverlayDataStore.getState();
+    useOverlayDataStore.setState({ songLength: duration });
 
     if (previousState && !previousState.map && difficulty && characteristic && mapHash) {
       useOverlayDataStore.setState({
@@ -44,7 +45,7 @@ const handlers: EventHandlers = {
     }
   },
   score: async ({ scoreEvent }: BeatSaberPlus_ScoreEvent) => {
-    const { accuracy, combo, score } = scoreEvent;
+    const { accuracy, combo, score, time } = scoreEvent;
 
     const previousState = useOverlayDataStore.getState();
     useOverlayDataStore.setState({
@@ -54,6 +55,8 @@ const handlers: EventHandlers = {
         combo: combo,
         accuracy: accuracy * 100,
       },
+      songTime: time,
+      songTimeSyncedAt: Date.now(),
     });
   },
   gameState: async ({ gameStateChanged }: BeatSaberPlus_GameStateEvent) => {

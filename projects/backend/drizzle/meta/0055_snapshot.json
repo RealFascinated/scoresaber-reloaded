@@ -132,12 +132,8 @@
           "name": "auth-accounts_userId_auth-users_id_fk",
           "tableFrom": "auth-accounts",
           "tableTo": "auth-users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -250,12 +246,8 @@
           "name": "auth-connections_userId_auth-users_id_fk",
           "tableFrom": "auth-connections",
           "tableTo": "auth-users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -343,12 +335,8 @@
           "name": "auth-sessions_userId_auth-users_id_fk",
           "tableFrom": "auth-sessions",
           "tableTo": "auth-users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -358,9 +346,7 @@
         "auth-sessions_token_unique": {
           "name": "auth-sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -446,9 +432,7 @@
         "auth-users_email_unique": {
           "name": "auth-users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1023,12 +1007,8 @@
           "name": "beatsaver-map-difficulties_versionId_beatsaver-map-versions_id_fk",
           "tableFrom": "beatsaver-map-difficulties",
           "tableTo": "beatsaver-map-versions",
-          "columnsFrom": [
-            "versionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["versionId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1135,12 +1115,8 @@
           "name": "beatsaver-map-versions_mapId_beatsaver-maps_id_fk",
           "tableFrom": "beatsaver-map-versions",
           "tableTo": "beatsaver-maps",
-          "columnsFrom": [
-            "mapId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["mapId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1280,12 +1256,8 @@
           "name": "beatsaver-maps_uploaderId_beatsaver-uploaders_id_fk",
           "tableFrom": "beatsaver-maps",
           "tableTo": "beatsaver-uploaders",
-          "columnsFrom": [
-            "uploaderId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["uploaderId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2136,10 +2108,7 @@
       "compositePrimaryKeys": {
         "scoresaber-leaderboard-realms_leaderboardId_realmId_pk": {
           "name": "scoresaber-leaderboard-realms_leaderboardId_realmId_pk",
-          "columns": [
-            "leaderboardId",
-            "realmId"
-          ]
+          "columns": ["leaderboardId", "realmId"]
         }
       },
       "uniqueConstraints": {},
@@ -2538,12 +2507,8 @@
           "name": "scoresaber-score-events_playerId_scoresaber-accounts_id_fk",
           "tableFrom": "scoresaber-score-events",
           "tableTo": "scoresaber-accounts",
-          "columnsFrom": [
-            "playerId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["playerId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2551,12 +2516,8 @@
           "name": "scoresaber-score-events_leaderboardId_scoresaber-leaderboards_id_fk",
           "tableFrom": "scoresaber-score-events",
           "tableTo": "scoresaber-leaderboards",
-          "columnsFrom": [
-            "leaderboardId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["leaderboardId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2898,10 +2859,7 @@
       "compositePrimaryKeys": {
         "scoresaber-score-realms_scoreId_realmId_pk": {
           "name": "scoresaber-score-realms_scoreId_realmId_pk",
-          "columns": [
-            "scoreId",
-            "realmId"
-          ]
+          "columns": ["scoreId", "realmId"]
         }
       },
       "uniqueConstraints": {},

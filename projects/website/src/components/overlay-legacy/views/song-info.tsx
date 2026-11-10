@@ -1,6 +1,6 @@
 import { OverlayData } from "@/common/overlay/overlay-data";
 import { cn } from "@/common/utils";
-import OverlayView, { OverlayViewPosition } from "@/components/overlay/views/view";
+import OverlayView, { OverlayViewPosition } from "@/components/overlay-legacy/views/view";
 import { truncateText } from "@ssr/common/string-utils";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";

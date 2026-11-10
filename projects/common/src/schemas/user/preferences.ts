@@ -1,5 +1,4 @@
 import { Type, type StaticDecode } from "typebox";
-import { OverlaySettingsSchema } from "../overlay/overlay-settings";
 import { ReplayViewerIdSchema } from "../replay-viewer/replay-viewer-id";
 import { HistoryMode, HistoryModeSchema } from "./history-mode";
 import { WebsiteLanding, WebsiteLandingSchema } from "./website-landing";
@@ -29,7 +28,6 @@ export const UserPreferencesSchema = Type.Object(
       Type.String({ maxLength: 64 }),
       Type.Record(Type.String({ maxLength: 64 }), Type.Boolean())
     ),
-    overlaySettings: Type.Union([OverlaySettingsSchema, Type.Null()]),
     /** A preset id, "custom" or "none". */
     backgroundCover: Type.String({ minLength: 1, maxLength: 64, pattern: "^[a-z0-9-]+$" }),
     /** A hex color or an http(s) image url, used when the cover is "custom". */
@@ -58,7 +56,6 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   websiteLanding: WebsiteLanding.PLAYER_HOME,
   defaultLeaderboardCountry: null,
   chartLegends: {},
-  overlaySettings: null,
   backgroundCover: BACKGROUND_COVER_NONE,
   customBackground: "",
   backgroundCoverBrightness: 50,

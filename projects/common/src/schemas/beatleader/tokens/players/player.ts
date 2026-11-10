@@ -70,6 +70,9 @@ export const BeatLeaderPlayerLookupSchema = Type.Object({
   id: Type.String(),
   name: Type.String(),
   platform: Type.String(),
+  pp: Type.Optional(Type.Number()),
+  rank: Type.Optional(Type.Number()),
+  countryRank: Type.Optional(Type.Number()),
   linkedIds: Type.Optional(Type.Union([BeatLeaderLinkedIdsSchema, Type.Null()])),
 });
 

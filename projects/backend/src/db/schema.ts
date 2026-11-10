@@ -2,6 +2,8 @@ import { HMD } from "@ssr/common/hmds";
 import { AuthConnectionProvider } from "@ssr/common/schemas/auth/connection-provider";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
+import type { OverlayConnectionSettings } from "@ssr/common/schemas/overlay/overlay-connection-settings";
+import type { OverlayLayout } from "@ssr/common/schemas/overlay/overlay-layout";
 import type { UserPreferencesPatch } from "@ssr/common/schemas/user/preferences";
 import { sql } from "drizzle-orm";
 import {
@@ -18,6 +20,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -743,6 +746,39 @@ export const userPinnedScoresTable = pgTable(
   },
   table => [primaryKey({ columns: [table.userId, table.scoreId] })]
 );
+
+/**
+ * The overlays a user built in the overlay editor. The id is random and part of the public OBS url,
+ * so it doubles as the secret for reading an overlay.
+ */
+export const userOverlaysTable = pgTable(
+  "user-overlays",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: text()
+      .notNull()
+      .references(() => authUsersTable.id, { onDelete: "cascade" }),
+    name: varchar({ length: 64 }).notNull(),
+    settings: jsonb().$type<OverlayConnectionSettings>().notNull(),
+    layout: jsonb().$type<OverlayLayout>().notNull(),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp({ precision: 3 })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  table => [index("user_overlays_user_id_idx").on(table.userId)]
+);
+
+/**
+ * The accuracy of a BeatLeader score for each second of the song, decoded from its replay (PBOT).
+ * A score's replay never changes, so rows are only ever inserted.
+ */
+export const beatLeaderPbotTable = pgTable("beatleader-pbot", {
+  scoreId: integer().primaryKey(),
+  /** Accuracy x 100 as integers, null before the first note. */
+  accuracyBySecond: jsonb().$type<(number | null)[]>().notNull(),
+});
 
 export type TableCountsTableRow = typeof tableCountsTable.$inferSelect;
 

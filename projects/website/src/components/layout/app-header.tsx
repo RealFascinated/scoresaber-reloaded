@@ -24,7 +24,6 @@ const STATIC_CRUMBS: Record<string, Crumb[]> = {
   "/maps/ranking-queue": [{ label: "Maps" }, { label: "Ranking Queue" }],
   "/scores/top": [{ label: "Scores" }, { label: "Top Scores" }],
   "/scores/live": [{ label: "Scores" }, { label: "Live Scores" }],
-  "/overlay/builder": [{ label: "Overlay" }],
   "/settings": [{ label: "Settings" }],
 };
 

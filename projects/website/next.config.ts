@@ -46,6 +46,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/overlay/builder",
+        destination: "/overlay/editor",
+        permanent: true,
+      },
+      {
         source: "/ranking/:country/:page",
         destination: "/ranking?country=:country&page=:page",
         permanent: true,
