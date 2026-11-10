@@ -19,9 +19,12 @@ const sansFont = Inter({
 });
 
 const monoFont = localFont({
-  src: "./fonts/JetBrainsMono.ttf",
+  src: "./fonts/JetBrainsMono.woff2",
   weight: "100 300",
   variable: "--font-jetbrains",
+  // Almost nothing on the site is monospace (the error page and one overlay chip), so it is fetched
+  // when text using it first renders instead of being preloaded on every page ahead of the scripts
+  preload: false,
 });
 
 const siteName = env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName;

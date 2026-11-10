@@ -43,6 +43,19 @@ const nextConfig: NextConfig = {
     "@heroicons/react/24/outline": { transform: "@heroicons/react/24/outline/{{member}}" },
   },
   poweredByHeader: false,
+  async headers() {
+    // Files in public/ are served with max-age=0 by default, so every flag, logo and icon was revalidated on
+    // each visit. Their names are not content-hashed, so they get a day (and are refreshed in the background
+    // for a week after that) instead of "immutable".
+    const publicFileCache = [
+      { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" },
+    ];
+    return [
+      { source: "/assets/:path*", headers: publicFileCache },
+      { source: "/backgrounds/:path*", headers: publicFileCache },
+      { source: "/:file(icon-192x192.png|icon-512x512.png|favicon.ico)", headers: publicFileCache },
+    ];
+  },
   async redirects() {
     return [
       {

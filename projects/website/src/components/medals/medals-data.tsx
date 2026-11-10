@@ -130,7 +130,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
                         </TableCell>
                       </TableRow>
                     )}
-                    {rankingData.items.map(player => (
+                    {rankingData.items.map((player, index) => (
                       <TableRow key={player.id} className="relative cursor-pointer">
                         <TableCell className="py-2">
                           <span className="text-sm font-semibold tabular-nums">#{player.medalsRank}</span>
@@ -144,7 +144,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
                           </div>
                         </TableCell>
                         <TableCell className="py-2">
-                          <MedalsRanking player={player} />
+                          <MedalsRanking player={player} deferAvatar={index >= 8} />
                         </TableCell>
                         <TableCell className="py-2 text-right">
                           <span className="text-medals font-semibold tabular-nums">

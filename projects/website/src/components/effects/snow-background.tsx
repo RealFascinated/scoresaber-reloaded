@@ -2,7 +2,10 @@
 
 import { useUserPreference } from "@/hooks/use-user-preferences";
 
-import { Snowfall } from "react-snowfall";
+import dynamic from "next/dynamic";
+
+// Off by default, so keep the library out of the shared bundle until someone turns it on
+const Snowfall = dynamic(() => import("react-snowfall").then(module => module.Snowfall), { ssr: false });
 
 export function SnowBackground() {
   const snowParticles = useUserPreference("snowParticles");

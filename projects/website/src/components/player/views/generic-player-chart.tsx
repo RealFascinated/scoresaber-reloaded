@@ -28,10 +28,7 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
   const { labels, histories } = useMemo(() => {
     const histories: Record<string, (number | null)[]> = {};
 
-    const dataMap = new Map<string, ScoreSaberPlayerHistory>();
-    Object.entries(statisticHistory).forEach(([dateString, history]) => {
-      dataMap.set(dateString, history);
-    });
+    const dataMap = new Map<string, ScoreSaberPlayerHistory>(Object.entries(statisticHistory));
 
     const allTime = daysAmount === -1;
 
@@ -71,10 +68,11 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
       }
     }
 
+    // Each day's history is the same for every dataset, so look it up once per label instead of once per dataset
+    const historyByLabel = labelsResult.map(currentDate => dataMap.get(formatDateMinimal(currentDate)));
+
     datasetConfig.forEach(config => {
-      histories[config.field] = labelsResult.map(currentDate => {
-        const dateString = formatDateMinimal(currentDate);
-        const history = dataMap.get(dateString);
+      histories[config.field] = historyByLabel.map(history => {
         const value = history
           ? getValueFromHistory(history, config.field as keyof ScoreSaberPlayerHistory)
           : null;

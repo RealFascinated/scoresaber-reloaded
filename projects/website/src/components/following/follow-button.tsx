@@ -3,6 +3,7 @@
 import { cn } from "@/common/utils";
 import { useFollowActions, useFollowingIds } from "@/hooks/use-following";
 import { useMainPlayerId } from "@/hooks/use-main-player";
+import useMe from "@/hooks/use-me";
 import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MedalRankingPlayer } from "@ssr/common/schemas/response/ranking/medal-rankings";
@@ -11,22 +12,34 @@ import { toast } from "sonner";
 import SimpleTooltip from "../simple-tooltip";
 import { Button } from "../ui/button";
 
-export default function FollowButton({
-  player,
-  iconOnly,
-  className,
-}: {
+type FollowButtonProps = {
   player: ScoreSaberPlayer | MedalRankingPlayer | { id: string; name: string };
 
   iconOnly?: boolean;
 
   className?: string;
-}) {
+};
+
+/**
+ * Rendered once per row of the player tables. Following is saved to the account, so signed-out visitors
+ * (and a player's own row) have nothing to follow with: those rows stop here, before the follow mutation
+ * and the following list are set up for them.
+ */
+export default function FollowButton(props: FollowButtonProps) {
+  const { data: me } = useMe();
+  const mainPlayerId = useMainPlayerId();
+
+  if (!me || mainPlayerId == props.player.id) {
+    return null;
+  }
+  return <FollowControl {...props} />;
+}
+
+function FollowControl({ player, iconOnly, className }: FollowButtonProps) {
   const { id, name } = player;
 
-  const { follow, unfollow, isSignedIn } = useFollowActions();
+  const { follow, unfollow } = useFollowActions();
   const isFollowing = useFollowingIds().includes(id);
-  const mainPlayerId = useMainPlayerId();
 
   function toggleFollowing() {
     if (isFollowing) {
@@ -48,15 +61,6 @@ export default function FollowButton({
         You are now following <b>{name}</b>.
       </p>
     );
-  }
-
-  // Following is saved to the account, so there is nothing to follow with when signed out
-  if (!isSignedIn) {
-    return null;
-  }
-
-  if (mainPlayerId == id) {
-    return null;
   }
 
   const button = (

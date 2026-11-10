@@ -7,13 +7,13 @@ export type BackgroundCoverPreset = {
 };
 
 export const BACKGROUND_COVER_PRESETS: BackgroundCoverPreset[] = [
-  { name: "Forest", id: "forest", image: "/backgrounds/forest.jpg" },
-  { name: "Alone", id: "alone", image: "/backgrounds/alone.jpg" },
-  { name: "Car Wreck", id: "car-wreck", image: "/backgrounds/car-wreck.png" },
-  { name: "Foggy Swamp", id: "foggy-swampland", image: "/backgrounds/foggy-swampland.jpg" },
-  { name: "Forest Trail", id: "forest-trail", image: "/backgrounds/forest-trail.jpg" },
-  { name: "Snowy Mountains", id: "snowy-mountains", image: "/backgrounds/snowy-mountains.jpg" },
-  { name: "Fantasy Mountains", id: "fantasy-mountains", image: "/backgrounds/fantasy-mountains.jpg" },
+  { name: "Forest", id: "forest", image: "/backgrounds/forest.webp" },
+  { name: "Alone", id: "alone", image: "/backgrounds/alone.webp" },
+  { name: "Car Wreck", id: "car-wreck", image: "/backgrounds/car-wreck.webp" },
+  { name: "Foggy Swamp", id: "foggy-swampland", image: "/backgrounds/foggy-swampland.webp" },
+  { name: "Forest Trail", id: "forest-trail", image: "/backgrounds/forest-trail.webp" },
+  { name: "Snowy Mountains", id: "snowy-mountains", image: "/backgrounds/snowy-mountains.webp" },
+  { name: "Fantasy Mountains", id: "fantasy-mountains", image: "/backgrounds/fantasy-mountains.webp" },
 ];
 
 export type ResolvedBackgroundCover = { type: "color"; value: string } | { type: "image"; value: string };

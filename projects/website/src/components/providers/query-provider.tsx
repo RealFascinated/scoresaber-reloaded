@@ -13,7 +13,10 @@ function makeQueryClient(): QueryClient {
       queries: {
         staleTime: 1000 * 30,
         retry: true,
-        retryDelay: 1000 * 5,
+        // 5s, 10s, 20s, then every 30s. A fixed 5s meant a failing request was sent again every 5 seconds
+        // for as long as the page was open, which on a weak connection or during a backend outage only
+        // adds load and keeps the radio awake.
+        retryDelay: attemptIndex => Math.min(1000 * 5 * 2 ** attemptIndex, 1000 * 30),
       },
     },
   });

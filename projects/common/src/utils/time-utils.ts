@@ -108,14 +108,28 @@ export function getMsAgo(input: Date) {
   return now - inputDate;
 }
 
+const ShortMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/**
+ * Formats as "MMM D, YYYY" in UTC (e.g. "Jan 1, 2024"). This is the key player history is stored under and
+ * charts call it for every day of every dataset, so it avoids building dayjs objects for valid dates.
+ */
 export function formatDateMinimal(date: Date) {
-  return dayjs(date).utc().format("MMM D, YYYY");
+  if (Number.isNaN(date.getTime())) {
+    return dayjs(date).utc().format("MMM D, YYYY");
+  }
+  return `${ShortMonths[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
 }
 
 export function formatChartDate(date: Date) {
-  const currentYear = dayjs().utc().year();
-  const year = dayjs(date).utc().year();
-  return dayjs(date).format(`MMM D${currentYear === year ? "" : ", YYYY"}`);
+  if (Number.isNaN(date.getTime())) {
+    return dayjs(date).format("MMM D");
+  }
+  const currentYear = new Date().getUTCFullYear();
+  const year = date.getUTCFullYear();
+  // The label itself is shown in local time, the year comparison is in UTC
+  const label = `${ShortMonths[date.getMonth()]} ${date.getDate()}`;
+  return currentYear === year ? label : `${label}, ${date.getFullYear()}`;
 }
 
 function getOrdinalSuffix(day: number): string {
@@ -179,7 +193,10 @@ export function formatDate(
 }
 
 export function getMidnightAlignedDate(date: Date) {
-  return dayjs(date).utc().startOf("day").toDate();
+  if (Number.isNaN(date.getTime())) {
+    return dayjs(date).utc().startOf("day").toDate();
+  }
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 
 /**

@@ -1,6 +1,6 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import Image from "next/image";
+import { PlayerBadgeImage } from "./player-badge-image";
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -17,7 +17,7 @@ export default function PlayerBadges({ player }: Props) {
             showOnMobile
           >
             <div>
-              <Image src={badge.url} alt={badge.description} width={80} height={30} />
+              <PlayerBadgeImage url={badge.url} description={badge.description} />
             </div>
           </SimpleTooltip>
         );

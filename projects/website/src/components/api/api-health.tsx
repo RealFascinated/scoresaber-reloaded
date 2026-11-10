@@ -6,6 +6,9 @@ import { useIsFirstRender } from "@uidotdev/usehooks";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+const HEALTH_POLL_DOWN_MS = 1000 * 5;
+const HEALTH_POLL_HEALTHY_MS = 1000 * 15;
+
 export function ApiHealth() {
   const firstRender = useIsFirstRender();
   const [online, setOnline] = useState<boolean>(true);
@@ -25,7 +28,8 @@ export function ApiHealth() {
         return false;
       }
     },
-    refetchInterval: 1000 * 5,
+    // Check quickly while the API is down so recovery is noticed, and relax while it is healthy
+    refetchInterval: query => (query.state.data === false ? HEALTH_POLL_DOWN_MS : HEALTH_POLL_HEALTHY_MS),
   });
 
   useEffect(() => {

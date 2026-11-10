@@ -1,5 +1,5 @@
+import { ScoreTimeSetTooltip } from "@/components/score/score-time-set";
 import SimpleTooltip from "@/components/simple-tooltip";
-import { format } from "@formkit/tempo";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { timeAgo } from "@ssr/common/utils/time-utils";
 
@@ -10,14 +10,7 @@ export function ScoreSaberScoreTimeSetVs({ score }: { score: ScoreSaberScore }) 
 
   return (
     <SimpleTooltip
-      display={
-        <p>
-          {format({
-            date: new Date(score.previousScore.timestamp),
-            format: "DD MMMM YYYY HH:mm a",
-          })}
-        </p>
-      }
+      display={<ScoreTimeSetTooltip timestamp={new Date(score.previousScore.timestamp)} />}
       showOnMobile
     >
       <div>

@@ -9,20 +9,10 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getPageFromRank } from "@ssr/common/utils/utils";
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import LeaderboardScoresDropdown from "../leaderboard/leaderboard-scores-dropdown";
 
-export default function ScoreDetailsDropdown({
-  score,
-  leaderboard,
-  beatSaverMap,
-  highlightedPlayerId,
-  isExpanded,
-  showLeaderboardScores = true,
-  defaultScoresPage,
-  isLeaderboardScore = false,
-  isLoading: setIsDetailsLoading,
-}: {
+type ScoreDetailsDropdownProps = {
   score: ScoreSaberScore;
   leaderboard: ScoreSaberLeaderboard;
   beatSaverMap?: BeatSaverMap;
@@ -32,7 +22,36 @@ export default function ScoreDetailsDropdown({
   defaultScoresPage?: number;
   isLeaderboardScore?: boolean;
   isLoading: (isLoading: boolean) => void;
-}) {
+};
+
+/**
+ * Every score row renders one of these, and almost none are ever opened. The data query, the presence
+ * animation and the motion hooks are only mounted once a row has been expanded (and then stay, so
+ * collapsing still animates out).
+ */
+export default function ScoreDetailsDropdown(props: ScoreDetailsDropdownProps) {
+  const [hasBeenExpanded, setHasBeenExpanded] = useState(props.isExpanded);
+  if (props.isExpanded && !hasBeenExpanded) {
+    setHasBeenExpanded(true);
+  }
+
+  if (!hasBeenExpanded) {
+    return null;
+  }
+  return <ScoreDetailsDropdownContent {...props} />;
+}
+
+function ScoreDetailsDropdownContent({
+  score,
+  leaderboard,
+  beatSaverMap,
+  highlightedPlayerId,
+  isExpanded,
+  showLeaderboardScores = true,
+  defaultScoresPage,
+  isLeaderboardScore = false,
+  isLoading: setIsDetailsLoading,
+}: ScoreDetailsDropdownProps) {
   const { data: dropdownData, isLoading } = useLeaderboardDropdownData(
     leaderboard.id,
     score.scoreId,

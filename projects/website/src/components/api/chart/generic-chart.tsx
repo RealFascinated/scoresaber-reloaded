@@ -212,6 +212,10 @@ const GenericChart = ({ config, labels }: Props) => {
       return labels.map(value => (typeof value === "number" ? value.toString() : value));
     }
 
+    // Same for every label, so work them out once instead of per label
+    const todayLabel = formatDateMinimal(getDaysAgoDate(0));
+    const yesterdayLabel = formatDateMinimal(getDaysAgoDate(1));
+
     return labels.map(value => {
       if (typeof value === "string") {
         return value;
@@ -220,10 +224,10 @@ const GenericChart = ({ config, labels }: Props) => {
         return value.toString();
       }
       const formattedDate = formatChartDate(value);
-      if (formattedDate === formatDateMinimal(getDaysAgoDate(0))) {
+      if (formattedDate === todayLabel) {
         return "Now";
       }
-      if (formattedDate === formatDateMinimal(getDaysAgoDate(1))) {
+      if (formattedDate === yesterdayLabel) {
         return "Yesterday";
       }
       return formattedDate;

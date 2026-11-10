@@ -201,7 +201,7 @@ export default function RankingData({ initial }: RankingDataProps) {
                         </TableCell>
                       </TableRow>
                     )}
-                    {rankingData.items.map(player => (
+                    {rankingData.items.map((player, index) => (
                       <TableRow
                         key={player.id}
                         className={cn(
@@ -222,7 +222,11 @@ export default function RankingData({ initial }: RankingDataProps) {
                           </div>
                         </TableCell>
                         <TableCell className="py-2">
-                          <PlayerTableName player={player} inactive={player.inactive} />
+                          <PlayerTableName
+                            player={player}
+                            inactive={player.inactive}
+                            deferAvatar={index >= EAGER_AVATAR_ROWS}
+                          />
                         </TableCell>
                         <TableCell className="py-2 text-right whitespace-nowrap">
                           <span className="text-pp font-semibold tabular-nums">{formatPp(player.pp)}pp</span>
@@ -291,12 +295,17 @@ function buildPageUrl(
   return query ? `/ranking?${query}` : "/ranking";
 }
 
+// Rows that fit above the fold on a phone keep their avatar in the first paint; the rest wait for hydration
+const EAGER_AVATAR_ROWS = 8;
+
 function PlayerTableName({
   player,
   inactive,
+  deferAvatar,
 }: {
   player: { name: string; avatar: string; id: string };
   inactive: boolean;
+  deferAvatar: boolean;
 }) {
   return (
     <SimpleLink
@@ -307,6 +316,7 @@ function PlayerTableName({
         profilePicture={player.avatar}
         name={player.name}
         className={inactive ? "grayscale" : ""}
+        deferred={deferAvatar}
       />
       <span className={cn("text-sm font-medium whitespace-nowrap", inactive && "text-muted-foreground")}>
         {player.name}

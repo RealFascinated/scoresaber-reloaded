@@ -37,18 +37,17 @@ export const useLeaderboardScores = (
       ? initial.data
       : undefined;
 
+  // Only what the query actually reads belongs in the key. Otherwise the global scores (which depend on
+  // neither) are refetched whenever the follow list or the signed-in player finishes loading.
+  const modeKey =
+    mode === ScoreModeEnum.Following
+      ? [followingIds, mainPlayer?.id]
+      : mode === ScoreModeEnum.History
+        ? [mainPlayer !== undefined]
+        : [];
+
   return useQuery<ScoreSaberScoresPageResponse | undefined>({
-    queryKey: [
-      "leaderboardScores",
-      leaderboardId,
-      realmId,
-      historyPlayerId,
-      page,
-      mode,
-      country,
-      followingIds,
-      mainPlayer,
-    ],
+    queryKey: ["leaderboardScores", leaderboardId, realmId, historyPlayerId, page, mode, country, ...modeKey],
     queryFn: async () => {
       switch (mode) {
         case ScoreModeEnum.Global: {

@@ -2,34 +2,38 @@
 
 import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffect, useState } from "react";
 
-type BreadcrumbContextValue = {
+type SetBreadcrumbTitle = Dispatch<SetStateAction<string | undefined>>;
+
+// Split in two so the pages that set the title (which are heavy) don't re-render when the title they set
+// changes; only the header that displays it reads the title.
+const BreadcrumbTitleContext = createContext<string | undefined>(undefined);
+const BreadcrumbSetTitleContext = createContext<SetBreadcrumbTitle | undefined>(undefined);
+
+export function BreadcrumbProvider({ children }: { children: ReactNode }) {
   /**
    * The label of the current page, used as the last crumb for dynamic routes (e.g. a player's name).
    */
-  title: string | undefined;
-  setTitle: Dispatch<SetStateAction<string | undefined>>;
-};
-
-const BreadcrumbContext = createContext<BreadcrumbContextValue | undefined>(undefined);
-
-export function BreadcrumbProvider({ children }: { children: ReactNode }) {
   const [title, setTitle] = useState<string | undefined>(undefined);
 
-  return <BreadcrumbContext.Provider value={{ title, setTitle }}>{children}</BreadcrumbContext.Provider>;
+  return (
+    <BreadcrumbSetTitleContext.Provider value={setTitle}>
+      <BreadcrumbTitleContext.Provider value={title}>{children}</BreadcrumbTitleContext.Provider>
+    </BreadcrumbSetTitleContext.Provider>
+  );
 }
 
 /**
  * Gets the title of the current page set via {@link useBreadcrumbTitle}.
  */
 export function useBreadcrumbPageTitle(): string | undefined {
-  return useContext(BreadcrumbContext)?.title;
+  return useContext(BreadcrumbTitleContext);
 }
 
 /**
  * Sets the last crumb of the breadcrumb bar while the calling component is mounted.
  */
 export function useBreadcrumbTitle(title: string | undefined) {
-  const setTitle = useContext(BreadcrumbContext)?.setTitle;
+  const setTitle = useContext(BreadcrumbSetTitleContext);
 
   useEffect(() => {
     if (!setTitle) {

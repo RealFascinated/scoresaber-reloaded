@@ -17,8 +17,15 @@ export function LandingBackground() {
     }
 
     let animationId: number;
-    let particles: { x: number; y: number; size: number; speedX: number; speedY: number; opacity: number }[] =
-      [];
+    const particles: {
+      x: number;
+      y: number;
+      size: number;
+      speedX: number;
+      speedY: number;
+      // Built once: this is drawn on every frame for every particle
+      color: string;
+    }[] = [];
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -35,14 +42,14 @@ export function LandingBackground() {
         size: Math.random() * 2 + 1,
         speedX: (Math.random() - 0.5) * 0.3,
         speedY: (Math.random() - 0.5) * 0.3,
-        opacity: Math.random() * 0.4 + 0.1,
+        color: `rgba(255, 255, 255, ${Math.random() * 0.4 + 0.1})`,
       });
     }
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach(p => {
+      for (const p of particles) {
         p.x += p.speedX;
         p.y += p.speedY;
 
@@ -61,9 +68,9 @@ export function LandingBackground() {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+        ctx.fillStyle = p.color;
         ctx.fill();
-      });
+      }
 
       animationId = requestAnimationFrame(animate);
     };

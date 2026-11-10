@@ -61,18 +61,27 @@ function CountryFlagImage({ code, size }: { code: string; size: number }) {
   );
 }
 
-export default function CountrySelector({
+/**
+ * The ~250 country rows. This is its own component so none of them are built until the dropdown is
+ * opened: a selector sits on every ranking page, and an inline `items.map` creates every row on each
+ * render even while the popover is closed.
+ */
+function CountryList({
   value,
   onValueChange,
-  className,
   clearable,
-  placeholder = "All countries",
+  placeholder,
   prioritizeCountry,
   counts,
-  countNoun = "player",
-}: CountrySelectorProps) {
-  const [open, setOpen] = useState(false);
-  const listId = useId();
+  countNoun,
+  listId,
+  close,
+}: Pick<CountrySelectorProps, "value" | "onValueChange" | "clearable" | "prioritizeCountry" | "counts"> & {
+  placeholder: string;
+  countNoun: string;
+  listId: string;
+  close: () => void;
+}) {
   const hasCounts = counts != undefined;
 
   const items = countryFilter
@@ -93,6 +102,68 @@ export default function CountrySelector({
       }
       return 0;
     });
+
+  return (
+    <Command>
+      <CommandInput placeholder="Search countries..." autoFocus />
+      <CommandList id={listId} className="max-h-96">
+        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandGroup>
+          {clearable && (
+            <CommandItem
+              value={CLEAR_VALUE}
+              onSelect={() => {
+                close();
+                onValueChange(undefined);
+              }}
+              className={cn("justify-between", !value && "bg-accent text-accent-foreground")}
+            >
+              <span className="text-muted-foreground">{placeholder}</span>
+              {!value && <SharedIcons.SelectCheckIcon className="h-4 w-4" />}
+            </CommandItem>
+          )}
+          {items.map(item => (
+            <CommandItem
+              key={item.value}
+              value={item.name}
+              onSelect={() => {
+                close();
+                onValueChange(item.value);
+              }}
+              className="flex w-full min-w-0 items-center justify-between gap-2"
+            >
+              <span className="flex min-w-0 items-center gap-2 truncate">
+                <CountryFlagImage code={item.value} size={12} />
+                <span className="truncate">{item.name}</span>
+              </span>
+              <span className="flex shrink-0 items-center gap-2">
+                {hasCounts && item.count != undefined && (
+                  <span className="text-muted-foreground text-sm whitespace-nowrap tabular-nums">
+                    {item.count.toLocaleString()} {pluralize(item.count, countNoun)}
+                  </span>
+                )}
+                {item.value === value && <SharedIcons.SelectCheckIcon className="h-4 w-4" />}
+              </span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+      </CommandList>
+    </Command>
+  );
+}
+
+export default function CountrySelector({
+  value,
+  onValueChange,
+  className,
+  clearable,
+  placeholder = "All countries",
+  prioritizeCountry,
+  counts,
+  countNoun = "player",
+}: CountrySelectorProps) {
+  const [open, setOpen] = useState(false);
+  const listId = useId();
 
   const selected = value ? countryFilter.find(c => c.key === value) : undefined;
 
@@ -123,51 +194,17 @@ export default function CountrySelector({
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-(--radix-popover-trigger-width) rounded-md p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search countries..." autoFocus />
-          <CommandList id={listId} className="max-h-96">
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup>
-              {clearable && (
-                <CommandItem
-                  value={CLEAR_VALUE}
-                  onSelect={() => {
-                    setOpen(false);
-                    onValueChange(undefined);
-                  }}
-                  className={cn("justify-between", !value && "bg-accent text-accent-foreground")}
-                >
-                  <span className="text-muted-foreground">{placeholder}</span>
-                  {!value && <SharedIcons.SelectCheckIcon className="h-4 w-4" />}
-                </CommandItem>
-              )}
-              {items.map(item => (
-                <CommandItem
-                  key={item.value}
-                  value={item.name}
-                  onSelect={() => {
-                    setOpen(false);
-                    onValueChange(item.value);
-                  }}
-                  className="flex w-full min-w-0 items-center justify-between gap-2"
-                >
-                  <span className="flex min-w-0 items-center gap-2 truncate">
-                    <CountryFlagImage code={item.value} size={12} />
-                    <span className="truncate">{item.name}</span>
-                  </span>
-                  <span className="flex shrink-0 items-center gap-2">
-                    {hasCounts && item.count != undefined && (
-                      <span className="text-muted-foreground text-sm whitespace-nowrap tabular-nums">
-                        {item.count.toLocaleString()} {pluralize(item.count, countNoun)}
-                      </span>
-                    )}
-                    {item.value === value && <SharedIcons.SelectCheckIcon className="h-4 w-4" />}
-                  </span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
+        <CountryList
+          value={value}
+          onValueChange={onValueChange}
+          clearable={clearable}
+          placeholder={placeholder}
+          prioritizeCountry={prioritizeCountry}
+          counts={counts}
+          countNoun={countNoun}
+          listId={listId}
+          close={() => setOpen(false)}
+        />
       </PopoverContent>
     </Popover>
   );
