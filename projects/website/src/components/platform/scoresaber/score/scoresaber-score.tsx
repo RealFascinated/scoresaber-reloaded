@@ -69,7 +69,7 @@ export default function ScoreSaberScoreDisplay({
         <div
           className={cn(
             "grid w-full gap-2 @3xl:gap-0",
-            "max-@3xl:[&>*:first-child]:col-span-2 max-@3xl:[&>*:last-child]:col-span-2 grid-cols-[minmax(0,1fr)_auto]",
+            "grid-cols-[minmax(0,1fr)_auto]",
             "@3xl:grid-cols-[120px_minmax(120px,1fr)_auto_minmax(240px,300px)]"
           )}
         >

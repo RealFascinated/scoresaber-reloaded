@@ -22,7 +22,7 @@ export default function ScoreSaberScoreInfo({
   const hmd = getHMDInfo(score.hmd as HMD);
 
   return (
-    <div className="flex w-full flex-row items-center justify-between @3xl:w-[120px] @3xl:flex-col @3xl:justify-center">
+    <div className="flex w-full flex-row items-center justify-between @max-3xl:col-span-2 @3xl:w-[120px] @3xl:flex-col @3xl:justify-center">
       <div className="flex items-center gap-1">
         {score.rank === -1 ? (
           <SimpleTooltip display="Unknown Score Rank">

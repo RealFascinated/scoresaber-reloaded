@@ -10,7 +10,7 @@ type Props = {
 
 export default function ScoreSaberScoreStats({ score, leaderboard, medalsMode }: Props) {
   return (
-    <div className="flex h-full w-full flex-col justify-center gap-2">
+    <div className="flex h-full w-full flex-col justify-center gap-2 @max-3xl:col-span-2">
       <MainScoreBadges score={score} leaderboard={leaderboard} medalsMode={medalsMode} />
     </div>
   );
