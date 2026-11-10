@@ -23,7 +23,37 @@ function getClientAddress(request: Request, socketAddress: string | undefined): 
 }
 
 /**
- * Fixed-window, in-memory rate limiter keyed by client address.
+ * Whether the address is loopback, link-local or in a private range (10/8, 172.16/12, 192.168/16, fc00::/7).
+ * The website's server reaches the backend over the internal network, and every one of its server renders
+ * comes from the same address, so counting them as a single client throttles all visitors at once.
+ * Public visitors always arrive through Cloudflare, which sets cf-connecting-ip to their real address.
+ */
+function isPrivateAddress(address: string): boolean {
+  const normalized = address.toLowerCase().replace(/^::ffff:/, "");
+
+  const ipv4 = normalized.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.\d{1,3}$/);
+  if (ipv4) {
+    const first = Number(ipv4[1]);
+    const second = Number(ipv4[2]);
+    return (
+      first === 10 ||
+      first === 127 ||
+      (first === 169 && second === 254) ||
+      (first === 172 && second >= 16 && second <= 31) ||
+      (first === 192 && second === 168)
+    );
+  }
+
+  return (
+    normalized === "::1" ||
+    normalized.startsWith("fc") ||
+    normalized.startsWith("fd") ||
+    normalized.startsWith("fe80:")
+  );
+}
+
+/**
+ * Fixed-window, in-memory rate limiter keyed by client address. Private network addresses are not limited.
  */
 export const rateLimit = ({ max, windowMs, routes = {} }: RateLimitOptions) => {
   const buckets = new Map<string, Bucket>();
@@ -46,9 +76,14 @@ export const rateLimit = ({ max, windowMs, routes = {} }: RateLimitOptions) => {
       return;
     }
 
+    const clientAddress = getClientAddress(request, server?.requestIP(request)?.address);
+    if (isPrivateAddress(clientAddress)) {
+      return;
+    }
+
     const routeEntry = routeEntries.find(([prefix]) => pathname.startsWith(prefix));
     const limit = routeEntry ? routeEntry[1] : max;
-    const key = `${routeEntry ? routeEntry[0] : "*"}|${getClientAddress(request, server?.requestIP(request)?.address)}`;
+    const key = `${routeEntry ? routeEntry[0] : "*"}|${clientAddress}`;
 
     const now = Date.now();
     let bucket = buckets.get(key);
