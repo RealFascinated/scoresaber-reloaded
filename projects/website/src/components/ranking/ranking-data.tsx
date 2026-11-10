@@ -180,7 +180,7 @@ export default function RankingData({ initial }: RankingDataProps) {
 
           {rankingData && (
             <div className="flex flex-col gap-4">
-              <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
+              <div className="ring-border bg-card overflow-x-auto rounded-xl ring-1">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -308,7 +308,9 @@ function PlayerTableName({
         name={player.name}
         className={inactive ? "grayscale" : ""}
       />
-      <span className={cn("text-sm font-medium", inactive && "text-muted-foreground")}>{player.name}</span>
+      <span className={cn("text-sm font-medium whitespace-nowrap", inactive && "text-muted-foreground")}>
+        {player.name}
+      </span>
     </SimpleLink>
   );
 }
