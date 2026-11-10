@@ -24,7 +24,7 @@ export default function leaderboardController(app: Elysia) {
           query: t.Composite([
             ScoreSaberLeaderboardQueryFiltersSchema,
             t.Object({
-              page: t.Optional(t.Number()),
+              page: t.Optional(t.Integer({ minimum: 1 })),
             }),
           ]),
           response: LeaderboardsPageResponseSchema,
@@ -54,7 +54,7 @@ export default function leaderboardController(app: Elysia) {
         {
           tags: ["Leaderboard"],
           params: t.Object({
-            leaderboardId: t.Number(),
+            leaderboardId: t.Integer({ minimum: 1 }),
           }),
           detail: {
             description: "Fetch leaderboard star rating change history",
@@ -75,7 +75,7 @@ export default function leaderboardController(app: Elysia) {
         {
           tags: ["Leaderboard"],
           params: t.Object({
-            leaderboardId: t.Number(),
+            leaderboardId: t.Integer({ minimum: 1 }),
           }),
           detail: {
             description: "Fetch leaderboard details",

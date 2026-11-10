@@ -19,7 +19,7 @@ export default function playerRankingController(app: Elysia) {
         {
           tags: ["Ranking"],
           params: t.Object({
-            page: t.Number(),
+            page: t.Integer({ minimum: 1 }),
           }),
           query: t.Object({
             country: t.Optional(t.String()),
@@ -40,7 +40,7 @@ export default function playerRankingController(app: Elysia) {
         {
           tags: ["Ranking"],
           params: t.Object({
-            page: t.Number(),
+            page: t.Integer({ minimum: 1 }),
           }),
           query: t.Object({
             country: t.Optional(t.String()),

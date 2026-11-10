@@ -47,6 +47,11 @@ export abstract class Queue<T> {
    */
   private isStopped = false;
 
+  /**
+   * Whether items left in the processing list by a previous run were put back on the queue
+   */
+  private recoveredInFlight = false;
+
   constructor(id: QueueId, queueMode: QueueMode = "lifo", concurrency: number = 1) {
     this.id = id;
     this.queueMode = queueMode;
@@ -67,7 +72,7 @@ export abstract class Queue<T> {
       return;
     }
 
-    await redisClient.lpush(`queue::${this.id}`, stringify(item));
+    await redisClient.lpush(this.queueKey, stringify(item));
     // Use setImmediate to ensure the item is committed before processing
     setImmediate(() => this.processQueue());
   }
@@ -86,7 +91,7 @@ export abstract class Queue<T> {
     // trip per item kept it filling for longer than a processing cycle.
     for (let i = 0; i < items.length; i += Queue.ADD_BATCH_SIZE) {
       const entries = items.slice(i, i + Queue.ADD_BATCH_SIZE).map(item => stringify(item));
-      await redisClient.lpush(`queue::${this.id}`, ...entries);
+      await redisClient.lpush(this.queueKey, ...entries);
     }
 
     // Use setImmediate to ensure the items are committed before processing
@@ -101,18 +106,63 @@ export abstract class Queue<T> {
       return;
     }
 
-    while (this.activeWorkers < this.concurrency && !this.isStopped) {
-      const rawItem =
-        this.queueMode === "fifo"
-          ? await redisClient.rpop(`queue::${this.id}`)
-          : await redisClient.lpop(`queue::${this.id}`);
+    try {
+      await this.recoverInFlightItems();
+    } catch (error) {
+      this.recoveredInFlight = false;
+      queueLogger.error(`Failed to recover in-flight items for queue ${this.id}:`, error);
+      return;
+    }
 
-      if (!rawItem) {
+    while (this.activeWorkers < this.concurrency && !this.isStopped) {
+      // Reserve the worker slot before awaiting the pop so concurrent callers can't exceed the limit
+      this.activeWorkers++;
+
+      let rawItem: string | null;
+      try {
+        // The item moves to a processing list and is only removed once handled, so a crash doesn't lose it
+        rawItem =
+          this.queueMode === "fifo"
+            ? await redisClient.lmove(this.queueKey, this.processingKey, "RIGHT", "LEFT")
+            : await redisClient.lmove(this.queueKey, this.processingKey, "LEFT", "LEFT");
+      } catch (error) {
+        this.activeWorkers--;
+        queueLogger.error(`Failed to pop an item from queue ${this.id}:`, error);
         break;
       }
 
-      this.activeWorkers++;
+      if (!rawItem) {
+        this.activeWorkers--;
+        break;
+      }
+
       void this.runOneItem(rawItem);
+    }
+  }
+
+  private get queueKey(): string {
+    return `queue::${this.id}`;
+  }
+
+  private get processingKey(): string {
+    return `queue::${this.id}::processing`;
+  }
+
+  /**
+   * Puts items that were being processed when the previous process stopped back on the queue.
+   */
+  private async recoverInFlightItems(): Promise<void> {
+    if (this.recoveredInFlight) {
+      return;
+    }
+    this.recoveredInFlight = true;
+
+    let recovered = 0;
+    while ((await redisClient.lmove(this.processingKey, this.queueKey, "RIGHT", "LEFT")) !== null) {
+      recovered++;
+    }
+    if (recovered > 0) {
+      queueLogger.info(`Recovered ${recovered} in-flight items for queue ${this.id}`);
     }
   }
 
@@ -137,8 +187,13 @@ export abstract class Queue<T> {
         });
       }
     } catch (error) {
-      queueLogger.error(`Error processing queue ${this.id}:`, error);
+      queueLogger.error(`Error processing queue ${this.id}: dropped item ${rawItem}`, error);
     } finally {
+      try {
+        await redisClient.lrem(this.processingKey, 1, rawItem);
+      } catch (error) {
+        queueLogger.error(`Failed to clear in-flight item from queue ${this.id}:`, error);
+      }
       this.activeWorkers--;
       if (!this.isStopped) {
         void this.processQueue();
@@ -152,7 +207,7 @@ export abstract class Queue<T> {
    * @returns the size of the queue
    */
   public async getSize(): Promise<number> {
-    return await redisClient.llen(`queue::${this.id}`);
+    return await redisClient.llen(this.queueKey);
   }
 
   public getActiveWorkers(): number {
@@ -160,14 +215,26 @@ export abstract class Queue<T> {
   }
 
   public async hasItem(item: T): Promise<boolean> {
-    return (await redisClient.lindex(`queue::${this.id}`, 0)) === stringify(item);
+    const serialized = stringify(item);
+    const [queued, inFlight] = await Promise.all([
+      redisClient.lpos(this.queueKey, serialized),
+      redisClient.lpos(this.processingKey, serialized),
+    ]);
+    return queued !== null || inFlight !== null;
   }
 
   /**
-   * Stops the queue
+   * Stops the queue and waits (up to the timeout) for in-flight items to finish
+   *
+   * @param timeoutMs the max time to wait for the workers
    */
-  public stop() {
+  public async stop(timeoutMs: number = 5_000): Promise<void> {
     this.isStopped = true;
+
+    const deadline = Date.now() + timeoutMs;
+    while (this.activeWorkers > 0 && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
   }
 
   /**

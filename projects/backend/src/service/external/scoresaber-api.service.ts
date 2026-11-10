@@ -60,6 +60,18 @@ type SerializableValue =
       [key: string]: SerializableValue;
     };
 
+/**
+ * Fills the `:name` placeholders of an endpoint template with URL-encoded values.
+ * A replacer function is used so `$` sequences in values are never interpreted.
+ */
+function fillEndpoint(template: string, values: Record<string, string | number>): string {
+  let result = template;
+  for (const [name, value] of Object.entries(values)) {
+    result = result.replace(`:${name}`, () => encodeURIComponent(String(value)));
+  }
+  return result;
+}
+
 export class ScoreSaberApiService {
   public static totalRequests: number = 0;
   public static failedRequests: number = 0;
@@ -276,7 +288,7 @@ export class ScoreSaberApiService {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up player "${playerId}"...`);
     const token = await ScoreSaberApiService.fetch<ScoreSaberV2PlayerToken>(
-      LOOKUP_PLAYER_V2_ENDPOINT.replace(":id", playerId)
+      fillEndpoint(LOOKUP_PLAYER_V2_ENDPOINT, { id: playerId })
     );
     if (token === undefined) {
       return undefined;
@@ -367,10 +379,8 @@ export class ScoreSaberApiService {
       `Looking up scores for player "${playerId}", sort "${sort}", page "${page}"${search ? `, search "${search}"` : ""}...`
     );
     const response = await ScoreSaberApiService.fetch<ScoreSaberPlayerScoresPageToken>(
-      LOOKUP_PLAYER_SCORES_ENDPOINT.replace(":id", playerId)
-        .replace(":limit", limit.toString())
-        .replace(":sort", sort)
-        .replace(":page", page.toString()) + (search ? `&search=${search}` : "")
+      fillEndpoint(LOOKUP_PLAYER_SCORES_ENDPOINT, { id: playerId, limit, sort, page }) +
+        (search ? `&search=${encodeURIComponent(search)}` : "")
     );
     if (response === undefined) {
       return undefined;
@@ -392,7 +402,7 @@ export class ScoreSaberApiService {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up leaderboard "${leaderboardId}"...`);
     const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardToken>(
-      LOOKUP_LEADERBOARD_ENDPOINT.replace(":id", leaderboardId.toString())
+      fillEndpoint(LOOKUP_LEADERBOARD_ENDPOINT, { id: leaderboardId })
     );
     if (response === undefined) {
       return undefined;
@@ -420,9 +430,7 @@ export class ScoreSaberApiService {
       `Looking up leaderboard by hash for "${hash}", difficulty "${difficulty}", gamemode "${gameMode}"...`
     );
     const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardToken>(
-      LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT.replace(":query", hash)
-        .replace(":difficulty", difficulty.toString())
-        .replace(":gameMode", gameMode)
+      fillEndpoint(LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT, { query: hash, difficulty, gameMode })
     );
     if (response === undefined) {
       return undefined;
@@ -504,10 +512,8 @@ export class ScoreSaberApiService {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up scores for leaderboard "${leaderboardId}", page "${page}"...`);
     const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardScoresPageToken>(
-      LOOKUP_LEADERBOARD_SCORES_ENDPOINT.replace(":id", leaderboardId.toString()).replace(
-        ":page",
-        page.toString()
-      ) + (options?.country ? `&countries=${options.country}` : "")
+      fillEndpoint(LOOKUP_LEADERBOARD_SCORES_ENDPOINT, { id: leaderboardId, page }) +
+        (options?.country ? `&countries=${encodeURIComponent(options.country)}` : "")
     );
 
     if (response === undefined) {
@@ -559,7 +565,7 @@ export class ScoreSaberApiService {
    */
   public static async refreshPlayer(id: string): Promise<PlayerRefreshResponse | undefined> {
     const result = await ScoreSaberApiService.fetch<PlayerRefreshResponse>(
-      REFRESH_PLAYER_ENDPOINT.replace(":id", id)
+      fillEndpoint(REFRESH_PLAYER_ENDPOINT, { id })
     );
     return result;
   }

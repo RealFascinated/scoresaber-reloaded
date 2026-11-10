@@ -112,7 +112,7 @@ export default class PlaylistService {
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of rankedLeaderboards) {
       if (!leaderboards.has(leaderboard.songHash)) {
-        leaderboards.set(leaderboard.songHash, leaderboard);
+        leaderboards.set(leaderboard.songHash, { ...leaderboard, difficulties: [] });
       }
       leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
     }
@@ -145,7 +145,7 @@ export default class PlaylistService {
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of qualifiedLeaderboards) {
       if (!leaderboards.has(leaderboard.songHash)) {
-        leaderboards.set(leaderboard.songHash, leaderboard);
+        leaderboards.set(leaderboard.songHash, { ...leaderboard, difficulties: [] });
       }
       leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
     }
@@ -178,7 +178,7 @@ export default class PlaylistService {
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of rankingQueueLeaderboards.all) {
       if (!leaderboards.has(leaderboard.songHash)) {
-        leaderboards.set(leaderboard.songHash, leaderboard);
+        leaderboards.set(leaderboard.songHash, { ...leaderboard, difficulties: [] });
       }
       leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
     }
@@ -211,7 +211,7 @@ export default class PlaylistService {
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of trendingLeaderboards) {
       if (!leaderboards.has(leaderboard.songHash)) {
-        leaderboards.set(leaderboard.songHash, leaderboard);
+        leaderboards.set(leaderboard.songHash, { ...leaderboard, difficulties: [] });
       }
       leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
     }
@@ -261,17 +261,18 @@ export default class PlaylistService {
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of rankedLeaderboards) {
       if (!leaderboards.has(leaderboard.songHash)) {
-        leaderboards.set(leaderboard.songHash, leaderboard);
+        leaderboards.set(leaderboard.songHash, { ...leaderboard, difficulties: [] });
       }
       leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
     }
 
     return {
-      playlistTitle: `ScoreSaber Custom (${parsedConfig.stars.min} - ${parsedConfig.stars.max} stars, ${customRankedSortLabels[parsedConfig.sort]
-        }, ${getPlaylistTitleDate(new Date())})`,
+      playlistTitle: `ScoreSaber Custom (${parsedConfig.stars.min} - ${parsedConfig.stars.max} stars, ${
+        customRankedSortLabels[parsedConfig.sort]
+      }, ${getPlaylistTitleDate(new Date())})`,
       playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
       customData: {
-        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-custom-ranked-maps.bplist?config=${settingsBase64}`,
+        syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-custom-ranked-maps.bplist?config=${encodeURIComponent(settingsBase64 ?? "")}`,
       },
       songs: Array.from(leaderboards.values()).map(leaderboard => ({
         songName: leaderboard.songName,
@@ -329,7 +330,7 @@ export default class PlaylistService {
         playlistTitle: getSelfSnipePlaylistTitle({ name: "Self Playlist", settings }),
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
-          syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/self.bplist?user=${user}&settings=${settingsBase64}`,
+          syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/self.bplist?user=${encodeURIComponent(user)}${settingsBase64 ? `&settings=${encodeURIComponent(settingsBase64)}` : ""}`,
         },
         songs,
       };
@@ -449,10 +450,13 @@ export default class PlaylistService {
       const songs = scoreRowsToPlaylistSongs(takeTopUniqueSongRows(filteredScores, settings.limit));
 
       return {
-        playlistTitle: getSelfSnipePlaylistTitle({ name: truncateText(player.name ?? "", 16) ?? "", settings }),
+        playlistTitle: getSelfSnipePlaylistTitle({
+          name: truncateText(player.name ?? "", 16) ?? "",
+          settings,
+        }),
         playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
         customData: {
-          syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/snipe.bplist?user=${user}&toSnipe=${toSnipe}&settings=${settingsBase64}`,
+          syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/snipe.bplist?user=${encodeURIComponent(user)}&toSnipe=${encodeURIComponent(toSnipe)}${settingsBase64 ? `&settings=${encodeURIComponent(settingsBase64)}` : ""}`,
         },
         songs,
       };

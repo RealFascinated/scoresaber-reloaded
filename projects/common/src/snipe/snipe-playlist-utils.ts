@@ -1,4 +1,5 @@
 import { Value } from "@sinclair/typebox/value";
+import { BadRequestError } from "../error/bad-request-error";
 import { SHARED_CONSTS } from "../shared-consts";
 import { SnipeSettings, snipeSettingsSchema } from "./snipe-settings-schema";
 
@@ -8,7 +9,7 @@ import { SnipeSettings, snipeSettingsSchema } from "./snipe-settings-schema";
  * @param settingsBase64 the raw settings
  */
 export function parseSnipePlaylistSettings(settingsBase64?: string) {
-  return Value.Parse(snipeSettingsSchema, {
+  const defaults = {
     sort: "pp",
     sortDirection: "desc",
     rankedStatus: "all",
@@ -21,10 +22,21 @@ export function parseSnipePlaylistSettings(settingsBase64?: string) {
       min: 0,
       max: 100,
     },
-    ...(settingsBase64
-      ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SnipeSettings)
-      : {}),
-  });
+  } as const;
+
+  try {
+    const parsed = settingsBase64
+      ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as Partial<SnipeSettings>)
+      : {};
+    return Value.Parse(snipeSettingsSchema, {
+      ...defaults,
+      ...parsed,
+      starRange: { ...defaults.starRange, ...parsed.starRange },
+      accuracyRange: { ...defaults.accuracyRange, ...parsed.accuracyRange },
+    });
+  } catch {
+    throw new BadRequestError("Invalid playlist settings");
+  }
 }
 
 /**

@@ -160,13 +160,13 @@ export class ScoreWebsockets implements EventListener {
           if (now - pendingScore.timestamp >= ScoreWebsockets.SCORE_MATCH_TIMEOUT) {
             ScoreWebsockets.clearPendingScore(key);
             if (pendingScore.scoreSaberToken && pendingScore.leaderboardToken && pendingScore.player) {
-              this.processScore(
+              void this.processScoreSafely(
                 pendingScore.scoreSaberToken,
                 pendingScore.leaderboardToken,
                 pendingScore.player
               );
             } else if (pendingScore.beatLeaderScore) {
-              this.processScore(undefined, undefined, undefined, pendingScore.beatLeaderScore);
+              void this.processScoreSafely(undefined, undefined, undefined, pendingScore.beatLeaderScore);
             }
             continue;
           }
@@ -416,7 +416,9 @@ export class ScoreWebsockets implements EventListener {
       // Save the score stats
       if (beatLeaderScore) {
         // no need to await this
-        BeatLeaderService.saveScoreStats(beatLeaderScore.id);
+        void BeatLeaderService.saveScoreStats(beatLeaderScore.id).catch(error => {
+          scoresWsLog.warn(`Failed to save score stats for "${beatLeaderScore.id}":`, error);
+        });
       }
 
       // Wait for all event listeners to process the score
@@ -459,18 +461,36 @@ export class ScoreWebsockets implements EventListener {
     }
   }
 
-  onStop: () => Promise<void> = async () => {
-    // Process all pending scores
-    for (const [key, pendingScore] of ScoreWebsockets.PENDING_SCORES.entries()) {
-      // Process the score
-      this.processScore(
-        pendingScore.scoreSaberToken,
-        pendingScore.leaderboardToken,
-        pendingScore.player,
-        pendingScore.beatLeaderScore
-      );
-
-      ScoreWebsockets.PENDING_SCORES.delete(key);
+  /**
+   * Process a score, logging instead of throwing so callers that don't await can't cause unhandled rejections.
+   */
+  private async processScoreSafely(
+    scoreSaberToken?: ScoreSaberScoreToken,
+    leaderboardToken?: ScoreSaberLeaderboardToken,
+    player?: ScoreSaberLeaderboardPlayerInfoToken,
+    beatLeaderScore?: BeatLeaderScoreToken
+  ): Promise<void> {
+    try {
+      await this.processScore(scoreSaberToken, leaderboardToken, player, beatLeaderScore);
+    } catch (error) {
+      scoresWsLog.error("Error processing pending score:", error);
     }
+  }
+
+  onStop: () => Promise<void> = async () => {
+    // Process all pending scores, waiting for them so they aren't lost when the process exits
+    const pendingScores = [...ScoreWebsockets.PENDING_SCORES.values()];
+    ScoreWebsockets.PENDING_SCORES.clear();
+
+    await Promise.all(
+      pendingScores.map(pendingScore =>
+        this.processScoreSafely(
+          pendingScore.scoreSaberToken,
+          pendingScore.leaderboardToken,
+          pendingScore.player,
+          pendingScore.beatLeaderScore
+        )
+      )
+    );
   };
 }

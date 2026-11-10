@@ -35,7 +35,7 @@ export default function scoresController(app: Elysia) {
         {
           tags: ["Scores"],
           params: t.Object({
-            scoreId: t.Number(),
+            scoreId: t.Integer({ minimum: 1 }),
           }),
           response: PlayerScoreSchema,
 
@@ -53,7 +53,7 @@ export default function scoresController(app: Elysia) {
           tags: ["Scores"],
           params: t.Object({
             playerId: t.String(),
-            page: t.Number(),
+            page: t.Integer({ minimum: 1 }),
             sort: ScoreSaberScoreSortSchema,
           }),
           query: t.Object({
@@ -80,7 +80,7 @@ export default function scoresController(app: Elysia) {
           tags: ["Scores"],
           params: t.Object({
             playerId: t.String(),
-            page: t.Number(),
+            page: t.Integer({ minimum: 1 }),
           }),
           query: t.Object({
             sort: t.Optional(t.Union(accSaberScoreSortSchema.anyOf)),
@@ -111,7 +111,7 @@ export default function scoresController(app: Elysia) {
             playerId: t.String(),
             field: ScoreSaberScoreSortFieldSchema,
             direction: SortDirectionSchema,
-            page: t.Number(),
+            page: t.Integer({ minimum: 1 }),
           }),
           query: PlayerScoresQuerySchema,
           response: PlayerScoresPageResponseSchema,
@@ -137,7 +137,7 @@ export default function scoresController(app: Elysia) {
             playerId: t.String(),
             field: ScoreSaberMedalScoreSortFieldSchema,
             direction: SortDirectionSchema,
-            page: t.Number(),
+            page: t.Integer({ minimum: 1 }),
           }),
           query: PlayerScoresQuerySchema,
           response: MedalPlayerScoresPageResponseSchema,
@@ -155,7 +155,7 @@ export default function scoresController(app: Elysia) {
           tags: ["Scores"],
           params: t.Object({
             playerId: t.String(),
-            leaderboardId: t.Number(),
+            leaderboardId: t.Integer({ minimum: 1 }),
           }),
           response: ScoreHistoryGraphSchema,
           detail: {
@@ -171,8 +171,8 @@ export default function scoresController(app: Elysia) {
         {
           tags: ["Scores"],
           params: t.Object({
-            leaderboardId: t.Number(),
-            page: t.Number(),
+            leaderboardId: t.Integer({ minimum: 1 }),
+            page: t.Integer({ minimum: 1 }),
           }),
           query: t.Object({
             country: t.Optional(t.String()),
@@ -190,8 +190,8 @@ export default function scoresController(app: Elysia) {
         {
           tags: ["Scores"],
           params: t.Object({
-            leaderboardId: t.Number(),
-            page: t.Number(),
+            leaderboardId: t.Integer({ minimum: 1 }),
+            page: t.Integer({ minimum: 1 }),
           }),
           body: t.Object({
             friendIds: t.Array(t.String(), { minItems: 1, maxItems: SHARED_CONSTS.maxFriends + 1 }),
@@ -204,14 +204,16 @@ export default function scoresController(app: Elysia) {
       )
       .get(
         "/top/:page",
-        async ({ params: { page, limit } }) => {
+        async ({ params: { page }, query: { limit } }) => {
           return await TopScoresService.getTopScores(page, limit);
         },
         {
           tags: ["Scores"],
           params: t.Object({
-            page: t.Number(),
-            limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
+            page: t.Integer({ minimum: 1 }),
+          }),
+          query: t.Object({
+            limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
           }),
           response: TopScoresPageResponseSchema,
           detail: {

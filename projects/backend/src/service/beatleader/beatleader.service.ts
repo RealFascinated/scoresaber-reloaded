@@ -106,6 +106,14 @@ export default class BeatLeaderService {
       timestamp,
     };
     const row = await BeatLeaderScoresRepository.insertReturning(insertRow);
+    if (!row) {
+      // Another request inserted the same score between our check and insert
+      const concurrent = await BeatLeaderScoresRepository.findRowById(scoreToken.id);
+      if (!concurrent) {
+        throw new Error(`BeatLeader score "${scoreToken.id}" could not be inserted`);
+      }
+      return beatLeaderScoreRowToType(concurrent);
+    }
 
     // Save the score stats alongside the score. Best-effort: failures are logged and
     // the stats are still fetched lazily on first request (see getScoreStats).
@@ -216,7 +224,11 @@ export default class BeatLeaderService {
     if (scoreStatsFile != undefined) {
       return JSON.parse(scoreStatsFile.toString()) as ScoreStatsToken;
     }
-    return this.saveScoreStats(scoreId);
+    // Only persist stats for scores we track, so arbitrary ids can't fill the storage
+    if (await BeatLeaderScoresRepository.findRowById(scoreId)) {
+      return this.saveScoreStats(scoreId);
+    }
+    return BeatLeaderApiService.lookupScoreStats(scoreId);
   }
 
   /**
@@ -300,8 +312,11 @@ export default class BeatLeaderService {
         });
 
         if (replay !== undefined) {
-          await StorageService.saveFile(StorageBucket.BeatLeaderReplays, `${replayId}`, Buffer.from(replay));
-          return true;
+          return await StorageService.saveFile(
+            StorageBucket.BeatLeaderReplays,
+            `${replayId}`,
+            Buffer.from(replay)
+          );
         }
       } catch (error) {
         sendEmbedToChannel(

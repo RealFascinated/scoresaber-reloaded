@@ -1,4 +1,5 @@
 import { Type, type StaticDecode } from "@sinclair/typebox";
+import { BadRequestError } from "../../error/bad-request-error";
 import { SHARED_CONSTS } from "../../shared-consts";
 
 export const customRankedPlaylistSchema = Type.Object({
@@ -23,23 +24,33 @@ export type CustomRankedPlaylist = StaticDecode<typeof customRankedPlaylistSchem
  * @returns the custom ranked playlist settings
  */
 export function parseCustomRankedPlaylistSettings(settingsBase64?: string) {
-  const settings: CustomRankedPlaylist = settingsBase64
-    ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as CustomRankedPlaylist)
-    : // Default values
+  let settings: CustomRankedPlaylist;
+  try {
+    settings = settingsBase64
+      ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as CustomRankedPlaylist)
+      : // Default values
+        {
+          stars: {
+            min: 0,
+            max: SHARED_CONSTS.maxStars,
+          },
+          sort: "stars",
+        };
+  } catch {
+    throw new BadRequestError("Invalid playlist settings");
+  }
 
-      {
-        stars: {
-          min: 0,
-          max: SHARED_CONSTS.maxStars,
-        },
-        sort: "stars",
-      };
+  const min = Number(settings?.stars?.min ?? 0);
+  const max = Number(settings?.stars?.max ?? SHARED_CONSTS.maxStars);
+  if (Number.isNaN(min) || Number.isNaN(max)) {
+    throw new BadRequestError("Invalid playlist settings");
+  }
 
   // Enforce limitations
   settings.sort = settings.sort ?? "stars";
   settings.stars = {
-    min: settings.stars.min < 0 ? 0 : settings.stars.min,
-    max: settings.stars.max > SHARED_CONSTS.maxStars ? SHARED_CONSTS.maxStars : settings.stars.max,
+    min: min < 0 ? 0 : min,
+    max: max > SHARED_CONSTS.maxStars ? SHARED_CONSTS.maxStars : max,
   };
 
   return settings;

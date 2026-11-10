@@ -54,8 +54,6 @@ export class QueueManager implements EventListener {
   }
 
   async onStop() {
-    for (const queue of QueueManager.queues.values()) {
-      queue.stop();
-    }
+    await Promise.all(Array.from(QueueManager.queues.values()).map(queue => queue.stop()));
   }
 }

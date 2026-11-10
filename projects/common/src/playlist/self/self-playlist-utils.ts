@@ -1,4 +1,5 @@
 import { Value } from "@sinclair/typebox/value";
+import { BadRequestError } from "../../error/bad-request-error";
 import { SHARED_CONSTS } from "../../shared-consts";
 import { SelfPlaylistSettings, selfPlaylistSettingsSchema } from "./self-playlist-settings-schema";
 
@@ -8,7 +9,7 @@ import { SelfPlaylistSettings, selfPlaylistSettingsSchema } from "./self-playlis
  * @param settingsBase64 the raw settings
  */
 export function parseSelfPlaylistSettings(settingsBase64?: string) {
-  return Value.Parse(selfPlaylistSettingsSchema, {
+  const defaults = {
     sort: "pp",
     sortDirection: "desc",
     rankedStatus: "all",
@@ -20,10 +21,21 @@ export function parseSelfPlaylistSettings(settingsBase64?: string) {
       min: 0,
       max: 100,
     },
-    ...(settingsBase64
-      ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as SelfPlaylistSettings)
-      : {}),
-  });
+  } as const;
+
+  try {
+    const parsed = settingsBase64
+      ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as Partial<SelfPlaylistSettings>)
+      : {};
+    return Value.Parse(selfPlaylistSettingsSchema, {
+      ...defaults,
+      ...parsed,
+      starRange: { ...defaults.starRange, ...parsed.starRange },
+      accuracyRange: { ...defaults.accuracyRange, ...parsed.accuracyRange },
+    });
+  } catch {
+    throw new BadRequestError("Invalid playlist settings");
+  }
 }
 
 /**

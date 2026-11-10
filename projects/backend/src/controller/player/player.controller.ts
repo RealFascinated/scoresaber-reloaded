@@ -167,8 +167,8 @@ export default function playerController(app: Elysia) {
           tags: ["Player"],
           params: t.Object({
             playerId: t.String(),
-            leaderboardId: t.Number(),
-            page: t.Number(),
+            leaderboardId: t.Integer({ minimum: 1 }),
+            page: t.Integer({ minimum: 1 }),
           }),
           response: ScoreSaberScoresPageResponseSchema,
           detail: {

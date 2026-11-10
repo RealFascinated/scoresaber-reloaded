@@ -292,7 +292,8 @@ export class ScoreSaberScoresRepository {
     return db
       .select({ pp: scoreSaberScoresTable.pp })
       .from(scoreSaberScoresTable)
-      .where(gt(scoreSaberScoresTable.pp, 0))
+      .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoresTable.playerId, scoreSaberAccountsTable.id))
+      .where(and(gt(scoreSaberScoresTable.pp, 0), eq(scoreSaberAccountsTable.banned, false)))
       .orderBy(desc(scoreSaberScoresTable.pp))
       .limit(limit);
   }

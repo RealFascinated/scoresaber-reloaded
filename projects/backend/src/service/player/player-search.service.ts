@@ -85,7 +85,11 @@ export class PlayerSearchService {
       includeInactives,
     });
 
-    const tokens = foundPlayers?.data ?? [];
+    if (!foundPlayers) {
+      return Pagination.empty<ScoreSaberPlayer>();
+    }
+
+    const tokens = foundPlayers.data;
     const items = await Promise.all(
       tokens.map(async token => {
         const player = await ScoreSaberPlayerService.getPlayer(token.id, "basic", token);
@@ -100,12 +104,13 @@ export class PlayerSearchService {
     return {
       items,
       metadata: {
-        totalPages: Math.ceil(
-          (foundPlayers?.metadata.totalItems ?? 0) / (foundPlayers?.metadata.itemsPerPage ?? 0)
-        ),
-        totalItems: foundPlayers?.metadata.totalItems ?? 0,
+        totalPages:
+          foundPlayers.metadata.itemsPerPage > 0
+            ? Math.ceil(foundPlayers.metadata.totalItems / foundPlayers.metadata.itemsPerPage)
+            : 0,
+        totalItems: foundPlayers.metadata.totalItems,
         page,
-        itemsPerPage: foundPlayers?.metadata.itemsPerPage ?? 0,
+        itemsPerPage: foundPlayers.metadata.itemsPerPage,
       },
     };
   }

@@ -155,7 +155,7 @@ export class PlayerHistoryService {
         .setColor("#00ff00")
     );
     PlayerHistoryService.logger.info(
-      `Finished tracking player statistics in ${(performance.now() - now.getTime()).toFixed(0)}ms\n` +
+      `Finished tracking player statistics in ${(Date.now() - now.getTime()).toFixed(0)}ms\n` +
         `Successfully processed: ${successCount} players\n` +
         `Failed to process: ${errorCount} players\n` +
         `Total inactive players: ${inactivePlayers}`

@@ -18,7 +18,7 @@ export default function beatleaderController(app: Elysia) {
         {
           tags: ["BeatLeader"],
           params: t.Object({
-            scoreId: t.Number(),
+            scoreId: t.Integer({ minimum: 1 }),
           }),
           detail: {
             description: "Fetch BeatLeader score stats",

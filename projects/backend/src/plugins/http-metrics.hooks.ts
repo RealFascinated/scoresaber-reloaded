@@ -23,7 +23,8 @@ function isMetricsRequest(request: Request): boolean {
 }
 
 export const createHttpMetricsHooks = () => {
-  const requestStartTimes = new Map<Request, bigint>();
+  // Weakly keyed: requests that error never reach onAfterHandle, so they must not be retained
+  const requestStartTimes = new WeakMap<Request, bigint>();
 
   let totalRequestsMetric: TotalRequestsMetric | undefined;
   let totalRequestsMetricLoaded = false;

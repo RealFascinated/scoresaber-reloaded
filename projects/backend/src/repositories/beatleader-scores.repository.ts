@@ -12,11 +12,13 @@ export class BeatLeaderScoresRepository {
     return row;
   }
 
-  public static async insertReturning(row: BeatLeaderScoreInsert): Promise<BeatLeaderScoreRow> {
-    const [inserted] = await db.insert(beatLeaderScoresTable).values(row).returning();
-    if (!inserted) {
-      throw new Error("BeatLeader score insert returned no row");
-    }
+  /**
+   * Inserts a score, ignoring conflicts with a concurrently inserted copy.
+   *
+   * @returns the inserted row, or undefined if the score already existed
+   */
+  public static async insertReturning(row: BeatLeaderScoreInsert): Promise<BeatLeaderScoreRow | undefined> {
+    const [inserted] = await db.insert(beatLeaderScoresTable).values(row).onConflictDoNothing().returning();
     return inserted;
   }
 

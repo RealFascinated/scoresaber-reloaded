@@ -58,9 +58,20 @@ export default class StorageService {
       const file = Buffer.from(bytes);
       StorageService.CACHE.set(cacheKey, file);
       return file;
-    } catch {
+    } catch (error) {
+      // A missing object is expected; anything else (network, auth) should be visible
+      if (!StorageService.isNotFoundError(error as Error & { code?: string })) {
+        StorageService.logger.warn(`Failed to read file from S3 (${bucket}/${filename}): ${error}`);
+      }
       return undefined;
     }
+  }
+
+  private static isNotFoundError(
+    error: Error | string | number | boolean | null | undefined | object
+  ): boolean {
+    const code = typeof error === "object" && error !== null && "code" in error ? error.code : undefined;
+    return code === "NoSuchKey" || code === "ERR_S3_NO_SUCH_KEY";
   }
 
   /**
@@ -69,15 +80,17 @@ export default class StorageService {
    * @param bucket the bucket to save to
    * @param filename the filename to save as
    * @param data the data to save
-   * @param contentType the content type of the file
+   * @returns true if the file was saved, false if the save failed
    */
-  public static async saveFile(bucket: StorageBucket, filename: string, data: Buffer) {
+  public static async saveFile(bucket: StorageBucket, filename: string, data: Buffer): Promise<boolean> {
     try {
       const s3file = StorageService.getFileRef(bucket, filename);
       await s3file.write(data);
       StorageService.CACHE.set(`${bucket}:${filename}`, data);
+      return true;
     } catch (error) {
       StorageService.logger.error(`Failed to save file to S3: ${error}`);
+      return false;
     }
   }
 

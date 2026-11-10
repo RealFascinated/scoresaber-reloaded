@@ -178,14 +178,21 @@ export default class CacheService {
 
     const cacheAndReturn = async () => {
       if (mode === "REDIS") {
-        const cachedData = await redisClient.get(cacheKey);
+        // A Redis outage must degrade to uncached fetches instead of failing requests
+        let cachedData: string | null = null;
+        try {
+          cachedData = await redisClient.get(cacheKey);
+        } catch (error) {
+          CacheService.logger.warn(`Failed to read ${cacheKey} from Redis:`, error);
+        }
         if (cachedData !== null) {
           try {
+            const parsed = parse(cachedData) as T;
             CachePerformanceMetric.recordHit(cache, mode);
-            return parse(cachedData) as T;
+            return parsed;
           } catch {
             CacheService.logger.warn(`Failed to parse cached data for ${cacheKey}, removing from cache`);
-            await redisClient.del(cacheKey);
+            await redisClient.del(cacheKey).catch(() => undefined);
           }
         }
       } else {
@@ -202,14 +209,18 @@ export default class CacheService {
       // Cache only when the fetch produced a concrete value (not `undefined` which is a "no result" signal).
       if (data !== undefined) {
         if (mode === "REDIS") {
-          const result = await redisClient.set(
-            cacheKey,
-            stringify(data),
-            "EX", // EX is used to set the TTL for the item
-            this.CACHE_INFO[cache].ttl // The TTL of the item
-          );
-          if (result !== "OK") {
-            throw new InternalServerError(`Failed to set cache for ${cacheKey}`);
+          try {
+            const result = await redisClient.set(
+              cacheKey,
+              stringify(data),
+              "EX", // EX is used to set the TTL for the item
+              this.CACHE_INFO[cache].ttl // The TTL of the item
+            );
+            if (result !== "OK") {
+              CacheService.logger.warn(`Failed to set cache for ${cacheKey}`);
+            }
+          } catch (error) {
+            CacheService.logger.warn(`Failed to write ${cacheKey} to Redis:`, error);
           }
         } else {
           this.getMemoryCache(cache).set(cacheKey, data);

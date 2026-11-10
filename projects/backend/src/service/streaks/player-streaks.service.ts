@@ -1,7 +1,6 @@
 import Logger, { ScopedLogger } from "@ssr/common/logger";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import dayjs from "dayjs";
 import { sql } from "drizzle-orm";
 import { db } from "../../db";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
@@ -30,7 +29,8 @@ export class PlayerPlayedStreakService {
       return;
     }
 
-    const today = dayjs().format("YYYY-MM-DD");
+    // UTC date, matching the UTC date used by expireBrokenStreaks
+    const today = new Date().toISOString().slice(0, 10);
     if (player.lastPlayedDate === today) {
       return;
     }
@@ -65,7 +65,7 @@ export class PlayerPlayedStreakService {
           SET "currentStreak" = 0
           WHERE "currentStreak" > 0
             AND "lastPlayedDate" IS NOT NULL
-            AND "lastPlayedDate" < (CURRENT_DATE - INTERVAL '1 day')::date
+            AND "lastPlayedDate" < ((now() AT TIME ZONE 'UTC')::date - 1)
         `);
         PlayerPlayedStreakService.logger.info(
           `Expired ${result.rowCount} broken streaks in ${formatDuration(performance.now() - before)}`

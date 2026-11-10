@@ -26,6 +26,7 @@ import ScoresController from "./controller/scores/scores.controller";
 import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
+import { rateLimit } from "./plugins/rate-limit";
 import { QueueManager } from "./queue/queue-manager";
 import { ScoreSaberMedalsRepository } from "./repositories/scoresaber-medals.repository";
 import { TableCountsRepository } from "./repositories/table-counts.repository";
@@ -226,6 +227,16 @@ export const app = new Elysia()
       },
     })
   )
+  .use(
+    rateLimit({
+      max: 300,
+      windowMs: 60_000,
+      routes: {
+        "/player/refresh/": 10,
+        "/beatleader/": 30,
+      },
+    })
+  )
   .onRequest(httpMetricsHooks.onRequest)
   .onError({ as: "global" }, ({ code, error, request, path, route }) => {
     // Return default error for type validation. JSON round-trip drops Elysia class instances (e.g. RequestParams in `value`) so mapResponse's devalue can serialize.
@@ -265,10 +276,13 @@ export const app = new Elysia()
       reportErrorToDiscord("HTTP 500", error, `${request.method} ${path}\nRoute: ${route}\nCode: ${code}`);
     }
 
+    // Never expose internals (e.g. SQL and its parameters) for server errors
     const errorMessage =
-      typeof error === "object" && error !== null && "message" in error
-        ? (error as { message?: unknown }).message
-        : undefined;
+      status === 500
+        ? "Internal server error"
+        : typeof error === "object" && error !== null && "message" in error
+          ? (error as { message?: unknown }).message
+          : undefined;
 
     return {
       ...((status && { statusCode: status }) || { status: code }),
@@ -347,8 +361,13 @@ app.onStart(async () => {
   });
 
   log.info("Listening on port http://localhost:8080");
-  await initDiscordBot();
-  sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder().setDescription("Backend started!"));
+  try {
+    await initDiscordBot();
+    sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder().setDescription("Backend started!"));
+  } catch (error) {
+    // A Discord outage must not stop the rest of the services from starting
+    log.error("Failed to initialize the Discord bot:", error);
+  }
 
   // Log all registered routes
   log.info("Registered routes:");
