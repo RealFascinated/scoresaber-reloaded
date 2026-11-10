@@ -13,7 +13,7 @@ export type ScoreModeType = {
 
 export enum ScoreModeEnum {
   Global = "global",
-  Friends = "friend",
+  Following = "following",
   History = "history",
 }
 
@@ -25,10 +25,10 @@ export const scoreModes: ScoreModeType[] = [
     icon: <SharedIcons.GlobalScoresModeIcon className="h-4 w-4" />,
   },
   {
-    name: "Friends",
-    id: ScoreModeEnum.Friends,
+    name: "Following",
+    id: ScoreModeEnum.Following,
     color: "bg-friends/40 border-friends text-primary-foreground",
-    icon: <SharedIcons.FriendsScoresModeIcon className="h-4 w-4" />,
+    icon: <SharedIcons.FollowingScoresModeIcon className="h-4 w-4" />,
   },
   {
     name: "History",

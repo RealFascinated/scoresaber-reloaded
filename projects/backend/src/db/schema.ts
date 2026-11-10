@@ -2,6 +2,7 @@ import { HMD } from "@ssr/common/hmds";
 import { AuthConnectionProvider } from "@ssr/common/schemas/auth/connection-provider";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
+import type { UserPreferencesPatch } from "@ssr/common/schemas/user/preferences";
 import { sql } from "drizzle-orm";
 import {
   bigint,
@@ -690,6 +691,57 @@ export const authVerificationsTable = pgTable(
       .$onUpdate(() => new Date()),
   },
   table => [index("auth_verifications_identifier_idx").on(table.identifier)]
+);
+
+/**
+ * The preferences of a user, stored sparsely: only the keys the user changed are present,
+ * everything else falls back to the defaults.
+ */
+export const userPreferencesTable = pgTable("user-preferences", {
+  userId: text()
+    .primaryKey()
+    .references(() => authUsersTable.id, { onDelete: "cascade" }),
+  preferences: jsonb().$type<UserPreferencesPatch>().notNull().default({}),
+  updatedAt: timestamp()
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+/**
+ * Which players a user follows. Users follow players by their public player id, so a player
+ * can be followed without having an account. A user's own follower id is their `playerId`.
+ */
+export const userFollowsTable = pgTable(
+  "user-follows",
+  {
+    userId: text()
+      .notNull()
+      .references(() => authUsersTable.id, { onDelete: "cascade" }),
+    followingPlayerId: varchar({ length: 32 }).notNull(),
+    createdAt: timestamp().notNull().defaultNow(),
+  },
+  table => [
+    primaryKey({ columns: [table.userId, table.followingPlayerId] }),
+    index("user_follows_following_player_id_idx").on(table.followingPlayerId),
+  ]
+);
+
+/**
+ * The scores a user pinned to the top of their profile. A pin is tied to that exact score, so
+ * it keeps showing it after the player improves their score on that map (it then lives in the
+ * score history).
+ */
+export const userPinnedScoresTable = pgTable(
+  "user-pinned-scores",
+  {
+    userId: text()
+      .notNull()
+      .references(() => authUsersTable.id, { onDelete: "cascade" }),
+    scoreId: integer().notNull(),
+    createdAt: timestamp().notNull().defaultNow(),
+  },
+  table => [primaryKey({ columns: [table.userId, table.scoreId] })]
 );
 
 export type TableCountsTableRow = typeof tableCountsTable.$inferSelect;

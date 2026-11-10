@@ -1,23 +1,26 @@
 "use client";
 
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
-import useDatabase from "@/hooks/use-database";
+import { useUpdateUserPreferences } from "@/hooks/use-user-preferences";
+import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/preferences";
+import { toast } from "sonner";
 import { Button } from "../../ui/button";
 
 export default function ResetSettings() {
-  const database = useDatabase();
+  const { updateAsync } = useUpdateUserPreferences();
 
   async function reset() {
-    await database.reset();
-    // Refresh the page
+    await updateAsync(DEFAULT_USER_PREFERENCES);
+    toast.success("Your settings have been reset");
+    // The settings forms only read the saved values when they open
     window.location.reload();
   }
 
   return (
     <ConfirmationDialog
       trigger={<Button variant="destructive">Reset Settings</Button>}
-      title="Reset Database"
-      description="This will reset the database to default values. You'll need to claim a new profile again."
+      title="Reset Settings"
+      description="This will reset all of your settings, to their default values."
       confirmText="Reset"
       variant="destructive"
       onConfirm={async () => await reset()}

@@ -1,17 +1,17 @@
 import Announcements from "@/components/announcements/announcements";
 import { ApiHealth } from "@/components/api/api-health";
-import { AuthSync } from "@/components/auth/auth-sync";
+import { LegacySettingsImport } from "@/components/auth/legacy-settings-import";
 import BackgroundCover from "@/components/background-cover";
 import { SnowBackground } from "@/components/effects/snow-background";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { BreadcrumbProvider } from "@/components/layout/breadcrumb-context";
 import { SidebarAutoCollapse } from "@/components/layout/sidebar-auto-collapse";
-import DatabaseLoader from "@/components/loaders/database-loader";
 import MeowMeow from "@/components/meow-meow";
 import { PlayerAndLeaderboardSearchDialog } from "@/components/navbar/player-and-leaderboard-search";
 import { RealmProvider } from "@/components/providers/realm-provider";
 import { SearchProvider } from "@/components/providers/search-provider";
+import SessionHydration from "@/components/providers/session-hydration";
 import ThemeProvider from "@/components/providers/theme-provider";
 import SSRLayout from "@/components/ssr-layout";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -19,7 +19,7 @@ import { SiteTheme, ssrConfig } from "config";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ReactNode } from "react";
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default async function Layout({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider
       attribute="class"
@@ -27,8 +27,8 @@ export default function Layout({ children }: { children: ReactNode }) {
       enableSystem={false}
       themes={ssrConfig.themes.map((theme: SiteTheme) => theme.id)}
     >
-      <DatabaseLoader>
-        <AuthSync />
+      <SessionHydration>
+        <LegacySettingsImport />
         <NuqsAdapter>
           <RealmProvider>
             <MeowMeow />
@@ -53,7 +53,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </SidebarProvider>
           </RealmProvider>
         </NuqsAdapter>
-      </DatabaseLoader>
+      </SessionHydration>
     </ThemeProvider>
   );
 }

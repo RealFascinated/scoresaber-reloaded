@@ -228,9 +228,9 @@ describe("ScoreSaberScoresRepository", () => {
     });
   });
 
-  describe("countFriendScoresOnLeaderboard", () => {
-    test("counts friend scores on a seeded leaderboard", async () => {
-      const count = await ScoreSaberScoresRepository.countFriendScoresOnLeaderboard(
+  describe("countFollowingScoresOnLeaderboard", () => {
+    test("counts following scores on a seeded leaderboard", async () => {
+      const count = await ScoreSaberScoresRepository.countFollowingScoresOnLeaderboard(
         [TEST_PLAYER_ID, TEST_PLAYER_TWO_ID],
         TEST_LEADERBOARD_ID
       );
@@ -238,9 +238,9 @@ describe("ScoreSaberScoresRepository", () => {
     });
   });
 
-  describe("findFriendScoresOnLeaderboardPage", () => {
-    test("returns friend scores for a seeded leaderboard", async () => {
-      const rows = await ScoreSaberScoresRepository.findFriendScoresOnLeaderboardPage(
+  describe("findFollowingScoresOnLeaderboardPage", () => {
+    test("returns following scores for a seeded leaderboard", async () => {
+      const rows = await ScoreSaberScoresRepository.findFollowingScoresOnLeaderboardPage(
         [TEST_PLAYER_ID, TEST_PLAYER_TWO_ID],
         TEST_LEADERBOARD_ID,
         10,

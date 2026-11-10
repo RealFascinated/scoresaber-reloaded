@@ -11,8 +11,7 @@ import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useMainPlayerId } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { env } from "@ssr/common/env";
@@ -53,8 +52,7 @@ function generateFilename(playerId: string, data: SelfPlaylistSettings): string 
 }
 
 export default function SelfPlaylistCreator() {
-  const database = useDatabase();
-  const playerId = useStableLiveQuery(() => database.getMainPlayerId());
+  const playerId = useMainPlayerId();
   const [downloading, setDownloading] = useState(false);
 
   const form = useForm<SelfPlaylistSettings>({

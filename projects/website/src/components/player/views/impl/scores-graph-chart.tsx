@@ -400,7 +400,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
               className="w-full gap-1.5 text-xs font-medium md:w-auto"
               disabled={comparisonPlayers.length >= MAX_COMPARISON_PLAYERS}
             >
-              <SharedIcons.ScoresGraphFriendIcon className="size-4" />
+              <SharedIcons.ScoresGraphFollowingIcon className="size-4" />
               Add Player to Compare
               {comparisonPlayers.length > 0 && (
                 <span className="bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-xs">

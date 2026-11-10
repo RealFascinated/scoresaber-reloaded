@@ -1,15 +1,15 @@
 "use client";
 
-import { HistoryMode } from "@/common/player/history-mode";
+import { useUserPreference } from "@/hooks/use-user-preferences";
+
 import Card from "@/components/card";
 import { Spinner } from "@/components/spinner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/contexts/viewport-context";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ScoreSaberPlayerHistoryEntries } from "@ssr/common/schemas/scoresaber/player/history";
+import { HistoryMode } from "@ssr/common/schemas/user/history-mode";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
@@ -215,8 +215,7 @@ function DateRangeSelector({
 
 export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
   const isMobile = useIsMobile("xl");
-  const database = useDatabase();
-  const historyMode = useStableLiveQuery(() => database.getHistoryMode());
+  const historyMode = useUserPreference("historyMode");
 
   const [selectedViewIndex, setSelectedViewIndex] = useState(0);
   const [daysAgo, setDaysAgo] = useState(DEFAULT_DAYS_AGO);
@@ -244,7 +243,7 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
         </div>
       </div>
 
-      {statisticHistory && historyMode !== undefined ? (
+      {statisticHistory ? (
         <Card className={cn("bg-chart-card", selectedView.isChart ? "px-2.5 pt-0 pb-2.5" : "")}>
           <PlayerViewPanel
             viewIndex={selectedView.index}

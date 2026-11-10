@@ -3,8 +3,7 @@
 import Avatar from "@/components/avatar";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useFollowing } from "@/hooks/use-following";
 import type { Page } from "@ssr/common/pagination";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -13,21 +12,20 @@ import { useCallback, useEffect, useState } from "react";
 import Card from "../../card";
 import { Spinner } from "../../spinner";
 
-export function FriendRanking() {
-  const database = useDatabase();
-  const friends = useStableLiveQuery(() => database.getFriends(true));
+export function FollowingRanking() {
+  const following = useFollowing(true).data;
 
   const [page, setPage] = useState(1);
-  const [friendsPage, setFriendsPage] = useState<Page<ScoreSaberPlayer>>();
+  const [followingPage, setFollowingPage] = useState<Page<ScoreSaberPlayer>>();
 
-  const getFriendsPage = useCallback(async () => {
-    if (!friends) {
+  const getFollowingPage = useCallback(async () => {
+    if (!following) {
       return;
     }
 
     const pagination = new Pagination<ScoreSaberPlayer>();
     pagination.setItems(
-      friends.toSorted((a, b) => {
+      following.toSorted((a, b) => {
         if (a.inactive && !b.inactive) {
           return 1;
         }
@@ -40,30 +38,30 @@ export function FriendRanking() {
     pagination.setItemsPerPage(8);
 
     return pagination.getPage(page);
-  }, [friends, page]);
+  }, [following, page]);
 
   useEffect(() => {
-    getFriendsPage().then(setFriendsPage);
-  }, [getFriendsPage]);
+    getFollowingPage().then(setFollowingPage);
+  }, [getFollowingPage]);
 
   return (
     <Card className="flex flex-col">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold">Friend Ranking</h2>
+        <h2 className="text-lg font-semibold">Following Ranking</h2>
         <p className="text-muted-foreground mt-1 text-sm">
-          See how your friends rank compared to each other.
+          See how the players you follow rank compared to each other.
         </p>
       </div>
 
-      {!friendsPage && (
+      {!followingPage && (
         <div className="flex w-full items-center justify-center py-12">
           <Spinner />
         </div>
       )}
 
-      {friendsPage && (
+      {followingPage && (
         <div className="flex flex-col gap-3">
-          {friendsPage.items.map(player => (
+          {followingPage.items.map(player => (
             <SimpleLink
               key={player.id}
               href={`/player/${player.id}`}
@@ -92,8 +90,8 @@ export function FriendRanking() {
 
           <SimplePagination
             page={page}
-            totalItems={friendsPage.metadata.totalItems}
-            itemsPerPage={friendsPage.metadata.itemsPerPage}
+            totalItems={followingPage.metadata.totalItems}
+            itemsPerPage={followingPage.metadata.itemsPerPage}
             onPageChange={newPage => setPage(newPage)}
           />
         </div>

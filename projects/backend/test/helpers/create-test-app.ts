@@ -12,6 +12,10 @@ import PlayerRankingController from "../../src/controller/player/player-ranking.
 import PlayerController from "../../src/controller/player/player.controller";
 import PlaylistController from "../../src/controller/playlist/playlist.controller";
 import ScoresController from "../../src/controller/scores/scores.controller";
+import UserFollowingController from "../../src/controller/user/user-following.controller";
+import UserPinnedScoresController from "../../src/controller/user/user-pinned-scores.controller";
+import UserPreferencesController from "../../src/controller/user/user-preferences.controller";
+import UserController from "../../src/controller/user/user.controller";
 import { authCors } from "../../src/plugins/auth-cors";
 import { WebsocketManager } from "../../src/websocket/websocket-manager";
 import { patchScoreSaberApiForTests } from "./scoresaber-api-test-patches";
@@ -87,6 +91,10 @@ export function createTestApp() {
     .use(cors())
     .use(AppController)
     .use(AuthController)
+    .use(UserPreferencesController)
+    .use(UserController)
+    .use(UserFollowingController)
+    .use(UserPinnedScoresController)
     .use(PlayerController)
     .use(ScoresController)
     .use(LeaderboardController)

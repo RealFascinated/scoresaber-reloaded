@@ -17,6 +17,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { parseAsString, useQueryState } from "nuqs";
 import ScoresCard from "../../score/scores-card";
 import { ScoresToolbar } from "../../score/scores-toolbar";
+import PinnedScores from "./pinned-scores";
 import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 
 const DEFAULT_SORT: ScoreSaberScoreSortField = "date";
@@ -137,6 +138,9 @@ export default function ScoreSaberPlayerScoresSSR({ player }: { player: ScoreSab
             onSortChange={query.handleSortChange}
           />
         </ScoresToolbar>
+
+        {/* Pinned scores sit above the first page of scores, unless searching */}
+        {query.page === 1 && !query.search && <PinnedScores playerId={player.id} />}
 
         <ScoresListPanel
           page={query.page}

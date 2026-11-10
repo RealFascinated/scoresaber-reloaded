@@ -105,8 +105,6 @@
         "critters": "npm:beasties@^0.5.5",
         "cross-env": "^10.1.0",
         "date-fns": "^4.4.0",
-        "dexie": "^4.4.7",
-        "dexie-react-hooks": "^4.4.0",
         "framer-motion": "^14.10.1",
         "globals": "^17.14.0",
         "js-cookie": "^3.0.8",
@@ -876,10 +874,6 @@
     "deuri": ["deuri@3.0.1", "", {}, "sha512-IUgdopWhjToYbgpYDe3ZCBdzILexypCTCEakqDGQyKSlayxWL7yonY/zeJL9ICIjwVmAm3cpiAyT64rBn34gGg=="],
 
     "devalue": ["devalue@6.0.3", "", {}, "sha512-3woMEITftG1wKeO/4d/QXH1DVKctTSZg3jNGPpjp9hNr5Hos8MCFF5McTML5ZtgKDObm2R591B0spRp2IVernA=="],
-
-    "dexie": ["dexie@4.4.7", "", {}, "sha512-wemFiCl3DTCnfzyqepUTX1ugbYbkTrw3aEZOG7YjAOUoEQB5g5PrEywPzk5JpbX/SxqQ9IvjUpxCDIEjoOWEfA=="],
-
-    "dexie-react-hooks": ["dexie-react-hooks@4.4.0", "", { "peerDependencies": { "dexie": ">=4.2.0-alpha.1 <5.0.0", "react": ">=16" } }, "sha512-ObLXBS5+4BJU8vtSvBx6b9fY6zZYgniAtwxzjCHsUQadgbqYN6935X2/1TWw4Rf2N1aZV1io5/ziox4vKuxABA=="],
 
     "discord-api-types": ["discord-api-types@0.38.58", "", {}, "sha512-6utghVho47hBzmx8nIp+pKEDDNIlVk6On/J5Y1Q529payNLZjBsrw+mt+G5Y3NYRE3kgta6eBx5hRYVyfHGdOA=="],
 

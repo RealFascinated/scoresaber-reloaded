@@ -1,36 +1,39 @@
+import { getServerSession } from "@/common/auth/session-server";
+import { WebsiteLanding } from "@ssr/common/schemas/user/website-landing";
 import { type NextRequest, NextResponse } from "next/server";
 
-export function proxy(request: NextRequest) {
-  const playerId = request.cookies.get("playerId");
-  const websiteLanding = request.cookies.get("websiteLanding");
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-  // Handle home redirect if they are signed in
-  if (request.nextUrl.pathname === "/" && !!playerId) {
-    // If they have a player and prefer the landing page, stay on landing
-    if (websiteLanding?.value === "landing") {
-      return NextResponse.next();
-    } else if (websiteLanding?.value === "playerHome") {
-      // Otherwise redirect to player home
-      return NextResponse.redirect(new URL("/home", request.url));
-    } else if (websiteLanding?.value === "playerPage") {
-      // Otherwise redirect to player page
-      return NextResponse.redirect(new URL(`/player/${playerId?.value}`, request.url));
-    } else {
-      // No preference set (or unknown value): stay on `/` — do not redirect to `/` (that loops)
+  // The session is the only source of who is signed in, so only the pages that depend on it
+  // pay for asking the backend
+  if (pathname === "/" || pathname.startsWith("/home")) {
+    const session = await getServerSession(request.headers.get("cookie") ?? "", true);
+
+    // Signed-in visitors land where they asked to
+    if (pathname === "/" && session.status === "signed-in" && session.me.playerId) {
+      const { websiteLanding } = session.preferences;
+      if (websiteLanding === WebsiteLanding.PLAYER_HOME) {
+        return NextResponse.redirect(new URL("/home", request.url));
+      }
+      if (websiteLanding === WebsiteLanding.PLAYER_PAGE) {
+        return NextResponse.redirect(new URL(`/player/${session.me.playerId}`, request.url));
+      }
       return NextResponse.next();
     }
-  }
 
-  // The player home needs a signed-in player, send everyone else to sign in
-  if (request.nextUrl.pathname.startsWith("/home") && !playerId) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
-    return NextResponse.redirect(loginUrl);
+    // The player home needs a signed-in player. Only a definite "not signed in" redirects,
+    // an unreachable backend must not lock everyone out.
+    if (pathname.startsWith("/home") && session.status === "anonymous") {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   // Log requests in production
   if (process.env.NEXT_PUBLIC_APP_ENV === "production") {
-    console.log(`${request.method} ${request.nextUrl.pathname}${request.nextUrl.search}`);
+    console.log(`${request.method} ${pathname}${request.nextUrl.search}`);
   }
 
   return NextResponse.next();

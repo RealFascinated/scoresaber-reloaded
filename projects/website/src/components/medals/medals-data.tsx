@@ -14,7 +14,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import Card from "../card";
-import AddFriend from "../friend/add-friend";
+import FollowButton from "../following/follow-button";
 import { Button } from "../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import MedalsInfo from "./medals-info";
@@ -135,7 +135,7 @@ export default function MedalsData() {
                           </span>
                         </TableCell>
                         <TableCell className="relative z-10 py-2">
-                          <AddFriend player={player} iconOnly />
+                          <FollowButton player={player} iconOnly />
                         </TableCell>
                       </TableRow>
                     ))}

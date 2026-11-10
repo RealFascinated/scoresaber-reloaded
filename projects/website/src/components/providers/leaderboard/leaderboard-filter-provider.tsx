@@ -1,6 +1,4 @@
-import { SettingIds } from "@/common/database/database";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useUpdateUserPreferences, useUserPreference } from "@/hooks/use-user-preferences";
 import { parseAsString, useQueryState } from "nuqs";
 import { createContext, ReactNode, useContext, useEffect } from "react";
 import { toast } from "sonner";
@@ -15,10 +13,8 @@ type FilterContextProps = {
 const LeaderboardFilterContext = createContext<FilterContextProps | undefined>(undefined);
 
 export const LeaderboardFilterProvider = ({ children }: { children: ReactNode }) => {
-  const database = useDatabase();
-  const defaultCountry = useStableLiveQuery(() =>
-    database.getSetting<string>(SettingIds.DefaultLeaderboardCountry)
-  );
+  const { update } = useUpdateUserPreferences();
+  const defaultCountry = useUserPreference("defaultLeaderboardCountry");
   // nuqs uses `null` as the "missing query param" value.
   // Our app code prefers `undefined`, so we map at the boundary.
   const [countryQuery, setCountryQuery] = useQueryState("country", parseAsString);
@@ -38,7 +34,7 @@ export const LeaderboardFilterProvider = ({ children }: { children: ReactNode })
 
   const resetFilters = () => {
     setCountry(undefined);
-    database.setSetting(SettingIds.DefaultLeaderboardCountry, undefined);
+    update({ defaultLeaderboardCountry: null });
 
     toast.success("Reset your filters");
   };

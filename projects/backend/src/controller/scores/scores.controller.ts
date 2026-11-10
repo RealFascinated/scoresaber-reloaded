@@ -20,7 +20,7 @@ import { ScoreSaberScoreSortSchema } from "@ssr/common/score/score-sort";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { Elysia, t } from "elysia";
 import { ScoreSaberLeaderboardScoresService } from "../../service/leaderboard/scoresaber-leaderboard-scores.service";
-import { PlayerFriendScoresService } from "../../service/player/player-friend-scores.service";
+import { PlayerFollowingScoresService } from "../../service/player/player-following-scores.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
 import { PlayerScoresService } from "../../service/player/player-scores.service";
 import { TopScoresService } from "../../service/score/top-scores.service";
@@ -195,7 +195,7 @@ export default function scoresController(app: Elysia) {
         }
       )
       .post(
-        "/friend/leaderboard/:leaderboardId/:page",
+        "/following/leaderboard/:leaderboardId/:page",
         {
           tags: ["Scores"],
           params: t.Object({
@@ -204,16 +204,16 @@ export default function scoresController(app: Elysia) {
           }),
           query: RealmQuerySchema,
           body: t.Object({
-            friendIds: t.Array(t.String(), { minItems: 1, maxItems: SHARED_CONSTS.maxFriends + 1 }),
+            followingIds: t.Array(t.String(), { minItems: 1, maxItems: SHARED_CONSTS.maxFollowing + 1 }),
           }),
           response: ScoreSaberScoresPageResponseSchema,
           detail: {
-            description: "Fetch friends' scores for a leaderboard",
+            description: "Fetch followed players' scores for a leaderboard",
           },
         },
-        async ({ params: { leaderboardId, page }, body: { friendIds }, query: { realmId } }) => {
-          return await PlayerFriendScoresService.getFriendLeaderboardScores(
-            friendIds,
+        async ({ params: { leaderboardId, page }, body: { followingIds }, query: { realmId } }) => {
+          return await PlayerFollowingScoresService.getFollowingLeaderboardScores(
+            followingIds,
             leaderboardId,
             page,
             realmId

@@ -1,12 +1,12 @@
 import { useRealm } from "@/components/providers/realm-provider";
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useFollowingIds } from "@/hooks/use-following";
+import { useMainPlayer } from "@/hooks/use-main-player";
 import { Pagination } from "@ssr/common/pagination";
 import type { ScoreSaberScoresPageResponse } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import useDatabase from "../use-database";
 
 export const useLeaderboardScores = (
   leaderboardId: number,
@@ -15,10 +15,9 @@ export const useLeaderboardScores = (
   mode: ScoreModeEnum,
   country?: string
 ) => {
-  const database = useDatabase();
   const { realmId } = useRealm();
-  const friendIds = useStableLiveQuery(() => database.getFriendIds());
-  const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
+  const followingIds = useFollowingIds();
+  const mainPlayer = useMainPlayer().data;
 
   return useQuery<ScoreSaberScoresPageResponse | undefined>({
     queryKey: [
@@ -29,7 +28,7 @@ export const useLeaderboardScores = (
       page,
       mode,
       country,
-      friendIds,
+      followingIds,
       mainPlayer,
     ],
     queryFn: async () => {
@@ -51,10 +50,10 @@ export const useLeaderboardScores = (
 
           return Pagination.empty();
         }
-        case ScoreModeEnum.Friends: {
-          if (friendIds && mainPlayer) {
-            const response = await ssrApi.getFriendLeaderboardScores(
-              [...friendIds, mainPlayer.id],
+        case ScoreModeEnum.Following: {
+          if (followingIds && mainPlayer) {
+            const response = await ssrApi.getFollowingLeaderboardScores(
+              [...followingIds, mainPlayer.id],
               leaderboardId.toString(),
               page,
               realmId

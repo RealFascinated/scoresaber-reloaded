@@ -73,9 +73,9 @@ export default async function LandingPage() {
       <section className="mx-auto mt-16 grid w-full max-w-4xl gap-4 px-6 sm:grid-cols-2">
         {[
           {
-            icon: SharedIcons.FriendSystemFeatureIcon,
-            title: "Friend System",
-            desc: "Keep tabs on friends across multiple platforms in one unified list.",
+            icon: SharedIcons.FollowingSystemFeatureIcon,
+            title: "Following",
+            desc: "Follow players and keep tabs on them across multiple platforms in one unified list.",
           },
           {
             icon: SharedIcons.AdvancedAnalyticsFeatureIcon,

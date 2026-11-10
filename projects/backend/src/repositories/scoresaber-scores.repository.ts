@@ -11,6 +11,7 @@ import {
   scoreSaberScoreRealmsTable,
   scoreSaberScoresTable,
   type ScoreSaberLeaderboardRow,
+  type ScoreSaberScoreHistoryRow,
   type ScoreSaberScoreRow,
 } from "../db/schema";
 import {
@@ -20,7 +21,10 @@ import {
   scorePpExpr,
   scoreRealmJoinOn,
 } from "./realm-columns";
-import { scoreRowToHistoryInsert } from "./scoresaber-score-history.repository";
+import {
+  ScoreSaberScoreHistoryRepository,
+  scoreRowToHistoryInsert,
+} from "./scoresaber-score-history.repository";
 import { TableCountsRepository } from "./table-counts.repository";
 
 /**
@@ -145,6 +149,23 @@ export class ScoreSaberScoresRepository {
       .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
       .where(eq(scoreSaberScoresTable.scoreId, scoreId));
     return row;
+  }
+
+  /**
+   * Finds a score by its id, whether it is still the player's current score or has since been
+   * replaced by a better one and moved to the score history.
+   *
+   * @param scoreId the score to find
+   * @param realmId the realm to resolve pp for current scores
+   */
+  public static async findAnyRowByScoreId(
+    scoreId: number,
+    realmId: number = DEFAULT_REALM_ID
+  ): Promise<ScoreSaberScoreRow | ScoreSaberScoreHistoryRow | undefined> {
+    return (
+      (await ScoreSaberScoresRepository.findRowByScoreId(scoreId, realmId)) ??
+      (await ScoreSaberScoreHistoryRepository.findRowByScoreId(scoreId))
+    );
   }
 
   public static async rowExistsByScoreId(scoreId: number): Promise<boolean> {
@@ -567,12 +588,12 @@ export class ScoreSaberScoresRepository {
     };
   }
 
-  public static async countFriendScoresOnLeaderboard(
-    friendIds: string[],
+  public static async countFollowingScoresOnLeaderboard(
+    followingIds: string[],
     leaderboardId: number
   ): Promise<number> {
     const conditions = and(
-      inArray(scoreSaberScoresTable.playerId, friendIds),
+      inArray(scoreSaberScoresTable.playerId, followingIds),
       eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
     );
     const [{ total }] = await db
@@ -582,15 +603,15 @@ export class ScoreSaberScoresRepository {
     return total;
   }
 
-  public static async findFriendScoresOnLeaderboardPage(
-    friendIds: string[],
+  public static async findFollowingScoresOnLeaderboardPage(
+    followingIds: string[],
     leaderboardId: number,
     limit: number,
     offset: number,
     realmId: number = DEFAULT_REALM_ID
   ): Promise<ScoreSaberScoreRow[]> {
     const conditions = and(
-      inArray(scoreSaberScoresTable.playerId, friendIds),
+      inArray(scoreSaberScoresTable.playerId, followingIds),
       eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
     );
     return db

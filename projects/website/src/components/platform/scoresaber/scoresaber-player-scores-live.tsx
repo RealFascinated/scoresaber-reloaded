@@ -4,8 +4,7 @@ import ScoreSortControl from "@/components/platform/shared/score-sort-control";
 import ScoresListPanel from "@/components/platform/shared/scores-list-panel";
 import SearchInput from "@/components/platform/shared/search-input";
 import { usePlayerScoresQuery, type SortOption } from "@/components/platform/shared/use-player-scores-query";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useMainPlayerId } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -28,8 +27,7 @@ interface ScoreSaberPlayerScoresLiveProps {
 }
 
 export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerScoresLiveProps) {
-  const database = useDatabase();
-  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
+  const mainPlayerId = useMainPlayerId();
 
   const query = usePlayerScoresQuery<ScoreSaberScoreSort, PlayerScoresPageResponse>({
     queryKeyPrefix: "playerScores:live",

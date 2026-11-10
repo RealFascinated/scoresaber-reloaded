@@ -6,8 +6,7 @@ import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useMainPlayerId } from "@/hooks/use-main-player";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { useMemo, useState } from "react";
@@ -29,14 +28,13 @@ export default function LeaderboardScoresDropdown({
   highlightedPlayerId?: string;
   historyPlayerId?: string;
 }) {
-  const database = useDatabase();
-  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
+  const mainPlayerId = useMainPlayerId();
   const filter = useLeaderboardFilter();
 
   const [mode, setMode] = useState<ScoreModeEnum>(ScoreModeEnum.Global);
   const [pagesByMode, setPagesByMode] = useState<Record<ScoreModeEnum, number>>({
     [ScoreModeEnum.Global]: initialPage,
-    [ScoreModeEnum.Friends]: 1,
+    [ScoreModeEnum.Following]: 1,
     [ScoreModeEnum.History]: 1,
   });
   const page = useMemo(() => pagesByMode[mode] ?? 1, [mode, pagesByMode]);
@@ -61,7 +59,7 @@ export default function LeaderboardScoresDropdown({
     filter.country ?? undefined
   );
 
-  const isFriends = mode === ScoreModeEnum.Friends;
+  const isFollowing = mode === ScoreModeEnum.Following;
   const noScores =
     isError || (!isLoading && !isRefetching && (!scores || (scores && scores.items.length === 0)));
 
@@ -99,8 +97,8 @@ export default function LeaderboardScoresDropdown({
                       <EmptyState
                         title="No Scores Found"
                         description={
-                          isFriends
-                            ? "You or your friends haven't played this map yet"
+                          isFollowing
+                            ? "You or the players you follow haven't played this map yet"
                             : "No scores were found on this leaderboard or page"
                         }
                       />

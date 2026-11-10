@@ -12,24 +12,22 @@ import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useMainPlayer } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { parseAsBoolean, parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import AddFriend from "../friend/add-friend";
+import FollowButton from "../following/follow-button";
 import { PlayerAvatar } from "../ranking/player-avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
 export default function RankingData() {
-  const database = useDatabase();
   const { realmId } = useRealm();
-  const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
+  const mainPlayer = useMainPlayer().data;
 
   const [currentPage, setCurrentPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [countryQuery, setCountryQuery] = useQueryState("country", parseAsString);
@@ -222,7 +220,7 @@ export default function RankingData() {
                           )}
                         </TableCell>
                         <TableCell className="relative z-10 py-2">
-                          <AddFriend player={player} iconOnly />
+                          <FollowButton player={player} iconOnly />
                         </TableCell>
                       </TableRow>
                     ))}

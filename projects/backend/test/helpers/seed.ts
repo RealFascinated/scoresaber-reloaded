@@ -54,7 +54,7 @@ const seededTables = [
   "beatsaver-map-versions",
   "beatsaver-maps",
   "beatsaver-uploaders",
-  "auth-users", // Cascades to auth-sessions and auth-accounts
+  "auth-users", // Cascades to auth-sessions, auth-accounts and user-preferences
   "auth-verifications",
 ] as const;
 

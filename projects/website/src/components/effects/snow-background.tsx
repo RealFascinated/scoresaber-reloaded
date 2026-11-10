@@ -1,12 +1,11 @@
 "use client";
 
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useUserPreference } from "@/hooks/use-user-preferences";
+
 import { Snowfall } from "react-snowfall";
 
 export function SnowBackground() {
-  const database = useDatabase();
-  const snowParticles = useStableLiveQuery(async () => database.getSnowParticles());
+  const snowParticles = useUserPreference("snowParticles");
 
   if (!snowParticles) {
     return null;

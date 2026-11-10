@@ -3,7 +3,7 @@
 import { LOGIN_PATH, signOut } from "@/common/auth/auth-api";
 import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
-import Friend from "@/components/friend/friend";
+import FollowedPlayer from "@/components/following/followed-player";
 import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
@@ -25,12 +25,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import useDatabase from "@/hooks/use-database";
+import { FOLLOWING_QUERY_KEY, useFollowing } from "@/hooks/use-following";
+import { useMainPlayer, useMainPlayerId } from "@/hooks/use-main-player";
 import { ME_QUERY_KEY } from "@/hooks/use-me";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { USER_PREFERENCES_QUERY_KEY } from "@/hooks/use-user-preferences";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
+import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/preferences";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
@@ -149,9 +151,8 @@ const navGroups: { label: string; items: NavItem[] }[] = [
   },
 ];
 
-function FriendsPopover() {
-  const database = useDatabase();
-  const friends = useStableLiveQuery(() => database.getFriends());
+function FollowingPopover() {
+  const { data: following, isLoading } = useFollowing();
   const { openSearch } = useSearch();
   const isMobile = useIsMobile();
 
@@ -175,8 +176,7 @@ function FriendsPopover() {
     closeTimeout.current = setTimeout(() => setOpen(false), 200);
   };
 
-  const friendCount = friends?.length ?? 0;
-  const isLoading = friends === undefined;
+  const followingCount = following.length;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -187,11 +187,11 @@ function FriendsPopover() {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          <SharedIcons.FriendsNavIcon className="size-[18px]" />
-          <span>Friends</span>
-          {friendCount > 0 && (
+          <SharedIcons.FollowingNavIcon className="size-[18px]" />
+          <span>Following</span>
+          {followingCount > 0 && (
             <span className="bg-muted text-muted-foreground ml-auto rounded-md px-1.5 py-0.5 text-xs font-medium tabular-nums">
-              {friendCount}
+              {followingCount}
             </span>
           )}
         </SidebarMenuButton>
@@ -210,12 +210,12 @@ function FriendsPopover() {
         {/* Header */}
         <div className="border-border/50 flex items-center justify-between border-b px-3 py-2.5">
           <div className="flex items-center gap-2">
-            <SharedIcons.FriendsNavIcon className="text-muted-foreground size-4" />
-            <span className="font-semibold">Friends</span>
+            <SharedIcons.FollowingNavIcon className="text-muted-foreground size-4" />
+            <span className="font-semibold">Following</span>
           </div>
-          {friendCount > 0 && (
+          {followingCount > 0 && (
             <span className="bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-xs font-medium tabular-nums">
-              {friendCount}
+              {followingCount}
             </span>
           )}
         </div>
@@ -226,9 +226,9 @@ function FriendsPopover() {
             <div className="flex items-center justify-center py-8">
               <SharedIcons.PageLoadingIcon className="text-muted-foreground size-5 animate-spin" />
             </div>
-          ) : friendCount > 0 ? (
+          ) : followingCount > 0 ? (
             <div className="flex flex-col gap-px">
-              {friends
+              {following
                 .sort((a, b) => {
                   if (a.inactive && !b.inactive) {
                     return 1;
@@ -238,17 +238,17 @@ function FriendsPopover() {
                   }
                   return a.rank - b.rank;
                 })
-                .map(friend => (
-                  <Friend player={friend} key={friend.id} onClick={() => setOpen(false)} />
+                .map(followed => (
+                  <FollowedPlayer player={followed} key={followed.id} onClick={() => setOpen(false)} />
                 ))}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center gap-3 py-8">
-              <SharedIcons.FriendsNavIcon className="text-muted-foreground/30 size-10" />
+              <SharedIcons.FollowingNavIcon className="text-muted-foreground/30 size-10" />
               <div className="flex flex-col items-center gap-1">
-                <p className="text-muted-foreground font-medium">No friends yet</p>
+                <p className="text-muted-foreground font-medium">Not following anyone yet</p>
                 <p className="text-muted-foreground/60 max-w-[220px] text-center text-xs">
-                  Search for players to add them to your friends list
+                  Search for players and follow them to see them here
                 </p>
               </div>
               <Button
@@ -272,19 +272,18 @@ function FriendsPopover() {
 }
 
 function ProfileSection() {
-  const database = useDatabase();
   const pathname = usePathname();
-  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
-  const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
+  const mainPlayerId = useMainPlayerId();
+  const mainPlayer = useMainPlayer().data;
   const queryClient = useQueryClient();
 
   async function handleSignOut() {
     try {
       await signOut();
+      // Everything that depends on the session reads these, so the whole UI signs out at once
       queryClient.setQueryData(ME_QUERY_KEY, null);
-      await database.setMainPlayerId(undefined);
-      // Reload so nothing keeps showing the previous player (see useStableLiveQuery's cache)
-      window.location.reload();
+      queryClient.setQueryData(USER_PREFERENCES_QUERY_KEY, DEFAULT_USER_PREFERENCES);
+      queryClient.setQueryData(FOLLOWING_QUERY_KEY, []);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to sign out");
     }
@@ -394,7 +393,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="gap-0.5">
               <SidebarMenuItem>
-                <FriendsPopover />
+                <FollowingPopover />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

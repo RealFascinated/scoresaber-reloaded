@@ -1,9 +1,9 @@
 "use client";
 
+import { useUserPreference } from "@/hooks/use-user-preferences";
+
 import { resolveBackgroundCover, ResolvedBackgroundCover } from "@/common/background-covers";
 import { cn } from "@/common/utils";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -48,19 +48,15 @@ function ColorLayer({
 }
 
 export default function BackgroundCover() {
-  const database = useDatabase();
   const pathname = usePathname();
 
-  const cover = useStableLiveQuery(async () => database.getBackgroundCover());
-  const custom = useStableLiveQuery(async () => database.getCustomBackground());
-  const brightness = useStableLiveQuery(async () => database.getBackgroundCoverBrightness());
-  const blur = useStableLiveQuery(async () => database.getBackgroundCoverBlur());
+  const cover = useUserPreference("backgroundCover");
+  const custom = useUserPreference("customBackground");
+  const brightness = useUserPreference("backgroundCoverBrightness");
+  const blur = useUserPreference("backgroundCoverBlur");
 
   // The landing page has its own animated background
-  const background =
-    pathname === "/" || cover === undefined || custom === undefined
-      ? undefined
-      : resolveBackgroundCover(cover, custom);
+  const background = pathname === "/" ? undefined : resolveBackgroundCover(cover, custom);
   const targetKey = backgroundKey(background);
 
   const [layers, setLayers] = useState<Layer[]>([]);

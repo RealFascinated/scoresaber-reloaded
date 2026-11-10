@@ -1,25 +1,23 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useFollowActions, useFollowingIds } from "@/hooks/use-following";
+import { useMainPlayerId } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MedalRankingPlayer } from "@ssr/common/schemas/response/ranking/medal-rankings";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
-import { useState } from "react";
 import { toast } from "sonner";
-import useDatabase from "../../hooks/use-database";
 import SimpleTooltip from "../simple-tooltip";
-import { Spinner } from "../spinner";
 import { Button } from "../ui/button";
 
-export default function FriendAction({
+export default function FollowButton({
   player,
   iconOnly,
   className,
 }: {
   /**
-   * The player to add or remove as a friend.
+   * The player to follow or unfollow.
    */
   player: ScoreSaberPlayer | MedalRankingPlayer | { id: string; name: string };
 
@@ -35,67 +33,42 @@ export default function FriendAction({
 }) {
   const { id, name } = player;
 
-  const database = useDatabase();
-  const isFriend = useStableLiveQuery(() => database.isFriend(id));
-  const playerId = useStableLiveQuery(() => database.getMainPlayerId());
-  const [pending, setPending] = useState(false);
+  const { follow, unfollow, isSignedIn } = useFollowActions();
+  const isFollowing = useFollowingIds().includes(id);
+  const mainPlayerId = useMainPlayerId();
 
   /**
-   * Adds this player as a friend
+   * Follows or unfollows this player
    */
-  async function addFriend() {
-    const friends = await database.getFriendIds();
-    if (friends.length >= SHARED_CONSTS.maxFriends) {
-      toast.error(`You can only have a maximum of ${SHARED_CONSTS.maxFriends} friends.`);
+  function toggleFollowing() {
+    if (isFollowing) {
+      unfollow(id);
+      toast.success(
+        <p>
+          You have unfollowed <b>{name}</b>.
+        </p>
+      );
       return;
     }
 
-    await database.addFriend(id);
+    if (follow(id) === "limit-reached") {
+      toast.error(`You can only follow a maximum of ${SHARED_CONSTS.maxFollowing} players.`);
+      return;
+    }
     toast.success(
       <p>
-        You have added <b>{name}</b> as a friend.
+        You are now following <b>{name}</b>.
       </p>
     );
   }
 
-  /**
-   * Removes this player as a friend
-   */
-  async function removeFriend() {
-    await database.removeFriend(id);
-    toast.success(
-      <p>
-        You have removed <b>{name}</b> as a friend.
-      </p>
-    );
-  }
-
-  /**
-   * Toggles the friend status of this player
-   */
-  async function toggleFriend() {
-    if (pending || isFriend === undefined) {
-      return;
-    }
-
-    setPending(true);
-    try {
-      if (isFriend) {
-        await removeFriend();
-      } else {
-        await addFriend();
-      }
-    } finally {
-      setPending(false);
-    }
-  }
-
-  if (!database) {
+  // Following is saved to the account, so there is nothing to follow with when signed out
+  if (!isSignedIn) {
     return null;
   }
 
   // Don't show the button for the current user
-  if (playerId == id) {
+  if (mainPlayerId == id) {
     return null;
   }
 
@@ -105,29 +78,26 @@ export default function FriendAction({
       size={iconOnly ? "icon" : "default"}
       onClick={e => {
         e.stopPropagation();
-        void toggleFriend();
+        toggleFollowing();
       }}
-      disabled={pending}
       className={cn(
         "transition-all duration-200 active:scale-95 disabled:opacity-100",
         iconOnly ? "size-8 rounded-full" : "gap-2",
-        isFriend
+        isFollowing
           ? "border-destructive/40 bg-destructive/10 text-destructive hover:border-destructive hover:bg-destructive/20"
           : "border-ssr/40 bg-ssr/10 text-ssr hover:border-primary hover:bg-primary hover:text-primary-foreground",
         className
       )}
     >
-      {pending ? (
-        <Spinner size="sm" />
-      ) : isFriend ? (
+      {isFollowing ? (
         <>
-          <SharedIcons.RemoveFriendIcon className={iconOnly ? "size-5" : "size-4"} />
-          {!iconOnly && <span>Remove Friend</span>}
+          <SharedIcons.UnfollowIcon className={iconOnly ? "size-5" : "size-4"} />
+          {!iconOnly && <span>Unfollow</span>}
         </>
       ) : (
         <>
-          <SharedIcons.AddFriendIcon className={iconOnly ? "size-5" : "size-4"} />
-          {!iconOnly && <span>Add Friend</span>}
+          <SharedIcons.FollowIcon className={iconOnly ? "size-5" : "size-4"} />
+          {!iconOnly && <span>Follow</span>}
         </>
       )}
     </Button>
@@ -137,13 +107,13 @@ export default function FriendAction({
     return button;
   }
 
-  const tooltipText = isFriend ? (
+  const tooltipText = isFollowing ? (
     <p>
-      Remove <b>{name}</b> as a friend.
+      Unfollow <b>{name}</b>.
     </p>
   ) : (
     <p>
-      Add <b>{name}</b> as a friend!
+      Follow <b>{name}</b>!
     </p>
   );
 

@@ -1,13 +1,13 @@
 "use client";
 
-import { BACKGROUND_COVER_NONE } from "@/common/background-covers";
-import { SettingIds, WebsiteLanding } from "@/common/database/database";
 import { BackgroundCoverControl } from "@/components/settings/background-cover-control";
 import { Form } from "@/components/ui/form";
-import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
+import { useUpdateUserPreferences } from "@/hooks/use-user-preferences";
 import { SharedIcons, type SharedDecorativeIcon } from "@/shared-icons";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { BACKGROUND_COVER_NONE } from "@ssr/common/schemas/user/preferences";
+import { WebsiteLanding } from "@ssr/common/schemas/user/website-landing";
 import { ssrConfig } from "config";
 import { useTheme } from "next-themes";
 import { Path, useForm } from "react-hook-form";
@@ -121,7 +121,7 @@ const settings: {
 
 const WebsiteSettings = () => {
   const { setTheme, theme } = useTheme();
-  const database = useDatabase();
+  const { updateAsync } = useUpdateUserPreferences();
 
   const form = useForm<FormValues>({
     resolver: typeboxResolver(formSchema),
@@ -136,26 +136,26 @@ const WebsiteSettings = () => {
     },
   });
 
-  const { isLoading } = useSettingsForm(form, {
-    backgroundCover: () => database.getBackgroundCover(),
-    backgroundCoverBrightness: () => database.getBackgroundCoverBrightness(),
-    backgroundCoverBlur: () => database.getBackgroundCoverBlur(),
-    snowParticles: () => database.getSnowParticles(),
-    showKitty: () => database.getShowKitty(),
-    websiteLanding: () => database.getWebsiteLanding(),
-    theme: () => theme,
-  });
+  const { isLoading } = useSettingsForm(form, preferences => ({
+    backgroundCover: preferences.backgroundCover,
+    backgroundCoverBrightness: preferences.backgroundCoverBrightness,
+    backgroundCoverBlur: preferences.backgroundCoverBlur,
+    snowParticles: preferences.snowParticles,
+    showKitty: preferences.showKitty,
+    websiteLanding: preferences.websiteLanding,
+    theme,
+  }));
 
   async function onSubmit(values: FormValues) {
     const before = getMonotonicTimeMs();
-    await Promise.all([
-      database.setBackgroundCover(values.backgroundCover),
-      database.setBackgroundCoverBrightness(values.backgroundCoverBrightness),
-      database.setBackgroundCoverBlur(values.backgroundCoverBlur),
-      database.setSetting(SettingIds.SnowParticles, values.snowParticles),
-      database.setSetting(SettingIds.ShowKitty, values.showKitty),
-      database.setWebsiteLanding(values.websiteLanding),
-    ]);
+    await updateAsync({
+      backgroundCover: values.backgroundCover,
+      backgroundCoverBrightness: values.backgroundCoverBrightness,
+      backgroundCoverBlur: values.backgroundCoverBlur,
+      snowParticles: values.snowParticles,
+      showKitty: values.showKitty,
+      websiteLanding: values.websiteLanding,
+    });
     setTheme(values.theme);
 
     showSettingsSavedToast(before);

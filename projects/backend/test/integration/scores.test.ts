@@ -172,14 +172,14 @@ describe("GET /scores/leaderboard/:leaderboardId/:page", () => {
   });
 });
 
-describe("POST /scores/friend/leaderboard/:leaderboardId/:page", () => {
+describe("POST /scores/following/leaderboard/:leaderboardId/:page", () => {
   const app = createTestApp();
 
-  test("returns friend scores for seeded leaderboard", async () => {
-    const response = await request(app, `/scores/friend/leaderboard/${TEST_LEADERBOARD_ID}/1`, {
+  test("returns following scores for seeded leaderboard", async () => {
+    const response = await request(app, `/scores/following/leaderboard/${TEST_LEADERBOARD_ID}/1`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ friendIds: [TEST_PLAYER_ID] }),
+      body: JSON.stringify({ followingIds: [TEST_PLAYER_ID] }),
     });
     expectStatus(response, 200);
 
@@ -188,21 +188,21 @@ describe("POST /scores/friend/leaderboard/:leaderboardId/:page", () => {
     expect((body as { items: unknown[] }).items.length).toBeGreaterThanOrEqual(1);
   });
 
-  test("rejects empty friend list", async () => {
-    const response = await request(app, `/scores/friend/leaderboard/${TEST_LEADERBOARD_ID}/1`, {
+  test("rejects empty following list", async () => {
+    const response = await request(app, `/scores/following/leaderboard/${TEST_LEADERBOARD_ID}/1`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ friendIds: [] }),
+      body: JSON.stringify({ followingIds: [] }),
     });
     await expectValidationError(response);
   });
 
-  test("rejects too many friends", async () => {
-    const response = await request(app, `/scores/friend/leaderboard/${TEST_LEADERBOARD_ID}/1`, {
+  test("rejects too many followed players", async () => {
+    const response = await request(app, `/scores/following/leaderboard/${TEST_LEADERBOARD_ID}/1`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        friendIds: Array.from({ length: SHARED_CONSTS.maxFriends + 2 }, (_, index) =>
+        followingIds: Array.from({ length: SHARED_CONSTS.maxFollowing + 2 }, (_, index) =>
           String(index).padStart(32, "0")
         ),
       }),
@@ -211,10 +211,10 @@ describe("POST /scores/friend/leaderboard/:leaderboardId/:page", () => {
   });
 
   test("returns 404 for unknown leaderboard", async () => {
-    const response = await request(app, `/scores/friend/leaderboard/${UNKNOWN_LEADERBOARD_ID}/1`, {
+    const response = await request(app, `/scores/following/leaderboard/${UNKNOWN_LEADERBOARD_ID}/1`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ friendIds: [TEST_PLAYER_ID] }),
+      body: JSON.stringify({ followingIds: [TEST_PLAYER_ID] }),
     });
     await expectNotFound(response);
   });

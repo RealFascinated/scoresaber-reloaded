@@ -1,10 +1,10 @@
 "use client";
 
-import { HistoryMode } from "@/common/player/history-mode";
-import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
+import { useUpdateUserPreferences } from "@/hooks/use-user-preferences";
 import { SharedIcons } from "@/shared-icons";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
+import { HistoryMode } from "@ssr/common/schemas/user/history-mode";
 import { Path, useForm } from "react-hook-form";
 import { Type, type Static } from "typebox";
 import { Form } from "../../ui/form";
@@ -39,7 +39,7 @@ const settings = [
 ] as const;
 
 const PlayerSettings = () => {
-  const database = useDatabase();
+  const { updateAsync } = useUpdateUserPreferences();
 
   const form = useForm<FormValues>({
     resolver: typeboxResolver(formSchema),
@@ -49,13 +49,13 @@ const PlayerSettings = () => {
   });
 
   // Sync form with database settings
-  const { isLoading } = useSettingsForm(form, {
-    historyMode: () => database.getHistoryMode(),
-  });
+  const { isLoading } = useSettingsForm(form, preferences => ({
+    historyMode: preferences.historyMode,
+  }));
 
   async function onSubmit(values: FormValues) {
     const before = getMonotonicTimeMs();
-    await database.setHistoryMode(values.historyMode as HistoryMode);
+    await updateAsync({ historyMode: values.historyMode as HistoryMode });
     showSettingsSavedToast(before);
   }
 

@@ -1,11 +1,10 @@
+import { BACKGROUND_COVER_CUSTOM } from "@ssr/common/schemas/user/preferences";
+
 export type BackgroundCoverPreset = {
   name: string;
   id: string;
   image: string;
 };
-
-export const BACKGROUND_COVER_NONE = "none";
-export const BACKGROUND_COVER_CUSTOM = "custom";
 
 export const BACKGROUND_COVER_PRESETS: BackgroundCoverPreset[] = [
   { name: "Forest", id: "forest", image: "/backgrounds/forest.jpg" },

@@ -12,8 +12,7 @@ import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/component
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useMainPlayerId } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { env } from "@ssr/common/env";
@@ -59,8 +58,7 @@ function generateFilename(toSnipeId: string, data: SnipeSettings): string {
 }
 
 export default function SnipePlaylistCreator({ toSnipe }: Props) {
-  const database = useDatabase();
-  const playerId = useStableLiveQuery(() => database.getMainPlayerId());
+  const playerId = useMainPlayerId();
   const [downloading, setDownloading] = useState(false);
 
   const form = useForm<SnipeSettings>({

@@ -2,7 +2,8 @@ import { isProduction } from "./utils/utils";
 
 export const SHARED_CONSTS = {
   maxStars: 15,
-  maxFriends: 15,
+  maxFollowing: 15,
+  maxPinnedScores: 5,
 };
 
 export const SERVER_PROXIES = [

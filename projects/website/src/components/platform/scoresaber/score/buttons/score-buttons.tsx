@@ -4,6 +4,7 @@ import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-but
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useMainPlayerId } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
@@ -12,6 +13,7 @@ import { useMemo } from "react";
 import { ScoreInstallMapButton } from "../../../../score/button/score-install-map-button";
 import ScoreEditorButton from "./score-editor-button";
 import ScoreHistoryGraphButton from "./score-history-graph-buton";
+import ScorePinButton from "./score-pin-button";
 
 type Props = {
   score: ScoreSaberScore;
@@ -19,6 +21,8 @@ type Props = {
   beatSaverMap?: BeatSaverMap;
   isLeaderboardLoading?: boolean;
   isPreviousScore?: boolean;
+  /** Whether the score belongs to the signed-in user. */
+  isOwnScore?: boolean;
   updateScore?: (score: ScoreSaberScore) => void;
 };
 
@@ -75,6 +79,15 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
+    id: "pin-score",
+    display: ({ isOwnScore }: Props) => {
+      return !!isOwnScore;
+    },
+    render: ({ score }: Props) => {
+      return <ScorePinButton scoreId={score.scoreId} />;
+    },
+  },
+  {
     id: "install-map",
     display: ({ beatSaverMap, isPreviousScore }: Props) => {
       return beatSaverMap != undefined && !isPreviousScore;
@@ -92,6 +105,8 @@ export default function ScoreSaberScoreButtons({
   updateScore,
   isPreviousScore,
 }: Props) {
+  const mainPlayerId = useMainPlayerId();
+  const isOwnScore = mainPlayerId !== undefined && score.playerId === mainPlayerId;
   const buttonProps = useMemo(
     () => ({
       score,
@@ -99,8 +114,9 @@ export default function ScoreSaberScoreButtons({
       beatSaverMap,
       updateScore,
       isPreviousScore,
+      isOwnScore,
     }),
-    [score, leaderboard, beatSaverMap, updateScore, isPreviousScore]
+    [score, leaderboard, beatSaverMap, updateScore, isPreviousScore, isOwnScore]
   );
   const visibleButtons = useMemo(() => buttons.filter(button => button.display(buttonProps)), [buttonProps]);
 

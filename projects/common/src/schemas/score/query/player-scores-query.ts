@@ -3,7 +3,7 @@ import { HmdSchema } from "../../../hmds";
 import { SHARED_CONSTS } from "../../../shared-consts";
 import { RealmIdSchema } from "../../realm/realm-query";
 
-const maxPlayerIds = SHARED_CONSTS.maxFriends + 1;
+const maxPlayerIds = SHARED_CONSTS.maxFollowing + 1;
 
 const PlayerIdsSchema = Type.Codec(
   Type.Refine(

@@ -224,24 +224,24 @@ class SSRApi {
   }
 
   /**
-   * Get the friend scores for a leaderboard
+   * Get the following scores for a leaderboard
    *
-   * @param friendIds the friends to lookup
+   * @param followingIds the followed players to lookup
    * @param leaderboardId the leaderboard to lookup
    * @param page the page
    * @param realmId the realm to resolve pp for
    */
-  async getFriendLeaderboardScores(
-    friendIds: string[],
+  async getFollowingLeaderboardScores(
+    followingIds: string[],
     leaderboardId: string,
     page: number,
     realmId?: number
   ) {
     return await this.request<ScoreSaberScoresPageResponse>(
-      `/scores/friend/leaderboard/${leaderboardId}/${page}`,
+      `/scores/following/leaderboard/${leaderboardId}/${page}`,
       realmParam(realmId),
       {
-        friendIds: friendIds,
+        followingIds: followingIds,
       }
     );
   }

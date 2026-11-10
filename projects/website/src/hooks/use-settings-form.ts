@@ -1,75 +1,46 @@
 import { useEffect, useRef } from "react";
 import { FieldValues, Path, UseFormReturn } from "react-hook-form";
-import { useStableLiveQuery } from "./use-stable-live-query";
-
-type SettingConfig<T extends FieldValues> = {
-  [K in Path<T>]?: () => Promise<T[K] | undefined> | T[K] | undefined;
-};
+import { useUserPreferences } from "./use-user-preferences";
 
 /**
- * Hook to sync form values with database settings
+ * Hook to sync form values with the saved user preferences
  *
  * @param form - The react-hook-form instance
- * @param config - Object mapping form field names to database getter functions
+ * @param getValues - Maps the saved preferences to the form values
  * @param excludeFromSync - Optional array of field names to exclude from automatic syncing
  */
 export function useSettingsForm<T extends FieldValues>(
   form: UseFormReturn<T>,
-  config: SettingConfig<T>,
+  getValues: (preferences: ReturnType<typeof useUserPreferences>["data"]) => Partial<T>,
   excludeFromSync: Path<T>[] = []
 ) {
-  const configKeys = Object.keys(config) as Path<T>[];
+  const { data: preferences, isPlaceholderData } = useUserPreferences();
 
-  // Create a single object to hold all setting values
-  const settings = useStableLiveQuery(async () => {
-    const entries = Object.entries(config) as [
-      Path<T>,
-      () => Promise<T[Path<T>] | undefined> | T[Path<T>] | undefined,
-    ][];
-    const results = await Promise.all(entries.map(async ([key, getter]) => [key, await getter()] as const));
-    return Object.fromEntries(results) as Partial<T>;
-  }, []);
-
-  // True when we have a result object and every field declared in `config` is defined.
-  // Note: `Object.values({}).every(...)` is true, so we must key off `configKeys`, not values only.
-  const settingsReady = settings !== undefined && configKeys.every(key => settings[key] !== undefined);
-
-  // Only sync external state (DB/theme) into the form once on initial load.
+  // Only sync the saved values into the form once on initial load.
   // Otherwise we overwrite user changes with stale values (e.g. theme dropdown
-  // reverting because the query hasn't re-run with the new theme yet).
+  // reverting because the saved value hasn't been updated yet).
   const hasSyncedRef = useRef(false);
 
   useEffect(() => {
-    if (!settingsReady || !settings) {
+    if (isPlaceholderData || hasSyncedRef.current) {
       return;
     }
 
-    if (hasSyncedRef.current) {
+    // Values that aren't available yet (like the theme before mounting) hold the sync back
+    const values = getValues(preferences);
+    if (Object.values(values).some(value => value === undefined)) {
       return;
     }
     hasSyncedRef.current = true;
 
     const currentValues = form.getValues();
-    const updates: Partial<T> = {};
-
-    // Collect all values that need updating
-    for (const [key, value] of Object.entries(settings) as [Path<T>, T[Path<T>]][]) {
-      // Skip excluded fields
-      if (excludeFromSync.includes(key)) {
+    for (const [key, value] of Object.entries(values) as [Path<T>, T[Path<T>]][]) {
+      if (excludeFromSync.includes(key) || currentValues[key] === value) {
         continue;
       }
-
-      if (currentValues[key] !== value) {
-        updates[key] = value;
-      }
-    }
-
-    // Batch update all changed values
-    for (const [key, value] of Object.entries(updates) as [Path<T>, T[Path<T>]][]) {
       form.setValue(key, value);
     }
-  }, [settings, settingsReady, form, excludeFromSync]);
+  }, [preferences, isPlaceholderData, form, getValues, excludeFromSync]);
 
-  // Skeleton only when the query has no result yet; `settingsReady` stays for sync gating only.
-  return { settings, isLoading: settings === undefined };
+  return { isLoading: isPlaceholderData };
 }

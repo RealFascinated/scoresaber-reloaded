@@ -1,7 +1,7 @@
 "use client";
 
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useUserPreference } from "@/hooks/use-user-preferences";
+
 import { useCallback, useEffect, useRef } from "react";
 
 type SpriteName =
@@ -87,8 +87,7 @@ const spriteSets: Record<SpriteName, number[][]> = {
 };
 
 export default function MeowMeow() {
-  const database = useDatabase();
-  const showKitty = useStableLiveQuery(async () => database.getShowKitty());
+  const showKitty = useUserPreference("showKitty");
   const nekoElRef = useRef<HTMLDivElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const mouseMoveListenerRef = useRef<((event: MouseEvent) => void) | null>(null);

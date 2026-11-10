@@ -3,8 +3,7 @@
 import { isBackendUnavailableError } from "@/common/api-error";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import { useRealm } from "@/components/providers/realm-provider";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useMainPlayerId } from "@/hooks/use-main-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import PlayerPreviewHeader from "../player/header/player-preview-header";
@@ -12,8 +11,7 @@ import { Spinner } from "../spinner";
 
 export function Player() {
   const { realmId } = useRealm();
-  const database = useDatabase();
-  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
+  const mainPlayerId = useMainPlayerId();
 
   const {
     data: player,

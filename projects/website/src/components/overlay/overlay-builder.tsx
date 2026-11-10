@@ -1,7 +1,6 @@
 "use client";
 
 import { openInNewTab } from "@/common/browser-utils";
-import { SettingIds } from "@/common/database/database";
 import { OverlayDataClients } from "@/common/overlay/data-client";
 import {
   defaultOverlaySettings,
@@ -15,12 +14,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useMainPlayerId } from "@/hooks/use-main-player";
+import { useUpdateUserPreferences, useUserPreference } from "@/hooks/use-user-preferences";
 import { SharedIcons } from "@/shared-icons";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Type, type Static } from "typebox";
@@ -56,8 +55,14 @@ const formSchema = Type.Object({
 });
 
 export default function OverlayBuilder() {
-  const database = useDatabase();
-  const overlaySettings = useStableLiveQuery(async () => database.getOverlaySettings());
+  const { update } = useUpdateUserPreferences();
+  const savedOverlaySettings = useUserPreference("overlaySettings");
+  const mainPlayerId = useMainPlayerId();
+  // Until settings are saved the overlay defaults to the signed-in player
+  const overlaySettings = useMemo(
+    () => savedOverlaySettings ?? { ...defaultOverlaySettings, playerId: mainPlayerId ?? "" },
+    [savedOverlaySettings, mainPlayerId]
+  );
   const [isRealTimeDataEnabled, setIsRealTimeDataEnabled] = useState(true);
   const hasInitialized = useRef(false);
 
@@ -118,12 +123,12 @@ export default function OverlayBuilder() {
 
     const timeoutId = setTimeout(() => {
       if (hasChanged) {
-        void database.setSetting(SettingIds.OverlaySettings, settingsToSave);
+        update({ overlaySettings: settingsToSave });
       }
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [formValues, overlaySettings, database]);
+  }, [formValues, overlaySettings, update]);
 
   const handleRealTimeDataChange = (value: boolean) => {
     // Don't run during initial load
@@ -168,7 +173,7 @@ export default function OverlayBuilder() {
       dataClient: dataClient as OverlayDataClients,
       views: views as Record<OverlayViews, boolean>,
     };
-    await database.setSetting(SettingIds.OverlaySettings, overlaySettings);
+    update({ overlaySettings });
     openInNewTab(`/overlay?settings=${encodeOverlaySettings(overlaySettings)}`);
   }
 

@@ -26,6 +26,10 @@ import PlayerController from "./controller/player/player.controller";
 import PlaylistController from "./controller/playlist/playlist.controller";
 import RealmController from "./controller/realm/realm.controller";
 import ScoresController from "./controller/scores/scores.controller";
+import UserFollowingController from "./controller/user/user-following.controller";
+import UserPinnedScoresController from "./controller/user/user-pinned-scores.controller";
+import UserPreferencesController from "./controller/user/user-preferences.controller";
+import UserController from "./controller/user/user.controller";
 import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
 import { authCors } from "./plugins/auth-cors";
@@ -240,6 +244,9 @@ export const app = new Elysia()
         "/player/refresh/": 10,
         "/beatleader/": 30,
         "/auth/": 30,
+        "/user/preferences": 60,
+        "/user/following": 60,
+        "/user/pinned-scores": 60,
       },
     })
   )
@@ -318,6 +325,10 @@ export const app = new Elysia()
   )
   .use(AppController)
   .use(AuthController)
+  .use(UserPreferencesController)
+  .use(UserController)
+  .use(UserFollowingController)
+  .use(UserPinnedScoresController)
   .use(PlayerController)
   .use(ScoresController)
   .use(LeaderboardController)

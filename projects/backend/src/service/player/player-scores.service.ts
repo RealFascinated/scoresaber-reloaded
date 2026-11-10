@@ -300,9 +300,7 @@ export class PlayerScoresService {
     scoreId: number,
     realmId: number = DEFAULT_REALM_ID
   ): Promise<PlayerScore<ScoreSaberScore>> {
-    const scoreRow =
-      (await ScoreSaberScoresRepository.findRowByScoreId(scoreId, realmId)) ??
-      (await ScoreSaberScoreHistoryRepository.findRowByScoreId(scoreId));
+    const scoreRow = await ScoreSaberScoresRepository.findAnyRowByScoreId(scoreId, realmId);
     if (!scoreRow) {
       throw new NotFoundError("Score not found");
     }

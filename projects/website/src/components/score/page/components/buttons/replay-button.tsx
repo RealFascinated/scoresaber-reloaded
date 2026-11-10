@@ -1,10 +1,11 @@
 "use client";
 
+import { useUserPreference } from "@/hooks/use-user-preferences";
+import { ReplayViewers } from "@ssr/common/replay-viewer";
+
 import { cn } from "@/common/utils";
 import SimpleLink from "@/components/simple-link";
 import { Button, type ButtonProps } from "@/components/ui/button";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-utils";
@@ -20,8 +21,7 @@ export default function ReplayButton({
   className,
   ...buttonProps
 }: ReplayButtonProps) {
-  const database = useDatabase();
-  const viewer = useStableLiveQuery(async () => database.getReplayViewer());
+  const viewer = ReplayViewers[useUserPreference("replayViewer")];
 
   if (!viewer || !score.beatLeaderScore) {
     return null;

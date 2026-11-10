@@ -85,6 +85,8 @@ import {
   MusicIcon,
   Palette,
   Pause,
+  Pin,
+  PinOff,
   Play,
   PlayCircle,
   PlayCircleIcon,
@@ -139,7 +141,7 @@ export const SharedIcons = {
   OverlayNavIcon: RadixCubeIcon,
   TopScoresNavIcon: TrophyIcon,
   SettingsNavIcon: Settings,
-  FriendsNavIcon: UsersIcon,
+  FollowingNavIcon: UsersIcon,
 
   // Player profile charts
   PlayerRankingViewIcon: GlobeAmericasIcon,
@@ -179,7 +181,7 @@ export const SharedIcons = {
 
   // Score feed modes
   GlobalScoresModeIcon: GlobeAmericasIcon,
-  FriendsScoresModeIcon: RadixPersonIcon,
+  FollowingScoresModeIcon: RadixPersonIcon,
   HistoryScoresModeIcon: TrendingUpIcon,
 
   // Playlist & score filters
@@ -233,13 +235,15 @@ export const SharedIcons = {
   InstallMapToGameIcon: CloudDownloadIcon,
   ExpandLeaderboardRowIcon: ChevronDown,
   ScoreActionsMenuIcon: Ellipsis,
+  PinScoreIcon: Pin,
+  UnpinScoreIcon: PinOff,
   OpenScorePageIcon: ChevronRight,
   RankingQueueExpandIcon: ChevronDownIcon,
 
-  // Friends
-  AddFriendIcon: UserPlus,
-  RemoveFriendIcon: UserMinus,
-  RemoveFriendFromListIcon: XIcon,
+  // Following
+  FollowIcon: UserPlus,
+  UnfollowIcon: UserMinus,
+  RemoveFollowingFromListIcon: XIcon,
 
   // Search
   SearchIcon: Search,
@@ -274,7 +278,7 @@ export const SharedIcons = {
   OpenSourceBadgeIcon: Star,
   OpenSourceArrowIcon: ArrowRight,
   ComprehensiveDataFeatureIcon: Database,
-  FriendSystemFeatureIcon: Users,
+  FollowingSystemFeatureIcon: Users,
   AdvancedAnalyticsFeatureIcon: BarChart3,
   GlobalLeaderboardsFeatureIcon: Globe,
   CustomOverlaysFeatureIcon: Monitor,
@@ -337,7 +341,7 @@ export const SharedIcons = {
 
   // Footer & misc
   ExternalNavigationIcon: ExternalLink,
-  ScoresGraphFriendIcon: Users,
+  ScoresGraphFollowingIcon: Users,
   ScoresGraphRemoveIcon: X,
 } as const;
 

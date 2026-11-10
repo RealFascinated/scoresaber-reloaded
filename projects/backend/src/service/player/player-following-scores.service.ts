@@ -8,17 +8,17 @@ import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { ScoreCoreService } from "../score/score-core.service";
 
-export class PlayerFriendScoresService {
+export class PlayerFollowingScoresService {
   /**
-   * Gets friend scores for a leaderboard.
+   * Gets following scores for a leaderboard.
    *
-   * @param friendIds the friend ids
+   * @param followingIds the followed player ids
    * @param leaderboardId the leaderboard id
    * @param page the page to fetch
    * @param realmId the realm to resolve pp for
    */
-  public static async getFriendLeaderboardScores(
-    friendIds: string[],
+  public static async getFollowingLeaderboardScores(
+    followingIds: string[],
     leaderboardId: number,
     page: number,
     realmId: number = DEFAULT_REALM_ID
@@ -30,19 +30,22 @@ export class PlayerFriendScoresService {
 
     const limit = 8;
     const offset = (page - 1) * limit;
-    const total = await ScoreSaberScoresRepository.countFriendScoresOnLeaderboard(friendIds, leaderboardId);
+    const total = await ScoreSaberScoresRepository.countFollowingScoresOnLeaderboard(
+      followingIds,
+      leaderboardId
+    );
 
     if (total === 0) {
       throw new NotFoundError(
-        `No scores found for friends "${friendIds.join(",")}" in leaderboard "${leaderboardId}"`
+        `No scores found for followed players "${followingIds.join(",")}" in leaderboard "${leaderboardId}"`
       );
     }
 
     const pagination = new Pagination<ScoreSaberScore>().setTotalItems(total).setItemsPerPage(limit);
 
     return pagination.getPage(page, async () => {
-      const rawScores = await ScoreSaberScoresRepository.findFriendScoresOnLeaderboardPage(
-        friendIds,
+      const rawScores = await ScoreSaberScoresRepository.findFollowingScoresOnLeaderboardPage(
+        followingIds,
         leaderboardId,
         limit,
         offset,

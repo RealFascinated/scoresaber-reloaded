@@ -1,9 +1,6 @@
 import Cookies from "js-cookie";
 
 export type CookieName =
-  | "playerId"
-  | "websiteLanding"
-
   // ScoreSaber
   | "scoreaber-scoreSort"
 

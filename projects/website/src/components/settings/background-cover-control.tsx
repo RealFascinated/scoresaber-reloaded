@@ -1,17 +1,12 @@
 "use client";
 
-import {
-  BACKGROUND_COVER_CUSTOM,
-  BACKGROUND_COVER_NONE,
-  BACKGROUND_COVER_PRESETS,
-  parseCustomBackground,
-} from "@/common/background-covers";
+import { BACKGROUND_COVER_PRESETS, parseCustomBackground } from "@/common/background-covers";
 import { DEBOUNCE_MS_FORM } from "@/common/debounce";
 import { cn } from "@/common/utils";
 import { FormDescription, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useUpdateUserPreferences, useUserPreference } from "@/hooks/use-user-preferences";
+import { BACKGROUND_COVER_CUSTOM, BACKGROUND_COVER_NONE } from "@ssr/common/schemas/user/preferences";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ReactNode, useEffect, useState } from "react";
 import { getMonotonicTimeMs, showSettingsSavedToast } from "./settings-feedback";
@@ -79,8 +74,8 @@ function CustomPreview({ value }: { value: string }) {
 }
 
 export function BackgroundCoverControl({ field }: BackgroundCoverControlProps) {
-  const database = useDatabase();
-  const storedCustom = useStableLiveQuery(async () => database.getCustomBackground());
+  const storedCustom = useUserPreference("customBackground");
+  const { updateAsync } = useUpdateUserPreferences();
 
   const [customValue, setCustomValue] = useState<string | undefined>(undefined);
   const debouncedCustomValue = useDebounce(customValue, DEBOUNCE_MS_FORM);
@@ -98,8 +93,8 @@ export function BackgroundCoverControl({ field }: BackgroundCoverControlProps) {
       return;
     }
     const before = getMonotonicTimeMs();
-    database.setCustomBackground(debouncedCustomValue).then(() => showSettingsSavedToast(before));
-  }, [database, debouncedCustomValue, storedCustom]);
+    updateAsync({ customBackground: debouncedCustomValue }).then(() => showSettingsSavedToast(before));
+  }, [updateAsync, debouncedCustomValue, storedCustom]);
 
   const selected = String(field.value);
   const isCustom = selected === BACKGROUND_COVER_CUSTOM;

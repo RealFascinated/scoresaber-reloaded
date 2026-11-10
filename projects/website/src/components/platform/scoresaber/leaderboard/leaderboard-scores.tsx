@@ -8,8 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useMainPlayer } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
 import { ScoreSaberLeaderboardDifficulty } from "@ssr/common/schemas/scoresaber/leaderboard/difficulty";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
@@ -118,9 +117,9 @@ const modeOptions = [
     icon: <SharedIcons.GlobalScoresModeIcon className="h-4 w-4" />,
   },
   {
-    value: ScoreModeEnum.Friends,
-    label: "Friends",
-    icon: <SharedIcons.FriendsScoresModeIcon className="h-4 w-4" />,
+    value: ScoreModeEnum.Following,
+    label: "Following",
+    icon: <SharedIcons.FollowingScoresModeIcon className="h-4 w-4" />,
   },
   {
     value: ScoreModeEnum.History,
@@ -163,8 +162,7 @@ function LeaderboardModeSelect({
 }
 
 export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreSaberLeaderboard }) {
-  const database = useDatabase();
-  const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
+  const mainPlayer = useMainPlayer().data;
   const filter = useLeaderboardFilter();
 
   const [mode, setMode] = useQueryState(
@@ -180,7 +178,7 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
     isRefetching,
   } = useLeaderboardScores(leaderboard.id, mainPlayer?.id ?? "", page, mode, filter.country ?? undefined);
 
-  const isFriends = mode === ScoreModeEnum.Friends;
+  const isFollowing = mode === ScoreModeEnum.Following;
   const noScores =
     isError || (!isLoading && !isRefetching && (!scores || (scores && scores.items.length === 0)));
 
@@ -236,8 +234,8 @@ export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreS
                       <EmptyState
                         title="No Scores Found"
                         description={
-                          isFriends
-                            ? "You or your friends haven't played this map yet"
+                          isFollowing
+                            ? "You or the players you follow haven't played this map yet"
                             : "No scores were found on this leaderboard or page"
                         }
                       />

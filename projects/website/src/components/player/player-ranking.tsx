@@ -4,8 +4,7 @@ import { getRankPillClass } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
 import { PlayerPpDisplay } from "@/components/ranking/player-pp-display";
 import SimpleLink from "@/components/simple-link";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useMainPlayer } from "@/hooks/use-main-player";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
@@ -68,8 +67,7 @@ export function PlayerRanking<T extends PlayerRankingRow>({
   worth: React.ReactNode;
   showAccountInactive?: boolean;
 }) {
-  const database = useDatabase();
-  const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
+  const mainPlayer = useMainPlayer().data;
 
   const rank = getRank(player);
   const countryRank = getCountryRank(player);

@@ -4,7 +4,7 @@ import { applyChartTheme, CHART_THEME, chartTitle } from "@/common/chart/chart-t
 import { ChartConfig } from "@/common/chart/types";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { useCanvasColors } from "@/hooks/use-canvas-colors";
-import useDatabase from "@/hooks/use-database";
+import { useUpdateUserPreferences, useUserPreference } from "@/hooks/use-user-preferences";
 import { SharedIcons } from "@/shared-icons";
 import {
   formatChartDate,
@@ -54,7 +54,8 @@ type Props = {
 const GenericChart = ({ config, labels }: Props) => {
   const { id, datasets, axes, options: customOptions } = config;
   const isMobile = useIsMobile();
-  const database = useDatabase();
+  const chartLegends = useUserPreference("chartLegends");
+  const { update: updatePreferences } = useUpdateUserPreferences();
   const { resolve: resolveColor } = useCanvasColors();
 
   const isXAxisLinear = customOptions?.scales?.x?.type === "linear";
@@ -90,7 +91,7 @@ const GenericChart = ({ config, labels }: Props) => {
         yAxisID: dataset.axisId,
         hidden:
           id && dataset.label
-            ? !database.getChartLegend(id, dataset.label, dataset.showLegend ?? true)
+            ? !(chartLegends[id]?.[dataset.label] ?? dataset.showLegend ?? true)
             : !dataset.showLegend,
         stack: dataset.stack,
         order: dataset.stackOrder,
@@ -110,7 +111,7 @@ const GenericChart = ({ config, labels }: Props) => {
 
       return { ...baseConfig, type: "line" as const };
     });
-  }, [datasets, database, id, labels, isXAxisLinear, isNumericLabels, resolveColor]);
+  }, [datasets, chartLegends, id, labels, isXAxisLinear, isNumericLabels, resolveColor]);
 
   const chartAxes = useMemo(() => {
     const generatedAxes: Record<string, any> = {
@@ -284,7 +285,12 @@ const GenericChart = ({ config, labels }: Props) => {
             const willBeVisible = !chart.isDatasetVisible(index);
             chart[willBeVisible ? "show" : "hide"](index);
             if (id) {
-              database.setChartLegend(id, legendItem.text, willBeVisible);
+              updatePreferences({
+                chartLegends: {
+                  ...chartLegends,
+                  [id]: { ...chartLegends[id], [legendItem.text]: willBeVisible },
+                },
+              });
             }
           },
         },
@@ -335,7 +341,17 @@ const GenericChart = ({ config, labels }: Props) => {
       },
       ...Object.fromEntries(Object.entries(customOptions || {}).filter(([key]) => key !== "scales")),
     };
-  }, [chartAxes, labels, datasets, database, id, customOptions, isXAxisLinear, isNumericLabels, axes]);
+  }, [
+    chartAxes,
+    labels,
+    datasets,
+    updatePreferences,
+    id,
+    customOptions,
+    isXAxisLinear,
+    isNumericLabels,
+    axes,
+  ]);
 
   const showNoData = !datasets.some(dataset => dataset.data.some(value => value !== null));
 

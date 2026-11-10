@@ -5,8 +5,8 @@ import BackendUnavailable from "@/components/api/backend-unavailable";
 import Avatar from "@/components/avatar";
 import { useRealm } from "@/components/providers/realm-provider";
 import SimpleLink from "@/components/simple-link";
-import useDatabase from "@/hooks/use-database";
-import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import { useFollowingIds } from "@/hooks/use-following";
+import { useMainPlayerId } from "@/hooks/use-main-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -14,11 +14,10 @@ import ScoreSaberScoreDisplay from "../../platform/scoresaber/score/scoresaber-s
 import SimplePagination from "../../simple-pagination";
 import { Spinner } from "../../spinner";
 
-export function FriendScores() {
+export function FollowingScores() {
   const { realmId } = useRealm();
-  const database = useDatabase();
-  const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
-  const friendIds = useStableLiveQuery(async () => database.getFriendIds(true));
+  const mainPlayerId = useMainPlayerId();
+  const followingIds = useFollowingIds(true);
 
   const [page, setPage] = useState(1);
 
@@ -30,16 +29,16 @@ export function FriendScores() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["friend-scores", friendIds, page, mainPlayerId, realmId],
+    queryKey: ["following-scores", followingIds, page, mainPlayerId, realmId],
     queryFn: async () =>
       ssrApi.fetchPlayerScoreSaberScores(mainPlayerId!, page, "date", "desc", {
-        playerIds: friendIds,
+        playerIds: followingIds,
         realmId,
       }),
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
     retry: false,
-    enabled: friendIds !== undefined && friendIds.length > 0 && mainPlayerId !== undefined,
+    enabled: followingIds !== undefined && followingIds.length > 0 && mainPlayerId !== undefined,
     placeholderData: prev => prev,
   });
 
@@ -52,8 +51,8 @@ export function FriendScores() {
   return (
     <div className="ring-border bg-card rounded-xl p-5 ring-1">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold">Friend Scores</h2>
-        <p className="text-muted-foreground mt-1 text-sm">See the recent scores of your friends.</p>
+        <h2 className="text-lg font-semibold">Following Scores</h2>
+        <p className="text-muted-foreground mt-1 text-sm">See the recent scores of the players you follow.</p>
       </div>
 
       {isLoading && !scoreData && (

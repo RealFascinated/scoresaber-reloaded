@@ -45,8 +45,6 @@
     "critters": "npm:beasties@^0.5.5",
     "cross-env": "^10.1.0",
     "date-fns": "^4.4.0",
-    "dexie": "^4.4.7",
-    "dexie-react-hooks": "^4.4.0",
     "framer-motion": "^14.10.1",
     "globals": "^17.14.0",
     "js-cookie": "^3.0.8",

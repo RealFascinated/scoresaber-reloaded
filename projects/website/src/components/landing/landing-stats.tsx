@@ -25,7 +25,7 @@ type StatBump = {
 };
 
 const STATS: LandingStat[] = [
-  { label: "Active Players", icon: SharedIcons.FriendSystemFeatureIcon, key: "activePlayers" },
+  { label: "Active Players", icon: SharedIcons.FollowingSystemFeatureIcon, key: "activePlayers" },
   { label: "Leaderboards", icon: SharedIcons.ViewLeaderboardIcon, key: "leaderboardCount" },
   { label: "Tracked Scores", icon: SharedIcons.AdvancedAnalyticsFeatureIcon, key: "trackedScores" },
   { label: "Score History", icon: SharedIcons.PlayerHistorySettingsIcon, key: "scoreHistoryScores" },

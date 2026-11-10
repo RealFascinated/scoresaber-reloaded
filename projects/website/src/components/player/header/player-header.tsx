@@ -1,6 +1,6 @@
 "use client";
 
-import AddFriend from "@/components/friend/add-friend";
+import FollowButton from "@/components/following/follow-button";
 import SimpleLink from "@/components/simple-link";
 import { useIsMobile } from "@/contexts/viewport-context";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -10,6 +10,7 @@ import PlayerBadges from "../player-badges";
 import PlayerAccBadges from "./acc-badges";
 import PlayerActions from "./player-actions";
 import PlayerAvatar from "./player-avatar";
+import PlayerFollows from "./player-follows";
 import PlayerOverview from "./player-overview";
 import PlayerStats from "./player-stats";
 import PlayerStreak from "./player-streak";
@@ -59,10 +60,13 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 )}
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <AddFriend player={player} iconOnly={isMobile} />
+                <FollowButton player={player} iconOnly={isMobile} />
               </div>
             </div>
             <PlayerOverview player={player} />
+            <div className="flex justify-center lg:justify-start">
+              <PlayerFollows player={player} />
+            </div>
           </div>
 
           <PlayerStats player={player} />
