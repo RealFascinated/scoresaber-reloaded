@@ -180,7 +180,7 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
           </div>
         </div>
 
-        {/* Map stats — same style as leaderboard page */}
+        {/* Map stats, same style as leaderboard page */}
         {beatSaver?.difficulty && (
           <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-xs sm:justify-start">
             <span className="flex items-center gap-1.5">

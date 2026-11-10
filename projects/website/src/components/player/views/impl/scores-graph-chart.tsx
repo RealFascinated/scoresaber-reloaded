@@ -109,7 +109,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
     placeholderData: prev => prev,
   });
 
-  // Transform raw API data into chart data points (memoized — the dataset pipeline is the
+  // Transform raw API data into chart data points (memoized, since the dataset pipeline is the
   // most expensive part of this component and only depends on the query results)
   const { resolve: resolveColor } = useCanvasColors();
   const { hasData, minStar, maxStar, minAccuracy, maxAccuracy, datasets } = useMemo(() => {

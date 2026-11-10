@@ -22,7 +22,7 @@ export function ApiHealth() {
         setOnline(online);
         return online;
       } catch {
-        // Backend is offline/unreachable — surface it so the connectivity
+        // Backend is offline or unreachable, so surface it so the connectivity
         // toast fires instead of silently keeping the previous status.
         setOnline(false);
         return false;

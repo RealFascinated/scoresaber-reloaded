@@ -142,7 +142,7 @@ const GenericChart = ({ config, labels }: Props) => {
             ticks: {
               maxRotation: 45,
               minRotation: 45,
-              // First arg is tick.value (category index); second is position in ticks array — use value for labels[].
+              // First arg is tick.value (category index), second is position in ticks array. Use value for labels[].
               callback: (tickValue: number | string) => {
                 const labelIndex = Number(tickValue);
                 if (typeof labels[labelIndex] === "string") {

@@ -115,7 +115,7 @@ export default function ScoreSaberLeaderboardScore({
               </p>
             </SimpleTooltip>
           ) : (
-            <span className="text-muted-foreground/50">—</span>
+            <span className="text-muted-foreground/50">-</span>
           )}
         </TableCell>
 

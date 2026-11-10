@@ -21,7 +21,7 @@ export default function Loading() {
                     <Skeleton className="h-8 w-48 max-w-[300px]" />
                   </div>
                   <div className="flex flex-col gap-2">
-                    {/* Empty inactive/banned badge row — mirrors the real header, which renders this row (empty for normal players) and so adds a gap-2 below the name */}
+                    {/* Empty inactive/banned badge row, mirroring the real header, which renders this row (empty for normal players) and so adds a gap-2 below the name */}
                     <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start" />
                     <div className="flex flex-wrap items-center justify-center gap-2 lg:items-start lg:justify-start">
                       {Array.from({ length: 4 }).map((_, index) => (

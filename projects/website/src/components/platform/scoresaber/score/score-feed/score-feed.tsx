@@ -21,7 +21,7 @@ const LIVE_FEED_MAX_ITEMS = 12;
 const EMPTY_COPY = {
   connecting: "Connecting to the live feed…",
   disconnected: "Disconnected from the live feed. Check your connection or refresh the page.",
-  waiting: "Connected — waiting for new scores…",
+  waiting: "Connected, waiting for new scores…",
 } as const;
 
 type EmptyVariant = keyof typeof EMPTY_COPY;

@@ -26,7 +26,7 @@ export function ScoreSaberScoreHMD({
             <div className="flex flex-col gap-1">
               <p className="font-semibold">Headset not recognized</p>
               <p className="text-muted-foreground">
-                Recorded with an unrecognized headset — usually an outdated mod version or a newly released
+                Recorded with an unrecognized headset, usually an outdated mod version or a newly released
                 headset. Updating the mod may resolve this.
               </p>
               {score.leftController === "Touch" && (
