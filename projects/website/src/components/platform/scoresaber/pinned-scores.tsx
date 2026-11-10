@@ -14,7 +14,7 @@ export default function PinnedScores({ playerId }: { playerId: string }) {
   }
 
   return (
-    <section className="border-border flex flex-col gap-1 border-b pb-3">
+    <section className="ring-border bg-card flex flex-col gap-2 rounded-xl p-4 ring-1">
       <h3 className="text-muted-foreground flex items-center gap-2 text-sm font-semibold">
         <SharedIcons.PinScoreIcon className="size-4" />
         Pinned Scores

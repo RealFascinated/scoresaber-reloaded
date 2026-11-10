@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { parseAsStringEnum } from "nuqs";
 import { useMemo } from "react";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
+import PinnedScores from "../platform/scoresaber/pinned-scores";
 import ScoreSaberPlayerScoresLive from "../platform/scoresaber/scoresaber-player-scores-live";
 import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-scores-medals";
 import ScoreSaberPlayerScoresSSR from "../platform/scoresaber/scoresaber-player-scores-ssr";
@@ -107,6 +108,8 @@ export default function PlayerData({ player: playerProp }: PlayerDataProps) {
               <PlayerViews player={player} key={player.id} />
             </div>
           )}
+
+          <PinnedScores playerId={player.id} />
 
           <ScoresToolbarLeadingProvider leading={platformSelector}>{platform}</ScoresToolbarLeadingProvider>
         </div>
