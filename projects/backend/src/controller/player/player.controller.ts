@@ -142,13 +142,17 @@ export default function playerController(app: Elysia) {
               RealmQuerySchema,
               t.Object({
                 count: Type.Optional(
-                  Type.Codec(Type.Union([Type.String(), Type.Number(), Type.Undefined()]))
-                    .Decode(v => {
-                      const n = v === "" || v === undefined ? 50 : Number(v);
-                      if (n === -1) return -1;
-                      if (!Number.isInteger(n) || n < 1) throw new Error("Expected -1 or an integer >= 1");
-                      return n;
-                    })
+                  Type.Codec(
+                    Type.Refine(
+                      Type.Union([Type.String(), Type.Number(), Type.Undefined()]),
+                      v => {
+                        const n = v === "" || v === undefined ? 50 : Number(v);
+                        return n === -1 || (Number.isInteger(n) && n >= 1);
+                      },
+                      () => "Expected -1 or an integer >= 1"
+                    )
+                  )
+                    .Decode(v => (v === "" || v === undefined ? 50 : Number(v)))
                     .Encode(v => v)
                 ),
               }),

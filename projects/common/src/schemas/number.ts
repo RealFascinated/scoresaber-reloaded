@@ -4,14 +4,13 @@ import { Type } from "typebox";
  * TypeBox's {@link Type.Number} rejects ±Infinity and NaN. ScoreSaber accuracy uses
  * `Infinity` when `maxScore` is 0 (see getScoreSaberScoreFromToken).
  */
-export const numberIncludingInfinitySchema = Type.Codec(Type.Unknown())
-  .Decode((val): number => {
-    if (typeof val !== "number" || Number.isNaN(val)) {
-      throw new Error("Expected a number (including ±Infinity)");
-    }
-    return val;
-  })
-  .Encode(value => value);
+export const numberIncludingInfinitySchema = Type.Unsafe<number>(
+  Type.Refine(
+    Type.Unknown(),
+    value => typeof value === "number" && !Number.isNaN(value),
+    () => "Expected a number (including ±Infinity)"
+  )
+);
 
 /**
  * Coalesce null from APIs to 0 so PP/weight stay plain numbers in app types.

@@ -3,12 +3,12 @@ import Metric from "../../metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";
 
 export default class ResponseTimeHistogramMetric extends Metric<number> {
-  private histogram: Histogram;
+  private histogram: Histogram<"route">;
 
   constructor() {
     super(MetricType.RESPONSE_TIME_MS, 0, { persist: false });
 
-    this.histogram = new Histogram({
+    this.histogram = new Histogram<"route">({
       name: "response_time_ms",
       help: "Per-route response time in milliseconds",
       labelNames: ["route"],
