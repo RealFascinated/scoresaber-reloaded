@@ -31,6 +31,7 @@ web_modules/
 .rts2_cache_umd/
 .node_repl_history
 *.tgz
+!vendor/**/*.tgz
 .yarn-integrity
 .env
 .env.development.local
