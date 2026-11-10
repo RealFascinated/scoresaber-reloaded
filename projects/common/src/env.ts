@@ -36,6 +36,11 @@ const serverSchema = Type.Object({
   DISCORD_CHANNEL_BEATSAVER_LOGS: Type.Optional(Type.String()),
 
   PROXY_URL: Type.String(),
+
+  // Auth (Better Auth)
+  BETTER_AUTH_SECRET: Type.String(),
+  STEAM_API_KEY: Type.Optional(Type.String()),
+  AUTH_COOKIE_DOMAIN: Type.Optional(Type.String()),
 });
 
 const clientSchema = Type.Object({
@@ -112,4 +117,9 @@ export const env = {
   NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: process.env.NEXT_PUBLIC_ANALYTICS_SCRIPT_URL,
 
   PROXY_URL: process.env.PROXY_URL,
+
+  // Auth
+  BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+  STEAM_API_KEY: process.env.STEAM_API_KEY,
+  AUTH_COOKIE_DOMAIN: process.env.AUTH_COOKIE_DOMAIN,
 } as unknown as StaticDecode<typeof envSchema>;

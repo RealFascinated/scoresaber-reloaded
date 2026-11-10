@@ -75,6 +75,7 @@ import {
   ListOrdered,
   Loader2,
   LoaderCircle,
+  LogIn,
   LogOut,
   Medal,
   MegaphoneIcon,
@@ -127,6 +128,8 @@ export const SharedIcons = {
   MedalsPlatformLogoIcon: Medal,
   PlayerStreakIcon: Flame,
   VerifiedPlayerIcon: ShieldCheck,
+  SignInIcon: LogIn,
+  SignOutIcon: LogOut,
   TwitchProfileIcon: TwitchIcon,
 
   // Navbar

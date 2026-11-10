@@ -109,16 +109,6 @@ export default class Database extends Dexie {
   }
 
   /**
-   * Checks if the database has a main player
-   *
-   * @returns whether the database has a main player
-   */
-  async hasMainPlayer(): Promise<boolean> {
-    const id = await this.getMainPlayerId();
-    return id !== undefined && id !== "";
-  }
-
-  /**
    * Gets the main player from the database
    *
    * @returns the main player
@@ -132,13 +122,25 @@ export default class Database extends Dexie {
   }
 
   /**
-   * Sets the main player id in the database
+   * Sets the main player id in the database and the cookie the server reads it from.
    *
-   * @param id the id of the main player
+   * This mirrors the signed-in user (see AuthSync), nothing else should set it.
+   *
+   * @param id the id of the main player, undefined when signed out
    */
   async setMainPlayerId(id: string | undefined) {
-    await this.setSetting(SettingIds.MainPlayer, id);
-    deleteCookieValue("playerId");
+    // Store "" rather than undefined for no player: useStableLiveQuery treats undefined as
+    // "still loading" and keeps returning the previous value, so the UI would never clear
+    const value = id ?? "";
+    if (((await this.getMainPlayerId()) ?? "") !== value) {
+      await this.setSetting(SettingIds.MainPlayer, value);
+    }
+
+    if (id) {
+      setCookieValue("playerId", id);
+    } else {
+      deleteCookieValue("playerId");
+    }
   }
 
   /**

@@ -23,6 +23,8 @@ const defaults: Record<string, string> = {
 
   PROMETHEUS_AUTH_TOKEN: "test-prometheus-token",
   PROXY_URL: "http://localhost:3128",
+
+  BETTER_AUTH_SECRET: "test-better-auth-secret-at-least-32-characters-long",
 };
 
 const forcedKeys = new Set(["DATABASE_URL", "REDIS_URL", "S3_ENDPOINT", "ENABLE_QUEUES"]);

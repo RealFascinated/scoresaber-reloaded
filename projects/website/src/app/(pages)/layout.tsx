@@ -1,5 +1,6 @@
 import Announcements from "@/components/announcements/announcements";
 import { ApiHealth } from "@/components/api/api-health";
+import { AuthSync } from "@/components/auth/auth-sync";
 import BackgroundCover from "@/components/background-cover";
 import { SnowBackground } from "@/components/effects/snow-background";
 import { AppHeader } from "@/components/layout/app-header";
@@ -27,6 +28,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       themes={ssrConfig.themes.map((theme: SiteTheme) => theme.id)}
     >
       <DatabaseLoader>
+        <AuthSync />
         <NuqsAdapter>
           <RealmProvider>
             <MeowMeow />

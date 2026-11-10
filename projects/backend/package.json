@@ -27,6 +27,7 @@
     "@prometheus-io/client": "^0.16.1",
     "@ssr/common": "workspace:common",
     "@tqman/nice-logger": "^1.1.1",
+    "better-auth": "file:../../vendor/better-auth/better-auth-1.7.7.tgz",
     "croner": "^11.0.0",
     "devalue": "^6.0.3",
     "discord.js": "^14.28.1",

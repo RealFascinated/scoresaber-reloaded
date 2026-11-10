@@ -16,6 +16,7 @@ import { cron } from "./common/cron";
 import { registerGlobalErrorHandlers, reportErrorToDiscord } from "./common/discord/error-reporting";
 import { getHttpErrorCode } from "./common/error-code";
 import AppController from "./controller/app/app.controller";
+import AuthController from "./controller/auth/auth.controller";
 import BeatLeaderController from "./controller/beatleader/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver/beatsaver.controller";
 import LeaderboardController from "./controller/leaderboard/leaderboard.controller";
@@ -27,6 +28,7 @@ import RealmController from "./controller/realm/realm.controller";
 import ScoresController from "./controller/scores/scores.controller";
 import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
+import { authCors } from "./plugins/auth-cors";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { rateLimit } from "./plugins/rate-limit";
 import { QueueManager } from "./queue/queue-manager";
@@ -237,6 +239,7 @@ export const app = new Elysia()
       routes: {
         "/player/refresh/": 10,
         "/beatleader/": 30,
+        "/auth/": 30,
       },
     })
   )
@@ -304,6 +307,7 @@ export const app = new Elysia()
       });
     }
   })
+  .use(authCors) // Must be before cors()
   .use(cors())
   .use(
     helmet({
@@ -313,6 +317,7 @@ export const app = new Elysia()
     })
   )
   .use(AppController)
+  .use(AuthController)
   .use(PlayerController)
   .use(ScoresController)
   .use(LeaderboardController)

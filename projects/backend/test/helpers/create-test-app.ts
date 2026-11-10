@@ -3,6 +3,7 @@ import { AnyElysia, Elysia, ValidationError } from "elysia";
 import { websocket as websocketPlugin } from "elysia/websocket";
 import { getHttpErrorCode } from "../../src/common/error-code";
 import AppController from "../../src/controller/app/app.controller";
+import AuthController from "../../src/controller/auth/auth.controller";
 import BeatLeaderController from "../../src/controller/beatleader/beatleader.controller";
 import BeatSaverController from "../../src/controller/beatsaver/beatsaver.controller";
 import LeaderboardController from "../../src/controller/leaderboard/leaderboard.controller";
@@ -11,6 +12,7 @@ import PlayerRankingController from "../../src/controller/player/player-ranking.
 import PlayerController from "../../src/controller/player/player.controller";
 import PlaylistController from "../../src/controller/playlist/playlist.controller";
 import ScoresController from "../../src/controller/scores/scores.controller";
+import { authCors } from "../../src/plugins/auth-cors";
 import { WebsocketManager } from "../../src/websocket/websocket-manager";
 import { patchScoreSaberApiForTests } from "./scoresaber-api-test-patches";
 
@@ -81,8 +83,10 @@ export function createTestApp() {
         timestamp: new Date().toISOString(),
       };
     })
+    .use(authCors)
     .use(cors())
     .use(AppController)
+    .use(AuthController)
     .use(PlayerController)
     .use(ScoresController)
     .use(LeaderboardController)

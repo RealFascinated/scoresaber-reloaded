@@ -1,4 +1,5 @@
 import { HMD } from "@ssr/common/hmds";
+import { AuthConnectionProvider } from "@ssr/common/schemas/auth/connection-provider";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { sql } from "drizzle-orm";
@@ -578,6 +579,119 @@ export const tableCountsTable = pgTable("ssr_table_counts", {
   refreshedAt: timestamp().notNull(),
 });
 
+/**
+ * Better Auth tables. Column keys must stay camelCase and match Better Auth's model fields,
+ * the Drizzle adapter maps fields to columns by key.
+ */
+export const authUsersTable = pgTable(
+  "auth-users",
+  {
+    id: text().primaryKey(),
+    name: text().notNull(),
+    email: text().notNull().unique(),
+    emailVerified: boolean().notNull().default(false),
+    image: text(),
+    // Public player id: the primary connection's id (also the ScoreSaber player id).
+    // Only written through AuthConnectionService so it stays in sync with the connections.
+    playerId: varchar({ length: 32 }),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp()
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  table => [uniqueIndex("auth_users_player_id_idx").on(table.playerId)]
+);
+
+/**
+ * The platform accounts (Steam, Oculus) linked to a user, like ScoreSaber's connections.
+ * A user has at most one primary connection, whose id is the public player id.
+ */
+export const authConnectionsTable = pgTable(
+  "auth-connections",
+  {
+    id: serial().primaryKey(),
+    userId: text()
+      .notNull()
+      .references(() => authUsersTable.id, { onDelete: "cascade" }),
+    provider: varchar({ length: 16 }).$type<AuthConnectionProvider>().notNull(),
+    providerPlayerId: varchar({ length: 32 }).notNull(),
+    isPrimary: boolean().notNull().default(false),
+    createdAt: timestamp().notNull().defaultNow(),
+  },
+  table => [
+    uniqueIndex("auth_connections_provider_player_idx").on(table.provider, table.providerPlayerId),
+    uniqueIndex("auth_connections_primary_idx")
+      .on(table.userId)
+      .where(sql`${table.isPrimary}`),
+    index("auth_connections_user_id_idx").on(table.userId),
+  ]
+);
+
+export const authSessionsTable = pgTable(
+  "auth-sessions",
+  {
+    id: text().primaryKey(),
+    expiresAt: timestamp().notNull(),
+    token: text().notNull().unique(),
+    ipAddress: text(),
+    userAgent: text(),
+    userId: text()
+      .notNull()
+      .references(() => authUsersTable.id, { onDelete: "cascade" }),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp()
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  table => [index("auth_sessions_user_id_idx").on(table.userId)]
+);
+
+export const authAccountsTable = pgTable(
+  "auth-accounts",
+  {
+    id: text().primaryKey(),
+    accountId: text().notNull(),
+    providerId: text().notNull(),
+    userId: text()
+      .notNull()
+      .references(() => authUsersTable.id, { onDelete: "cascade" }),
+    accessToken: text(),
+    refreshToken: text(),
+    idToken: text(),
+    accessTokenExpiresAt: timestamp(),
+    refreshTokenExpiresAt: timestamp(),
+    scope: text(),
+    password: text(),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp()
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  table => [
+    index("auth_accounts_user_id_idx").on(table.userId),
+    uniqueIndex("auth_accounts_provider_account_idx").on(table.providerId, table.accountId),
+  ]
+);
+
+export const authVerificationsTable = pgTable(
+  "auth-verifications",
+  {
+    id: text().primaryKey(),
+    identifier: text().notNull(),
+    value: text().notNull(),
+    expiresAt: timestamp().notNull(),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp()
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  table => [index("auth_verifications_identifier_idx").on(table.identifier)]
+);
+
 export type TableCountsTableRow = typeof tableCountsTable.$inferSelect;
 
 export type ScoreSaberAccountRow = typeof scoreSaberAccountsTable.$inferSelect;
@@ -600,3 +714,4 @@ export type BeatSaverMapRow = typeof beatSaverMapsTable.$inferSelect;
 export type BeatSaverMapVersionRow = typeof beatSaverMapVersionsTable.$inferSelect;
 export type BeatSaverMapDifficultyRow = typeof beatSaverMapDifficultiesTable.$inferSelect;
 export type MetricRow = typeof metricsTable.$inferSelect;
+export type AuthUserRow = typeof authUsersTable.$inferSelect;

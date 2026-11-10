@@ -4,7 +4,7 @@ export function proxy(request: NextRequest) {
   const playerId = request.cookies.get("playerId");
   const websiteLanding = request.cookies.get("websiteLanding");
 
-  // Handle home redirect if they have claimed a player
+  // Handle home redirect if they are signed in
   if (request.nextUrl.pathname === "/" && !!playerId) {
     // If they have a player and prefer the landing page, stay on landing
     if (websiteLanding?.value === "landing") {
@@ -21,9 +21,11 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // Handle player home redirect if they don't have a player claimed
+  // The player home needs a signed-in player, send everyone else to sign in
   if (request.nextUrl.pathname.startsWith("/home") && !playerId) {
-    return NextResponse.redirect(new URL("/", request.url));
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   // Log requests in production

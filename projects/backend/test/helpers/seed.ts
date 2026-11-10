@@ -54,6 +54,8 @@ const seededTables = [
   "beatsaver-map-versions",
   "beatsaver-maps",
   "beatsaver-uploaders",
+  "auth-users", // Cascades to auth-sessions and auth-accounts
+  "auth-verifications",
 ] as const;
 
 const now = new Date("2024-06-01T12:00:00.000Z");

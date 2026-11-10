@@ -8,7 +8,6 @@ import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import Card from "../../card";
 import PlayerBadges from "../player-badges";
 import PlayerAccBadges from "./acc-badges";
-import ClaimProfile from "./claim-profile";
 import PlayerActions from "./player-actions";
 import PlayerAvatar from "./player-avatar";
 import PlayerOverview from "./player-overview";
@@ -61,7 +60,6 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <AddFriend player={player} iconOnly={isMobile} />
-                <ClaimProfile playerId={player.id} />
               </div>
             </div>
             <PlayerOverview player={player} />

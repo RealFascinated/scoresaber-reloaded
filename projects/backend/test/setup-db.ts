@@ -26,9 +26,9 @@ function ensureInfra(): void {
 }
 
 beforeAll(async () => {
-  ensureInfra();
   await acquireTestSuiteLock();
   await ensureTestMigrations();
+  ensureInfra();
 });
 
 beforeEach(async () => {

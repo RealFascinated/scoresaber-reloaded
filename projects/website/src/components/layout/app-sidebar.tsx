@@ -1,5 +1,6 @@
 "use client";
 
+import { LOGIN_PATH, signOut } from "@/common/auth/auth-api";
 import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
 import Friend from "@/components/friend/friend";
@@ -9,6 +10,7 @@ import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboa
 import { useSearch } from "@/components/providers/search-provider";
 import RealmSelector from "@/components/realm-selector";
 import SimpleLink from "@/components/simple-link";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -24,14 +26,17 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import useDatabase from "@/hooks/use-database";
+import { ME_QUERY_KEY } from "@/hooks/use-me";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ReactElement, useRef, useState } from "react";
+import { toast } from "sonner";
 
 type FooterLink = {
   name: string;
@@ -268,21 +273,33 @@ function FriendsPopover() {
 
 function ProfileSection() {
   const database = useDatabase();
-  const { openSearch } = useSearch();
   const pathname = usePathname();
   const mainPlayerId = useStableLiveQuery(() => database.getMainPlayerId());
   const mainPlayer = useStableLiveQuery(() => database.getMainPlayer());
+  const queryClient = useQueryClient();
+
+  async function handleSignOut() {
+    try {
+      await signOut();
+      queryClient.setQueryData(ME_QUERY_KEY, null);
+      await database.setMainPlayerId(undefined);
+      // Reload so nothing keeps showing the previous player (see useStableLiveQuery's cache)
+      window.location.reload();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to sign out");
+    }
+  }
 
   if (mainPlayerId == null || mainPlayerId === "") {
     return (
-      <button
-        type="button"
-        onClick={openSearch}
-        className="text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors"
+      <SimpleLink
+        href={`${LOGIN_PATH}?redirect=${encodeURIComponent(pathname ?? "/")}`}
+        draggable={false}
+        className="text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors"
       >
-        <SharedIcons.VerifiedPlayerIcon className="text-success size-5 shrink-0" />
-        <span className="font-medium">Claim your profile</span>
-      </button>
+        <SharedIcons.SignInIcon className="text-success size-5 shrink-0" />
+        <span className="font-medium">Sign in</span>
+      </SimpleLink>
     );
   }
 
@@ -290,29 +307,41 @@ function ProfileSection() {
   const isActive = pathname != null && (pathname === href || (href !== "/" && pathname.startsWith(href)));
 
   return (
-    <SimpleLink
-      href={href}
-      draggable={false}
-      className={cn(
-        "flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 transition-colors",
-        isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/60"
-      )}
-    >
-      <Avatar
-        size={32}
-        src={mainPlayer?.avatar ?? ""}
-        className="border-border box-border size-8 shrink-0 rounded-full border"
-        alt="Your Profile Picture"
-      />
-      <div className="grid min-w-0 flex-1 leading-tight">
-        <span className="truncate text-sm font-medium">{mainPlayer?.name ?? "My Profile"}</span>
-        {mainPlayer != undefined && (
-          <span className="text-muted-foreground text-xs tabular-nums">
-            #{formatNumberWithCommas(mainPlayer.rank)} · {formatPp(mainPlayer.pp)}pp
-          </span>
+    <div className="flex items-center gap-1">
+      <SimpleLink
+        href={href}
+        draggable={false}
+        className={cn(
+          "flex min-w-0 flex-1 items-center gap-2.5 rounded-md px-2.5 py-1.5 transition-colors",
+          isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/60"
         )}
-      </div>
-    </SimpleLink>
+      >
+        <Avatar
+          size={32}
+          src={mainPlayer?.avatar ?? ""}
+          className="border-border box-border size-8 shrink-0 rounded-full border"
+          alt="Your Profile Picture"
+        />
+        <div className="grid min-w-0 flex-1 leading-tight">
+          <span className="truncate text-sm font-medium">{mainPlayer?.name ?? "My Profile"}</span>
+          {mainPlayer != undefined && (
+            <span className="text-muted-foreground text-xs tabular-nums">
+              #{formatNumberWithCommas(mainPlayer.rank)} · {formatPp(mainPlayer.pp)}pp
+            </span>
+          )}
+        </div>
+      </SimpleLink>
+      <SimpleTooltip display={<p>Sign out</p>} side="top">
+        <button
+          type="button"
+          onClick={handleSignOut}
+          aria-label="Sign out"
+          className="text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors"
+        >
+          <SharedIcons.SignOutIcon className="size-4" />
+        </button>
+      </SimpleTooltip>
+    </div>
   );
 }
 
