@@ -34,8 +34,15 @@ export function toCookieHeader(response: TestResponse): string {
 /**
  * Runs the whole Steam sign-in against the app: starts the flow, then answers with the
  * assertion Steam would send back to the callback.
+ *
+ * @param seenOrigin the origin the backend sees the callback on, when it differs from the public API
+ * origin (like behind a reverse proxy)
  */
-export async function signInWithSteam(app: ReturnType<typeof createTestApp>, steamId: string) {
+export async function signInWithSteam(
+  app: ReturnType<typeof createTestApp>,
+  steamId: string,
+  seenOrigin?: string
+) {
   const start = await request(app, "/auth/sign-in/social", {
     method: "POST",
     headers: { "content-type": "application/json", origin: WEBSITE_ORIGIN },
@@ -64,5 +71,6 @@ export async function signInWithSteam(app: ReturnType<typeof createTestApp>, ste
     callback.searchParams.set(key, value);
   }
 
-  return request(app, callback.toString(), { headers: { cookie: toCookieHeader(start) } });
+  const seenUrl = seenOrigin ? new URL(`${callback.pathname}${callback.search}`, seenOrigin) : callback;
+  return request(app, seenUrl.toString(), { headers: { cookie: toCookieHeader(start) } });
 }

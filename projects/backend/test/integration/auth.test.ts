@@ -94,6 +94,15 @@ describe("auth", () => {
       });
     });
 
+    test("accepts the Steam callback when a proxy hides the public origin", async () => {
+      mockSteamVerification(true);
+
+      // Behind a reverse proxy the backend sees its own origin instead of the public one
+      const callback = await signInWithSteam(app, STEAM_ID, "http://backend.internal:3000");
+      expectStatus(callback, 302);
+      expect(callback.headers.get("location")).toBe(`${WEBSITE_ORIGIN}/`);
+    });
+
     test("signing in twice reuses the same user", async () => {
       mockSteamVerification(true);
 
