@@ -1,3 +1,4 @@
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { BeatLeaderPlayersTotalSchema } from "@ssr/common/schemas/beatleader/tokens/players/page";
 import {
@@ -137,7 +138,7 @@ export class BeatLeaderApiService {
     const timeoutId = setTimeout(() => controller.abort(), BeatLeaderApiService.REQUEST_TIMEOUT_MS);
 
     const baseUrl = effectiveOptions.useProxy
-      ? `https://p.fascinated.cc/${encodeURIComponent(`${url}${getQueryParamsFromObject(effectiveOptions.searchParams || {})}`)}`
+      ? `${env.PROXY_URL}/${encodeURIComponent(`${url}${getQueryParamsFromObject(effectiveOptions.searchParams || {})}`)}`
       : `${url}${getQueryParamsFromObject(effectiveOptions.searchParams || {})}`;
     let response: Response | undefined;
     try {
