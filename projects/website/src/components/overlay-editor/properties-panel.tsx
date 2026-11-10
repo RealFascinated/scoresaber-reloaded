@@ -15,7 +15,7 @@ import {
   OverlayWidgetTypes,
   type OverlayElement,
 } from "@ssr/common/schemas/overlay/overlay-element";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 
 const ANCHOR_GRID: OverlayAnchor[][] = [
   ["top-left", "top", "top-right"],
@@ -368,8 +368,11 @@ function ConnectionProperties() {
 }
 
 function MultiProperties({ ids }: { ids: string[] }) {
-  const elements = useOverlayEditorStore(state =>
-    state.layout.elements.filter(element => ids.includes(element.id))
+  // Select the stable array and filter it here: a selector that returns a new array every time loops forever
+  const layoutElements = useOverlayEditorStore(state => state.layout.elements);
+  const elements = useMemo(
+    () => layoutElements.filter(element => ids.includes(element.id)),
+    [layoutElements, ids]
   );
   const updateElements = useOverlayEditorStore(state => state.updateElements);
   const duplicateElements = useOverlayEditorStore(state => state.duplicateElements);
