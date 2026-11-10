@@ -23,6 +23,9 @@ const serverSchema = Type.Object({
 
   PROMETHEUS_AUTH_TOKEN: Type.String(),
 
+  /** Comma separated client addresses the backend's rate limiter skips (e.g. the website's own server) */
+  RATE_LIMIT_ALLOWLIST: Type.Optional(Type.String()),
+
   DISCORD_BOT_TOKEN: Type.Optional(Type.String()),
 
   DISCORD_CHANNEL_TRACKED_PLAYER_LOGS: Type.Optional(Type.String()),
@@ -104,6 +107,8 @@ export const env = {
 
   // Prometheus
   PROMETHEUS_AUTH_TOKEN: process.env.PROMETHEUS_AUTH_TOKEN,
+
+  RATE_LIMIT_ALLOWLIST: process.env.RATE_LIMIT_ALLOWLIST,
 
   // Misc
   NEXT_PUBLIC_WEBSITE_NAME: process.env.NEXT_PUBLIC_WEBSITE_NAME,

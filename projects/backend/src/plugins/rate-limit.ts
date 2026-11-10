@@ -1,3 +1,4 @@
+import { env } from "@ssr/common/env";
 import { RateLimitError } from "@ssr/common/error/rate-limit-error";
 import Logger from "@ssr/common/logger";
 import { Elysia } from "elysia";
@@ -58,6 +59,13 @@ function isPrivateAddress(address: string): boolean {
  */
 export const rateLimit = ({ max, windowMs, routes = {} }: RateLimitOptions) => {
   const buckets = new Map<string, Bucket>();
+  // Addresses that are never limited, e.g. the website's server when it reaches the API through Cloudflare
+  const allowlist = new Set(
+    (env.RATE_LIMIT_ALLOWLIST ?? "")
+      .split(",")
+      .map(address => address.trim())
+      .filter(address => address.length > 0)
+  );
   const routeEntries = Object.entries(routes);
 
   const cleanup = setInterval(() => {
@@ -78,7 +86,7 @@ export const rateLimit = ({ max, windowMs, routes = {} }: RateLimitOptions) => {
     }
 
     const clientAddress = getClientAddress(request, server?.requestIP(request)?.address);
-    if (isPrivateAddress(clientAddress)) {
+    if (isPrivateAddress(clientAddress) || allowlist.has(clientAddress)) {
       return;
     }
 
