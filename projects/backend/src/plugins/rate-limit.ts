@@ -1,4 +1,5 @@
 import { RateLimitError } from "@ssr/common/error/rate-limit-error";
+import Logger from "@ssr/common/logger";
 import { Elysia } from "elysia";
 
 type RateLimitOptions = {
@@ -94,6 +95,17 @@ export const rateLimit = ({ max, windowMs, routes = {} }: RateLimitOptions) => {
     bucket.count++;
 
     if (bucket.count > limit) {
+      // Once per bucket per window, with every header the address was derived from, so it is visible
+      // who is being limited (e.g. whether the website's own requests show up as a shared address)
+      if (bucket.count === limit + 1) {
+        Logger.warn(
+          `Rate limited ${key} (limit ${limit}/${windowMs / 1000}s) on ${request.method} ${pathname}; ` +
+            `cf-connecting-ip=${request.headers.get("cf-connecting-ip") ?? "-"} ` +
+            `x-forwarded-for=${request.headers.get("x-forwarded-for") ?? "-"} ` +
+            `socket=${server?.requestIP(request)?.address ?? "-"} ` +
+            `user-agent=${request.headers.get("user-agent") ?? "-"}`
+        );
+      }
       set.headers["retry-after"] = Math.ceil((bucket.resetAt - now) / 1000).toString();
       throw new RateLimitError("Too many requests");
     }
