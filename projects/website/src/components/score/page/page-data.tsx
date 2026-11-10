@@ -85,7 +85,7 @@ export default function ScorePageData({ scoreId, initialScore }: ScorePageDataPr
   if (isError) {
     return (
       <Card className="flex flex-col items-center justify-center text-center">
-        <SharedIcons.WarningAlertIcon className="mb-(--spacing-xl) size-16 text-red-500" />
+        <SharedIcons.WarningAlertIcon className="text-danger mb-(--spacing-xl) size-16" />
         <h2 className="mb-(--spacing-sm) text-xl font-semibold">Score Not Found</h2>
         <p className="text-muted-foreground">This score has not been tracked or may have been removed.</p>
       </Card>

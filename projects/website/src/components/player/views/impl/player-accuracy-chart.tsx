@@ -10,7 +10,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Average Accuracy",
     field: "averageAccuracy",
-    color: "#48ff58",
+    color: Colors.status.success,
     axisId: "y2",
     axisConfig: {
       reverse: false,
@@ -50,7 +50,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Average Unranked Accuracy",
     field: "averageUnrankedAccuracy",
-    color: "#ff4848", // Changed to red
+    color: Colors.status.danger,
     axisId: "y1",
     axisConfig: {
       reverse: false,

@@ -47,7 +47,7 @@ export default function OverlaySongInfoView({ overlayData }: OverlaySongInfoProp
             className="w-fit rounded-md px-2 py-1 text-sm font-medium"
             style={{
               backgroundColor: difficulty.color,
-              color: difficulty.color === "#FFFFFF" ? "#000000" : "#FFFFFF",
+              color: "var(--difficulty-foreground)",
             }}
           >
             {getDifficultyName(difficulty)}

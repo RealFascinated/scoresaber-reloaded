@@ -81,9 +81,7 @@ export default function Leaderboards() {
                   className="ring-border rounded-xl ring-1"
                   title="No Leaderboards Found"
                   description="No leaderboards were found on this page"
-                  icon={
-                    <SharedIcons.LeaderboardEmptyStateIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />
-                  }
+                  icon={<SharedIcons.LeaderboardEmptyStateIcon className="text-muted-foreground h-10 w-10" />}
                 />
               </div>
             )}

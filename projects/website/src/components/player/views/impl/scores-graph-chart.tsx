@@ -1,5 +1,6 @@
 import { openInNewTab } from "@/common/browser-utils";
 import { applyChartTheme, CHART_THEME, chartTitle } from "@/common/chart/chart-theme";
+import { Colors } from "@/common/colors";
 import { useRealm } from "@/components/providers/realm-provider";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
@@ -219,8 +220,8 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
           type: "line",
           label: "Best",
           data: bestLineData,
-          borderColor: "rgba(0, 255, 127, 0.8)",
-          backgroundColor: "rgba(0, 255, 127, 0.1)",
+          borderColor: Colors.status.success,
+          backgroundColor: `${Colors.status.success}1a`,
           borderWidth: 3,
           fill: false,
           pointRadius: 0,
@@ -230,8 +231,8 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
           type: "line",
           label: "Average",
           data: averageLineData,
-          borderColor: "rgba(0, 123, 255, 0.8)",
-          backgroundColor: "rgba(0, 123, 255, 0.1)",
+          borderColor: Colors.pp,
+          backgroundColor: `${Colors.pp}1a`,
           borderWidth: 3,
           fill: false,
           pointRadius: 0,

@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
 import Friend from "@/components/friend/friend";
 import GithubLogo from "@/components/logos/logos/github-logo";
@@ -27,6 +28,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
+import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ReactElement, useRef, useState } from "react";
@@ -87,6 +89,12 @@ const socialLinks: SocialLinkType[] = [
     href: "https://github.com/RealFascinated/scoresaber-reloaded",
   },
 ];
+
+const navButtonClass = cn(
+  "text-sidebar-foreground/70 h-8 gap-2.5 px-2.5",
+  "hover:text-sidebar-foreground",
+  "data-[active=true]:text-sidebar-foreground data-[active=true]:[&_svg]:text-primary"
+);
 
 type NavItem = {
   id: string;
@@ -169,11 +177,12 @@ function FriendsPopover() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <SidebarMenuButton
+          className={navButtonClass}
           onClick={() => isMobile && setOpen(prev => !prev)}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          <SharedIcons.FriendsNavIcon className="size-5" />
+          <SharedIcons.FriendsNavIcon className="size-[18px]" />
           <span>Friends</span>
           {friendCount > 0 && (
             <span className="bg-muted text-muted-foreground ml-auto rounded-md px-1.5 py-0.5 text-xs font-medium tabular-nums">
@@ -266,12 +275,14 @@ function ProfileSection() {
 
   if (mainPlayerId == null || mainPlayerId === "") {
     return (
-      <SidebarMenuItem>
-        <SidebarMenuButton onClick={openSearch}>
-          <SharedIcons.VerifiedPlayerIcon className="size-5 shrink-0 text-green-500" />
-          <span>Claim profile</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      <button
+        type="button"
+        onClick={openSearch}
+        className="text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors"
+      >
+        <SharedIcons.VerifiedPlayerIcon className="text-success size-5 shrink-0" />
+        <span className="font-medium">Claim your profile</span>
+      </button>
     );
   }
 
@@ -279,19 +290,29 @@ function ProfileSection() {
   const isActive = pathname != null && (pathname === href || (href !== "/" && pathname.startsWith(href)));
 
   return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={isActive}>
-        <SimpleLink href={href}>
-          <Avatar
-            size={20}
-            src={mainPlayer?.avatar ?? ""}
-            className="border-border box-border size-5 shrink-0 rounded-full border"
-            alt="Your Profile Picture"
-          />
-          <span>My Profile</span>
-        </SimpleLink>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
+    <SimpleLink
+      href={href}
+      draggable={false}
+      className={cn(
+        "flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 transition-colors",
+        isActive ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/60"
+      )}
+    >
+      <Avatar
+        size={32}
+        src={mainPlayer?.avatar ?? ""}
+        className="border-border box-border size-8 shrink-0 rounded-full border"
+        alt="Your Profile Picture"
+      />
+      <div className="grid min-w-0 flex-1 leading-tight">
+        <span className="truncate text-sm font-medium">{mainPlayer?.name ?? "My Profile"}</span>
+        {mainPlayer != undefined && (
+          <span className="text-muted-foreground text-xs tabular-nums">
+            #{formatNumberWithCommas(mainPlayer.rank)} · {formatPp(mainPlayer.pp)}pp
+          </span>
+        )}
+      </div>
+    </SimpleLink>
   );
 }
 
@@ -301,23 +322,20 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-1">
-            <SidebarMenuButton size="lg" asChild>
-              <SimpleLink href="/" draggable={false}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Image
-                    width={32}
-                    height={32}
-                    className="size-8"
-                    src="/assets/logos/scoresaber.png"
-                    alt="ScoreSaber Logo"
-                  />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">SSR</span>
-                  <span className="text-muted-foreground truncate text-xs">ScoreSaber Reloaded</span>
-                </div>
-              </SimpleLink>
-            </SidebarMenuButton>
+            <SimpleLink
+              href="/"
+              draggable={false}
+              className="flex min-w-0 flex-1 items-center gap-2.5 rounded-md px-2 py-1"
+            >
+              <Image
+                width={24}
+                height={24}
+                className="size-6 shrink-0"
+                src="/assets/logos/scoresaber.png"
+                alt="ScoreSaber Logo"
+              />
+              <span className="truncate text-sm font-semibold">ScoreSaber Reloaded</span>
+            </SimpleLink>
             <RealmSelector />
           </SidebarMenuItem>
         </SidebarMenu>
@@ -329,17 +347,23 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <PlayerAndLeaderboardSearch />
+                <PlayerAndLeaderboardSearch variant="sidebar" />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Profile & Friends */}
-        <SidebarGroup>
+        {/* Profile */}
+        <SidebarGroup className="pt-0 pb-2">
           <SidebarGroupContent>
-            <SidebarMenu>
-              <ProfileSection />
+            <ProfileSection />
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Navigation */}
+        <SidebarGroup className="py-0">
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-0.5">
               <SidebarMenuItem>
                 <FriendsPopover />
               </SidebarMenuItem>
@@ -347,12 +371,13 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Navigation */}
         {navGroups.map(group => (
-          <SidebarGroup key={group.label} className="py-1">
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+          <SidebarGroup key={group.label} className="py-1.5">
+            <SidebarGroupLabel className="text-muted-foreground/70 h-6 px-2.5 text-xs font-normal">
+              {group.label}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="gap-0.5">
                 {group.items.map(item => (
                   <SidebarMenuItem key={item.id}>
                     <SidebarNavLink href={item.href} icon={item.icon}>
@@ -366,27 +391,26 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <div className="border-sidebar-border border-t px-2 py-2">
-        <SidebarMenu className="gap-0">
-          {resourceLinks.map(link => (
-            <SidebarMenuItem key={link.name}>
-              <SidebarExternalLink href={link.href}>{link.name}</SidebarExternalLink>
-            </SidebarMenuItem>
+      <SidebarFooter className="border-sidebar-border gap-2 border-t p-3">
+        <div className="flex flex-wrap gap-x-3 gap-y-1">
+          {[...resourceLinks, ...appLinks].map(link => (
+            <SimpleLink
+              key={link.name}
+              href={link.href}
+              target="_blank"
+              draggable={false}
+              className="text-muted-foreground hover:text-foreground text-xs transition-colors"
+            >
+              {link.shortName ?? link.name}
+            </SimpleLink>
           ))}
-          {appLinks.map(link => (
-            <SidebarMenuItem key={link.name}>
-              <SidebarExternalLink href={link.href}>{link.name}</SidebarExternalLink>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </div>
-
-      <SidebarFooter className="border-sidebar-border border-t p-3">
-        <div className="flex items-center justify-center gap-3">
+        </div>
+        <div className="flex items-center gap-1">
           {socialLinks.map(link => (
             <SimpleLink
               key={link.name}
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={link.name}
+              className="text-muted-foreground hover:text-foreground hover:bg-sidebar-accent flex size-8 items-center justify-center rounded-md transition-colors"
               href={link.href}
               target="_blank"
               draggable={false}
@@ -406,29 +430,17 @@ function SidebarNavLink({
   children,
 }: {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: NavItem["icon"];
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const isActive = pathname != null && (pathname === href || (href !== "/" && pathname.startsWith(href)));
 
   return (
-    <SidebarMenuButton asChild isActive={isActive}>
+    <SidebarMenuButton asChild isActive={isActive} className={navButtonClass}>
       <SimpleLink href={href} draggable={false}>
-        <Icon className="size-5" />
+        <Icon className="size-[18px]" />
         <span>{children}</span>
-      </SimpleLink>
-    </SidebarMenuButton>
-  );
-}
-
-function SidebarExternalLink({ href, children }: { href: string; children: React.ReactNode }) {
-  const external = !href.startsWith("/");
-  return (
-    <SidebarMenuButton asChild size="sm" className="text-muted-foreground hover:text-foreground">
-      <SimpleLink href={href} target={external ? "_blank" : undefined} draggable={false}>
-        <span>{children}</span>
-        {external && <SharedIcons.ExternalNavigationIcon className="ml-auto h-3.5 w-3.5 shrink-0" />}
       </SimpleLink>
     </SidebarMenuButton>
   );

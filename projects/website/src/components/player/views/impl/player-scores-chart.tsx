@@ -1,4 +1,5 @@
-"use client";
+import { Colors } from "@/common/colors";
+("use client");
 
 import { DatasetConfig } from "@/common/chart/types";
 import GenericPlayerChart from "@/components/player/views/generic-player-chart";
@@ -14,7 +15,7 @@ export const scoreBarsDataset: DatasetConfig[] = [
   {
     title: "Ranked Scores",
     field: "rankedScores",
-    color: "#8b5cf6",
+    color: Colors.series.ranked,
     axisId: "y100",
     axisConfig: {
       reverse: false,
@@ -30,7 +31,7 @@ export const scoreBarsDataset: DatasetConfig[] = [
   {
     title: "Ranked Improved",
     field: "rankedScoresImproved",
-    color: "#ef4444",
+    color: Colors.series.rankedImproved,
     axisId: "y100",
     axisConfig: {
       reverse: false,
@@ -46,7 +47,7 @@ export const scoreBarsDataset: DatasetConfig[] = [
   {
     title: "Unranked Scores",
     field: "unrankedScores",
-    color: "#6b7280",
+    color: Colors.series.unranked,
     axisId: "y100",
     axisConfig: {
       reverse: false,
@@ -62,7 +63,7 @@ export const scoreBarsDataset: DatasetConfig[] = [
   {
     title: "Unranked Improved",
     field: "unrankedScoresImproved",
-    color: "#464a53",
+    color: Colors.series.unrankedImproved,
     axisId: "y100",
     axisConfig: {
       reverse: false,
@@ -82,7 +83,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Total Scores",
     field: "totalScores",
-    color: "#f97316",
+    color: Colors.series.total,
     axisId: "y1",
     axisConfig: {
       reverse: false,
@@ -95,7 +96,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Total Ranked Scores",
     field: "totalRankedScores",
-    color: "#06b6d4",
+    color: Colors.series.totalRanked,
     axisId: "y2",
     axisConfig: {
       reverse: false,
@@ -109,7 +110,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Total Unranked Scores",
     field: "totalUnrankedScores",
-    color: "#6b7280",
+    color: Colors.series.unranked,
     axisId: "y3",
     axisConfig: {
       reverse: false,

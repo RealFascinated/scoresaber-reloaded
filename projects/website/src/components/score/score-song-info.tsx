@@ -4,6 +4,7 @@ import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { getDifficulty } from "@ssr/common/utils/song-utils";
 import Image from "next/image";
+import { CSSProperties } from "react";
 import LeaderboardSongName from "./leaderboard-song-name";
 
 interface ScoreSongInfoProps {
@@ -69,19 +70,20 @@ export default function ScoreSongInfo({
             className="h-full w-full object-cover"
           />
         </div>
+        {/* A dark chip reads on any cover art; the difficulty color lives in the ring and the icon/label. */}
         <div
-          className="absolute -right-2 bottom-1 inline-flex h-4.5 w-fit cursor-default items-center justify-end rounded-sm px-1 text-right text-[0.65rem] font-semibold shadow-sm"
-          style={{
-            backgroundColor: `color-mix(in srgb, ${diff.color} 95%, transparent)`,
-          }}
+          className="bg-background/90 text-foreground absolute -right-2 bottom-1 inline-flex h-5.5 w-fit cursor-default items-center gap-1 rounded-md px-1.5 text-xs leading-none font-bold tabular-nums shadow-md ring-[1.5px] ring-(--diff-color) backdrop-blur-sm"
+          style={{ "--diff-color": diff.color } as CSSProperties}
         >
           {metric != undefined && metric.value > 0 ? (
-            <div className="flex items-center justify-center gap-1">
-              <p>{metric.value.toFixed(2)}</p>
-              {MetricIcon && <MetricIcon className="size-[12px]" />}
-            </div>
+            <>
+              <span>{metric.value.toFixed(2)}</span>
+              {MetricIcon && <MetricIcon className="size-3.5 text-(--diff-color)" />}
+            </>
           ) : (
-            <p>{shortDiffNames ? diff.shortName : (diff.displayName ?? diff.mapDifficulty)}</p>
+            <span className="text-(--diff-color)">
+              {shortDiffNames ? diff.shortName : (diff.displayName ?? diff.mapDifficulty)}
+            </span>
           )}
         </div>
       </div>
@@ -97,9 +99,9 @@ export default function ScoreSongInfo({
 
           {/* Author Info */}
           <div className="flex flex-row items-end gap-1.5 text-[12.5px] leading-none">
-            <p className={cn("line-clamp-2 text-gray-400", className)}>
+            <p className={cn("text-muted-foreground line-clamp-2", className)}>
               {song.authorName}
-              <span className="px-1 text-gray-500">|</span>
+              <span className="text-muted-foreground px-1">|</span>
               <span className="text-song-mapper">
                 <FallbackLink
                   href={mappersProfile}

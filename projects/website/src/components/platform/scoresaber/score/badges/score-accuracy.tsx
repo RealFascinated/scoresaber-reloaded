@@ -38,7 +38,7 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
                 <p>
                   Accuracy: {formatScoreAccuracy(score.accuracy)}
                   {!score.fullCombo && fcAccuracy && (
-                    <span className="text-green-500"> (FC: {formatScoreAccuracy(fcAccuracy)})</span>
+                    <span className="text-success"> (FC: {formatScoreAccuracy(fcAccuracy)})</span>
                   )}
                 </p>
                 <p>Max Combo: {formatNumberWithCommas(score.maxCombo)}x</p>
@@ -50,7 +50,7 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
                   <ScoreSaberScoreModifiers type="full" score={score} />
                 </div>
               )}
-              {failed && <p className="text-red-500">Failed</p>}
+              {failed && <p className="text-danger">Failed</p>}
             </div>
           }
           showOnMobile
@@ -80,7 +80,7 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
                     <ScoreSaberScoreModifiers type="full" score={score.previousScore} />
                   </div>
                 )}
-                {previousScoreFailed && <p className="text-red-500">Failed</p>}
+                {previousScoreFailed && <p className="text-danger">Failed</p>}
               </div>
             }
           >
@@ -88,6 +88,7 @@ export function ScoreAccuracyBadge({ score, showDifference = true }: ScoreAccura
               className="text-xs"
               change={previousScore.change.accuracy}
               formatValue={num => `${num.toFixed(2)}%`}
+              showColors
             />
             {previousModCount > 0 && score.previousScore && (
               <ScoreSaberScoreModifiers type="simple" limit={1} score={score.previousScore} />

@@ -40,7 +40,7 @@ export default function ClaimProfile({ playerId }: Props) {
       <ConfirmationDialog
         trigger={
           <Button variant={"outline"}>
-            <SharedIcons.VerifiedPlayerIcon className="size-5 text-green-500" />
+            <SharedIcons.VerifiedPlayerIcon className="text-success size-5" />
           </Button>
         }
         title="Claim Profile"

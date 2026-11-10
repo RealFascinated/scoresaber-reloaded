@@ -24,7 +24,7 @@ export default function Error(props: ErrorProps) {
     <div className="flex w-full justify-center">
       <Card className="mt-2 flex w-full max-w-2xl flex-col items-center gap-4">
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-red-400">
+          <h1 className="text-danger flex items-center gap-2 text-2xl font-bold">
             Something went wrong <SharedIcons.PageErrorIcon className="size-6" />
           </h1>
           <p className="text-muted-foreground text-lg">{errorMessage}</p>

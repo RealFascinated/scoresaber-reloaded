@@ -109,7 +109,7 @@ export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberSc
                       <TableCell className="text-muted-foreground px-3 py-1.5 whitespace-nowrap">
                         {formatRelativeDate(point.timestamp.getTime(), true)}
                       </TableCell>
-                      <TableCell className="px-3 py-1.5 text-right text-green-400">
+                      <TableCell className="text-success px-3 py-1.5 text-right">
                         {point.accuracy.toFixed(2)}%
                       </TableCell>
                     </TableRow>

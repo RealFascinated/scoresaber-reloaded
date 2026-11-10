@@ -112,8 +112,8 @@ export default function FriendAction({
         "transition-all duration-200 active:scale-95 disabled:opacity-100",
         iconOnly ? "size-8 rounded-full" : "gap-2",
         isFriend
-          ? "border-destructive/40 bg-destructive/10 text-destructive hover:border-destructive hover:bg-destructive hover:text-white"
-          : "border-ssr/40 bg-ssr/10 text-ssr hover:border-ssr hover:bg-ssr hover:text-white",
+          ? "border-destructive/40 bg-destructive/10 text-destructive hover:border-destructive hover:bg-destructive/20"
+          : "border-ssr/40 bg-ssr/10 text-ssr hover:border-primary hover:bg-primary hover:text-primary-foreground",
         className
       )}
     >

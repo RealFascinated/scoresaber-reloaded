@@ -53,10 +53,10 @@ export default function DatabaseLoader({ children }: DatabaseLoaderProps) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <p className="mb-4 text-red-500">{error}</p>
+          <p className="text-danger mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="rounded-sm bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-sm px-4 py-2"
           >
             Retry
           </button>

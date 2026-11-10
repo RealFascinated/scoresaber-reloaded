@@ -115,7 +115,7 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
               <span
                 className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold"
                 style={{
-                  backgroundColor: `color-mix(in srgb, ${diff.color} 25%, transparent)`,
+                  backgroundColor: `color-mix(in oklab, ${diff.color} 18%, transparent)`,
                   color: diff.color,
                 }}
               >
@@ -125,7 +125,7 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
                 {leaderboard.difficulty.characteristic}
               </span>
               {isRanked && (
-                <span className="bg-background/90 ring-border inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold text-yellow-400 ring-1">
+                <span className="bg-background/90 ring-border text-warning inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold ring-1">
                   <SharedIcons.DifficultyStarIcon className="size-3" />
                   {leaderboard.stars.toFixed(2)}
                 </span>
@@ -150,12 +150,12 @@ export default function ScoreDetails({ score: playerScore }: ScoreDetailsProps) 
               {score.fullCombo ? (
                 <>
                   <span aria-hidden>·</span>
-                  <span className="text-xs font-semibold text-green-400">FC</span>
+                  <span className="text-success text-xs font-semibold">FC</span>
                 </>
               ) : (
                 <>
                   <span aria-hidden>·</span>
-                  <span className="text-xs font-semibold text-red-400">
+                  <span className="text-danger text-xs font-semibold">
                     {score.misses} miss{score.misses !== 1 ? "es" : ""}
                   </span>
                 </>

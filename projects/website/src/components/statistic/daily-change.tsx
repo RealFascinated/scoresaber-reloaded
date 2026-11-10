@@ -54,7 +54,7 @@ export function DailyChange({
   }
 
   const value = (
-    <p className={cn("text-xs", change > 0 ? "text-green-400" : "text-red-400", className)}>
+    <p className={cn("text-xs", change > 0 ? "text-success" : "text-danger", className)}>
       {change > 0 ? "+" : ""}
       {`${formatValue(change)}${type.type == "Performance Points" ? "pp" : ""}`}
     </p>

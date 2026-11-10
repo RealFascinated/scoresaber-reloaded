@@ -47,9 +47,9 @@ export default function ScoreMissesAndPausesBadge({
       >
         <span>
           {score.fullCombo ? (
-            <span className="text-green-400">FC</span>
+            <span className="text-success">FC</span>
           ) : (
-            <span className="text-red-400">{formatNumberWithCommas(misses)}</span>
+            <span className="text-danger">{formatNumberWithCommas(misses)}</span>
           )}
         </span>
         {!hideXMark && !score.fullCombo && <span>x</span>}
@@ -70,7 +70,7 @@ export default function ScoreMissesAndPausesBadge({
           <span className="text-xs">
             (vs{" "}
             {previousScore.fullCombo ? (
-              <span className="text-green-400">FC</span>
+              <span className="text-success">FC</span>
             ) : (
               formatNumberWithCommas(previousMissCount)
             )}

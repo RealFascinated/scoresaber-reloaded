@@ -88,7 +88,7 @@ export default function ScoreSaberLeaderboardScore({
           className={cn(
             TABLE_CELL_WIDTH,
             "cursor-default whitespace-nowrap tabular-nums",
-            score.misses > 0 ? "text-red-500" : "text-green-500"
+            score.misses > 0 ? "text-danger" : "text-success"
           )}
         >
           <ScoreMissesAndPausesBadge score={score} hideXMark hidePreviousScore />

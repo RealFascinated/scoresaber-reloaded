@@ -17,7 +17,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Rank",
     field: "rank",
-    color: "#2ecc71",
+    color: Colors.rank.global,
     axisId: "y",
     axisConfig: {
       reverse: true,
@@ -30,7 +30,7 @@ const datasetConfig: DatasetConfig[] = [
   {
     title: "Country Rank",
     field: "countryRank",
-    color: "#FFEA00",
+    color: Colors.rank.country,
     axisId: "y1",
     axisConfig: {
       reverse: true,

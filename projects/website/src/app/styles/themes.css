@@ -1,70 +1,94 @@
+/*
+  Color system
+  ------------
+  Every color is defined in OKLCH so lightness is controlled directly:
+  - Surfaces are a neutral ladder with a faint brand tint (L 0.155 -> 0.32).
+  - Text-on-dark tokens share roughly the same lightness (L ~0.76-0.85), so no single hue shouts louder
+    than another and every one clears 4.5:1 on cards. Hue alone carries the meaning.
+  - Fills that carry dark text (difficulties) share L ~0.64-0.68.
+  - One meaning per hue: brand/pp = indigo, gain = green, loss = red, medals = amber,
+    accuracy tiers = a "rarity" ramp (grey -> green -> blue -> indigo -> purple -> pink -> gold).
+  The brand hue is a single knob (--brand-h); the color themes below only change it.
+*/
 :root {
-  --background: hsl(240 6% 4.5%);
-  --foreground: hsl(60 9.1% 97.8%);
-  --card: hsl(240 5% 8%);
-  --chart-card: hsl(240 5% 6.5%);
-  --card-foreground: hsl(60 9.1% 97.8%);
-  --popover: hsl(240 5% 9%);
-  --popover-foreground: hsl(60 9.1% 97.8%);
-  --primary: hsl(216 100% 58%);
-  --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(240 4% 12%);
-  --secondary-foreground: hsl(60 9.1% 97.8%);
-  --muted: hsl(240 4% 13%);
-  --muted-foreground: hsl(240 5% 62%);
-  --accent: hsl(240 4% 14%);
-  --accent-foreground: hsl(60 9.1% 97.8%);
-  --accent-deep: hsl(240 5% 10.5%);
-  --accent-deep-foreground: hsl(60 9.1% 97.8%);
-  --accent-secondary: hsl(270 100% 60%);
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(60 9.1% 97.8%);
-  --border: hsl(240 4% 15%);
-  --input: hsl(240 4% 20%);
-  --ring: hsl(0, 0%, 60%);
+  --brand-h: 268;
 
-  /* Sidebar Colors */
-  --sidebar-background: hsl(240 6% 6%);
+  /* Surfaces */
+  --background: oklch(0.155 0.006 270);
+  --foreground: oklch(0.965 0.004 270);
+  --card: oklch(0.195 0.008 270);
+  --chart-card: oklch(0.175 0.007 270);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.225 0.009 270);
+  --popover-foreground: var(--foreground);
+  --secondary: oklch(0.245 0.01 270);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.245 0.01 270);
+  --muted-foreground: oklch(0.7 0.012 270);
+  --accent: oklch(0.265 0.01 270);
+  --accent-foreground: var(--foreground);
+  --accent-deep: oklch(0.215 0.009 270);
+  --accent-deep-foreground: var(--foreground);
+  --border: oklch(0.285 0.01 270);
+  --input: oklch(0.32 0.012 270);
+  --ring: oklch(0.6 0.012 270);
+
+  /* Sidebar */
+  --sidebar-background: oklch(0.175 0.007 270);
   --sidebar-foreground: var(--foreground);
-  --sidebar-primary: var(--primary);
-  --sidebar-primary-foreground: var(--primary-foreground);
-  --sidebar-accent: hsl(240 4% 12%);
+  --sidebar-accent: oklch(0.245 0.01 270);
   --sidebar-accent-foreground: var(--accent-foreground);
-  --sidebar-border: hsl(240 4% 12%);
+  --sidebar-border: oklch(0.245 0.01 270);
   --sidebar-ring: var(--ring);
 
-  /* SSR Colors */
-  --pp: #5c6bff;
-  --ssr: #5c6bff;
-  --medals: #cd7f32;
+  /* Status (text-on-dark lightness) */
+  --success: oklch(0.78 0.17 150);
+  --danger: oklch(0.7 0.19 22);
+  --destructive: var(--danger);
+  --destructive-foreground: var(--foreground);
+  --warning: oklch(0.84 0.16 85);
+  --info: oklch(0.78 0.12 230);
+
+  /* Fixed-meaning colors */
+  --medals: oklch(0.78 0.13 65);
+  --streak: oklch(0.75 0.17 50);
   --discord-blue: #5865f2;
-  --inactive-account: #ff6467;
-  --statistic: #5c6bff;
+  --inactive-account: var(--danger);
 
-  /* Song Colors */
-  --song-name: #4a56cc;
-  --song-mapper: #7d8aff;
+  /* Podium (rank 1-3) */
+  --rank-gold: oklch(0.84 0.15 88);
+  --rank-silver: oklch(0.8 0.045 250);
+  --rank-bronze: oklch(0.72 0.12 55);
 
-  /* Difficulty Colors */
-  --easy: #3cb371;
-  --normal: #59b0f4;
-  --hard: #ff6347;
-  --expert: #bf2a42;
-  --expertPlus: #8f48db;
+  /* Difficulty fills (game convention hues, equal lightness, use dark text on them) */
+  --easy: oklch(0.66 0.16 150);
+  --normal: oklch(0.64 0.14 240);
+  --hard: oklch(0.68 0.17 55);
+  --expert: oklch(0.66 0.19 20);
+  --expertPlus: oklch(0.66 0.19 305);
+  --difficulty-foreground: var(--background);
 
-  /* Leaderboard Status Colors */
-  --ranked: #23d160;
-  --unranked: #8b949e;
-  --qualified: #ffde1a;
+  /* Accuracy tiers: ordinal "rarity" ramp, readable as text and as a tint */
+  --acc-none: oklch(0.7 0.012 270);
+  --acc-a: oklch(0.8 0.15 150);
+  --acc-s: oklch(0.8 0.12 235);
+  --acc-s-plus: oklch(0.76 0.14 270);
+  --acc-ss: oklch(0.76 0.17 305);
+  --acc-ss-plus: oklch(0.78 0.17 350);
+  --acc-god: oklch(0.85 0.15 88);
 
-  /* Score Mode Colors */
-  --global: #5c6bff;
-  --friends: #ff9500;
-  --history: #9d4edd;
+  /* Leaderboard status */
+  --ranked: var(--success);
+  --unranked: var(--muted-foreground);
+  --qualified: var(--warning);
 
-  /* Hand Colors */
-  --hands-left: #a82020;
-  --hands-right: #2064a8;
+  /* Score modes */
+  --friends: oklch(0.72 0.17 60);
+  --history: oklch(0.62 0.2 300);
+
+  /* Hands (Beat Saber: red left, blue right) */
+  --hands-left: oklch(0.7 0.18 25);
+  --hands-right: oklch(0.72 0.14 245);
 
   /* Border Radius Scale */
   --radius: 0.5rem;
@@ -86,39 +110,65 @@
   --spacing-3xl: 3rem; /* 48px - very spacious */
 
   /* Scrollbar Colors */
-  --scrollbar-track: hsl(240 5% 7%);
-  --scrollbar-thumb: hsl(240 4% 20%);
-  --scrollbar-thumb-hover: hsl(240 4% 26%);
+  --scrollbar-track: oklch(0.175 0.007 270);
+  --scrollbar-thumb: oklch(0.32 0.012 270);
+  --scrollbar-thumb-hover: oklch(0.4 0.012 270);
+}
+
+/* Brand-derived tokens. Declared on every theme scope so a theme class only has to change --brand-h. */
+:root,
+.purple,
+.red,
+.green {
+  /* Filled brand surfaces (buttons, active tabs); white text on these is >= 4.5:1 */
+  --primary: oklch(0.555 0.2 var(--brand-h));
+  --primary-foreground: oklch(0.985 0.002 270);
+  /* Brand as text on dark surfaces */
+  --brand: oklch(0.76 0.13 var(--brand-h));
+  --accent-secondary: oklch(0.72 0.17 calc(var(--brand-h) + 20));
+  --pp: var(--brand);
+  --ssr: var(--brand);
+  --statistic: var(--brand);
+  --global: var(--primary);
+  --song-name: oklch(0.82 0.09 var(--brand-h));
+  --song-mapper: oklch(0.74 0.1 var(--brand-h));
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
 }
 
 .purple {
-  --primary: oklch(70% 0.28 285);
-  --accent-secondary: oklch(70% 0.3 285);
-  --pp: oklch(58% 0.25 295);
-  --ssr: oklch(55% 0.22 275);
-  --song-name: oklch(50% 0.22 295);
-  --song-mapper: oklch(75% 0.18 280);
-  --statistic: oklch(65% 0.25 285);
+  --brand-h: 300;
 }
 
 .red {
-  --primary: oklch(70% 0.25 25);
-  --accent-secondary: oklch(75% 0.3 25);
-  --pp: oklch(65% 0.22 20);
-  --ssr: oklch(60% 0.2 15);
-  --song-name: oklch(55% 0.2 25);
-  --song-mapper: oklch(78% 0.15 30);
-  --statistic: oklch(70% 0.2 20);
+  --brand-h: 25;
 }
 
 .green {
-  --primary: oklch(65% 0.28 140);
-  --accent-secondary: oklch(70% 0.3 140);
-  --pp: oklch(58% 0.25 135);
-  --ssr: oklch(55% 0.22 130);
-  --song-name: oklch(50% 0.22 150);
-  --song-mapper: oklch(75% 0.18 145);
-  --statistic: oklch(70% 0.2 145);
+  --brand-h: 150;
+}
+
+/*
+ * A background cover is active (set on <html> by BackgroundCover). Instead of every card floating on the
+ * image, the page content sits on one translucent sheet and the cards stay solid on top of it; the cover only
+ * shows around the sheet and through the sidebar.
+ */
+:root[data-background-cover] {
+  --sidebar-background: oklch(0.155 0.006 270 / 0.72);
+  --sidebar-border: oklch(0.285 0.01 270 / 0.6);
+}
+
+:root[data-background-cover] .page-sheet {
+  background-color: oklch(0.155 0.006 270 / 0.85);
+  border: 1px solid oklch(0.285 0.01 270 / 0.6);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  :root[data-background-cover] .page-sheet {
+    padding: 1.25rem;
+  }
 }
 
 @theme inline {
@@ -138,6 +188,7 @@
   --color-pp: var(--pp);
   --color-ssr: var(--ssr);
   --color-medals: var(--medals);
+  --color-streak: var(--streak);
   --color-discord-blue: var(--discord-blue);
   --color-inactive-account: var(--inactive-account);
   --color-song-name: var(--song-name);
@@ -160,6 +211,25 @@
 
   --color-hands-left: var(--hands-left);
   --color-hands-right: var(--hands-right);
+
+  --color-brand: var(--brand);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-difficulty-foreground: var(--difficulty-foreground);
+
+  --color-rank-gold: var(--rank-gold);
+  --color-rank-silver: var(--rank-silver);
+  --color-rank-bronze: var(--rank-bronze);
+
+  --color-acc-none: var(--acc-none);
+  --color-acc-a: var(--acc-a);
+  --color-acc-s: var(--acc-s);
+  --color-acc-s-plus: var(--acc-s-plus);
+  --color-acc-ss: var(--acc-ss);
+  --color-acc-ss-plus: var(--acc-ss-plus);
+  --color-acc-god: var(--acc-god);
 
   --color-background: var(--background);
 

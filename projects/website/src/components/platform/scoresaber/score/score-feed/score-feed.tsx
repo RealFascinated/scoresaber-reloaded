@@ -60,8 +60,8 @@ function FeedConnectionStatus({ readyState }: { readyState: ReadyState }) {
     <span
       className={cn(
         "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium",
-        state === "open" && "border-emerald-500/35 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-        state === "connecting" && "border-amber-500/35 bg-amber-500/10 text-amber-800 dark:text-amber-400",
+        state === "open" && "border-success/35 bg-success/10 text-success",
+        state === "connecting" && "border-warning/35 bg-warning/10 text-warning",
         state === "closed" && "border-destructive/35 bg-destructive/10 text-destructive"
       )}
       title="WebSocket status for the live score feed"
@@ -69,8 +69,8 @@ function FeedConnectionStatus({ readyState }: { readyState: ReadyState }) {
       <span
         className={cn(
           "size-2 rounded-full",
-          state === "open" && "bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.7)]",
-          state === "connecting" && "animate-pulse bg-amber-500",
+          state === "open" && "bg-success shadow-[0_0_8px_var(--success)]",
+          state === "connecting" && "bg-warning animate-pulse",
           state === "closed" && "bg-destructive"
         )}
         aria-hidden
@@ -83,19 +83,23 @@ function FeedConnectionStatus({ readyState }: { readyState: ReadyState }) {
 function FeedEmptyState({ variant }: { variant: EmptyVariant }) {
   if (variant === "connecting") {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-12">
+      <div className="ring-border bg-card flex flex-col items-center justify-center gap-3 rounded-xl py-12 ring-1">
         <Spinner />
         <p className="text-muted-foreground text-sm">{EMPTY_COPY[variant]}</p>
       </div>
     );
   }
 
-  return <p className="text-muted-foreground py-12 text-center text-sm">{EMPTY_COPY[variant]}</p>;
+  return (
+    <p className="ring-border bg-card text-muted-foreground rounded-xl py-12 text-center text-sm ring-1">
+      {EMPTY_COPY[variant]}
+    </p>
+  );
 }
 
 function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="ring-border bg-card divide-border divide-y overflow-hidden rounded-xl ring-1">
       {scores.map(scoreToken => {
         if (!scoreToken.leaderboard || !scoreToken.score) {
           return null;
@@ -106,8 +110,8 @@ function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
         const leaderboard = scoreToken.leaderboard;
 
         return (
-          <div key={score.scoreId} className="ring-border bg-card overflow-hidden rounded-xl ring-1">
-            <div className="border-border/50 flex items-center gap-2 border-b px-4 py-2">
+          <div key={score.scoreId}>
+            <div className="flex items-center gap-2 px-4 pt-3">
               <Avatar
                 src={player?.avatar ?? ""}
                 alt={`${player?.name ?? "Unknown"}'s Profile Picture`}
@@ -188,13 +192,11 @@ export default function ScoreFeed() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="flex items-start justify-between gap-3">
-        <PageTitle
-          title="Live Scores"
-          description={<>New scores from ScoreSaber appear here as they are submitted.</>}
-        />
-        <FeedConnectionStatus readyState={readyState} />
-      </div>
+      <PageTitle
+        title="Live Scores"
+        description={<>New scores from ScoreSaber appear here as they are submitted.</>}
+        actions={<FeedConnectionStatus readyState={readyState} />}
+      />
       <FeedBody phase={phase} />
     </div>
   );

@@ -45,9 +45,7 @@ const renderChange = (type: PlayerStatValue, value: number | undefined, range: S
   <p>
     {capitalizeFirstLetter(range)} Change:{" "}
     <span
-      className={
-        value === undefined ? "" : value >= 0 ? (value === 0 ? "" : "text-green-500") : "text-red-500"
-      }
+      className={value === undefined ? "" : value >= 0 ? (value === 0 ? "" : "text-success") : "text-danger"}
     >
       <b>{formatChangeValue(type, value)}</b>
     </span>

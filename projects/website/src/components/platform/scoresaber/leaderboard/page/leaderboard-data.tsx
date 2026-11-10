@@ -53,9 +53,8 @@ export function ScoreSaberLeaderboardData({
 
   return (
     <LeaderboardFilterProvider>
-      <div className="mx-auto flex w-full flex-col gap-6 px-4">
+      <div className="mx-auto flex w-full flex-col gap-4">
         <LeaderboardInfo leaderboard={leaderboardData} starChangeHistory={starChangeHistory} />
-        <div className="border-border w-full border-t" />
         <div className="flex w-full flex-col gap-4">
           <LeaderboardScores leaderboard={leaderboard} />
         </div>

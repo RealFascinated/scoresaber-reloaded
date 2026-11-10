@@ -28,7 +28,7 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
   const showStarHistory = leaderboardData.ranked && starChangeHistory.length > 0;
 
   return (
-    <section className="flex w-full flex-col gap-5">
+    <section className="bg-card ring-border flex w-full flex-col gap-5 rounded-xl p-4 ring-1 sm:p-5">
       {/* Song header */}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
         {/* Album Art */}

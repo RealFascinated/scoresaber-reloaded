@@ -23,7 +23,11 @@ import { useEffect, useState } from "react";
 /**
  * Button that opens the global player & leaderboard search.
  */
-export default function PlayerAndLeaderboardSearch({ variant = "field" }: { variant?: "field" | "icon" }) {
+export default function PlayerAndLeaderboardSearch({
+  variant = "field",
+}: {
+  variant?: "field" | "icon" | "sidebar";
+}) {
   const { openSearch } = useSearch();
 
   if (variant === "icon") {
@@ -31,6 +35,20 @@ export default function PlayerAndLeaderboardSearch({ variant = "field" }: { vari
       <Button variant="ghost" size="icon" aria-label="Search players and maps" onClick={openSearch}>
         <SharedIcons.SearchLeaderboardsPlayersIcon className="size-5" />
       </Button>
+    );
+  }
+
+  if (variant === "sidebar") {
+    return (
+      <button
+        type="button"
+        className="group bg-sidebar-accent/50 text-muted-foreground hover:bg-sidebar-accent hover:text-foreground flex h-8 w-full cursor-pointer items-center gap-2 rounded-md px-2.5 text-sm transition-colors select-none"
+        onClick={openSearch}
+      >
+        <SharedIcons.SearchLeaderboardsPlayersIcon className="size-4 shrink-0" />
+        <span className="flex-1 text-left">Search</span>
+        <kbd className="text-muted-foreground/60 text-xs font-medium">⌘K</kbd>
+      </button>
     );
   }
 
@@ -151,7 +169,7 @@ export function PlayerAndLeaderboardSearchDialog() {
           </div>
         ) : isError && isBackendUnavailableError(error) ? (
           <div className="flex flex-col items-center justify-center px-4 py-12">
-            <SharedIcons.WarningAlertIcon className="mb-3 size-10 text-red-400" />
+            <SharedIcons.WarningAlertIcon className="text-danger mb-3 size-10" />
             <p className="text-muted-foreground mb-1 text-sm font-medium">Backend unavailable</p>
             <p className="text-muted-foreground/70 text-center text-xs">
               The backend is currently offline or unreachable. Please try again later.
@@ -223,7 +241,7 @@ export function PlayerAndLeaderboardSearchDialog() {
                             <span
                               className="font-medium"
                               style={{
-                                color: getDifficulty(leaderboard.difficulty.difficulty).color + "f0",
+                                color: getDifficulty(leaderboard.difficulty.difficulty).color,
                               }}
                             >
                               {getDifficultyName(leaderboard.difficulty.difficulty)}

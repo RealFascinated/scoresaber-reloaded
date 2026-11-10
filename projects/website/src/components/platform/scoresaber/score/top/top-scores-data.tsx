@@ -50,45 +50,48 @@ export function TopScoresData() {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {scores.items.map(({ score, leaderboard, beatSaver }) => {
-            const player = score.playerInfo;
-            if (!player) {
-              return null;
-            }
+          {/* One surface with dividers instead of a card per score, so the list reads as a list */}
+          <div className="ring-border bg-card divide-border divide-y overflow-hidden rounded-xl ring-1">
+            {scores.items.map(({ score, leaderboard, beatSaver }) => {
+              const player = score.playerInfo;
+              if (!player) {
+                return null;
+              }
 
-            return (
-              <div key={score.scoreId} className="ring-border bg-card overflow-hidden rounded-xl ring-1">
-                <div className="border-border/50 flex items-center gap-2 border-b px-4 py-2">
-                  <Avatar
-                    src={player.avatar}
-                    alt={`${player.name}'s Profile Picture`}
-                    size={20}
-                    className="shrink-0"
+              return (
+                <div key={score.scoreId}>
+                  <div className="flex items-center gap-2 px-4 pt-3">
+                    <Avatar
+                      src={player.avatar}
+                      alt={`${player.name}'s Profile Picture`}
+                      size={20}
+                      className="shrink-0"
+                    />
+                    <SimpleLink
+                      href={`/player/${player.id}`}
+                      className="hover:text-primary text-sm font-medium transition-colors"
+                    >
+                      {player.name}
+                    </SimpleLink>
+                    {score.rank > 0 && (
+                      <span className="text-muted-foreground ml-auto text-xs">
+                        #{score.rank.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  <ScoreSaberScoreDisplay
+                    score={score}
+                    leaderboard={leaderboard}
+                    beatSaverMap={beatSaver}
+                    settings={{
+                      hideAccuracyChanger: true,
+                      hideDetailsDropdown: true,
+                    }}
                   />
-                  <SimpleLink
-                    href={`/player/${player.id}`}
-                    className="hover:text-primary text-sm font-medium transition-colors"
-                  >
-                    {player.name}
-                  </SimpleLink>
-                  {score.rank > 0 && (
-                    <span className="text-muted-foreground ml-auto text-xs">
-                      #{score.rank.toLocaleString()}
-                    </span>
-                  )}
                 </div>
-                <ScoreSaberScoreDisplay
-                  score={score}
-                  leaderboard={leaderboard}
-                  beatSaverMap={beatSaver}
-                  settings={{
-                    hideAccuracyChanger: true,
-                    hideDetailsDropdown: true,
-                  }}
-                />
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
 
           <SimplePagination
             page={page}

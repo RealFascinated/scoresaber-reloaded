@@ -106,7 +106,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
             showOnMobile
           >
             <span className="flex items-center gap-1.5 font-medium text-white/85">
-              <SharedIcons.PlayerStreakIcon className="size-3.5 text-orange-400" />
+              <SharedIcons.PlayerStreakIcon className="text-streak size-3.5" />
               {formatNumberWithCommas(currentStreak)}
             </span>
           </SimpleTooltip>

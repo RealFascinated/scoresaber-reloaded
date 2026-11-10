@@ -1,37 +1,38 @@
 /**
- * Gets the color of the score rank.
+ * Gets the text color class for a rank (gold, silver and bronze for the podium).
  *
  * @param rank the rank of the score
- * @returns the color of the score rank
+ * @returns the text color class for the rank
  */
 export function getRankColor(rank: number) {
   switch (rank) {
     case 1:
-      return "text-[#B8860B]"; // Gold
+      return "text-rank-gold";
     case 2:
-      return "text-[#888888]"; // Silver
+      return "text-rank-silver";
     case 3:
-      return "text-[#8B4513]"; // Lighter bronze
+      return "text-rank-bronze";
     default:
-      return "text-white"; // Default
+      return "text-foreground";
   }
 }
 
 /**
- * Gets the color of the country rank.
+ * Gets the classes for a rank pill: podium ranks are tinted with their medal color, everything else
+ * uses the neutral muted surface.
  *
- * @param rank the rank of the country
- * @returns the color of the country rank
+ * @param rank the rank of the player
+ * @returns the background, ring and text classes for the pill
  */
-export function getRankBgColor(rank: number) {
+export function getRankPillClass(rank: number) {
   switch (rank) {
     case 1:
-      return "bg-[#B8860B]"; // Gold
+      return "bg-rank-gold/15 text-rank-gold ring-1 ring-inset ring-rank-gold/45";
     case 2:
-      return "bg-[#888888]"; // Silver
+      return "bg-rank-silver/15 text-rank-silver ring-1 ring-inset ring-rank-silver/45";
     case 3:
-      return "bg-[#8B4513]"; // Lighter bronze
+      return "bg-rank-bronze/15 text-rank-bronze ring-1 ring-inset ring-rank-bronze/45";
     default:
-      return "bg-[#313131]"; // Default
+      return "bg-muted text-foreground";
   }
 }

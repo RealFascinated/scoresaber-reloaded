@@ -121,7 +121,7 @@ export default async function ScorePage({ params }: ScorePageProps) {
   if (result.status === "not-found") {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <SharedIcons.WarningAlertIcon className="size-16 text-amber-500" />
+        <SharedIcons.WarningAlertIcon className="text-warning size-16" />
         <h2 className="text-xl font-semibold">Score Not Found</h2>
         <p className="text-muted-foreground">This score could not be found or may have been removed.</p>
       </div>

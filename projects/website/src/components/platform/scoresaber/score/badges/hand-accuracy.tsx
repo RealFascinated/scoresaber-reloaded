@@ -49,6 +49,7 @@ export function HandAccuracyBadge({ beatLeaderScore, hand }: HandAccuracyProps) 
             className="text-xs"
             change={scoreImprovement.handAccuracy[hand]}
             formatValue={num => num.toFixed(2)}
+            showColors
           />
         </SimpleTooltip>
       )}

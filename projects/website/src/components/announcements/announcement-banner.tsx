@@ -57,7 +57,8 @@ export default function AnnouncementBanner({ id, children }: AnnouncementBannerP
   };
 
   return (
-    <div className="border-primary/30 bg-primary/10 flex w-full items-center justify-center gap-2 border-b px-3 py-1.5">
+    // The brand tint is a gradient layered over a solid backing so the bar stays legible over a background cover
+    <div className="border-primary/30 bg-background/80 from-primary/12 to-primary/12 flex w-full items-center justify-center gap-2 border-b bg-linear-to-r px-3 py-1.5 backdrop-blur">
       <p className="flex min-w-0 items-center justify-center gap-2 text-center text-xs sm:text-sm">
         <SharedIcons.AnnouncementIcon className="text-primary hidden size-4 shrink-0 sm:block" />
         <span className="text-balance">{children}</span>

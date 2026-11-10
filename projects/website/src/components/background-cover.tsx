@@ -86,6 +86,20 @@ export default function BackgroundCover() {
     return () => clearTimeout(timeout);
   }, [layers, currentKey]);
 
+  // Lets the theme switch its large surfaces to translucent while a cover is shown (see themes.css)
+  const hasCover = targetKey !== undefined;
+  useEffect(() => {
+    const root = document.documentElement;
+    if (hasCover) {
+      root.dataset.backgroundCover = "";
+    } else {
+      delete root.dataset.backgroundCover;
+    }
+    return () => {
+      delete root.dataset.backgroundCover;
+    };
+  }, [hasCover]);
+
   const showLayer = useCallback((key: string) => {
     setLayers(prev =>
       prev.some(layer => layer.key === key && !layer.visible)
@@ -128,6 +142,11 @@ export default function BackgroundCover() {
           )}
         </div>
       ))}
+      {/*
+       * Scrim: guarantees contrast for text drawn straight onto the cover (page titles, the leaderboard
+       * header, breadcrumbs) no matter how bright the image is, darkest at the top where that text sits.
+       */}
+      <div className="from-background/45 via-background/10 to-background/25 absolute inset-0 bg-linear-to-b" />
     </div>
   );
 }

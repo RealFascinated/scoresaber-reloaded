@@ -156,7 +156,7 @@ function PlayerMiniRanking({
                     {formatPp(playerRanking.pp, isMobile ? 1 : 2)}pp
                   </p>
                   {playerRanking.id !== player.id && !isMobile && (
-                    <p className={ppDifference > 0 ? "text-green-400" : "text-red-400"}>
+                    <p className={ppDifference > 0 ? "text-success" : "text-danger"}>
                       {ppDifference > 0 ? "+" : ""}
                       {formatPp(ppDifference, 2)}
                     </p>

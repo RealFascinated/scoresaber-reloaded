@@ -32,7 +32,7 @@ function AverageCutValues({ cuts, hand }: { cuts: number[]; hand: Hand }) {
     <div className="flex flex-col gap-0.5">
       {cuts.map((cut, i) => (
         <div key={i} className={cn("flex gap-1", hand === "right" ? "justify-end" : "justify-start")}>
-          <p className="text-xs font-medium text-gray-400">{cut.toFixed(2)}</p>
+          <p className="text-muted-foreground text-xs font-medium">{cut.toFixed(2)}</p>
         </div>
       ))}
     </div>
@@ -60,7 +60,7 @@ function AccuracyCircle({ accuracy, averageCut, hand }: AccuracyCircleProps) {
               fill="none"
               stroke="currentColor"
               strokeWidth={STROKE_WIDTH}
-              className="text-gray-800"
+              className="text-input"
             />
             <AnimatePresence mode="wait">
               <m.circle
@@ -99,7 +99,7 @@ function HandStat({ hand, name, value }: { hand: Hand; name: string; value: stri
       className="inline-flex w-full min-w-0 items-center justify-between rounded-lg px-2 py-1.5 transition-[filter] hover:brightness-110 md:px-3"
       style={{ backgroundColor: `${handColors[hand]}20` }}
     >
-      <p className="shrink-0 text-xs font-semibold tracking-wide text-gray-300 uppercase">{name}</p>
+      <p className="text-foreground/80 shrink-0 text-xs font-semibold tracking-wide uppercase">{name}</p>
       <p className="ml-2 truncate text-sm font-bold text-white">{value}</p>
     </div>
   );

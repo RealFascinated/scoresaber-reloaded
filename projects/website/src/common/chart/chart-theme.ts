@@ -4,10 +4,11 @@ import { Chart, LegendItem, Plugin } from "chart.js";
  * Shared look for every Chart.js chart on the site, so each chart only defines its data.
  */
 export const CHART_THEME = {
-  gridColor: "#252525",
-  tickColor: "#a3a3a3",
-  titleColor: "#d4d4d4",
-  hiddenColor: "#5f5f5f",
+  // Mirrors --border, --muted-foreground and the secondary text tone in themes.css
+  gridColor: "#2c2e34",
+  tickColor: "#9b9ea6",
+  titleColor: "#c2c4c9",
+  hiddenColor: "#5c5f66",
   fontSize: 11,
 };
 

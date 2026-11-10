@@ -187,8 +187,8 @@ function TriangleSVG({
             x2={(corner2.x + corner3.x) / 2}
             y2={(corner2.y + corner3.y) / 2}
           >
-            <stop offset="0%" stopColor={`rgba(255, 0, 0, ${normalizedTech})`} />
-            <stop offset="100%" stopColor={`rgba(255, 0, 0, ${normalizedTech * 0.25})`} />
+            <stop offset="0%" stopColor="var(--danger)" stopOpacity={normalizedTech} />
+            <stop offset="100%" stopColor="var(--danger)" stopOpacity={normalizedTech * 0.25} />
           </linearGradient>
           <linearGradient
             id="fadeB"
@@ -198,8 +198,8 @@ function TriangleSVG({
             x2={(corner1.x + corner2.x) / 2}
             y2={(corner1.y + corner2.y) / 2}
           >
-            <stop offset="0%" stopColor={`rgba(0, 255, 0, ${normalizedPass})`} />
-            <stop offset="100%" stopColor={`rgba(0, 255, 0, ${normalizedPass * 0.25})`} />
+            <stop offset="0%" stopColor="var(--success)" stopOpacity={normalizedPass} />
+            <stop offset="100%" stopColor="var(--success)" stopOpacity={normalizedPass * 0.25} />
           </linearGradient>
           <linearGradient
             id="fadeC"
@@ -209,8 +209,8 @@ function TriangleSVG({
             x2={(corner3.x + corner1.x) / 2}
             y2={(corner1.y + corner3.y) / 2}
           >
-            <stop offset="0%" stopColor={`rgba(0, 100, 255, ${normalizedAcc})`} />
-            <stop offset="100%" stopColor={`rgba(0, 100, 255, ${normalizedAcc * 0.25})`} />
+            <stop offset="0%" stopColor="var(--info)" stopOpacity={normalizedAcc} />
+            <stop offset="100%" stopColor="var(--info)" stopOpacity={normalizedAcc * 0.25} />
           </linearGradient>
         </defs>
 
@@ -381,10 +381,12 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
                 showOnMobile
               >
                 <div className="flex flex-col items-start gap-0.5 md:items-center">
-                  <span className="text-xs font-semibold text-red-400 sm:text-sm">
+                  <span className="text-danger text-xs font-semibold sm:text-sm">
                     Tech: {metrics.tech.toFixed(4)}
                   </span>
-                  <span className="text-[10px] text-yellow-400 sm:text-xs">({techPart.toFixed(1)}%)</span>
+                  <span className="text-muted-foreground text-[10px] sm:text-xs">
+                    ({techPart.toFixed(1)}%)
+                  </span>
                 </div>
               </SimpleTooltip>
             </div>
@@ -396,10 +398,12 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
                 showOnMobile
               >
                 <div className="flex flex-col items-end gap-0.5 md:items-center">
-                  <span className="text-xs font-semibold text-blue-400 sm:text-sm">
+                  <span className="text-info text-xs font-semibold sm:text-sm">
                     Acc: {metrics.acc.toFixed(2)}%
                   </span>
-                  <span className="text-[10px] text-yellow-400 sm:text-xs">({accPart.toFixed(1)}%)</span>
+                  <span className="text-muted-foreground text-[10px] sm:text-xs">
+                    ({accPart.toFixed(1)}%)
+                  </span>
                 </div>
               </SimpleTooltip>
             </div>
@@ -411,11 +415,13 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
                 showOnMobile
               >
                 <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-xs font-semibold text-green-400 sm:text-sm">
+                  <span className="text-success text-xs font-semibold sm:text-sm">
                     Pass: {metrics.pass.toFixed(1)}
                     {"\u2009"}★
                   </span>
-                  <span className="text-[10px] text-yellow-400 sm:text-xs">({passPart.toFixed(1)}%)</span>
+                  <span className="text-muted-foreground text-[10px] sm:text-xs">
+                    ({passPart.toFixed(1)}%)
+                  </span>
                 </div>
               </SimpleTooltip>
             </div>

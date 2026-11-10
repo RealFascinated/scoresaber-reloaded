@@ -1,6 +1,6 @@
 "use client";
 
-import { getRankBgColor } from "@/common/rank-color-utils";
+import { getRankPillClass } from "@/common/rank-color-utils";
 import { cn } from "@/common/utils";
 import { PlayerPpDisplay } from "@/components/ranking/player-pp-display";
 import SimpleLink from "@/components/simple-link";
@@ -152,8 +152,10 @@ export function PlayerRanking<T extends PlayerRankingRow>({
 function RankDisplay({ rank, activeRank }: { rank: number; activeRank?: number }) {
   const pill = (
     <div
-      className="flex h-[24px] w-fit items-center justify-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold text-white"
-      style={{ backgroundColor: getRankBgColor(rank) }}
+      className={cn(
+        "flex h-[24px] w-fit items-center justify-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold",
+        getRankPillClass(rank)
+      )}
     >
       <span>#{formatNumberWithCommas(rank)}</span>
     </div>
@@ -178,8 +180,10 @@ function CountryRankDisplay({
   const pill = (
     <div className="flex items-center">
       <div
-        className="flex h-[24px] items-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold text-white"
-        style={{ backgroundColor: getRankBgColor(countryRank) }}
+        className={cn(
+          "flex h-[24px] items-center gap-1 rounded-sm px-1.5 py-1 text-xs font-semibold",
+          getRankPillClass(countryRank)
+        )}
       >
         <CountryFlag code={country} size={10} />
         <span>#{formatNumberWithCommas(countryRank)}</span>

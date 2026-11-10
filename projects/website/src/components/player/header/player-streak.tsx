@@ -40,7 +40,7 @@ export default function PlayerStreak({ player }: PlayerStreakProps) {
           <span className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
             Streak
           </span>
-          <SharedIcons.PlayerStreakIcon className="size-3.5 text-orange-300/90" />
+          <SharedIcons.PlayerStreakIcon className="text-streak size-3.5" />
         </div>
 
         <div className="relative mt-0.5 flex items-end gap-1">
@@ -53,7 +53,7 @@ export default function PlayerStreak({ player }: PlayerStreakProps) {
         </div>
 
         <div className="relative mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/8">
-          <div className="h-full rounded-full bg-orange-400" style={{ width: `${progress}%` }} />
+          <div className="bg-streak h-full rounded-full" style={{ width: `${progress}%` }} />
         </div>
 
         <div className="text-muted-foreground relative mt-1 text-[10px]">

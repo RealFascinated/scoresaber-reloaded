@@ -38,7 +38,7 @@ export default function OverlayScoreDataView({ overlayData }: OverlayScoreDataPr
       </b>
 
       {/* Paused */}
-      {overlayData.paused && <p className="text-md text-red-500 italic">Currently Paused</p>}
+      {overlayData.paused && <p className="text-md text-danger italic">Currently Paused</p>}
     </div>
   );
 }

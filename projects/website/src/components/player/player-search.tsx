@@ -92,7 +92,7 @@ const PlayerSearch = ({
         </div>
       ) : isError && isBackendUnavailableError(error) ? (
         <div className="flex flex-col items-center justify-center px-4 py-12">
-          <SharedIcons.WarningAlertIcon className="mb-3 size-10 text-red-400" />
+          <SharedIcons.WarningAlertIcon className="text-danger mb-3 size-10" />
           <p className="text-muted-foreground mb-1 text-sm font-medium">Backend unavailable</p>
           <p className="text-muted-foreground/70 text-center text-xs">
             The backend is currently offline or unreachable. Please try again later.

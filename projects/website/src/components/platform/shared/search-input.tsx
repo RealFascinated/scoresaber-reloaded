@@ -19,7 +19,7 @@ export default function SearchInput({
       <Input
         type="search"
         placeholder="Search scores..."
-        className={cn("h-8 w-full pr-3 pl-8 text-xs sm:w-64", invalidSearch && "border-red-500")}
+        className={cn("h-8 w-full pr-3 pl-8 text-xs sm:w-64", invalidSearch && "border-danger")}
         value={search || ""}
         onChange={e => onSearchChange(e.target.value)}
       />

@@ -55,20 +55,16 @@ export type ScoreBadge = {
   textColor?: string;
 };
 
+// Accuracy tiers are ordinal, so they use their own "rarity" ramp (see themes.css) rather than the
+// categorical difficulty colors. Each tier color is readable both as text and as a tint.
 const scoreBadges: ScoreBadge[] = [
-  { name: "GOD", min: 98, max: null, color: "#008B8B", textColor: "#00FFFF" },
-  {
-    name: "SS+",
-    min: 95,
-    max: 98,
-    color: "var(--expertPlus)",
-    textColor: "#00FFFF",
-  },
-  { name: "SS", min: 90, max: 95, color: "var(--expert)", textColor: "#00FFFF" },
-  { name: "S+", min: 85, max: 90, color: "var(--hard)", textColor: "#FFFFFF" },
-  { name: "S", min: 80, max: 85, color: "var(--normal)", textColor: "#FFFFFF" },
-  { name: "A", min: 70, max: 80, color: "var(--easy)", textColor: "#00FF00" },
-  { name: "-", min: null, max: 70, color: "var(--accent)", textColor: "#FF0000" },
+  { name: "GOD", min: 98, max: null, color: "var(--acc-god)", textColor: "var(--acc-god)" },
+  { name: "SS+", min: 95, max: 98, color: "var(--acc-ss-plus)", textColor: "var(--acc-ss-plus)" },
+  { name: "SS", min: 90, max: 95, color: "var(--acc-ss)", textColor: "var(--acc-ss)" },
+  { name: "S+", min: 85, max: 90, color: "var(--acc-s-plus)", textColor: "var(--acc-s-plus)" },
+  { name: "S", min: 80, max: 85, color: "var(--acc-s)", textColor: "var(--acc-s)" },
+  { name: "A", min: 70, max: 80, color: "var(--acc-a)", textColor: "var(--acc-a)" },
+  { name: "-", min: null, max: 70, color: "var(--acc-none)", textColor: "var(--acc-none)" },
 ];
 
 /**

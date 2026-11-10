@@ -60,7 +60,12 @@ export function ScorePpBadge({ score, leaderboard, showDifference = true }: Scor
           previousScore.change.pp !== score.pp &&
           showDifference && (
             <SimpleTooltip display={<p>Previous PP: {formatPp(previousScore.pp)}pp</p>}>
-              <Change className="text-xs" change={ensurePositiveNumber(previousScore.change.pp)} isPp />
+              <Change
+                className="text-xs"
+                change={ensurePositiveNumber(previousScore.change.pp)}
+                isPp
+                showColors
+              />
             </SimpleTooltip>
           )}
       </div>
