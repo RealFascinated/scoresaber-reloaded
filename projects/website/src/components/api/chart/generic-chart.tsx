@@ -22,6 +22,7 @@ import {
   Chart,
   Legend,
   LinearScale,
+  LineController,
   LineElement,
   PointElement,
   Tooltip,
@@ -48,7 +49,8 @@ Chart.register(
   CategoryScale,
   Legend,
   Tooltip,
-  BarController
+  BarController,
+  LineController
 );
 applyChartTheme();
 
