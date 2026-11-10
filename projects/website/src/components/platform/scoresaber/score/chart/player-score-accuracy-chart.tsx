@@ -4,7 +4,6 @@ import { buildChartConfig } from "@/common/chart/build-chart-config";
 import { DatasetConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/api/chart/generic-chart-dynamic";
-import Card from "@/components/card";
 import { useRealm } from "@/components/providers/realm-provider";
 import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
@@ -105,8 +104,8 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
   });
 
   return (
-    <Card className="h-[330px] w-full rounded-xl">
+    <div className="bg-card ring-border h-[330px] w-full rounded-xl ring-1">
       <GenericChart labels={labels} config={config} />
-    </Card>
+    </div>
   );
 }
