@@ -207,7 +207,7 @@ export default function PlayerStats({ player }: Props) {
     <div className="flex w-full flex-col items-center gap-2 lg:items-start">
       <dl
         id="player-stats"
-        className="m-0 grid w-full grid-cols-3 gap-1.5 text-left lg:gap-2 2xl:grid-cols-4"
+        className="m-0 grid w-full grid-cols-2 gap-1.5 text-left sm:grid-cols-3 lg:gap-2 2xl:grid-cols-4"
       >
         {visibleStats.map(({ stat, content }) =>
           content ? <PlayerStat key={`player-stat-${stat.name}`} name={stat.name} content={content} /> : null
