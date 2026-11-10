@@ -50,32 +50,32 @@ export default function MedalsData() {
     <div className="flex w-full flex-col gap-4">
       <PageTitle title="Medals" description="Track medal rankings and compare players by medal count" />
 
+      <div className="flex flex-wrap items-center gap-2">
+        <CountrySelector
+          className="h-9 w-full sm:w-56"
+          value={currentCountry}
+          onValueChange={(newCountry: string | undefined) => {
+            setCurrentCountry(newCountry);
+            setCurrentPage(1);
+          }}
+          placeholder="All countries"
+        />
+        {currentCountry && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setCurrentCountry(undefined);
+              setCurrentPage(1);
+            }}
+          >
+            Clear
+          </Button>
+        )}
+      </div>
+
       <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <CountrySelector
-              className="h-9 w-full sm:w-56"
-              value={currentCountry}
-              onValueChange={(newCountry: string | undefined) => {
-                setCurrentCountry(newCountry);
-                setCurrentPage(1);
-              }}
-              placeholder="All countries"
-            />
-            {currentCountry && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setCurrentCountry(undefined);
-                  setCurrentPage(1);
-                }}
-              >
-                Clear
-              </Button>
-            )}
-          </div>
-
           {showBackendUnavailable && <BackendUnavailable onRetry={() => refetch()} />}
 
           {!rankingData && !isError && !showBackendUnavailable && <PlayerTableSkeleton />}
