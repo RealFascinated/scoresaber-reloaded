@@ -110,8 +110,8 @@ function PlayerMiniRanking({
                 className="group hover:bg-accent/50 grid cursor-pointer items-center gap-2 px-2 py-1.5 transition-colors duration-200 first:rounded-t-md last:rounded-b-md"
                 style={{
                   gridTemplateColumns: isMobile
-                    ? `${playerRankWidth}px 1fr auto`
-                    : `${playerRankWidth}px 1fr 1fr`,
+                    ? `${playerRankWidth}px minmax(0,1fr) auto`
+                    : `${playerRankWidth}px minmax(0,1fr) auto`,
                 }}
               >
                 {/* Rank */}
@@ -120,7 +120,7 @@ function PlayerMiniRanking({
                 </p>
 
                 {/* Player */}
-                <div className="flex w-full items-center gap-2">
+                <div className="flex min-w-0 items-center gap-2">
                   <Avatar
                     src={playerRanking.avatar}
                     size={26}
@@ -130,7 +130,7 @@ function PlayerMiniRanking({
                   <p
                     className={clsx(
                       playerRanking.id == player.id ? "font-bold" : "",
-                      "w-[125px] overflow-hidden text-left break-all text-ellipsis whitespace-nowrap transition-all duration-200"
+                      "min-w-0 flex-1 truncate text-left transition-all duration-200"
                     )}
                     style={{
                       color: getScoreSaberRoles(playerRanking)[0]?.color,
@@ -142,9 +142,9 @@ function PlayerMiniRanking({
 
                 {/* PP */}
                 <div
-                  className="grid w-fit items-center gap-1.5 md:w-[100px]"
+                  className="grid w-fit items-center gap-1.5"
                   style={{
-                    gridTemplateColumns: isMobile ? "1fr" : "1fr 0.3fr",
+                    gridTemplateColumns: isMobile ? "1fr" : "auto auto",
                   }}
                 >
                   <p

@@ -4,7 +4,6 @@ import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-but
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useIsMobile } from "@/contexts/viewport-context";
 import { SharedIcons } from "@/shared-icons";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
@@ -93,8 +92,6 @@ export default function ScoreSaberScoreButtons({
   updateScore,
   isPreviousScore,
 }: Props) {
-  const isMobile = useIsMobile("lg");
-
   const buttonProps = useMemo(
     () => ({
       score,
@@ -117,13 +114,13 @@ export default function ScoreSaberScoreButtons({
     return null;
   }
 
-  // On small screens the buttons are folded into a menu so the row stays compact
-  if (isMobile) {
-    return (
+  // When the row is narrow the buttons are folded into a menu so it stays compact
+  return (
+    <>
       <Popover>
         <PopoverTrigger
           aria-label="Score actions"
-          className="text-muted-foreground hover:text-foreground hover:bg-accent flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors"
+          className="text-muted-foreground hover:text-foreground hover:bg-accent flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors @3xl:hidden"
         >
           <SharedIcons.ScoreActionsMenuIcon className="size-4" />
         </PopoverTrigger>
@@ -131,15 +128,13 @@ export default function ScoreSaberScoreButtons({
           {renderedButtons}
         </PopoverContent>
       </Popover>
-    );
-  }
 
-  return (
-    <div
-      className="flex min-w-0 flex-wrap justify-end gap-1"
-      style={{ width: (visibleButtons.length / 2) * 40 }}
-    >
-      {renderedButtons}
-    </div>
+      <div
+        className="hidden min-w-0 flex-wrap justify-end gap-1 @3xl:flex"
+        style={{ width: (visibleButtons.length / 2) * 40 }}
+      >
+        {renderedButtons}
+      </div>
+    </>
   );
 }

@@ -3,7 +3,6 @@
 import { PlatformRepository, PlatformType } from "@/common/platform/platform-repository";
 import { useBreadcrumbTitle } from "@/components/layout/breadcrumb-context";
 import PlayerViews from "@/components/player/views/player-views";
-import { useIsMobile } from "@/contexts/viewport-context";
 import { useQueryParamSelector } from "@/hooks/use-query-param-selector";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -29,8 +28,6 @@ interface PlayerDataProps {
 }
 
 export default function PlayerData({ player: playerProp }: PlayerDataProps) {
-  const isMobile = useIsMobile("xl");
-
   const { value: selectedPlatform, setValue: setSelectedPlatform } = useQueryParamSelector({
     param: "platform",
     parser: PLATFORM_QUERY,
@@ -98,26 +95,28 @@ export default function PlayerData({ player: playerProp }: PlayerDataProps) {
       </TabGroup>
     ) : undefined;
 
-  const showRankings = !isMobile && !player.inactive && !player.banned;
+  const showRankings = !player.inactive && !player.banned;
   return (
-    <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
-      <div className="flex min-w-0 flex-1 flex-col gap-4">
-        <PlayerHeader player={player} />
+    <div className="@container w-full">
+      <div className="flex w-full flex-col gap-4 @6xl:flex-row @6xl:gap-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          <PlayerHeader player={player} />
 
-        {!player.inactive && (
-          <div className="ring-border bg-card rounded-xl p-4 ring-1">
-            <PlayerViews player={player} key={player.id} />
-          </div>
+          {!player.inactive && (
+            <div className="ring-border bg-card rounded-xl p-4 ring-1">
+              <PlayerViews player={player} key={player.id} />
+            </div>
+          )}
+
+          <ScoresToolbarLeadingProvider leading={platformSelector}>{platform}</ScoresToolbarLeadingProvider>
+        </div>
+
+        {showRankings && (
+          <aside className="hidden w-full shrink-0 @6xl:block @6xl:w-80 @7xl:w-96">
+            <PlayerMiniRankings player={player} />
+          </aside>
         )}
-
-        <ScoresToolbarLeadingProvider leading={platformSelector}>{platform}</ScoresToolbarLeadingProvider>
       </div>
-
-      {showRankings && (
-        <aside className="w-full shrink-0 xl:w-80 2xl:w-96">
-          <PlayerMiniRankings player={player} />
-        </aside>
-      )}
     </div>
   );
 }

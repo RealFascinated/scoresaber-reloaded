@@ -64,13 +64,13 @@ export default function ScoreSaberScoreDisplay({
   const isTracked = score.beatLeaderScore != undefined;
 
   return (
-    <div data-ss-score-row className="group/score relative px-2 pt-2 pb-2 lg:pl-0">
+    <div data-ss-score-row className="group/score @container relative px-2 pt-2 pb-2 @3xl:pl-0">
       <div className="flex items-center">
         <div
           className={cn(
-            "grid w-full gap-2 lg:gap-0",
-            "grid-cols-[minmax(0,1fr)_auto] max-lg:[&>*:first-child]:col-span-2 max-lg:[&>*:last-child]:col-span-2",
-            "lg:grid-cols-[120px_minmax(120px,1fr)_auto_minmax(240px,300px)]"
+            "grid w-full gap-2 @3xl:gap-0",
+            "max-@3xl:[&>*:first-child]:col-span-2 max-@3xl:[&>*:last-child]:col-span-2 grid-cols-[minmax(0,1fr)_auto]",
+            "@3xl:grid-cols-[120px_minmax(120px,1fr)_auto_minmax(240px,300px)]"
           )}
         >
           <ScoreSaberScoreInfo score={score} leaderboard={leaderboard} />
@@ -97,7 +97,7 @@ export default function ScoreSaberScoreDisplay({
 
           <div className="flex items-center justify-end gap-(--spacing-md) px-(--spacing-md)">
             {!settings?.noScoreButtons && (
-              <div className="transition-opacity duration-150 focus-within:opacity-100 lg:pointer-fine:opacity-40 lg:pointer-fine:group-hover/score:opacity-100">
+              <div className="transition-opacity duration-150 focus-within:opacity-100 @3xl:pointer-fine:opacity-40 @3xl:pointer-fine:group-hover/score:opacity-100">
                 <ScoreSaberScoreButtons
                   leaderboard={leaderboard}
                   beatSaverMap={beatSaverMap}

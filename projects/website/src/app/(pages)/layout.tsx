@@ -5,6 +5,7 @@ import { SnowBackground } from "@/components/effects/snow-background";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { BreadcrumbProvider } from "@/components/layout/breadcrumb-context";
+import { SidebarAutoCollapse } from "@/components/layout/sidebar-auto-collapse";
 import DatabaseLoader from "@/components/loaders/database-loader";
 import MeowMeow from "@/components/meow-meow";
 import { PlayerAndLeaderboardSearchDialog } from "@/components/navbar/player-and-leaderboard-search";
@@ -34,6 +35,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <ApiHealth />
             <SidebarProvider defaultOpen={true}>
               <SearchProvider>
+                <SidebarAutoCollapse />
                 <PlayerAndLeaderboardSearchDialog />
                 <AppSidebar />
                 <SidebarInset className="bg-transparent text-white">

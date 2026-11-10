@@ -22,7 +22,7 @@ export default function ScoreSaberScoreInfo({
   const hmd = getHMDInfo(score.hmd as HMD);
 
   return (
-    <div className="flex w-full flex-row items-center justify-between lg:w-[120px] lg:flex-col lg:justify-center">
+    <div className="flex w-full flex-row items-center justify-between @3xl:w-[120px] @3xl:flex-col @3xl:justify-center">
       <div className="flex items-center gap-1">
         {score.rank === -1 ? (
           <SimpleTooltip display="Unknown Score Rank">
@@ -50,7 +50,7 @@ export default function ScoreSaberScoreInfo({
           </ScoreSaberScoreHMD>
         )}
       </div>
-      <div className="flex items-center gap-2 lg:flex-col lg:gap-0">
+      <div className="flex items-center gap-2 @3xl:flex-col @3xl:gap-0">
         <ScoreTimeSet timestamp={score.timestamp} />
         <ScoreSaberScoreTimeSetVs score={score} />
       </div>
