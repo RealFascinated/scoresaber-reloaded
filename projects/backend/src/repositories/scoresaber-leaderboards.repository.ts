@@ -5,7 +5,7 @@ import type {
   ScoreSaberLeaderboardQueryCategory,
   ScoreSaberLeaderboardQueryFilters,
 } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
-import type { SQL } from "drizzle-orm";
+import type { AnyColumn, SQL } from "drizzle-orm";
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { normalizeSongHash } from "../common/cache-keys";
@@ -21,6 +21,9 @@ import { leaderboardRealmJoinOn, resolvedLeaderboardColumns } from "./realm-colu
 import { TableCountsRepository } from "./table-counts.repository";
 
 export const LEADERBOARD_SEARCH_PAGE_SIZE = 20;
+
+/** Anything exposing the leaderboards full-text search column: the table itself or an alias of it. */
+type SearchVectorSource = { searchVector: AnyColumn };
 
 type LeaderboardAlias = ReturnType<typeof alias<typeof scoreSaberLeaderboardsTable, string>>;
 type LeaderboardRealmAlias = ReturnType<typeof alias<typeof scoreSaberLeaderboardRealmsTable, string>>;
@@ -105,12 +108,12 @@ function selectWithDifficulties(
     .orderBy(...extraOrder, asc(difficultySortSql(difficultiesAlias)));
 }
 
-export function aliasFtsMatch(tableAlias: LeaderboardAlias, search: string): SQL {
-  return sql`to_tsvector('english', ${tableAlias.songName} || ' ' || ${tableAlias.songSubName} || ' ' || ${tableAlias.songAuthorName} || ' ' || ${tableAlias.levelAuthorName}) @@ plainto_tsquery('english', ${search})`;
+export function aliasFtsMatch(tableAlias: SearchVectorSource, search: string): SQL {
+  return sql`${tableAlias.searchVector} @@ plainto_tsquery('english', ${search})`;
 }
 
-export function aliasTsRankExpr(tableAlias: LeaderboardAlias, search: string): SQL {
-  return sql`ts_rank(to_tsvector('english', ${tableAlias.songName} || ' ' || ${tableAlias.songSubName} || ' ' || ${tableAlias.songAuthorName} || ' ' || ${tableAlias.levelAuthorName}), plainto_tsquery('english', ${search}))`;
+export function aliasTsRankExpr(tableAlias: SearchVectorSource, search: string): SQL {
+  return sql`ts_rank(${tableAlias.searchVector}, plainto_tsquery('english', ${search}))`;
 }
 
 /**
@@ -390,6 +393,17 @@ export class ScoreSaberLeaderboardsRepository {
             rankedDate: sql`excluded."rankedDate"`,
             qualifiedDate: sql`excluded."qualifiedDate"`,
           },
+          // Skip rewriting rows that already hold these values, so a re-sync of unchanged state
+          // doesn't produce dead tuples and index churn.
+          setWhere: sql`(
+            ${scoreSaberLeaderboardRealmsTable.ranked},
+            ${scoreSaberLeaderboardRealmsTable.qualified},
+            ${scoreSaberLeaderboardRealmsTable.stars},
+            ${scoreSaberLeaderboardRealmsTable.rankedDate},
+            ${scoreSaberLeaderboardRealmsTable.qualifiedDate}
+          ) IS DISTINCT FROM (
+            excluded."ranked", excluded."qualified", excluded."stars", excluded."rankedDate", excluded."qualifiedDate"
+          )`,
         });
     }
   }
@@ -427,6 +441,24 @@ export class ScoreSaberLeaderboardsRepository {
     partial: Partial<ScoreSaberLeaderboardBaseRow>
   ): Promise<void> {
     await db.update(scoreSaberLeaderboardsTable).set(partial).where(eq(scoreSaberLeaderboardsTable.id, id));
+  }
+
+  /**
+   * Records a play on a leaderboard: sets its play count and max score.
+   *
+   * @param id the leaderboard id
+   * @param plays the new play count
+   * @param maxScore the leaderboard's max score
+   * @returns whether the leaderboard exists. A leaderboard that doesn't is left untouched, so the
+   *  caller can create it without having to check for it first.
+   */
+  public static async updatePlaysAndMaxScore(id: number, plays: number, maxScore: number): Promise<boolean> {
+    const rows = await db
+      .update(scoreSaberLeaderboardsTable)
+      .set({ plays, maxScore })
+      .where(eq(scoreSaberLeaderboardsTable.id, id))
+      .returning({ id: scoreSaberLeaderboardsTable.id });
+    return rows.length > 0;
   }
 
   public static async upsertLeaderboards(
@@ -474,6 +506,25 @@ export class ScoreSaberLeaderboardsRepository {
             timestamp: sql`excluded."timestamp"`,
             seededScores: sql`${scoreSaberLeaderboardsTable.seededScores}`,
           },
+          // Leaderboard rows carry several descending indexes (plays, timestamp), so skip the
+          // rewrite when nothing about the row changed.
+          setWhere: sql`(
+            ${scoreSaberLeaderboardsTable.songHash},
+            ${scoreSaberLeaderboardsTable.songName},
+            ${scoreSaberLeaderboardsTable.songSubName},
+            ${scoreSaberLeaderboardsTable.songAuthorName},
+            ${scoreSaberLeaderboardsTable.levelAuthorName},
+            ${scoreSaberLeaderboardsTable.difficulty},
+            ${scoreSaberLeaderboardsTable.characteristic},
+            ${scoreSaberLeaderboardsTable.maxScore},
+            ${scoreSaberLeaderboardsTable.plays},
+            ${scoreSaberLeaderboardsTable.dailyPlays},
+            ${scoreSaberLeaderboardsTable.timestamp}
+          ) IS DISTINCT FROM (
+            excluded."songHash", excluded."songName", excluded."songSubName", excluded."songAuthorName",
+            excluded."levelAuthorName", excluded."difficulty", excluded."characteristic", excluded."maxScore",
+            excluded."plays", excluded."dailyPlays", excluded."timestamp"
+          )`,
         });
 
       await ScoreSaberLeaderboardsRepository.writeRealmState(leaderboards, realmId, tx);

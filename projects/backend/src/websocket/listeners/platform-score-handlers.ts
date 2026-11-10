@@ -386,18 +386,19 @@ export class ScoreWebsockets implements EventListener {
         });
       }
 
-      // Fetch the leaderboard if it doesn't exist
-      if (!(await ScoreSaberLeaderboardsRepository.existsById(scoreLeaderboard.id))) {
+      // Record the play. The update reports whether the leaderboard exists, so there's no separate
+      // existence check. The websocket's play count is 1 less than the actual plays.
+      const leaderboardExists = await ScoreSaberLeaderboardsRepository.updatePlaysAndMaxScore(
+        scoreLeaderboard.id,
+        scoreLeaderboard.plays + 1,
+        scoreLeaderboard.maxScore
+      );
+      if (!leaderboardExists) {
         // The websocket event already carries the full leaderboard, so create it from that instead
         // of round-tripping to the ScoreSaber API (which can transiently fail for brand-new
         // leaderboards and would drop the score event entirely).
         await ScoreSaberLeaderboardsService.createLeaderboard(scoreLeaderboard.id, undefined, {
-          leaderboard: { ...scoreLeaderboard, plays: scoreLeaderboard.plays + 1 }, // returned value from the websocket is 1 less than the actual plays
-        });
-      } else {
-        await ScoreSaberLeaderboardsRepository.updateLeaderboard(scoreLeaderboard.id, {
-          plays: scoreLeaderboard.plays + 1, // returned value from the websocket is 1 less than the actual plays
-          maxScore: scoreLeaderboard.maxScore,
+          leaderboard: { ...scoreLeaderboard, plays: scoreLeaderboard.plays + 1 },
         });
       }
 

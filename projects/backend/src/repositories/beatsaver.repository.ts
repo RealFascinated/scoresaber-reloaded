@@ -1,6 +1,6 @@
 import { BeatSaverMapToken } from "@ssr/common/schemas/beatsaver/tokens/map";
 import { parseDate } from "@ssr/common/utils/time-utils";
-import { eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
 import {
   beatSaverMapDifficultiesTable,
@@ -8,6 +8,7 @@ import {
   beatSaverMapVersionsTable,
   beatSaverUploadersTable,
 } from "../db/schema";
+import { differsFromExcluded } from "../db/upsert";
 
 const DIFFICULTY_INSERT_CHUNK = 500;
 
@@ -19,6 +20,15 @@ const beatSaverVersionConflictSet = {
   coverUrl: sql`excluded."coverUrl"`,
   previewUrl: sql`excluded."previewUrl"`,
 } as const;
+
+const beatSaverVersionChangedWhere = differsFromExcluded([
+  beatSaverMapVersionsTable.mapId,
+  beatSaverMapVersionsTable.stage,
+  beatSaverMapVersionsTable.createdAt,
+  beatSaverMapVersionsTable.downloadUrl,
+  beatSaverMapVersionsTable.coverUrl,
+  beatSaverMapVersionsTable.previewUrl,
+]);
 
 const beatSaverDifficultyConflictSet = {
   njs: sql`excluded."njs"`,
@@ -37,6 +47,55 @@ const beatSaverDifficultyConflictSet = {
   maxScore: sql`excluded."maxScore"`,
   label: sql`excluded."label"`,
 } as const;
+
+const beatSaverDifficultyChangedWhere = differsFromExcluded([
+  beatSaverMapDifficultiesTable.njs,
+  beatSaverMapDifficultiesTable.offset,
+  beatSaverMapDifficultiesTable.notes,
+  beatSaverMapDifficultiesTable.bombs,
+  beatSaverMapDifficultiesTable.obstacles,
+  beatSaverMapDifficultiesTable.nps,
+  beatSaverMapDifficultiesTable.length,
+  beatSaverMapDifficultiesTable.events,
+  beatSaverMapDifficultiesTable.chroma,
+  beatSaverMapDifficultiesTable.mappingExtensions,
+  beatSaverMapDifficultiesTable.noodleExtensions,
+  beatSaverMapDifficultiesTable.cinema,
+  beatSaverMapDifficultiesTable.seconds,
+  beatSaverMapDifficultiesTable.maxScore,
+  beatSaverMapDifficultiesTable.label,
+]);
+
+const beatSaverUploaderChangedWhere = differsFromExcluded([
+  beatSaverUploadersTable.name,
+  beatSaverUploadersTable.hash,
+  beatSaverUploadersTable.avatar,
+  beatSaverUploadersTable.type,
+  beatSaverUploadersTable.admin,
+  beatSaverUploadersTable.curator,
+  beatSaverUploadersTable.seniorCurator,
+  beatSaverUploadersTable.verifiedMapper,
+  beatSaverUploadersTable.playlistUrl,
+]);
+
+const beatSaverMapChangedWhere = differsFromExcluded([
+  beatSaverMapsTable.name,
+  beatSaverMapsTable.description,
+  beatSaverMapsTable.uploaderId,
+  beatSaverMapsTable.bpm,
+  beatSaverMapsTable.duration,
+  beatSaverMapsTable.songName,
+  beatSaverMapsTable.songSubName,
+  beatSaverMapsTable.songAuthorName,
+  beatSaverMapsTable.songAuthorUrl,
+  beatSaverMapsTable.levelAuthorName,
+  beatSaverMapsTable.uploadedAt,
+  beatSaverMapsTable.automapper,
+  beatSaverMapsTable.createdAt,
+  beatSaverMapsTable.updatedAt,
+  beatSaverMapsTable.lastPublishedAt,
+  beatSaverMapsTable.tags,
+]);
 
 export class BeatSaverRepository {
   public static async upsertMap(map: BeatSaverMapToken): Promise<void> {
@@ -74,6 +133,7 @@ export class BeatSaverRepository {
               verifiedMapper: uploader.verifiedMapper,
               playlistUrl: uploader.playlistUrl,
             },
+            setWhere: beatSaverUploaderChangedWhere,
           });
       }
 
@@ -118,6 +178,7 @@ export class BeatSaverRepository {
             lastPublishedAt: map.lastPublishedAt ? parseDate(map.lastPublishedAt) : null,
             tags: map.tags,
           },
+          setWhere: beatSaverMapChangedWhere,
         });
 
       if (map.versions.length === 0) {
@@ -140,6 +201,7 @@ export class BeatSaverRepository {
         .onConflictDoUpdate({
           target: beatSaverMapVersionsTable.hash,
           set: beatSaverVersionConflictSet,
+          setWhere: beatSaverVersionChangedWhere,
         })
         .returning({
           id: beatSaverMapVersionsTable.id,
@@ -149,6 +211,21 @@ export class BeatSaverRepository {
       const versionIdByHash = new Map(
         versionRows.map(versionRow => [versionRow.hash.toLowerCase(), versionRow.id])
       );
+
+      // Versions that were already stored unchanged are skipped by the upsert, so they aren't
+      // returned by it; look their ids up instead.
+      const unchangedHashes = map.versions
+        .map(version => version.hash)
+        .filter(hash => !versionIdByHash.has(hash.toLowerCase()));
+      if (unchangedHashes.length > 0) {
+        const unchangedRows = await tx
+          .select({ id: beatSaverMapVersionsTable.id, hash: beatSaverMapVersionsTable.hash })
+          .from(beatSaverMapVersionsTable)
+          .where(inArray(beatSaverMapVersionsTable.hash, unchangedHashes));
+        for (const row of unchangedRows) {
+          versionIdByHash.set(row.hash.toLowerCase(), row.id);
+        }
+      }
 
       const difficultyValues: (typeof beatSaverMapDifficultiesTable.$inferInsert)[] = [];
       for (const version of map.versions) {
@@ -192,6 +269,7 @@ export class BeatSaverRepository {
               beatSaverMapDifficultiesTable.difficulty,
             ],
             set: beatSaverDifficultyConflictSet,
+            setWhere: beatSaverDifficultyChangedWhere,
           });
       }
     });

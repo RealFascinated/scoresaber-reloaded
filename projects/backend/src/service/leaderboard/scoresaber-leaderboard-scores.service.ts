@@ -26,14 +26,14 @@ export class ScoreSaberLeaderboardScoresService {
     country: string | undefined,
     realmId: number
   ): Promise<LeaderboardScoresResponse | undefined> {
-    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
+    // The leaderboard and its page of scores don't depend on each other.
+    const [leaderboard, leaderboardScores] = await Promise.all([
+      ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId),
+      ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page, { country: country }),
+    ]);
     if (leaderboard == undefined) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }
-
-    const leaderboardScores = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page, {
-      country: country,
-    });
     if (!leaderboardScores) {
       throw new NotFoundError(`Leaderboard scores for leaderboard "${leaderboardId}" not found`);
     }
@@ -56,6 +56,16 @@ export class ScoreSaberLeaderboardScoresService {
       }));
     }
 
+    // The map doesn't need the scores, so it loads while they are enriched.
+    const beatSaverPromise = BeatSaverService.getMap(
+      leaderboard.songHash,
+      leaderboard.difficulty.difficulty,
+      leaderboard.difficulty.characteristic
+    );
+    const playerInfoById = await ScoreCoreService.getPlayerInfoByIds(
+      parsedScores.map(score => score.playerId)
+    );
+
     const scores = (
       await Promise.all(
         parsedScores.map(score => {
@@ -66,6 +76,7 @@ export class ScoreSaberLeaderboardScoresService {
             insertBeatLeaderScore: true,
             insertPlayerInfo: true,
             insertPreviousScore: false,
+            playerInfoById,
           });
         })
       )
@@ -76,11 +87,7 @@ export class ScoreSaberLeaderboardScoresService {
     return {
       scores,
       leaderboard: leaderboard,
-      beatSaver: await BeatSaverService.getMap(
-        leaderboard.songHash,
-        leaderboard.difficulty.difficulty,
-        leaderboard.difficulty.characteristic
-      ),
+      beatSaver: await beatSaverPromise,
       metadata: {
         totalPages,
         totalItems: leaderboardScores.metadata.total,

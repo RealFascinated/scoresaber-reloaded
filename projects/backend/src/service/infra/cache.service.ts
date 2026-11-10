@@ -266,6 +266,20 @@ export default class CacheService {
   }
 
   /**
+   * Invalidates every in-memory entry whose key starts with the prefix. Use this instead of
+   * {@link invalidatePrefix} for caches that only live in memory: it never touches Redis, whereas
+   * `invalidatePrefix` walks Redis's whole keyspace with SCAN, which is wasted work (and a lot of it
+   * on a large keyspace) when nothing is stored there.
+   *
+   * @param prefix the key prefix to invalidate
+   */
+  public static invalidateMemoryPrefix(prefix: string): void {
+    for (const cache of this.memoryCaches.values()) {
+      cache.removeMatching(key => key.startsWith(prefix));
+    }
+  }
+
+  /**
    * Invalidates every entry, in memory or in Redis, whose key starts with the prefix.
    *
    * @param prefix the key prefix to invalidate

@@ -7,6 +7,10 @@ import { db } from "../../db";
 import { scoreSaberScoreEventTable } from "../../db/schema";
 
 export class ScoreEventService {
+  /** Trending looks at the last 7 days; one extra day keeps a margin for clock and cron drift. */
+  private static readonly RETENTION_DAYS = 8;
+  private static readonly PURGE_BATCH_SIZE = 50_000;
+
   /**
    * Inserts a score event.
    *
@@ -22,6 +26,42 @@ export class ScoreEventService {
       leaderboardId: score.leaderboardId,
       timestamp: score.timestamp,
     });
+  }
+
+  /**
+   * Deletes score events older than the retention window. Trending needs the last 7 days, so
+   * anything older is dead weight that only slows down inserts and the aggregation queries.
+   * Deletes in batches so the first run on a large backlog doesn't hold one huge transaction.
+   *
+   * @returns how many events were deleted
+   */
+  public static async purgeOldEvents(): Promise<number> {
+    const before = performance.now();
+    const cutoff = new Date(Date.now() - TimeUnit.toMillis(TimeUnit.Day, ScoreEventService.RETENTION_DAYS));
+
+    let deleted = 0;
+    for (;;) {
+      const result = await db.execute(sql`
+        DELETE FROM "scoresaber-score-events"
+        WHERE "id" IN (
+          SELECT "id" FROM "scoresaber-score-events"
+          WHERE "timestamp" < ${cutoff}
+          LIMIT ${ScoreEventService.PURGE_BATCH_SIZE}
+        )
+      `);
+      const count = result.rowCount ?? 0;
+      deleted += count;
+      if (count < ScoreEventService.PURGE_BATCH_SIZE) {
+        break;
+      }
+    }
+
+    if (deleted > 0) {
+      Logger.info(
+        `Purged ${deleted} score events older than ${ScoreEventService.RETENTION_DAYS} days in ${formatDuration(performance.now() - before)}`
+      );
+    }
+    return deleted;
   }
 
   /**
@@ -48,6 +88,8 @@ export class ScoreEventService {
         (agg.unique_players_7d * 1000 + agg.plays_7d)::double precision
       FROM agg
       WHERE leaderboards."id" = agg.leaderboard_id
+        AND leaderboards."trendingScore" IS DISTINCT FROM
+          (agg.unique_players_7d * 1000 + agg.plays_7d)::double precision
     `);
 
     await db.execute(sql`
@@ -85,6 +127,7 @@ export class ScoreEventService {
       SET "dailyPlays" = agg.plays_24h
       FROM agg
       WHERE leaderboards."id" = agg.leaderboard_id
+        AND leaderboards."dailyPlays" IS DISTINCT FROM agg.plays_24h
     `);
 
     await db.execute(sql`

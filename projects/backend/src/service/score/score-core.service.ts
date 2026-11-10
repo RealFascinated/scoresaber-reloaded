@@ -6,10 +6,10 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { formatDuration } from "@ssr/common/utils/time-utils";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { sendMedalScoreNotification } from "../../common/score/score.util";
 import { db } from "../../db";
-import type { ScoreSaberScoreRow } from "../../db/schema";
+import type { ScoreSaberAccountRow, ScoreSaberScoreRow } from "../../db/schema";
 import { scoreSaberAccountsTable } from "../../db/schema";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import {
@@ -23,10 +23,20 @@ import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
 import { RealmService } from "../realm/realm.service";
 
+/** The account fields shown next to a score. */
+export type ScorePlayerInfoRow = Pick<ScoreSaberAccountRow, "id" | "name" | "country" | "avatar">;
+
 type InsertScoreDataOptions = {
   insertBeatLeaderScore?: boolean;
   insertPreviousScore?: boolean;
   insertPlayerInfo?: boolean;
+  /**
+   * Player info already loaded for the scores being enriched (see
+   * {@link ScoreCoreService.getPlayerInfoByIds}). Callers enriching a page of scores pass it so the
+   * page costs one account query instead of one per score. Players missing from it are looked up
+   * individually.
+   */
+  playerInfoById?: ReadonlyMap<string, ScorePlayerInfoRow>;
 };
 
 export class ScoreCoreService {
@@ -56,23 +66,18 @@ export class ScoreCoreService {
   }> {
     const before = performance.now();
 
-    if (
-      !options?.skipDuplicateCheck &&
-      (await ScoreSaberScoresRepository.existsByScoreIdAndScore(score.scoreId, score.score))
-    ) {
-      return { score: undefined, hasPreviousScore: false, tracked: false };
-    }
-
-    if (await ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId)) {
-      return { score: undefined, hasPreviousScore: false, tracked: false };
-    }
-
+    // A score already stored under this id (whatever its value) is a duplicate, so one primary key
+    // lookup covers both the "same id and score" and the "same id" cases.
+    // The two lookups are independent, so they share a round trip. The player's current row is
+    // wasted work for a duplicate, which is the rarer case.
     const playerId = score.playerId;
-    const currentRow = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
-      playerId,
-      leaderboard.id,
-      DEFAULT_REALM_ID
-    );
+    const [alreadyTracked, currentRow] = await Promise.all([
+      ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId),
+      ScoreSaberScoresRepository.findByPlayerAndLeaderboard(playerId, leaderboard.id, DEFAULT_REALM_ID),
+    ]);
+    if (alreadyTracked) {
+      return { score: undefined, hasPreviousScore: false, tracked: false };
+    }
 
     let hasPreviousScore = false;
     const insertRow = ScoreCoreService.toInsertRow(score);
@@ -274,6 +279,31 @@ export class ScoreCoreService {
   }
 
   /**
+   * Loads the player info of several players with a single query.
+   *
+   * @param playerIds the ids of the players, duplicates are fine
+   * @returns the info of the players that exist, by player id
+   */
+  public static async getPlayerInfoByIds(
+    playerIds: Iterable<string>
+  ): Promise<Map<string, ScorePlayerInfoRow>> {
+    const ids = [...new Set(playerIds)];
+    if (ids.length === 0) {
+      return new Map();
+    }
+    const rows = await db
+      .select({
+        id: scoreSaberAccountsTable.id,
+        name: scoreSaberAccountsTable.name,
+        country: scoreSaberAccountsTable.country,
+        avatar: scoreSaberAccountsTable.avatar,
+      })
+      .from(scoreSaberAccountsTable)
+      .where(inArray(scoreSaberAccountsTable.id, ids));
+    return new Map(rows.map(row => [row.id, row]));
+  }
+
+  /**
    * Inserts the score data into the score.
    *
    * @param score the score to insert data into
@@ -332,6 +362,10 @@ export class ScoreCoreService {
 
     async function getPlayerInfo() {
       if (options?.insertPlayerInfo) {
+        const preloaded = options.playerInfoById?.get(score.playerId);
+        if (preloaded) {
+          return preloaded;
+        }
         const [row] = await db
           .select({
             id: scoreSaberAccountsTable.id,

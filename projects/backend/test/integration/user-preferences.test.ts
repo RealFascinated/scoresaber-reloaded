@@ -89,18 +89,6 @@ describe("user preferences", () => {
     });
   });
 
-  test("stores overlay settings", async () => {
-    const cookie = await signIn("76561198000000001");
-    const overlaySettings = {
-      playerId: "76561198000000001",
-      useRealTimeData: false,
-      dataClient: "BeatSaberPlus",
-      views: { scoreInfo: true, playerInfo: false, songInfo: true },
-    };
-    const response = await patch(cookie, { overlaySettings });
-    expect(await response.json()).toMatchObject({ overlaySettings });
-  });
-
   test.each([
     ["a wrong type", { showKitty: "yes" }],
     ["an out of range number", { backgroundCoverBlur: 500 }],

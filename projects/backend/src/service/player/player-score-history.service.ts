@@ -101,6 +101,8 @@ export class PlayerScoreHistoryService {
           ? await RealmService.getCalculationCurve(realmId)
           : undefined;
 
+      const playerInfoById = await ScoreCoreService.getPlayerInfoByIds(rawScores.map(row => row.playerId));
+
       return Promise.all(
         rawScores.map(async row => {
           const scoreRow = scoreSaberScoreRowToType(
@@ -110,6 +112,7 @@ export class PlayerScoreHistoryService {
           );
           const enriched = await ScoreCoreService.insertScoreData(scoreRow, leaderboard, {
             insertPreviousScore: false,
+            playerInfoById,
           });
           return enriched;
         })

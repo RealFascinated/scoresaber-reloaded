@@ -2,6 +2,7 @@ import { MEDAL_COUNTS, MEDAL_RANKS } from "@ssr/common/medal";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { and, asc, count, desc, eq, gt, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { db } from "../db";
+import { descNullsLast } from "../db/order";
 import { scoreSaberAccountsTable, scoreSaberScoresTable } from "../db/schema";
 
 function sqlMedalPointsCase(rnColumnIdentifier: string) {
@@ -58,6 +59,7 @@ export class ScoreSaberMedalsRepository {
         SET medals = mm.medal
         FROM medal_map AS mm
         WHERE u."scoreId" = mm."scoreId"
+          AND u.medals IS DISTINCT FROM mm.medal
         ${returnPlayerIds ? sql`RETURNING u."playerId" AS "playerId"` : sql``}
       `;
   }
@@ -159,10 +161,18 @@ export class ScoreSaberMedalsRepository {
 
   public static async syncGlobalMedalTotalsFromScoresTable(): Promise<void> {
     await db.transaction(async tx => {
-      await tx
-        .update(scoreSaberAccountsTable)
-        .set({ medals: 0 })
-        .where(gt(scoreSaberAccountsTable.medals, 0));
+      // Accounts that no longer have any (counted) medals drop to 0. Done only for accounts that
+      // actually need it, instead of zeroing every medal holder and writing them all back again.
+      await tx.execute(sql`
+        UPDATE "scoresaber-accounts" AS a
+        SET medals = 0
+        WHERE a.medals > 0
+          AND NOT EXISTS (
+            SELECT 1
+            FROM "scoresaber-scores" s
+            WHERE s."playerId" = a.id AND s.medals > 0 AND a.banned = false
+          )
+      `);
 
       await tx.execute(sql`
         UPDATE "scoresaber-accounts" AS a
@@ -195,7 +205,16 @@ export class ScoreSaberMedalsRepository {
       })
       .from(scoreSaberScoresTable)
       .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoresTable.playerId, scoreSaberAccountsTable.id))
-      .where(and(inArray(scoreSaberScoresTable.playerId, unique), eq(scoreSaberAccountsTable.banned, false)))
+      .where(
+        and(
+          inArray(scoreSaberScoresTable.playerId, unique),
+          // Almost every score has 0 medals. Restricting to positive ones lets Postgres read just those
+          // from the partial scores_player_medals_positive_idx instead of every score of each player,
+          // and doesn't change the sums. Players with none keep the 0 they were seeded with above.
+          gt(scoreSaberScoresTable.medals, 0),
+          eq(scoreSaberAccountsTable.banned, false)
+        )
+      )
       .groupBy(scoreSaberScoresTable.playerId);
 
     for (const row of rows) {
@@ -297,7 +316,7 @@ export class ScoreSaberMedalsRepository {
       .select()
       .from(scoreSaberAccountsTable)
       .where(baseWhere)
-      .orderBy(desc(scoreSaberAccountsTable.medals), asc(scoreSaberAccountsTable.id))
+      .orderBy(descNullsLast(scoreSaberAccountsTable.medals), asc(scoreSaberAccountsTable.id))
       .limit(limit)
       .offset(offset);
   }

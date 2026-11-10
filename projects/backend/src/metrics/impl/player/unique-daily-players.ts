@@ -37,8 +37,8 @@ export default class UniqueDailyPlayersMetric extends Metric<null> {
    */
   public async addPlayer(playerId: string): Promise<void> {
     const key = this.getDateKey();
-    await redisClient.sadd(key, playerId);
-    await redisClient.expire(key, TimeUnit.toSeconds(TimeUnit.Day, 2));
+    // One round trip for both commands; this runs for every score that comes in.
+    await redisClient.multi().sadd(key, playerId).expire(key, TimeUnit.toSeconds(TimeUnit.Day, 2)).exec();
   }
 
   /**

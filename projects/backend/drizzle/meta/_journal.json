@@ -435,6 +435,27 @@
       "when": 1794327524799,
       "tag": "0061_remove_overlay_settings_preference",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1794330798107,
+      "tag": "0062_drop_redundant_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 63,
+      "version": "7",
+      "when": 1794332787134,
+      "tag": "0063_leaderboard_search_vector",
+      "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1794333311476,
+      "tag": "0064_drop_redundant_beatsaver_difficulty_index",
+      "breakpoints": true
     }
   ]
 }

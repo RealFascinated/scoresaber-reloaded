@@ -1,0 +1,1 @@
+DROP INDEX "beatsaver_map_difficulties_version_id_idx";

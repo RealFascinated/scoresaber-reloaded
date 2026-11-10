@@ -55,6 +55,8 @@ export class PlayerFollowingScoresService {
         return [];
       }
 
+      const playerInfoById = await ScoreCoreService.getPlayerInfoByIds(rawScores.map(row => row.playerId));
+
       return Promise.all(
         rawScores.map(async rawScore => {
           const score = scoreSaberScoreRowToType(rawScore);
@@ -62,6 +64,7 @@ export class PlayerFollowingScoresService {
             insertBeatLeaderScore: true,
             insertPreviousScore: false,
             insertPlayerInfo: true,
+            playerInfoById,
           });
         })
       );

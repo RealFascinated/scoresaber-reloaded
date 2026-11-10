@@ -24,15 +24,11 @@ export class PlayerHmdService {
    */
   public static async getPlayerHmdBreakdown(playerId: string, limit?: number): Promise<Record<HMD, number>> {
     return CacheService.fetch(CacheId.PLAYER_HMD_BREAKDOWN, playerId, async () => {
-      const rows = await ScoreSaberScoresRepository.getHmdByPlayerId(playerId, limit);
+      const rows = await ScoreSaberScoresRepository.getHmdCountsByPlayerId(playerId, limit);
 
-      const counts = new Map<HMD, number>();
-      for (const row of rows) {
-        const hmd = row.hmd;
-        counts.set(hmd, (counts.get(hmd) ?? 0) + 1);
-      }
-
-      return Object.fromEntries([...counts.entries()].sort((a, b) => b[1] - a[1])) as Record<HMD, number>;
+      return Object.fromEntries(
+        rows.sort((a, b) => b.count - a.count).map(row => [row.hmd, row.count])
+      ) as Record<HMD, number>;
     });
   }
 }

@@ -64,7 +64,10 @@ export class SSRCache<TValue = unknown> {
     });
 
     if (this.maxObjects !== undefined && this.cache.size >= this.maxObjects) {
-      this.remove(Array.from(this.cache.keys())[0]); // Remove the oldest object
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.remove(oldestKey); // Remove the oldest object
+      }
     }
   }
 

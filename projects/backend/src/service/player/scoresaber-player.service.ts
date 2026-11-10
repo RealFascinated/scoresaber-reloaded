@@ -211,6 +211,43 @@ export default class ScoreSaberPlayerService {
   }
 
   /**
+   * Builds the basic players of a page of freshly looked up tokens, like calling {@link getPlayer}
+   * with each token (the built player refreshes the cache) but with one account query for the whole
+   * page instead of one per player.
+   *
+   * @param tokens the tokens, resolved for the realm
+   * @param realmId the realm the tokens were resolved for
+   * @returns the players in the order of the tokens
+   */
+  public static async getPlayersFromTokens(
+    tokens: ScoreSaberPlayerLookupToken[],
+    realmId: number
+  ): Promise<ScoreSaberPlayer[]> {
+    const batched = await ScoreSaberPlayerService.getBasicPlayers(tokens);
+    const batchedById = new Map(batched.map(player => [player.id, player]));
+
+    return Promise.all(
+      tokens.map(async token => {
+        const player = batchedById.get(token.id);
+        if (player === undefined) {
+          // No tracked account yet: the per-player path knows how to create it.
+          return ScoreSaberPlayerService.getPlayer(token.id, "basic", token, realmId);
+        }
+        try {
+          await CacheService.insert(
+            CacheId.SCORESABER_PLAYER,
+            playerCacheKey(token.id, "basic", realmId),
+            player
+          );
+        } catch (error) {
+          ScoreSaberPlayerService.logger.warn(`Failed to cache player "${token.id}":`, error);
+        }
+        return player;
+      })
+    );
+  }
+
+  /**
    * Resolves basic player objects for a batch of player tokens using a single
    * batched account lookup, instead of one DB query per player.
    *

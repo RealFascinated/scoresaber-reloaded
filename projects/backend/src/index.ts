@@ -204,6 +204,7 @@ export const app = new Elysia()
         try {
           await ScoreEventService.updateTrendingLeaderboards();
           await ScoreEventService.updateLeaderboardDailyPlays();
+          await ScoreEventService.purgeOldEvents();
         } catch (error) {
           log.error("leaderboard-updates cron failed:", error);
           reportErrorToDiscord("Cron: leaderboard-updates", error);

@@ -271,13 +271,13 @@ export class PlayerHistoryService {
     }
 
     const date = getMidnightAlignedDate(trackTime);
-    const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(player.id, date, realmId);
 
+    // No read of the existing row: the upsert leaves the daily counters of an existing row untouched.
     const statistics = await PlayerStatisticsService.getStatistics(playerToken, realmId);
     await PlayerHistoryRepository.upsertByPlayerAndDate(
       player.id,
       date,
-      PlayerHistoryService.createHistoryEntry(statistics, playerToken, existingEntry ?? undefined),
+      PlayerHistoryService.createHistoryEntry(statistics, playerToken),
       realmId
     );
 

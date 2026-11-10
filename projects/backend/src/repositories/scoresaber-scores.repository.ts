@@ -3,6 +3,7 @@ import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { AnyColumn, SQL } from "drizzle-orm";
 import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "../db";
+import { descNullsLast } from "../db/order";
 import {
   scoreSaberAccountsTable,
   scoreSaberLeaderboardRealmsTable,
@@ -440,7 +441,10 @@ export class ScoreSaberScoresRepository {
           eq(scoreSaberAccountsTable.banned, false)
         )
       )
-      .orderBy(desc(scoreSaberScoreRealmsTable.pp), desc(scoreSaberScoreRealmsTable.scoreId))
+      .orderBy(
+        descNullsLast(scoreSaberScoreRealmsTable.pp),
+        descNullsLast(scoreSaberScoreRealmsTable.scoreId)
+      )
       .limit(limit)
       .offset(offset);
   }
@@ -457,7 +461,7 @@ export class ScoreSaberScoresRepository {
           eq(scoreSaberAccountsTable.banned, false)
         )
       )
-      .orderBy(desc(scoreSaberScoreRealmsTable.pp))
+      .orderBy(descNullsLast(scoreSaberScoreRealmsTable.pp))
       .limit(limit);
   }
 
@@ -609,12 +613,35 @@ export class ScoreSaberScoresRepository {
       .offset(offset);
   }
 
-  public static async getHmdByPlayerId(playerId: string, limit?: number): Promise<{ hmd: HMD }[]> {
-    const q = db
-      .select({ hmd: scoreSaberScoresTable.hmd })
-      .from(scoreSaberScoresTable)
-      .where(eq(scoreSaberScoresTable.playerId, playerId));
-    return limit != null ? q.limit(limit) : q;
+  /**
+   * Counts a player's scores per headset, grouped in the database so only a handful of rows come
+   * back instead of one row per score.
+   *
+   * @param playerId the player to count for
+   * @param limit when set, only the first `limit` scores are counted
+   */
+  public static async getHmdCountsByPlayerId(
+    playerId: string,
+    limit?: number
+  ): Promise<{ hmd: HMD; count: number }[]> {
+    const scores =
+      limit != null
+        ? db
+            .select({ hmd: scoreSaberScoresTable.hmd })
+            .from(scoreSaberScoresTable)
+            .where(eq(scoreSaberScoresTable.playerId, playerId))
+            .limit(limit)
+            .as("limited_scores")
+        : db
+            .select({ hmd: scoreSaberScoresTable.hmd })
+            .from(scoreSaberScoresTable)
+            .where(eq(scoreSaberScoresTable.playerId, playerId))
+            .as("player_scores");
+
+    return db
+      .select({ hmd: scores.hmd, count: sql<number>`cast(count(*) as integer)` })
+      .from(scores)
+      .groupBy(scores.hmd);
   }
 
   public static async getChartRowsByPlayer(
@@ -750,15 +777,21 @@ export class ScoreSaberScoresRepository {
   }
 
   /**
-   * Counts the scores that have pp in a realm.
+   * Counts the scores that have pp in a realm, stopping once `limit` have been found. Callers that
+   * only display a capped total therefore never scan every ranked score.
    *
    * @param realmId the realm to count ranked scores for
+   * @param limit the most scores to count
+   * @returns the number of scores with pp, at most `limit`
    */
-  public static async countRealmScores(realmId: number): Promise<number> {
-    const [row] = await db
-      .select({ count: sql<number>`cast(count(*) as integer)` })
+  public static async countRealmScores(realmId: number, limit: number): Promise<number> {
+    const capped = db
+      .select({ one: sql<number>`1`.as("one") })
       .from(scoreSaberScoreRealmsTable)
-      .where(and(eq(scoreSaberScoreRealmsTable.realmId, realmId), gt(scoreSaberScoreRealmsTable.pp, 0)));
+      .where(and(eq(scoreSaberScoreRealmsTable.realmId, realmId), gt(scoreSaberScoreRealmsTable.pp, 0)))
+      .limit(limit)
+      .as("capped");
+    const [row] = await db.select({ count: sql<number>`cast(count(*) as integer)` }).from(capped);
     return Number(row?.count ?? 0);
   }
 

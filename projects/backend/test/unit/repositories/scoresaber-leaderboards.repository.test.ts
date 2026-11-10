@@ -246,6 +246,41 @@ describe("ScoreSaberLeaderboardsRepository", () => {
     });
   });
 
+  describe("updatePlaysAndMaxScore", () => {
+    test("updates an existing leaderboard and reports that it exists", async () => {
+      const before = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
+        TEST_LEADERBOARD_ID,
+        false,
+        DEFAULT_REALM_ID
+      );
+      try {
+        expect(
+          await ScoreSaberLeaderboardsRepository.updatePlaysAndMaxScore(TEST_LEADERBOARD_ID, 4321, 777)
+        ).toBe(true);
+        const after = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
+          TEST_LEADERBOARD_ID,
+          false,
+          DEFAULT_REALM_ID
+        );
+        expect(after?.plays).toBe(4321);
+        expect(after?.maxScore).toBe(777);
+      } finally {
+        await ScoreSaberLeaderboardsRepository.updatePlaysAndMaxScore(
+          TEST_LEADERBOARD_ID,
+          before?.plays ?? 0,
+          before?.maxScore ?? 0
+        );
+      }
+    });
+
+    test("reports a missing leaderboard without creating it", async () => {
+      expect(
+        await ScoreSaberLeaderboardsRepository.updatePlaysAndMaxScore(UNKNOWN_LEADERBOARD_ID, 1, 1)
+      ).toBe(false);
+      expect(await ScoreSaberLeaderboardsRepository.existsById(UNKNOWN_LEADERBOARD_ID)).toBe(false);
+    });
+  });
+
   describe("upsertLeaderboards", () => {
     test("upserts leaderboard metadata in bulk", async () => {
       const template = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
@@ -316,7 +351,7 @@ describe("ScoreSaberLeaderboardsRepository", () => {
     test("builds a full-text search expression", () => {
       const dialect = new PgDialect();
       const tableAlias = alias(scoreSaberLeaderboardsTable, "lb");
-      expect(dialect.sqlToQuery(aliasFtsMatch(tableAlias, "test")).sql).toContain("to_tsvector");
+      expect(dialect.sqlToQuery(aliasFtsMatch(tableAlias, "test")).sql).toContain("searchVector");
       expect(dialect.sqlToQuery(aliasTsRankExpr(tableAlias, "test")).sql).toContain("ts_rank");
     });
   });

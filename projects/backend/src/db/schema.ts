@@ -9,6 +9,7 @@ import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  customType,
   date,
   doublePrecision,
   index,
@@ -23,6 +24,12 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return "tsvector";
+  },
+});
 
 export const scoreSaberAccountsTable = pgTable(
   "scoresaber-accounts",
@@ -197,7 +204,8 @@ export const scoreSaberScoresTable = pgTable(
     // playerId IN (...) AND timestamp BETWEEN ... would otherwise scan every
     // row of each candidate player.
     index("scores_player_id_timestamp_idx").on(table.playerId, table.timestamp),
-    index("scores_leaderboard_id_idx").on(table.leaderboardId),
+    // Also serves every plain `leaderboardId = ?` lookup through its leading column, so a separate
+    // single-column leaderboardId index would only add write cost and size.
     index("scores_leaderboard_score_scoreid_desc_idx").on(
       table.leaderboardId,
       table.score.desc(),
@@ -244,7 +252,6 @@ export const scoreSaberScoreHistoryTable = pgTable(
     timestamp: timestamp().notNull(),
   },
   table => [
-    index("scoresaber_score_history_leaderboard_idx").on(table.leaderboardId),
     // Archived-score lookups by scoreId (GET /scores/:scoreId fallback) would
     // otherwise seq-scan the whole history table.
     index("scoresaber_score_history_score_id_idx").on(table.scoreId),
@@ -289,12 +296,18 @@ export const scoreSaberLeaderboardsTable = pgTable(
     trendingScore: doublePrecision().notNull().default(0),
 
     timestamp: timestamp().notNull(),
+
+    // Full-text search document, kept up to date by Postgres. Storing it (instead of calling
+    // to_tsvector in every query) lets ts_rank read it directly rather than re-parsing the text
+    // of every matching row.
+    searchVector: tsvector().generatedAlwaysAs(
+      sql.raw(
+        `to_tsvector('english', "songName" || ' ' || "songSubName" || ' ' || "songAuthorName" || ' ' || "levelAuthorName")`
+      )
+    ),
   },
   table => [
-    index("leaderboards_search_idx").using(
-      "gin",
-      sql`to_tsvector('english', ${table.songName} || ' ' || ${table.songSubName} || ' ' || ${table.songAuthorName} || ' ' || ${table.levelAuthorName})`
-    ),
+    index("leaderboards_search_idx").using("gin", table.searchVector),
     index("leaderboards_song_lookup_idx").on(
       sql`lower(${table.songHash})`,
       table.difficulty,
@@ -537,12 +550,13 @@ export const beatSaverMapDifficultiesTable = pgTable(
     label: text(),
   },
   table => [
+    // Also serves every plain `versionId = ?` lookup through its leading column, so a separate
+    // single-column versionId index would only add write cost and size.
     uniqueIndex("beatsaver_map_difficulties_version_char_diff_unique").on(
       table.versionId,
       table.characteristic,
       table.difficulty
     ),
-    index("beatsaver_map_difficulties_version_id_idx").on(table.versionId),
   ]
 );
 
@@ -569,7 +583,6 @@ export const scoreSaberScoreEventTable = pgTable(
   table => [
     index("score_events_leaderboard_timestamp_idx").on(table.leaderboardId, table.timestamp),
     index("score_events_timestamp_idx").on(table.timestamp),
-    index("score_events_player_id_idx").on(table.playerId),
   ]
 );
 
@@ -789,7 +802,11 @@ export type ScoreSaberScoreRealmRow = typeof scoreSaberScoreRealmsTable.$inferSe
 /** A score row resolved for one realm: the base row plus that realm's pp (0 when unranked). */
 export type ScoreSaberScoreRow = ScoreSaberScoreBaseRow & { pp: number };
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
-export type ScoreSaberLeaderboardBaseRow = typeof scoreSaberLeaderboardsTable.$inferSelect;
+// The generated full-text search document is internal to the database and never read back.
+export type ScoreSaberLeaderboardBaseRow = Omit<
+  typeof scoreSaberLeaderboardsTable.$inferSelect,
+  "searchVector"
+>;
 export type ScoreSaberLeaderboardRealmRow = typeof scoreSaberLeaderboardRealmsTable.$inferSelect;
 /** A leaderboard row resolved for one realm: the base row plus that realm's ranking state. */
 export type ScoreSaberLeaderboardRow = ScoreSaberLeaderboardBaseRow &

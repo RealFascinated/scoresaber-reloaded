@@ -72,9 +72,15 @@ export function resolvedLeaderboardColumns(
   leaderboard: LeaderboardTableOrAlias = scoreSaberLeaderboardsTable,
   leaderboardRealm: LeaderboardRealmTableOrAlias = scoreSaberLeaderboardRealmsTable
 ) {
+  // An alias exposes the same columns under another table name, so the base table's column types apply.
+  // The generated full-text search document is only ever used inside WHERE / ORDER BY, so it is left
+  // out of the selected columns instead of being transferred with every row.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { searchVector: _searchVector, ...leaderboardColumns } = getTableColumns(leaderboard) as ReturnType<
+    typeof getTableColumns<LeaderboardTable>
+  >;
   return {
-    // An alias exposes the same columns under another table name, so the base table's column types apply.
-    ...(getTableColumns(leaderboard) as ReturnType<typeof getTableColumns<LeaderboardTable>>),
+    ...leaderboardColumns,
     ranked: sql<boolean>`coalesce(${(leaderboardRealm as LeaderboardRealmTable).ranked}, false)`.mapWith(
       Boolean
     ),

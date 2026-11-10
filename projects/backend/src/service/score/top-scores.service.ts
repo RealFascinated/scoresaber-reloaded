@@ -9,6 +9,9 @@ import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores
 import BeatSaverService from "../external/beatsaver.service";
 import { ScoreCoreService } from "./score-core.service";
 
+/** The most top scores the page lets a user page through. */
+const MAX_DISPLAYED_SCORES = 50_000;
+
 export class TopScoresService {
   /**
    * Gets the top tracked scores.
@@ -25,7 +28,7 @@ export class TopScoresService {
   ): Promise<TopScoresPageResponse> {
     const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
       .setItemsPerPage(limit)
-      .setTotalItems(Math.min(50_000, await ScoreSaberScoresRepository.countRealmScores(realmId))); // allow up to 50,000 scores to be displayed
+      .setTotalItems(await ScoreSaberScoresRepository.countRealmScores(realmId, MAX_DISPLAYED_SCORES));
 
     return pagination.getPage(page, async fetchItems => {
       const scoresRows = await ScoreSaberScoresRepository.getTopScores(
@@ -44,6 +47,7 @@ export class TopScoresService {
         realmId
       );
       const leaderboardMap = new Map(leaderboards.map(leaderboard => [leaderboard.id, leaderboard]));
+      const playerInfoById = await ScoreCoreService.getPlayerInfoByIds(scoresRows.map(row => row.playerId));
 
       const scores = await Promise.all(
         scoresRows.map(async scoreRow => {
@@ -59,6 +63,7 @@ export class TopScoresService {
               insertPlayerInfo: true,
               insertBeatLeaderScore: true,
               insertPreviousScore: false,
+              playerInfoById,
             }),
             BeatSaverService.getMap(
               leaderboard.songHash,

@@ -241,7 +241,8 @@ export class PlayerCoreService {
    * @param playerId the player's id
    */
   public static async invalidatePlayerCaches(playerId: string): Promise<void> {
-    await CacheService.invalidatePrefix(miniRankingCacheKeyPrefix(playerId));
+    // Mini-rankings are cached in memory only, so there is nothing in Redis to scan for.
+    CacheService.invalidateMemoryPrefix(miniRankingCacheKeyPrefix(playerId));
     await PlayerCoreService.invalidatePlayersCaches([playerId]);
   }
 

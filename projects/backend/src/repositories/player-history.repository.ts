@@ -45,9 +45,9 @@ export class PlayerHistoryRepository {
           totalScore: sql`excluded."totalScore"`,
           totalRankedScore: sql`excluded."totalRankedScore"`,
           rankedScores: sql`excluded."rankedScores"`,
-          unrankedScores: sql`excluded."unrankedScores"`,
-          rankedScoresImproved: sql`excluded."rankedScoresImproved"`,
-          unrankedScoresImproved: sql`excluded."unrankedScoresImproved"`,
+          // The daily counters (rankedScores, unrankedScores and their improved variants) are owned
+          // by incrementDailyCounter, so a conflicting upsert leaves them alone. That also means the
+          // nightly tracker no longer has to read the row first just to carry them over.
           totalRankedScores: sql`excluded."totalRankedScores"`,
           totalUnrankedScores: sql`excluded."totalUnrankedScores"`,
           totalScores: sql`excluded."totalScores"`,
