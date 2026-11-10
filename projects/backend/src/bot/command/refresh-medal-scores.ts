@@ -6,8 +6,7 @@ import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-class RefreshMedalScores {
+export class RefreshMedalScores {
   @Slash({
     description: "Recomputes score medals from ranked leaderboards and refreshes account totals/ranks",
     name: "refresh-medal-scores",

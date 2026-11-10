@@ -1,4 +1,5 @@
 import { encodeCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import { ScoreSaberLeaderboardsRepository } from "../../src/repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoresRepository } from "../../src/repositories/scoresaber-scores.repository";
@@ -30,47 +31,61 @@ const now = new Date("2024-06-01T12:00:00.000Z");
  * ExpertPlus/Standard leaderboard plus this one).
  */
 async function seedSecondDifficultyScores(): Promise<void> {
-  const template = await ScoreSaberLeaderboardsRepository.getLeaderboardById(TEST_LEADERBOARD_ID, false);
+  const template = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
+    TEST_LEADERBOARD_ID,
+    false,
+    DEFAULT_REALM_ID
+  );
   const expertLeaderboard = {
     ...template!,
     id: TEST_LEADERBOARD_SECOND_ID,
     difficulty: { ...template!.difficulty, difficulty: "Expert" },
   };
-  await ScoreSaberLeaderboardsRepository.insert(TEST_LEADERBOARD_SECOND_ID, expertLeaderboard);
+  await ScoreSaberLeaderboardsRepository.insert(
+    TEST_LEADERBOARD_SECOND_ID,
+    expertLeaderboard,
+    DEFAULT_REALM_ID
+  );
 
-  await ScoreSaberScoresRepository.insertScore({
-    scoreId: 900_010,
-    playerId: TEST_PLAYER_ID,
-    leaderboardId: TEST_LEADERBOARD_SECOND_ID,
-    difficulty: "Expert",
-    characteristic: "Standard",
-    score: 850,
-    accuracy: 0.85,
-    pp: 180,
-    missedNotes: 0,
-    badCuts: 0,
-    maxCombo: 400,
-    fullCombo: false,
-    modifiers: [],
-    timestamp: now,
-  });
+  await ScoreSaberScoresRepository.insertScore(
+    {
+      scoreId: 900_010,
+      playerId: TEST_PLAYER_ID,
+      leaderboardId: TEST_LEADERBOARD_SECOND_ID,
+      difficulty: "Expert",
+      characteristic: "Standard",
+      score: 850,
+      accuracy: 0.85,
+      pp: 180,
+      missedNotes: 0,
+      badCuts: 0,
+      maxCombo: 400,
+      fullCombo: false,
+      modifiers: [],
+      timestamp: now,
+    },
+    DEFAULT_REALM_ID
+  );
 
-  await ScoreSaberScoresRepository.insertScore({
-    scoreId: 900_011,
-    playerId: TEST_PLAYER_TWO_ID,
-    leaderboardId: TEST_LEADERBOARD_SECOND_ID,
-    difficulty: "Expert",
-    characteristic: "Standard",
-    score: 800,
-    accuracy: 0.8,
-    pp: 150,
-    missedNotes: 1,
-    badCuts: 1,
-    maxCombo: 380,
-    fullCombo: false,
-    modifiers: [],
-    timestamp: now,
-  });
+  await ScoreSaberScoresRepository.insertScore(
+    {
+      scoreId: 900_011,
+      playerId: TEST_PLAYER_TWO_ID,
+      leaderboardId: TEST_LEADERBOARD_SECOND_ID,
+      difficulty: "Expert",
+      characteristic: "Standard",
+      score: 800,
+      accuracy: 0.8,
+      pp: 150,
+      missedNotes: 1,
+      badCuts: 1,
+      maxCombo: 380,
+      fullCombo: false,
+      modifiers: [],
+      timestamp: now,
+    },
+    DEFAULT_REALM_ID
+  );
 }
 
 describe("Playlist API integration", () => {

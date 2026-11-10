@@ -1,5 +1,11 @@
 import cors from "@elysiajs/cors";
 import { serverTiming } from "@elysiajs/server-timing";
+import {
+  AUTH_ROUTE,
+  USER_FOLLOWING_ROUTE,
+  USER_PINNED_SCORES_ROUTE,
+  USER_PREFERENCES_ROUTE,
+} from "@ssr/common/api-routes";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
@@ -244,10 +250,10 @@ export const app = new Elysia()
       routes: {
         "/player/refresh/": 10,
         "/beatleader/": 30,
-        "/auth/": 30,
-        "/user/preferences": 60,
-        "/user/following": 60,
-        "/user/pinned-scores": 60,
+        [`${AUTH_ROUTE}/`]: 30,
+        [USER_PREFERENCES_ROUTE]: 60,
+        [USER_FOLLOWING_ROUTE]: 60,
+        [USER_PINNED_SCORES_ROUTE]: 60,
       },
     })
   )

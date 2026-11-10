@@ -1,3 +1,4 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import {
   ScoreSaberScoreHistoryRepository,
@@ -130,7 +131,8 @@ describe("ScoreSaberScoreHistoryRepository", () => {
         TEST_PLAYER_ID,
         TEST_LEADERBOARD_ID,
         10,
-        0
+        0,
+        DEFAULT_REALM_ID
       );
       expect(page.length).toBeGreaterThanOrEqual(2);
       const scoreIds = page.map(row => row.scoreId);

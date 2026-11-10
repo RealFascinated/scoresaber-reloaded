@@ -1,4 +1,5 @@
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { asc, eq } from "drizzle-orm";
@@ -24,7 +25,7 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
 
   protected async processItem(item: QueueItem<number>): Promise<void> {
     const leaderboardId = Number(item.id);
-    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId);
+    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, DEFAULT_REALM_ID);
 
     let newScoresTracked = 0;
     let currentPbReplaced = 0;

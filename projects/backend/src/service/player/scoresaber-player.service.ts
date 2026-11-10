@@ -52,8 +52,8 @@ export default class ScoreSaberPlayerService {
   public static async getPlayer(
     id: string,
     type: DetailType = "basic",
-    player?: ScoreSaberPlayerLookupToken,
-    realmId: number = DEFAULT_REALM_ID
+    player: ScoreSaberPlayerLookupToken | undefined,
+    realmId: number
   ): Promise<ScoreSaberPlayer> {
     const cacheKey = playerCacheKey(id, type, realmId);
 
@@ -167,7 +167,7 @@ export default class ScoreSaberPlayerService {
   public static async cacheBasicPlayer(
     token: ScoreSaberPlayerLookupToken,
     account: ScoreSaberAccount,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<void> {
     try {
       await CacheService.insert(

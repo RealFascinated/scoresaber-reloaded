@@ -1,4 +1,3 @@
-import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ScoreSaberPlayerHistory } from "@ssr/common/schemas/scoresaber/player/history";
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "../db";
@@ -11,7 +10,7 @@ export class PlayerHistoryRepository {
   public static async findByPlayerAndDate(
     playerId: string,
     date: Date,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<PlayerHistoryRow | undefined> {
     const [row] = await db
       .select()
@@ -30,7 +29,7 @@ export class PlayerHistoryRepository {
     playerId: string,
     date: Date,
     data: ScoreSaberPlayerHistory,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<void> {
     await db
       .insert(playerHistoryTable)
@@ -68,7 +67,7 @@ export class PlayerHistoryRepository {
   public static async getByPlayerOrderedByDateDesc(
     playerId: string,
     options: { count: number; alignedStart: Date; today: Date },
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<PlayerHistoryRow[]> {
     const { count: dayCount, alignedStart, today } = options;
     const base = db
@@ -88,12 +87,7 @@ export class PlayerHistoryRepository {
     return await (dayCount > 0 ? base.limit(dayCount) : base);
   }
 
-  public static async upsertRank(
-    playerId: string,
-    date: Date,
-    rank: number,
-    realmId: number = DEFAULT_REALM_ID
-  ): Promise<void> {
+  public static async upsertRank(playerId: string, date: Date, rank: number, realmId: number): Promise<void> {
     await db
       .insert(playerHistoryTable)
       .values({ playerId, date, realmId, rank })
@@ -107,7 +101,7 @@ export class PlayerHistoryRepository {
     playerId: string,
     date: Date,
     counterKey: DailyScoreCounterKey,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<void> {
     const incrementSet = (() => {
       switch (counterKey) {

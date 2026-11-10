@@ -1,3 +1,4 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import { scoreSaberScoreRowToType } from "../../src/db/converter/scoresaber-score";
 import { TopScoresService } from "../../src/service/score/top-scores.service";
@@ -7,7 +8,7 @@ import { buildScoreRow } from "../helpers/fixtures";
 describe("TopScoresService", () => {
   describe("getTopScores", () => {
     test("returns paginated top scores including the seeded score", async () => {
-      const page = await TopScoresService.getTopScores(1, 25);
+      const page = await TopScoresService.getTopScores(1, 25, DEFAULT_REALM_ID);
 
       expect(page.metadata.page).toBe(1);
       expect(page.metadata.totalItems).toBeGreaterThanOrEqual(1);

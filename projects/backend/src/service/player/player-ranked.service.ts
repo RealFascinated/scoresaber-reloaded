@@ -1,4 +1,3 @@
-import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { PlayerPpsResponse } from "@ssr/common/schemas/response/player/player-pps";
 import { updateScoreWeights } from "@ssr/common/utils/scoresaber.util";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
@@ -13,10 +12,7 @@ export class PlayerRankedService {
    * @param realmId the realm to get pp scores for
    * @returns the ranked pp scores
    */
-  public static async getPlayerPps(
-    playerId: string,
-    realmId: number = DEFAULT_REALM_ID
-  ): Promise<PlayerPpsResponse> {
+  public static async getPlayerPps(playerId: string, realmId: number): Promise<PlayerPpsResponse> {
     return CacheService.fetch(CacheId.PLAYER_PPS, `${playerId}:${realmId}`, async () => {
       await PlayerCoreService.playerExists(playerId, true);
 

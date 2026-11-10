@@ -1,3 +1,4 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import { ScoreSaberLeaderboardsRepository } from "../../../src/repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberMedalsRepository } from "../../../src/repositories/scoresaber-medals.repository";
@@ -16,17 +17,19 @@ describe("ScoreSaberMedalsRepository", () => {
     test("updates medals for a ranked leaderboard", async () => {
       const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         TEST_LEADERBOARD_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       await ScoreSaberMedalsRepository.updateMedalsOnRankedLeaderboard(leaderboard!);
-      const topScore = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID);
+      const topScore = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID, DEFAULT_REALM_ID);
       expect(topScore?.medals).toBeGreaterThan(0);
     });
 
     test("no-ops for an unranked leaderboard", async () => {
       const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         TEST_LEADERBOARD_QUALIFIED_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       await ScoreSaberMedalsRepository.updateMedalsOnRankedLeaderboard({
         ...leaderboard!,
@@ -39,7 +42,8 @@ describe("ScoreSaberMedalsRepository", () => {
     test("returns affected player ids for a ranked leaderboard", async () => {
       const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         TEST_LEADERBOARD_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       const playerIds = await ScoreSaberMedalsRepository.updateMedalsOnLeaderboard(leaderboard!);
       expect(playerIds).toContain(TEST_PLAYER_ID);
@@ -48,7 +52,8 @@ describe("ScoreSaberMedalsRepository", () => {
     test("returns an empty array for an unranked leaderboard", async () => {
       const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         TEST_LEADERBOARD_QUALIFIED_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       const playerIds = await ScoreSaberMedalsRepository.updateMedalsOnLeaderboard({
         ...leaderboard!,
@@ -62,7 +67,8 @@ describe("ScoreSaberMedalsRepository", () => {
     test("includes players on the ranked leaderboard", async () => {
       const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         TEST_LEADERBOARD_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       const playerIds = await ScoreSaberMedalsRepository.selectPlayerIdsAffectedByMedalUpdate(leaderboard!);
       expect(playerIds).toContain(TEST_PLAYER_ID);
@@ -72,7 +78,8 @@ describe("ScoreSaberMedalsRepository", () => {
     test("returns an empty array for an unranked leaderboard", async () => {
       const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         TEST_LEADERBOARD_QUALIFIED_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       const playerIds = await ScoreSaberMedalsRepository.selectPlayerIdsAffectedByMedalUpdate({
         ...leaderboard!,
@@ -86,7 +93,8 @@ describe("ScoreSaberMedalsRepository", () => {
     test("returns ranks for medal-bearing scores", async () => {
       const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         TEST_LEADERBOARD_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       await ScoreSaberMedalsRepository.updateMedalsOnLeaderboard(leaderboard!);
 

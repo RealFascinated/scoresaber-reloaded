@@ -1,9 +1,8 @@
-import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { and, asc, count, desc, eq, isNotNull } from "drizzle-orm";
 import { db } from "../db";
 import { authUsersTable, userFollowsTable } from "../db/schema";
 
-export type FollowResult = "followed" | "already-following" | "self" | "limit-reached";
+export type FollowResult = "followed" | "already-following" | "limit-reached";
 
 const MAX_LISTED_FOLLOWERS = 100;
 
@@ -23,24 +22,20 @@ export class UserFollowsRepository {
   }
 
   /**
-   * Makes a user follow a player. Users can't follow themselves or follow more than
-   * `SHARED_CONSTS.maxFollowing` players.
+   * Makes a user follow a player, unless they already do or already follow `maxFollowing` players.
    *
    * @param userId the user that follows
    * @param playerId the player to follow
+   * @param maxFollowing how many players a user can follow
    */
-  public static async follow(userId: string, playerId: string): Promise<FollowResult> {
+  public static async follow(userId: string, playerId: string, maxFollowing: number): Promise<FollowResult> {
     return db.transaction(async tx => {
       // Lock the user so two follows can't both slip under the limit
-      const [user] = await tx
-        .select({ playerId: authUsersTable.playerId })
+      await tx
+        .select({ id: authUsersTable.id })
         .from(authUsersTable)
         .where(eq(authUsersTable.id, userId))
         .for("update");
-
-      if (user?.playerId === playerId) {
-        return "self";
-      }
 
       const [existing] = await tx
         .select({ playerId: userFollowsTable.followingPlayerId })
@@ -54,7 +49,7 @@ export class UserFollowsRepository {
         .select({ total: count() })
         .from(userFollowsTable)
         .where(eq(userFollowsTable.userId, userId));
-      if (total >= SHARED_CONSTS.maxFollowing) {
+      if (total >= maxFollowing) {
         return "limit-reached";
       }
 

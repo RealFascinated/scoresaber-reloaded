@@ -1,4 +1,5 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import { ScoreSaberLeaderboardsService } from "../../src/service/leaderboard/scoresaber-leaderboards.service";
 import { TEST_LEADERBOARD_ID, TEST_SONG_HASH, UNKNOWN_LEADERBOARD_ID } from "../helpers/constants";
@@ -6,7 +7,10 @@ import { TEST_LEADERBOARD_ID, TEST_SONG_HASH, UNKNOWN_LEADERBOARD_ID } from "../
 describe("ScoreSaberLeaderboardsService", () => {
   describe("getLeaderboard", () => {
     test("returns the seeded leaderboard by id", async () => {
-      const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(TEST_LEADERBOARD_ID);
+      const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(
+        TEST_LEADERBOARD_ID,
+        DEFAULT_REALM_ID
+      );
       expect(leaderboard.id).toBe(TEST_LEADERBOARD_ID);
       expect(leaderboard.songName).toBe("Test Song");
       expect(leaderboard.ranked).toBe(true);
@@ -14,7 +18,7 @@ describe("ScoreSaberLeaderboardsService", () => {
 
     test("throws NotFoundError for an unknown id", async () => {
       await expect(
-        ScoreSaberLeaderboardsService.getLeaderboard(UNKNOWN_LEADERBOARD_ID)
+        ScoreSaberLeaderboardsService.getLeaderboard(UNKNOWN_LEADERBOARD_ID, DEFAULT_REALM_ID)
       ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
@@ -24,7 +28,8 @@ describe("ScoreSaberLeaderboardsService", () => {
       const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboardByHash(
         TEST_SONG_HASH,
         "ExpertPlus",
-        "Standard"
+        "Standard",
+        DEFAULT_REALM_ID
       );
       expect(leaderboard.id).toBe(TEST_LEADERBOARD_ID);
       expect(leaderboard.difficulty.difficulty).toBe("ExpertPlus");
@@ -34,7 +39,8 @@ describe("ScoreSaberLeaderboardsService", () => {
       const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboardByHash(
         TEST_SONG_HASH.toUpperCase(),
         "ExpertPlus",
-        "Standard"
+        "Standard",
+        DEFAULT_REALM_ID
       );
       expect(leaderboard.id).toBe(TEST_LEADERBOARD_ID);
     });
@@ -44,7 +50,8 @@ describe("ScoreSaberLeaderboardsService", () => {
         ScoreSaberLeaderboardsService.getLeaderboardByHash(
           "ffffffffffffffffffffffffffffffff",
           "ExpertPlus",
-          "Standard"
+          "Standard",
+          DEFAULT_REALM_ID
         )
       ).rejects.toBeInstanceOf(NotFoundError);
     });
@@ -52,7 +59,11 @@ describe("ScoreSaberLeaderboardsService", () => {
 
   describe("getLeaderboardsPaginated", () => {
     test("returns ranked leaderboards on the first page", async () => {
-      const page = await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(1, { ranked: true });
+      const page = await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(
+        1,
+        { ranked: true },
+        DEFAULT_REALM_ID
+      );
       expect(page.metadata.page).toBe(1);
       expect(page.metadata.totalItems).toBeGreaterThanOrEqual(1);
       expect(page.items.some(lb => lb.id === TEST_LEADERBOARD_ID)).toBe(true);
@@ -60,10 +71,14 @@ describe("ScoreSaberLeaderboardsService", () => {
     });
 
     test("returns an empty leaderboard list when filters match nothing", async () => {
-      const page = await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(1, {
-        ranked: true,
-        qualified: true,
-      });
+      const page = await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(
+        1,
+        {
+          ranked: true,
+          qualified: true,
+        },
+        DEFAULT_REALM_ID
+      );
       expect(page.items).toEqual([]);
       expect(page.metadata.totalItems).toBe(0);
     });

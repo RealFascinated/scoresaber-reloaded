@@ -1,3 +1,4 @@
+import { USER_PREFERENCES_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
 import {
   DEFAULT_USER_PREFERENCES,
@@ -26,7 +27,9 @@ export function assertUserPreferences(value: UserPreferences): UserPreferences {
  * @throws when the backend could not be reached or answered with an error
  */
 export async function fetchUserPreferences(): Promise<UserPreferences> {
-  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/user/preferences`, { credentials: "include" });
+  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${USER_PREFERENCES_ROUTE}`, {
+    credentials: "include",
+  });
   if (response.status === 401) {
     return DEFAULT_USER_PREFERENCES;
   }
@@ -43,7 +46,7 @@ export async function fetchUserPreferences(): Promise<UserPreferences> {
  * @throws when the update was rejected or the backend could not be reached
  */
 export async function patchUserPreferences(patch: UserPreferencesPatch): Promise<UserPreferences> {
-  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/user/preferences`, {
+  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${USER_PREFERENCES_ROUTE}`, {
     method: "PATCH",
     credentials: "include",
     headers: { "content-type": "application/json" },

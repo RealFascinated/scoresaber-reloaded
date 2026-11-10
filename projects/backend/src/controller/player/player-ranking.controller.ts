@@ -1,7 +1,8 @@
-import { RealmQuerySchema } from "@ssr/common/schemas/realm/realm-query";
+import { MedalRankingQuerySchema, PlayerRankingQuerySchema } from "@ssr/common/schemas/ranking/ranking-route";
 import { PlayerRankingsResponseSchema } from "@ssr/common/schemas/response/player/player-rankings";
 import { PlayerMedalRankingsResponseSchema } from "@ssr/common/schemas/response/ranking/medal-rankings";
-import { Elysia, t } from "elysia";
+import { PagePathParamsSchema } from "@ssr/common/schemas/route/route-params";
+import { Elysia } from "elysia";
 import { PlayerMedalsService } from "../../service/medals/player-medals.service";
 import { PlayerSearchService } from "../../service/player/player-search.service";
 
@@ -12,19 +13,8 @@ export default function playerRankingController(app: Elysia) {
         "/:page",
         {
           tags: ["Ranking"],
-          params: t.Object({
-            page: t.Integer({ minimum: 1 }),
-          }),
-          query: t.Evaluate(
-            t.Intersect([
-              RealmQuerySchema,
-              t.Object({
-                country: t.Optional(t.String()),
-                search: t.Optional(t.String()),
-                includeInactives: t.Optional(t.BooleanString()),
-              }),
-            ])
-          ),
+          params: PagePathParamsSchema,
+          query: PlayerRankingQuerySchema,
           response: PlayerRankingsResponseSchema,
           detail: {
             description: "Fetch player ranking",
@@ -43,12 +33,8 @@ export default function playerRankingController(app: Elysia) {
         "/medals/:page",
         {
           tags: ["Ranking"],
-          params: t.Object({
-            page: t.Integer({ minimum: 1 }),
-          }),
-          query: t.Object({
-            country: t.Optional(t.String()),
-          }),
+          params: PagePathParamsSchema,
+          query: MedalRankingQuerySchema,
           response: PlayerMedalRankingsResponseSchema,
           detail: {
             description: "Fetch medal ranking",

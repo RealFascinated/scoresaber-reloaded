@@ -1,3 +1,5 @@
+import { USER_PINNED_SCORES_ROUTE } from "@ssr/common/api-routes";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { RealmQuerySchema } from "@ssr/common/schemas/realm/realm-query";
 import {
   PinnedScoreIdsResponseSchema,
@@ -5,8 +7,8 @@ import {
 } from "@ssr/common/schemas/response/user/pinned-scores";
 import { Elysia, t } from "elysia";
 import { authPlugin } from "../../plugins/auth.plugin";
-import { UserPinnedScoresRepository } from "../../repositories/user-pinned-scores.repository";
 import { PlayerPinnedScoresService } from "../../service/player/player-pinned-scores.service";
+import { UserPinnedScoresService } from "../../service/user/user-pinned-scores.service";
 
 const ScoreParamsSchema = t.Object({ scoreId: t.Integer({ minimum: 1 }) });
 const PRIVATE_NO_STORE = "private, no-store";
@@ -15,7 +17,7 @@ export default function userPinnedScoresController(app: Elysia) {
   return app
     .use(authPlugin)
     .get(
-      "/user/pinned-scores",
+      USER_PINNED_SCORES_ROUTE,
       {
         auth: true,
         tags: ["User"],
@@ -24,11 +26,11 @@ export default function userPinnedScoresController(app: Elysia) {
       },
       async ({ user, set }) => {
         set.headers["cache-control"] = PRIVATE_NO_STORE;
-        return { scoreIds: await UserPinnedScoresRepository.getScoreIds(user.id) };
+        return { scoreIds: await UserPinnedScoresService.getScoreIds(user.id) };
       }
     )
     .put(
-      "/user/pinned-scores/:scoreId",
+      `${USER_PINNED_SCORES_ROUTE}/:scoreId`,
       {
         auth: true,
         tags: ["User"],
@@ -38,18 +40,18 @@ export default function userPinnedScoresController(app: Elysia) {
       async ({ user, params: { scoreId }, set, status }) => {
         set.headers["cache-control"] = PRIVATE_NO_STORE;
 
-        const result = await UserPinnedScoresRepository.pin(user.id, scoreId);
+        const result = await UserPinnedScoresService.pin(user, scoreId);
         if (result === "no-player" || result === "no-score") {
           return status(400, { statusCode: 400, message: "You can only pin scores you have set" });
         }
         if (result === "limit-reached") {
           return status(400, { statusCode: 400, message: "You have reached the maximum of pinned scores" });
         }
-        return { scoreIds: await UserPinnedScoresRepository.getScoreIds(user.id) };
+        return { scoreIds: await UserPinnedScoresService.getScoreIds(user.id) };
       }
     )
     .delete(
-      "/user/pinned-scores/:scoreId",
+      `${USER_PINNED_SCORES_ROUTE}/:scoreId`,
       {
         auth: true,
         tags: ["User"],
@@ -59,8 +61,8 @@ export default function userPinnedScoresController(app: Elysia) {
       async ({ user, params: { scoreId }, set }) => {
         set.headers["cache-control"] = PRIVATE_NO_STORE;
 
-        await UserPinnedScoresRepository.unpin(user.id, scoreId);
-        return { scoreIds: await UserPinnedScoresRepository.getScoreIds(user.id) };
+        await UserPinnedScoresService.unpin(user.id, scoreId);
+        return { scoreIds: await UserPinnedScoresService.getScoreIds(user.id) };
       }
     )
     .get(
@@ -74,7 +76,7 @@ export default function userPinnedScoresController(app: Elysia) {
         response: PinnedScoresResponseSchema,
         detail: { description: "Fetch the scores a player pinned to the top of their profile" },
       },
-      async ({ params: { playerId }, query: { realmId } }) =>
+      async ({ params: { playerId }, query: { realmId = DEFAULT_REALM_ID } }) =>
         PlayerPinnedScoresService.getPinnedScores(playerId, realmId)
     );
 }

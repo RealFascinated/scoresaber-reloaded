@@ -25,12 +25,18 @@ import {
   LineElement,
   PointElement,
   Tooltip,
+  type ChartEvent,
   type ChartOptions,
+  type LegendElement,
+  type LegendItem,
+  type ScriptableContext,
+  type ScriptableLineSegmentContext,
+  type TooltipItem,
 } from "chart.js";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
 import { useMemo } from "react";
-import { Line } from "react-chartjs-2";
+import { Chart as ChartComponent } from "react-chartjs-2";
 
 dayjs.extend(utc);
 
@@ -50,6 +56,12 @@ type Props = {
   config: ChartConfig;
   labels: Date[] | string[] | number[];
 };
+
+type LineChartOptions = ChartOptions<"line">;
+type LineScales = NonNullable<LineChartOptions["scales"]>;
+
+// Datasets are either "bar" or "line" (points are drawn as lines with a point radius)
+type MixedChartMode = "bar" | "line";
 
 const GenericChart = ({ config, labels }: Props) => {
   const { id, datasets, axes, options: customOptions } = config;
@@ -99,7 +111,7 @@ const GenericChart = ({ config, labels }: Props) => {
         pointRadius: dataset.pointRadius ?? (dataset.type === "point" ? 3 : 0),
         showLine: dataset.type !== "point",
         segment: {
-          borderDash: (ctx: any) => {
+          borderDash: (ctx: ScriptableLineSegmentContext) => {
             return ctx.p0.skip || ctx.p1.skip ? [5, 5] : [];
           },
         },
@@ -114,13 +126,13 @@ const GenericChart = ({ config, labels }: Props) => {
   }, [datasets, chartLegends, id, labels, isXAxisLinear, isNumericLabels, resolveColor]);
 
   const chartAxes = useMemo(() => {
-    const generatedAxes: Record<string, any> = {
+    const generatedAxes: LineScales = {
       x: isXAxisLinear
         ? {
             type: "linear",
             grid: { color: CHART_THEME.gridColor },
             ticks: axes.x?.valueFormatter
-              ? { callback: (value: number) => axes.x!.valueFormatter!(value) }
+              ? { callback: (value: number | string) => axes.x!.valueFormatter!(Number(value)) }
               : undefined,
           }
         : {
@@ -129,7 +141,8 @@ const GenericChart = ({ config, labels }: Props) => {
               maxRotation: 45,
               minRotation: 45,
               // First arg is tick.value (category index); second is position in ticks array — use value for labels[].
-              callback: (labelIndex: number) => {
+              callback: (tickValue: number | string) => {
+                const labelIndex = Number(tickValue);
                 if (typeof labels[labelIndex] === "string") {
                   return labels[labelIndex];
                 }
@@ -179,7 +192,7 @@ const GenericChart = ({ config, labels }: Props) => {
         ticks: preserveXTicks
           ? previousAxis.ticks
           : {
-              callback: (value: number) => {
+              callback: (value: number | string) => {
                 const formattedValue = Number(Number(value).toFixed(4));
                 return axis.valueFormatter?.(formattedValue) ?? formattedValue.toString();
               },
@@ -216,9 +229,6 @@ const GenericChart = ({ config, labels }: Props) => {
   }, [labels, isXAxisLinear, isNumericLabels]);
 
   const chartOptions = useMemo(() => {
-    type LineChartOptions = ChartOptions<"line">;
-    type LineScales = NonNullable<LineChartOptions["scales"]>;
-
     const mergedScales: LineScales = { ...chartAxes };
     const customScales = (customOptions as LineChartOptions | undefined)?.scales;
     if (customScales) {
@@ -250,7 +260,7 @@ const GenericChart = ({ config, labels }: Props) => {
           tension: 0.4,
         },
         point: {
-          radius: (ctx: any) => {
+          radius: (ctx: ScriptableContext<MixedChartMode>) => {
             if (labels.length > 90) {
               return 0;
             }
@@ -258,9 +268,15 @@ const GenericChart = ({ config, labels }: Props) => {
             if (!dataset) {
               return 3;
             }
-            return dataset.type === "point" ? dataset.pointRadius || 3 : 3;
+            // Point datasets carry a pointRadius that chart.js's dataset typings don't declare
+            const datasetType: string | undefined = dataset.type;
+            const pointRadius =
+              "pointRadius" in dataset && typeof dataset.pointRadius === "number"
+                ? dataset.pointRadius
+                : undefined;
+            return datasetType === "point" ? pointRadius || 3 : 3;
           },
-          hoverRadius: (ctx: any) => {
+          hoverRadius: (ctx: ScriptableContext<MixedChartMode>) => {
             if (labels.length > 365) {
               return 0;
             }
@@ -271,15 +287,23 @@ const GenericChart = ({ config, labels }: Props) => {
             if (!dataset) {
               return 4;
             }
-            return dataset.type === "point" ? (dataset.pointRadius || 3) + 2 : 4;
+            const datasetType: string | undefined = dataset.type;
+            const pointRadius =
+              "pointRadius" in dataset && typeof dataset.pointRadius === "number"
+                ? dataset.pointRadius
+                : undefined;
+            return datasetType === "point" ? (pointRadius || 3) + 2 : 4;
           },
         },
       },
       plugins: {
         legend: {
           position: "top" as const,
-          onClick: (_: any, legendItem: any, legend: any) => {
+          onClick: (_: ChartEvent, legendItem: LegendItem, legend: LegendElement<MixedChartMode>) => {
             const index = legendItem.datasetIndex;
+            if (index === undefined) {
+              return;
+            }
             const chart = legend.chart;
             const willBeVisible = !chart.isDatasetVisible(index);
             chart[willBeVisible ? "show" : "hide"](index);
@@ -295,9 +319,9 @@ const GenericChart = ({ config, labels }: Props) => {
         },
         tooltip: {
           callbacks: {
-            title: (context: any) => {
+            title: (context: TooltipItem<MixedChartMode>[]) => {
               if (isXAxisLinear && isNumericLabels) {
-                const xValue = context[0].parsed.x;
+                const xValue = Number(context[0].parsed.x);
                 return axes.x?.valueFormatter?.(xValue) ?? `${xValue.toFixed(1)}%`;
               }
 
@@ -326,7 +350,7 @@ const GenericChart = ({ config, labels }: Props) => {
               const maxUnits = differenceInDays <= 30 ? 1 : differenceInDays < 395 ? 2 : 3;
               return `${formattedDate} (${timeAgo(date, maxUnits)})`;
             },
-            label: (context: any) => {
+            label: (context: TooltipItem<MixedChartMode>) => {
               const value = Number(context.parsed.y);
               const datasetConfig = datasets[context.datasetIndex];
               if (datasetConfig.labelFormatter) {
@@ -366,10 +390,11 @@ const GenericChart = ({ config, labels }: Props) => {
   return (
     <div className="relative flex h-full w-full">
       <div className="relative block h-full w-full">
-        <Line
+        <ChartComponent<MixedChartMode>
+          type="line"
           className="h-full max-w-full"
           options={chartOptions}
-          data={{ labels: formattedLabels, datasets: chartDatasets as any }}
+          data={{ labels: formattedLabels, datasets: chartDatasets }}
         />
       </div>
     </div>

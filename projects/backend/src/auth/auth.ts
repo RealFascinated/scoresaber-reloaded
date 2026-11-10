@@ -1,3 +1,4 @@
+import { AUTH_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
 import type { AuthConnectionProvider } from "@ssr/common/schemas/auth/connection-provider";
 import { betterAuth } from "better-auth";
@@ -13,9 +14,6 @@ import {
 } from "../db/schema";
 import { AuthConnectionsRepository } from "../repositories/auth-connections.repository";
 
-/** Path prefix the Better Auth handler is mounted on. */
-export const AUTH_BASE_PATH = "/auth";
-
 /** Origins allowed to make credentialed requests to the auth routes. */
 export const AUTH_TRUSTED_ORIGINS: string[] = [env.NEXT_PUBLIC_WEBSITE_URL];
 
@@ -30,7 +28,7 @@ const AUTH_PROVIDER_CONNECTIONS: Record<string, AuthConnectionProvider | undefin
 export const auth = betterAuth({
   appName: env.NEXT_PUBLIC_WEBSITE_NAME,
   baseURL: env.NEXT_PUBLIC_API_URL,
-  basePath: AUTH_BASE_PATH,
+  basePath: AUTH_ROUTE,
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins: AUTH_TRUSTED_ORIGINS,
   database: drizzleAdapter(db, {

@@ -1,7 +1,8 @@
+import { USER_PREFERENCES_ROUTE } from "@ssr/common/api-routes";
 import { UserPreferencesPatchSchema, UserPreferencesSchema } from "@ssr/common/schemas/user/preferences";
 import { Elysia } from "elysia";
 import { authPlugin } from "../../plugins/auth.plugin";
-import { UserPreferencesRepository } from "../../repositories/user-preferences.repository";
+import { UserPreferencesService } from "../../service/user/user-preferences.service";
 
 const PRIVATE_NO_STORE = "private, no-store";
 
@@ -9,7 +10,7 @@ export default function userPreferencesController(app: Elysia) {
   return app
     .use(authPlugin)
     .get(
-      "/user/preferences",
+      USER_PREFERENCES_ROUTE,
       {
         auth: true,
         tags: ["User"],
@@ -18,11 +19,11 @@ export default function userPreferencesController(app: Elysia) {
       },
       async ({ user, set }) => {
         set.headers["cache-control"] = PRIVATE_NO_STORE;
-        return UserPreferencesRepository.get(user.id);
+        return UserPreferencesService.get(user.id);
       }
     )
     .patch(
-      "/user/preferences",
+      USER_PREFERENCES_ROUTE,
       {
         auth: true,
         tags: ["User"],
@@ -34,7 +35,7 @@ export default function userPreferencesController(app: Elysia) {
       },
       async ({ user, body, set }) => {
         set.headers["cache-control"] = PRIVATE_NO_STORE;
-        return UserPreferencesRepository.patch(user.id, body);
+        return UserPreferencesService.patch(user.id, body);
       }
     );
 }

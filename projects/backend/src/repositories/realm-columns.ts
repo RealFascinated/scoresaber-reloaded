@@ -1,4 +1,3 @@
-import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { AnyColumn, SQL } from "drizzle-orm";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import type { alias } from "drizzle-orm/pg-core";
@@ -37,7 +36,7 @@ export function resolvedScoreColumns() {
  *
  * @param realmId the realm to resolve pp for
  */
-export function scoreRealmJoinOn(realmId: number = DEFAULT_REALM_ID): SQL {
+export function scoreRealmJoinOn(realmId: number): SQL {
   return and(
     eq(scoreSaberScoreRealmsTable.scoreId, scoreSaberScoresTable.scoreId),
     eq(scoreSaberScoreRealmsTable.realmId, realmId)
@@ -54,7 +53,7 @@ export function scoreRealmJoinOn(realmId: number = DEFAULT_REALM_ID): SQL {
 export function leaderboardRealmJoinOn(
   leaderboard: { id: AnyColumn },
   leaderboardRealm: { leaderboardId: AnyColumn; realmId: AnyColumn },
-  realmId: number = DEFAULT_REALM_ID
+  realmId: number
 ): SQL {
   return and(
     eq(leaderboardRealm.leaderboardId, leaderboard.id),

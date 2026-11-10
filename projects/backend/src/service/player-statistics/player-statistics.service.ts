@@ -1,5 +1,4 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { eq } from "drizzle-orm";
@@ -18,7 +17,7 @@ export class PlayerStatisticsService {
    */
   public static async getStatistics(
     playerToken: ScoreSaberPlayerLookupToken,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberPlayerStatistics> {
     const playerId = String(playerToken.id);
     const [account] = await db

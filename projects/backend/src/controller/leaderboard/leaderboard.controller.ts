@@ -1,10 +1,13 @@
-import { MapCharacteristicSchema } from "@ssr/common/schemas/map/map-characteristic";
-import { MapDifficultySchema } from "@ssr/common/schemas/map/map-difficulty";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
+import {
+  LeaderboardByHashParamsSchema,
+  LeaderboardSearchQuerySchema,
+} from "@ssr/common/schemas/leaderboard/leaderboard-route";
 import { RealmQuerySchema } from "@ssr/common/schemas/realm/realm-query";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { LeaderboardsPageResponseSchema } from "@ssr/common/schemas/response/leaderboard/leaderboards-page";
-import { ScoreSaberLeaderboardQueryFiltersSchema } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
-import { Elysia, t } from "elysia";
+import { LeaderboardIdParamsSchema } from "@ssr/common/schemas/route/route-params";
+import { Elysia } from "elysia";
 import BeatSaverService from "../../service/external/beatsaver.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 
@@ -15,21 +18,13 @@ export default function leaderboardController(app: Elysia) {
         "/search",
         {
           tags: ["Leaderboard"],
-          query: t.Evaluate(
-            t.Intersect([
-              ScoreSaberLeaderboardQueryFiltersSchema,
-              RealmQuerySchema,
-              t.Object({
-                page: t.Optional(t.Integer({ minimum: 1 })),
-              }),
-            ])
-          ),
+          query: LeaderboardSearchQuerySchema,
           response: LeaderboardsPageResponseSchema,
           detail: {
             description: "Search ScoreSaber leaderboards",
           },
         },
-        async ({ query: { page, realmId, ...filters } }) => {
+        async ({ query: { page, realmId = DEFAULT_REALM_ID, ...filters } }) => {
           return await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(
             page ?? 1,
             {
@@ -57,15 +52,13 @@ export default function leaderboardController(app: Elysia) {
         "/by-id/:leaderboardId/star-history",
         {
           tags: ["Leaderboard"],
-          params: t.Object({
-            leaderboardId: t.Integer({ minimum: 1 }),
-          }),
+          params: LeaderboardIdParamsSchema,
           query: RealmQuerySchema,
           detail: {
             description: "Fetch leaderboard star rating change history",
           },
         },
-        async ({ params: { leaderboardId }, query: { realmId } }) => {
+        async ({ params: { leaderboardId }, query: { realmId = DEFAULT_REALM_ID } }) => {
           const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
           return await ScoreSaberLeaderboardsService.getStarChangeHistory(leaderboard, realmId);
         }
@@ -74,15 +67,13 @@ export default function leaderboardController(app: Elysia) {
         "/by-id/:leaderboardId",
         {
           tags: ["Leaderboard"],
-          params: t.Object({
-            leaderboardId: t.Integer({ minimum: 1 }),
-          }),
+          params: LeaderboardIdParamsSchema,
           query: RealmQuerySchema,
           detail: {
             description: "Fetch leaderboard details",
           },
         },
-        async ({ params: { leaderboardId }, query: { realmId } }) => {
+        async ({ params: { leaderboardId }, query: { realmId = DEFAULT_REALM_ID } }) => {
           const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
           const beatsaver = await BeatSaverService.getMap(
             leaderboard.songHash,
@@ -96,17 +87,13 @@ export default function leaderboardController(app: Elysia) {
         "/by-hash/:hash/:difficulty/:characteristic",
         {
           tags: ["Leaderboard"],
-          params: t.Object({
-            hash: t.String(),
-            difficulty: MapDifficultySchema,
-            characteristic: MapCharacteristicSchema,
-          }),
+          params: LeaderboardByHashParamsSchema,
           query: RealmQuerySchema,
           detail: {
             description: "Fetch leaderboard details",
           },
         },
-        async ({ params: { hash, difficulty, characteristic }, query: { realmId } }) => {
+        async ({ params: { hash, difficulty, characteristic }, query: { realmId = DEFAULT_REALM_ID } }) => {
           const [leaderboard, beatsaver] = await Promise.all([
             ScoreSaberLeaderboardsService.getLeaderboardByHash(hash, difficulty, characteristic, realmId),
             BeatSaverService.getMap(hash, difficulty, characteristic),

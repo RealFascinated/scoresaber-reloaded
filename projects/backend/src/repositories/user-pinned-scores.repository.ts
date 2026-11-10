@@ -1,10 +1,8 @@
-import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { and, asc, count, eq } from "drizzle-orm";
 import { db } from "../db";
 import { authUsersTable, userPinnedScoresTable } from "../db/schema";
-import { ScoreSaberScoresRepository } from "./scoresaber-scores.repository";
 
-export type PinResult = "pinned" | "already-pinned" | "no-player" | "no-score" | "limit-reached";
+export type PinResult = "pinned" | "already-pinned" | "limit-reached";
 
 export class UserPinnedScoresRepository {
   /**
@@ -37,28 +35,20 @@ export class UserPinnedScoresRepository {
   }
 
   /**
-   * Pins one of the user's own scores, current or from their score history. Users can only pin
-   * scores they set, and at most `SHARED_CONSTS.maxPinnedScores` of them.
+   * Pins a score for a user, unless it already is or the user already has `maxPinned` pinned scores.
    *
    * @param userId the user that pins
    * @param scoreId the score to pin
+   * @param maxPinned how many scores a user can pin
    */
-  public static async pin(userId: string, scoreId: number): Promise<PinResult> {
+  public static async pin(userId: string, scoreId: number, maxPinned: number): Promise<PinResult> {
     return db.transaction(async tx => {
       // Lock the user so two pins can't both slip under the limit
-      const [user] = await tx
-        .select({ playerId: authUsersTable.playerId })
+      await tx
+        .select({ id: authUsersTable.id })
         .from(authUsersTable)
         .where(eq(authUsersTable.id, userId))
         .for("update");
-      if (!user?.playerId) {
-        return "no-player";
-      }
-
-      const score = await ScoreSaberScoresRepository.findAnyRowByScoreId(scoreId);
-      if (score?.playerId !== user.playerId) {
-        return "no-score";
-      }
 
       const [existing] = await tx
         .select({ scoreId: userPinnedScoresTable.scoreId })
@@ -72,7 +62,7 @@ export class UserPinnedScoresRepository {
         .select({ total: count() })
         .from(userPinnedScoresTable)
         .where(eq(userPinnedScoresTable.userId, userId));
-      if (total >= SHARED_CONSTS.maxPinnedScores) {
+      if (total >= maxPinned) {
         return "limit-reached";
       }
 

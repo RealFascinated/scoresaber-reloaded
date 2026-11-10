@@ -9,20 +9,24 @@ type CacheOptions = {
   maxObjects?: number;
 };
 
-type CachedObject = {
-  value: any;
+type CachedObject<TValue> = {
+  value: TValue;
 
   timestamp: number;
 };
 
-export class SSRCache {
+/**
+ * In-memory TTL cache. `TValue` is the type of the stored values; it defaults to `unknown` so existing
+ * heterogeneous callers keep compiling, and `get<T>` remains an unchecked assertion for them.
+ */
+export class SSRCache<TValue = unknown> {
   private readonly ttl: number | undefined;
 
   private readonly checkInterval: number | undefined;
 
   private readonly maxObjects: number | undefined;
 
-  private cache = new Map<string, CachedObject>();
+  private cache = new Map<string, CachedObject<TValue>>();
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor({ ttl, checkInterval, maxObjects }: CacheOptions) {
@@ -41,7 +45,7 @@ export class SSRCache {
     }
   }
 
-  public get<T>(key: string): T | undefined {
+  public get<T extends TValue = TValue>(key: string): T | undefined {
     const cachedObject = this.cache.get(key);
     if (cachedObject === undefined) {
       return undefined;
@@ -53,7 +57,7 @@ export class SSRCache {
     return cachedObject.value as T;
   }
 
-  public set<T>(key: string, value: T): void {
+  public set<T extends TValue>(key: string, value: T): void {
     this.cache.set(key, {
       value,
       timestamp: Date.now(),
@@ -98,7 +102,7 @@ export class SSRCache {
     }
   }
 
-  private isExpired(cachedObject: CachedObject): boolean {
+  private isExpired(cachedObject: CachedObject<TValue>): boolean {
     if (this.ttl === undefined) {
       return false;
     }

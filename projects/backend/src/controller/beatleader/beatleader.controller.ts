@@ -1,7 +1,11 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger from "@ssr/common/logger";
+import {
+  BeatLeaderReplayParamsSchema,
+  BeatLeaderScoreStatsParamsSchema,
+} from "@ssr/common/schemas/beatleader/beatleader-route";
 import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
-import { Elysia, redirect, t } from "elysia";
+import { Elysia, redirect } from "elysia";
 import BeatLeaderService from "../../service/beatleader/beatleader.service";
 import { PlayerReplayService } from "../../service/player/player-replay.service";
 
@@ -14,9 +18,7 @@ export default function beatleaderController(app: Elysia) {
         "/scorestats/:scoreId",
         {
           tags: ["BeatLeader"],
-          params: t.Object({
-            scoreId: t.Integer({ minimum: 1 }),
-          }),
+          params: BeatLeaderScoreStatsParamsSchema,
           detail: {
             description: "Fetch BeatLeader score stats",
           },
@@ -29,9 +31,7 @@ export default function beatleaderController(app: Elysia) {
         "/replay/:scoreId",
         {
           tags: ["BeatLeader"],
-          params: t.Object({
-            scoreId: t.String({ pattern: "^\\d+\\.bsor$" }),
-          }),
+          params: BeatLeaderReplayParamsSchema,
           detail: {
             description: "Redirect to the raw BeatLeader replay file",
           },

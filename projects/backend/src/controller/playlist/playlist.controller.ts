@@ -1,9 +1,12 @@
-import { playlistSchema } from "@ssr/common/schemas/ssr/playlist/playlist";
+import {
+  CustomRankedPlaylistQuerySchema,
+  PlaylistResponseSchema,
+  SelfPlaylistQuerySchema,
+  SnipePlaylistQuerySchema,
+} from "@ssr/common/schemas/ssr/playlist/playlist-route";
 import { Elysia, t } from "elysia";
 import { playlistToBplist } from "../../service/playlist/playlist-to-bplist";
 import PlaylistService, { PlaylistIdsSchema } from "../../service/playlist/playlist.service";
-
-const playlistResponseSchema = t.Union([playlistSchema, t.String()]);
 
 /** Serializes to BPLIST when the request path asks for it (`.bplist` suffix). */
 function toBplistIfRequested(
@@ -23,7 +26,7 @@ export default function playlistController(app: Elysia) {
           params: t.Object({
             id: PlaylistIdsSchema,
           }),
-          response: playlistResponseSchema,
+          response: PlaylistResponseSchema,
           detail: {
             description: "Gets a playlist by id",
           },
@@ -37,10 +40,8 @@ export default function playlistController(app: Elysia) {
         "/scoresaber-custom-ranked-maps",
         {
           tags: ["Playlist"],
-          query: t.Object({
-            config: t.String(),
-          }),
-          response: playlistResponseSchema,
+          query: CustomRankedPlaylistQuerySchema,
+          response: PlaylistResponseSchema,
           detail: {
             description: "Create a custom ranked playlist",
           },
@@ -54,10 +55,8 @@ export default function playlistController(app: Elysia) {
         "/scoresaber-custom-ranked-maps.bplist",
         {
           tags: ["Playlist"],
-          query: t.Object({
-            config: t.String(),
-          }),
-          response: playlistResponseSchema,
+          query: CustomRankedPlaylistQuerySchema,
+          response: PlaylistResponseSchema,
           detail: {
             description: "Create a custom ranked playlist (BPLIST)",
           },
@@ -71,12 +70,8 @@ export default function playlistController(app: Elysia) {
         "/snipe",
         {
           tags: ["Playlist"],
-          query: t.Object({
-            user: t.String(),
-            toSnipe: t.String(),
-            settings: t.Optional(t.String()),
-          }),
-          response: playlistResponseSchema,
+          query: SnipePlaylistQuerySchema,
+          response: PlaylistResponseSchema,
           detail: {
             description: "Create a snipe playlist",
           },
@@ -90,12 +85,8 @@ export default function playlistController(app: Elysia) {
         "/snipe.bplist",
         {
           tags: ["Playlist"],
-          query: t.Object({
-            user: t.String(),
-            toSnipe: t.String(),
-            settings: t.Optional(t.String()),
-          }),
-          response: playlistResponseSchema,
+          query: SnipePlaylistQuerySchema,
+          response: PlaylistResponseSchema,
           detail: {
             description: "Create a snipe playlist (BPLIST)",
           },
@@ -109,11 +100,8 @@ export default function playlistController(app: Elysia) {
         "/self",
         {
           tags: ["Playlist"],
-          query: t.Object({
-            user: t.String(),
-            settings: t.Optional(t.String()),
-          }),
-          response: playlistResponseSchema,
+          query: SelfPlaylistQuerySchema,
+          response: PlaylistResponseSchema,
           detail: {
             description: "Create a self playlist",
           },
@@ -127,11 +115,8 @@ export default function playlistController(app: Elysia) {
         "/self.bplist",
         {
           tags: ["Playlist"],
-          query: t.Object({
-            user: t.String(),
-            settings: t.Optional(t.String()),
-          }),
-          response: playlistResponseSchema,
+          query: SelfPlaylistQuerySchema,
+          response: PlaylistResponseSchema,
           detail: {
             description: "Create a self playlist (BPLIST)",
           },

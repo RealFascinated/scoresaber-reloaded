@@ -1,3 +1,4 @@
+import { USER_PINNED_SCORES_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
 import type {
   PinnedScoreIdsResponse,
@@ -15,7 +16,7 @@ async function pinnedRequest(path: string, method: "GET" | "PUT" | "DELETE" = "G
  * @throws when the backend could not be reached or answered with an error
  */
 export async function fetchPinnedScoreIds(): Promise<number[]> {
-  const response = await pinnedRequest("/user/pinned-scores");
+  const response = await pinnedRequest(USER_PINNED_SCORES_ROUTE);
   if (response.status === 401) {
     return [];
   }
@@ -32,7 +33,10 @@ export async function fetchPinnedScoreIds(): Promise<number[]> {
  * @throws with the backend's message when it was refused
  */
 export async function changePinnedScore(scoreId: number, action: "pin" | "unpin"): Promise<number[]> {
-  const response = await pinnedRequest(`/user/pinned-scores/${scoreId}`, action === "pin" ? "PUT" : "DELETE");
+  const response = await pinnedRequest(
+    `${USER_PINNED_SCORES_ROUTE}/${scoreId}`,
+    action === "pin" ? "PUT" : "DELETE"
+  );
   if (!response.ok) {
     const body = (await response.json().catch(() => undefined)) as { message?: string } | undefined;
     throw new Error(body?.message ?? `Failed to ${action} the score (${response.status})`);

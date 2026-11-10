@@ -23,8 +23,8 @@ export class ScoreSaberLeaderboardScoresService {
   public static async getLeaderboardScores(
     leaderboardId: number,
     page: number,
-    country?: string,
-    realmId: number = DEFAULT_REALM_ID
+    country: string | undefined,
+    realmId: number
   ): Promise<LeaderboardScoresResponse | undefined> {
     const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
     if (leaderboard == undefined) {

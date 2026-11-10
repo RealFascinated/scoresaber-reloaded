@@ -38,7 +38,7 @@ export class PlayerSearchService {
     return (
       await Promise.all(
         uniquePlayerIds.map(async id =>
-          ScoreSaberPlayerService.getPlayer(id, "basic", scoreSaberPlayerTokenMap.get(id))
+          ScoreSaberPlayerService.getPlayer(id, "basic", scoreSaberPlayerTokenMap.get(id), DEFAULT_REALM_ID)
         )
       )
     ).sort((a, b) => {

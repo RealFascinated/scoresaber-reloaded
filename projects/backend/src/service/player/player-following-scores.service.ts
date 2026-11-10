@@ -1,6 +1,5 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { Pagination } from "@ssr/common/pagination";
-import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { ScoreSaberScoresPageResponse } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
@@ -21,7 +20,7 @@ export class PlayerFollowingScoresService {
     followingIds: string[],
     leaderboardId: number,
     page: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberScoresPageResponse> {
     const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
     if (!leaderboard) {

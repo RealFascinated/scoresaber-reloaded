@@ -1,3 +1,4 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import { leaderboardRowToType } from "../../src/db/converter/scoresaber-leaderboard";
 import { scoreSaberScoreRowToType } from "../../src/db/converter/scoresaber-score";
@@ -75,7 +76,9 @@ describe("ScoreCoreService", () => {
       await ScoreCoreService.upsertScoresFromApi([score, score, score]);
 
       expect(await ScoreSaberScoresRepository.rowExistsByScoreId(900_060)).toBe(true);
-      expect(await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID)).toBeDefined();
+      expect(
+        await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID, DEFAULT_REALM_ID)
+      ).toBeDefined();
     });
   });
 });

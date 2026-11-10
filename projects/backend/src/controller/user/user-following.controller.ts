@@ -1,10 +1,11 @@
+import { USER_FOLLOWING_ROUTE } from "@ssr/common/api-routes";
 import {
   PlayerFollowsResponseSchema,
   PlayerIdListResponseSchema,
 } from "@ssr/common/schemas/response/user/following";
 import { Elysia, t } from "elysia";
 import { authPlugin } from "../../plugins/auth.plugin";
-import { UserFollowsRepository } from "../../repositories/user-follows.repository";
+import { UserFollowsService } from "../../service/user/user-follows.service";
 
 const PlayerIdParamsSchema = t.Object({
   playerId: t.String({ minLength: 1, maxLength: 32, pattern: "^[A-Za-z0-9_-]+$" }),
@@ -15,7 +16,7 @@ export default function userFollowingController(app: Elysia) {
   return app
     .use(authPlugin)
     .get(
-      "/user/following",
+      USER_FOLLOWING_ROUTE,
       {
         auth: true,
         tags: ["User"],
@@ -24,11 +25,11 @@ export default function userFollowingController(app: Elysia) {
       },
       async ({ user, set }) => {
         set.headers["cache-control"] = PRIVATE_NO_STORE;
-        return { playerIds: await UserFollowsRepository.getFollowingIds(user.id) };
+        return { playerIds: await UserFollowsService.getFollowingIds(user.id) };
       }
     )
     .put(
-      "/user/following/:playerId",
+      `${USER_FOLLOWING_ROUTE}/:playerId`,
       {
         auth: true,
         tags: ["User"],
@@ -38,7 +39,7 @@ export default function userFollowingController(app: Elysia) {
       async ({ user, params: { playerId }, set, status }) => {
         set.headers["cache-control"] = PRIVATE_NO_STORE;
 
-        const result = await UserFollowsRepository.follow(user.id, playerId);
+        const result = await UserFollowsService.follow(user, playerId);
         if (result === "self") {
           return status(400, { statusCode: 400, message: "You can't follow yourself" });
         }
@@ -48,11 +49,11 @@ export default function userFollowingController(app: Elysia) {
             message: "You have reached the maximum of followed players",
           });
         }
-        return { playerIds: await UserFollowsRepository.getFollowingIds(user.id) };
+        return { playerIds: await UserFollowsService.getFollowingIds(user.id) };
       }
     )
     .delete(
-      "/user/following/:playerId",
+      `${USER_FOLLOWING_ROUTE}/:playerId`,
       {
         auth: true,
         tags: ["User"],
@@ -62,8 +63,8 @@ export default function userFollowingController(app: Elysia) {
       async ({ user, params: { playerId }, set }) => {
         set.headers["cache-control"] = PRIVATE_NO_STORE;
 
-        await UserFollowsRepository.unfollow(user.id, playerId);
-        return { playerIds: await UserFollowsRepository.getFollowingIds(user.id) };
+        await UserFollowsService.unfollow(user.id, playerId);
+        return { playerIds: await UserFollowsService.getFollowingIds(user.id) };
       }
     )
     .get(
@@ -74,7 +75,7 @@ export default function userFollowingController(app: Elysia) {
         response: PlayerFollowsResponseSchema,
         detail: { description: "Fetch how many users follow a player and how many players they follow" },
       },
-      async ({ params: { playerId } }) => UserFollowsRepository.getCounts(playerId)
+      async ({ params: { playerId } }) => UserFollowsService.getCounts(playerId)
     )
     .get(
       "/player/:playerId/followers",
@@ -85,7 +86,7 @@ export default function userFollowingController(app: Elysia) {
         detail: { description: "Fetch the players that follow a player (the latest 100)" },
       },
       async ({ params: { playerId } }) => ({
-        playerIds: await UserFollowsRepository.getFollowerIds(playerId),
+        playerIds: await UserFollowsService.getFollowerIds(playerId),
       })
     )
     .get(
@@ -97,7 +98,7 @@ export default function userFollowingController(app: Elysia) {
         detail: { description: "Fetch the players a player follows" },
       },
       async ({ params: { playerId } }) => ({
-        playerIds: await UserFollowsRepository.getFollowingIdsByPlayerId(playerId),
+        playerIds: await UserFollowsService.getFollowingIdsByPlayerId(playerId),
       })
     );
 }

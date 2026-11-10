@@ -141,7 +141,7 @@ export class ScoreSaberScoresRepository {
 
   public static async findRowByScoreId(
     scoreId: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberScoreRow | undefined> {
     const [row] = await db
       .select(resolvedScoreColumns())
@@ -160,7 +160,7 @@ export class ScoreSaberScoresRepository {
    */
   public static async findAnyRowByScoreId(
     scoreId: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberScoreRow | ScoreSaberScoreHistoryRow | undefined> {
     return (
       (await ScoreSaberScoresRepository.findRowByScoreId(scoreId, realmId)) ??
@@ -199,7 +199,7 @@ export class ScoreSaberScoresRepository {
   public static async findByPlayerAndLeaderboard(
     playerId: string,
     leaderboardId: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberScoreRow | undefined> {
     const [row] = await db
       .select(resolvedScoreColumns())
@@ -216,10 +216,7 @@ export class ScoreSaberScoresRepository {
     return row;
   }
 
-  public static async insertScore(
-    row: ScoreSaberScoreInsertRow,
-    realmId: number = DEFAULT_REALM_ID
-  ): Promise<boolean> {
+  public static async insertScore(row: ScoreSaberScoreInsertRow, realmId: number): Promise<boolean> {
     const { base, pp } = splitInsertRow(row);
     return await db.transaction(async tx => {
       const result = await tx
@@ -258,10 +255,7 @@ export class ScoreSaberScoresRepository {
    * @returns whether the new row was inserted (false when a concurrent, newer
    *   row already holds the slot)
    */
-  public static async replaceScore(
-    row: ScoreSaberScoreInsertRow,
-    realmId: number = DEFAULT_REALM_ID
-  ): Promise<boolean> {
+  public static async replaceScore(row: ScoreSaberScoreInsertRow, realmId: number): Promise<boolean> {
     const { base: insertRow, pp } = splitInsertRow(row);
     return await db.transaction(async tx => {
       // Re-read the current row inside the transaction so the snapshot reflects
@@ -344,10 +338,7 @@ export class ScoreSaberScoresRepository {
    * @param rows the score rows to upsert
    * @param realmId the realm the rows' pp belongs to
    */
-  public static async upsertScores(
-    rows: ScoreSaberScoreInsertRow[],
-    realmId: number = DEFAULT_REALM_ID
-  ): Promise<void> {
+  public static async upsertScores(rows: ScoreSaberScoreInsertRow[], realmId: number): Promise<void> {
     if (rows.length === 0) {
       return;
     }
@@ -406,10 +397,7 @@ export class ScoreSaberScoresRepository {
    * Counts scores matching the conditions. Conditions may reference {@link scorePpExpr}; pp is
    * resolved for `realmId`.
    */
-  public static async countByConditions(
-    conditions: SQL[],
-    realmId: number = DEFAULT_REALM_ID
-  ): Promise<number> {
+  public static async countByConditions(conditions: SQL[], realmId: number): Promise<number> {
     const [row] = await db
       .select({ count: sql<number>`cast(count(*) as integer)` })
       .from(scoreSaberScoresTable)
@@ -423,7 +411,7 @@ export class ScoreSaberScoresRepository {
     orderBy: SQL | AnyColumn,
     limit: number,
     offset: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberScoreRow[]> {
     return db
       .select(resolvedScoreColumns())
@@ -438,7 +426,7 @@ export class ScoreSaberScoresRepository {
   public static async getTopScores(
     limit: number,
     offset: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberScoreRow[]> {
     return db
       .select({ ...resolvedScoreColumns(), pp: scoreSaberScoreRealmsTable.pp })
@@ -457,10 +445,7 @@ export class ScoreSaberScoresRepository {
       .offset(offset);
   }
 
-  public static async selectTopPp(
-    limit: number = 50,
-    realmId: number = DEFAULT_REALM_ID
-  ): Promise<{ pp: number }[]> {
+  public static async selectTopPp(limit: number = 50, realmId: number): Promise<{ pp: number }[]> {
     return db
       .select({ pp: scoreSaberScoreRealmsTable.pp })
       .from(scoreSaberScoreRealmsTable)
@@ -478,7 +463,7 @@ export class ScoreSaberScoresRepository {
 
   public static async getPpAndScoreIdByPlayer(
     playerId: string,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<{ pp: number; scoreId: number }[]> {
     return db
       .select({
@@ -498,7 +483,7 @@ export class ScoreSaberScoresRepository {
 
   public static async getRankedRowsByPlayerId(
     playerId: string,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberScoreRow[]> {
     return db
       .select({ ...resolvedScoreColumns(), pp: scoreSaberScoreRealmsTable.pp })
@@ -515,7 +500,7 @@ export class ScoreSaberScoresRepository {
 
   public static async getPlayerScoreStatistics(
     playerId: string,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberPlayerScoreStatistics> {
     const [scoreStats] = await db
       .select({
@@ -562,7 +547,7 @@ export class ScoreSaberScoresRepository {
 
   public static async getAverageAccuracies(
     playerId: string,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<{
     averageAccuracy: number;
     unrankedAccuracy: number;
@@ -608,7 +593,7 @@ export class ScoreSaberScoresRepository {
     leaderboardId: number,
     limit: number,
     offset: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberScoreRow[]> {
     const conditions = and(
       inArray(scoreSaberScoresTable.playerId, followingIds),
@@ -634,7 +619,7 @@ export class ScoreSaberScoresRepository {
 
   public static async getChartRowsByPlayer(
     playerId: string,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<
     {
       accuracy: number;
@@ -719,7 +704,7 @@ export class ScoreSaberScoresRepository {
    */
   public static async selectScoresJoinedLeaderboardsWhere(
     conditions: SQL[],
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<{ scoreRow: ScoreSaberScoreRow; lbRow: ScoreSaberLeaderboardRow }[]> {
     return db
       .select({
@@ -769,7 +754,7 @@ export class ScoreSaberScoresRepository {
    *
    * @param realmId the realm to count ranked scores for
    */
-  public static async countRealmScores(realmId: number = DEFAULT_REALM_ID): Promise<number> {
+  public static async countRealmScores(realmId: number): Promise<number> {
     const [row] = await db
       .select({ count: sql<number>`cast(count(*) as integer)` })
       .from(scoreSaberScoreRealmsTable)

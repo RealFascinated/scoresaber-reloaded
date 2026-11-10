@@ -9,6 +9,7 @@ import {
 } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import type { SelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-settings-schema";
 import { parseSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { parseSchema } from "@ssr/common/schemas/parse";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardQueryCategory } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
@@ -109,7 +110,7 @@ export default class PlaylistService {
    * @returns the ranked maps playlist
    */
   public static async getRankedMapsPlaylist(): Promise<Playlist> {
-    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
+    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(DEFAULT_REALM_ID);
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of rankedLeaderboards) {
       if (!leaderboards.has(leaderboard.songHash)) {
@@ -142,7 +143,8 @@ export default class PlaylistService {
    * @returns the qualified maps playlist
    */
   public static async getQualifiedMapsPlaylist(): Promise<Playlist> {
-    const qualifiedLeaderboards = await ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();
+    const qualifiedLeaderboards =
+      await ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards(DEFAULT_REALM_ID);
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of qualifiedLeaderboards) {
       if (!leaderboards.has(leaderboard.songHash)) {
@@ -208,7 +210,10 @@ export default class PlaylistService {
    * @returns the top trending leaderboards playlist
    */
   public static async getTopTrendingMapsPlaylist(): Promise<Playlist> {
-    const trendingLeaderboards = await ScoreSaberLeaderboardsRepository.getTopTrendingLeaderboards(150);
+    const trendingLeaderboards = await ScoreSaberLeaderboardsRepository.getTopTrendingLeaderboards(
+      150,
+      DEFAULT_REALM_ID
+    );
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of trendingLeaderboards) {
       if (!leaderboards.has(leaderboard.songHash)) {
@@ -249,12 +254,15 @@ export default class PlaylistService {
       plays: "plays",
       dailyPlays: "daily_plays",
     };
-    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards({
-      ranked: true,
-      minStars: parsedConfig.stars.min,
-      maxStars: parsedConfig.stars.max,
-      category: sort[parsedConfig.sort] ?? "date_ranked",
-    });
+    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards(
+      {
+        ranked: true,
+        minStars: parsedConfig.stars.min,
+        maxStars: parsedConfig.stars.max,
+        category: sort[parsedConfig.sort] ?? "date_ranked",
+      },
+      DEFAULT_REALM_ID
+    );
 
     // `getLeaderboards` returns each leaderboard without its `difficulties`
     // array populated — group by song hash and collect the difficulties so
@@ -531,10 +539,17 @@ export default class PlaylistService {
       conditions.push(lte(scoreSaberLeaderboardRealmsTable.stars, starRange.max));
     }
 
-    const rows = await ScoreSaberScoresRepository.selectScoresJoinedLeaderboardsWhere(conditions);
+    const rows = await ScoreSaberScoresRepository.selectScoresJoinedLeaderboardsWhere(
+      conditions,
+      DEFAULT_REALM_ID
+    );
 
     const leaderboardIds = [...new Set(rows.map(r => r.lbRow.id))];
-    const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(leaderboardIds, false);
+    const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(
+      leaderboardIds,
+      false,
+      DEFAULT_REALM_ID
+    );
     const leaderboardMap = new Map(leaderboards.map(lb => [lb.id, lb]));
 
     return rows.map(({ scoreRow, lbRow }) => {

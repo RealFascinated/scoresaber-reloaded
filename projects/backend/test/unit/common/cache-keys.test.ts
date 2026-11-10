@@ -1,4 +1,5 @@
 import { DetailType } from "@ssr/common/detail-type";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import {
   beatLeaderScoreByIdCacheKey,
@@ -44,7 +45,7 @@ describe("playerCacheKey", () => {
 
   for (const { name, id, type, expected } of cases) {
     test(name, () => {
-      expect(playerCacheKey(id, type)).toBe(expected);
+      expect(playerCacheKey(id, type, DEFAULT_REALM_ID)).toBe(expected);
     });
   }
 });
@@ -52,25 +53,29 @@ describe("playerCacheKey", () => {
 describe("playerCacheKeyPrefix", () => {
   test("covers every realm and detail type of the same player", () => {
     const prefix = playerCacheKeyPrefix("player-1");
-    expect(playerCacheKey("player-1", "basic").startsWith(prefix)).toBe(true);
+    expect(playerCacheKey("player-1", "basic", DEFAULT_REALM_ID).startsWith(prefix)).toBe(true);
     expect(playerCacheKey("player-1", "full", 2).startsWith(prefix)).toBe(true);
   });
 
   test("does not cover a different player whose id starts with the same characters", () => {
-    expect(playerCacheKey("player-10", "basic").startsWith(playerCacheKeyPrefix("player-1"))).toBe(false);
+    expect(
+      playerCacheKey("player-10", "basic", DEFAULT_REALM_ID).startsWith(playerCacheKeyPrefix("player-1"))
+    ).toBe(false);
   });
 });
 
 describe("playerCacheKeysPattern", () => {
   test("matches every player cache key", () => {
     const prefix = playerCacheKeysPattern.slice(0, -1);
-    expect(playerCacheKey("player-1", "basic").startsWith(prefix)).toBe(true);
+    expect(playerCacheKey("player-1", "basic", DEFAULT_REALM_ID).startsWith(prefix)).toBe(true);
     expect(playerCacheKey("player-2", "full", 2).startsWith(prefix)).toBe(true);
   });
 
   test("does not match mini-ranking keys", () => {
     const prefix = playerCacheKeysPattern.slice(0, -1);
-    expect(miniRankingCacheKey("player-1", "global", 1).startsWith(prefix)).toBe(false);
+    expect(miniRankingCacheKey("player-1", "global", 1, undefined, DEFAULT_REALM_ID).startsWith(prefix)).toBe(
+      false
+    );
   });
 });
 
@@ -125,7 +130,7 @@ describe("miniRankingCacheKey", () => {
 
   for (const { name, playerId, type, page, country, expected } of cases) {
     test(name, () => {
-      expect(miniRankingCacheKey(playerId, type, page, country)).toBe(expected);
+      expect(miniRankingCacheKey(playerId, type, page, country, DEFAULT_REALM_ID)).toBe(expected);
     });
   }
 });

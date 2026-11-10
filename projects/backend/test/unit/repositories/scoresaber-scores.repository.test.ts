@@ -1,3 +1,4 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import { desc, eq } from "drizzle-orm";
 import { scoreSaberScoresTable } from "../../../src/db/schema";
@@ -25,7 +26,7 @@ const DUPLICATE_SCORE_ID = 900_012;
 describe("ScoreSaberScoresRepository", () => {
   describe("findPlayerIdsInTimeRange", () => {
     test("returns players with scores inside the inclusive window", async () => {
-      const row = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID);
+      const row = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID, DEFAULT_REALM_ID);
       const from = new Date(row!.timestamp.getTime() - 1000);
       const to = new Date(row!.timestamp.getTime() + 1000);
       const ids = await ScoreSaberScoresRepository.findPlayerIdsInTimeRange([TEST_PLAYER_ID], from, to);
@@ -44,13 +45,15 @@ describe("ScoreSaberScoresRepository", () => {
 
   describe("findRowByScoreId", () => {
     test("returns the seeded score", async () => {
-      const row = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID);
+      const row = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID, DEFAULT_REALM_ID);
       expect(row?.playerId).toBe(TEST_PLAYER_ID);
       expect(row?.leaderboardId).toBe(TEST_LEADERBOARD_ID);
     });
 
     test("returns undefined for an unknown score id", async () => {
-      expect(await ScoreSaberScoresRepository.findRowByScoreId(UNKNOWN_SCORE_ID)).toBeUndefined();
+      expect(
+        await ScoreSaberScoresRepository.findRowByScoreId(UNKNOWN_SCORE_ID, DEFAULT_REALM_ID)
+      ).toBeUndefined();
     });
   });
 
@@ -78,7 +81,7 @@ describe("ScoreSaberScoresRepository", () => {
 
   describe("existsByScoreIdAndScore", () => {
     test("returns true when both id and score value match", async () => {
-      const row = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID);
+      const row = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID, DEFAULT_REALM_ID);
       expect(await ScoreSaberScoresRepository.existsByScoreIdAndScore(TEST_SCORE_ID, row!.score)).toBe(true);
     });
 
@@ -91,14 +94,19 @@ describe("ScoreSaberScoresRepository", () => {
     test("returns the current personal best row", async () => {
       const row = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
         TEST_PLAYER_ID,
-        TEST_LEADERBOARD_ID
+        TEST_LEADERBOARD_ID,
+        DEFAULT_REALM_ID
       );
       expect(row?.scoreId).toBe(TEST_SCORE_ID);
     });
 
     test("returns undefined when the player has no score on the map", async () => {
       expect(
-        await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(UNKNOWN_PLAYER_ID, TEST_LEADERBOARD_ID)
+        await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
+          UNKNOWN_PLAYER_ID,
+          TEST_LEADERBOARD_ID,
+          DEFAULT_REALM_ID
+        )
       ).toBeUndefined();
     });
   });
@@ -111,10 +119,13 @@ describe("ScoreSaberScoresRepository", () => {
           playerId: TEST_PLAYER_TWO_ID,
           leaderboardId: TEST_LEADERBOARD_QUALIFIED_ID,
           pp: 0,
-        })
+        }),
+        DEFAULT_REALM_ID
       );
       expect(inserted).toBe(true);
-      expect(await ScoreSaberScoresRepository.findRowByScoreId(INSERT_SCORE_ID)).toBeDefined();
+      expect(
+        await ScoreSaberScoresRepository.findRowByScoreId(INSERT_SCORE_ID, DEFAULT_REALM_ID)
+      ).toBeDefined();
     });
 
     test("returns false on duplicate score id", async () => {
@@ -124,25 +135,29 @@ describe("ScoreSaberScoresRepository", () => {
         leaderboardId: TEST_LEADERBOARD_QUALIFIED_ID,
       });
 
-      expect(await ScoreSaberScoresRepository.insertScore(row)).toBe(true);
-      expect(await ScoreSaberScoresRepository.insertScore(row)).toBe(false);
+      expect(await ScoreSaberScoresRepository.insertScore(row, DEFAULT_REALM_ID)).toBe(true);
+      expect(await ScoreSaberScoresRepository.insertScore(row, DEFAULT_REALM_ID)).toBe(false);
     });
   });
 
   describe("replaceScore", () => {
     test("replaces the current row and archives the previous attempt", async () => {
-      const original = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID);
+      const original = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID, DEFAULT_REALM_ID);
       const replacementId = 900_011;
-      const replaced = await ScoreSaberScoresRepository.replaceScore({
-        ...original!,
-        scoreId: replacementId,
-        score: original!.score + 5,
-        timestamp: new Date(original!.timestamp.getTime() + 60_000),
-      });
+      const replaced = await ScoreSaberScoresRepository.replaceScore(
+        {
+          ...original!,
+          scoreId: replacementId,
+          score: original!.score + 5,
+          timestamp: new Date(original!.timestamp.getTime() + 60_000),
+        },
+        DEFAULT_REALM_ID
+      );
       expect(replaced).toBe(true);
       const current = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
         TEST_PLAYER_ID,
-        TEST_LEADERBOARD_ID
+        TEST_LEADERBOARD_ID,
+        DEFAULT_REALM_ID
       );
       expect(current?.scoreId).toBe(replacementId);
     });
@@ -177,7 +192,7 @@ describe("ScoreSaberScoresRepository", () => {
 
   describe("getTopScores", () => {
     test("returns ranked scores for non-banned players", async () => {
-      const rows = await ScoreSaberScoresRepository.getTopScores(10, 0);
+      const rows = await ScoreSaberScoresRepository.getTopScores(10, 0, DEFAULT_REALM_ID);
       expect(rows.length).toBeGreaterThanOrEqual(2);
       expect(rows[0]!.pp).toBeGreaterThanOrEqual(rows[1]!.pp);
     });
@@ -185,7 +200,7 @@ describe("ScoreSaberScoresRepository", () => {
 
   describe("selectTopPp", () => {
     test("returns pp values in descending order", async () => {
-      const rows = await ScoreSaberScoresRepository.selectTopPp(5);
+      const rows = await ScoreSaberScoresRepository.selectTopPp(5, DEFAULT_REALM_ID);
       expect(rows.length).toBeGreaterThanOrEqual(2);
       expect(rows[0]!.pp).toBeGreaterThanOrEqual(rows[1]!.pp);
     });
@@ -193,7 +208,7 @@ describe("ScoreSaberScoresRepository", () => {
 
   describe("getRankedRowsByPlayerId", () => {
     test("returns ranked rows for a seeded player", async () => {
-      const rows = await ScoreSaberScoresRepository.getRankedRowsByPlayerId(TEST_PLAYER_ID);
+      const rows = await ScoreSaberScoresRepository.getRankedRowsByPlayerId(TEST_PLAYER_ID, DEFAULT_REALM_ID);
       expect(rows.length).toBeGreaterThanOrEqual(1);
       expect(rows.every(row => row.pp > 0)).toBe(true);
     });
@@ -201,21 +216,24 @@ describe("ScoreSaberScoresRepository", () => {
 
   describe("getPlayerScoreStatistics", () => {
     test("returns aggregate statistics for a seeded player", async () => {
-      const stats = await ScoreSaberScoresRepository.getPlayerScoreStatistics(TEST_PLAYER_ID);
+      const stats = await ScoreSaberScoresRepository.getPlayerScoreStatistics(
+        TEST_PLAYER_ID,
+        DEFAULT_REALM_ID
+      );
       expect(stats.totalScores).toBeGreaterThanOrEqual(1);
       expect(stats.totalRankedScores).toBeGreaterThanOrEqual(1);
     });
 
     test("returns zeroed statistics for an unknown player", async () => {
-      expect(await ScoreSaberScoresRepository.getPlayerScoreStatistics(UNKNOWN_PLAYER_ID)).toEqual(
-        emptyScoreSaberPlayerScoreStatistics()
-      );
+      expect(
+        await ScoreSaberScoresRepository.getPlayerScoreStatistics(UNKNOWN_PLAYER_ID, DEFAULT_REALM_ID)
+      ).toEqual(emptyScoreSaberPlayerScoreStatistics());
     });
   });
 
   describe("getPpAndScoreIdByPlayer", () => {
     test("returns pp rows for a seeded player", async () => {
-      const rows = await ScoreSaberScoresRepository.getPpAndScoreIdByPlayer(TEST_PLAYER_ID);
+      const rows = await ScoreSaberScoresRepository.getPpAndScoreIdByPlayer(TEST_PLAYER_ID, DEFAULT_REALM_ID);
       expect(rows.length).toBeGreaterThanOrEqual(1);
       expect(rows[0]!.scoreId).toBe(TEST_SCORE_ID);
     });
@@ -244,7 +262,8 @@ describe("ScoreSaberScoresRepository", () => {
         [TEST_PLAYER_ID, TEST_PLAYER_TWO_ID],
         TEST_LEADERBOARD_ID,
         10,
-        0
+        0,
+        DEFAULT_REALM_ID
       );
       expect(rows.length).toBe(2);
     });
@@ -252,14 +271,14 @@ describe("ScoreSaberScoresRepository", () => {
 
   describe("getAverageAccuracies", () => {
     test("returns accuracy aggregates for a seeded player", async () => {
-      const result = await ScoreSaberScoresRepository.getAverageAccuracies(TEST_PLAYER_ID);
+      const result = await ScoreSaberScoresRepository.getAverageAccuracies(TEST_PLAYER_ID, DEFAULT_REALM_ID);
       expect(result.averageAccuracy).toBeGreaterThan(0);
     });
   });
 
   describe("getChartRowsByPlayer", () => {
     test("returns chart rows for a seeded player", async () => {
-      const rows = await ScoreSaberScoresRepository.getChartRowsByPlayer(TEST_PLAYER_ID);
+      const rows = await ScoreSaberScoresRepository.getChartRowsByPlayer(TEST_PLAYER_ID, DEFAULT_REALM_ID);
       expect(rows.length).toBeGreaterThanOrEqual(1);
     });
   });
@@ -267,12 +286,13 @@ describe("ScoreSaberScoresRepository", () => {
   describe("countByConditions and findRowsByConditions", () => {
     test("filters rows by player id", async () => {
       const conditions = [eq(scoreSaberScoresTable.playerId, TEST_PLAYER_ID)];
-      expect(await ScoreSaberScoresRepository.countByConditions(conditions)).toBe(1);
+      expect(await ScoreSaberScoresRepository.countByConditions(conditions, DEFAULT_REALM_ID)).toBe(1);
       const rows = await ScoreSaberScoresRepository.findRowsByConditions(
         conditions,
         desc(scorePpExpr),
         10,
-        0
+        0,
+        DEFAULT_REALM_ID
       );
       expect(rows).toHaveLength(1);
       expect(rows[0]!.scoreId).toBe(TEST_SCORE_ID);

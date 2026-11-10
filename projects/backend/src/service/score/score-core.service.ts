@@ -68,7 +68,11 @@ export class ScoreCoreService {
     }
 
     const playerId = score.playerId;
-    const currentRow = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(playerId, leaderboard.id);
+    const currentRow = await ScoreSaberScoresRepository.findByPlayerAndLeaderboard(
+      playerId,
+      leaderboard.id,
+      DEFAULT_REALM_ID
+    );
 
     let hasPreviousScore = false;
     const insertRow = ScoreCoreService.toInsertRow(score);
@@ -82,7 +86,7 @@ export class ScoreCoreService {
         // Atomic replace: snapshots the previous PB to history and upserts the
         // new row in one transaction, with the newest play winning under
         // concurrent writes (see ScoreSaberScoresRepository.replaceScore).
-        const inserted = await ScoreSaberScoresRepository.replaceScore(insertRow);
+        const inserted = await ScoreSaberScoresRepository.replaceScore(insertRow, DEFAULT_REALM_ID);
         if (!inserted) {
           return { score: undefined, hasPreviousScore, tracked: false };
         }
@@ -91,7 +95,7 @@ export class ScoreCoreService {
         return { score: undefined, hasPreviousScore: true, tracked: true };
       }
     } else {
-      const inserted = await ScoreSaberScoresRepository.insertScore(insertRow);
+      const inserted = await ScoreSaberScoresRepository.insertScore(insertRow, DEFAULT_REALM_ID);
       if (!inserted) {
         // Either a concurrent writer already recorded this scoreId (fine), or it
         // took the (playerId, leaderboardId) slot with a different score — keep
@@ -247,7 +251,7 @@ export class ScoreCoreService {
     }
 
     try {
-      await ScoreSaberScoresRepository.upsertScores(insertRows);
+      await ScoreSaberScoresRepository.upsertScores(insertRows, DEFAULT_REALM_ID);
     } catch (error) {
       ScoreCoreService.logger.debug(
         `Bulk score upsert for %d score(s) failed, retrying per score: %s`,
@@ -256,7 +260,7 @@ export class ScoreCoreService {
       );
       await Promise.allSettled(
         insertRows.map(row =>
-          ScoreSaberScoresRepository.upsertScores([row]).catch(error =>
+          ScoreSaberScoresRepository.upsertScores([row], DEFAULT_REALM_ID).catch(error =>
             ScoreCoreService.logger.debug(
               `Failed to upsert score "%s" for player "%s": %s`,
               row.scoreId,
@@ -299,7 +303,7 @@ export class ScoreCoreService {
     };
 
     leaderboard = !leaderboard
-      ? await ScoreSaberLeaderboardsService.getLeaderboard(score.leaderboardId)
+      ? await ScoreSaberLeaderboardsService.getLeaderboard(score.leaderboardId, DEFAULT_REALM_ID)
       : leaderboard;
 
     if (!leaderboard) {

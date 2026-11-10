@@ -2,6 +2,7 @@ import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import OverlayDataClient from "../data-client";
+import { isHandledEventName } from "../event-name";
 import { resetOverlayData, useOverlayDataStore } from "../overlay-data-store";
 import { BeatSaberPlus_GameStateEvent } from "../types/beatsaberplus/event/game-state";
 import { BeatSaberPlus_MapInfoEvent } from "../types/beatsaberplus/event/map-info";
@@ -79,13 +80,9 @@ export default class BeatSaberPlusClient extends OverlayDataClient {
 
   onMessage(message: string) {
     const data = JSON.parse(message);
-    if (!isValidEventName(data._event)) {
+    if (!isHandledEventName(handlers, data._event)) {
       return;
     }
     handlers[data._event as EventName](data);
   }
-}
-
-function isValidEventName(event: unknown): event is EventName {
-  return typeof event === "string" && event in handlers;
 }

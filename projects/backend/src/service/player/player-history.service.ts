@@ -69,7 +69,12 @@ export class PlayerHistoryService {
 
       try {
         const account = await PlayerCoreService.getOrCreateAccount(playerId, player);
-        const statistics = await PlayerHistoryService.trackPlayerHistory(account, now, player);
+        const statistics = await PlayerHistoryService.trackPlayerHistory(
+          account,
+          now,
+          player,
+          DEFAULT_REALM_ID
+        );
 
         // Update the player's inactive status if it has changed
         if (account.inactive !== player.inactive) {
@@ -78,7 +83,7 @@ export class PlayerHistoryService {
         }
 
         // Ranks shift without the player doing anything, so the nightly tokens keep cached profiles live
-        await ScoreSaberPlayerService.cacheBasicPlayer(player, account);
+        await ScoreSaberPlayerService.cacheBasicPlayer(player, account, DEFAULT_REALM_ID);
         refreshedPlayerIds.push(playerId);
 
         // If the player has fewer recorded plays (current rows + archived attempts)
@@ -253,7 +258,7 @@ export class PlayerHistoryService {
     player: ScoreSaberAccount,
     trackTime: Date,
     playerToken: ScoreSaberPlayerLookupToken,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberPlayerStatistics | undefined> {
     // Don't track inactive players
     if (!playerToken || playerToken.inactive) {
@@ -293,8 +298,8 @@ export class PlayerHistoryService {
     playerToken: ScoreSaberPlayerLookupToken,
     date: Date,
     statistics: ScoreSaberPlayerStatistics,
-    includeToday?: boolean,
-    realmId: number = DEFAULT_REALM_ID
+    includeToday: boolean | undefined,
+    realmId: number
   ): Promise<ScoreSaberPlayerHistoryEntries> {
     const targetDate = getMidnightAlignedDate(date);
     const dateKey = formatDateMinimal(targetDate);
@@ -339,7 +344,7 @@ export class PlayerHistoryService {
     playerToken: ScoreSaberPlayerLookupToken,
     statistics: ScoreSaberPlayerStatistics,
     count: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberPlayerHistoryEntries> {
     const today = getMidnightAlignedDate(new Date());
     const allTime = count === -1;
@@ -386,7 +391,7 @@ export class PlayerHistoryService {
   public static async getTodayPlayerStatistic(
     playerToken: ScoreSaberPlayerLookupToken,
     statistics: ScoreSaberPlayerStatistics,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberPlayerHistory | undefined> {
     const today = getMidnightAlignedDate(new Date());
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(playerToken.id, today, realmId);
@@ -454,6 +459,6 @@ export class PlayerHistoryService {
     const today = getMidnightAlignedDate(new Date());
     const counterKey = getCounterToIncrement(isRanked, isImprovement) as DailyScoreCounterKey;
 
-    await PlayerHistoryRepository.incrementDailyCounter(playerId, today, counterKey);
+    await PlayerHistoryRepository.incrementDailyCounter(playerId, today, counterKey, DEFAULT_REALM_ID);
   }
 }

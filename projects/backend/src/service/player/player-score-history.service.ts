@@ -33,7 +33,7 @@ export class PlayerScoreHistoryService {
 
     const [rows, curve] = await Promise.all([
       ScoreSaberScoreHistoryRepository.getPpAccuracyByLeaderboardId(leaderboard.id),
-      RealmService.getCalculationCurve(),
+      RealmService.getCalculationCurve(DEFAULT_REALM_ID),
     ]);
     const updates: Partial<ScoreSaberScoreHistoryRow>[] = [];
 
@@ -67,7 +67,7 @@ export class PlayerScoreHistoryService {
     playerId: string,
     leaderboardId: number,
     page: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberScoresPageResponse> {
     const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
     if (!leaderboard) {

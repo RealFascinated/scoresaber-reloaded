@@ -1,3 +1,4 @@
+import { USER_FOLLOWING_ROUTE, USER_PREFERENCES_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
 import { parseSchema } from "@ssr/common/schemas/parse";
 import { AuthMeResponseSchema, type AuthMeResponse } from "@ssr/common/schemas/response/auth/me";
@@ -33,8 +34,8 @@ export async function getServerSession(cookie: string): Promise<ServerSession> {
   try {
     const [meResponse, preferencesResponse, followingResponse] = await Promise.all([
       backendGet("/me", cookie),
-      backendGet("/user/preferences", cookie),
-      backendGet("/user/following", cookie),
+      backendGet(USER_PREFERENCES_ROUTE, cookie),
+      backendGet(USER_FOLLOWING_ROUTE, cookie),
     ]);
     if (meResponse.status === 401) {
       return { status: "anonymous" };

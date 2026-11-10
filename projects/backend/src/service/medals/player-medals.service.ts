@@ -1,4 +1,5 @@
 import { Pagination } from "@ssr/common/pagination";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
 import {
   MedalRankingPlayer,
@@ -58,7 +59,7 @@ export class PlayerMedalsService {
    * and refreshes materialized medal rank columns.
    */
   public static async recomputeMedalsFromScoresAndRefreshAccounts(): Promise<void> {
-    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
+    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(DEFAULT_REALM_ID);
 
     for (const batch of chunkArray(rankedLeaderboards, RANKED_MEDAL_RECOMPUTE_CONCURRENCY)) {
       await Promise.all(batch.map(lb => ScoreSaberMedalsRepository.updateMedalsOnRankedLeaderboard(lb)));

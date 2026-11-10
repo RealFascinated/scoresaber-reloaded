@@ -68,7 +68,7 @@ export class RealmService {
    * @param realmId the ID of the realm
    * @returns the curve points, sorted by ascending accuracy
    */
-  public static async getCalculationCurve(realmId: number = DEFAULT_REALM_ID) {
+  public static async getCalculationCurve(realmId: number) {
     try {
       return (await RealmService.getRealmPpCurve(realmId)).curve;
     } catch (error) {

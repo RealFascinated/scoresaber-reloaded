@@ -1,4 +1,4 @@
-import { accSaberScoreSortSchema, accSaberScoreTypeSchema } from "@ssr/common/schemas/accsaber/query/query";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { RealmQuerySchema } from "@ssr/common/schemas/realm/realm-query";
 import { AccSaberScoresPageResponseSchema } from "@ssr/common/schemas/response/score/accsaber-scores-page";
 import {
@@ -9,16 +9,26 @@ import {
 import { ScoreHistoryGraphSchema } from "@ssr/common/schemas/response/score/score-history-graph";
 import { ScoreSaberScoresPageResponseSchema } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import { TopScoresPageResponseSchema } from "@ssr/common/schemas/response/score/top-scores";
+import { LeaderboardPageParamsSchema } from "@ssr/common/schemas/route/route-params";
 import {
   PlayerScoresQuery,
   PlayerScoresQuerySchema,
 } from "@ssr/common/schemas/score/query/player-scores-query";
-import { ScoreSaberMedalScoreSortFieldSchema } from "@ssr/common/schemas/score/query/sort/scoresaber-medal-scores-sort";
-import { ScoreSaberScoreSortFieldSchema } from "@ssr/common/schemas/score/query/sort/scoresaber-scores-sort";
-import { SortDirectionSchema } from "@ssr/common/schemas/score/query/sort/sort-direction";
-import { ScoreSaberScoreSortSchema } from "@ssr/common/score/score-sort";
-import { SHARED_CONSTS } from "@ssr/common/shared-consts";
-import { Elysia, t } from "elysia";
+import {
+  AccSaberPlayerScoresParamsSchema,
+  AccSaberPlayerScoresQuerySchema,
+  FollowingLeaderboardScoresBodySchema,
+  LeaderboardScoresQuerySchema,
+  PlayerMedalScoresParamsSchema,
+  PlayerScoreHistoryGraphParamsSchema,
+  PlayerScoresParamsSchema,
+  ScoreByIdParamsSchema,
+  ScoreSaberLivePlayerScoresParamsSchema,
+  ScoreSaberLivePlayerScoresQuerySchema,
+  TopScoresParamsSchema,
+  TopScoresQuerySchema,
+} from "@ssr/common/schemas/score/scores-route";
+import { Elysia } from "elysia";
 import { ScoreSaberLeaderboardScoresService } from "../../service/leaderboard/scoresaber-leaderboard-scores.service";
 import { PlayerFollowingScoresService } from "../../service/player/player-following-scores.service";
 import { PlayerScoreHistoryService } from "../../service/player/player-score-history.service";
@@ -32,9 +42,7 @@ export default function scoresController(app: Elysia) {
         "/:scoreId",
         {
           tags: ["Scores"],
-          params: t.Object({
-            scoreId: t.Integer({ minimum: 1 }),
-          }),
+          params: ScoreByIdParamsSchema,
           query: RealmQuerySchema,
           response: PlayerScoreSchema,
 
@@ -42,7 +50,7 @@ export default function scoresController(app: Elysia) {
             description: "Fetch a score",
           },
         },
-        async ({ params: { scoreId }, query: { realmId } }) => {
+        async ({ params: { scoreId }, query: { realmId = DEFAULT_REALM_ID } }) => {
           return PlayerScoresService.getScore(scoreId, realmId);
         }
       )
@@ -50,14 +58,8 @@ export default function scoresController(app: Elysia) {
         "/player/scoresaber/:playerId/:sort/:page",
         {
           tags: ["Scores"],
-          params: t.Object({
-            playerId: t.String(),
-            page: t.Integer({ minimum: 1 }),
-            sort: ScoreSaberScoreSortSchema,
-          }),
-          query: t.Object({
-            search: t.Optional(t.String()),
-          }),
+          params: ScoreSaberLivePlayerScoresParamsSchema,
+          query: ScoreSaberLivePlayerScoresQuerySchema,
           response: PlayerScoresPageResponseSchema,
           detail: {
             description: "Fetch player scores from ScoreSaber",
@@ -71,15 +73,8 @@ export default function scoresController(app: Elysia) {
         "/player/accsaber/:playerId/:page",
         {
           tags: ["Scores"],
-          params: t.Object({
-            playerId: t.String(),
-            page: t.Integer({ minimum: 1 }),
-          }),
-          query: t.Object({
-            sort: t.Optional(t.Union(accSaberScoreSortSchema.anyOf)),
-            direction: t.Optional(t.Union(SortDirectionSchema.anyOf)),
-            type: t.Optional(t.Union(accSaberScoreTypeSchema.anyOf)),
-          }),
+          params: AccSaberPlayerScoresParamsSchema,
+          query: AccSaberPlayerScoresQuerySchema,
           response: AccSaberScoresPageResponseSchema,
           detail: {
             description: "Fetch AccSaber player scores with optional BeatLeader replay URLs",
@@ -99,12 +94,7 @@ export default function scoresController(app: Elysia) {
         "/player/ssr/:playerId/:field/:direction/:page",
         {
           tags: ["Scores"],
-          params: t.Object({
-            playerId: t.String(),
-            field: ScoreSaberScoreSortFieldSchema,
-            direction: SortDirectionSchema,
-            page: t.Integer({ minimum: 1 }),
-          }),
+          params: PlayerScoresParamsSchema,
           query: PlayerScoresQuerySchema,
           response: PlayerScoresPageResponseSchema,
           detail: {
@@ -126,12 +116,7 @@ export default function scoresController(app: Elysia) {
         "/player/medals/:playerId/:field/:direction/:page",
         {
           tags: ["Scores"],
-          params: t.Object({
-            playerId: t.String(),
-            field: ScoreSaberMedalScoreSortFieldSchema,
-            direction: SortDirectionSchema,
-            page: t.Integer({ minimum: 1 }),
-          }),
+          params: PlayerMedalScoresParamsSchema,
           query: PlayerScoresQuerySchema,
           response: MedalPlayerScoresPageResponseSchema,
           detail: {
@@ -152,10 +137,7 @@ export default function scoresController(app: Elysia) {
         "/history-graph/:playerId/:leaderboardId",
         {
           tags: ["Scores"],
-          params: t.Object({
-            playerId: t.String(),
-            leaderboardId: t.Integer({ minimum: 1 }),
-          }),
+          params: PlayerScoreHistoryGraphParamsSchema,
           response: ScoreHistoryGraphSchema,
           detail: {
             description: "Fetch player score history graph",
@@ -169,23 +151,13 @@ export default function scoresController(app: Elysia) {
         "/leaderboard/:leaderboardId/:page",
         {
           tags: ["Scores"],
-          params: t.Object({
-            leaderboardId: t.Integer({ minimum: 1 }),
-            page: t.Integer({ minimum: 1 }),
-          }),
-          query: t.Evaluate(
-            t.Intersect([
-              RealmQuerySchema,
-              t.Object({
-                country: t.Optional(t.String()),
-              }),
-            ])
-          ),
+          params: LeaderboardPageParamsSchema,
+          query: LeaderboardScoresQuerySchema,
           detail: {
             description: "Fetch leaderboard scores",
           },
         },
-        async ({ params: { leaderboardId, page }, query: { country, realmId } }) => {
+        async ({ params: { leaderboardId, page }, query: { country, realmId = DEFAULT_REALM_ID } }) => {
           return await ScoreSaberLeaderboardScoresService.getLeaderboardScores(
             leaderboardId,
             page,
@@ -198,20 +170,19 @@ export default function scoresController(app: Elysia) {
         "/following/leaderboard/:leaderboardId/:page",
         {
           tags: ["Scores"],
-          params: t.Object({
-            leaderboardId: t.Integer({ minimum: 1 }),
-            page: t.Integer({ minimum: 1 }),
-          }),
+          params: LeaderboardPageParamsSchema,
           query: RealmQuerySchema,
-          body: t.Object({
-            followingIds: t.Array(t.String(), { minItems: 1, maxItems: SHARED_CONSTS.maxFollowing + 1 }),
-          }),
+          body: FollowingLeaderboardScoresBodySchema,
           response: ScoreSaberScoresPageResponseSchema,
           detail: {
             description: "Fetch followed players' scores for a leaderboard",
           },
         },
-        async ({ params: { leaderboardId, page }, body: { followingIds }, query: { realmId } }) => {
+        async ({
+          params: { leaderboardId, page },
+          body: { followingIds },
+          query: { realmId = DEFAULT_REALM_ID },
+        }) => {
           return await PlayerFollowingScoresService.getFollowingLeaderboardScores(
             followingIds,
             leaderboardId,
@@ -224,23 +195,14 @@ export default function scoresController(app: Elysia) {
         "/top/:page",
         {
           tags: ["Scores"],
-          params: t.Object({
-            page: t.Integer({ minimum: 1 }),
-          }),
-          query: t.Evaluate(
-            t.Intersect([
-              RealmQuerySchema,
-              t.Object({
-                limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
-              }),
-            ])
-          ),
+          params: TopScoresParamsSchema,
+          query: TopScoresQuerySchema,
           response: TopScoresPageResponseSchema,
           detail: {
             description: "Fetch top scores",
           },
         },
-        async ({ params: { page }, query: { limit, realmId } }) => {
+        async ({ params: { page }, query: { limit, realmId = DEFAULT_REALM_ID } }) => {
           return await TopScoresService.getTopScores(page, limit, realmId);
         }
       )

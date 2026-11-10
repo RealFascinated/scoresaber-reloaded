@@ -1,4 +1,3 @@
-import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { and, asc, desc, eq, getTableColumns, inArray, lt, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/pg-core";
@@ -195,7 +194,7 @@ export class ScoreSaberScoreHistoryRepository {
     leaderboardId: number,
     limit: number,
     offset: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberScoreRow[]> {
     const { onScores, onHistory } = playerMapFilters(playerId, leaderboardId);
     const fullRowsUnion = unionAll(

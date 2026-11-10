@@ -7,8 +7,7 @@ import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-class ForceTrackPlayerStatistics {
+export class ForceTrackPlayerStatistics {
   @Slash({
     description: "Force track statistics for all players",
     name: "force-track-player-statistics",

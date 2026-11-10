@@ -11,14 +11,19 @@ import { isValidElement, ReactNode } from "react";
  * In that case the element itself is the keyboard focus target, so the wrapper must not
  * add a second tab stop.
  */
+type InteractiveChildProps = {
+  onClick?: (...args: never[]) => void;
+  href?: string;
+};
+
 function isInteractiveChild(child: React.ReactNode): boolean {
-  if (!isValidElement(child)) {
+  if (!isValidElement<InteractiveChildProps>(child)) {
     return false;
   }
   if (typeof child.type === "string") {
     return ["button", "a", "input", "select", "textarea", "summary", "label"].includes(child.type);
   }
-  const props = child.props as { onClick?: unknown; href?: unknown };
+  const props = child.props;
   return typeof props.onClick === "function" || typeof props.href === "string";
 }
 

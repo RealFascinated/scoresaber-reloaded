@@ -11,8 +11,7 @@ import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-class FetchMissingPlayerScores {
+export class FetchMissingPlayerScores {
   @Slash({
     description: "Force fetch missing scores for a player or all players",
     name: "fetch-missing-player-scores",

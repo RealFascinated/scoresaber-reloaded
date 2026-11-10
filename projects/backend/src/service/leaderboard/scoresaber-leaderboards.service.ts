@@ -47,10 +47,7 @@ export class ScoreSaberLeaderboardsService {
    * @param realmId the realm to resolve ranking state (ranked, stars, ...) for
    * @returns the leaderboard
    */
-  public static async getLeaderboard(
-    id: number,
-    realmId: number = DEFAULT_REALM_ID
-  ): Promise<ScoreSaberLeaderboard> {
+  public static async getLeaderboard(id: number, realmId: number): Promise<ScoreSaberLeaderboard> {
     const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(id, true, realmId);
     if (leaderboard !== undefined) {
       return leaderboard;
@@ -71,7 +68,7 @@ export class ScoreSaberLeaderboardsService {
     hash: string,
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberLeaderboard> {
     const hashNorm = normalizeSongHash(hash);
     const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardByHash(
@@ -121,8 +118,8 @@ export class ScoreSaberLeaderboardsService {
    */
   public static async getLeaderboardsPaginated(
     page: number,
-    filters?: ScoreSaberLeaderboardQueryFilters,
-    realmId: number = DEFAULT_REALM_ID
+    filters: ScoreSaberLeaderboardQueryFilters | undefined,
+    realmId: number
   ): Promise<LeaderboardsPageResponse> {
     const { whereClause, orderParts } = buildLeaderboardQuery(filters);
 
@@ -201,7 +198,7 @@ export class ScoreSaberLeaderboardsService {
    */
   public static async getStarChangeHistory(
     leaderboard: ScoreSaberLeaderboard,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<LeaderboardStarChange[]> {
     const rows = await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
       leaderboard.id,
@@ -222,7 +219,7 @@ export class ScoreSaberLeaderboardsService {
    * @param leaderboard the leaderboard to save
    */
   public static async saveLeaderboard(id: number, leaderboard: ScoreSaberLeaderboard) {
-    await ScoreSaberLeaderboardsRepository.insert(id, leaderboard);
+    await ScoreSaberLeaderboardsRepository.insert(id, leaderboard, DEFAULT_REALM_ID);
   }
 
   /**

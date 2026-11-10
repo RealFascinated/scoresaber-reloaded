@@ -21,7 +21,7 @@ export class TopScoresService {
   public static async getTopScores(
     page: number = 1,
     limit: number = 25,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<TopScoresPageResponse> {
     const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
       .setItemsPerPage(limit)
@@ -86,7 +86,7 @@ export class TopScoresService {
       return false;
     }
 
-    const top50 = await ScoreSaberScoresRepository.selectTopPp();
+    const top50 = await ScoreSaberScoresRepository.selectTopPp(50, DEFAULT_REALM_ID);
 
     if (!top50.length) {
       return false;

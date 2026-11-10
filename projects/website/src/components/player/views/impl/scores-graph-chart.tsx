@@ -16,7 +16,9 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import {
+  ActiveElement,
   Chart,
+  ChartEvent,
   ChartOptions,
   Legend,
   LinearScale,
@@ -25,9 +27,10 @@ import {
   PointElement,
   ScatterController,
   Tooltip,
+  TooltipItem,
 } from "chart.js";
 import { useMemo, useState } from "react";
-import { Line } from "react-chartjs-2";
+import { Chart as ChartComponent } from "react-chartjs-2";
 import PlayerSearch from "../../player-search";
 
 Chart.register(LineController, ScatterController, LineElement, PointElement, LinearScale, Tooltip, Legend);
@@ -37,6 +40,9 @@ const TOP_SCORE_COUNT = 500;
 const MAX_COMPARISON_PLAYERS = 3;
 const STAR_TICK_SIZE = 0.5;
 const ACCURACY_TICK_SIZE = 2;
+
+// The chart is drawn as a "line" chart, but its datasets mix line (best/average) and scatter (scores) types
+type ChartMode = "line" | "scatter";
 
 type DataPoint = {
   x: number;
@@ -275,7 +281,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
     [showTop, minStar, maxStar, minAccuracy, maxAccuracy]
   );
 
-  const chartOptions = useMemo<ChartOptions>(
+  const chartOptions = useMemo<ChartOptions<ChartMode>>(
     () => ({
       responsive: true,
       maintainAspectRatio: false,
@@ -283,8 +289,9 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
       plugins: {
         tooltip: {
           callbacks: {
-            label: (context: any) => {
-              const point = context.raw;
+            label: (context: TooltipItem<ChartMode>) => {
+              // Scatter points are always the DataPoint objects built in this component
+              const point = context.raw as DataPoint;
               const tooltipLines: string[] = [];
 
               const mapName = point.leaderboardName || "N/A";
@@ -318,7 +325,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
           position: "top" as const,
         },
       },
-      onClick: (_, elements: any[]) => {
+      onClick: (_: ChartEvent, elements: ActiveElement[]) => {
         if (isMobile || elements.length === 0) {
           return;
         }
@@ -374,7 +381,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
   return (
     <>
       <div className="h-[400px]">
-        <Line data={datasets as any} options={chartOptions as any} />
+        <ChartComponent<ChartMode> type="line" data={datasets} options={chartOptions} />
       </div>
 
       <div className="flex flex-col justify-center gap-2 pt-2">

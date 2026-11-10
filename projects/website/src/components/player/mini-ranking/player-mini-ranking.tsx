@@ -16,7 +16,7 @@ import CountryFlag from "../../ui/country-flag";
 
 type Variants = {
   [key: string]: {
-    icon: (player: ScoreSaberPlayer) => ReactElement<unknown>;
+    icon: (player: ScoreSaberPlayer) => ReactElement;
   };
 };
 

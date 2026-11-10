@@ -1,3 +1,4 @@
+import { AUTH_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
 import type { AuthMeResponse } from "@ssr/common/schemas/response/auth/me";
 
@@ -48,7 +49,7 @@ export function getSafeRedirectPath(redirect: string | null | undefined): string
  * which then redirects to the given path (or back to the login page with an `error` on failure).
  */
 export async function signInWithSteam(redirectPath: string = "/"): Promise<void> {
-  const response = await authFetch("/auth/sign-in/social", {
+  const response = await authFetch(`${AUTH_ROUTE}/sign-in/social`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
@@ -66,7 +67,7 @@ export async function signInWithSteam(redirectPath: string = "/"): Promise<void>
 }
 
 export async function signOut(): Promise<void> {
-  const response = await authFetch("/auth/sign-out", {
+  const response = await authFetch(`${AUTH_ROUTE}/sign-out`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: "{}",

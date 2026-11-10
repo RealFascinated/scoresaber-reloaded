@@ -6,8 +6,7 @@ import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-class ForceRefreshPlayerScores {
+export class ForceRefreshPlayerScores {
   @Slash({ description: "Updates every players medal count", name: "update-player-medals" })
   async updatePlayerMedals(interaction: CommandInteraction) {
     await interaction.reply({

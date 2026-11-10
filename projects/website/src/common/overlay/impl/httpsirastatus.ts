@@ -4,6 +4,7 @@ import { HttpSiraStatusScoreChangedEvent } from "@/common/overlay/types/httpsira
 import { HttpSiraStatusSongStartedEvent } from "@/common/overlay/types/httpsirastatus/event/song-started-event";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import OverlayDataClient from "../data-client";
+import { isHandledEventName } from "../event-name";
 import { resetOverlayData, useOverlayDataStore } from "../overlay-data-store";
 
 type EventName = keyof EventHandlers;
@@ -52,15 +53,11 @@ export default class HTTPSiraStatusClient extends OverlayDataClient {
 
   onMessage(message: string) {
     const data = JSON.parse(message);
-    if (!isValidEventName(data.event)) {
+    if (!isHandledEventName(handlers, data.event)) {
       return;
     }
     handlers[data.event as EventName](data);
   }
-}
-
-function isValidEventName(event: unknown): event is EventName {
-  return typeof event === "string" && event in handlers;
 }
 
 async function loadStatusData(status: HttpSiraStatus_Status) {

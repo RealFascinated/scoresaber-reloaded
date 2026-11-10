@@ -1,3 +1,4 @@
+import { USER_FOLLOWING_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
 import type {
   PlayerFollowsResponse,
@@ -15,7 +16,7 @@ async function followingRequest(path: string, method: "GET" | "PUT" | "DELETE" =
  * @throws when the backend could not be reached or answered with an error
  */
 export async function fetchFollowing(): Promise<string[]> {
-  const response = await followingRequest("/user/following");
+  const response = await followingRequest(USER_FOLLOWING_ROUTE);
   if (response.status === 401) {
     return [];
   }
@@ -33,7 +34,7 @@ export async function fetchFollowing(): Promise<string[]> {
  */
 export async function changeFollowing(playerId: string, action: "follow" | "unfollow"): Promise<string[]> {
   const response = await followingRequest(
-    `/user/following/${encodeURIComponent(playerId)}`,
+    `${USER_FOLLOWING_ROUTE}/${encodeURIComponent(playerId)}`,
     action === "follow" ? "PUT" : "DELETE"
   );
   if (!response.ok) {

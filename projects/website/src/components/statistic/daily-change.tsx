@@ -15,7 +15,7 @@ interface DailyChangeProps {
    */
   change?: number;
 
-  tooltip?: React.ReactElement<any> | string;
+  tooltip?: React.ReactElement | string;
 
   className?: string;
 

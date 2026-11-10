@@ -53,7 +53,7 @@ const Combobox = <T,>({
   onValueChange,
   className,
   clearable = false,
-}: ComboboxProps<T>): ReactElement<any> => {
+}: ComboboxProps<T>): ReactElement => {
   const [open, setOpen] = useState<boolean>(false);
   const [internalValue, setInternalValue] = useState<T | undefined>(() => controlledValue);
   const listId = useId();

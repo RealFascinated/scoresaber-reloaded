@@ -30,7 +30,7 @@ export function playerCacheKeyPrefix(id: string): string {
 /** Matches every player cache key, whatever the player, realm or detail type. */
 export const playerCacheKeysPattern = "scoresaber:player:*";
 
-export function playerCacheKey(id: string, type: DetailType, realmId: number = DEFAULT_REALM_ID): string {
+export function playerCacheKey(id: string, type: DetailType, realmId: number): string {
   return `${playerCacheKeyPrefix(id)}${type}${realmKeySuffix(realmId)}`;
 }
 
@@ -46,8 +46,8 @@ export function miniRankingCacheKey(
   playerId: string,
   type: "global" | "country",
   page: number,
-  country?: string,
-  realmId: number = DEFAULT_REALM_ID
+  country: string | undefined,
+  realmId: number
 ): string {
   const scope = type === "country" ? `country:${country ?? ""}` : type;
   return `${miniRankingCacheKeyPrefix(playerId)}${scope}:${page}${realmKeySuffix(realmId)}`;

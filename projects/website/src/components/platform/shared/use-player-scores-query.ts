@@ -7,8 +7,10 @@ import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce, useDocumentTitle } from "@uidotdev/usehooks";
 import { ssrConfig } from "config";
-import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { ReactNode, useCallback, useEffect } from "react";
+import { parseAsInteger, parseAsString, parseAsStringLiteral, useQueryState } from "nuqs";
+import { ReactNode, useCallback, useEffect, useMemo } from "react";
+
+const directionParser = parseAsStringLiteral<SortDirection>(["asc", "desc"]);
 
 export type SortOption<T extends string> = {
   name: string;
@@ -85,14 +87,12 @@ export function usePlayerScoresQuery<T extends string, TData>({
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [sort, setSort] = useQueryState("sort", parseAsString.withDefault(defaultSort)) as unknown as [
-    T,
-    (value: T | null) => void,
-  ];
-  const [direction, setDirection] = useQueryState(
-    "direction",
-    parseAsString.withDefault("desc")
-  ) as unknown as [SortDirection, (value: SortDirection | null) => void];
+  const sortParser = useMemo(
+    () => parseAsStringLiteral<T>(sortOptions.map(option => option.value)).withDefault(defaultSort),
+    [sortOptions, defaultSort]
+  );
+  const [sort, setSort] = useQueryState("sort", sortParser);
+  const [direction, setDirection] = useQueryState("direction", directionParser.withDefault("desc"));
   const [search, setSearch] = useQueryState("search", parseAsString);
   const debouncedSearchTerm = useDebounce(search || "", DEBOUNCE_MS_SEARCH);
   const invalidSearch = search !== null && search.length >= 1 && search.length < 3;

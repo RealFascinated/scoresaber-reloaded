@@ -6,6 +6,7 @@ import {
   defaultOverlaySettings,
   encodeOverlaySettings,
   OverlayViews,
+  type OverlayView,
 } from "@/common/overlay/overlay-settings";
 import { cn } from "@/common/utils";
 import Card from "@/components/card";
@@ -106,10 +107,10 @@ export default function OverlayBuilder() {
       playerId: currentValues.playerId,
       useRealTimeData: currentValues.useRealTimeData,
       dataClient: currentValues.dataClient as OverlayDataClients,
-      views: currentValues.views as Record<OverlayViews, boolean>,
+      views: currentValues.views as Record<OverlayView, boolean>,
     };
 
-    const getStoredView = (view: OverlayViews) => overlaySettings.views?.[view] ?? true;
+    const getStoredView = (view: OverlayView) => overlaySettings.views?.[view] ?? true;
     const hasChanged =
       settingsToSave.playerId !== overlaySettings.playerId ||
       settingsToSave.useRealTimeData !== overlaySettings.useRealTimeData ||
@@ -162,7 +163,7 @@ export default function OverlayBuilder() {
       playerId: playerId,
       useRealTimeData: useRealTimeData,
       dataClient: dataClient as OverlayDataClients,
-      views: views as Record<OverlayViews, boolean>,
+      views: views as Record<OverlayView, boolean>,
     };
     update({ overlaySettings });
     openInNewTab(`/overlay?settings=${encodeOverlaySettings(overlaySettings)}`);

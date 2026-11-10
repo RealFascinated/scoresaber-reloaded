@@ -1,3 +1,4 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import { alias, PgDialect } from "drizzle-orm/pg-core";
 import { scoreSaberLeaderboardsTable } from "../../../src/db/schema";
@@ -23,21 +24,30 @@ const INSERT_LEADERBOARD_ID = 900_010;
 describe("ScoreSaberLeaderboardsRepository", () => {
   describe("getLeaderboards", () => {
     test("returns ranked leaderboards matching filters", async () => {
-      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards({ ranked: true });
+      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards(
+        { ranked: true },
+        DEFAULT_REALM_ID
+      );
       expect(leaderboards.some(lb => lb.id === TEST_LEADERBOARD_ID)).toBe(true);
       expect(leaderboards.every(lb => lb.ranked)).toBe(true);
     });
 
     test("returns qualified leaderboards when qualified filter is set", async () => {
-      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards({ qualified: true });
+      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards(
+        { qualified: true },
+        DEFAULT_REALM_ID
+      );
       expect(leaderboards.some(lb => lb.id === TEST_LEADERBOARD_QUALIFIED_ID)).toBe(true);
     });
 
     test("returns an empty array when nothing matches", async () => {
-      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards({
-        ranked: true,
-        qualified: true,
-      });
+      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards(
+        {
+          ranked: true,
+          qualified: true,
+        },
+        DEFAULT_REALM_ID
+      );
       expect(leaderboards).toEqual([]);
     });
   });
@@ -47,7 +57,9 @@ describe("ScoreSaberLeaderboardsRepository", () => {
       const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardByHash(
         TEST_SONG_HASH,
         "ExpertPlus",
-        "Standard"
+        "Standard",
+        true,
+        DEFAULT_REALM_ID
       );
       expect(leaderboard?.id).toBe(TEST_LEADERBOARD_ID);
       expect(leaderboard?.songName).toBe("Test Song");
@@ -57,7 +69,9 @@ describe("ScoreSaberLeaderboardsRepository", () => {
       const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardByHash(
         TEST_SONG_HASH.toUpperCase(),
         "ExpertPlus",
-        "Standard"
+        "Standard",
+        true,
+        DEFAULT_REALM_ID
       );
       expect(leaderboard?.id).toBe(TEST_LEADERBOARD_ID);
     });
@@ -67,7 +81,9 @@ describe("ScoreSaberLeaderboardsRepository", () => {
         await ScoreSaberLeaderboardsRepository.getLeaderboardByHash(
           "ffffffffffffffffffffffffffffffff",
           "ExpertPlus",
-          "Standard"
+          "Standard",
+          true,
+          DEFAULT_REALM_ID
         )
       ).toBeUndefined();
     });
@@ -85,14 +101,22 @@ describe("ScoreSaberLeaderboardsRepository", () => {
 
   describe("getLeaderboardById", () => {
     test("returns the seeded leaderboard with difficulties", async () => {
-      const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(TEST_LEADERBOARD_ID);
+      const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
+        TEST_LEADERBOARD_ID,
+        true,
+        DEFAULT_REALM_ID
+      );
       expect(leaderboard?.id).toBe(TEST_LEADERBOARD_ID);
       expect(leaderboard?.difficulty.difficulty).toBe("ExpertPlus");
     });
 
     test("returns undefined for an unknown id", async () => {
       expect(
-        await ScoreSaberLeaderboardsRepository.getLeaderboardById(UNKNOWN_LEADERBOARD_ID)
+        await ScoreSaberLeaderboardsRepository.getLeaderboardById(
+          UNKNOWN_LEADERBOARD_ID,
+          true,
+          DEFAULT_REALM_ID
+        )
       ).toBeUndefined();
     });
   });
@@ -114,37 +138,45 @@ describe("ScoreSaberLeaderboardsRepository", () => {
 
   describe("getLeaderboardsByIds", () => {
     test("returns all requested leaderboards", async () => {
-      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds([
-        TEST_LEADERBOARD_ID,
-        TEST_LEADERBOARD_QUALIFIED_ID,
-      ]);
+      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(
+        [TEST_LEADERBOARD_ID, TEST_LEADERBOARD_QUALIFIED_ID],
+        true,
+        DEFAULT_REALM_ID
+      );
       expect(leaderboards).toHaveLength(2);
     });
 
     test("returns an empty array when no ids match", async () => {
-      expect(await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds([UNKNOWN_LEADERBOARD_ID])).toEqual(
-        []
-      );
+      expect(
+        await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(
+          [UNKNOWN_LEADERBOARD_ID],
+          true,
+          DEFAULT_REALM_ID
+        )
+      ).toEqual([]);
     });
   });
 
   describe("getRankedLeaderboards", () => {
     test("includes the seeded ranked map", async () => {
-      const leaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards();
+      const leaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(DEFAULT_REALM_ID);
       expect(leaderboards.some(lb => lb.id === TEST_LEADERBOARD_ID)).toBe(true);
     });
   });
 
   describe("getQualifiedLeaderboards", () => {
     test("includes the seeded qualified map", async () => {
-      const leaderboards = await ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards();
+      const leaderboards = await ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards(DEFAULT_REALM_ID);
       expect(leaderboards.some(lb => lb.id === TEST_LEADERBOARD_QUALIFIED_ID)).toBe(true);
     });
   });
 
   describe("getTopTrendingLeaderboards", () => {
     test("returns leaderboards ordered by trending score", async () => {
-      const leaderboards = await ScoreSaberLeaderboardsRepository.getTopTrendingLeaderboards(5);
+      const leaderboards = await ScoreSaberLeaderboardsRepository.getTopTrendingLeaderboards(
+        5,
+        DEFAULT_REALM_ID
+      );
       expect(leaderboards[0]?.id).toBe(TEST_LEADERBOARD_QUALIFIED_ID);
       expect(leaderboards[1]?.id).toBe(TEST_LEADERBOARD_ID);
     });
@@ -154,7 +186,8 @@ describe("ScoreSaberLeaderboardsRepository", () => {
     test("inserts a leaderboard without overwriting on conflict", async () => {
       const template = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         TEST_LEADERBOARD_QUALIFIED_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       const clone = {
         ...template!,
@@ -163,20 +196,26 @@ describe("ScoreSaberLeaderboardsRepository", () => {
         songHash: TEST_SONG_HASH_TWO,
       };
 
-      await ScoreSaberLeaderboardsRepository.insert(INSERT_LEADERBOARD_ID, clone);
+      await ScoreSaberLeaderboardsRepository.insert(INSERT_LEADERBOARD_ID, clone, DEFAULT_REALM_ID);
       const inserted = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         INSERT_LEADERBOARD_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       expect(inserted?.songName).toBe("Inserted Leaderboard");
 
-      await ScoreSaberLeaderboardsRepository.insert(INSERT_LEADERBOARD_ID, {
-        ...clone,
-        songName: "Should Not Overwrite",
-      });
+      await ScoreSaberLeaderboardsRepository.insert(
+        INSERT_LEADERBOARD_ID,
+        {
+          ...clone,
+          songName: "Should Not Overwrite",
+        },
+        DEFAULT_REALM_ID
+      );
       const unchanged = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         INSERT_LEADERBOARD_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       expect(unchanged?.songName).toBe("Inserted Leaderboard");
     });
@@ -186,7 +225,8 @@ describe("ScoreSaberLeaderboardsRepository", () => {
     test("updates partial fields on an existing leaderboard", async () => {
       const template = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         TEST_LEADERBOARD_QUALIFIED_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       const clone = {
         ...template!,
@@ -194,10 +234,14 @@ describe("ScoreSaberLeaderboardsRepository", () => {
         songName: "Updated Insert",
         songHash: TEST_SONG_HASH_TWO,
       };
-      await ScoreSaberLeaderboardsRepository.insert(INSERT_LEADERBOARD_ID, clone);
+      await ScoreSaberLeaderboardsRepository.insert(INSERT_LEADERBOARD_ID, clone, DEFAULT_REALM_ID);
 
       await ScoreSaberLeaderboardsRepository.updateLeaderboard(INSERT_LEADERBOARD_ID, { dailyPlays: 99 });
-      const after = await ScoreSaberLeaderboardsRepository.getLeaderboardById(INSERT_LEADERBOARD_ID, false);
+      const after = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
+        INSERT_LEADERBOARD_ID,
+        false,
+        DEFAULT_REALM_ID
+      );
       expect(after?.dailyPlays).toBe(99);
     });
   });
@@ -206,7 +250,8 @@ describe("ScoreSaberLeaderboardsRepository", () => {
     test("upserts leaderboard metadata in bulk", async () => {
       const template = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         TEST_LEADERBOARD_QUALIFIED_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
       const clone = {
         ...template!,
@@ -214,24 +259,32 @@ describe("ScoreSaberLeaderboardsRepository", () => {
         songName: "Upsert Insert",
         songHash: TEST_SONG_HASH_TWO,
       };
-      await ScoreSaberLeaderboardsRepository.insert(INSERT_LEADERBOARD_ID, clone);
+      await ScoreSaberLeaderboardsRepository.insert(INSERT_LEADERBOARD_ID, clone, DEFAULT_REALM_ID);
       const inserted = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
         INSERT_LEADERBOARD_ID,
-        false
+        false,
+        DEFAULT_REALM_ID
       );
 
-      await ScoreSaberLeaderboardsRepository.upsertLeaderboards([
-        {
-          ...inserted!,
-          plays: inserted!.plays + 1,
-        },
-      ]);
-      const updated = await ScoreSaberLeaderboardsRepository.getLeaderboardById(INSERT_LEADERBOARD_ID, false);
+      await ScoreSaberLeaderboardsRepository.upsertLeaderboards(
+        [
+          {
+            ...inserted!,
+            plays: inserted!.plays + 1,
+          },
+        ],
+        DEFAULT_REALM_ID
+      );
+      const updated = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
+        INSERT_LEADERBOARD_ID,
+        false,
+        DEFAULT_REALM_ID
+      );
       expect(updated?.plays).toBe(inserted!.plays + 1);
     });
 
     test("no-ops on an empty batch", async () => {
-      await ScoreSaberLeaderboardsRepository.upsertLeaderboards([]);
+      await ScoreSaberLeaderboardsRepository.upsertLeaderboards([], DEFAULT_REALM_ID);
     });
   });
 

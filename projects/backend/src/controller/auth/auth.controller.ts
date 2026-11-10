@@ -1,12 +1,13 @@
+import { AUTH_ROUTE } from "@ssr/common/api-routes";
 import { Elysia } from "elysia";
-import { AUTH_BASE_PATH, auth } from "../../auth/auth";
+import { auth } from "../../auth/auth";
 
 export default function authController(app: Elysia) {
   return (
     app
       // Better Auth owns everything under /auth (sign-in, OAuth callbacks, session, sign-out)
       .all(
-        `${AUTH_BASE_PATH}/*`,
+        `${AUTH_ROUTE}/*`,
         {
           tags: ["Auth"],
           detail: {

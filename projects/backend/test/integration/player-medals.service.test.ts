@@ -1,3 +1,4 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import { ScoreSaberLeaderboardsRepository } from "../../src/repositories/scoresaber-leaderboards.repository";
 import { PlayerMedalsService } from "../../src/service/medals/player-medals.service";
@@ -7,7 +8,9 @@ describe("PlayerMedalsService", () => {
   describe("refreshLeaderboardMedals", () => {
     test("no-ops for an unranked qualified leaderboard", async () => {
       const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
-        TEST_LEADERBOARD_QUALIFIED_ID
+        TEST_LEADERBOARD_QUALIFIED_ID,
+        true,
+        DEFAULT_REALM_ID
       );
       expect(leaderboard).toBeDefined();
 
@@ -16,7 +19,11 @@ describe("PlayerMedalsService", () => {
     });
 
     test("recomputes medals for a ranked leaderboard without throwing", async () => {
-      const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(TEST_LEADERBOARD_ID);
+      const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(
+        TEST_LEADERBOARD_ID,
+        true,
+        DEFAULT_REALM_ID
+      );
       expect(leaderboard).toBeDefined();
 
       const changes = await PlayerMedalsService.refreshLeaderboardMedals(leaderboard!);

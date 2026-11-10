@@ -1,13 +1,14 @@
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../../src/repositories/scoresaber-leaderboard-star-change.repository";
 import { TEST_LEADERBOARD_ID } from "../../helpers/constants";
 
 describe("ScoreSaberLeaderboardStarChangeRepository", () => {
   test("listByLeaderboardIdOrderedByTimestampDesc returns seeded history", async () => {
-    const rows =
-      await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
-        TEST_LEADERBOARD_ID
-      );
+    const rows = await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
+      TEST_LEADERBOARD_ID,
+      DEFAULT_REALM_ID
+    );
     expect(rows).toHaveLength(1);
     expect(rows[0]?.newStars).toBe(8.5);
   });
@@ -19,10 +20,10 @@ describe("ScoreSaberLeaderboardStarChangeRepository", () => {
       newStars: 9,
       timestamp: new Date("2024-07-01T00:00:00.000Z"),
     });
-    const rows =
-      await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
-        TEST_LEADERBOARD_ID
-      );
+    const rows = await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
+      TEST_LEADERBOARD_ID,
+      DEFAULT_REALM_ID
+    );
     expect(rows.length).toBeGreaterThanOrEqual(2);
   });
 });

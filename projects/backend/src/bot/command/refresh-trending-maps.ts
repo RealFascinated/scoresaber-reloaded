@@ -6,8 +6,7 @@ import { OwnerOnly } from "../lib/guards";
 
 @Discord()
 @Guard(IsGuildUser(OwnerOnly))
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-class RefreshTrendingMaps {
+export class RefreshTrendingMaps {
   @Slash({
     description: "Force refresh trending map scores",
     name: "refresh-trending-maps",

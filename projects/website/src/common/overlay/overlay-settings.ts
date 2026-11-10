@@ -1,14 +1,11 @@
 import { OverlayDataClients } from "@/common/overlay/data-client";
 import { OverlaySettingsSchema, type OverlaySettings } from "@ssr/common/schemas/overlay/overlay-settings";
+import { OverlayViews } from "@ssr/common/schemas/overlay/overlay-view";
 import { parseSchema } from "@ssr/common/schemas/parse";
 
 export type { OverlaySettings } from "@ssr/common/schemas/overlay/overlay-settings";
-
-export enum OverlayViews {
-  ScoreInfo = "scoreInfo",
-  PlayerInfo = "playerInfo",
-  SongInfo = "songInfo",
-}
+export { OverlayViews } from "@ssr/common/schemas/overlay/overlay-view";
+export type { OverlayView } from "@ssr/common/schemas/overlay/overlay-view";
 
 export const defaultOverlaySettings: OverlaySettings = {
   playerId: "",

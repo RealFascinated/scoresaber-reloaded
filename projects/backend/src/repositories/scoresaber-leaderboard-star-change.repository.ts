@@ -1,4 +1,3 @@
-import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "../db";
 import { scoreSaberLeaderboardStarChangeTable, type ScoreSaberLeaderboardStarChangeRow } from "../db/schema";
@@ -12,7 +11,7 @@ export class ScoreSaberLeaderboardStarChangeRepository {
 
   public static async listByLeaderboardIdOrderedByTimestampDesc(
     leaderboardId: number,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<ScoreSaberLeaderboardStarChangeRow[]> {
     return db
       .select()

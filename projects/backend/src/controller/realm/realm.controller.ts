@@ -1,6 +1,7 @@
+import { RealmPpCurveParamsSchema } from "@ssr/common/schemas/realm/realm-route";
 import { RealmPpCurveResponseSchema } from "@ssr/common/schemas/response/realm/realm-pp-curve";
 import { RealmsResponseSchema } from "@ssr/common/schemas/response/realm/realms";
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { RealmService } from "../../service/realm/realm.service";
 
 export default function realmController(app: Elysia) {
@@ -23,9 +24,7 @@ export default function realmController(app: Elysia) {
         "/:id/pp-curve",
         {
           tags: ["Realms"],
-          params: t.Object({
-            id: t.Integer({ minimum: 1 }),
-          }),
+          params: RealmPpCurveParamsSchema,
           response: RealmPpCurveResponseSchema,
           detail: {
             description: "Fetch the pp curve of a realm",

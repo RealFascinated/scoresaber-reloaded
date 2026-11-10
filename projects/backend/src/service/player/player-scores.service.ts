@@ -268,7 +268,7 @@ export class PlayerScoresService {
    */
   public static async getPlayerScoreChart(
     playerId: string,
-    realmId: number = DEFAULT_REALM_ID
+    realmId: number
   ): Promise<PlayerScoresChartResponse> {
     const rows = await ScoreSaberScoresRepository.getChartRowsByPlayer(playerId, realmId);
 
@@ -296,10 +296,7 @@ export class PlayerScoresService {
    * @param realmId the realm to resolve pp and leaderboard ranking for
    * @returns the score
    */
-  public static async getScore(
-    scoreId: number,
-    realmId: number = DEFAULT_REALM_ID
-  ): Promise<PlayerScore<ScoreSaberScore>> {
+  public static async getScore(scoreId: number, realmId: number): Promise<PlayerScore<ScoreSaberScore>> {
     const scoreRow = await ScoreSaberScoresRepository.findAnyRowByScoreId(scoreId, realmId);
     if (!scoreRow) {
       throw new NotFoundError("Score not found");

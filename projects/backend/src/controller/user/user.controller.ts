@@ -1,7 +1,7 @@
 import { AuthMeResponseSchema } from "@ssr/common/schemas/response/auth/me";
 import { Elysia } from "elysia";
 import { authPlugin } from "../../plugins/auth.plugin";
-import { AuthConnectionsRepository } from "../../repositories/auth-connections.repository";
+import { UserService } from "../../service/user/user.service";
 
 export default function userController(app: Elysia) {
   return app.use(authPlugin).get(
@@ -14,12 +14,6 @@ export default function userController(app: Elysia) {
         description: "Fetch the signed-in user",
       },
     },
-    async ({ user }) => ({
-      id: user.id,
-      name: user.name,
-      image: user.image ?? null,
-      playerId: user.playerId ?? null,
-      connections: await AuthConnectionsRepository.getByUserId(user.id),
-    })
+    async ({ user }) => UserService.getMe(user)
   );
 }

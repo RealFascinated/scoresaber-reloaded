@@ -48,7 +48,7 @@ type FooterLink = {
 
 type SocialLinkType = {
   name: string;
-  logo: ReactElement<any>;
+  logo: ReactElement;
   href: string;
 };
 
