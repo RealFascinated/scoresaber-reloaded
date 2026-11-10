@@ -1,5 +1,8 @@
-import Card from "@/components/card";
-import PlaylistDownloadButton from "@/components/maps/playlist/playlist-download-button";
+"use client";
+
+import { downloadFile } from "@/common/browser-utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import { Button } from "../../ui/button";
 import CustomPlaylistCreator from "./custom-playlist-creator";
@@ -35,26 +38,45 @@ const playlists: Playlist[] = [
   },
 ];
 
+const MENU_ITEM_CLASS =
+  "hover:bg-accent flex w-full cursor-pointer items-center rounded-md px-2 py-1.5 text-left text-sm transition-colors";
+
 export default function Playlists() {
   return (
-    <Card className="h-fit gap-4">
-      <div className="flex flex-col gap-1">
-        <h3 className="text-foreground text-lg font-semibold">Playlists</h3>
-        <p className="text-muted-foreground text-sm">Download ScoreSaber map playlists in one click.</p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-2 2xl:grid-cols-2">
-        {playlists.map(playlist => (
-          <PlaylistDownloadButton
-            key={playlist.id}
-            name={playlist.name}
-            url={`${env.NEXT_PUBLIC_API_URL}/playlist/${playlist.id}.bplist`}
-          />
-        ))}
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-2">
+          <SharedIcons.OneClickInstallIcon className="size-4" />
+          Download playlist
+          <SharedIcons.ExpandLeaderboardRowIcon className="text-muted-foreground size-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="flex w-56 flex-col gap-0.5 p-1">
+        {playlists.map(playlist => {
+          const url = `${env.NEXT_PUBLIC_API_URL}/playlist/${playlist.id}.bplist`;
+          return (
+            <a
+              key={playlist.id}
+              href={url}
+              className={MENU_ITEM_CLASS}
+              onClick={e => {
+                e.preventDefault();
+                downloadFile(url, `${playlist.name}.bplist`);
+              }}
+            >
+              {playlist.name}
+            </a>
+          );
+        })}
+        <div className="bg-border my-1 h-px" />
         <CustomPlaylistCreator
-          trigger={<Button className="flex w-full items-center">Custom Playlist</Button>}
+          trigger={
+            <button type="button" className={MENU_ITEM_CLASS}>
+              Custom playlist…
+            </button>
+          }
         />
-      </div>
-    </Card>
+      </PopoverContent>
+    </Popover>
   );
 }

@@ -42,7 +42,7 @@ export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlaye
   });
 
   return (
-    <div className="sticky top-4 flex flex-col gap-4">
+    <div className="sticky top-16 flex flex-col gap-4">
       <PlayerMiniRanking
         type="Global"
         player={player}

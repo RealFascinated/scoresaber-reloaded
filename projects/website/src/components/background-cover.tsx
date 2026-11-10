@@ -1,0 +1,133 @@
+"use client";
+
+import { resolveBackgroundCover, ResolvedBackgroundCover } from "@/common/background-covers";
+import { cn } from "@/common/utils";
+import useDatabase from "@/hooks/use-database";
+import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
+const FADE_DURATION_MS = 700;
+
+type Layer = {
+  key: string;
+  background: ResolvedBackgroundCover;
+  visible: boolean;
+};
+
+function backgroundKey(background: ResolvedBackgroundCover | undefined): string | undefined {
+  return background ? `${background.type}:${background.value}` : undefined;
+}
+
+/**
+ * Drops layers that are no longer needed: anything below the top-most visible
+ * layer, and hidden layers that aren't the current target.
+ */
+function pruneLayers(layers: Layer[], targetKey: string | undefined): Layer[] {
+  const lastVisible = layers.findLastIndex(layer => layer.visible);
+  return layers.filter((layer, index) => layer.key === targetKey || (layer.visible && index === lastVisible));
+}
+
+function ColorLayer({
+  layerKey,
+  color,
+  onReady,
+}: {
+  layerKey: string;
+  color: string;
+  onReady: (key: string) => void;
+}) {
+  useEffect(() => {
+    // Wait a frame so the layer is painted at opacity 0 before fading in
+    const frame = requestAnimationFrame(() => onReady(layerKey));
+    return () => cancelAnimationFrame(frame);
+  }, [layerKey, onReady]);
+
+  return <div className="absolute inset-0" style={{ backgroundColor: color }} />;
+}
+
+export default function BackgroundCover() {
+  const database = useDatabase();
+  const pathname = usePathname();
+
+  const cover = useStableLiveQuery(async () => database.getBackgroundCover());
+  const custom = useStableLiveQuery(async () => database.getCustomBackground());
+  const brightness = useStableLiveQuery(async () => database.getBackgroundCoverBrightness());
+  const blur = useStableLiveQuery(async () => database.getBackgroundCoverBlur());
+
+  // The landing page has its own animated background
+  const background =
+    pathname === "/" || cover === undefined || custom === undefined
+      ? undefined
+      : resolveBackgroundCover(cover, custom);
+  const targetKey = backgroundKey(background);
+
+  const [layers, setLayers] = useState<Layer[]>([]);
+  const [currentKey, setCurrentKey] = useState<string | undefined>(undefined);
+
+  // When the target changes, stack a new hidden layer on top (it fades in once loaded),
+  // or fade every layer out when there's no background anymore
+  if (targetKey !== currentKey) {
+    setCurrentKey(targetKey);
+    setLayers(prev =>
+      background && targetKey
+        ? [...prev.filter(layer => layer.key !== targetKey), { key: targetKey, background, visible: false }]
+        : prev.map(layer => ({ ...layer, visible: false }))
+    );
+  }
+
+  // Remove layers once they've finished fading out / been covered
+  useEffect(() => {
+    if (pruneLayers(layers, currentKey).length === layers.length) {
+      return;
+    }
+    const timeout = setTimeout(() => setLayers(prev => pruneLayers(prev, currentKey)), FADE_DURATION_MS);
+    return () => clearTimeout(timeout);
+  }, [layers, currentKey]);
+
+  const showLayer = useCallback((key: string) => {
+    setLayers(prev =>
+      prev.some(layer => layer.key === key && !layer.visible)
+        ? prev.map(layer => (layer.key === key ? { ...layer, visible: true } : layer))
+        : prev
+    );
+  }, []);
+
+  if (layers.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-none fixed inset-0 -z-50 overflow-hidden select-none">
+      {layers.map(layer => (
+        <div
+          key={layer.key}
+          className={cn(
+            "absolute inset-0 transition-opacity ease-in-out motion-reduce:transition-none",
+            layer.visible ? "opacity-100" : "opacity-0"
+          )}
+          style={{ transitionDuration: `${FADE_DURATION_MS}ms` }}
+        >
+          {layer.background.type === "color" ? (
+            <ColorLayer layerKey={layer.key} color={layer.background.value} onReady={showLayer} />
+          ) : (
+            <Image
+              src={layer.background.value}
+              alt=""
+              aria-hidden
+              fetchPriority="high"
+              // Custom backgrounds can be any url, so skip the remotePatterns check
+              unoptimized
+              fill
+              onLoad={() => showLayer(layer.key)}
+              // Scale up slightly so the blur doesn't bleed the page background in at the edges
+              className="scale-105 object-cover"
+              style={{ filter: `blur(${blur ?? 0}px) brightness(${brightness ?? 100}%)` }}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}

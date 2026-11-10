@@ -15,7 +15,8 @@ import { SortDirection } from "@ssr/common/schemas/score/query/sort/sort-directi
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { parseAsString, useQueryState } from "nuqs";
 import ScoresCard from "../../score/scores-card";
-import { ButtonGroup, ControlButton, ControlPanel, ControlRow } from "../../ui/control-panel";
+import { ScoresToolbar } from "../../score/scores-toolbar";
+import { ButtonGroup, ControlButton } from "../../ui/control-panel";
 import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 
 const DEFAULT_SORT: ScoreSaberMedalScoreSortField = "date";
@@ -106,51 +107,47 @@ export default function ScoreSaberPlayerMedalScores({ player }: { player: ScoreS
 
   return (
     <ScoresCard>
-      <div className="flex w-full flex-col gap-2">
-        <ControlPanel>
-          <ControlRow className="mb-2">
-            <ButtonGroup>
-              {SORT_OPTIONS.map(sortOption => (
-                <ControlButton
-                  key={sortOption.value}
-                  isActive={sortOption.value === query.sort}
-                  onClick={() => query.handleSortChange(sortOption.value, sortOption.defaultOrder ?? "desc")}
-                >
-                  {sortOption.value === query.sort ? (
-                    query.isLoading || query.isRefetching ? (
-                      <Spinner size="sm" className="size-4" />
-                    ) : query.direction === "desc" ? (
-                      <SharedIcons.SortDescendingIcon className="size-4" />
-                    ) : (
-                      <SharedIcons.SortAscendingIcon className="size-4" />
-                    )
+      <div className="flex w-full flex-col gap-3">
+        <ScoresToolbar>
+          <ButtonGroup>
+            {SORT_OPTIONS.map(sortOption => (
+              <ControlButton
+                key={sortOption.value}
+                isActive={sortOption.value === query.sort}
+                onClick={() => query.handleSortChange(sortOption.value, sortOption.defaultOrder ?? "desc")}
+              >
+                {sortOption.value === query.sort ? (
+                  query.isLoading || query.isRefetching ? (
+                    <Spinner size="sm" className="size-4" />
+                  ) : query.direction === "desc" ? (
+                    <SharedIcons.SortDescendingIcon className="size-4" />
                   ) : (
-                    sortOption.icon
-                  )}
-                  {sortOption.name}
-                </ControlButton>
-              ))}
-            </ButtonGroup>
-          </ControlRow>
+                    <SharedIcons.SortAscendingIcon className="size-4" />
+                  )
+                ) : (
+                  sortOption.icon
+                )}
+                {sortOption.name}
+              </ControlButton>
+            ))}
+          </ButtonGroup>
 
-          <ControlRow>
-            <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
-              <SearchInput
-                search={query.search}
-                invalidSearch={query.invalidSearch}
-                onSearchChange={query.handleSearchChange}
-              />
+          <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
+            <SearchInput
+              search={query.search}
+              invalidSearch={query.invalidSearch}
+              onSearchChange={query.handleSearchChange}
+            />
 
-              <HmdFilter
-                player={player}
-                hmdFilter={hmdFilter}
-                onHmdFilterChange={value =>
-                  query.handleFilterChange(() => setHmdFilter(value === "All Hmds" ? null : (value as HMD)))
-                }
-              />
-            </div>
-          </ControlRow>
-        </ControlPanel>
+            <HmdFilter
+              player={player}
+              hmdFilter={hmdFilter}
+              onHmdFilterChange={value =>
+                query.handleFilterChange(() => setHmdFilter(value === "All Hmds" ? null : (value as HMD)))
+              }
+            />
+          </div>
+        </ScoresToolbar>
 
         <ScoresListPanel
           page={query.page}

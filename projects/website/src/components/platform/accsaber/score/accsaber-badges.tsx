@@ -9,7 +9,7 @@ import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 export const badges: ScoreBadge<AccSaberScoreItem, AccSaberScoreItem>[] = [
   {
     name: "AP",
-    color: () => "bg-statistic",
+    color: () => "var(--statistic)",
     create: (score: AccSaberScoreItem) => {
       return (
         <div className="flex cursor-default flex-col items-center justify-center">
@@ -43,7 +43,7 @@ export const badges: ScoreBadge<AccSaberScoreItem, AccSaberScoreItem>[] = [
   },
   {
     name: "Left Hand Accuracy",
-    color: () => "bg-hands-left",
+    color: () => "var(--hands-left)",
     create: (score: AccSaberScoreItem) => {
       const beatLeaderScore = score.beatLeaderScore;
       if (!beatLeaderScore) {
@@ -54,7 +54,7 @@ export const badges: ScoreBadge<AccSaberScoreItem, AccSaberScoreItem>[] = [
   },
   {
     name: "Right Hand Accuracy",
-    color: () => "bg-hands-right",
+    color: () => "var(--hands-right)",
     create: (score: AccSaberScoreItem) => {
       const beatLeaderScore = score.beatLeaderScore;
       if (!beatLeaderScore) {

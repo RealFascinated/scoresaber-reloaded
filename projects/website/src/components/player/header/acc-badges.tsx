@@ -1,6 +1,5 @@
+import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";
-import StatValue from "@/components/statistic/stat-value";
-import { SharedIcons } from "@/shared-icons";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getAccDetails, getScoreBadgeFromName } from "@ssr/common/utils/song-utils";
@@ -16,9 +15,10 @@ const badges: Partial<Record<keyof ScoreSaberPlayerStatistics, string>> = {
 
 export default function PlayerAccBadges({ statistics }: { statistics: ScoreSaberPlayerStatistics }) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-2">
+    <div className="bg-background/60 ring-border divide-border/60 flex divide-x overflow-hidden rounded-lg ring-1">
       {Object.entries(badges).map(([name, displayName]) => {
         const badge = getScoreBadgeFromName(displayName.replace("Plus", "+"));
+        const count = statistics[name as keyof ScoreSaberPlayerStatistics] ?? 0;
 
         return (
           <SimpleTooltip
@@ -31,14 +31,17 @@ export default function PlayerAccBadges({ statistics }: { statistics: ScoreSaber
             key={name}
             showOnMobile
           >
-            <StatValue
-              name={badge.name}
-              icon={<SharedIcons.StatAccuracyGradeIcon className="size-4 shrink-0" />}
-              textColor={badge.color}
-              value={formatNumberWithCommas(statistics[name as keyof ScoreSaberPlayerStatistics] ?? 0)}
-              className="h-full"
-              size="lg"
-            />
+            <div
+              className={cn(
+                "flex min-w-12 cursor-default flex-col items-center px-2.5 py-1 leading-tight",
+                count === 0 && "opacity-45"
+              )}
+            >
+              <span className="text-[11px] font-semibold tracking-wide" style={{ color: badge.color }}>
+                {badge.name}
+              </span>
+              <span className="text-sm font-semibold tabular-nums">{formatNumberWithCommas(count)}</span>
+            </div>
           </SimpleTooltip>
         );
       })}

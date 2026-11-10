@@ -1,5 +1,6 @@
 "use client";
 
+import { useBreadcrumbTitle } from "@/components/layout/breadcrumb-context";
 import { LeaderboardInfo } from "@/components/platform/scoresaber/leaderboard/leaderboard-info";
 import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
@@ -48,6 +49,7 @@ export function ScoreSaberLeaderboardData({
     : (realmLeaderboard ?? serverLeaderboardData);
   const starChangeHistory = isDefaultRealm ? serverStarChangeHistory : (realmStarChanges ?? []);
   const { leaderboard } = leaderboardData;
+  useBreadcrumbTitle(leaderboard.songName);
 
   return (
     <LeaderboardFilterProvider>

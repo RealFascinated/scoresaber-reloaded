@@ -7,5 +7,5 @@ type Props = {
 };
 
 export default function ScoresCard({ children }: Props) {
-  return <Card className="flex gap-1 rounded-tl-none">{children}</Card>;
+  return <Card className="flex gap-1">{children}</Card>;
 }

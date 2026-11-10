@@ -1,7 +1,7 @@
 "use client";
 
 import { PlatformRepository, PlatformType } from "@/common/platform/platform-repository";
-import PlayerBadges from "@/components/player/player-badges";
+import { useBreadcrumbTitle } from "@/components/layout/breadcrumb-context";
 import PlayerViews from "@/components/player/views/player-views";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { useQueryParamSelector } from "@/hooks/use-query-param-selector";
@@ -14,7 +14,8 @@ import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import ScoreSaberPlayerScoresLive from "../platform/scoresaber/scoresaber-player-scores-live";
 import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-scores-medals";
 import ScoreSaberPlayerScoresSSR from "../platform/scoresaber/scoresaber-player-scores-ssr";
-import { Button } from "../ui/button";
+import { ScoresToolbarLeadingProvider } from "../score/scores-toolbar";
+import { Tab, TabGroup } from "../ui/control-panel";
 import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
 
@@ -45,6 +46,7 @@ export default function PlayerData({ player: playerProp }: PlayerDataProps) {
     refetchOnMount: false,
   });
   const player = playerData ?? playerProp;
+  useBreadcrumbTitle(player.name);
 
   const { data: availablePlatforms = [] } = useQuery({
     queryKey: ["available-platforms", player.id],
@@ -80,17 +82,27 @@ export default function PlayerData({ player: playerProp }: PlayerDataProps) {
     }
   }, [selectedPlatform, player]);
 
+  const platformSelector =
+    availablePlatforms.length > 1 ? (
+      <TabGroup className="mr-1">
+        {availablePlatforms.map(platform => (
+          <Tab
+            key={platform.getDisplayName()}
+            isActive={selectedPlatform === platform.getType()}
+            onClick={() => setSelectedPlatform(platform.getType())}
+          >
+            {platform.getLogo()}
+            <span className="hidden md:block">{platform.getDisplayName()}</span>
+          </Tab>
+        ))}
+      </TabGroup>
+    ) : undefined;
+
   const showRankings = !isMobile && !player.inactive && !player.banned;
   return (
     <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <PlayerHeader player={player} />
-
-        {player.badges.length > 0 && (
-          <div className="ring-border bg-card rounded-xl p-4 ring-1">
-            <PlayerBadges player={player} />
-          </div>
-        )}
 
         {!player.inactive && (
           <div className="ring-border bg-card rounded-xl p-4 ring-1">
@@ -98,22 +110,7 @@ export default function PlayerData({ player: playerProp }: PlayerDataProps) {
           </div>
         )}
 
-        <div className="flex flex-col">
-          <div className="flex flex-wrap">
-            {availablePlatforms.map(platform => (
-              <Button
-                key={platform.getDisplayName()}
-                variant={selectedPlatform === platform.getType() ? "default" : "secondary"}
-                className="flex items-center gap-2 rounded-b-none"
-                onClick={() => setSelectedPlatform(platform.getType())}
-              >
-                {platform.getLogo()}
-                <span className="hidden md:block">{platform.getDisplayName()}</span>
-              </Button>
-            ))}
-          </div>
-          <div className="[&>div]:rounded-tl-none">{platform}</div>
-        </div>
+        <ScoresToolbarLeadingProvider leading={platformSelector}>{platform}</ScoresToolbarLeadingProvider>
       </div>
 
       {showRankings && (

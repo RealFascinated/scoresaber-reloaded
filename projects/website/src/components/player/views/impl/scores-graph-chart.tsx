@@ -1,4 +1,5 @@
 import { openInNewTab } from "@/common/browser-utils";
+import { applyChartTheme, CHART_THEME, chartTitle } from "@/common/chart/chart-theme";
 import { useRealm } from "@/components/providers/realm-provider";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ import { Line } from "react-chartjs-2";
 import PlayerSearch from "../../player-search";
 
 Chart.register(LineController, ScatterController, LineElement, PointElement, LinearScale, Tooltip, Legend);
+applyChartTheme();
 
 const TOP_SCORE_COUNT = 500;
 const MAX_COMPARISON_PLAYERS = 3;
@@ -256,32 +258,23 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
         type: "linear" as const,
         min: showTop ? minStar : 0,
         max: maxStar,
-        grid: { color: "#252525" },
+        grid: { color: CHART_THEME.gridColor },
         ticks: {
-          color: "white",
           stepSize: STAR_TICK_SIZE,
           callback: (value: number | string) => {
             const numValue = Number(value);
             return Math.abs((numValue * (1 / STAR_TICK_SIZE)) % 1) < 0.0001 ? numValue : "";
           },
         },
-        title: {
-          display: true,
-          text: "Star Rating",
-          color: "white",
-        },
+        title: chartTitle("Star Rating"),
       },
       y: {
         type: "linear" as const,
         min: minAccuracy,
         max: showTop ? maxAccuracy : 100,
-        grid: { color: "#252525" },
-        ticks: { color: "white", stepSize: ACCURACY_TICK_SIZE },
-        title: {
-          display: true,
-          text: "Score %",
-          color: "white",
-        },
+        grid: { color: CHART_THEME.gridColor },
+        ticks: { stepSize: ACCURACY_TICK_SIZE },
+        title: chartTitle("Score %"),
       },
     }),
     [showTop, minStar, maxStar, minAccuracy, maxAccuracy]
@@ -332,7 +325,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
         legend: {
           display: true,
           position: "top" as const,
-          labels: { color: "white" },
         },
       },
       onClick: (_, elements: any[]) => {
@@ -395,16 +387,17 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
       </div>
 
       {/* Comparison Players */}
-      <div className="flex flex-col justify-center gap-2">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col justify-center gap-2 pt-2">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => setIsSearchOpen(true)}
-              className="w-full text-sm font-medium md:w-auto"
+              className="w-full gap-1.5 text-xs font-medium md:w-auto"
               disabled={comparisonPlayers.length >= MAX_COMPARISON_PLAYERS}
             >
-              <SharedIcons.ScoresGraphFriendIcon className="mr-2 h-4 w-4" />
+              <SharedIcons.ScoresGraphFriendIcon className="size-4" />
               Add Player to Compare
               {comparisonPlayers.length > 0 && (
                 <span className="bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-xs">
@@ -418,7 +411,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
                 {comparisonPlayers.map(comparisonPlayer => (
                   <div
                     key={comparisonPlayer.id}
-                    className="bg-primary/10 border-primary/20 ring-border flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium ring-1 md:w-auto"
+                    className="bg-primary/10 border-primary/20 ring-border flex w-full items-center gap-2 rounded-lg px-2.5 py-1 text-xs font-medium ring-1 md:w-auto"
                   >
                     <span className="text-primary-foreground flex-1 md:flex-initial">
                       {comparisonPlayer.name}
@@ -441,7 +434,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
 
           <div className="flex items-center justify-end gap-2">
             <Switch checked={showTop} onCheckedChange={setShowTop} id="top-mode" />
-            <label htmlFor="top-mode" className="text-muted-foreground text-sm font-medium">
+            <label htmlFor="top-mode" className="text-muted-foreground text-xs font-medium">
               Only Top {TOP_SCORE_COUNT} Scores
             </label>
           </div>

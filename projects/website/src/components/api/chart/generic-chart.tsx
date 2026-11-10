@@ -1,5 +1,6 @@
 "use client";
 
+import { applyChartTheme, CHART_THEME, chartTitle } from "@/common/chart/chart-theme";
 import { ChartConfig } from "@/common/chart/types";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
@@ -42,6 +43,7 @@ Chart.register(
   Tooltip,
   BarController
 );
+applyChartTheme();
 
 type Props = {
   config: ChartConfig;
@@ -112,13 +114,13 @@ const GenericChart = ({ config, labels }: Props) => {
       x: isXAxisLinear
         ? {
             type: "linear",
-            grid: { color: "#252525" },
+            grid: { color: CHART_THEME.gridColor },
             ticks: axes.x?.valueFormatter
               ? { callback: (value: number) => axes.x!.valueFormatter!(value) }
               : undefined,
           }
         : {
-            grid: { color: "#252525" },
+            grid: { color: CHART_THEME.gridColor },
             ticks: {
               maxRotation: 45,
               minRotation: 45,
@@ -168,8 +170,8 @@ const GenericChart = ({ config, labels }: Props) => {
         position: axis.position,
         reverse: axis.reverse,
         display: axis.hideOnMobile && isMobile ? false : axis.display,
-        grid: { drawOnChartArea: axisId === "y", color: axisId === "y" ? "#252525" : "" },
-        title: { display: true, text: axis.displayName, color: "#ffffff" },
+        grid: { drawOnChartArea: axisId === "y", color: axisId === "y" ? CHART_THEME.gridColor : "" },
+        title: chartTitle(axis.displayName),
         ticks: preserveXTicks
           ? previousAxis.ticks
           : {
@@ -273,35 +275,6 @@ const GenericChart = ({ config, labels }: Props) => {
       plugins: {
         legend: {
           position: "top" as const,
-          labels: {
-            color: "#d4d4d4",
-            usePointStyle: true,
-            pointStyle: "circle",
-            boxWidth: 6,
-            boxHeight: 6,
-            padding: 14,
-            font: { size: 11 },
-            // Series without any data are left out; hidden ones stay toggleable but are
-            // dimmed instead of struck through
-            generateLabels: (chart: Chart) =>
-              Chart.defaults.plugins.legend.labels
-                .generateLabels(chart)
-                .filter(item => {
-                  const data = chart.data.datasets[item.datasetIndex ?? 0]?.data ?? [];
-                  return data.some(value => value !== null && value !== undefined);
-                })
-                .map(item =>
-                  item.hidden
-                    ? {
-                        ...item,
-                        hidden: false,
-                        fontColor: "#5f5f5f",
-                        fillStyle: "transparent",
-                        strokeStyle: "#5f5f5f",
-                      }
-                    : item
-                ),
-          },
           onClick: (_: any, legendItem: any, legend: any) => {
             const index = legendItem.datasetIndex;
             const chart = legend.chart;
@@ -379,19 +352,6 @@ const GenericChart = ({ config, labels }: Props) => {
           className="h-full max-w-full"
           options={chartOptions}
           data={{ labels: formattedLabels, datasets: chartDatasets as any }}
-          plugins={[
-            {
-              id: "paddingBelowLegends",
-              beforeInit(chart: any) {
-                const legend = chart.legend;
-                const originalFit = legend.fit;
-                legend.fit = function fit() {
-                  originalFit.bind(legend)();
-                  legend.height = legend.height + 8;
-                };
-              },
-            },
-          ]}
         />
       </div>
     </div>

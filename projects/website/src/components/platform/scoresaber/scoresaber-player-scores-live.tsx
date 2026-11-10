@@ -13,7 +13,8 @@ import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/pla
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import ScoresCard from "../../score/scores-card";
-import { ButtonGroup, ControlButton, ControlPanel, ControlRow } from "../../ui/control-panel";
+import { ScoresToolbar } from "../../score/scores-toolbar";
+import { ButtonGroup, ControlButton } from "../../ui/control-panel";
 import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 
 const DEFAULT_SORT: ScoreSaberScoreSort = "recent";
@@ -62,37 +63,33 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
 
   return (
     <ScoresCard>
-      <div className="flex w-full flex-col gap-2">
-        <ControlPanel>
-          <ControlRow className="mb-2">
-            <ButtonGroup>
-              {SORT_OPTIONS.map(sortOption => (
-                <ControlButton
-                  key={sortOption.value}
-                  isActive={sortOption.value === query.sort}
-                  onClick={() => query.handleSortChange(sortOption.value)}
-                >
-                  {sortOption.value === query.sort && (query.isLoading || query.isRefetching) ? (
-                    <Spinner size="sm" className="size-4" />
-                  ) : (
-                    sortOption.icon
-                  )}
-                  {sortOption.name}
-                </ControlButton>
-              ))}
-            </ButtonGroup>
-          </ControlRow>
+      <div className="flex w-full flex-col gap-3">
+        <ScoresToolbar>
+          <ButtonGroup>
+            {SORT_OPTIONS.map(sortOption => (
+              <ControlButton
+                key={sortOption.value}
+                isActive={sortOption.value === query.sort}
+                onClick={() => query.handleSortChange(sortOption.value)}
+              >
+                {sortOption.value === query.sort && (query.isLoading || query.isRefetching) ? (
+                  <Spinner size="sm" className="size-4" />
+                ) : (
+                  sortOption.icon
+                )}
+                {sortOption.name}
+              </ControlButton>
+            ))}
+          </ButtonGroup>
 
-          <ControlRow>
-            <div className="flex w-full flex-col-reverse items-center gap-2 sm:w-auto sm:flex-row">
-              <SearchInput
-                search={query.search}
-                invalidSearch={query.invalidSearch}
-                onSearchChange={query.handleSearchChange}
-              />
-            </div>
-          </ControlRow>
-        </ControlPanel>
+          <div className="flex w-full items-center gap-2 sm:ml-auto sm:w-auto">
+            <SearchInput
+              search={query.search}
+              invalidSearch={query.invalidSearch}
+              onSearchChange={query.handleSearchChange}
+            />
+          </div>
+        </ScoresToolbar>
 
         <ScoresListPanel
           page={query.page}

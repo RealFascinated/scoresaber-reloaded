@@ -4,6 +4,7 @@ import { isBackendUnavailableError } from "@/common/api-error";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import CountrySelector from "@/components/country-selector";
 import { PageTitle } from "@/components/page-title";
+import { PlayerTableSkeleton } from "@/components/ranking/player-table-skeleton";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
@@ -13,10 +14,8 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import Card from "../card";
-import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
 import { Button } from "../ui/button";
-import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import MedalsInfo from "./medals-info";
 import { MedalsRanking } from "./medals-ranking";
@@ -53,11 +52,33 @@ export default function MedalsData() {
 
       <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <CountrySelector
+              className="h-9 w-full sm:w-56"
+              value={currentCountry}
+              onValueChange={(newCountry: string | undefined) => {
+                setCurrentCountry(newCountry);
+                setCurrentPage(1);
+              }}
+              placeholder="All countries"
+            />
+            {currentCountry && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setCurrentCountry(undefined);
+                  setCurrentPage(1);
+                }}
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+
           {showBackendUnavailable && <BackendUnavailable onRetry={() => refetch()} />}
 
-          {!rankingData && !isError && !showBackendUnavailable && (
-            <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
-          )}
+          {!rankingData && !isError && !showBackendUnavailable && <PlayerTableSkeleton />}
 
           {isError && !showBackendUnavailable && (
             <div className="flex h-full flex-col items-center justify-center gap-3 py-12">
@@ -134,30 +155,7 @@ export default function MedalsData() {
           )}
         </div>
 
-        <div className="flex w-full shrink-0 flex-col gap-4 xl:w-96">
-          <FilterSection
-            title="Filters"
-            hasActiveFilters={Boolean(currentCountry)}
-            onClear={() => {
-              setCurrentCountry(undefined);
-              setCurrentPage(1);
-            }}
-          >
-            <FilterField label="Country">
-              <FilterRow>
-                <CountrySelector
-                  className="h-10 w-full"
-                  value={currentCountry}
-                  onValueChange={(newCountry: string | undefined) => {
-                    setCurrentCountry(newCountry);
-                    setCurrentPage(1);
-                  }}
-                  placeholder="Select country..."
-                />
-              </FilterRow>
-            </FilterField>
-          </FilterSection>
-
+        <div className="flex w-full shrink-0 flex-col gap-4 xl:w-80">
           <Card>
             <MedalsInfo />
           </Card>

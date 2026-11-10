@@ -1,5 +1,6 @@
 "use client";
 
+import { chartTitle } from "@/common/chart/chart-theme";
 import { ChartConfig } from "@/common/chart/types";
 import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import Card from "@/components/card";
@@ -59,11 +60,7 @@ export default function CutDistributionChart({ cutDistribution }: Props) {
     },
     options: {
       plugins: {
-        title: {
-          display: true,
-          text: "Distance to Center Distribution (0-15)",
-          color: "#ffffff",
-        },
+        title: chartTitle("Distance to Center Distribution (0-15)"),
       },
     },
   };

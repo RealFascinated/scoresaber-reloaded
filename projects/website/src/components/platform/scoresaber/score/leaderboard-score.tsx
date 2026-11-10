@@ -47,7 +47,7 @@ export default function ScoreSaberLeaderboardScore({
       >
         {/* Score Rank */}
         <TableCell className={cn(TABLE_CELL_WIDTH, "pr-1 pl-3 whitespace-nowrap")}>
-          <p className={getRankColor(score.rank)}>
+          <p className={cn("font-medium tabular-nums", getRankColor(score.rank))}>
             {score.rank !== -1 ? `#${formatNumberWithCommas(score.rank)}` : "-"}
           </p>
         </TableCell>
@@ -74,20 +74,20 @@ export default function ScoreSaberLeaderboardScore({
         </TableCell>
 
         {/* Time Set */}
-        <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
+        <TableCell className={cn(TABLE_CELL_WIDTH, "text-muted-foreground text-center whitespace-nowrap")}>
           <ScoreTimeSet timestamp={score.timestamp} />
         </TableCell>
 
         {/* Score Accuracy */}
         <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
-          <span className="tabular-nums">{formatScoreAccuracy(score.accuracy)}</span>
+          <span className="font-medium tabular-nums">{formatScoreAccuracy(score.accuracy)}</span>
         </TableCell>
 
         {/* Score Misses */}
         <TableCell
           className={cn(
             TABLE_CELL_WIDTH,
-            "cursor-default whitespace-nowrap",
+            "cursor-default whitespace-nowrap tabular-nums",
             score.misses > 0 ? "text-red-500" : "text-green-500"
           )}
         >
@@ -96,11 +96,11 @@ export default function ScoreSaberLeaderboardScore({
 
         {/* PP / Score */}
         {leaderboard.stars > 0 ? (
-          <TableCell className={cn(TABLE_CELL_WIDTH, "text-pp whitespace-nowrap")}>
+          <TableCell className={cn(TABLE_CELL_WIDTH, "text-pp font-medium whitespace-nowrap tabular-nums")}>
             <ScorePpBadge score={score} leaderboard={leaderboard} />
           </TableCell>
         ) : (
-          <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap")}>
+          <TableCell className={cn(TABLE_CELL_WIDTH, "text-center whitespace-nowrap tabular-nums")}>
             <p>{formatNumberWithCommas(score.score)}</p>
           </TableCell>
         )}
@@ -122,7 +122,7 @@ export default function ScoreSaberLeaderboardScore({
               </p>
             </SimpleTooltip>
           ) : (
-            "-"
+            <span className="text-muted-foreground/50">—</span>
           )}
         </TableCell>
 

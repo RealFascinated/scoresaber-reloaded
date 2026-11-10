@@ -52,6 +52,7 @@ import {
   Download,
   DownloadIcon,
   DrumIcon,
+  Ellipsis,
   ExternalLink,
   ExternalLinkIcon,
   Eye,
@@ -228,6 +229,8 @@ export const SharedIcons = {
   OneClickInstallIcon: DownloadIcon,
   InstallMapToGameIcon: CloudDownloadIcon,
   ExpandLeaderboardRowIcon: ChevronDown,
+  ScoreActionsMenuIcon: Ellipsis,
+  OpenScorePageIcon: ChevronRight,
   RankingQueueExpandIcon: ChevronDownIcon,
 
   // Friends

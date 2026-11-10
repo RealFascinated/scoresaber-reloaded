@@ -8,7 +8,7 @@ type Props = {
 
 export default function PlayerBadges({ player }: Props) {
   return (
-    <div className="flex w-full flex-wrap items-center justify-center gap-2">
+    <div className="flex w-full flex-wrap items-center justify-center gap-2 lg:justify-start">
       {player.badges?.map((badge, index) => {
         return (
           <SimpleTooltip

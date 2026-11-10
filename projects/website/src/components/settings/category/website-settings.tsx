@@ -1,6 +1,8 @@
 "use client";
 
+import { BACKGROUND_COVER_NONE } from "@/common/background-covers";
 import { SettingIds, WebsiteLanding } from "@/common/database/database";
+import { BackgroundCoverControl } from "@/components/settings/background-cover-control";
 import { Form } from "@/components/ui/form";
 import useDatabase from "@/hooks/use-database";
 import { useSettingsForm } from "@/hooks/use-settings-form";
@@ -15,6 +17,9 @@ import { SettingsCategorySkeleton } from "../settings-category-skeleton";
 import { getMonotonicTimeMs, showSettingsSavedToast } from "../settings-feedback";
 
 const formSchema = Type.Object({
+  backgroundCover: Type.String({ maxLength: 128 }),
+  backgroundCoverBrightness: Type.Number({ minimum: 0, maximum: 100 }),
+  backgroundCoverBlur: Type.Number({ minimum: 0, maximum: 20 }),
   snowParticles: Type.Boolean(),
   showKitty: Type.Boolean(),
   websiteLanding: Type.Enum(WebsiteLanding),
@@ -29,6 +34,38 @@ const settings: {
   icon: SharedDecorativeIcon;
   fields: Field<FormValues, keyof FormValues>[];
 }[] = [
+  {
+    id: "background",
+    title: "Background",
+    icon: SharedIcons.WebsiteCoverImageSettingsIcon,
+    fields: [
+      {
+        name: "backgroundCover" as Path<FormValues>,
+        label: "Background",
+        type: "select" as const,
+        customControl: BackgroundCoverControl,
+      },
+      {
+        name: "backgroundCoverBrightness" as Path<FormValues>,
+        label: "Background Brightness",
+        type: "slider" as const,
+        description: "Adjust the brightness of background images",
+        min: 20,
+        max: 100,
+        step: 1,
+      },
+      {
+        name: "backgroundCoverBlur" as Path<FormValues>,
+        label: "Background Blur",
+        type: "slider" as const,
+        description: "Adjust the blur of background images",
+        min: 0,
+        max: 20,
+        step: 1,
+        labelFormatter: (value: number | undefined) => `${value}px`,
+      },
+    ],
+  },
   {
     id: "effects",
     title: "Visual Effects",
@@ -89,6 +126,9 @@ const WebsiteSettings = () => {
   const form = useForm<FormValues>({
     resolver: typeboxResolver(formSchema),
     defaultValues: {
+      backgroundCover: BACKGROUND_COVER_NONE,
+      backgroundCoverBrightness: 50,
+      backgroundCoverBlur: 6,
       snowParticles: false,
       showKitty: false,
       websiteLanding: WebsiteLanding.PLAYER_HOME,
@@ -97,6 +137,9 @@ const WebsiteSettings = () => {
   });
 
   const { isLoading } = useSettingsForm(form, {
+    backgroundCover: () => database.getBackgroundCover(),
+    backgroundCoverBrightness: () => database.getBackgroundCoverBrightness(),
+    backgroundCoverBlur: () => database.getBackgroundCoverBlur(),
     snowParticles: () => database.getSnowParticles(),
     showKitty: () => database.getShowKitty(),
     websiteLanding: () => database.getWebsiteLanding(),
@@ -106,6 +149,9 @@ const WebsiteSettings = () => {
   async function onSubmit(values: FormValues) {
     const before = getMonotonicTimeMs();
     await Promise.all([
+      database.setBackgroundCover(values.backgroundCover),
+      database.setBackgroundCoverBrightness(values.backgroundCoverBrightness),
+      database.setBackgroundCoverBlur(values.backgroundCoverBlur),
       database.setSetting(SettingIds.SnowParticles, values.snowParticles),
       database.setSetting(SettingIds.ShowKitty, values.showKitty),
       database.setWebsiteLanding(values.websiteLanding),

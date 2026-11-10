@@ -37,12 +37,18 @@ export function ScoreBadges<TScore, TLeaderboard>({
       <div
         key={key}
         className={clsx(
-          "flex h-full cursor-default items-center justify-center rounded-md p-1 text-sm",
-          color ? color : "bg-accent"
+          "flex h-full cursor-default items-center justify-center rounded-md p-1 text-sm font-medium tabular-nums ring-1 ring-inset",
+          !color && "bg-accent/60 ring-border"
         )}
-        style={{
-          backgroundColor: (!color?.includes("bg") && color) || undefined,
-        }}
+        style={
+          color
+            ? ({
+                // Tint the badge with its color instead of filling it, so rows stay calm to scan.
+                backgroundColor: `color-mix(in srgb, ${color} 22%, transparent)`,
+                "--tw-ring-color": `color-mix(in srgb, ${color} 40%, transparent)`,
+              } as React.CSSProperties)
+            : undefined
+        }
       >
         {toRender}
       </div>

@@ -75,7 +75,7 @@ export default function Settings() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[16rem_1fr] lg:gap-6">
         {/* Category navigation */}
         <nav
-          className="ring-border bg-card h-fit rounded-xl p-3 ring-1 lg:sticky lg:top-4"
+          className="ring-border bg-card h-fit rounded-xl p-3 ring-1 lg:sticky lg:top-16"
           aria-label="Settings categories"
         >
           <div className="flex flex-col gap-1">

@@ -161,9 +161,15 @@ export function LandingStats() {
     return null;
   }
 
+  // Empty counters (e.g. features with no data yet) read as broken, so they're left out
+  const visibleStats = STATS.filter(({ key }) => data[key].value > 0);
+  if (visibleStats.length === 0) {
+    return null;
+  }
+
   return (
     <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3">
-      {STATS.map(({ label, icon, key }) => (
+      {visibleStats.map(({ label, icon, key }) => (
         <LandingStatCard
           key={label}
           label={label}

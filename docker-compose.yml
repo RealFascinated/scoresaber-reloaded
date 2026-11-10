@@ -38,7 +38,8 @@ services:
     # auto-create buckets on first PUT, unlike MinIO). Bucket names are the
     # StorageBucket values in projects/common/src/minio-buckets.ts.
     entrypoint: ["sh", "-c"]
-    command: ["mkdir -p /data/ssr-beatleader-replays /data/ssr-beatleader-score-stats && exec versitygw posix /data"]
+    command:
+      ["mkdir -p /data/ssr-beatleader-replays /data/ssr-beatleader-score-stats && exec versitygw posix /data"]
     environment:
       VGW_PORT: ":9000"
       ROOT_ACCESS_KEY_ID: minioadmin

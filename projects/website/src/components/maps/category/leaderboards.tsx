@@ -122,7 +122,7 @@ export default function Leaderboards() {
                               className="line-clamp-1"
                             />
                           </TableCell>
-                          <TableCell className="text-center text-xs">
+                          <TableCell className="text-center text-xs tabular-nums">
                             <div className="flex items-center justify-center gap-1 font-medium">
                               {leaderboard.ranked ? (
                                 <>
@@ -134,7 +134,7 @@ export default function Leaderboards() {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="text-foreground relative z-10 text-center text-xs">
+                          <TableCell className="text-foreground relative z-10 text-center text-xs tabular-nums">
                             <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
                               <p className="inline-flex items-center justify-center gap-1">
                                 <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -142,7 +142,7 @@ export default function Leaderboards() {
                               </p>
                             </SimpleTooltip>
                           </TableCell>
-                          <TableCell className="text-foreground relative z-10 text-center text-xs">
+                          <TableCell className="text-foreground relative z-10 text-center text-xs tabular-nums">
                             <SimpleTooltip display="Total plays on this leaderboard">
                               <p className="inline-flex items-center justify-center gap-1">
                                 <SharedIcons.PlayMapIcon className="h-3 w-3" />

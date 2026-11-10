@@ -13,7 +13,7 @@ const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   {
     name: "PP",
     color: (_, __, medalsMode?: boolean) => {
-      return medalsMode ? "bg-medals" : "bg-statistic";
+      return medalsMode ? "var(--medals)" : "var(--statistic)";
     },
     create: (score: ScoreSaberScore, leaderboard: ScoreSaberLeaderboard, medalsMode?: boolean) => {
       if (medalsMode) {
@@ -44,7 +44,7 @@ const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   },
   {
     name: "Left Hand Accuracy",
-    color: () => "bg-hands-left",
+    color: () => "var(--hands-left)",
     create: (score: ScoreSaberScore) => {
       const beatLeaderScore = score.beatLeaderScore;
       if (!beatLeaderScore) {
@@ -55,7 +55,7 @@ const mainBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   },
   {
     name: "Right Hand Accuracy",
-    color: () => "bg-hands-right",
+    color: () => "var(--hands-right)",
     create: (score: ScoreSaberScore) => {
       const beatLeaderScore = score.beatLeaderScore;
       if (!beatLeaderScore) {
@@ -80,7 +80,7 @@ type MainScoreBadgesProps = {
 
 export function MainScoreBadges({ score, leaderboard, medalsMode }: MainScoreBadgesProps) {
   return (
-    <div className="grid w-full grid-cols-3 justify-center gap-1">
+    <div className="grid w-full grid-cols-4 justify-center gap-1 lg:grid-cols-3 max-lg:[&>div:empty]:hidden">
       <ScoreBadges badges={mainBadges} score={score} leaderboard={leaderboard} medalsMode={medalsMode} />
     </div>
   );

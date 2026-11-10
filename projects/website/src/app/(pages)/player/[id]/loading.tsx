@@ -90,45 +90,30 @@ export default function Loading() {
           </div>
 
           {/* Platform scores */}
-          <div className="flex flex-col">
-            <div className="flex flex-wrap">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <Skeleton key={index} className="h-9 w-32 rounded-b-none" />
-              ))}
-            </div>
+          <div className="ring-border bg-card flex flex-col gap-1 rounded-xl p-4 ring-1">
+            <div className="flex w-full flex-col gap-3">
+              {/* Toolbar */}
+              <div className="border-border/50 flex flex-wrap items-center gap-2 border-b pb-3">
+                <Skeleton className="h-9 w-72 rounded-lg" />
+                {Array.from({ length: 2 }).map((_, index) => (
+                  <Skeleton key={index} className="h-8 w-16 rounded-md" />
+                ))}
+                <Skeleton className="h-8 w-full sm:ml-auto sm:w-64" />
+              </div>
 
-            <div className="[&>div]:rounded-tl-none">
-              <div className="ring-border bg-card flex flex-col gap-1 rounded-xl rounded-tl-none p-4 ring-1">
-                <div className="flex w-full flex-col gap-2">
-                  {/* Control panel */}
-                  <div className="ring-border bg-card rounded-xl p-4 ring-1">
-                    <div className="mb-2 flex justify-center">
-                      <div className="flex flex-wrap justify-center gap-1.5">
-                        {Array.from({ length: 2 }).map((_, index) => (
-                          <Skeleton key={index} className="h-8 w-16 rounded-md" />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex justify-center">
-                      <Skeleton className="h-8 w-full sm:w-64" />
-                    </div>
-                  </div>
+              {/* Scores list */}
+              <div className="flex flex-col">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Skeleton key={index} className="h-16 w-full" />
+                ))}
+              </div>
 
-                  {/* Scores list */}
-                  <div className="flex flex-col">
-                    {Array.from({ length: 4 }).map((_, index) => (
-                      <Skeleton key={index} className="h-16 w-full" />
-                    ))}
-                  </div>
-
-                  {/* Pagination */}
-                  <div className="flex w-full justify-center">
-                    <div className="flex items-center gap-1.5">
-                      {Array.from({ length: 7 }).map((_, index) => (
-                        <Skeleton key={index} className="h-9 w-10 rounded-md" />
-                      ))}
-                    </div>
-                  </div>
+              {/* Pagination */}
+              <div className="flex w-full justify-center">
+                <div className="flex items-center gap-1.5">
+                  {Array.from({ length: 7 }).map((_, index) => (
+                    <Skeleton key={index} className="h-9 w-10 rounded-md" />
+                  ))}
                 </div>
               </div>
             </div>
@@ -137,7 +122,7 @@ export default function Loading() {
 
         {/* Mini rankings sidebar */}
         <aside className="hidden w-full shrink-0 xl:block xl:w-96">
-          <div className="sticky top-4 flex flex-col gap-4">
+          <div className="sticky top-16 flex flex-col gap-4">
             {Array.from({ length: 2 }).map((_, cardIndex) => (
               <div
                 key={cardIndex}

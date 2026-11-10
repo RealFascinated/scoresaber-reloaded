@@ -7,6 +7,7 @@ import BackendUnavailable from "@/components/api/backend-unavailable";
 import CountrySelector from "@/components/country-selector";
 import { PageTitle } from "@/components/page-title";
 import { useRealm } from "@/components/providers/realm-provider";
+import { PlayerTableSkeleton } from "@/components/ranking/player-table-skeleton";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
@@ -19,11 +20,9 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { parseAsBoolean, parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { FancyLoader } from "../fancy-loader";
 import AddFriend from "../friend/add-friend";
 import { PlayerAvatar } from "../ranking/player-avatar";
 import { Button } from "../ui/button";
-import { FilterField, FilterRow, FilterSection } from "../ui/filter-section";
 import { Input } from "../ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
@@ -85,13 +84,78 @@ export default function RankingData() {
         description="View players ranked by performance points globally or by country"
       />
 
-      <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
+      <div className="flex w-full flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <CountrySelector
+            className="h-9 w-full sm:w-56"
+            value={currentCountry}
+            onValueChange={(newCountry: string | undefined) => {
+              setCurrentCountry(newCountry);
+              setCurrentPage(1);
+            }}
+            placeholder="All countries"
+          />
+          <div className="relative w-full sm:w-64">
+            <SharedIcons.SearchFieldIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
+            <Input
+              type="search"
+              placeholder="Search players..."
+              value={currentSearch ?? ""}
+              onChange={e => {
+                setCurrentSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="h-9 pl-8"
+            />
+          </div>
+          {(currentCountry || currentSearch) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setCurrentCountry(undefined);
+                setCurrentSearch("");
+                setCurrentPage(1);
+              }}
+            >
+              Clear
+            </Button>
+          )}
+
+          <div className="flex items-center gap-4 sm:ml-auto">
+            <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm">
+              <Switch
+                checked={includeInactives}
+                onCheckedChange={value => {
+                  setIncludeInactives(value);
+                  setCurrentPage(1);
+                }}
+              />
+              Include inactive
+            </label>
+            <label
+              className={cn(
+                "text-muted-foreground flex items-center gap-2 text-sm",
+                mainPlayer == undefined ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+              )}
+            >
+              <Switch
+                checked={showRelativePp}
+                onCheckedChange={value => {
+                  setShowRelativePp(value);
+                  setCurrentPage(1);
+                }}
+                disabled={mainPlayer == undefined}
+              />
+              Relative PP
+            </label>
+          </div>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-4">
           {showBackendUnavailable && <BackendUnavailable onRetry={() => refetch()} />}
 
-          {!rankingData && !isError && !showBackendUnavailable && (
-            <FancyLoader title="Loading Players" description="Please wait while we fetch the players..." />
-          )}
+          {!rankingData && !isError && !showBackendUnavailable && <PlayerTableSkeleton />}
 
           {isError && !showBackendUnavailable && (
             <div className="flex h-full flex-col items-center justify-center gap-3 py-12">
@@ -183,69 +247,6 @@ export default function RankingData() {
               />
             </div>
           )}
-        </div>
-
-        <div className="w-full shrink-0 xl:w-96">
-          <FilterSection
-            title="Filters"
-            hasActiveFilters={Boolean(currentCountry || currentSearch)}
-            onClear={() => {
-              setCurrentCountry(undefined);
-              setCurrentSearch("");
-              setCurrentPage(1);
-            }}
-          >
-            <FilterField label="Country">
-              <FilterRow>
-                <CountrySelector
-                  className="h-10 w-full"
-                  value={currentCountry}
-                  onValueChange={(newCountry: string | undefined) => {
-                    setCurrentCountry(newCountry);
-                    setCurrentPage(1);
-                  }}
-                  placeholder="Select country..."
-                />
-              </FilterRow>
-            </FilterField>
-
-            <FilterField label="Search">
-              <FilterRow>
-                <Input
-                  placeholder="Search for players..."
-                  value={currentSearch ?? ""}
-                  onChange={e => {
-                    setCurrentSearch(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="h-10"
-                />
-              </FilterRow>
-            </FilterField>
-
-            <FilterRow className="justify-between">
-              <span className="text-foreground text-sm font-medium">Include Inactives</span>
-              <Switch
-                checked={includeInactives}
-                onCheckedChange={value => {
-                  setIncludeInactives(value);
-                  setCurrentPage(1);
-                }}
-              />
-            </FilterRow>
-
-            <FilterRow className="justify-between">
-              <span className="text-foreground text-sm font-medium">Relative PP</span>
-              <Switch
-                checked={showRelativePp}
-                onCheckedChange={value => {
-                  setShowRelativePp(value);
-                  setCurrentPage(1);
-                }}
-                disabled={mainPlayer == undefined}
-              />
-            </FilterRow>
-          </FilterSection>
         </div>
       </div>
     </div>

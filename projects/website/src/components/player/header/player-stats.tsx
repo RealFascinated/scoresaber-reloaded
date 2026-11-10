@@ -1,7 +1,7 @@
 "use client";
 
+import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";
-import StatValue from "@/components/statistic/stat-value";
 import { SharedIcons } from "@/shared-icons";
 import { getHMDInfo, HMD } from "@ssr/common/hmds";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -10,217 +10,192 @@ import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { ReactNode, useState } from "react";
 
+type StatContent = {
+  /**
+   * The value shown under the stat name.
+   */
+  value: ReactNode;
+
+  /**
+   * Optional tooltip shown when hovering the value.
+   */
+  tooltip?: ReactNode;
+
+  /**
+   * Optional classes for the value (e.g. a color).
+   */
+  valueClassName?: string;
+};
+
 type Stat = {
   name: string;
   defaultHidden?: boolean;
-  create: (player: ScoreSaberPlayer, statName: string) => ReactNode | undefined;
+  create: (player: ScoreSaberPlayer) => StatContent | undefined;
 };
-
-type StatValueProps = React.ComponentProps<typeof StatValue>;
-
-function statWithTooltip(statName: string, tooltip: ReactNode, statProps: Omit<StatValueProps, "name">) {
-  return (
-    <SimpleTooltip display={tooltip} side="bottom" showOnMobile>
-      <StatValue name={statName} {...statProps} />
-    </SimpleTooltip>
-  );
-}
 
 const RANKED_VALUE_COLOR = "text-pp";
 
 const playerStats: Stat[] = [
   {
     name: "Ranked Play Count",
-    create: (player, statName) => (
-      <StatValue
-        name={statName}
-        icon={<SharedIcons.StatRankedPlayCountIcon className="size-4 shrink-0" />}
-        value={formatNumberWithCommas(player.statistics.totalRankedScores)}
-        size="lg"
-        valueColor={RANKED_VALUE_COLOR}
-      />
-    ),
+    create: player => ({
+      value: formatNumberWithCommas(player.statistics.totalRankedScores),
+      valueClassName: RANKED_VALUE_COLOR,
+    }),
   },
   {
     name: "Total Ranked Score",
-    create: (player, statName) => (
-      <StatValue
-        name={statName}
-        icon={<SharedIcons.StatTotalRankedScoreIcon className="size-4 shrink-0" />}
-        value={formatNumberWithCommas(player.statistics.totalRankedScore)}
-        size="lg"
-        valueColor={RANKED_VALUE_COLOR}
-      />
-    ),
+    create: player => ({
+      value: formatNumberWithCommas(player.statistics.totalRankedScore),
+      valueClassName: RANKED_VALUE_COLOR,
+    }),
   },
   {
     name: "Average Ranked Accuracy",
-    create: (player, statName) => (
-      <StatValue
-        name={statName}
-        icon={<SharedIcons.StatAverageRankedAccuracyIcon className="size-4 shrink-0" />}
-        value={`${player.statistics.averageRankedAccuracy.toFixed(2)}%`}
-        size="lg"
-        valueColor={RANKED_VALUE_COLOR}
-      />
-    ),
+    create: player => ({
+      value: `${player.statistics.averageRankedAccuracy.toFixed(2)}%`,
+      valueClassName: RANKED_VALUE_COLOR,
+    }),
   },
   {
     name: "Total Play Count",
-    create: (player, statName) => (
-      <StatValue
-        name={statName}
-        icon={<SharedIcons.StatTotalPlayCountIcon className="size-4 shrink-0" />}
-        value={formatNumberWithCommas(player.statistics.totalScores)}
-        size="lg"
-      />
-    ),
+    create: player => ({ value: formatNumberWithCommas(player.statistics.totalScores) }),
   },
   {
     name: "Total Score",
-    create: (player, statName) => (
-      <StatValue
-        name={statName}
-        icon={<SharedIcons.StatTotalScoreIcon className="size-4 shrink-0" />}
-        value={formatNumberWithCommas(player.statistics.totalScore)}
-        size="lg"
-      />
-    ),
+    create: player => ({ value: formatNumberWithCommas(player.statistics.totalScore) }),
   },
-  // {
-  //   name: "Replays Watched by Others",
-  //   create: player => (
-  //     <StatValue
-  //       name="Replays Watched by Others"
-  //       value={formatNumberWithCommas(player.statistics.replaysWatched)}
-  //       size="lg"
-  //     />
-  //   ),
-  // },
   {
     name: "Joined Date",
-    create: (player, statName) =>
-      statWithTooltip(
-        statName,
+    create: player => ({
+      value: formatDate(player.joinedDate),
+      tooltip: (
         <p>
           {formatDate(player.joinedDate, "DD MMMM YYYY HH:mm")} ({timeAgo(player.joinedDate)})
-        </p>,
-        {
-          icon: <SharedIcons.StatJoinedDateIcon className="size-4 shrink-0" />,
-          value: formatDate(player.joinedDate),
-          size: "lg",
-        }
+        </p>
       ),
-  },
-  {
-    name: "Tracked Since",
-    defaultHidden: true,
-    create: (player, statName) =>
-      statWithTooltip(
-        statName,
-        <p>
-          {formatDate(player.trackedSince, "DD MMMM YYYY HH:mm")} ({timeAgo(player.trackedSince)})
-        </p>,
-        {
-          icon: <SharedIcons.StatTrackedSinceIcon className="size-4 shrink-0" />,
-          value: formatDate(player.trackedSince),
-          size: "lg",
-        }
-      ),
-  },
-  {
-    name: "Headset",
-    defaultHidden: true,
-    create: (player, statName) => {
-      if (player.hmd === undefined) {
-        return undefined;
-      }
-
-      const hmd = getHMDInfo(player.hmd as HMD);
-
-      return statWithTooltip(
-        statName,
-        <div className="flex flex-col gap-1">
-          <p className="mb-1">Percentage breakdown of headsets for all scores</p>
-          {Object.entries(player.hmdBreakdown ?? {}).map(([hmdKey, percentage]) => (
-            <div key={hmdKey} className="flex items-center gap-2">
-              <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(hmdKey as HMD)} />
-              <span>{hmdKey}</span>
-              <span className="text-muted-foreground text-sm">{percentage.toFixed(2)}%</span>
-            </div>
-          ))}
-        </div>,
-        {
-          icon: <SharedIcons.HeadMountedDisplayIcon hmd={hmd} />,
-          value: player.hmd,
-          size: "lg",
-        }
-      );
-    },
+    }),
   },
   {
     name: "Roles",
-    create: (player, statName) => {
+    create: player => {
       const roles = getScoreSaberRoles(player);
       if (roles.length === 0) {
         return undefined;
       }
 
-      return statWithTooltip(
-        statName,
-        <div className="flex flex-col gap-0.5">
-          {roles.map(role => (
-            <div key={role.roleId} className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full" style={{ backgroundColor: role.color }} />
-              <span>{role.name}</span>
-            </div>
-          ))}
-        </div>,
-        {
-          icon: <SharedIcons.StatPlayerRolesIcon className="size-4 shrink-0" />,
-          value: <p>{roles.map(role => role.shortName ?? role.name).join(", ")}</p>,
-          size: "lg",
-        }
-      );
+      return {
+        value: roles.map(role => role.shortName ?? role.name).join(", "),
+        tooltip: (
+          <div className="flex flex-col gap-0.5">
+            {roles.map(role => (
+              <div key={role.roleId} className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full" style={{ backgroundColor: role.color }} />
+                <span>{role.name}</span>
+              </div>
+            ))}
+          </div>
+        ),
+      };
+    },
+  },
+  {
+    name: "Tracked Since",
+    defaultHidden: true,
+    create: player => ({
+      value: formatDate(player.trackedSince),
+      tooltip: (
+        <p>
+          {formatDate(player.trackedSince, "DD MMMM YYYY HH:mm")} ({timeAgo(player.trackedSince)})
+        </p>
+      ),
+    }),
+  },
+  {
+    name: "Headset",
+    defaultHidden: true,
+    create: player => {
+      if (player.hmd === undefined) {
+        return undefined;
+      }
+
+      return {
+        value: (
+          <span className="flex items-center gap-1.5">
+            <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(player.hmd as HMD)} />
+            {player.hmd}
+          </span>
+        ),
+        tooltip: (
+          <div className="flex flex-col gap-1">
+            <p className="mb-1">Percentage breakdown of headsets for all scores</p>
+            {Object.entries(player.hmdBreakdown ?? {}).map(([hmdKey, percentage]) => (
+              <div key={hmdKey} className="flex items-center gap-2">
+                <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(hmdKey as HMD)} />
+                <span>{hmdKey}</span>
+                <span className="text-muted-foreground text-sm">{percentage.toFixed(2)}%</span>
+              </div>
+            ))}
+          </div>
+        ),
+      };
     },
   },
   {
     name: "Peak Rank",
     defaultHidden: true,
-    create: (player, statName) => {
+    create: player => {
       if (player.peakRank === undefined) {
         return undefined;
       }
 
-      return statWithTooltip(
-        statName,
-        <p>
-          {formatDate(player.peakRank.timestamp, "DD MMMM YYYY")} ({timeAgo(player.peakRank.timestamp)})
-        </p>,
-        {
-          icon: <SharedIcons.StatPeakRankIcon className="size-4 shrink-0" />,
-          value: `#${formatNumberWithCommas(player.peakRank.rank)}`,
-          size: "lg",
-        }
-      );
+      return {
+        value: `#${formatNumberWithCommas(player.peakRank.rank)}`,
+        tooltip: (
+          <p>
+            {formatDate(player.peakRank.timestamp, "DD MMMM YYYY")} ({timeAgo(player.peakRank.timestamp)})
+          </p>
+        ),
+      };
     },
   },
   {
     name: "+1 PP",
     defaultHidden: true,
-    create: (player, statName) => {
+    create: player => {
       if (!player.plusOnePp) {
         return undefined;
       }
 
-      return statWithTooltip(statName, <p>Amount of raw PP required to increase your global pp by 1pp</p>, {
-        icon: <SharedIcons.StatPlusOnePpIcon className="size-4 shrink-0" />,
+      return {
         value: `${formatPp(player.plusOnePp)}pp`,
-        size: "lg",
-      });
+        tooltip: <p>Amount of raw PP required to increase your global pp by 1pp</p>,
+      };
     },
   },
 ];
+
+function PlayerStat({ name, content }: { name: string; content: StatContent }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-0.5">
+      <dt className="text-muted-foreground truncate text-xs">{name}</dt>
+      <dd className={cn("m-0 truncate text-sm font-semibold tabular-nums", content.valueClassName)}>
+        {content.tooltip ? (
+          <SimpleTooltip
+            display={content.tooltip}
+            side="bottom"
+            showOnMobile
+            className="mx-auto w-fit max-w-full lg:mx-0"
+          >
+            {content.value}
+          </SimpleTooltip>
+        ) : (
+          content.value
+        )}
+      </dd>
+    </div>
+  );
+}
 
 type Props = {
   player: ScoreSaberPlayer;
@@ -229,7 +204,7 @@ type Props = {
 export default function PlayerStats({ player }: Props) {
   const [showMore, setShowMore] = useState(false);
 
-  const allStats = playerStats.map(stat => ({ stat, content: stat.create(player, stat.name) }));
+  const allStats = playerStats.map(stat => ({ stat, content: stat.create(player) }));
   const visibleStats = allStats.filter(
     ({ stat, content }) => content !== undefined && (!stat.defaultHidden || showMore)
   );
@@ -238,10 +213,15 @@ export default function PlayerStats({ player }: Props) {
   ).length;
 
   return (
-    <div id="player-stats" className="flex w-full flex-wrap justify-center gap-2 lg:justify-start">
-      {visibleStats.map(({ stat, content }) => (
-        <div key={`player-stat-${stat.name}`}>{content}</div>
-      ))}
+    <div className="flex w-full flex-col items-center gap-2 lg:items-start">
+      <dl
+        id="player-stats"
+        className="m-0 grid w-full grid-cols-2 gap-x-6 gap-y-3 text-center sm:grid-cols-3 lg:text-left 2xl:grid-cols-4"
+      >
+        {visibleStats.map(({ stat, content }) =>
+          content ? <PlayerStat key={`player-stat-${stat.name}`} name={stat.name} content={content} /> : null
+        )}
+      </dl>
 
       {hiddenStatCount > 0 && (
         <button
@@ -249,13 +229,13 @@ export default function PlayerStats({ player }: Props) {
           aria-expanded={showMore}
           aria-controls="player-stats"
           onClick={() => setShowMore(current => !current)}
-          className="border-border bg-background/90 text-muted-foreground hover:border-primary/50 hover:text-foreground ring-border flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium ring-1 transition-colors"
+          className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-1 text-xs font-medium transition-colors"
         >
           {showMore ? "Show less" : `Show ${hiddenStatCount} more`}
           {showMore ? (
-            <SharedIcons.CollapsePlayerStatsIcon className="size-4 shrink-0" />
+            <SharedIcons.CollapsePlayerStatsIcon className="size-3.5 shrink-0" />
           ) : (
-            <SharedIcons.ExpandPlayerStatsIcon className="size-4 shrink-0" />
+            <SharedIcons.ExpandPlayerStatsIcon className="size-3.5 shrink-0" />
           )}
         </button>
       )}

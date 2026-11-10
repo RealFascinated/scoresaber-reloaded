@@ -19,7 +19,7 @@ export default function PlayerRankingsButton({ player }: PlayerRankingsButtonPro
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" size="sm">
           <SimpleTooltip
             display={
               <p>

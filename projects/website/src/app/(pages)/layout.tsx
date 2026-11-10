@@ -1,8 +1,10 @@
 import Announcements from "@/components/announcements/announcements";
 import { ApiHealth } from "@/components/api/api-health";
+import BackgroundCover from "@/components/background-cover";
 import { SnowBackground } from "@/components/effects/snow-background";
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { BreadcrumbProvider } from "@/components/layout/breadcrumb-context";
 import DatabaseLoader from "@/components/loaders/database-loader";
 import MeowMeow from "@/components/meow-meow";
 import { PlayerAndLeaderboardSearchDialog } from "@/components/navbar/player-and-leaderboard-search";
@@ -27,18 +29,21 @@ export default function Layout({ children }: { children: ReactNode }) {
         <NuqsAdapter>
           <RealmProvider>
             <MeowMeow />
+            <BackgroundCover />
             <SnowBackground />
             <ApiHealth />
             <SidebarProvider defaultOpen={true}>
               <SearchProvider>
                 <PlayerAndLeaderboardSearchDialog />
                 <AppSidebar />
-                <SidebarInset className="text-white">
-                  <Announcements />
-                  <AppHeader />
-                  <div className="flex min-w-0 flex-1 flex-col gap-4 px-3 pb-6 sm:px-4 md:pt-0">
-                    <SSRLayout className="flex flex-col gap-2">{children}</SSRLayout>
-                  </div>
+                <SidebarInset className="bg-transparent text-white">
+                  <BreadcrumbProvider>
+                    <Announcements />
+                    <AppHeader />
+                    <div className="flex min-w-0 flex-1 flex-col gap-4 px-3 pb-6 sm:px-4">
+                      <SSRLayout className="flex flex-col gap-2">{children}</SSRLayout>
+                    </div>
+                  </BreadcrumbProvider>
                 </SidebarInset>
               </SearchProvider>
             </SidebarProvider>

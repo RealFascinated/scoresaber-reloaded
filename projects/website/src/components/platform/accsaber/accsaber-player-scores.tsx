@@ -14,7 +14,8 @@ import { capitalizeFirstLetter } from "@ssr/common/string-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { parseAsString, useQueryState } from "nuqs";
 import ScoresCard from "../../score/scores-card";
-import { ButtonGroup, ControlButton, ControlPanel, ControlRow, Tab, TabGroup } from "../../ui/control-panel";
+import { ScoresToolbar } from "../../score/scores-toolbar";
+import { ButtonGroup, ControlButton, Tab, TabGroup } from "../../ui/control-panel";
 import AccSaberScoreComponent from "./score/accsaber-score";
 
 const DEFAULT_SORT: AccSaberScoreSort = "date";
@@ -92,53 +93,44 @@ export default function AccSaberPlayerScores({ player }: Props) {
 
   return (
     <ScoresCard>
-      <div className="flex w-full flex-col gap-2">
-        {/* Control Panel */}
-        <ControlPanel>
-          {/* Type Selection - Top Row */}
-          <ControlRow className="mb-2">
-            <TabGroup>
-              {scoreTypes.map(typeOption => (
-                <Tab
-                  key={typeOption.value}
-                  isActive={typeOption.value === type}
-                  onClick={() =>
-                    query.handleFilterChange(() => setType(typeOption.value as AccSaberScoreType))
-                  }
-                >
-                  {typeOption.icon}
-                  {typeOption.name}
-                </Tab>
-              ))}
-            </TabGroup>
-          </ControlRow>
+      <div className="flex w-full flex-col gap-3">
+        <ScoresToolbar>
+          <TabGroup>
+            {scoreTypes.map(typeOption => (
+              <Tab
+                key={typeOption.value}
+                isActive={typeOption.value === type}
+                onClick={() => query.handleFilterChange(() => setType(typeOption.value as AccSaberScoreType))}
+              >
+                {typeOption.icon}
+                {typeOption.name}
+              </Tab>
+            ))}
+          </TabGroup>
 
-          {/* Sort Options - Middle Row */}
-          <ControlRow>
-            <ButtonGroup>
-              {scoreSort.map(sortOption => (
-                <ControlButton
-                  key={sortOption.value}
-                  isActive={sortOption.value === query.sort}
-                  onClick={() => query.handleSortChange(sortOption.value, sortOption.defaultOrder ?? "desc")}
-                >
-                  {sortOption.value === query.sort ? (
-                    query.isLoading || query.isRefetching ? (
-                      <Spinner size="sm" className="size-4" />
-                    ) : query.direction === "desc" ? (
-                      <SharedIcons.SortDescendingIcon className="size-4" />
-                    ) : (
-                      <SharedIcons.SortAscendingIcon className="size-4" />
-                    )
+          <ButtonGroup>
+            {scoreSort.map(sortOption => (
+              <ControlButton
+                key={sortOption.value}
+                isActive={sortOption.value === query.sort}
+                onClick={() => query.handleSortChange(sortOption.value, sortOption.defaultOrder ?? "desc")}
+              >
+                {sortOption.value === query.sort ? (
+                  query.isLoading || query.isRefetching ? (
+                    <Spinner size="sm" className="size-4" />
+                  ) : query.direction === "desc" ? (
+                    <SharedIcons.SortDescendingIcon className="size-4" />
                   ) : (
-                    sortOption.icon
-                  )}
-                  {sortOption.name}
-                </ControlButton>
-              ))}
-            </ButtonGroup>
-          </ControlRow>
-        </ControlPanel>
+                    <SharedIcons.SortAscendingIcon className="size-4" />
+                  )
+                ) : (
+                  sortOption.icon
+                )}
+                {sortOption.name}
+              </ControlButton>
+            ))}
+          </ButtonGroup>
+        </ScoresToolbar>
 
         {/* Scores List */}
         <ScoresListPanel

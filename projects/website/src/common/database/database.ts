@@ -3,6 +3,11 @@ import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ReplayViewer, ReplayViewers } from "@ssr/common/replay-viewer";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import Dexie, { EntityTable } from "dexie";
+import {
+  BACKGROUND_COVER_CUSTOM,
+  BACKGROUND_COVER_NONE,
+  BACKGROUND_COVER_PRESETS,
+} from "../background-covers";
 import { deleteCookieValue, setCookieValue } from "../cookie.util";
 import { defaultOverlaySettings, OverlaySettings } from "../overlay/overlay-settings";
 import { HistoryMode } from "../player/history-mode";
@@ -49,6 +54,10 @@ export enum SettingIds {
   WebsiteLanding = "websiteLanding",
   PlusPpDefaultAccuracy = "plusPpDefaultAccuracy",
   HistoryMode = "historyMode",
+  BackgroundCover = "backgroundCover",
+  CustomBackground = "customBackground",
+  BackgroundCoverBrightness = "backgroundCoverBrightness",
+  BackgroundCoverBlur = "backgroundCoverBlur",
 }
 
 export const DEFAULT_WHAT_IF_RANGE: [number, number] = [90, 98.5];
@@ -59,6 +68,8 @@ const DEFAULT_SHOW_KITTY: boolean = false;
 const DEFAULT_SNOW_PARTICLES: boolean = false;
 const DEFAULT_REPLAY_VIEWER: string = "chroviewer";
 const DEFAULT_PLUS_PP_DEFAULT_ACCURACY: number = 95;
+const DEFAULT_BACKGROUND_COVER_BRIGHTNESS: number = 50;
+const DEFAULT_BACKGROUND_COVER_BLUR: number = 6;
 
 export enum WebsiteLanding {
   PLAYER_HOME = "playerHome",
@@ -443,6 +454,86 @@ export default class Database extends Dexie {
   async setWebsiteLanding(websiteLanding: WebsiteLanding) {
     setCookieValue("websiteLanding", websiteLanding);
     await this.setSetting(SettingIds.WebsiteLanding, websiteLanding);
+  }
+
+  /**
+   * Gets the selected background cover from the database
+   *
+   * @returns the background cover id (a preset id, "custom", or "none")
+   */
+  async getBackgroundCover(): Promise<string> {
+    const cover = await this.getSetting<string>(SettingIds.BackgroundCover, BACKGROUND_COVER_NONE);
+    const isKnown =
+      cover === BACKGROUND_COVER_NONE ||
+      cover === BACKGROUND_COVER_CUSTOM ||
+      BACKGROUND_COVER_PRESETS.some(preset => preset.id === cover);
+    return cover && isKnown ? cover : BACKGROUND_COVER_NONE;
+  }
+
+  /**
+   * Sets the selected background cover in the database
+   *
+   * @param cover the background cover id
+   */
+  async setBackgroundCover(cover: string) {
+    await this.setSetting(SettingIds.BackgroundCover, cover);
+  }
+
+  /**
+   * Gets the custom background (hex color or image url) from the database
+   *
+   * @returns the custom background
+   */
+  async getCustomBackground(): Promise<string> {
+    return (await this.getSetting<string>(SettingIds.CustomBackground, ""))!;
+  }
+
+  /**
+   * Sets the custom background (hex color or image url) in the database
+   *
+   * @param value the custom background
+   */
+  async setCustomBackground(value: string) {
+    await this.setSetting(SettingIds.CustomBackground, value);
+  }
+
+  /**
+   * Gets the background cover brightness from the database
+   *
+   * @returns the background cover brightness (percentage)
+   */
+  async getBackgroundCoverBrightness(): Promise<number> {
+    return (await this.getSetting<number>(
+      SettingIds.BackgroundCoverBrightness,
+      DEFAULT_BACKGROUND_COVER_BRIGHTNESS
+    ))!;
+  }
+
+  /**
+   * Sets the background cover brightness in the database
+   *
+   * @param brightness the background cover brightness (percentage)
+   */
+  async setBackgroundCoverBrightness(brightness: number) {
+    await this.setSetting(SettingIds.BackgroundCoverBrightness, brightness);
+  }
+
+  /**
+   * Gets the background cover blur from the database
+   *
+   * @returns the background cover blur (pixels)
+   */
+  async getBackgroundCoverBlur(): Promise<number> {
+    return (await this.getSetting<number>(SettingIds.BackgroundCoverBlur, DEFAULT_BACKGROUND_COVER_BLUR))!;
+  }
+
+  /**
+   * Sets the background cover blur in the database
+   *
+   * @param blur the background cover blur (pixels)
+   */
+  async setBackgroundCoverBlur(blur: number) {
+    await this.setSetting(SettingIds.BackgroundCoverBlur, blur);
   }
 
   /**

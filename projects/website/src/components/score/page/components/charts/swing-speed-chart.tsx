@@ -1,5 +1,6 @@
 "use client";
 
+import { chartTitle } from "@/common/chart/chart-theme";
 import { ChartConfig } from "@/common/chart/types";
 import { Colors } from "@/common/colors";
 import GenericChart from "@/components/api/chart/generic-chart-dynamic";
@@ -68,11 +69,7 @@ export default function SwingSpeedChart({ swingSpeed }: Props) {
     },
     options: {
       plugins: {
-        title: {
-          display: true,
-          text: "Swing Speed Over Time (2s average)",
-          color: "#ffffff",
-        },
+        title: chartTitle("Swing Speed Over Time (2s average)"),
       },
     },
   };

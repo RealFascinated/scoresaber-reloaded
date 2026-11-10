@@ -3,7 +3,6 @@
 import { HistoryMode } from "@/common/player/history-mode";
 import Card from "@/components/card";
 import { Spinner } from "@/components/spinner";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/contexts/viewport-context";
 import useDatabase from "@/hooks/use-database";
@@ -164,19 +163,29 @@ function ViewSelector({
   onViewSelect: (view: ViewMeta) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-1">
-      {views.map(view => (
-        <Button
-          key={view.index}
-          onClick={() => onViewSelect(view)}
-          variant={view.index === selectedView.index ? "default" : "outline"}
-          size="sm"
-          className="flex items-center gap-2"
-        >
-          <view.icon className="hidden size-4 md:block" />
-          <span>{view.label}</span>
-        </Button>
-      ))}
+    <div className="-mx-1 min-w-0 [scrollbar-width:none] overflow-x-auto px-1">
+      <div className="bg-muted/50 flex w-max gap-1 rounded-lg p-1">
+        {views.map(view => {
+          const isActive = view.index === selectedView.index;
+          return (
+            <button
+              key={view.index}
+              type="button"
+              onClick={() => onViewSelect(view)}
+              aria-pressed={isActive}
+              className={cn(
+                "flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors",
+                isActive
+                  ? "bg-primary/40 border-primary text-primary-foreground"
+                  : "text-foreground/70 hover:bg-accent hover:text-accent-foreground border-transparent"
+              )}
+            >
+              <view.icon className="size-3.5" />
+              {view.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -190,7 +199,7 @@ function DateRangeSelector({
 }) {
   return (
     <Select value={daysAgo.toString()} onValueChange={value => onDaysChange(parseInt(value, 10))}>
-      <SelectTrigger className="w-[180px] cursor-pointer">
+      <SelectTrigger className="h-8 w-[150px] cursor-pointer text-xs">
         <SelectValue placeholder="Select time range" />
       </SelectTrigger>
       <SelectContent>
@@ -205,7 +214,7 @@ function DateRangeSelector({
 }
 
 export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
-  const isMobile = useIsMobile("2xl");
+  const isMobile = useIsMobile("xl");
   const database = useDatabase();
   const historyMode = useStableLiveQuery(() => database.getHistoryMode());
 
@@ -220,15 +229,23 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
 
   const selectedView = VIEW_METAS[selectedViewIndex] ?? VIEW_METAS[0];
   return (
-    <div className="flex flex-col gap-(--spacing-md)">
-      <ViewSelector
-        views={VIEW_METAS}
-        selectedView={selectedView}
-        onViewSelect={view => setSelectedViewIndex(view.index)}
-      />
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+        <ViewSelector
+          views={VIEW_METAS}
+          selectedView={selectedView}
+          onViewSelect={view => setSelectedViewIndex(view.index)}
+        />
+        <div className="flex w-full shrink-0 items-center justify-between gap-2 sm:w-auto">
+          {selectedView.showDateRangeSelector && (
+            <DateRangeSelector daysAgo={daysAgo} onDaysChange={days => setDaysAgo(days)} />
+          )}
+          {isMobile && <PlayerRankingsButton player={player} />}
+        </div>
+      </div>
 
       {statisticHistory && historyMode !== undefined ? (
-        <Card className={cn("bg-chart-card", selectedView.isChart ? "p-2.5" : "")}>
+        <Card className={cn("bg-chart-card", selectedView.isChart ? "px-2.5 pt-0 pb-2.5" : "")}>
           <PlayerViewPanel
             viewIndex={selectedView.index}
             player={player}
@@ -252,13 +269,6 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
             <Spinner />
           </div>
         </Card>
-      )}
-
-      {selectedView.showDateRangeSelector && (
-        <div className="flex items-center justify-between gap-2">
-          <DateRangeSelector daysAgo={daysAgo} onDaysChange={days => setDaysAgo(days)} />
-          {isMobile && <PlayerRankingsButton player={player} />}
-        </div>
       )}
     </div>
   );

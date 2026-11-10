@@ -191,12 +191,7 @@ export default function ScoreFeed() {
       <div className="flex items-start justify-between gap-3">
         <PageTitle
           title="Live Scores"
-          description={
-            <>
-              New scores from ScoreSaber appear here as they are submitted. The list keeps the{" "}
-              {LIVE_FEED_MAX_ITEMS} most recent plays.
-            </>
-          }
+          description={<>New scores from ScoreSaber appear here as they are submitted.</>}
         />
         <FeedConnectionStatus readyState={readyState} />
       </div>

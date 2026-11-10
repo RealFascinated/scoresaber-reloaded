@@ -46,7 +46,11 @@ export default function ScoreMissesAndPausesBadge({
         fullCombo={score.fullCombo}
       >
         <span>
-          {score.fullCombo ? <span className="text-green-400">FC</span> : formatNumberWithCommas(misses)}
+          {score.fullCombo ? (
+            <span className="text-green-400">FC</span>
+          ) : (
+            <span className="text-red-400">{formatNumberWithCommas(misses)}</span>
+          )}
         </span>
         {!hideXMark && !score.fullCombo && <span>x</span>}
       </ScoreMissesTooltip>

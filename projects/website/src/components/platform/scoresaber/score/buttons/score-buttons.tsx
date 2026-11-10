@@ -3,7 +3,9 @@
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useIsMobile } from "@/contexts/viewport-context";
+import { SharedIcons } from "@/shared-icons";
 import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -105,20 +107,39 @@ export default function ScoreSaberScoreButtons({
   );
   const visibleButtons = useMemo(() => buttons.filter(button => button.display(buttonProps)), [buttonProps]);
 
+  const renderedButtons = visibleButtons.map(button => (
+    <div key={button.id} className="shrink-0">
+      {button.render(buttonProps)}
+    </div>
+  ));
+
+  if (visibleButtons.length === 0) {
+    return null;
+  }
+
+  // On small screens the buttons are folded into a menu so the row stays compact
+  if (isMobile) {
+    return (
+      <Popover>
+        <PopoverTrigger
+          aria-label="Score actions"
+          className="text-muted-foreground hover:text-foreground hover:bg-accent flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors"
+        >
+          <SharedIcons.ScoreActionsMenuIcon className="size-4" />
+        </PopoverTrigger>
+        <PopoverContent align="end" className="flex w-auto flex-wrap gap-1 p-2">
+          {renderedButtons}
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
   return (
     <div
       className="flex min-w-0 flex-wrap justify-end gap-1"
-      style={{
-        width: isMobile ? "auto" : (visibleButtons.length / 2) * 40,
-      }}
+      style={{ width: (visibleButtons.length / 2) * 40 }}
     >
-      {visibleButtons
-        .filter(button => button.display(buttonProps))
-        .map(button => (
-          <div key={button.id} className="shrink-0">
-            {button.render(buttonProps)}
-          </div>
-        ))}
+      {renderedButtons}
     </div>
   );
 }
