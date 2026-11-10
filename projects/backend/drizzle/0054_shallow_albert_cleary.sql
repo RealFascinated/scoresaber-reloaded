@@ -18,13 +18,13 @@ CREATE TABLE "scoresaber-score-realms" (
 	CONSTRAINT "scoresaber-score-realms_scoreId_realmId_pk" PRIMARY KEY("scoreId","realmId")
 );
 --> statement-breakpoint
-DROP INDEX "scoresaber_player_history_player_id_date_unique";--> statement-breakpoint
-DROP INDEX "leaderboards_ranked_true_idx";--> statement-breakpoint
-DROP INDEX "leaderboards_qualified_true_idx";--> statement-breakpoint
-DROP INDEX "leaderboards_ranked_date_desc_idx";--> statement-breakpoint
-DROP INDEX "leaderboards_stars_not_null_idx";--> statement-breakpoint
-DROP INDEX "scores_player_pp_desc_idx";--> statement-breakpoint
-DROP INDEX "scores_pp_desc_scoreid_desc_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "scoresaber_player_history_player_id_date_unique";--> statement-breakpoint
+DROP INDEX IF EXISTS "leaderboards_ranked_true_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "leaderboards_qualified_true_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "leaderboards_ranked_date_desc_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "leaderboards_stars_not_null_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "scores_player_pp_desc_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "scores_pp_desc_scoreid_desc_idx";--> statement-breakpoint
 ALTER TABLE "scoresaber-player-history" ADD COLUMN "realmId" integer DEFAULT 1 NOT NULL;--> statement-breakpoint
 ALTER TABLE "scoresaber-leaderboard-star-change" ADD COLUMN "realmId" integer DEFAULT 1 NOT NULL;--> statement-breakpoint
 CREATE INDEX "leaderboard_realms_ranked_true_idx" ON "scoresaber-leaderboard-realms" USING btree ("realmId","leaderboardId") WHERE "scoresaber-leaderboard-realms"."ranked" = true;--> statement-breakpoint
