@@ -7,6 +7,12 @@ import { prometheusRegistry } from "../../metrics/prometheus";
 export default function metricsController(app: Elysia) {
   return app.get(
     "/metrics",
+    {
+      detail: {
+        description: "Prometheus metrics endpoint (requires Bearer token authentication in production)",
+        tags: [],
+      },
+    },
     async ({ headers, set }) => {
       // Validate Bearer token (skip in development)
       if (isProduction()) {
@@ -35,12 +41,6 @@ export default function metricsController(app: Elysia) {
       // Export Prometheus metrics
       set.headers["content-type"] = "text/plain; version=0.0.4; charset=utf-8";
       return await prometheusRegistry.metrics();
-    },
-    {
-      detail: {
-        description: "Prometheus metrics endpoint (requires Bearer token authentication in production)",
-        tags: [],
-      },
     }
   );
 }

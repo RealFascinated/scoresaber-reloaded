@@ -1,4 +1,5 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
+import { DateSchema } from "../../date";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
 import { MapDifficultySchema } from "../../map/map-difficulty";
 
@@ -37,7 +38,7 @@ export const BeatLeaderScoreSchema = Type.Object({
     }),
   }),
   savedReplay: Type.Boolean(),
-  timestamp: Type.Date(),
+  timestamp: DateSchema,
 });
 
 export type BeatLeaderScore = StaticDecode<typeof BeatLeaderScoreSchema>;

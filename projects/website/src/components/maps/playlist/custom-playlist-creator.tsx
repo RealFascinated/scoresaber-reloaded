@@ -10,7 +10,6 @@ import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { Form, FormControl, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { SharedIcons } from "@/shared-icons";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
-import { type Static } from "@sinclair/typebox";
 import { env } from "@ssr/common/env";
 import {
   customRankedPlaylistSchema,
@@ -19,6 +18,7 @@ import {
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { useCallback, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
+import { type Static } from "typebox";
 
 type CustomRankedPlaylist = Static<typeof customRankedPlaylistSchema>;
 

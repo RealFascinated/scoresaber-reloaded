@@ -1,4 +1,5 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
+import { DateSchema } from "../../date";
 import { PaginationMetadataSchema } from "../../pagination";
 
 export const MedalsGlobalRankingSchema = Type.Object({
@@ -9,8 +10,8 @@ export const MedalsGlobalRankingSchema = Type.Object({
   medals: Type.Number(),
   medalsRank: Type.Number(),
   medalsCountryRank: Type.Number(),
-  trackedSince: Type.Date(),
-  joinedDate: Type.Date(),
+  trackedSince: DateSchema,
+  joinedDate: DateSchema,
 });
 
 export type MedalRankingPlayer = StaticDecode<typeof MedalsGlobalRankingSchema>;

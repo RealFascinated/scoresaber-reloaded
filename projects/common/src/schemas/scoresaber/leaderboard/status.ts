@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 export const ScoreSaberLeaderboardStatusSchema = Type.Union([
   Type.Literal("Unranked"),

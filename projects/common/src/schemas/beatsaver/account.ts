@@ -1,4 +1,4 @@
-import { Type } from "@sinclair/typebox";
+import { Type } from "typebox";
 
 export const BeatSaverAccountSchema = Type.Object({
   id: Type.Number(),

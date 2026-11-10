@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 /**
  * Raw `IdolCanvas` token mirroring the upstream `IdolCanvas` schema. The

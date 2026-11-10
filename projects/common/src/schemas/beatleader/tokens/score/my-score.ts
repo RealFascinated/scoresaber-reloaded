@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { BeatLeaderPlayerResponseSchema } from "../players/player";
 import { BeatLeaderScoreImprovementSchema } from "./score-improvement";
 import { BeatLeaderScoreOffsetsSchema } from "./score-offsets";

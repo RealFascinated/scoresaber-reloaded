@@ -1,4 +1,5 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
+import { DateSchema } from "../../date";
 import { ScoreSaberLeaderboardDifficultySchema } from "./difficulty";
 import { ScoreSaberLeaderboardStatusSchema } from "./status";
 
@@ -27,14 +28,14 @@ export const ScoreSaberLeaderboardSchema = Type.Object({
   ranked: Type.Boolean(),
   qualified: Type.Boolean(),
   stars: Type.Number(),
-  rankedDate: Type.Optional(Type.Date()),
-  qualifiedDate: Type.Optional(Type.Date()),
+  rankedDate: Type.Optional(DateSchema),
+  qualifiedDate: Type.Optional(DateSchema),
   status: ScoreSaberLeaderboardStatusSchema,
 
   // Play information
   plays: Type.Number(),
   dailyPlays: Type.Number(),
 
-  timestamp: Type.Date(),
+  timestamp: DateSchema,
 });
 export type ScoreSaberLeaderboard = StaticDecode<typeof ScoreSaberLeaderboardSchema>;

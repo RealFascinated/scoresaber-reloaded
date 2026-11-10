@@ -13,6 +13,22 @@ export default function leaderboardController(app: Elysia) {
     app
       .get(
         "/search",
+        {
+          tags: ["Leaderboard"],
+          query: t.Evaluate(
+            t.Intersect([
+              ScoreSaberLeaderboardQueryFiltersSchema,
+              RealmQuerySchema,
+              t.Object({
+                page: t.Optional(t.Integer({ minimum: 1 })),
+              }),
+            ])
+          ),
+          response: LeaderboardsPageResponseSchema,
+          detail: {
+            description: "Search ScoreSaber leaderboards",
+          },
+        },
         async ({ query: { page, realmId, ...filters } }) => {
           return await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(
             page ?? 1,
@@ -23,40 +39,22 @@ export default function leaderboardController(app: Elysia) {
             },
             realmId
           );
-        },
-        {
-          tags: ["Leaderboard"],
-          query: t.Composite([
-            ScoreSaberLeaderboardQueryFiltersSchema,
-            RealmQuerySchema,
-            t.Object({
-              page: t.Optional(t.Integer({ minimum: 1 })),
-            }),
-          ]),
-          response: LeaderboardsPageResponseSchema,
-          detail: {
-            description: "Search ScoreSaber leaderboards",
-          },
         }
       )
       .get(
         "/ranking-queue",
-        async () => {
-          return await ScoreSaberLeaderboardsService.getRankingQueueLeaderboards();
-        },
         {
           tags: ["Leaderboard"],
           detail: {
             description: "Fetch the ScoreSaber ranking request queue",
           },
+        },
+        async () => {
+          return await ScoreSaberLeaderboardsService.getRankingQueueLeaderboards();
         }
       )
       .get(
         "/by-id/:leaderboardId/star-history",
-        async ({ params: { leaderboardId }, query: { realmId } }) => {
-          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
-          return await ScoreSaberLeaderboardsService.getStarChangeHistory(leaderboard, realmId);
-        },
         {
           tags: ["Leaderboard"],
           params: t.Object({
@@ -66,19 +64,14 @@ export default function leaderboardController(app: Elysia) {
           detail: {
             description: "Fetch leaderboard star rating change history",
           },
+        },
+        async ({ params: { leaderboardId }, query: { realmId } }) => {
+          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
+          return await ScoreSaberLeaderboardsService.getStarChangeHistory(leaderboard, realmId);
         }
       )
       .get(
         "/by-id/:leaderboardId",
-        async ({ params: { leaderboardId }, query: { realmId } }) => {
-          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
-          const beatsaver = await BeatSaverService.getMap(
-            leaderboard.songHash,
-            leaderboard.difficulty.difficulty,
-            leaderboard.difficulty.characteristic
-          );
-          return { leaderboard, beatsaver } as LeaderboardResponse;
-        },
         {
           tags: ["Leaderboard"],
           params: t.Object({
@@ -88,17 +81,19 @@ export default function leaderboardController(app: Elysia) {
           detail: {
             description: "Fetch leaderboard details",
           },
+        },
+        async ({ params: { leaderboardId }, query: { realmId } }) => {
+          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
+          const beatsaver = await BeatSaverService.getMap(
+            leaderboard.songHash,
+            leaderboard.difficulty.difficulty,
+            leaderboard.difficulty.characteristic
+          );
+          return { leaderboard, beatsaver } as LeaderboardResponse;
         }
       )
       .get(
         "/by-hash/:hash/:difficulty/:characteristic",
-        async ({ params: { hash, difficulty, characteristic }, query: { realmId } }) => {
-          const [leaderboard, beatsaver] = await Promise.all([
-            ScoreSaberLeaderboardsService.getLeaderboardByHash(hash, difficulty, characteristic, realmId),
-            BeatSaverService.getMap(hash, difficulty, characteristic),
-          ]);
-          return { leaderboard, beatsaver } as LeaderboardResponse;
-        },
         {
           tags: ["Leaderboard"],
           params: t.Object({
@@ -110,6 +105,13 @@ export default function leaderboardController(app: Elysia) {
           detail: {
             description: "Fetch leaderboard details",
           },
+        },
+        async ({ params: { hash, difficulty, characteristic }, query: { realmId } }) => {
+          const [leaderboard, beatsaver] = await Promise.all([
+            ScoreSaberLeaderboardsService.getLeaderboardByHash(hash, difficulty, characteristic, realmId),
+            BeatSaverService.getMap(hash, difficulty, characteristic),
+          ]);
+          return { leaderboard, beatsaver } as LeaderboardResponse;
         }
       )
   );

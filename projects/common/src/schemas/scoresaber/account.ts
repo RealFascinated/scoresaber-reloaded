@@ -1,11 +1,12 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
+import { DateSchema } from "../date";
 import { ScoreSaberPeakRankSchema } from "./player/peak-rank";
 
 export const ScoreSaberAccountSchema = Type.Object({
   id: Type.String(),
   name: Type.String(),
   avatar: Type.String(),
-  country: Type.Transform(Type.Union([Type.String(), Type.Null()]))
+  country: Type.Codec(Type.Union([Type.String(), Type.Null()]))
     .Decode(value => value ?? "Unknown")
     .Encode(value => value),
   peakRank: Type.Optional(ScoreSaberPeakRankSchema),
@@ -21,8 +22,8 @@ export const ScoreSaberAccountSchema = Type.Object({
   medalsCountryRank: Type.Number(),
   currentStreak: Type.Number(),
   longestStreak: Type.Number(),
-  trackedSince: Type.Date(),
-  joinedDate: Type.Date(),
+  trackedSince: DateSchema,
+  joinedDate: DateSchema,
 });
 
 export type ScoreSaberAccount = StaticDecode<typeof ScoreSaberAccountSchema>;

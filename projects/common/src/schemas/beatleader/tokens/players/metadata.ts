@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 export const BeatLeaderMetadataSchema = Type.Object({
   itemsPerPage: Type.Number(),

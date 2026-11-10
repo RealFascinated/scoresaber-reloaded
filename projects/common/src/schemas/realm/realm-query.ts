@@ -1,9 +1,9 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 /**
  * A realm id. Query strings arrive as text, so it is decoded from a string or number.
  */
-const RealmIdTransform = Type.Transform(Type.Union([Type.String(), Type.Number()]))
+const RealmIdTransform = Type.Codec(Type.Union([Type.String(), Type.Number()]))
   .Decode(v => {
     const n = typeof v === "number" ? v : Number(v);
     if (v === "" || !Number.isInteger(n) || n < 1) {

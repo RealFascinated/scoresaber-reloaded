@@ -1,4 +1,4 @@
-import { Value } from "@sinclair/typebox/value";
+import { parseSchema } from "@ssr/common/schemas/parse";
 import { ScoreSaberAccount, ScoreSaberAccountSchema } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberAccountRow } from "../schema";
 
@@ -9,7 +9,7 @@ import { ScoreSaberAccountRow } from "../schema";
  * @returns the converted ScoreSaberAccount
  */
 export function scoreSaberAccountRowToType(row: ScoreSaberAccountRow): ScoreSaberAccount {
-  return Value.Parse(ScoreSaberAccountSchema, {
+  return parseSchema(ScoreSaberAccountSchema, {
     id: row.id,
     name: row.name,
     avatar: row.avatar,

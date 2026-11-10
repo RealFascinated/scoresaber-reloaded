@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 export const ScoreSaberV2PlayerBadgeTokenSchema = Type.Object({
   id: Type.Number(),

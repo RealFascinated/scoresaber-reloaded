@@ -1,7 +1,7 @@
-import { Value } from "@sinclair/typebox/value";
 import { BeatSaverMap, BeatSaverMapSchema } from "@ssr/common/schemas/beatsaver/map/map";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
+import { parseSchema } from "@ssr/common/schemas/parse";
 import {
   BeatSaverMapDifficultyRow,
   BeatSaverMapRow,
@@ -38,7 +38,7 @@ export function beatSaverRowsToMap({
     return undefined;
   }
 
-  return Value.Parse(BeatSaverMapSchema, {
+  return parseSchema(BeatSaverMapSchema, {
     id: map.id,
     bsr: map.id,
     name: map.name,

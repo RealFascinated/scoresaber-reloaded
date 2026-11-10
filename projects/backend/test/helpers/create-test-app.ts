@@ -1,5 +1,7 @@
 import cors from "@elysiajs/cors";
-import { Elysia, ValidationError } from "elysia";
+import { AnyElysia, Elysia, ValidationError } from "elysia";
+import { websocket as websocketPlugin } from "elysia/websocket";
+import { getHttpErrorCode } from "../../src/common/error-code";
 import AppController from "../../src/controller/app/app.controller";
 import BeatLeaderController from "../../src/controller/beatleader/beatleader.controller";
 import BeatSaverController from "../../src/controller/beatsaver/beatsaver.controller";
@@ -12,18 +14,22 @@ import ScoresController from "../../src/controller/scores/scores.controller";
 import { WebsocketManager } from "../../src/websocket/websocket-manager";
 import { patchScoreSaberApiForTests } from "./scoresaber-api-test-patches";
 
+type TestWebsocketClient = { id: string; send(data: string): unknown };
+
 let websocketsRegistered = false;
 
-function registerWebsocketRoutes(app: Elysia): void {
+function registerWebsocketRoutes(app: AnyElysia): void {
   if (!websocketsRegistered) {
     new WebsocketManager();
     websocketsRegistered = true;
   }
 
+  app.use(websocketPlugin());
+
   for (const websocket of WebsocketManager.getAll()) {
     app.ws(websocket.route, {
-      open: ws => websocket.onOpen(ws.raw),
-      close: ws => websocket.onClose(ws.raw),
+      open: (ws: TestWebsocketClient) => websocket.onOpen(ws),
+      close: (ws: TestWebsocketClient) => websocket.onClose(ws),
     });
   }
 }
@@ -36,7 +42,8 @@ export function createTestApp() {
   patchScoreSaberApiForTests();
 
   const app = new Elysia()
-    .onError({ as: "global" }, ({ code, error }) => {
+    .onError("global", ({ error }) => {
+      const code = getHttpErrorCode(error);
       if (code === "VALIDATION") {
         return JSON.parse(JSON.stringify((error as ValidationError).all));
       }

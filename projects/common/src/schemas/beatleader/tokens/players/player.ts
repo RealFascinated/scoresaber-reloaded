@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { BeatLeaderClanSchema } from "./clan";
 import { BeatLeaderPatreonFeaturesSchema } from "./patreon-features";
 import { BeatLeaderPlayerContextExtensionSchema } from "./player-context-extension";

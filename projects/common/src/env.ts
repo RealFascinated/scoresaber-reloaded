@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 const serverSchema = Type.Object({
   // Databases
@@ -52,7 +52,7 @@ const clientSchema = Type.Object({
   NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: Type.Optional(Type.String()),
 });
 
-const envSchema = Type.Composite([serverSchema, clientSchema]);
+const envSchema = Type.Evaluate(Type.Intersect([serverSchema, clientSchema]));
 
 /**
  * Environment variables, typed via the schemas above.

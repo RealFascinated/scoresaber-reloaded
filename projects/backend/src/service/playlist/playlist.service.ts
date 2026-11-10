@@ -1,5 +1,3 @@
-import { Type, type Static } from "@sinclair/typebox";
-import { Value } from "@sinclair/typebox/value";
 import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
@@ -11,6 +9,7 @@ import {
 } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import type { SelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-settings-schema";
 import { parseSelfPlaylistSettings } from "@ssr/common/playlist/self/self-playlist-utils";
+import { parseSchema } from "@ssr/common/schemas/parse";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardQueryCategory } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
@@ -20,6 +19,7 @@ import type { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { eq, gt, gte, isNotNull, lte } from "drizzle-orm";
+import { Type, type Static } from "typebox";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberLeaderboardRealmsTable, scoreSaberScoresTable } from "../../db/schema";
 import { scorePpExpr } from "../../repositories/realm-columns";
@@ -86,7 +86,7 @@ export default class PlaylistService {
    * @returns the playlist
    */
   public static async getPlaylist(id: PlaylistId): Promise<Playlist> {
-    const playlistId = Value.Parse(PlaylistIdsSchema, id);
+    const playlistId = parseSchema(PlaylistIdsSchema, id);
     const parts = playlistId.split(".");
     const normalizedPlaylistId = parts[0];
 

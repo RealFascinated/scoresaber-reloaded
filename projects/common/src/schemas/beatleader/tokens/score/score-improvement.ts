@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 export const BeatLeaderScoreImprovementSchema = Type.Object({
   id: Type.Number(),

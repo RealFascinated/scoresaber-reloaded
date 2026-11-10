@@ -8,22 +8,19 @@ export default function realmController(app: Elysia) {
     app
       .get(
         "/",
-        async () => {
-          return await RealmService.getRealms();
-        },
         {
           tags: ["Realms"],
           response: RealmsResponseSchema,
           detail: {
             description: "Fetch all realms",
           },
+        },
+        async () => {
+          return await RealmService.getRealms();
         }
       )
       .get(
         "/:id/pp-curve",
-        async ({ params: { id } }) => {
-          return await RealmService.getRealmPpCurve(id);
-        },
         {
           tags: ["Realms"],
           params: t.Object({
@@ -33,6 +30,9 @@ export default function realmController(app: Elysia) {
           detail: {
             description: "Fetch the pp curve of a realm",
           },
+        },
+        async ({ params: { id } }) => {
+          return await RealmService.getRealmPpCurve(id);
         }
       )
   );

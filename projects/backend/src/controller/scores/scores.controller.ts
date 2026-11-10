@@ -30,9 +30,6 @@ export default function scoresController(app: Elysia) {
     app
       .get(
         "/:scoreId",
-        async ({ params: { scoreId }, query: { realmId } }) => {
-          return PlayerScoresService.getScore(scoreId, realmId);
-        },
         {
           tags: ["Scores"],
           params: t.Object({
@@ -44,13 +41,13 @@ export default function scoresController(app: Elysia) {
           detail: {
             description: "Fetch a score",
           },
+        },
+        async ({ params: { scoreId }, query: { realmId } }) => {
+          return PlayerScoresService.getScore(scoreId, realmId);
         }
       )
       .get(
         "/player/scoresaber/:playerId/:sort/:page",
-        async ({ params: { playerId, page, sort }, query: { search } }) => {
-          return await PlayerScoresService.getScoreSaberLivePlayerScores(playerId, page, sort, search);
-        },
         {
           tags: ["Scores"],
           params: t.Object({
@@ -65,19 +62,13 @@ export default function scoresController(app: Elysia) {
           detail: {
             description: "Fetch player scores from ScoreSaber",
           },
+        },
+        async ({ params: { playerId, page, sort }, query: { search } }) => {
+          return await PlayerScoresService.getScoreSaberLivePlayerScores(playerId, page, sort, search);
         }
       )
       .get(
         "/player/accsaber/:playerId/:page",
-        async ({ params: { playerId, page }, query: { sort, direction, type } }) => {
-          return await PlayerScoresService.getPlayerAccSaberScores(
-            playerId,
-            page,
-            sort ?? "date",
-            direction ?? "desc",
-            type ?? "overall"
-          );
-        },
         {
           tags: ["Scores"],
           params: t.Object({
@@ -93,20 +84,19 @@ export default function scoresController(app: Elysia) {
           detail: {
             description: "Fetch AccSaber player scores with optional BeatLeader replay URLs",
           },
+        },
+        async ({ params: { playerId, page }, query: { sort, direction, type } }) => {
+          return await PlayerScoresService.getPlayerAccSaberScores(
+            playerId,
+            page,
+            sort ?? "date",
+            direction ?? "desc",
+            type ?? "overall"
+          );
         }
       )
       .get(
         "/player/ssr/:playerId/:field/:direction/:page",
-        async ({ params: { playerId, page, field, direction }, query }) => {
-          // Elysia types transform properties by their raw input; at runtime the query was decoded.
-          return await PlayerScoresService.getScoreSaberPlayerScores(
-            playerId,
-            page,
-            field,
-            direction,
-            query as PlayerScoresQuery
-          );
-        },
         {
           tags: ["Scores"],
           params: t.Object({
@@ -120,19 +110,20 @@ export default function scoresController(app: Elysia) {
           detail: {
             description: "Fetch player scores",
           },
-        }
-      )
-      .get(
-        "/player/medals/:playerId/:field/:direction/:page",
+        },
         async ({ params: { playerId, page, field, direction }, query }) => {
-          return await PlayerScoresService.getScoreSaberPlayerMedalScores(
+          // Elysia types transform properties by their raw input; at runtime the query was decoded.
+          return await PlayerScoresService.getScoreSaberPlayerScores(
             playerId,
             page,
             field,
             direction,
             query as PlayerScoresQuery
           );
-        },
+        }
+      )
+      .get(
+        "/player/medals/:playerId/:field/:direction/:page",
         {
           tags: ["Scores"],
           params: t.Object({
@@ -146,13 +137,19 @@ export default function scoresController(app: Elysia) {
           detail: {
             description: "Fetch player medal scores",
           },
+        },
+        async ({ params: { playerId, page, field, direction }, query }) => {
+          return await PlayerScoresService.getScoreSaberPlayerMedalScores(
+            playerId,
+            page,
+            field,
+            direction,
+            query as PlayerScoresQuery
+          );
         }
       )
       .get(
         "/history-graph/:playerId/:leaderboardId",
-        async ({ params: { playerId, leaderboardId } }) => {
-          return await PlayerScoreHistoryService.getPlayerScoreHistoryGraph(playerId, leaderboardId);
-        },
         {
           tags: ["Scores"],
           params: t.Object({
@@ -163,10 +160,31 @@ export default function scoresController(app: Elysia) {
           detail: {
             description: "Fetch player score history graph",
           },
+        },
+        async ({ params: { playerId, leaderboardId } }) => {
+          return await PlayerScoreHistoryService.getPlayerScoreHistoryGraph(playerId, leaderboardId);
         }
       )
       .get(
         "/leaderboard/:leaderboardId/:page",
+        {
+          tags: ["Scores"],
+          params: t.Object({
+            leaderboardId: t.Integer({ minimum: 1 }),
+            page: t.Integer({ minimum: 1 }),
+          }),
+          query: t.Evaluate(
+            t.Intersect([
+              RealmQuerySchema,
+              t.Object({
+                country: t.Optional(t.String()),
+              }),
+            ])
+          ),
+          detail: {
+            description: "Fetch leaderboard scores",
+          },
+        },
         async ({ params: { leaderboardId, page }, query: { country, realmId } }) => {
           return await ScoreSaberLeaderboardScoresService.getLeaderboardScores(
             leaderboardId,
@@ -174,34 +192,10 @@ export default function scoresController(app: Elysia) {
             country,
             realmId
           );
-        },
-        {
-          tags: ["Scores"],
-          params: t.Object({
-            leaderboardId: t.Integer({ minimum: 1 }),
-            page: t.Integer({ minimum: 1 }),
-          }),
-          query: t.Composite([
-            RealmQuerySchema,
-            t.Object({
-              country: t.Optional(t.String()),
-            }),
-          ]),
-          detail: {
-            description: "Fetch leaderboard scores",
-          },
         }
       )
       .post(
         "/friend/leaderboard/:leaderboardId/:page",
-        async ({ params: { leaderboardId, page }, body: { friendIds }, query: { realmId } }) => {
-          return await PlayerFriendScoresService.getFriendLeaderboardScores(
-            friendIds,
-            leaderboardId,
-            page,
-            realmId
-          );
-        },
         {
           tags: ["Scores"],
           params: t.Object({
@@ -216,28 +210,38 @@ export default function scoresController(app: Elysia) {
           detail: {
             description: "Fetch friends' scores for a leaderboard",
           },
+        },
+        async ({ params: { leaderboardId, page }, body: { friendIds }, query: { realmId } }) => {
+          return await PlayerFriendScoresService.getFriendLeaderboardScores(
+            friendIds,
+            leaderboardId,
+            page,
+            realmId
+          );
         }
       )
       .get(
         "/top/:page",
-        async ({ params: { page }, query: { limit, realmId } }) => {
-          return await TopScoresService.getTopScores(page, limit, realmId);
-        },
         {
           tags: ["Scores"],
           params: t.Object({
             page: t.Integer({ minimum: 1 }),
           }),
-          query: t.Composite([
-            RealmQuerySchema,
-            t.Object({
-              limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
-            }),
-          ]),
+          query: t.Evaluate(
+            t.Intersect([
+              RealmQuerySchema,
+              t.Object({
+                limit: t.Optional(t.Integer({ minimum: 1, maximum: 50 })),
+              }),
+            ])
+          ),
           response: TopScoresPageResponseSchema,
           detail: {
             description: "Fetch top scores",
           },
+        },
+        async ({ params: { page }, query: { limit, realmId } }) => {
+          return await TopScoresService.getTopScores(page, limit, realmId);
         }
       )
   );

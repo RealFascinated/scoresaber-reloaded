@@ -6,41 +6,41 @@ export default function appController(app: Elysia) {
   return app
     .get(
       "/",
-      async () => {
-        return {
-          app: "backend",
-          version: await getAppVersion(),
-        };
-      },
       {
         tags: ["App"],
         detail: {
           description: "Return backend name and version",
         },
+      },
+      async () => {
+        return {
+          app: "backend",
+          version: await getAppVersion(),
+        };
       }
     )
     .get(
       "/health",
-      async () => {
-        return "OK";
-      },
       {
         tags: ["App"],
         detail: {
           description: "Health check (returns OK)",
         },
+      },
+      async () => {
+        return "OK";
       }
     )
     .get(
       "/statistics",
-      async () => {
-        return await AppService.getAppStatistics();
-      },
       {
         tags: ["App"],
         detail: {
           description: "Return backend statistics",
         },
+      },
+      async () => {
+        return await AppService.getAppStatistics();
       }
     );
 }

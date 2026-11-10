@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 /**
  * Raw `Badge` token mirroring the upstream `Badge` schema. The upstream

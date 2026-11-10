@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { BeatSaverMapTokenSchema } from "../map";
 
 export const BeatSaverMultiMapLookupSchema = Type.Record(Type.String(), BeatSaverMapTokenSchema);

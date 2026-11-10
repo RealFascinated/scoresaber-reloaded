@@ -1,8 +1,5 @@
 import cors from "@elysiajs/cors";
-import { cron } from "@elysiajs/cron";
-import { openapi } from "@elysiajs/openapi";
 import { serverTiming } from "@elysiajs/server-timing";
-import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
@@ -11,9 +8,13 @@ import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError } from "elysia";
 import { helmet } from "elysia-helmet";
+import { trace } from "elysia/trace";
+import { websocket as websocketPlugin } from "elysia/websocket";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { getAppVersion } from "./common/app.util";
+import { cron } from "./common/cron";
 import { registerGlobalErrorHandlers, reportErrorToDiscord } from "./common/discord/error-reporting";
+import { getHttpErrorCode } from "./common/error-code";
 import AppController from "./controller/app/app.controller";
 import BeatLeaderController from "./controller/beatleader/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver/beatsaver.controller";
@@ -76,6 +77,7 @@ export const app = new Elysia()
       mode: "combined",
     })
   )
+  .use(trace())
   .use(serverTiming())
   .use(
     cron({
@@ -239,15 +241,11 @@ export const app = new Elysia()
     })
   )
   .onRequest(httpMetricsHooks.onRequest)
-  .onError({ as: "global" }, ({ code, error, request, path, route }) => {
+  .onError("global", ({ error, request, path, route }) => {
+    const code = getHttpErrorCode(error);
     // Return default error for type validation. JSON round-trip drops Elysia class instances (e.g. RequestParams in `value`) so mapResponse's devalue can serialize.
     if (code === "VALIDATION") {
       return JSON.parse(JSON.stringify((error as ValidationError).all));
-    }
-
-    // Assume unknown error is an internal server error
-    if (code === "UNKNOWN") {
-      code = "INTERNAL_SERVER_ERROR";
     }
 
     let status: number | undefined = undefined;
@@ -291,8 +289,8 @@ export const app = new Elysia()
       timestamp: new Date().toISOString(),
     };
   })
-  .onAfterHandle(async ({ request, route, response, set }) => {
-    await httpMetricsHooks.onAfterHandle({ request, route, response, set });
+  .onAfterHandle(async ({ request, route, responseValue, set }) => {
+    await httpMetricsHooks.onAfterHandle({ request, route, response: responseValue, set });
   })
   .mapResponse(({ request, responseValue }) => {
     const ResponseCtor = (globalThis as unknown as { Response?: typeof Response }).Response;
@@ -323,37 +321,17 @@ export const app = new Elysia()
   .use(BeatLeaderController)
   .use(PlayerRankingController)
   .use(MetricsController)
-  .use(RealmController)
-  .use(
-    openapi({
-      path: "/swagger",
-      documentation: {
-        info: {
-          title: "SSR Backend",
-          description: "The API for ScoreSaber Reloaded!",
-          version: appVersion,
-        },
-        servers: [
-          {
-            url: env.NEXT_PUBLIC_API_URL,
-            description: isProduction() ? "Production" : "Development",
-          },
-        ],
-      },
-      scalar: {
-        defaultOpenAllTags: true,
-        expandAllModelSections: true,
-        expandAllResponses: true,
-      },
-    })
-  );
+  .use(RealmController);
 
+// OpenAPI docs (/swagger) are disabled: @elysiajs/openapi does not support Elysia 2 yet
 new WebsocketManager();
+
+app.use(websocketPlugin());
 
 for (const websocket of WebsocketManager.getAll()) {
   app.ws(websocket.route, {
-    open: ws => websocket.onOpen(ws.raw),
-    close: ws => websocket.onClose(ws.raw),
+    open: ws => websocket.onOpen(ws),
+    close: ws => websocket.onClose(ws),
   });
 }
 

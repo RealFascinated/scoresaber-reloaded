@@ -32,7 +32,7 @@
     "@radix-ui/react-slot": "^1.5.0",
     "@radix-ui/react-switch": "^1.4.1",
     "@radix-ui/react-tooltip": "^1.4.1",
-    "@sinclair/typebox": "^0.34.52",
+    "typebox": "^1.4.6",
     "@ssr/common": "workspace:*",
     "@tanstack/react-query": "^5.107.1",
     "@types/websocket": "^1.0.10",

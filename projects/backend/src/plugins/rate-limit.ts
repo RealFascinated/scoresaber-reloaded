@@ -39,7 +39,7 @@ export const rateLimit = ({ max, windowMs, routes = {} }: RateLimitOptions) => {
   }, CLEANUP_INTERVAL_MS);
   cleanup.unref();
 
-  return new Elysia({ name: "rate-limit" }).onBeforeHandle({ as: "global" }, ({ request, server, set }) => {
+  return new Elysia({ name: "rate-limit" }).onBeforeHandle("global", ({ request, server, set }) => {
     const { pathname } = new URL(request.url);
     // Prometheus scrapes are authenticated separately
     if (pathname === "/metrics") {

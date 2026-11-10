@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { ScoreStatsAccuracyTrackerSchema } from "./accuracy-tracker";
 import { ScoreStatsHitTrackerSchema } from "./hit-tracker";
 import { ScoreStatsGraphTrackerSchema } from "./score-graph-tracker";

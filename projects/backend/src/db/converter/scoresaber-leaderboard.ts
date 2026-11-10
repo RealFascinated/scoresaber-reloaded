@@ -1,6 +1,6 @@
-import { Value } from "@sinclair/typebox/value";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
+import { parseSchema } from "@ssr/common/schemas/parse";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardSchema,
@@ -36,7 +36,7 @@ export function leaderboardRowToType(
       ? "Qualified"
       : "Unranked";
 
-  return Value.Parse(ScoreSaberLeaderboardSchema, {
+  return parseSchema(ScoreSaberLeaderboardSchema, {
     id: row.id,
     fullName: `${row.songName} ${row.songSubName}`.trim(),
     songHash: row.songHash.toUpperCase(),

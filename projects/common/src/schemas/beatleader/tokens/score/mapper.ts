@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 /**
  * Raw `Mapper` token mirroring the upstream `Mapper` schema. `status` is

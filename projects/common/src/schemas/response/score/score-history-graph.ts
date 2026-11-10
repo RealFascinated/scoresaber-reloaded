@@ -1,8 +1,9 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
+import { DateSchema } from "../../date";
 
 export const ScoreHistoryGraphSchema = Type.Array(
   Type.Object({
-    timestamp: Type.Date(),
+    timestamp: DateSchema,
     accuracy: Type.Number(),
   })
 );

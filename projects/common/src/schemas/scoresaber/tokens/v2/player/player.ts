@@ -1,5 +1,5 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
-import { Value } from "@sinclair/typebox/value";
+import { Type, type StaticDecode } from "typebox";
+import { Value } from "typebox/value";
 import { ScoreSaberV2LeaderboardPageTokenSchema } from "../leaderboard/leaderboards-page";
 import { ScoreSaberV2PlayerBadgeTokenSchema } from "./player-badge";
 import { ScoreSaberV2PlayerStatsTokenSchema } from "./player-stats";

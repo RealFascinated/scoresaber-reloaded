@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 export const ScoreSaberPlayerHistorySchema = Type.Object({
   rank: Type.Optional(Type.Union([Type.Number(), Type.Null()])),

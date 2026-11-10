@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 /**
  * AccSaber score sort options (mapped to `ScoreResponse` fields in the REST API).

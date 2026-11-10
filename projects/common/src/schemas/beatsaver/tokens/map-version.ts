@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { BeatSaverAccountTokenSchema } from "./account";
 import { BeatSaverMapDifficultyTokenSchema } from "./map-difficulty";
 

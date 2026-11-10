@@ -1,4 +1,3 @@
-import { Type } from "@sinclair/typebox";
 import { DetailTypeSchema } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { RealmQuerySchema } from "@ssr/common/schemas/realm/realm-query";
@@ -7,6 +6,7 @@ import { PlayerRefreshResponseSchema } from "@ssr/common/schemas/response/player
 import { PlayerScoresChartResponseSchema } from "@ssr/common/schemas/response/player/scores-chart";
 import { ScoreSaberScoresPageResponseSchema } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import { Elysia, t } from "elysia";
+import { Type } from "typebox";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
 import { PlayerStatisticsService } from "../../service/player-statistics/player-statistics.service";
 import MiniRankingService from "../../service/player/mini-ranking.service";
@@ -23,12 +23,6 @@ export default function playerController(app: Elysia) {
     app
       .get(
         "/search",
-        async ({ query: { query } }) => {
-          const normalizedQuery = query?.trim();
-          return {
-            players: await PlayerSearchService.searchPlayers(normalizedQuery),
-          };
-        },
         {
           tags: ["Player"],
           query: t.Object({
@@ -38,35 +32,40 @@ export default function playerController(app: Elysia) {
           detail: {
             description: "Search players",
           },
+        },
+        async ({ query: { query } }) => {
+          const normalizedQuery = query?.trim();
+          return {
+            players: await PlayerSearchService.searchPlayers(normalizedQuery),
+          };
         }
       )
 
       .get(
         "/:playerId",
-        async ({ params: { playerId }, query: { type, realmId } }) => {
-          return ScoreSaberPlayerService.getPlayer(playerId, type, undefined, realmId);
-        },
         {
           tags: ["Player"],
           params: t.Object({
             playerId: t.String(),
           }),
-          query: t.Composite([
-            RealmQuerySchema,
-            t.Object({
-              type: t.Optional(DetailTypeSchema),
-            }),
-          ]),
+          query: t.Evaluate(
+            t.Intersect([
+              RealmQuerySchema,
+              t.Object({
+                type: t.Optional(DetailTypeSchema),
+              }),
+            ])
+          ),
           detail: {
             description: "Fetch ScoreSaber player profile",
           },
+        },
+        async ({ params: { playerId }, query: { type, realmId } }) => {
+          return ScoreSaberPlayerService.getPlayer(playerId, type, undefined, realmId);
         }
       )
       .get(
         "/scores-chart/:playerId",
-        async ({ params: { playerId }, query: { realmId } }) => {
-          return PlayerScoresService.getPlayerScoreChart(playerId, realmId);
-        },
         {
           tags: ["Player"],
           params: t.Object({
@@ -77,13 +76,13 @@ export default function playerController(app: Elysia) {
           detail: {
             description: "Fetch player score chart data",
           },
+        },
+        async ({ params: { playerId }, query: { realmId } }) => {
+          return PlayerScoresService.getPlayerScoreChart(playerId, realmId);
         }
       )
       .get(
         "/pps/:playerId",
-        async ({ params: { playerId }, query: { realmId } }) => {
-          return PlayerRankedService.getPlayerPps(playerId, realmId);
-        },
         {
           tags: ["Player"],
           params: t.Object({
@@ -94,13 +93,13 @@ export default function playerController(app: Elysia) {
           detail: {
             description: "Fetch player PP values",
           },
+        },
+        async ({ params: { playerId }, query: { realmId } }) => {
+          return PlayerRankedService.getPlayerPps(playerId, realmId);
         }
       )
       .get(
         "/refresh/:playerId",
-        async ({ params: { playerId } }) => {
-          return PlayerCoreService.refreshPlayer(playerId);
-        },
         {
           tags: ["Player"],
           params: t.Object({
@@ -110,13 +109,13 @@ export default function playerController(app: Elysia) {
           detail: {
             description: "Refresh player data from ScoreSaber",
           },
+        },
+        async ({ params: { playerId } }) => {
+          return PlayerCoreService.refreshPlayer(playerId);
         }
       )
       .get(
         "/mini-ranking/:playerId",
-        async ({ params: { playerId }, query: { realmId } }) => {
-          return MiniRankingService.getPlayerMiniRankings(playerId, realmId);
-        },
         {
           tags: ["Player"],
           params: t.Object({
@@ -126,10 +125,39 @@ export default function playerController(app: Elysia) {
           detail: {
             description: "Fetch player mini-ranking",
           },
+        },
+        async ({ params: { playerId }, query: { realmId } }) => {
+          return MiniRankingService.getPlayerMiniRankings(playerId, realmId);
         }
       )
       .get(
         "/history/:playerId",
+        {
+          tags: ["Player"],
+          params: t.Object({
+            playerId: t.String(),
+          }),
+          query: t.Evaluate(
+            t.Intersect([
+              RealmQuerySchema,
+              t.Object({
+                count: Type.Optional(
+                  Type.Codec(Type.Union([Type.String(), Type.Number(), Type.Undefined()]))
+                    .Decode(v => {
+                      const n = v === "" || v === undefined ? 50 : Number(v);
+                      if (n === -1) return -1;
+                      if (!Number.isInteger(n) || n < 1) throw new Error("Expected -1 or an integer >= 1");
+                      return n;
+                    })
+                    .Encode(v => v)
+                ),
+              }),
+            ])
+          ),
+          detail: {
+            description: "Fetch player statistics history",
+          },
+        },
         async ({ params: { playerId }, query: { count, realmId } }) => {
           const player = await ScoreSaberApiService.lookupPlayer(playerId, realmId);
           if (!player) {
@@ -143,42 +171,10 @@ export default function playerController(app: Elysia) {
             (count ?? 50) as number,
             realmId
           );
-        },
-        {
-          tags: ["Player"],
-          params: t.Object({
-            playerId: t.String(),
-          }),
-          query: t.Composite([
-            RealmQuerySchema,
-            t.Object({
-              count: Type.Optional(
-                Type.Transform(Type.Union([Type.String(), Type.Number(), Type.Undefined()]))
-                  .Decode(v => {
-                    const n = v === "" || v === undefined ? 50 : Number(v);
-                    if (n === -1) return -1;
-                    if (!Number.isInteger(n) || n < 1) throw new Error("Expected -1 or an integer >= 1");
-                    return n;
-                  })
-                  .Encode(v => v)
-              ),
-            }),
-          ]),
-          detail: {
-            description: "Fetch player statistics history",
-          },
         }
       )
       .get(
         "/score-history/:playerId/:leaderboardId/:page",
-        async ({ params: { playerId, leaderboardId, page }, query: { realmId } }) => {
-          return await PlayerScoreHistoryService.getPlayerScoreHistory(
-            playerId,
-            leaderboardId,
-            page,
-            realmId
-          );
-        },
         {
           tags: ["Player"],
           params: t.Object({
@@ -191,6 +187,14 @@ export default function playerController(app: Elysia) {
           detail: {
             description: "Fetch player score history for a leaderboard",
           },
+        },
+        async ({ params: { playerId, leaderboardId, page }, query: { realmId } }) => {
+          return await PlayerScoreHistoryService.getPlayerScoreHistory(
+            playerId,
+            leaderboardId,
+            page,
+            realmId
+          );
         }
       )
   );

@@ -10,6 +10,26 @@ export default function playerRankingController(app: Elysia) {
     app
       .get(
         "/:page",
+        {
+          tags: ["Ranking"],
+          params: t.Object({
+            page: t.Integer({ minimum: 1 }),
+          }),
+          query: t.Evaluate(
+            t.Intersect([
+              RealmQuerySchema,
+              t.Object({
+                country: t.Optional(t.String()),
+                search: t.Optional(t.String()),
+                includeInactives: t.Optional(t.BooleanString()),
+              }),
+            ])
+          ),
+          response: PlayerRankingsResponseSchema,
+          detail: {
+            description: "Fetch player ranking",
+          },
+        },
         async ({ params: { page }, query: { country, search, includeInactives, realmId } }) => {
           return await PlayerSearchService.getPlayerRanking(page, {
             country: country ?? "",
@@ -17,31 +37,10 @@ export default function playerRankingController(app: Elysia) {
             includeInactives: includeInactives ?? false,
             realmId,
           });
-        },
-        {
-          tags: ["Ranking"],
-          params: t.Object({
-            page: t.Integer({ minimum: 1 }),
-          }),
-          query: t.Composite([
-            RealmQuerySchema,
-            t.Object({
-              country: t.Optional(t.String()),
-              search: t.Optional(t.String()),
-              includeInactives: t.Optional(t.BooleanString()),
-            }),
-          ]),
-          response: PlayerRankingsResponseSchema,
-          detail: {
-            description: "Fetch player ranking",
-          },
         }
       )
       .get(
         "/medals/:page",
-        async ({ params: { page }, query: { country } }) => {
-          return await PlayerMedalsService.getPlayerMedalRanking(page, country);
-        },
         {
           tags: ["Ranking"],
           params: t.Object({
@@ -54,6 +53,9 @@ export default function playerRankingController(app: Elysia) {
           detail: {
             description: "Fetch medal ranking",
           },
+        },
+        async ({ params: { page }, query: { country } }) => {
+          return await PlayerMedalsService.getPlayerMedalRanking(page, country);
         }
       )
   );

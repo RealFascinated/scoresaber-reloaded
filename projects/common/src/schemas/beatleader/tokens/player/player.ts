@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { BeatLeaderAchievementSchema } from "../players/achievement";
 import { BeatLeaderBadgeSchema } from "../players/badge";
 import { BeatLeaderEarthDayMapSchema } from "../players/earth-day-map";

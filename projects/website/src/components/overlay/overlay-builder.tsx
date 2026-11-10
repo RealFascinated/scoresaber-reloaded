@@ -19,11 +19,11 @@ import useDatabase from "@/hooks/use-database";
 import { useStableLiveQuery } from "@/hooks/use-stable-live-query";
 import { SharedIcons } from "@/shared-icons";
 import { typeboxResolver } from "@hookform/resolvers/typebox";
-import { Type, type Static } from "@sinclair/typebox";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { Type, type Static } from "typebox";
 import { Button } from "../ui/button";
 import { Form, FormControl, FormDescription, FormItem, FormLabel } from "../ui/form";
 

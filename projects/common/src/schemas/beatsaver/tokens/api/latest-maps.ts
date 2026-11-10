@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { BeatSaverMapTokenSchema } from "../map";
 
 /** BeatSaver `SearchResponse.info` subset (Swagger). */

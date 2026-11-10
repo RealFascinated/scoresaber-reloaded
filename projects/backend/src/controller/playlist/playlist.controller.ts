@@ -18,10 +18,6 @@ export default function playlistController(app: Elysia) {
     app
       .get(
         "/:id",
-        async ({ params: { id } }) => {
-          const playlist = await PlaylistService.getPlaylist(id);
-          return toBplistIfRequested(playlist, id);
-        },
         {
           tags: ["Playlist"],
           params: t.Object({
@@ -31,14 +27,14 @@ export default function playlistController(app: Elysia) {
           detail: {
             description: "Gets a playlist by id",
           },
+        },
+        async ({ params: { id } }) => {
+          const playlist = await PlaylistService.getPlaylist(id);
+          return toBplistIfRequested(playlist, id);
         }
       )
       .get(
         "/scoresaber-custom-ranked-maps",
-        async ({ query: { config }, path }) => {
-          const playlist = await PlaylistService.createCustomRankedPlaylist(config);
-          return toBplistIfRequested(playlist, path);
-        },
         {
           tags: ["Playlist"],
           query: t.Object({
@@ -48,14 +44,14 @@ export default function playlistController(app: Elysia) {
           detail: {
             description: "Create a custom ranked playlist",
           },
+        },
+        async ({ query: { config }, path }) => {
+          const playlist = await PlaylistService.createCustomRankedPlaylist(config);
+          return toBplistIfRequested(playlist, path);
         }
       )
       .get(
         "/scoresaber-custom-ranked-maps.bplist",
-        async ({ query: { config }, path }) => {
-          const playlist = await PlaylistService.createCustomRankedPlaylist(config);
-          return toBplistIfRequested(playlist, path);
-        },
         {
           tags: ["Playlist"],
           query: t.Object({
@@ -65,14 +61,14 @@ export default function playlistController(app: Elysia) {
           detail: {
             description: "Create a custom ranked playlist (BPLIST)",
           },
+        },
+        async ({ query: { config }, path }) => {
+          const playlist = await PlaylistService.createCustomRankedPlaylist(config);
+          return toBplistIfRequested(playlist, path);
         }
       )
       .get(
         "/snipe",
-        async ({ query: { user, toSnipe, settings }, path }) => {
-          const playlist = await PlaylistService.getSnipePlaylist(user, toSnipe, settings);
-          return toBplistIfRequested(playlist, path);
-        },
         {
           tags: ["Playlist"],
           query: t.Object({
@@ -84,14 +80,14 @@ export default function playlistController(app: Elysia) {
           detail: {
             description: "Create a snipe playlist",
           },
+        },
+        async ({ query: { user, toSnipe, settings }, path }) => {
+          const playlist = await PlaylistService.getSnipePlaylist(user, toSnipe, settings);
+          return toBplistIfRequested(playlist, path);
         }
       )
       .get(
         "/snipe.bplist",
-        async ({ query: { user, toSnipe, settings }, path }) => {
-          const playlist = await PlaylistService.getSnipePlaylist(user, toSnipe, settings);
-          return toBplistIfRequested(playlist, path);
-        },
         {
           tags: ["Playlist"],
           query: t.Object({
@@ -103,14 +99,14 @@ export default function playlistController(app: Elysia) {
           detail: {
             description: "Create a snipe playlist (BPLIST)",
           },
+        },
+        async ({ query: { user, toSnipe, settings }, path }) => {
+          const playlist = await PlaylistService.getSnipePlaylist(user, toSnipe, settings);
+          return toBplistIfRequested(playlist, path);
         }
       )
       .get(
         "/self",
-        async ({ query: { user, settings }, path }) => {
-          const playlist = await PlaylistService.getSelfPlaylist(user, settings);
-          return toBplistIfRequested(playlist, path);
-        },
         {
           tags: ["Playlist"],
           query: t.Object({
@@ -121,14 +117,14 @@ export default function playlistController(app: Elysia) {
           detail: {
             description: "Create a self playlist",
           },
+        },
+        async ({ query: { user, settings }, path }) => {
+          const playlist = await PlaylistService.getSelfPlaylist(user, settings);
+          return toBplistIfRequested(playlist, path);
         }
       )
       .get(
         "/self.bplist",
-        async ({ query: { user, settings }, path }) => {
-          const playlist = await PlaylistService.getSelfPlaylist(user, settings);
-          return toBplistIfRequested(playlist, path);
-        },
         {
           tags: ["Playlist"],
           query: t.Object({
@@ -139,6 +135,10 @@ export default function playlistController(app: Elysia) {
           detail: {
             description: "Create a self playlist (BPLIST)",
           },
+        },
+        async ({ query: { user, settings }, path }) => {
+          const playlist = await PlaylistService.getSelfPlaylist(user, settings);
+          return toBplistIfRequested(playlist, path);
         }
       )
   );

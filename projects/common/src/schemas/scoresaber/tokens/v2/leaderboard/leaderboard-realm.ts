@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { ScoreSaberV2LeaderboardStatusTokenSchema } from "./leaderboard-status";
 
 export const ScoreSaberV2LeaderboardRealmTokenSchema = Type.Object({

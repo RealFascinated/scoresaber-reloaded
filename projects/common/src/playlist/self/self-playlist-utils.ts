@@ -1,5 +1,5 @@
-import { Value } from "@sinclair/typebox/value";
 import { BadRequestError } from "../../error/bad-request-error";
+import { parseSchema } from "../../schemas/parse";
 import { SHARED_CONSTS } from "../../shared-consts";
 import { SelfPlaylistSettings, selfPlaylistSettingsSchema } from "./self-playlist-settings-schema";
 
@@ -27,7 +27,7 @@ export function parseSelfPlaylistSettings(settingsBase64?: string) {
     const parsed = settingsBase64
       ? (JSON.parse(Buffer.from(settingsBase64, "base64").toString()) as Partial<SelfPlaylistSettings>)
       : {};
-    return Value.Parse(selfPlaylistSettingsSchema, {
+    return parseSchema(selfPlaylistSettingsSchema, {
       ...defaults,
       ...parsed,
       starRange: { ...defaults.starRange, ...parsed.starRange },

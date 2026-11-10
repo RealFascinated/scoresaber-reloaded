@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 /** BeatSaver API `UserDetail.type` (Swagger). */
 export const BeatSaverAccountTypeSchema = Type.Union([

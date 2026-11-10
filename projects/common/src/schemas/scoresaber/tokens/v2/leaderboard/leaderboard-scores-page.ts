@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { ScoreSaberV2MetadataTokenSchema } from "../metadata";
 
 export const ScoreSaberV2LeaderboardScoreTokenSchema = Type.Object({

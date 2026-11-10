@@ -1,4 +1,3 @@
-import { Value } from "@sinclair/typebox/value";
 import Logger from "@ssr/common/logger";
 import { BeatLeaderPlayersTotalSchema } from "@ssr/common/schemas/beatleader/tokens/players/page";
 import {
@@ -10,8 +9,10 @@ import {
   BeatLeaderPlayerScoresPageSchema,
   type BeatLeaderPlayerScoresPageToken,
 } from "@ssr/common/schemas/beatleader/tokens/score/page";
+import { parseSchema } from "@ssr/common/schemas/parse";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
+import { Value } from "typebox/value";
 
 const LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT = "https://cdn.scorestats.beatleader.xyz/:scoreId.json";
 const LOOKUP_PLAYERS_ENDPOINT =
@@ -258,7 +259,7 @@ export class BeatLeaderApiService {
     BeatLeaderApiService.log(
       `Found BeatLeader players total in ${formatDuration(performance.now() - before)}`
     );
-    return Value.Parse(BeatLeaderPlayersTotalSchema, response).metadata.total;
+    return parseSchema(BeatLeaderPlayersTotalSchema, response).metadata.total;
   }
 
   /**
@@ -282,12 +283,12 @@ export class BeatLeaderApiService {
 
     if (!Value.Check(BeatLeaderPlayerLookupSchema, response)) {
       BeatLeaderApiService.log(
-        `Failed to parse BeatLeader player "${playerId}": ${Value.Errors(BeatLeaderPlayerLookupSchema, response).First()?.message}`
+        `Failed to parse BeatLeader player "${playerId}": ${Value.Errors(BeatLeaderPlayerLookupSchema, response)[0]?.message}`
       );
       return undefined;
     }
 
-    const parsed = Value.Parse(BeatLeaderPlayerLookupSchema, response);
+    const parsed = parseSchema(BeatLeaderPlayerLookupSchema, response);
     BeatLeaderApiService.log(
       `Found BeatLeader player "${parsed.name}" in ${formatDuration(performance.now() - before)}`
     );
@@ -373,12 +374,12 @@ export class BeatLeaderApiService {
 
     if (!Value.Check(BeatLeaderPlayerScoresPageSchema, result.data)) {
       BeatLeaderApiService.log(
-        `Failed to parse BeatLeader scores page ${page} for "${playerId}": ${Value.Errors(BeatLeaderPlayerScoresPageSchema, result.data).First()?.message}`
+        `Failed to parse BeatLeader scores page ${page} for "${playerId}": ${Value.Errors(BeatLeaderPlayerScoresPageSchema, result.data)[0]?.message}`
       );
       return { status: result.status, page: undefined };
     }
 
-    const parsed = Value.Parse(BeatLeaderPlayerScoresPageSchema, result.data);
+    const parsed = parseSchema(BeatLeaderPlayerScoresPageSchema, result.data);
     BeatLeaderApiService.log(
       `Found BeatLeader scores page ${page} for "${playerId}" in ${formatDuration(performance.now() - before)}`
     );

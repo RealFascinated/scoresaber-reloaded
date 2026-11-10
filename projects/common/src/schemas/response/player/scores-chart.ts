@@ -1,10 +1,11 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
+import { DateSchema } from "../../date";
 
 export const PlayerScoreChartDataPointSchema = Type.Object({
   accuracy: Type.Number(),
   stars: Type.Number(),
   pp: Type.Number(),
-  timestamp: Type.Date(),
+  timestamp: DateSchema,
   leaderboardId: Type.Number(),
   leaderboardName: Type.String(),
   leaderboardDifficulty: Type.String(),

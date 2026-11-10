@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 const CurvePointSchema = Type.Tuple([Type.Number(), Type.Number()]);
 

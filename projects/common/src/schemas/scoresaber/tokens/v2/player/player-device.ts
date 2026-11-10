@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 export const ScoreSaberV2PlayerDeviceTokenSchema = Type.Object({
   hmd: Type.Union([Type.String(), Type.Null()]),

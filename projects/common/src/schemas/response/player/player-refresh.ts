@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 export const PlayerRefreshResponseSchema = Type.Object({
   result: Type.Boolean(),

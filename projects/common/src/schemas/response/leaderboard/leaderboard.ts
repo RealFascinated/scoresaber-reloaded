@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { BeatSaverMapSchema } from "../../beatsaver/map/map";
 import { ScoreSaberLeaderboardSchema } from "../../scoresaber/leaderboard/leaderboard";
 

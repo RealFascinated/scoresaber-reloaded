@@ -1,12 +1,14 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { ScoreSaberLeaderboardSchema } from "../../scoresaber/leaderboard/leaderboard";
 
-export const RankingQueueLeaderboardSchema = Type.Composite([
-  ScoreSaberLeaderboardSchema,
-  Type.Object({
-    difficultyCount: Type.Number(),
-  }),
-]);
+export const RankingQueueLeaderboardSchema = Type.Evaluate(
+  Type.Intersect([
+    ScoreSaberLeaderboardSchema,
+    Type.Object({
+      difficultyCount: Type.Number(),
+    }),
+  ])
+);
 
 export const RankingQueueLeaderboardsResponseSchema = Type.Object({
   nextInQueue: Type.Array(RankingQueueLeaderboardSchema),

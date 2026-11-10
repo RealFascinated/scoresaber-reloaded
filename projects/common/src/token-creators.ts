@@ -1,6 +1,6 @@
-import { Value } from "@sinclair/typebox/value";
 import type { HMD } from "./hmds";
 import { MapCharacteristic } from "./schemas/map/map-characteristic";
+import { parseSchema } from "./schemas/parse";
 import { ScoreSaberLeaderboardDifficulty } from "./schemas/scoresaber/leaderboard/difficulty";
 import {
   ScoreSaberLeaderboard,
@@ -41,7 +41,7 @@ export function getScoreSaberLeaderboardFromV2PageToken(
     status = "Ranked";
   }
 
-  return Value.Parse(ScoreSaberLeaderboardSchema, {
+  return parseSchema(ScoreSaberLeaderboardSchema, {
     id: token.id,
     songHash: token.map.hash.toUpperCase(),
     songName: token.map.songName,
@@ -89,7 +89,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
     status = "Ranked";
   }
 
-  return Value.Parse(ScoreSaberLeaderboardSchema, {
+  return parseSchema(ScoreSaberLeaderboardSchema, {
     id: token.id,
     songHash: token.songHash.toUpperCase(),
     songName: token.songName,
@@ -137,7 +137,7 @@ export function getScoreSaberScoreFromToken(
           return modifier;
         });
 
-  return Value.Parse(ScoreSaberScoreSchema, {
+  return parseSchema(ScoreSaberScoreSchema, {
     playerId: playerId ?? token.leaderboardPlayerInfo.id,
     leaderboardId: leaderboard.id,
     scoreId: token.id,

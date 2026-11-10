@@ -1,6 +1,6 @@
 import { OverlayDataClients } from "@/common/overlay/data-client";
-import { Value } from "@sinclair/typebox/value";
 import { OverlaySettingsSchema, type OverlaySettings } from "@ssr/common/schemas/overlay/overlay-settings";
+import { parseSchema } from "@ssr/common/schemas/parse";
 
 export type { OverlaySettings } from "@ssr/common/schemas/overlay/overlay-settings";
 
@@ -30,7 +30,7 @@ export const defaultOverlaySettings: OverlaySettings = {
  * @param settingsBase64 the raw settings
  */
 export function parseOverlaySettings(settingsBase64: string) {
-  return Value.Parse(OverlaySettingsSchema, {
+  return parseSchema(OverlaySettingsSchema, {
     ...defaultOverlaySettings, // Default values
     ...JSON.parse(Buffer.from(settingsBase64, "base64").toString()), // Override defaults
   });

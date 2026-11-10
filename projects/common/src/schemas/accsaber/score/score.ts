@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 /** AccSaber REST API `MyScoreSummary` (nullable `ScoreResponse.myScore`). */
 export const ScoreSummarySchema = Type.Object({

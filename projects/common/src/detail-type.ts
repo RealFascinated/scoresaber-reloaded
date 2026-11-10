@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 const DetailTypeValues = Type.Union([Type.Literal("basic"), Type.Literal("full")]);
 

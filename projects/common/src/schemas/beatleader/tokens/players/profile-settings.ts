@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 export const BeatLeaderProfileSettingsSchema = Type.Object({
   id: Type.Optional(Type.Number()),

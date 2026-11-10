@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import type { Server } from "elysia/universal/server";
+import type { Server } from "elysia";
 import { WebsocketManager } from "../../src/websocket/websocket-manager";
 import { createTestApp } from "../helpers/create-test-app";
 

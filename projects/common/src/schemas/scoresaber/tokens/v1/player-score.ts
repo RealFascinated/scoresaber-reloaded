@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { ScoreSaberLeaderboardTokenSchema } from "./leaderboard";
 import { ScoreSaberScoreTokenSchema } from "./score";
 

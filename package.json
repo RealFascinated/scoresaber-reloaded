@@ -36,6 +36,7 @@
     "prettier-plugin-tailwindcss": "^0.8.1"
   },
   "overrides": {
+    "elysia": "2.0.0-rc.4",
     "typescript-eslint": "^8.71.1"
   }
 }

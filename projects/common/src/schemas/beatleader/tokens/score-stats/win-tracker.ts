@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { ScoreStatsHeadPositionSchema } from "./head-position";
 
 export const ScoreStatsWinTrackerSchema = Type.Object({

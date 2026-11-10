@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 
 export const PlaysByHmdResponseSchema = Type.Record(Type.String(), Type.Number());
 

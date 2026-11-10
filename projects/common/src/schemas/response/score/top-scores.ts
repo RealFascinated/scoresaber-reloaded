@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { PaginationMetadataSchema } from "../../pagination";
 import { PlayerScoreSchema } from "./player-scores";
 

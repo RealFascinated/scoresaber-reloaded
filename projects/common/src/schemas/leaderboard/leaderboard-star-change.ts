@@ -1,9 +1,10 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
+import { DateSchema } from "../date";
 
 export const LeaderboardStarChangeSchema = Type.Object({
   previousStars: Type.Number(),
   newStars: Type.Number(),
-  timestamp: Type.Date(),
+  timestamp: DateSchema,
 });
 
 export type LeaderboardStarChange = StaticDecode<typeof LeaderboardStarChangeSchema>;

@@ -12,9 +12,6 @@ export default function beatleaderController(app: Elysia) {
     app
       .get(
         "/scorestats/:scoreId",
-        async ({ params: { scoreId } }): Promise<ScoreStatsResponse> => {
-          return BeatLeaderService.getScoresFullScoreStats(scoreId);
-        },
         {
           tags: ["BeatLeader"],
           params: t.Object({
@@ -23,18 +20,13 @@ export default function beatleaderController(app: Elysia) {
           detail: {
             description: "Fetch BeatLeader score stats",
           },
+        },
+        async ({ params: { scoreId } }): Promise<ScoreStatsResponse> => {
+          return BeatLeaderService.getScoresFullScoreStats(scoreId);
         }
       )
       .get(
         "/replay/:scoreId",
-        async ({ params: { scoreId } }) => {
-          const replayUrl = await PlayerReplayService.getPlayerReplayUrl(scoreId);
-          if (!replayUrl) {
-            throw new NotFoundError(`Replay not found for score "${scoreId}"`);
-          }
-          beatLeaderControllerLog.info(`Redirecting to replay URL "${replayUrl}" for score "${scoreId}"`);
-          return redirect(replayUrl);
-        },
         {
           tags: ["BeatLeader"],
           params: t.Object({
@@ -43,6 +35,14 @@ export default function beatleaderController(app: Elysia) {
           detail: {
             description: "Redirect to the raw BeatLeader replay file",
           },
+        },
+        async ({ params: { scoreId } }) => {
+          const replayUrl = await PlayerReplayService.getPlayerReplayUrl(scoreId);
+          if (!replayUrl) {
+            throw new NotFoundError(`Replay not found for score "${scoreId}"`);
+          }
+          beatLeaderControllerLog.info(`Redirecting to replay URL "${replayUrl}" for score "${scoreId}"`);
+          return redirect(replayUrl);
         }
       )
   );

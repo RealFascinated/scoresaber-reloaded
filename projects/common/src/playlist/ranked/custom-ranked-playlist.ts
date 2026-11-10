@@ -1,4 +1,4 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { BadRequestError } from "../../error/bad-request-error";
 import { SHARED_CONSTS } from "../../shared-consts";
 

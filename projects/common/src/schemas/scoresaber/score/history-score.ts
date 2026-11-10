@@ -1,6 +1,7 @@
-import { Type, type StaticDecode } from "@sinclair/typebox";
+import { Type, type StaticDecode } from "typebox";
 import { ModifiersSchema } from "../../../score/modifier";
 import { BeatLeaderScoreSchema } from "../../beatleader/score/score";
+import { DateSchema } from "../../date";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
 import { MapDifficultySchema } from "../../map/map-difficulty";
 import { nullToZeroNumberSchema, numberIncludingInfinitySchema } from "../../number";
@@ -51,7 +52,7 @@ export const ScoreSaberHistoryScoreSchema = Type.Object({
   // Other scores
   beatLeaderScore: Type.Optional(BeatLeaderScoreSchema),
 
-  timestamp: Type.Date(),
+  timestamp: DateSchema,
 });
 
 export type ScoreSaberHistoryScore = StaticDecode<typeof ScoreSaberHistoryScoreSchema>;
