@@ -4,6 +4,7 @@ import { parseSchema } from "@ssr/common/schemas/parse";
 import { AuthMeResponseSchema, type AuthMeResponse } from "@ssr/common/schemas/response/auth/me";
 import { PlayerIdListResponseSchema } from "@ssr/common/schemas/response/user/following";
 import { type UserPreferences } from "@ssr/common/schemas/user/preferences";
+import { cache } from "react";
 import { assertUserPreferences } from "../preferences/preferences-api";
 
 const SESSION_REQUEST_TIMEOUT_MS = 3000;
@@ -25,8 +26,9 @@ async function backendGet(path: string, cookie: string): Promise<Response> {
 /**
  * Resolves the session of a request on the server by forwarding its cookies to the backend.
  * A body that does not match its schema counts as the backend being unavailable.
+ * The result is shared by everything rendered in the same request, so the layout and a page can both ask for it.
  */
-export async function getServerSession(cookie: string): Promise<ServerSession> {
+export const getServerSession = cache(async (cookie: string): Promise<ServerSession> => {
   if (!cookie) {
     return { status: "anonymous" };
   }
@@ -51,4 +53,4 @@ export async function getServerSession(cookie: string): Promise<ServerSession> {
   } catch {
     return { status: "unavailable" };
   }
-}
+});

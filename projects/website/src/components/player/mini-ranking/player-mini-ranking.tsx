@@ -13,6 +13,7 @@ import clsx from "clsx";
 import { ReactElement } from "react";
 import Card from "../../card";
 import CountryFlag from "../../ui/country-flag";
+import { miniRankingQueryKey } from "./mini-ranking-query";
 
 type Variants = {
   [key: string]: {
@@ -37,7 +38,7 @@ export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlaye
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["mini-ranking", player.id],
+    queryKey: miniRankingQueryKey(player.id),
     queryFn: () => ssrApi.getPlayerMiniRanking(player.id),
   });
 

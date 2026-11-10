@@ -1,3 +1,4 @@
+import { prefetchTimestampedData } from "@/common/server-prefetch";
 import { LandingBackground } from "@/components/landing/landing-background";
 import { LandingStats } from "@/components/landing/landing-stats";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
@@ -5,8 +6,14 @@ import SimpleLink from "@/components/simple-link";
 import { DiscordButton } from "@/components/social/discord-button";
 import { Button } from "@/components/ui/button";
 import { SharedIcons } from "@/shared-icons";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
+
+// The landing page would otherwise be prerendered once at build time, freezing the stats
+export const revalidate = 300;
 
 export default async function LandingPage() {
+  const initialStatistics = await prefetchTimestampedData(ssrApi.getAppStatistics());
+
   return (
     <div className="flex w-full flex-col items-center">
       <LandingBackground />
@@ -24,7 +31,7 @@ export default async function LandingPage() {
       </section>
 
       <section className="mx-auto w-full max-w-4xl px-6">
-        <LandingStats />
+        <LandingStats initial={initialStatistics} />
       </section>
 
       <section className="mx-auto mt-16 grid w-full max-w-4xl grid-cols-2 gap-4 px-6 sm:grid-cols-4 md:hidden">

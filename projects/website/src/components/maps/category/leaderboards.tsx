@@ -12,20 +12,33 @@ import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SharedIcons } from "@/shared-icons";
 import { Pagination } from "@ssr/common/pagination";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import { parseAsInteger, useQueryState } from "nuqs";
+import { useQueryState } from "nuqs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
+import { buildMapsQuery, isSameMapsQuery, mapsSearchParams, type MapsInitialData } from "../maps-query";
 
-export default function Leaderboards() {
+type LeaderboardsProps = {
+  /** Maps rendered on the server, used until the client has data of its own. */
+  initial?: MapsInitialData;
+};
+
+export default function Leaderboards({ initial }: LeaderboardsProps) {
   const filter = useMapFilter();
   const { realmId } = useRealm();
+  const isDefaultRealm = realmId === DEFAULT_REALM_ID;
   const filterDebounced = useDebounce(filter, DEBOUNCE_MS_FILTER);
-  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [page, setPage] = useQueryState("page", mapsSearchParams.page);
+  const mapsQuery = buildMapsQuery(page, filterDebounced);
+
+  // The server only renders the default realm, and its data is only valid for the query it was fetched for
+  const initialData =
+    initial && isDefaultRealm && isSameMapsQuery(initial.query, mapsQuery) ? initial.data : undefined;
 
   const {
     data: leaderboardResponse,
@@ -38,24 +51,28 @@ export default function Leaderboards() {
     queryKey: ["maps", filterDebounced, page, realmId],
     queryFn: async () => {
       const response = await ssrApi.searchLeaderboards(
-        page,
+        mapsQuery.page,
         {
-          category: filterDebounced.category,
-          sort: filterDebounced.sort,
-          minStars: filterDebounced.starMin,
-          maxStars: filterDebounced.starMax,
-          ranked: filterDebounced.ranked,
-          qualified: filterDebounced.qualified,
-          query: filterDebounced.search.length > 3 ? filterDebounced.search : undefined,
+          category: mapsQuery.category,
+          sort: mapsQuery.sort,
+          minStars: mapsQuery.minStars,
+          maxStars: mapsQuery.maxStars,
+          ranked: mapsQuery.ranked,
+          qualified: mapsQuery.qualified,
+          query: mapsQuery.query,
         },
         realmId
       );
       return response ?? Pagination.empty<ScoreSaberLeaderboard>();
     },
+    initialData,
+    initialDataUpdatedAt: initial?.fetchedAt,
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
     retry: false,
-    placeholderData: data => data,
+    // Don't carry the server's default realm data over to a realm it wasn't rendered for
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.options.initialData !== undefined && !isDefaultRealm ? undefined : previous,
   });
 
   const showBackendUnavailable = !leaderboardResponse && isError && isBackendUnavailableError(error);

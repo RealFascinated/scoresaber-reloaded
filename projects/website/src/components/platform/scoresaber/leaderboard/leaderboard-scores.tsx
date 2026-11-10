@@ -15,9 +15,10 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { useRouter } from "next/navigation";
-import { parseAsInteger, parseAsStringLiteral, useQueryState } from "nuqs";
+import { useQueryState } from "nuqs";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
+import { leaderboardScoresSearchParams, type LeaderboardScoresInitialData } from "./leaderboard-scores-query";
 
 function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;
@@ -161,22 +162,32 @@ function LeaderboardModeSelect({
   );
 }
 
-export default function LeaderboardScores({ leaderboard }: { leaderboard: ScoreSaberLeaderboard }) {
+type LeaderboardScoresProps = {
+  leaderboard: ScoreSaberLeaderboard;
+  /** Global scores rendered on the server, used until the client has data of its own. */
+  initialScores?: LeaderboardScoresInitialData;
+};
+
+export default function LeaderboardScores({ leaderboard, initialScores }: LeaderboardScoresProps) {
   const mainPlayer = useMainPlayer().data;
   const filter = useLeaderboardFilter();
 
-  const [mode, setMode] = useQueryState(
-    "mode",
-    parseAsStringLiteral<ScoreModeEnum>(Object.values(ScoreModeEnum)).withDefault(ScoreModeEnum.Global)
-  );
-  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [mode, setMode] = useQueryState("mode", leaderboardScoresSearchParams.mode);
+  const [page, setPage] = useQueryState("page", leaderboardScoresSearchParams.page);
   const [highlight] = useQueryState("highlight");
   const {
     data: scores,
     isError,
     isLoading,
     isRefetching,
-  } = useLeaderboardScores(leaderboard.id, mainPlayer?.id ?? "", page, mode, filter.country ?? undefined);
+  } = useLeaderboardScores(
+    leaderboard.id,
+    mainPlayer?.id ?? "",
+    page,
+    mode,
+    filter.country ?? undefined,
+    initialScores
+  );
 
   const isFollowing = mode === ScoreModeEnum.Following;
   const noScores =

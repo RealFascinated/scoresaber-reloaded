@@ -3,6 +3,9 @@
 import { SharedIcons } from "@/shared-icons";
 import { ReactElement, useState } from "react";
 import { ControlRow, Tab, TabGroup } from "../ui/control-panel";
+import { ScoreModeEnum } from "./score-mode";
+
+export { ScoreModeEnum };
 
 export type ScoreModeType = {
   name: string;
@@ -10,12 +13,6 @@ export type ScoreModeType = {
   color: string;
   icon: ReactElement;
 };
-
-export enum ScoreModeEnum {
-  Global = "global",
-  Following = "following",
-  History = "history",
-}
 
 export const scoreModes: ScoreModeType[] = [
   {

@@ -2,7 +2,6 @@
 
 import FollowButton from "@/components/following/follow-button";
 import SimpleLink from "@/components/simple-link";
-import { useIsMobile } from "@/contexts/viewport-context";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import Card from "../../card";
@@ -20,13 +19,11 @@ type PlayerHeaderProps = {
 };
 
 export default function PlayerHeader({ player }: PlayerHeaderProps) {
-  const isMobile = useIsMobile("lg");
-
   return (
     <Card className="flex flex-col gap-4 lg:gap-5">
       <div className="flex flex-col items-center gap-4 text-center select-none lg:flex-row lg:items-start lg:gap-6 lg:text-start">
         <div className="flex flex-col items-center gap-2">
-          <PlayerAvatar player={player} size={isMobile ? 88 : 128} />
+          <PlayerAvatar player={player} />
           <div className="hidden lg:flex">
             <PlayerStreak player={player} />
           </div>
@@ -35,16 +32,18 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
           <div className="flex w-full flex-col gap-2 lg:gap-3">
             <div className="flex w-full flex-wrap items-center justify-center gap-3 lg:justify-between">
               <div className="flex min-w-0 flex-wrap items-center justify-center gap-2 lg:justify-start">
-                <SimpleLink
-                  href={`https://steamcommunity.com/profiles/${player.id}`}
-                  target="_blank"
-                  className="hover:text-primary/80 max-w-[300px] truncate text-2xl font-semibold transition-colors duration-200"
-                  style={{
-                    color: getScoreSaberRoles(player)[0]?.color,
-                  }}
-                >
-                  {player.name}
-                </SimpleLink>
+                <h1 className="contents">
+                  <SimpleLink
+                    href={`https://steamcommunity.com/profiles/${player.id}`}
+                    target="_blank"
+                    className="hover:text-primary/80 max-w-[300px] truncate text-2xl font-semibold transition-colors duration-200"
+                    style={{
+                      color: getScoreSaberRoles(player)[0]?.color,
+                    }}
+                  >
+                    {player.name}
+                  </SimpleLink>
+                </h1>
                 {player.inactive && (
                   <span className="text-inactive-account rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium">
                     Inactive Account
@@ -57,7 +56,9 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 )}
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <FollowButton player={player} iconOnly={isMobile} />
+                {/* Both are rendered and CSS picks one, as a viewport check in JS shifts the layout on hydration */}
+                <FollowButton player={player} iconOnly className="lg:hidden" />
+                <FollowButton player={player} className="hidden lg:inline-flex" />
               </div>
             </div>
             <div className="flex justify-center lg:justify-start">

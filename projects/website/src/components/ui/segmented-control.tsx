@@ -32,11 +32,11 @@ export function SegmentedOption({
       aria-pressed={isActive}
       onClick={onClick}
       className={cn(
-        "flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-medium whitespace-nowrap transition-colors duration-150 [&_svg]:size-3.5",
+        "flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-xs font-medium whitespace-nowrap transition-colors duration-150 [&_svg]:size-3.5",
         "focus-visible:ring-primary focus-visible:ring-2 focus-visible:outline-hidden",
         isActive
-          ? "bg-foreground text-background"
-          : "text-muted-foreground hover:bg-hover hover:text-foreground",
+          ? "border-foreground bg-foreground text-background"
+          : "border-border bg-muted/50 text-foreground hover:border-foreground/40 hover:bg-hover",
         className
       )}
     >

@@ -4,45 +4,31 @@ import Avatar from "@/components/avatar";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import { useFollowing } from "@/hooks/use-following";
-import type { Page } from "@ssr/common/pagination";
-import { Pagination } from "@ssr/common/pagination";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Card from "../../card";
 import { Spinner } from "../../spinner";
 
+const ITEMS_PER_PAGE = 8;
+
 export function FollowingRanking() {
-  const following = useFollowing(true).data;
+  const { data: following, isLoading } = useFollowing(true);
 
   const [page, setPage] = useState(1);
-  const [followingPage, setFollowingPage] = useState<Page<ScoreSaberPlayer>>();
 
-  const getFollowingPage = useCallback(async () => {
-    if (!following) {
-      return;
+  // Derived while rendering (not in an effect) so the server-rendered HTML already has the list
+  const sortedFollowing = following.toSorted((a, b) => {
+    if (a.inactive && !b.inactive) {
+      return 1;
     }
-
-    const pagination = new Pagination<ScoreSaberPlayer>();
-    pagination.setItems(
-      following.toSorted((a, b) => {
-        if (a.inactive && !b.inactive) {
-          return 1;
-        }
-        if (!a.inactive && b.inactive) {
-          return -1;
-        }
-        return b.pp - a.pp;
-      })
-    );
-    pagination.setItemsPerPage(8);
-
-    return pagination.getPage(page);
-  }, [following, page]);
-
-  useEffect(() => {
-    getFollowingPage().then(setFollowingPage);
-  }, [getFollowingPage]);
+    if (!a.inactive && b.inactive) {
+      return -1;
+    }
+    return b.pp - a.pp;
+  });
+  const totalPages = Math.max(Math.ceil(sortedFollowing.length / ITEMS_PER_PAGE), 1);
+  const currentPage = Math.min(page, totalPages);
+  const pageItems = sortedFollowing.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   return (
     <Card className="flex flex-col">
@@ -53,15 +39,13 @@ export function FollowingRanking() {
         </p>
       </div>
 
-      {!followingPage && (
+      {isLoading && sortedFollowing.length === 0 ? (
         <div className="flex w-full items-center justify-center py-12">
           <Spinner />
         </div>
-      )}
-
-      {followingPage && (
+      ) : (
         <div className="flex flex-col gap-3">
-          {followingPage.items.map(player => (
+          {pageItems.map(player => (
             <SimpleLink
               key={player.id}
               href={`/player/${player.id}`}
@@ -89,9 +73,9 @@ export function FollowingRanking() {
           ))}
 
           <SimplePagination
-            page={page}
-            totalItems={followingPage.metadata.totalItems}
-            itemsPerPage={followingPage.metadata.itemsPerPage}
+            page={currentPage}
+            totalItems={sortedFollowing.length}
+            itemsPerPage={ITEMS_PER_PAGE}
             onPageChange={newPage => setPage(newPage)}
           />
         </div>

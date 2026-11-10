@@ -1,14 +1,25 @@
 import { isBackendUnavailableError } from "@/common/api-error";
+import { fetchPlayerFollows } from "@/common/following/following-api";
+import { prefetchInitialData, prefetchTimestampedData } from "@/common/server-prefetch";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import NotFound from "@/components/not-found";
+import {
+  buildPlayerLiveScoresQuery,
+  loadPlayerLiveScoresSearchParams,
+  type PlayerLiveScoresInitialData,
+} from "@/components/platform/scoresaber/player-scores-live-query";
+import { miniRankingQueryKey } from "@/components/player/mini-ranking/mini-ranking-query";
 import PlayerData from "@/components/player/player-data";
+import { playerFollowsQueryKey } from "@/hooks/use-following";
 import { env } from "@ssr/common/env";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { ssrConfig } from "config";
 import { Metadata } from "next";
+import type { SearchParams } from "nuqs/server";
 import { cache } from "react";
 
 const UNKNOWN_PLAYER = {
@@ -20,6 +31,7 @@ type Props = {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<SearchParams>;
 };
 
 type PlayerFetchResult =
@@ -102,9 +114,36 @@ export default async function PlayerPage(props: Props) {
     );
   }
 
+  // Render the ScoreSaber scores on the server so they are part of the HTML crawlers and users first
+  // receive. The other score tabs are only shown when selected, so the client fetches those.
+  const { page, sort, search, platform } = loadPlayerLiveScoresSearchParams(await props.searchParams);
+  const followsPromise = prefetchInitialData(fetchPlayerFollows(result.player.id));
+  const miniRankingPromise = prefetchInitialData(ssrApi.getPlayerMiniRanking(result.player.id));
+  let initialScores: PlayerLiveScoresInitialData | undefined;
+  if (platform === null) {
+    const query = buildPlayerLiveScoresQuery(page, sort, search);
+    const prefetched = await prefetchTimestampedData(
+      ssrApi.fetchScoreSaberPlayerScores(result.player.id, query.page, query.sort, query.search)
+    );
+    initialScores = prefetched ? { query, ...prefetched } : undefined;
+  }
+
+  // The follower counts and the mini rankings are part of the page layout. Rendered later they push content
+  // around (or leave an empty row), so they are seeded into the client's cache like the scores.
+  const queryClient = new QueryClient();
+  const [follows, miniRanking] = await Promise.all([followsPromise, miniRankingPromise]);
+  if (follows) {
+    queryClient.setQueryData(playerFollowsQueryKey(result.player.id), follows);
+  }
+  if (miniRanking) {
+    queryClient.setQueryData(miniRankingQueryKey(result.player.id), miniRanking);
+  }
+
   return (
     <section className="w-full">
-      <PlayerData player={result.player} />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <PlayerData player={result.player} initialScores={initialScores} />
+      </HydrationBoundary>
     </section>
   );
 }

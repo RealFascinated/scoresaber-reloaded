@@ -13,9 +13,10 @@ import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import ScoresCard from "../../score/scores-card";
 import { ScoresToolbar } from "../../score/scores-toolbar";
+import { DEFAULT_LIVE_SCORES_SORT, type PlayerLiveScoresInitialData } from "./player-scores-live-query";
 import ScoreSaberScoreDisplay from "./score/scoresaber-score";
 
-const DEFAULT_SORT: ScoreSaberScoreSort = "recent";
+const DEFAULT_SORT = DEFAULT_LIVE_SCORES_SORT;
 
 const SORT_OPTIONS: SortOption<ScoreSaberScoreSort>[] = [
   { name: "Top", value: "top", icon: <SharedIcons.TopScoresTabIcon className="h-4 w-4" /> },
@@ -24,9 +25,14 @@ const SORT_OPTIONS: SortOption<ScoreSaberScoreSort>[] = [
 
 interface ScoreSaberPlayerScoresLiveProps {
   player: ScoreSaberPlayer;
+  /** Scores rendered on the server, used until the client has data of its own. */
+  initialScores?: PlayerLiveScoresInitialData;
 }
 
-export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerScoresLiveProps) {
+export default function ScoreSaberPlayerScoresLive({
+  player,
+  initialScores,
+}: ScoreSaberPlayerScoresLiveProps) {
   const mainPlayerId = useMainPlayerId();
 
   const query = usePlayerScoresQuery<ScoreSaberScoreSort, PlayerScoresPageResponse>({
@@ -37,6 +43,7 @@ export default function ScoreSaberPlayerScoresLive({ player }: ScoreSaberPlayerS
     defaultSort: DEFAULT_SORT,
     sortOptions: SORT_OPTIONS,
     hasDirection: false,
+    initial: initialScores,
     extraKeyParts: [mainPlayerId],
     queryFn: async ({ page, sort, search }) => {
       const response = await ssrApi.fetchScoreSaberPlayerScores(player.id, page, sort, search);

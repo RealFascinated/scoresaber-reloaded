@@ -8,14 +8,25 @@ import { useRealm } from "@/components/providers/realm-provider";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import { Spinner } from "@/components/spinner";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { parseAsInteger, useQueryState } from "nuqs";
+import { useQueryState } from "nuqs";
 import ScoreSaberScoreDisplay from "../scoresaber-score";
+import { topScoresSearchParams, type TopScoresInitialData } from "./top-scores-query";
 
-export function TopScoresData() {
+type TopScoresDataProps = {
+  /** Top scores rendered on the server, used until the client has data of its own. */
+  initial?: TopScoresInitialData;
+};
+
+export function TopScoresData({ initial }: TopScoresDataProps) {
   const { realmId } = useRealm();
-  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const isDefaultRealm = realmId === DEFAULT_REALM_ID;
+  const [page, setPage] = useQueryState("page", topScoresSearchParams.page);
+
+  // The server only renders the default realm, and its data is only valid for the page it was fetched for
+  const initialData = initial && isDefaultRealm && initial.page === page ? initial.data : undefined;
 
   const {
     data: scores,
@@ -27,11 +38,15 @@ export function TopScoresData() {
   } = useQuery({
     queryKey: ["top-scores", page, realmId],
     queryFn: () => ssrApi.fetchTopScores(page, realmId),
+    initialData,
+    initialDataUpdatedAt: initial?.fetchedAt,
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
     retry: false,
     refetchInterval: false,
-    placeholderData: data => data,
+    // Don't carry the server's default realm data over to a realm it wasn't rendered for
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.options.initialData !== undefined && !isDefaultRealm ? undefined : previous,
   });
 
   const showBackendUnavailable = !scores && isError && isBackendUnavailableError(error);

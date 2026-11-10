@@ -12,20 +12,35 @@ import { SharedIcons } from "@/shared-icons";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
-import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import { useQueryState } from "nuqs";
 import Card from "../card";
 import FollowButton from "../following/follow-button";
 import { Button } from "../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import MedalsInfo from "./medals-info";
+import {
+  buildMedalsQuery,
+  isSameMedalsQuery,
+  medalsSearchParams,
+  type MedalsInitialData,
+} from "./medals-query";
 import { MedalsRanking } from "./medals-ranking";
 
-export default function MedalsData() {
-  const [currentPage, setCurrentPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [countryQuery, setCountryQuery] = useQueryState("country", parseAsString);
+type MedalsDataProps = {
+  /** Medal rankings rendered on the server, used until the client has data of its own. */
+  initial?: MedalsInitialData;
+};
+
+export default function MedalsData({ initial }: MedalsDataProps) {
+  const [currentPage, setCurrentPage] = useQueryState("page", medalsSearchParams.page);
+  const [countryQuery, setCountryQuery] = useQueryState("country", medalsSearchParams.country);
   const currentCountry = countryQuery?.toUpperCase() ?? undefined;
   const setCurrentCountry = (value: string | undefined) =>
     setCountryQuery(value ? value.toUpperCase() : null);
+  const query = buildMedalsQuery(currentPage, countryQuery);
+
+  // The server data is only valid for the query it was fetched for
+  const initialData = initial && isSameMedalsQuery(initial.query, query) ? initial.data : undefined;
 
   const {
     data: rankingData,
@@ -37,6 +52,8 @@ export default function MedalsData() {
   } = useQuery({
     queryKey: ["medalRankingData", currentPage, currentCountry],
     queryFn: async () => ssrApi.getMedalRankedPlayers(currentPage, currentCountry),
+    initialData,
+    initialDataUpdatedAt: initial?.fetchedAt,
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
     retry: false,

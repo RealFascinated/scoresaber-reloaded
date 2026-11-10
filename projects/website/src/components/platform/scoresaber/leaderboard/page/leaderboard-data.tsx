@@ -3,6 +3,7 @@
 import { useBreadcrumbTitle } from "@/components/layout/breadcrumb-context";
 import { LeaderboardInfo } from "@/components/platform/scoresaber/leaderboard/leaderboard-info";
 import LeaderboardScores from "@/components/platform/scoresaber/leaderboard/leaderboard-scores";
+import type { LeaderboardScoresInitialData } from "@/components/platform/scoresaber/leaderboard/leaderboard-scores-query";
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { useRealm } from "@/components/providers/realm-provider";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
@@ -14,11 +15,14 @@ import { useQuery } from "@tanstack/react-query";
 type LeaderboardDataProps = {
   leaderboardData: LeaderboardResponse;
   starChangeHistory: LeaderboardStarChange[];
+  /** Global scores rendered on the server, used until the client has data of its own. */
+  initialScores?: LeaderboardScoresInitialData;
 };
 
 export function ScoreSaberLeaderboardData({
   leaderboardData: serverLeaderboardData,
   starChangeHistory: serverStarChangeHistory,
+  initialScores,
 }: LeaderboardDataProps) {
   const { realmId } = useRealm();
   const isDefaultRealm = realmId === DEFAULT_REALM_ID;
@@ -50,7 +54,7 @@ export function ScoreSaberLeaderboardData({
       <div className="mx-auto flex w-full flex-col gap-4">
         <LeaderboardInfo leaderboard={leaderboardData} starChangeHistory={starChangeHistory} />
         <div className="flex w-full flex-col gap-4">
-          <LeaderboardScores leaderboard={leaderboard} />
+          <LeaderboardScores leaderboard={leaderboard} initialScores={initialScores} />
         </div>
       </div>
     </LeaderboardFilterProvider>

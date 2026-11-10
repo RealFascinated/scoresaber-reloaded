@@ -11,6 +11,7 @@ import { parseAsStringEnum } from "nuqs";
 import { useMemo } from "react";
 import AccSaberPlayerScores from "../platform/accsaber/accsaber-player-scores";
 import PinnedScores from "../platform/scoresaber/pinned-scores";
+import type { PlayerLiveScoresInitialData } from "../platform/scoresaber/player-scores-live-query";
 import ScoreSaberPlayerScoresLive from "../platform/scoresaber/scoresaber-player-scores-live";
 import ScoreSaberPlayerMedalScores from "../platform/scoresaber/scoresaber-player-scores-medals";
 import ScoreSaberPlayerScoresSSR from "../platform/scoresaber/scoresaber-player-scores-ssr";
@@ -26,9 +27,11 @@ const PLATFORM_QUERY = parseAsStringEnum<PlatformType>(Object.values(PlatformTyp
 
 interface PlayerDataProps {
   player: ScoreSaberPlayer;
+  /** ScoreSaber scores rendered on the server, used until the client has data of its own. */
+  initialScores?: PlayerLiveScoresInitialData;
 }
 
-export default function PlayerData({ player: playerProp }: PlayerDataProps) {
+export default function PlayerData({ player: playerProp, initialScores }: PlayerDataProps) {
   const { value: selectedPlatform, setValue: setSelectedPlatform } = useQueryParamSelector({
     param: "platform",
     parser: PLATFORM_QUERY,
@@ -70,7 +73,7 @@ export default function PlayerData({ player: playerProp }: PlayerDataProps) {
   const platform = useMemo(() => {
     switch (selectedPlatform) {
       case PlatformType.ScoreSaber:
-        return <ScoreSaberPlayerScoresLive player={player} />;
+        return <ScoreSaberPlayerScoresLive player={player} initialScores={initialScores} />;
       case PlatformType.SSR:
         return <ScoreSaberPlayerScoresSSR player={player} />;
       case PlatformType.MedalScores:
@@ -78,7 +81,7 @@ export default function PlayerData({ player: playerProp }: PlayerDataProps) {
       case PlatformType.AccSaber:
         return <AccSaberPlayerScores player={player} />;
     }
-  }, [selectedPlatform, player]);
+  }, [selectedPlatform, player, initialScores]);
 
   const platformSelector =
     availablePlatforms.length > 1 ? (

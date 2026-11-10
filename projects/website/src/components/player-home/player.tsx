@@ -8,6 +8,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import PlayerPreviewHeader from "../player/header/player-preview-header";
 import { Spinner } from "../spinner";
+import { homePlayerQueryKey } from "./home-queries";
 
 export function Player() {
   const { realmId } = useRealm();
@@ -20,7 +21,7 @@ export function Player() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["player", mainPlayerId, realmId],
+    queryKey: homePlayerQueryKey(mainPlayerId, realmId),
     queryFn: () => ssrApi.getScoreSaberPlayer(mainPlayerId!, "full", realmId),
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).

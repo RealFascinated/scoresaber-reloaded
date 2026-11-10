@@ -1,11 +1,15 @@
 import { isBackendUnavailableError } from "@/common/api-error";
+import type { TimestampedData } from "@/common/server-prefetch";
 import { cn } from "@/common/utils";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { SharedIcons } from "@/shared-icons";
-import { RankingQueueLeaderboard } from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
+import {
+  RankingQueueLeaderboard,
+  RankingQueueLeaderboardsResponse,
+} from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";
@@ -14,7 +18,12 @@ import { useState } from "react";
 import SimpleTooltip from "../../simple-tooltip";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
 
-export default function RankingQueue() {
+type RankingQueueProps = {
+  /** The ranking queue rendered on the server, used until the client has data of its own. */
+  initial?: TimestampedData<RankingQueueLeaderboardsResponse>;
+};
+
+export default function RankingQueue({ initial }: RankingQueueProps) {
   const {
     data: rankingRequests,
     isLoading,
@@ -24,6 +33,8 @@ export default function RankingQueue() {
   } = useQuery({
     queryKey: ["ranking-queue"],
     queryFn: async () => ssrApi.fetchRankingQueue(),
+    initialData: initial?.data,
+    initialDataUpdatedAt: initial?.fetchedAt,
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
     retry: false,

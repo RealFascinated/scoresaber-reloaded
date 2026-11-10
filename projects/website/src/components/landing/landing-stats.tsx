@@ -1,6 +1,7 @@
 "use client";
 
 import { isBackendUnavailableError } from "@/common/api-error";
+import type { TimestampedData } from "@/common/server-prefetch";
 import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/ui/count-up";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -69,15 +70,23 @@ function LandingStatCard({
   );
 }
 
+type LandingStatsProps = {
+  /** Statistics fetched on the server, and when they were fetched. */
+  initial?: TimestampedData<AppStatisticsResponse>;
+};
+
 /**
  * Live stats for the landing page, fetched from the backend `/statistics` endpoint.
  * Values tick upward client-side at the reported velocity until the next fetch,
  * with a floating "+N" animation whenever a displayed value increments.
  */
-export function LandingStats() {
+export function LandingStats({ initial }: LandingStatsProps) {
   const { data, dataUpdatedAt, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["app-statistics"],
     queryFn: () => ssrApi.getAppStatistics(),
+    // Rendered on the server. It is stale by the time it is hydrated, so it is refetched right away
+    initialData: initial?.data,
+    initialDataUpdatedAt: initial?.fetchedAt,
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
     retry: false,

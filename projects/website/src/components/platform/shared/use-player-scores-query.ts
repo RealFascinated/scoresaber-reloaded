@@ -62,6 +62,16 @@ type UsePlayerScoresQueryOptions<T extends string, TData> = {
   extraKeyParts?: unknown[];
   queryFn: (params: { page: number; sort: T; direction: SortDirection; search?: string }) => Promise<TData>;
   buildUrl: (pageNum: number, state: PlayerScoresQueryState<T>) => string;
+  /**
+   * Scores rendered on the server, used until the client has data of its own. Only used when the
+   * page, sort and search match what the server fetched, and only for tabs without a sort direction.
+   */
+  initial?: {
+    query: { page: number; sort: T; search: string | undefined };
+    data: TData;
+    /** Unix timestamp in milliseconds. */
+    fetchedAt: number;
+  };
 };
 
 /**
@@ -83,6 +93,7 @@ export function usePlayerScoresQuery<T extends string, TData>({
   extraKeyParts = [],
   queryFn,
   buildUrl,
+  initial,
 }: UsePlayerScoresQueryOptions<T, TData>) {
   const { animateLeft, animateRight, setIsLoading } = usePageTransition();
 
@@ -121,6 +132,17 @@ export function usePlayerScoresQuery<T extends string, TData>({
     }
   }, [debouncedSearchTerm, setSearch]);
 
+  // The search the query requests, which is what the server data has to have been fetched for
+  const requestedSearch = hasSearch && !invalidSearch ? debouncedSearchTerm || undefined : undefined;
+  const initialData =
+    initial &&
+    !hasDirection &&
+    initial.query.page === page &&
+    initial.query.sort === sort &&
+    initial.query.search === requestedSearch
+      ? initial.data
+      : undefined;
+
   const { data, isError, isLoading, isRefetching } = useQuery<TData>({
     queryKey: [
       queryKeyPrefix,
@@ -138,6 +160,8 @@ export function usePlayerScoresQuery<T extends string, TData>({
         direction,
         search: hasSearch && !invalidSearch ? debouncedSearchTerm : undefined,
       }),
+    initialData,
+    initialDataUpdatedAt: initial?.fetchedAt,
     placeholderData: prev => prev,
   });
 

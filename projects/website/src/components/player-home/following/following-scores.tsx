@@ -13,6 +13,7 @@ import { useState } from "react";
 import ScoreSaberScoreDisplay from "../../platform/scoresaber/score/scoresaber-score";
 import SimplePagination from "../../simple-pagination";
 import { Spinner } from "../../spinner";
+import { followingScoresQueryKey } from "../home-queries";
 
 export function FollowingScores() {
   const { realmId } = useRealm();
@@ -29,7 +30,7 @@ export function FollowingScores() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["following-scores", followingIds, page, mainPlayerId, realmId],
+    queryKey: followingScoresQueryKey(followingIds, page, mainPlayerId, realmId),
     queryFn: async () =>
       ssrApi.fetchPlayerScoreSaberScores(mainPlayerId!, page, "date", "desc", {
         playerIds: followingIds,

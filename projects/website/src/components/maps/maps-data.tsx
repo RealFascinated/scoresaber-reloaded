@@ -1,5 +1,6 @@
 "use client";
 
+import type { TimestampedData } from "@/common/server-prefetch";
 import Leaderboards from "@/components/maps/category/leaderboards";
 import RankingQueue from "@/components/maps/category/ranking-queue";
 import MapFilters from "@/components/maps/map-filters";
@@ -9,7 +10,15 @@ import { MapFilterProvider } from "@/components/providers/maps/map-filter-provid
 import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import { SharedIcons } from "@/shared-icons";
+import { RankingQueueLeaderboardsResponse } from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
 import { ElementType, ReactNode } from "react";
+import { MapsInitialData } from "./maps-query";
+
+/** Data fetched on the server for the selected category. */
+type MapsInitialDataProps = {
+  initialMaps?: MapsInitialData;
+  initialRankingQueue?: TimestampedData<RankingQueueLeaderboardsResponse>;
+};
 
 type Category = {
   name: string;
@@ -18,7 +27,7 @@ type Category = {
   id: string;
   showFilter: boolean;
   preservePage?: boolean;
-  render: () => ReactNode;
+  render: (initial: MapsInitialDataProps) => ReactNode;
 };
 
 const categories: Category[] = [
@@ -29,7 +38,7 @@ const categories: Category[] = [
     id: "leaderboards",
     showFilter: true,
     preservePage: true,
-    render: () => <Leaderboards />,
+    render: ({ initialMaps }) => <Leaderboards initial={initialMaps} />,
   },
   {
     name: "Ranking Queue",
@@ -37,15 +46,15 @@ const categories: Category[] = [
     icon: SharedIcons.MapsRankingQueueTabIcon,
     id: "ranking-queue",
     showFilter: false,
-    render: () => <RankingQueue />,
+    render: ({ initialRankingQueue }) => <RankingQueue initial={initialRankingQueue} />,
   },
 ];
 
-type MapsDataProps = {
+type MapsDataProps = MapsInitialDataProps & {
   type?: string;
 };
 
-export function MapsData({ type }: MapsDataProps) {
+export function MapsData({ type, initialMaps, initialRankingQueue }: MapsDataProps) {
   const selectedCategory = categories.find(c => c.id === type) || categories[0];
 
   return (
@@ -69,7 +78,9 @@ export function MapsData({ type }: MapsDataProps) {
           }
         />
         <div className="flex w-full flex-col gap-4 xl:flex-row xl:gap-6">
-          <div className="flex min-w-0 flex-1 flex-col gap-4">{selectedCategory.render()}</div>
+          <div className="flex min-w-0 flex-1 flex-col gap-4">
+            {selectedCategory.render({ initialMaps, initialRankingQueue })}
+          </div>
           {selectedCategory.showFilter && (
             <div className="flex w-full shrink-0 flex-col gap-4 xl:w-80">
               <MapFilters />

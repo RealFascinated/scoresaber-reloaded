@@ -1,17 +1,16 @@
 "use client";
 
+import { DEFAULT_MAP_CATEGORY, DEFAULT_MAP_SORT, mapFilterParsers } from "@/components/maps/maps-query";
 import {
   ScoreSaberLeaderboardQueryCategory,
-  ScoreSaberLeaderboardQueryCategorySchema,
   ScoreSaberLeaderboardQuerySort,
-  ScoreSaberLeaderboardQuerySortSchema,
 } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
-import { parseAsBoolean, parseAsFloat, parseAsString, parseAsStringLiteral, useQueryState } from "nuqs";
+import { useQueryState } from "nuqs";
 import { createContext, ReactNode, useContext } from "react";
 
-const defaultCategory: ScoreSaberLeaderboardQueryCategory = "trending";
-const defaultSort: ScoreSaberLeaderboardQuerySort = "desc";
+const defaultCategory = DEFAULT_MAP_CATEGORY;
+const defaultSort = DEFAULT_MAP_SORT;
 
 type FilterContextProps = {
   category: ScoreSaberLeaderboardQueryCategory;
@@ -36,23 +35,13 @@ type FilterContextProps = {
 const MapFilterContext = createContext<FilterContextProps | undefined>(undefined);
 
 export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
-  const [category, setCategory] = useQueryState<ScoreSaberLeaderboardQueryCategory>(
-    "category",
-    parseAsStringLiteral(
-      ScoreSaberLeaderboardQueryCategorySchema.anyOf.map(option => option.const)
-    ).withDefault(defaultCategory)
-  );
-  const [sort, setSort] = useQueryState<ScoreSaberLeaderboardQuerySort>(
-    "sort",
-    parseAsStringLiteral(ScoreSaberLeaderboardQuerySortSchema.anyOf.map(option => option.const)).withDefault(
-      defaultSort
-    )
-  );
-  const [starMin, setStarMin] = useQueryState("starMin", parseAsFloat.withDefault(0));
-  const [starMax, setStarMax] = useQueryState("starMax", parseAsFloat.withDefault(SHARED_CONSTS.maxStars));
-  const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
-  const [ranked, setRanked] = useQueryState("ranked", parseAsBoolean.withDefault(false));
-  const [qualified, setQualified] = useQueryState("qualified", parseAsBoolean.withDefault(false));
+  const [category, setCategory] = useQueryState("category", mapFilterParsers.category);
+  const [sort, setSort] = useQueryState("sort", mapFilterParsers.sort);
+  const [starMin, setStarMin] = useQueryState("starMin", mapFilterParsers.starMin);
+  const [starMax, setStarMax] = useQueryState("starMax", mapFilterParsers.starMax);
+  const [search, setSearch] = useQueryState("search", mapFilterParsers.search);
+  const [ranked, setRanked] = useQueryState("ranked", mapFilterParsers.ranked);
+  const [qualified, setQualified] = useQueryState("qualified", mapFilterParsers.qualified);
 
   const clearFilters = () => {
     setCategory(defaultCategory);

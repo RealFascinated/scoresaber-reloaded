@@ -13,6 +13,11 @@ import { useMainPlayerId, usePlayers } from "./use-main-player";
 
 export const FOLLOWING_QUERY_KEY = ["user", "following"] as const;
 const FOLLOWING_MUTATION_KEY = ["user", "following", "update"] as const;
+
+/** The query of how many users follow a player and how many players they follow. */
+export function playerFollowsQueryKey(playerId: string) {
+  return ["player", playerId, "follows"] as const;
+}
 const NOT_FOLLOWING: string[] = [];
 
 /**
@@ -118,7 +123,7 @@ export function useFollowActions() {
  */
 export function usePlayerFollows(playerId: string) {
   return useQuery({
-    queryKey: ["player", playerId, "follows"],
+    queryKey: playerFollowsQueryKey(playerId),
     queryFn: () => fetchPlayerFollows(playerId),
     staleTime: 1000 * 60,
   });

@@ -14,34 +14,48 @@ import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
 import { useMainPlayer } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import { parseAsBoolean, parseAsInteger, parseAsString, useQueryState } from "nuqs";
+import { useQueryState } from "nuqs";
 import FollowButton from "../following/follow-button";
 import { PlayerAvatar } from "../ranking/player-avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import {
+  buildRankingQuery,
+  isSameRankingQuery,
+  rankingSearchParams,
+  type RankingInitialData,
+} from "./ranking-query";
 
-export default function RankingData() {
+type RankingDataProps = {
+  /** Ranking data rendered on the server, used until the client has data of its own. */
+  initial?: RankingInitialData;
+};
+
+export default function RankingData({ initial }: RankingDataProps) {
   const { realmId } = useRealm();
+  const isDefaultRealm = realmId === DEFAULT_REALM_ID;
   const mainPlayer = useMainPlayer().data;
 
-  const [currentPage, setCurrentPage] = useQueryState("page", parseAsInteger.withDefault(1));
-  const [countryQuery, setCountryQuery] = useQueryState("country", parseAsString);
+  const [currentPage, setCurrentPage] = useQueryState("page", rankingSearchParams.page);
+  const [countryQuery, setCountryQuery] = useQueryState("country", rankingSearchParams.country);
   const currentCountry = countryQuery?.toUpperCase() ?? undefined;
   const setCurrentCountry = (value: string | undefined) =>
     setCountryQuery(value ? value.toUpperCase() : null);
-  const [currentSearch, setCurrentSearch] = useQueryState("search", parseAsString.withDefault(""));
-  const [includeInactives, setIncludeInactives] = useQueryState(
-    "inactive",
-    parseAsBoolean.withDefault(false)
-  );
-  const [showRelativePp, setShowRelativePp] = useQueryState("relativePp", parseAsBoolean.withDefault(false));
+  const [currentSearch, setCurrentSearch] = useQueryState("search", rankingSearchParams.search);
+  const [includeInactives, setIncludeInactives] = useQueryState("inactive", rankingSearchParams.inactive);
+  const [showRelativePp, setShowRelativePp] = useQueryState("relativePp", rankingSearchParams.relativePp);
   const debouncedSearch = useDebounce(currentSearch, DEBOUNCE_MS_SEARCH);
-  const isValidSearch = debouncedSearch.length >= 3;
+  const query = buildRankingQuery(currentPage, countryQuery, debouncedSearch, includeInactives);
+
+  // The server only renders the default realm, and its data is only valid for the query it was fetched for
+  const initialData =
+    initial && isDefaultRealm && isSameRankingQuery(initial.query, query) ? initial.data : undefined;
 
   const {
     data: rankingData,
@@ -51,26 +65,23 @@ export default function RankingData() {
     error,
     refetch,
   } = useQuery({
-    queryKey: [
-      "rankingData",
-      realmId,
-      currentPage,
-      currentCountry,
-      isValidSearch ? debouncedSearch : undefined,
-      includeInactives,
-    ],
+    queryKey: ["rankingData", realmId, query.page, query.country, query.search, query.includeInactives],
     queryFn: async () =>
-      ssrApi.searchPlayersRanking(currentPage, {
-        country: currentCountry,
-        search: isValidSearch ? debouncedSearch : undefined,
-        includeInactives: includeInactives,
+      ssrApi.searchPlayersRanking(query.page, {
+        country: query.country,
+        search: query.search,
+        includeInactives: query.includeInactives,
         realmId,
       }),
+    initialData,
+    initialDataUpdatedAt: initial?.fetchedAt,
     // Fail fast so a backend outage surfaces as an error state instead of an
     // endless retry spinner (the provider default is infinite retries).
     retry: false,
     refetchIntervalInBackground: false,
-    placeholderData: prev => prev,
+    // Don't carry the server's default realm data over to a realm it wasn't rendered for
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.options.initialData !== undefined && !isDefaultRealm ? undefined : previous,
   });
 
   const showBackendUnavailable = !rankingData && isError && isBackendUnavailableError(error);
