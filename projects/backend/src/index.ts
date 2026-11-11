@@ -41,6 +41,7 @@ import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
 import { authCors } from "./plugins/auth-cors";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
+import { privateNetworkCors } from "./plugins/private-network-cors";
 import { rateLimit } from "./plugins/rate-limit";
 import { QueueManager } from "./queue/queue-manager";
 import { ScoreSaberMedalsRepository } from "./repositories/scoresaber-medals.repository";
@@ -324,6 +325,7 @@ export const app = new Elysia()
     }
   })
   .use(authCors) // Must be before cors()
+  .use(privateNetworkCors) // Must be before cors()
   .use(cors())
   .use(
     helmet({

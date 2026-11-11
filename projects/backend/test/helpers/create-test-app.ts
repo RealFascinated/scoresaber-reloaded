@@ -17,6 +17,7 @@ import UserPinnedScoresController from "../../src/controller/user/user-pinned-sc
 import UserPreferencesController from "../../src/controller/user/user-preferences.controller";
 import UserController from "../../src/controller/user/user.controller";
 import { authCors } from "../../src/plugins/auth-cors";
+import { privateNetworkCors } from "../../src/plugins/private-network-cors";
 import { WebsocketManager } from "../../src/websocket/websocket-manager";
 import { patchScoreSaberApiForTests } from "./scoresaber-api-test-patches";
 
@@ -88,6 +89,7 @@ export function createTestApp() {
       };
     })
     .use(authCors)
+    .use(privateNetworkCors)
     .use(cors())
     .use(AppController)
     .use(AuthController)
