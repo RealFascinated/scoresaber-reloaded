@@ -88,11 +88,6 @@ export function TopScoresData({ initial }: TopScoresDataProps) {
                     >
                       {player.name}
                     </SimpleLink>
-                    {score.rank > 0 && (
-                      <span className="text-muted-foreground ml-auto text-xs">
-                        #{score.rank.toLocaleString()}
-                      </span>
-                    )}
                   </div>
                   <ScoreSaberScoreDisplay
                     score={score}
