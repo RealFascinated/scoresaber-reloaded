@@ -98,7 +98,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
   });
 
   return (
-    <div className="bg-card ring-border h-[330px] w-full rounded-xl ring-1">
+    <div className="bg-card ring-border h-full min-h-[330px] w-full flex-1 rounded-xl ring-1">
       <GenericChart labels={labels} config={config} />
     </div>
   );

@@ -28,7 +28,7 @@ export default function CutDistributionChart({ cutDistribution }: Props) {
       chartData: {
         datasets: [
           {
-            label: "Cuts",
+            label: "Hits",
             data: bins,
             color: CHART_COLORS.primary,
             axisId: "y",
@@ -47,19 +47,19 @@ export default function CutDistributionChart({ cutDistribution }: Props) {
     axes: {
       x: {
         display: true,
-        displayName: "Distance to Center (0-15)",
+        displayName: "Center score (15 = dead center of the block)",
         hideOnMobile: false,
       },
       y: {
         display: true,
-        displayName: "Number of Cuts",
+        displayName: "Number of hits",
         hideOnMobile: false,
         position: "left",
       },
     },
     options: {
       plugins: {
-        title: chartTitle("Distance to Center Distribution (0-15)"),
+        title: chartTitle("How Close to the Center You Hit"),
       },
     },
   };
@@ -67,7 +67,7 @@ export default function CutDistributionChart({ cutDistribution }: Props) {
   if (chartData.datasets.length === 0) {
     return (
       <div className={getEmptyStateClassName(350)}>
-        <p className="text-muted-foreground">No cut data available</p>
+        <p className="text-muted-foreground">No hit data available</p>
       </div>
     );
   }

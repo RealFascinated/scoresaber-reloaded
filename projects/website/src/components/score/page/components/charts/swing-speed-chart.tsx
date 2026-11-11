@@ -62,14 +62,14 @@ export default function SwingSpeedChart({ swingSpeed }: Props) {
       },
       y: {
         display: true,
-        displayName: "Swing Speed (m/s)",
+        displayName: "Saber speed (m/s)",
         hideOnMobile: false,
         position: "left",
       },
     },
     options: {
       plugins: {
-        title: chartTitle("Swing Speed Over Time (2s average)"),
+        title: chartTitle("How Fast You Swung"),
       },
     },
   };

@@ -30,7 +30,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 /** The score a good cut of a note is worth, before the multiplier, and the most the note could be worth. */
-function getNoteScore(noteId: number, cut: NoteCutInfo): { score: number; max: number } {
+export function getNoteScore(noteId: number, cut: NoteCutInfo): { score: number; max: number } {
   const scoringType = getScoringType(noteId);
   if (scoringType === BURST_SLIDER_ELEMENT) {
     return { score: BURST_SLIDER_ELEMENT_SCORE, max: BURST_SLIDER_ELEMENT_SCORE };
@@ -46,7 +46,7 @@ function getNoteScore(noteId: number, cut: NoteCutInfo): { score: number; max: n
   return { score: Math.round(before + after + center), max: MAX_NORMAL_CUT };
 }
 
-function getMaxNoteScore(noteId: number): number {
+export function getMaxNoteScore(noteId: number): number {
   const scoringType = getScoringType(noteId);
   if (scoringType === BURST_SLIDER_ELEMENT) {
     return BURST_SLIDER_ELEMENT_SCORE;

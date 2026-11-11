@@ -1,7 +1,18 @@
 import { isBackendUnavailableError } from "@/common/api-error";
 import BackendUnavailable from "@/components/api/backend-unavailable";
-import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
-import ScoreDetails from "@/components/score/page/components/score-details";
+import PlayerScoreAccuracyChart from "@/components/platform/scoresaber/score/chart/player-score-accuracy-chart";
+import BlockPositionCard from "@/components/score/page/components/block-position-card";
+import DirectionBreakdown from "@/components/score/page/components/direction-breakdown";
+import HandComparison from "@/components/score/page/components/hand-comparison";
+import ScoreHero from "@/components/score/page/components/score-hero";
+import ScoreKpiStrip from "@/components/score/page/components/score-kpi-strip";
+import ScoreLossCard from "@/components/score/page/components/score-loss-card";
+import ScoreMapSection from "@/components/score/page/components/score-map-section";
+import { ScoreSection, ScoreSectionNav } from "@/components/score/page/components/score-section";
+import ScoreTimeline from "@/components/score/page/components/score-timeline";
+import TakeawaysCard from "@/components/score/page/components/takeaways-card";
+import { computeReplayInsights } from "@/components/score/page/replay-insights";
+import { buildTakeaways } from "@/components/score/page/replay-takeaways";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
@@ -145,42 +156,65 @@ export default async function ScorePage({ params }: ScorePageProps) {
     throw error;
   }
 
-  const hasScoreStats = !!scoreStats;
-  const hasReplay = !!replay;
-  const hasAnyAdditionalData = hasScoreStats || hasReplay;
+  const { score, leaderboard, beatSaver } = playerScore;
+  const hasMap = !!beatSaver?.difficulty;
+
+  const insights = replay ? computeReplayInsights(replay.rawReplay) : undefined;
+  const takeaways = insights ? buildTakeaways(insights, score) : [];
+
+  const sections = [
+    { id: "performance", label: "Performance", show: true },
+    { id: "analysis", label: "Where You Lose Points", show: !!insights },
+    { id: "swing", label: "Swing", show: !!replay },
+  ].filter(section => section.show);
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <ScoreDetails score={playerScore} />
+      <ScoreHero score={playerScore} />
+      <ScoreKpiStrip score={score} />
+      {hasMap && beatSaver && <ScoreMapSection beatSaver={beatSaver} />}
+      {takeaways.length > 0 && <TakeawaysCard takeaways={takeaways} />}
+      <ScoreSectionNav sections={sections} />
 
-      {!hasAnyAdditionalData ? (
-        <div className="ring-border bg-card flex flex-col items-center justify-center gap-2 rounded-xl py-8 text-center ring-1">
-          <SharedIcons.LeaderboardEmptyStateIcon className="text-muted-foreground size-10" />
-          <h3 className="font-semibold">Basic Score View</h3>
-          <p className="text-muted-foreground max-w-sm text-sm">
-            Advanced stats and replay analysis are only available for scores tracked by BeatLeader.
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
+      <ScoreSection id="performance" title="Performance">
+        {insights && <ScoreTimeline insights={insights} />}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           {scoreStats && (
-            <ScoreOverview
-              score={playerScore.score}
-              scoreStats={scoreStats}
-              leaderboard={playerScore.leaderboard}
-            />
-          )}
-
-          {replay && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <CutDistributionChart cutDistribution={replay.cutDistribution} />
-              <SwingSpeedChart
-                swingSpeed={replay.swingSpeed}
-                replayLengthSeconds={replay.replayLengthSeconds}
-              />
+            <div className="flex flex-col lg:col-span-2">
+              <PlayerScoreAccuracyChart scoreStats={scoreStats} leaderboard={leaderboard} />
             </div>
           )}
+          <div className={scoreStats ? "flex flex-col gap-4" : "flex flex-col gap-4 lg:col-span-3"}>
+            {insights && <ScoreLossCard insights={insights} />}
+          </div>
         </div>
+        {!insights && (
+          <p className="text-muted-foreground text-sm">
+            Detailed analysis is only available for scores with a saved BeatLeader replay.
+          </p>
+        )}
+      </ScoreSection>
+
+      {insights && (
+        <ScoreSection id="analysis" title="Where You Lose Points">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <DirectionBreakdown insights={insights} />
+            <BlockPositionCard insights={insights} />
+            <HandComparison insights={insights} />
+          </div>
+        </ScoreSection>
+      )}
+
+      {replay && (
+        <ScoreSection id="swing" title="Swing">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <CutDistributionChart cutDistribution={replay.cutDistribution} />
+            <SwingSpeedChart
+              swingSpeed={replay.swingSpeed}
+              replayLengthSeconds={replay.replayLengthSeconds}
+            />
+          </div>
+        </ScoreSection>
       )}
     </div>
   );

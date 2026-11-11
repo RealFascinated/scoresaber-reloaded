@@ -39,10 +39,11 @@ function computeReplayDerivedData(replay: Replay): {
           agg = { rightSum: 0, rightCount: 0, leftSum: 0, leftCount: 0 };
           swingByInterval.set(interval, agg);
         }
-        if (note.noteCutInfo.saberType === 0) {
+        // saberType 0 is the left saber (matches BeatLeader's per-hand accuracy)
+        if (note.noteCutInfo.saberType === 1) {
           agg.rightSum += note.noteCutInfo.saberSpeed;
           agg.rightCount++;
-        } else if (note.noteCutInfo.saberType === 1) {
+        } else if (note.noteCutInfo.saberType === 0) {
           agg.leftSum += note.noteCutInfo.saberSpeed;
           agg.leftCount++;
         }
