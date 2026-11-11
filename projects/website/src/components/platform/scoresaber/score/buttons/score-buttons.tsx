@@ -75,7 +75,7 @@ const buttons: ButtonConfig[] = [
       return score?.beatLeaderScore != undefined;
     },
     render: ({ score }: Props) => {
-      return <ScoreReplayButton score={score.beatLeaderScore} />;
+      return <ScoreReplayButton score={score.beatLeaderScore} scoreSaberScoreId={score.scoreId} />;
     },
   },
   {

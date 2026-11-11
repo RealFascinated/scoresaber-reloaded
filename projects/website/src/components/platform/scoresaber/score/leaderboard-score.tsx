@@ -122,7 +122,7 @@ export default function ScoreSaberLeaderboardScore({
         <TableCell className={cn(TABLE_CELL_WIDTH_SMALL, "w-[37px]")}>
           {score.beatLeaderScore && (
             <div className="flex justify-center">
-              <ScoreReplayButton score={score.beatLeaderScore} size={26} />
+              <ScoreReplayButton score={score.beatLeaderScore} scoreSaberScoreId={score.scoreId} size={26} />
             </div>
           )}
         </TableCell>

@@ -31,7 +31,7 @@ export default function ReplayButton({
     <SimpleLink
       className="inline-flex"
       href={viewer.generateUrl(
-        score.beatLeaderScore.scoreId,
+        viewer.id === "chroviewer" ? score.scoreId : score.beatLeaderScore.scoreId,
         getBeatLeaderReplayRedirectUrl(score.beatLeaderScore)
       )}
     >

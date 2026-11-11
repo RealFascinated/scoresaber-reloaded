@@ -10,19 +10,26 @@ import { getBeatLeaderReplayRedirectUrl } from "@ssr/common/utils/beatleader-uti
 
 type ScoreReplayButtonProps = {
   score: BeatLeaderScore | undefined;
+  /** The ScoreSaber score id, required by ChroViewer. */
+  scoreSaberScoreId?: number;
   size?: number;
 };
 
-export function ScoreReplayButton({ score, size = 28 }: ScoreReplayButtonProps) {
+export function ScoreReplayButton({ score, scoreSaberScoreId, size = 28 }: ScoreReplayButtonProps) {
   const viewer = ReplayViewers[useUserPreference("replayViewer")];
 
   if (!viewer || !score) {
     return null;
   }
 
+  const viewerScoreId = viewer.id === "chroviewer" ? scoreSaberScoreId : score.scoreId;
+  if (viewerScoreId === undefined) {
+    return null;
+  }
+
   return (
     <ScoreButton
-      href={viewer.generateUrl(score.scoreId, getBeatLeaderReplayRedirectUrl(score))}
+      href={viewer.generateUrl(viewerScoreId, getBeatLeaderReplayRedirectUrl(score))}
       tooltip={<p>Click to view the score replay!</p>}
       size={size}
     >
