@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import PageTransition from "@/components/ui/page-transition";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SharedIcons } from "@/shared-icons";
 import { Page } from "@ssr/common/pagination";
 import { ReactNode } from "react";
@@ -24,6 +24,11 @@ type ScoresListPanelProps<T> = {
    * @default "cv-score-card"
    */
   itemClassName?: string;
+  /**
+   * Number of placeholder rows shown while the first page loads; should match the page size.
+   * @default 8
+   */
+  loadingRows?: number;
 };
 
 /**
@@ -41,12 +46,36 @@ export default function ScoresListPanel<T>({
   renderItem,
   getKey,
   itemClassName = "cv-score-card",
+  loadingRows = 8,
 }: ScoresListPanelProps<T>) {
+  // Mirrors the loaded list (same wrapper, one row per score, pagination) so the page keeps its height when
+  // the scores arrive. A smaller placeholder collapses the page and shifts the scroll position.
   if (isLoading && data === undefined) {
     return (
-      <div className="flex w-full justify-center py-8">
-        <Spinner size="md" className="text-primary" />
-      </div>
+      <>
+        {/* Same (empty) element as the loaded state, since the parent's gap applies to it as well */}
+        <div className="text-center" />
+        <div
+          className={cn(
+            "divide-border grid min-w-full grid-cols-1 divide-y",
+            // Rows are 80px (72px for the first and last, which drop their outer padding) plus the 1px divider
+            "[&>div:first-child]:h-[72px] [&>div:last-child]:h-[73px]"
+          )}
+        >
+          {Array.from({ length: loadingRows }).map((_, index) => (
+            <div key={index} className="flex h-[81px] items-center py-2">
+              <Skeleton className="size-full rounded-lg" />
+            </div>
+          ))}
+        </div>
+        <div className="flex w-full justify-center">
+          <div className="flex h-9 items-center gap-1.5">
+            {Array.from({ length: 7 }).map((_, index) => (
+              <Skeleton key={index} className="h-9 w-10 rounded-md" />
+            ))}
+          </div>
+        </div>
+      </>
     );
   }
 
