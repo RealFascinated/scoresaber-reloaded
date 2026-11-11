@@ -349,7 +349,9 @@ export class ScoreSaberScoresRepository {
       await tx
         .insert(scoreSaberScoresTable)
         .values(split.map(({ base }) => base))
-        .onConflictDoNothing({ target: scoreSaberScoresTable.scoreId });
+        // Untargeted so a conflict on the (playerId, leaderboardId) unique index (the player
+        // already has a different score on this leaderboard) is skipped rather than raising.
+        .onConflictDoNothing();
 
       // A conflicting (playerId, leaderboardId) row holds a different scoreId, so only write pp for
       // scores that now exist under the id we were given.
