@@ -8,6 +8,7 @@ import { PlayerTableSkeleton } from "@/components/ranking/player-table-skeleton"
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
+import useMe from "@/hooks/use-me";
 import { SharedIcons } from "@/shared-icons";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
@@ -38,6 +39,8 @@ export default function MedalsData({ initial }: MedalsDataProps) {
   const setCurrentCountry = (value: string | undefined) =>
     setCountryQuery(value ? value.toUpperCase() : null);
   const query = buildMedalsQuery(currentPage, countryQuery);
+  // The follow column only exists for a signed-in user, so signed-out tables don't reserve its space
+  const { data: me } = useMe();
 
   // The server data is only valid for the query it was fetched for
   const initialData = initial && isSameMedalsQuery(initial.query, query) ? initial.data : undefined;
@@ -119,13 +122,13 @@ export default function MedalsData({ initial }: MedalsDataProps) {
                       <TableHead className="w-20">Country</TableHead>
                       <TableHead>Player</TableHead>
                       <TableHead className="w-24 text-right">Medals</TableHead>
-                      <TableHead className="w-10"></TableHead>
+                      {me && <TableHead className="w-10"></TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {rankingData.items.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-muted-foreground py-10 text-center">
+                        <TableCell colSpan={me ? 5 : 4} className="text-muted-foreground py-10 text-center">
                           No players found
                         </TableCell>
                       </TableRow>
@@ -151,9 +154,11 @@ export default function MedalsData({ initial }: MedalsDataProps) {
                             {formatNumberWithCommas(player.medals)}
                           </span>
                         </TableCell>
-                        <TableCell className="relative z-10 py-2">
-                          <FollowButton player={player} iconOnly />
-                        </TableCell>
+                        {me && (
+                          <TableCell className="relative z-10 py-2">
+                            <FollowButton player={player} iconOnly />
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>

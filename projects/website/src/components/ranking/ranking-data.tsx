@@ -13,6 +13,7 @@ import SimplePagination from "@/components/simple-pagination";
 import CountryFlag from "@/components/ui/country-flag";
 import { Switch } from "@/components/ui/switch";
 import { useMainPlayer } from "@/hooks/use-main-player";
+import useMe from "@/hooks/use-me";
 import { SharedIcons } from "@/shared-icons";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { formatPp } from "@ssr/common/utils/number-utils";
@@ -41,6 +42,8 @@ export default function RankingData({ initial }: RankingDataProps) {
   const { realmId } = useRealm();
   const isDefaultRealm = realmId === DEFAULT_REALM_ID;
   const mainPlayer = useMainPlayer().data;
+  // The follow column only exists for a signed-in user, so signed-out tables don't reserve its space
+  const { data: me } = useMe();
 
   const [currentPage, setCurrentPage] = useQueryState("page", rankingSearchParams.page);
   const [countryQuery, setCountryQuery] = useQueryState("country", rankingSearchParams.country);
@@ -190,13 +193,13 @@ export default function RankingData({ initial }: RankingDataProps) {
                       <TableHead className={cn("text-right", showRelativePp && mainPlayer ? "w-44" : "w-24")}>
                         PP
                       </TableHead>
-                      <TableHead className="w-10"></TableHead>
+                      {me && <TableHead className="w-10"></TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {rankingData.items.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-muted-foreground py-10 text-center">
+                        <TableCell colSpan={me ? 5 : 4} className="text-muted-foreground py-10 text-center">
                           No players found
                         </TableCell>
                       </TableRow>
@@ -234,9 +237,11 @@ export default function RankingData({ initial }: RankingDataProps) {
                             <PlayerPpDifference pp={player.pp} mainPp={mainPlayer.pp} />
                           )}
                         </TableCell>
-                        <TableCell className="relative z-10 py-2">
-                          <FollowButton player={player} iconOnly />
-                        </TableCell>
+                        {me && (
+                          <TableCell className="relative z-10 py-2">
+                            <FollowButton player={player} iconOnly />
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
