@@ -38,19 +38,14 @@ export function scoreSaberApiResponseCacheKey(cacheHash: string): string {
   return `scoresaber:api-cache:${cacheHash}`;
 }
 
-export function miniRankingCacheKeyPrefix(playerId: string): string {
-  return `scoresaber:mini-ranking:${playerId}:`;
-}
-
 export function miniRankingCacheKey(
-  playerId: string,
   type: "global" | "country",
   page: number,
   country: string | undefined,
   realmId: number
 ): string {
   const scope = type === "country" ? `country:${country ?? ""}` : type;
-  return `${miniRankingCacheKeyPrefix(playerId)}${scope}:${page}${realmKeySuffix(realmId)}`;
+  return `scoresaber:mini-ranking:${scope}:${page}${realmKeySuffix(realmId)}`;
 }
 
 // BeatSaver

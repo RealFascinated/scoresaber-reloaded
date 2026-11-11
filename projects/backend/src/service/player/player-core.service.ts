@@ -11,7 +11,7 @@ import {
   type ScoreSaberV2PlayerToken,
 } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { chunkArray, isProduction } from "@ssr/common/utils/utils";
-import { miniRankingCacheKeyPrefix, playerCacheKey } from "../../common/cache-keys";
+import { playerCacheKey } from "../../common/cache-keys";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { redisClient } from "../../common/redis";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
@@ -21,7 +21,6 @@ import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
-import CacheService from "../infra/cache.service";
 import { RealmService } from "../realm/realm.service";
 
 export const accountCreationLock: Record<string, Promise<ScoreSaberAccount | undefined>> = {};
@@ -234,15 +233,13 @@ export class PlayerCoreService {
   }
 
   /**
-   * Drops every cached view of a player: profiles in every realm and detail type, and mini-rankings.
+   * Drops every cached view of a player: profiles in every realm and detail type.
    *
    * The player cache has no short TTL, so anything that changes what a profile shows must call this.
    *
    * @param playerId the player's id
    */
   public static async invalidatePlayerCaches(playerId: string): Promise<void> {
-    // Mini-rankings are cached in memory only, so there is nothing in Redis to scan for.
-    CacheService.invalidateMemoryPrefix(miniRankingCacheKeyPrefix(playerId));
     await PlayerCoreService.invalidatePlayersCaches([playerId]);
   }
 

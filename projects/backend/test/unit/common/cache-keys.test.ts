@@ -73,9 +73,7 @@ describe("playerCacheKeysPattern", () => {
 
   test("does not match mini-ranking keys", () => {
     const prefix = playerCacheKeysPattern.slice(0, -1);
-    expect(miniRankingCacheKey("player-1", "global", 1, undefined, DEFAULT_REALM_ID).startsWith(prefix)).toBe(
-      false
-    );
+    expect(miniRankingCacheKey("global", 1, undefined, DEFAULT_REALM_ID).startsWith(prefix)).toBe(false);
   });
 });
 
@@ -96,41 +94,37 @@ describe("miniRankingCacheKey", () => {
   const cases = [
     {
       name: "global ranking",
-      playerId: "p1",
       type: "global" as const,
       page: 1,
       country: undefined,
-      expected: "scoresaber:mini-ranking:p1:global:1",
+      expected: "scoresaber:mini-ranking:global:1",
     },
     {
       name: "country ranking with country",
-      playerId: "p2",
       type: "country" as const,
       page: 3,
       country: "US",
-      expected: "scoresaber:mini-ranking:p2:country:US:3",
+      expected: "scoresaber:mini-ranking:country:US:3",
     },
     {
       name: "country ranking without country",
-      playerId: "p3",
       type: "country" as const,
       page: 0,
       country: undefined,
-      expected: "scoresaber:mini-ranking:p3:country::0",
+      expected: "scoresaber:mini-ranking:country::0",
     },
     {
       name: "country ranking with empty country",
-      playerId: "p4",
       type: "country" as const,
       page: 2,
       country: "",
-      expected: "scoresaber:mini-ranking:p4:country::2",
+      expected: "scoresaber:mini-ranking:country::2",
     },
   ] as const;
 
-  for (const { name, playerId, type, page, country, expected } of cases) {
+  for (const { name, type, page, country, expected } of cases) {
     test(name, () => {
-      expect(miniRankingCacheKey(playerId, type, page, country, DEFAULT_REALM_ID)).toBe(expected);
+      expect(miniRankingCacheKey(type, page, country, DEFAULT_REALM_ID)).toBe(expected);
     });
   }
 });
