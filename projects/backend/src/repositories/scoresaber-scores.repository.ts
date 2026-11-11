@@ -431,11 +431,12 @@ export class ScoreSaberScoresRepository {
     offset: number,
     realmId: number
   ): Promise<ScoreSaberScoreRow[]> {
-    return db
-      .select({ ...resolvedScoreColumns(), pp: scoreSaberScoreRealmsTable.pp })
+    // Page through the realm rows first (the banned check uses the denormalised playerId), so the
+    // scores table is only touched for the rows on the requested page instead of every skipped row.
+    const page = db
+      .select({ scoreId: scoreSaberScoreRealmsTable.scoreId, pp: scoreSaberScoreRealmsTable.pp })
       .from(scoreSaberScoreRealmsTable)
-      .innerJoin(scoreSaberScoresTable, eq(scoreSaberScoresTable.scoreId, scoreSaberScoreRealmsTable.scoreId))
-      .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoresTable.playerId, scoreSaberAccountsTable.id))
+      .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoreRealmsTable.playerId, scoreSaberAccountsTable.id))
       .where(
         and(
           eq(scoreSaberScoreRealmsTable.realmId, realmId),
@@ -448,7 +449,14 @@ export class ScoreSaberScoresRepository {
         descNullsLast(scoreSaberScoreRealmsTable.scoreId)
       )
       .limit(limit)
-      .offset(offset);
+      .offset(offset)
+      .as("page");
+
+    return db
+      .select({ ...resolvedScoreColumns(), pp: page.pp })
+      .from(page)
+      .innerJoin(scoreSaberScoresTable, eq(scoreSaberScoresTable.scoreId, page.scoreId))
+      .orderBy(descNullsLast(page.pp), descNullsLast(page.scoreId));
   }
 
   public static async selectTopPp(limit: number = 50, realmId: number): Promise<{ pp: number }[]> {
