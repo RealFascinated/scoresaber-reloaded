@@ -14,6 +14,8 @@ export default class QueueProcessingDurationMetric extends Metric<null> {
       name: "queue_processing_duration_ms",
       help: "Queue item processing duration in milliseconds",
       labelNames: ["queue"],
+      // Buckets in milliseconds.
+      buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 30000],
       registers: [prometheusRegistry],
     });
 
