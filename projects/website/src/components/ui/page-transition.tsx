@@ -62,54 +62,57 @@ export default function PageTransition({ children, className }: { children: Reac
   const displayChildren = isLoading ? idleView.children : children;
 
   return (
-    <AnimatePresence mode="wait">
-      <m.div
-        key={transitionKey}
-        className={className}
-        custom={direction}
-        variants={containerVariants}
-        initial="enter"
-        animate="center"
-        exit="exit"
-        transition={{
-          type: "tween",
-          duration: transitionDuration,
-          ease: [0.4, 0, 0.2, 1],
-          filter: { duration: filterDuration },
-        }}
-      >
-        {Array.isArray(displayChildren) ? (
-          displayChildren.map((child, index) => (
+    // The slide offsets would otherwise widen the page for a moment; the wrapper stays put and clips them
+    <div className="overflow-x-clip">
+      <AnimatePresence mode="wait">
+        <m.div
+          key={transitionKey}
+          className={className}
+          custom={direction}
+          variants={containerVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{
+            type: "tween",
+            duration: transitionDuration,
+            ease: [0.4, 0, 0.2, 1],
+            filter: { duration: filterDuration },
+          }}
+        >
+          {Array.isArray(displayChildren) ? (
+            displayChildren.map((child, index) => (
+              <m.div
+                key={`${transitionKey}-${index}`}
+                custom={direction}
+                variants={itemVariants}
+                transition={{
+                  type: "tween",
+                  duration: transitionDuration,
+                  ease: [0.4, 0, 0.2, 1],
+                  delay: shouldReduceMotion ? 0 : index * 0.025,
+                  filter: { duration: filterDuration },
+                }}
+              >
+                {child}
+              </m.div>
+            ))
+          ) : (
             <m.div
-              key={`${transitionKey}-${index}`}
               custom={direction}
               variants={itemVariants}
               transition={{
                 type: "tween",
                 duration: transitionDuration,
                 ease: [0.4, 0, 0.2, 1],
-                delay: shouldReduceMotion ? 0 : index * 0.025,
                 filter: { duration: filterDuration },
               }}
             >
-              {child}
+              {displayChildren}
             </m.div>
-          ))
-        ) : (
-          <m.div
-            custom={direction}
-            variants={itemVariants}
-            transition={{
-              type: "tween",
-              duration: transitionDuration,
-              ease: [0.4, 0, 0.2, 1],
-              filter: { duration: filterDuration },
-            }}
-          >
-            {displayChildren}
-          </m.div>
-        )}
-      </m.div>
-    </AnimatePresence>
+          )}
+        </m.div>
+      </AnimatePresence>
+    </div>
   );
 }
