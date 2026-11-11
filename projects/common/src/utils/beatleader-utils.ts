@@ -1,5 +1,4 @@
 import { env } from "../env";
-import { NotFoundError } from "../error/not-found-error";
 import { getS3BucketName, StorageBucket } from "../minio-buckets";
 import { BeatLeaderScore } from "../schemas/beatleader/score/score";
 
@@ -26,9 +25,17 @@ export function getBeatLeaderReplayId(beatLeaderScore: BeatLeaderScore): string 
   return `${beatLeaderScore.scoreId}-${beatLeaderScore.playerId}-${beatLeaderScore.difficulty}-${beatLeaderScore.characteristic}-${beatLeaderScore.songHash.toUpperCase()}.bsor`;
 }
 
+/**
+ * Gets the URL of a score's replay file. Replays we saved are served from our own storage,
+ * anything else is served from BeatLeader's replay CDN.
+ *
+ * @param beatLeaderScore the BeatLeader score
+ * @returns the replay file URL
+ */
 export function getBeatLeaderReplayCdnUrl(beatLeaderScore: BeatLeaderScore): string {
+  const replayId = getBeatLeaderReplayId(beatLeaderScore);
   if (beatLeaderScore.savedReplay) {
-    return `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.BeatLeaderReplays)}/${getBeatLeaderReplayId(beatLeaderScore)}`;
+    return `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.BeatLeaderReplays)}/${replayId}`;
   }
-  throw new NotFoundError(`No saved replay found for ${beatLeaderScore.scoreId}`);
+  return `https://cdn.replays.beatleader.xyz/${replayId}`;
 }
