@@ -116,7 +116,7 @@ export default async function LandingPage() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <SectionHeading title="By the numbers" desc="Live counters that tick up as scores are tracked." />
+        <SectionHeading title="Statistics" desc="See the current website statistics." />
         <LandingStats initial={initialStatistics} />
       </section>
 
@@ -138,7 +138,7 @@ export default async function LandingPage() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <SectionHeading title="Why Reloaded" desc="Everything ScoreSaber shows, and a lot it doesn't." />
+        <SectionHeading title="Why Reloaded" desc="See some reasons why people choose us." />
         <div className="grid gap-3 sm:grid-cols-2">
           {FEATURES.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="ring-border bg-card flex items-start gap-4 rounded-xl p-5 ring-1">
