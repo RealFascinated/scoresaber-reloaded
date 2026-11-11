@@ -7,6 +7,9 @@ import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
 export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
+  /** Players enqueued per cycle; the rest are picked up by later cycles once the queue drains. */
+  private static readonly SEED_CYCLE_LIMIT = 20_000;
+
   private static readonly logger: ScopedLogger = Logger.withTopic("Player BeatLeader Score Seed Queue");
 
   constructor() {
@@ -40,7 +43,9 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
       return;
     }
     try {
-      const players = await ScoreSaberAccountsRepository.selectIdsNeedingBeatLeaderSeed();
+      const players = await ScoreSaberAccountsRepository.selectIdsNeedingBeatLeaderSeed(
+        PlayerBeatLeaderScoreSeedQueue.SEED_CYCLE_LIMIT
+      );
       if (players.length === 0) {
         PlayerBeatLeaderScoreSeedQueue.logger.info("No players to seed BeatLeader scores for");
         return;

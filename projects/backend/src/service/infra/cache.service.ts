@@ -14,6 +14,7 @@ export enum CacheId {
   BEATSAVER_MAP = "beatsaver_map",
   SCORESABER_PLAYER = "scoresaber_player",
   SCORESABER_MINI_RANKING = "scoresaber_mini_ranking",
+  SCORESABER_MINI_RANKING_RESPONSE = "scoresaber_mini_ranking_response",
   SCORESABER_API_RESPONSE = "scoresaber_api_response",
   SCORESABER_LEADERBOARD_STAR_CHANGE = "scoresaber_leaderboard_star_change",
   SCORESABER_RANKING_QUEUE_LEADERBOARDS = "scoresaber_ranking_queue_leaderboards",
@@ -34,66 +35,74 @@ export default class CacheService {
    */
   private static readonly inFlightRequests = new Map<string, Promise<unknown>>();
 
-  public static readonly CACHE_INFO: Record<CacheId, { ttl: number; mode: CacheMode }> = {
-    // Memory caches
-    [CacheId.PLAYER_HMD_BREAKDOWN]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.PLAYER_PPS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.PLAYER_SCORE_STATISTICS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_MINI_RANKING]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_API_RESPONSE]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
-      mode: "MEMORY",
-    },
+  public static readonly CACHE_INFO: Record<CacheId, { ttl: number; mode: CacheMode; negativeTtl?: number }> =
+    {
+      // Memory caches
+      [CacheId.PLAYER_HMD_BREAKDOWN]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.PLAYER_PPS]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.PLAYER_SCORE_STATISTICS]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_MINI_RANKING]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_MINI_RANKING_RESPONSE]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Minute, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_API_RESPONSE]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
+        mode: "MEMORY",
+      },
 
-    [CacheId.SCORESABER_REALMS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_REALM_PP_CURVE]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
+      [CacheId.SCORESABER_REALMS]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_REALM_PP_CURVE]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
 
-    // Redis caches
-    // Live-ish: entries are dropped by events (see PlayerCoreService.invalidatePlayerCaches), so the
-    // TTL is only a safety net that heals an invalidation that was missed.
-    [CacheId.SCORESABER_PLAYER]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
-      mode: "REDIS",
-    },
-    [CacheId.BEATSAVER_MAP]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
-      mode: "REDIS",
-    },
-    [CacheId.BEATLEADER_SCORE]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "REDIS",
-    },
-    [CacheId.SCORESABER_SCORE_HISTORY_GRAPH]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "REDIS",
-    },
-  };
+      // Redis caches
+      // Live-ish: entries are dropped by events (see PlayerCoreService.invalidatePlayerCaches), so the
+      // TTL is only a safety net that heals an invalidation that was missed.
+      [CacheId.SCORESABER_PLAYER]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
+        mode: "REDIS",
+      },
+      [CacheId.BEATSAVER_MAP]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
+        mode: "REDIS",
+      },
+      [CacheId.BEATLEADER_SCORE]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        // Most scores have no BeatLeader score; without this each page view re-queries the DB for all of them.
+        // Kept short because a BeatLeader score can arrive shortly after the ScoreSaber one.
+        negativeTtl: TimeUnit.toSeconds(TimeUnit.Minute, 1),
+        mode: "REDIS",
+      },
+      [CacheId.SCORESABER_SCORE_HISTORY_GRAPH]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "REDIS",
+      },
+    };
 
   public static async get<T>(cache: CacheId, cacheKey: string): Promise<T | undefined> {
     // Skip cache in development
@@ -219,7 +228,15 @@ export default class CacheService {
       CachePerformanceMetric.recordMiss(cache, mode);
       const data = await fetchFn();
 
-      // Cache only when the fetch produced a concrete value (not `undefined` which is a "no result" signal).
+      // `undefined` is a "no result" signal: only caches that opt in with a `negativeTtl` remember it.
+      const negativeTtl = this.CACHE_INFO[cache].negativeTtl;
+      if (data === undefined && mode === "REDIS" && negativeTtl !== undefined) {
+        try {
+          await redisClient.set(cacheKey, stringify(undefined), "EX", negativeTtl);
+        } catch (error) {
+          CacheService.logger.warn(`Failed to write negative ${cacheKey} to Redis:`, error);
+        }
+      }
       if (data !== undefined) {
         if (mode === "REDIS") {
           try {

@@ -5,10 +5,12 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
+import { leaderboardStarChangeCacheKey } from "../../common/cache-keys";
 import { ScoreSaberLeaderboardStarChangeRepository } from "../../repositories/scoresaber-leaderboard-star-change.repository";
 import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
+import CacheService from "../infra/cache.service";
 import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
@@ -124,6 +126,7 @@ export class LeaderboardRankedSyncService {
             newStars: apiLeaderboard.stars,
             timestamp: new Date(),
           });
+          await CacheService.invalidate(leaderboardStarChangeCacheKey(apiLeaderboard.id, realmId));
         }
 
         if (isDefaultRealm && !dbLeaderboard?.ranked && apiLeaderboard.ranked) {

@@ -9,6 +9,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
+import { BatchLoader } from "../../common/batch-loader";
 import { scoreHistoryGraphCacheKey } from "../../common/cache-keys";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { ScoreSaberScoreHistoryRow } from "../../db/schema";
@@ -20,6 +21,12 @@ import { ScoreCoreService } from "../score/score-core.service";
 
 export class PlayerScoreHistoryService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player Score History");
+
+  /** Resolves the previous-score lookups of a whole page of scores with one query. */
+  private static readonly previousScoreLoader = new BatchLoader<
+    { playerId: string; leaderboardId: number; beforeTimestamp: Date },
+    Awaited<ReturnType<typeof ScoreSaberScoreHistoryRepository.findLatestRowBeforeTimestamp>> | undefined
+  >(requests => ScoreSaberScoreHistoryRepository.findLatestRowsBeforeTimestamps(requests));
 
   /**
    * Reweights the history scores for a leaderboard.
@@ -132,11 +139,11 @@ export class PlayerScoreHistoryService {
     score: ScoreSaberScore | ScoreSaberMedalScore,
     leaderboard: ScoreSaberLeaderboard
   ): Promise<ScoreSaberHistoryScore | undefined> {
-    const previousScore = await ScoreSaberScoreHistoryRepository.findLatestRowBeforeTimestamp(
-      score.playerId,
-      leaderboard.id,
-      score.timestamp
-    );
+    const previousScore = await PlayerScoreHistoryService.previousScoreLoader.load({
+      playerId: score.playerId,
+      leaderboardId: leaderboard.id,
+      beforeTimestamp: score.timestamp,
+    });
 
     if (!previousScore) {
       return undefined;

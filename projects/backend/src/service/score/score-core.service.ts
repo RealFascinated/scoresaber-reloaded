@@ -217,6 +217,29 @@ export class ScoreCoreService {
     };
   }
 
+  /** Scores persisted from the API recently, by `scoreId:score`, so repeated page views skip the write. */
+  private static readonly recentlyUpserted = new Map<string, number>();
+  private static readonly UPSERT_DEDUPE_MS = 10 * 60 * 1000;
+  private static readonly UPSERT_DEDUPE_MAX = 50_000;
+
+  private static markUpserted(rows: ScoreSaberScoreInsertRow[], now: number): void {
+    const recentlyUpserted = ScoreCoreService.recentlyUpserted;
+    for (const row of rows) {
+      const key = `${row.scoreId}:${row.score}`;
+      // Delete first so a refreshed key moves to the end of the Map's insertion order.
+      recentlyUpserted.delete(key);
+      recentlyUpserted.set(key, now);
+    }
+    // Evict the oldest entries (Map iterates in insertion order) instead of rescanning the whole map.
+    while (recentlyUpserted.size > ScoreCoreService.UPSERT_DEDUPE_MAX) {
+      const oldest = recentlyUpserted.keys().next();
+      if (oldest.done) {
+        break;
+      }
+      recentlyUpserted.delete(oldest.value);
+    }
+  }
+
   /**
    * Upserts scores fetched from the ScoreSaber API into the database.
    *
@@ -233,6 +256,7 @@ export class ScoreCoreService {
    */
   public static async upsertScoresFromApi(scores: ScoreSaberScore[]): Promise<void> {
     const insertRows: ScoreSaberScoreInsertRow[] = [];
+    const now = Date.now();
     try {
       const seenScoreIds = new Set<number>();
       const seenPlayerLeaderboards = new Set<string>();
@@ -240,6 +264,11 @@ export class ScoreCoreService {
         const row = ScoreCoreService.toInsertRow(score);
         const playerLeaderboardKey = `${row.playerId}:${row.leaderboardId}`;
         if (seenScoreIds.has(row.scoreId) || seenPlayerLeaderboards.has(playerLeaderboardKey)) {
+          continue;
+        }
+        // The same API page is served again and again; skip scores already persisted moments ago.
+        const persistedAt = ScoreCoreService.recentlyUpserted.get(`${row.scoreId}:${row.score}`);
+        if (persistedAt !== undefined && now - persistedAt < ScoreCoreService.UPSERT_DEDUPE_MS) {
           continue;
         }
         seenScoreIds.add(row.scoreId);
@@ -257,6 +286,7 @@ export class ScoreCoreService {
 
     try {
       await ScoreSaberScoresRepository.upsertScores(insertRows, DEFAULT_REALM_ID);
+      ScoreCoreService.markUpserted(insertRows, now);
     } catch (error) {
       ScoreCoreService.logger.debug(
         `Bulk score upsert for %d score(s) failed, retrying per score: %s`,

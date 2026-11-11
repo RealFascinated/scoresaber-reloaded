@@ -1,6 +1,7 @@
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { asc, eq } from "drizzle-orm";
 import { db } from "../../db";
@@ -12,6 +13,9 @@ import { PlayerCoreService } from "../../service/player/player-core.service";
 import { ScoreCoreService } from "../../service/score/score-core.service";
 import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
+
+/** Scores of one API page tracked concurrently; an unbounded page fan-out exhausts the shared DB pool. */
+const SCORE_TRACKING_BATCH_SIZE = 20;
 
 export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
   private static readonly logger: ScopedLogger = Logger.withTopic("Leaderboard Score Seed Queue");
@@ -81,29 +85,27 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       const parsedScores = response.scores.map(rawScore =>
         getScoreSaberScoreFromToken(rawScore, leaderboard, undefined)
       );
-      await Promise.all(
-        parsedScores.map(async score => {
-          // The player's account must exist before their score rows are written,
-          // so wait for creation (a no-op when the account is already tracked).
-          await PlayerCoreService.createIfMissing(score.playerId);
+      await processInBatches(parsedScores, SCORE_TRACKING_BATCH_SIZE, async score => {
+        // The player's account must exist before their score rows are written,
+        // so wait for creation (a no-op when the account is already tracked).
+        await PlayerCoreService.createIfMissing(score.playerId);
 
-          const trackingResult = await ScoreCoreService.trackScoreSaberScore(
-            score,
-            leaderboard,
-            false,
-            undefined,
-            {
-              skipDuplicateCheck: true,
-            }
-          );
-          if (trackingResult.tracked) {
-            newScoresTracked++;
-            if (trackingResult.hasPreviousScore) {
-              currentPbReplaced++;
-            }
+        const trackingResult = await ScoreCoreService.trackScoreSaberScore(
+          score,
+          leaderboard,
+          false,
+          undefined,
+          {
+            skipDuplicateCheck: true,
           }
-        })
-      );
+        );
+        if (trackingResult.tracked) {
+          newScoresTracked++;
+          if (trackingResult.hasPreviousScore) {
+            currentPbReplaced++;
+          }
+        }
+      });
 
       // Treat an empty leaderboard (totalPages 0) as complete after its first
       // page, and terminate on or after the last page.
@@ -156,9 +158,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
         return;
       }
 
-      for (const leaderboardId of leaderboardIds) {
-        await this.add({ id: leaderboardId.toString(), data: leaderboardId });
-      }
+      await this.addAll(
+        leaderboardIds.map(leaderboardId => ({ id: leaderboardId.toString(), data: leaderboardId }))
+      );
 
       await this.processQueue(); // Process the queue immediately
       LeaderboardScoreSeedQueue.logger.info(

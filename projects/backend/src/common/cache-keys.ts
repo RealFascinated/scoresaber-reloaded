@@ -48,6 +48,18 @@ export function miniRankingCacheKey(
   return `scoresaber:mini-ranking:${scope}:${page}${realmKeySuffix(realmId)}`;
 }
 
+export function miniRankingResponseCacheKeyPrefix(playerId: string): string {
+  return `scoresaber:mini-ranking-response:${playerId}:`;
+}
+
+export function miniRankingResponseCacheKey(playerId: string, realmId: number): string {
+  return `${miniRankingResponseCacheKeyPrefix(playerId)}${realmId}`;
+}
+
+export function leaderboardStarChangeCacheKey(leaderboardId: number, realmId: number): string {
+  return `scoresaber:leaderboard-star-change:${leaderboardId}${realmKeySuffix(realmId)}`;
+}
+
 // BeatSaver
 export function beatSaverMapCacheKey(
   hash: string,

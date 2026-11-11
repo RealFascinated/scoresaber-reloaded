@@ -24,6 +24,7 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-difficulty";
+import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { SQL, asc, desc, eq, gt, gte, inArray, isNotNull, sql, type AnyColumn } from "drizzle-orm";
@@ -40,12 +41,15 @@ import BeatSaverService from "../external/beatsaver.service";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerMedalsService } from "../medals/player-medals.service";
-import { ScoreCoreService } from "../score/score-core.service";
+import { ScoreCoreService, type ScorePlayerInfoRow } from "../score/score-core.service";
 import { PlayerCoreService } from "./player-core.service";
 
 /**
  * Describes how to paginate and enrich a specific score table.
  */
+/** Scores of one API page tracked concurrently; an unbounded page fan-out exhausts the shared DB pool. */
+const SCORE_TRACKING_BATCH_SIZE = 20;
+
 type ScoreTableConfig<TRow, TScore, TContext = undefined> = {
   buildConditions: (playerIds: string[], leaderboardIds: number[] | null, hmd?: HMD) => SQL[];
   countRows: (conditions: SQL[], realmId: number) => Promise<number>;
@@ -59,10 +63,13 @@ type ScoreTableConfig<TRow, TScore, TContext = undefined> = {
   ) => Promise<TRow[]>;
   getLeaderboardId: (row: TRow) => number;
   prepareContext?: (rows: TRow[]) => Promise<TContext>;
+  /** When set, the page's player info is loaded with one query and handed to `enrichRow`. */
+  getPlayerId?: (row: TRow) => string;
   enrichRow: (
     row: TRow,
     leaderboard: ScoreSaberLeaderboard,
-    context: TContext
+    context: TContext,
+    playerInfoById?: ReadonlyMap<string, ScorePlayerInfoRow>
   ) => Promise<PlayerScore<TScore> | undefined>;
 };
 
@@ -171,29 +178,27 @@ export class PlayerScoresService {
         ScoreSaberScoreHistoryRepository.findExistingScoreIds(parsedScores.map(score => score.score.scoreId)),
       ]);
 
-      await Promise.all(
-        parsedScores.map(async ({ score, leaderboard }) => {
-          if (existingScores.has(score.scoreId) || existingHistory.has(score.scoreId)) {
-            return;
-          }
+      await processInBatches(parsedScores, SCORE_TRACKING_BATCH_SIZE, async ({ score, leaderboard }) => {
+        if (existingScores.has(score.scoreId) || existingHistory.has(score.scoreId)) {
+          return;
+        }
 
-          const trackingResult = await ScoreCoreService.trackScoreSaberScore(
-            score,
-            leaderboard,
-            false,
-            undefined,
-            {
-              skipDuplicateCheck: true,
-            }
-          );
-          if (trackingResult.tracked) {
-            result.missingScores++;
-            if (leaderboard.ranked) {
-              rankedLeaderboardsToRefresh.set(leaderboard.id, leaderboard);
-            }
+        const trackingResult = await ScoreCoreService.trackScoreSaberScore(
+          score,
+          leaderboard,
+          false,
+          undefined,
+          {
+            skipDuplicateCheck: true,
           }
-        })
-      );
+        );
+        if (trackingResult.tracked) {
+          result.missingScores++;
+          if (leaderboard.ranked) {
+            rankedLeaderboardsToRefresh.set(leaderboard.id, leaderboard);
+          }
+        }
+      });
 
       // Count recorded plays across both current rows and archived attempts;
       // the scores-table count alone can never match the API's total.
@@ -445,11 +450,15 @@ export class PlayerScoresService {
         return [];
       }
 
-      const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(
-        rows.map(config.getLeaderboardId),
-        true,
-        realmId
-      );
+      const getPlayerId = config.getPlayerId;
+      const [leaderboards, playerInfoById] = await Promise.all([
+        ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(
+          rows.map(config.getLeaderboardId),
+          true,
+          realmId
+        ),
+        getPlayerId ? ScoreCoreService.getPlayerInfoByIds(rows.map(getPlayerId)) : undefined,
+      ]);
       const leaderboardMap = new Map(leaderboards.map(lb => [lb.id, lb]));
       const context = config.prepareContext ? await config.prepareContext(rows) : (undefined as TContext);
 
@@ -459,7 +468,7 @@ export class PlayerScoresService {
           if (!leaderboard) {
             return undefined;
           }
-          return config.enrichRow(row, leaderboard, context);
+          return config.enrichRow(row, leaderboard, context, playerInfoById);
         })
       );
 
@@ -524,11 +533,12 @@ export class PlayerScoresService {
       },
 
       getLeaderboardId: row => row.leaderboardId,
+      getPlayerId: row => row.playerId,
 
-      async enrichRow(row, leaderboard, _context) {
+      async enrichRow(row, leaderboard, _context, playerInfoById) {
         void _context;
         const [enrichedScore, beatSaver] = await Promise.all([
-          ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(row), leaderboard),
+          ScoreCoreService.insertScoreData(scoreSaberScoreRowToType(row), leaderboard, { playerInfoById }),
           BeatSaverService.getMap(
             leaderboard.songHash,
             leaderboard.difficulty.difficulty,
@@ -609,6 +619,7 @@ export class PlayerScoresService {
         },
 
         getLeaderboardId: row => row.leaderboardId,
+        getPlayerId: row => row.playerId,
 
         async prepareContext(rows) {
           return ScoreSaberMedalsRepository.getMedalTableScoreRanksForScores(
@@ -619,14 +630,14 @@ export class PlayerScoresService {
           );
         },
 
-        async enrichRow(row, leaderboard, context) {
+        async enrichRow(row, leaderboard, context, playerInfoById) {
           const medalScore: ScoreSaberMedalScore = {
             ...scoreSaberMedalScoreRowToType(row),
             rank: context.get(row.scoreId) ?? 0,
           };
 
           const [enrichedScore, beatSaver] = await Promise.all([
-            ScoreCoreService.insertScoreData(medalScore, leaderboard),
+            ScoreCoreService.insertScoreData(medalScore, leaderboard, { playerInfoById }),
             BeatSaverService.getMap(
               leaderboard.songHash,
               leaderboard.difficulty.difficulty,

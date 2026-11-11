@@ -84,9 +84,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
         return;
       }
 
-      for (const playerId of playerIds) {
-        await this.add({ id: playerId, data: playerId });
-      }
+      await this.addAll(playerIds.map(playerId => ({ id: playerId, data: playerId })));
 
       await this.processQueue(); // Process the queue immediately
       FetchMissingScoresQueue.logger.info(`Added ${playerIds.length} players to score refresh queue`);

@@ -1,7 +1,7 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { MiniRankingResponse } from "@ssr/common/schemas/response/player/around-player";
-import { miniRankingCacheKey } from "../../common/cache-keys";
+import { miniRankingCacheKey, miniRankingResponseCacheKey } from "../../common/cache-keys";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 import ScoreSaberPlayerService from "./scoresaber-player.service";
@@ -16,6 +16,14 @@ export default class MiniRankingService {
    * @param realmId the realm to rank within
    */
   public static async getPlayerMiniRankings(id: string, realmId: number): Promise<MiniRankingResponse> {
+    return CacheService.fetch(
+      CacheId.SCORESABER_MINI_RANKING_RESPONSE,
+      miniRankingResponseCacheKey(id, realmId),
+      () => this.buildPlayerMiniRankings(id, realmId)
+    );
+  }
+
+  private static async buildPlayerMiniRankings(id: string, realmId: number): Promise<MiniRankingResponse> {
     const player = await ScoreSaberPlayerService.getPlayer(id, "basic", undefined, realmId);
     if (player == undefined) {
       throw new NotFoundError(`Player "${id}" not found`);

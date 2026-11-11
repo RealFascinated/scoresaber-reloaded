@@ -21,7 +21,11 @@ import {
 import { getScoreSaberDifficultyFromDifficulty } from "@ssr/common/utils/scoresaber.util";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { count } from "drizzle-orm";
-import { normalizeSongHash, rankingQueueLeaderboardsCacheKey } from "../../common/cache-keys";
+import {
+  leaderboardStarChangeCacheKey,
+  normalizeSongHash,
+  rankingQueueLeaderboardsCacheKey,
+} from "../../common/cache-keys";
 import { db } from "../../db";
 import { leaderboardRowToType } from "../../db/converter/scoresaber-leaderboard";
 import { scoreSaberLeaderboardRealmsTable, scoreSaberLeaderboardsTable } from "../../db/schema";
@@ -200,16 +204,23 @@ export class ScoreSaberLeaderboardsService {
     leaderboard: ScoreSaberLeaderboard,
     realmId: number
   ): Promise<LeaderboardStarChange[]> {
-    const rows = await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
-      leaderboard.id,
-      realmId
+    // Star changes only happen during the ranked sync, which invalidates this entry when it records one.
+    return CacheService.fetch(
+      CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE,
+      leaderboardStarChangeCacheKey(leaderboard.id, realmId),
+      async () => {
+        const rows =
+          await ScoreSaberLeaderboardStarChangeRepository.listByLeaderboardIdOrderedByTimestampDesc(
+            leaderboard.id,
+            realmId
+          );
+        return rows.map(starChange => ({
+          previousStars: starChange.previousStars,
+          newStars: starChange.newStars,
+          timestamp: starChange.timestamp,
+        }));
+      }
     );
-
-    return rows.map(starChange => ({
-      previousStars: starChange.previousStars,
-      newStars: starChange.newStars,
-      timestamp: starChange.timestamp,
-    }));
   }
 
   /**

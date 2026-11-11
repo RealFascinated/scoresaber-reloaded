@@ -177,6 +177,37 @@ export class ScoreSaberScoreHistoryRepository {
     return previousScore;
   }
 
+  /**
+   * Batched {@link findLatestRowBeforeTimestamp}: one query for many (player, leaderboard, timestamp)
+   * lookups. Results line up with the requests.
+   */
+  public static async findLatestRowsBeforeTimestamps(
+    requests: { playerId: string; leaderboardId: number; beforeTimestamp: Date }[]
+  ) {
+    if (requests.length === 0) {
+      return [];
+    }
+    const pairs = [...new Set(requests.map(r => `${r.playerId}:${r.leaderboardId}`))].map(key => {
+      const [playerId, leaderboardId] = key.split(":");
+      return sql`(${playerId}, ${Number(leaderboardId)})`;
+    });
+    const rows = await db
+      .select()
+      .from(scoreSaberScoreHistoryTable)
+      .where(
+        sql`(${scoreSaberScoreHistoryTable.playerId}, ${scoreSaberScoreHistoryTable.leaderboardId}) in (${sql.join(pairs, sql`, `)})`
+      )
+      .orderBy(desc(scoreSaberScoreHistoryTable.timestamp));
+    return requests.map(request =>
+      rows.find(
+        row =>
+          row.playerId === request.playerId &&
+          row.leaderboardId === request.leaderboardId &&
+          row.timestamp < request.beforeTimestamp
+      )
+    );
+  }
+
   public static async countCombinedScoresForPlayerMap(
     playerId: string,
     leaderboardId: number
