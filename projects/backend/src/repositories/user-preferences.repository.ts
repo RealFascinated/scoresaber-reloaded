@@ -1,3 +1,4 @@
+import { checkSchema } from "@ssr/common/schemas/parse";
 import {
   DEFAULT_USER_PREFERENCES,
   UserPreferencesSchema,
@@ -6,7 +7,6 @@ import {
   type UserPreferencesPatch,
 } from "@ssr/common/schemas/user/preferences";
 import { eq } from "drizzle-orm";
-import { Value } from "typebox/value";
 import { db } from "../db";
 import { userPreferencesTable } from "../db/schema";
 
@@ -23,7 +23,7 @@ export class UserPreferencesRepository {
     const resolved: Record<string, UserPreferences[UserPreferenceKey]> = { ...DEFAULT_USER_PREFERENCES };
     for (const key of PREFERENCE_KEYS) {
       const value = stored?.[key];
-      if (value !== undefined && Value.Check(UserPreferencesSchema.properties[key], value)) {
+      if (value !== undefined && checkSchema(UserPreferencesSchema.properties[key], value)) {
         resolved[key] = value;
       }
     }

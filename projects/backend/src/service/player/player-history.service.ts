@@ -20,7 +20,6 @@ import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { playerHistoryRowToType } from "../../db/converter/player-history";
 import { type PlayerHistoryRow } from "../../db/schema";
-import { PlayerBeatLeaderScoreSeedQueue } from "../../queue/impl/player-beatleader-score-seed-queue";
 import { FetchMissingScoresQueue } from "../../queue/impl/player-scoresaber-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
 import {
@@ -29,6 +28,7 @@ import {
 } from "../../repositories/player-history.repository";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { RealmService } from "../realm/realm.service";
@@ -89,23 +89,22 @@ export class PlayerHistoryService {
         // If the player has fewer recorded plays (current rows + archived attempts)
         // than their total play count, add them to the refresh queue. Replays are
         // archived to score history, so the current-rows count alone always looks
-        // incomplete and re-queued the whole player base every night.
+        // incomplete and re-queued the whole player base every night. The same row
+        // counts as the refresh worker are used: `statistics.totalScores` is cached
+        // and skips rows without an accuracy, so it undercounted and queued players
+        // the worker then found complete.
         if (statistics && !player.banned) {
-          const recordedPlays =
-            (statistics?.totalScores ?? 0) +
-            (await ScoreSaberScoreHistoryRepository.countByPlayerId(playerId));
+          const [recordedScores, archivedScores] = await Promise.all([
+            ScoreSaberScoresRepository.countByPlayerId(playerId),
+            ScoreSaberScoreHistoryRepository.countByPlayerId(playerId),
+          ]);
+          const recordedPlays = recordedScores + archivedScores;
           if (recordedPlays < player.stats.totalSubmittedPlays) {
             PlayerHistoryService.logger.info(
               `Player ${playerId} has missing scores. Adding them to the refresh queue...`
             );
             // Add the player to the refresh queue
             (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
-              id: playerId,
-              data: playerId,
-            });
-            (
-              QueueManager.getQueue(QueueId.PlayerBeatLeaderScoreSeedQueue) as PlayerBeatLeaderScoreSeedQueue
-            ).add({
               id: playerId,
               data: playerId,
             });

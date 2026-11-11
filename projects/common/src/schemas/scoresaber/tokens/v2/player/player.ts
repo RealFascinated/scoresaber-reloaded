@@ -1,5 +1,5 @@
 import { Type, type StaticDecode } from "typebox";
-import { Value } from "typebox/value";
+import { checkSchema } from "../../../../parse";
 import { ScoreSaberV2LeaderboardPageTokenSchema } from "../leaderboard/leaderboards-page";
 import { ScoreSaberV2PlayerBadgeTokenSchema } from "./player-badge";
 import { ScoreSaberV2PlayerStatsTokenSchema } from "./player-stats";
@@ -95,5 +95,5 @@ export type ScoreSaberPlayerLookupToken = ScoreSaberV2PlayerToken | ScoreSaberV2
 export function isScoreSaberV2PlayerToken(
   token: ScoreSaberPlayerLookupToken
 ): token is ScoreSaberV2PlayerToken {
-  return Value.Check(ScoreSaberV2PlayerTokenSchema, token);
+  return checkSchema(ScoreSaberV2PlayerTokenSchema, token);
 }

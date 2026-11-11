@@ -14,7 +14,7 @@ import {
   BeatLeaderPlayerScoresPageSchema,
   type BeatLeaderPlayerScoresPageToken,
 } from "@ssr/common/schemas/beatleader/tokens/score/page";
-import { parseSchema } from "@ssr/common/schemas/parse";
+import { checkSchema, parseCheckedSchema, parseSchema } from "@ssr/common/schemas/parse";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import { Value } from "typebox/value";
@@ -220,7 +220,7 @@ export class BeatLeaderApiService {
       return undefined;
     }
 
-    if (!Value.Check(BeatLeaderPlayersTotalSchema, response)) {
+    if (!checkSchema(BeatLeaderPlayersTotalSchema, response)) {
       return undefined;
     }
 
@@ -249,7 +249,7 @@ export class BeatLeaderApiService {
       return undefined;
     }
 
-    if (!Value.Check(BeatLeaderPlayerLookupSchema, response)) {
+    if (!checkSchema(BeatLeaderPlayerLookupSchema, response)) {
       BeatLeaderApiService.log(
         `Failed to parse BeatLeader player "${playerId}": ${Value.Errors(BeatLeaderPlayerLookupSchema, response)[0]?.message}`
       );
@@ -281,7 +281,7 @@ export class BeatLeaderApiService {
       return undefined;
     }
 
-    if (!Value.Check(BeatLeaderLeaderboardsByHashSchema, response)) {
+    if (!checkSchema(BeatLeaderLeaderboardsByHashSchema, response)) {
       BeatLeaderApiService.log(
         `Failed to parse BeatLeader leaderboards for "${hash}": ${Value.Errors(BeatLeaderLeaderboardsByHashSchema, response)[0]?.message}`
       );
@@ -367,14 +367,14 @@ export class BeatLeaderApiService {
       return { status: result.status, page: undefined };
     }
 
-    if (!Value.Check(BeatLeaderPlayerScoresPageSchema, result.data)) {
+    if (!checkSchema(BeatLeaderPlayerScoresPageSchema, result.data)) {
       BeatLeaderApiService.log(
         `Failed to parse BeatLeader scores page ${page} for "${playerId}": ${Value.Errors(BeatLeaderPlayerScoresPageSchema, result.data)[0]?.message}`
       );
       return { status: result.status, page: undefined };
     }
 
-    const parsed = parseSchema(BeatLeaderPlayerScoresPageSchema, result.data);
+    const parsed = parseCheckedSchema(BeatLeaderPlayerScoresPageSchema, result.data);
     BeatLeaderApiService.log(
       `Found BeatLeader scores page ${page} for "${playerId}" in ${formatDuration(performance.now() - before)}`
     );

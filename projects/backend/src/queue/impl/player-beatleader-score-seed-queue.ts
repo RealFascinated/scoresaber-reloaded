@@ -25,6 +25,11 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
       return;
     }
 
+    // A seeded player's scores are tracked in real time; walking the whole history again only costs API calls
+    if (account.seededBeatLeaderScores) {
+      return;
+    }
+
     await PlayerBeatLeaderScoresService.fetchMissingBeatLeaderScores(account, {
       mode: "backfill",
     });
