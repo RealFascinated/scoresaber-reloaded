@@ -1,6 +1,6 @@
 "use client";
 
-import { LOGIN_PATH, signOut } from "@/common/auth/auth-api";
+import { signInWithSteam, signOut } from "@/common/auth/auth-api";
 import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
 import FollowedPlayer from "@/components/following/followed-player";
@@ -289,14 +289,14 @@ function ProfileSection() {
 
   if (mainPlayerId == null || mainPlayerId === "") {
     return (
-      <SimpleLink
-        href={`${LOGIN_PATH}?redirect=${encodeURIComponent(pathname ?? "/")}`}
-        draggable={false}
+      <button
+        type="button"
+        onClick={() => signInWithSteam(pathname ?? "/").catch(error => toast.error(error.message))}
         className="text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors"
       >
         <SharedIcons.SignInIcon className="text-success size-5 shrink-0" />
         <span className="font-medium">Sign in</span>
-      </SimpleLink>
+      </button>
     );
   }
 

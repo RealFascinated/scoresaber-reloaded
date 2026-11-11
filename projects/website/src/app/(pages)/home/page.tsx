@@ -1,4 +1,5 @@
 import { getServerSession } from "@/common/auth/session-server";
+import SteamSignInRedirect from "@/components/auth/steam-sign-in-redirect";
 import { FollowingRanking } from "@/components/player-home/following/following-ranking";
 import { FollowingScores } from "@/components/player-home/following/following-scores";
 import { prefetchHomeData } from "@/components/player-home/home-prefetch";
@@ -6,9 +7,17 @@ import { Player } from "@/components/player-home/player";
 import { HydrationBoundary } from "@tanstack/react-query";
 import { cookies } from "next/headers";
 
-export default async function HomePage() {
+interface HomePageProps {
+  searchParams: Promise<{ error?: string | string[] }>;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
   // The layout resolves the same session, which is shared within the request
   const session = await getServerSession((await cookies()).toString());
+  if (session.status === "anonymous") {
+    const { error } = await searchParams;
+    return <SteamSignInRedirect redirectPath="/home" failed={error !== undefined} />;
+  }
   const homeData = await prefetchHomeData(session);
 
   const content = (

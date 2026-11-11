@@ -5,13 +5,13 @@ import { type NextRequest, NextResponse } from "next/server";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // The session is the only source of who is signed in, so only the pages that depend on it
-  // pay for asking the backend
-  if (pathname === "/" || pathname.startsWith("/home")) {
+  // The session is the only source of who is signed in, so only the landing page pays for asking
+  // the backend. The player home checks its own session and sends signed-out visitors to Steam.
+  if (pathname === "/") {
     const session = await getServerSession(request.headers.get("cookie") ?? "");
 
     // Signed-in visitors land where they asked to
-    if (pathname === "/" && session.status === "signed-in" && session.me.playerId) {
+    if (session.status === "signed-in" && session.me.playerId) {
       const { websiteLanding } = session.preferences;
       if (websiteLanding === WebsiteLanding.PLAYER_HOME) {
         return NextResponse.redirect(new URL("/home", request.url));
@@ -20,14 +20,6 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL(`/player/${session.me.playerId}`, request.url));
       }
       return NextResponse.next();
-    }
-
-    // The player home needs a signed-in player. Only a definite "not signed in" redirects,
-    // an unreachable backend must not lock everyone out.
-    if (pathname.startsWith("/home") && session.status === "anonymous") {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
     }
   }
 

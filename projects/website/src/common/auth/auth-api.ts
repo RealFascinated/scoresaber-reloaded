@@ -28,11 +28,6 @@ export async function fetchMe(): Promise<AuthMeResponse | null> {
 }
 
 /**
- * The page that lists the sign-in providers, and where failed sign-ins return to.
- */
-export const LOGIN_PATH = "/login";
-
-/**
  * Only allows redirecting to a path on this site, so a login link can't send users elsewhere.
  *
  * @returns the redirect path, or "/" when it is missing or not a local path
@@ -46,16 +41,17 @@ export function getSafeRedirectPath(redirect: string | null | undefined): string
 
 /**
  * Starts the Steam sign-in by sending the browser to Steam. Steam returns to the backend,
- * which then redirects to the given path (or back to the login page with an `error` on failure).
+ * which then redirects to the given path, or back to it with an `error` query param on failure.
  */
 export async function signInWithSteam(redirectPath: string = "/"): Promise<void> {
+  const safePath = getSafeRedirectPath(redirectPath);
   const response = await authFetch(`${AUTH_ROUTE}/sign-in/social`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       provider: "steam",
-      callbackURL: `${window.location.origin}${getSafeRedirectPath(redirectPath)}`,
-      errorCallbackURL: `${window.location.origin}${LOGIN_PATH}`,
+      callbackURL: `${window.location.origin}${safePath}`,
+      errorCallbackURL: `${window.location.origin}${safePath}`,
     }),
   });
   if (!response.ok) {
