@@ -34,6 +34,7 @@ export default function ScoreSaberScoreDisplay({
     noScoreButtons?: boolean;
     hideDetailsDropdown?: boolean;
     hideAccuracyChanger?: boolean;
+    hideRank?: boolean;
     defaultLeaderboardScoresPage?: number;
     medalsMode?: boolean;
     isPreviousScore?: boolean;
@@ -73,7 +74,7 @@ export default function ScoreSaberScoreDisplay({
             "@3xl:grid-cols-[120px_minmax(120px,1fr)_auto_minmax(240px,300px)]"
           )}
         >
-          <ScoreSaberScoreInfo score={score} leaderboard={leaderboard} />
+          <ScoreSaberScoreInfo score={score} leaderboard={leaderboard} hideRank={settings?.hideRank} />
 
           <div className="flex min-w-0 items-center">
             <ScoreSongInfo

@@ -96,6 +96,7 @@ export function TopScoresData({ initial }: TopScoresDataProps) {
                     settings={{
                       hideAccuracyChanger: true,
                       hideDetailsDropdown: true,
+                      hideRank: true,
                     }}
                   />
                 </div>
