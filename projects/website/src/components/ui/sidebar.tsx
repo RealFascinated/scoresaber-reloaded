@@ -9,7 +9,6 @@ import { cn } from "@/common/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,7 +16,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "18rem";
-const SIDEBAR_WIDTH_MOBILE = "100%";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
@@ -137,6 +135,43 @@ const Sidebar = React.forwardRef<
 >(({ side = "left", variant = "sidebar", collapsible = "offcanvas", className, children, ...props }, ref) => {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 
+  React.useEffect(() => {
+    if (!isMobile || !openMobile) {
+      return;
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpenMobile(false);
+      }
+    };
+    // Tapping outside the panel closes it. The trigger toggles on its own, and popovers opened
+    // from inside the sidebar (realm selector, following list) are portaled outside the panel.
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!(event.target instanceof Element)) {
+        return;
+      }
+      if (
+        event.target.closest(
+          '[data-sidebar="sidebar"], [data-sidebar="trigger"], [data-radix-popper-content-wrapper]'
+        )
+      ) {
+        return;
+      }
+      setOpenMobile(false);
+    };
+    // Lock page scroll while the panel is open; the panel's own content still scrolls.
+    const root = document.documentElement;
+    const previousOverflow = root.style.overflow;
+    root.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      root.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isMobile, openMobile, setOpenMobile]);
+
   if (collapsible === "none") {
     return (
       <div
@@ -152,36 +187,6 @@ const Sidebar = React.forwardRef<
     );
   }
 
-  if (isMobile) {
-    return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} modal={false} {...props}>
-        <SheetContent
-          data-sidebar="sidebar"
-          data-mobile="true"
-          className={cn(
-            "bg-sidebar text-sidebar-foreground w-[--sidebar-width] max-w-none border-r-0 p-0 [&>button]:hidden",
-            // The default sheet slide is 500ms in / 300ms out with a blanket `transition`, which feels
-            // sluggish for a full-width nav panel. The slide is a keyframe animation, so drop the
-            // transition and shorten it, and promote the panel to its own layer.
-            "transition-none will-change-transform data-[state=closed]:duration-150 data-[state=open]:duration-200"
-          )}
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-            } as React.CSSProperties
-          }
-          side={side}
-        >
-          <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-          </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
   return (
     <>
       <div
@@ -192,19 +197,35 @@ const Sidebar = React.forwardRef<
           "transition-[width] duration-200 ease-linear"
         )}
       />
+      {/* Mobile backdrop: dims and blurs the page behind the open panel; tapping it closes the panel. */}
+      <div
+        aria-hidden
+        className={cn(
+          "fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-[opacity,visibility] duration-200 ease-out md:hidden",
+          openMobile ? "opacity-100" : "invisible opacity-0"
+        )}
+      />
       <div
         ref={ref}
         className={cn(
-          // Hidden below md in CSS (not via isMobile) so SSR/first paint never shows it on mobile,
-          // since useIsMobile reports false during SSR and hydration.
-          "bg-sidebar text-sidebar-foreground fixed inset-y-0 z-10 hidden h-svh w-72 flex-col md:flex",
+          "bg-sidebar text-sidebar-foreground fixed inset-y-0 z-10 flex h-svh w-72 flex-col",
           side === "left" ? "left-0" : "right-0",
           state === "collapsed" && side === "left" && "-translate-x-full",
           state === "collapsed" && side === "right" && "translate-x-full",
-          "transition-transform duration-200 ease-linear",
+          "transition-[translate,visibility] duration-200 ease-linear",
+          // Below md the same panel is an overlay driven by openMobile. It stays mounted
+          // and only slides (a compositor-only transition), since mounting the whole sidebar on
+          // every open stalled the main thread before the slide could start. The breakpoint is
+          // applied in CSS (not via isMobile) so SSR/first paint is already correct on mobile,
+          // and `invisible` keeps the closed panel out of the tab order and accessibility tree.
+          "max-md:z-50 max-md:w-3/4 max-md:max-w-sm max-md:shadow-lg max-md:ease-out max-md:will-change-[translate]",
+          !openMobile && "max-md:invisible",
+          !openMobile && (side === "left" ? "max-md:-translate-x-full" : "max-md:translate-x-full"),
+          openMobile && "max-md:translate-x-0",
           className
         )}
         data-sidebar="sidebar"
+        data-mobile={isMobile ? "true" : undefined}
         data-state={state}
         data-variant={variant}
         data-side={side}
