@@ -1,12 +1,18 @@
 "use client";
 
+import { cn } from "@/common/utils";
+import Avatar from "@/components/avatar";
 import CountrySelector from "@/components/country-selector";
+import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
+import ScoresListPanel from "@/components/platform/shared/scores-list-panel";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
+import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import { useMainPlayer } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
@@ -175,6 +181,7 @@ export default function LeaderboardScores({ leaderboard, initialScores }: Leader
   const [mode, setMode] = useQueryState("mode", leaderboardScoresSearchParams.mode);
   const [page, setPage] = useQueryState("page", leaderboardScoresSearchParams.page);
   const [highlight] = useQueryState("highlight");
+  const isMobile = useIsMobile();
   const {
     data: scores,
     isError,
@@ -215,7 +222,43 @@ export default function LeaderboardScores({ leaderboard, initialScores }: Leader
         </div>
       </div>
 
-      {isLoading && !scores ? (
+      {isMobile ? (
+        <div className="ring-border bg-card flex flex-col gap-2 overflow-hidden rounded-xl px-2 pb-2 ring-1">
+          <ScoresListPanel
+            page={page}
+            data={scores}
+            isLoading={isLoading}
+            isRefetching={isRefetching}
+            isError={isError}
+            generatePageUrl={page => `/leaderboard/${leaderboard.id}?page=${page}`}
+            onPageChange={setPage}
+            getKey={getScoreId}
+            renderItem={playerScore => (
+              <div className={cn(highlight === playerScore.playerId && "bg-primary/10")}>
+                <div className="flex items-center gap-2 px-2 pt-2">
+                  <Avatar
+                    src={playerScore.playerInfo?.avatar ?? ""}
+                    alt={`${playerScore.playerInfo?.name ?? "Unknown"}'s Profile Picture`}
+                    size={20}
+                    className="shrink-0"
+                  />
+                  {playerScore.playerInfo ? (
+                    <SimpleLink
+                      href={`/player/${playerScore.playerId}`}
+                      className="hover:text-primary text-sm font-medium transition-colors"
+                    >
+                      {playerScore.playerInfo.name}
+                    </SimpleLink>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">Unknown Player</p>
+                  )}
+                </div>
+                <ScoreSaberScoreDisplay score={playerScore} leaderboard={leaderboard} />
+              </div>
+            )}
+          />
+        </div>
+      ) : isLoading && !scores ? (
         <div className="flex items-center justify-center py-12">
           <Spinner size="lg" />
         </div>
