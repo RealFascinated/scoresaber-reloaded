@@ -48,10 +48,13 @@ function LandingStatCard({
   onBumpComplete: () => void;
 }) {
   return (
-    <div className="ring-border bg-card flex flex-col items-center gap-1 rounded-xl p-5 text-center ring-1">
-      <Icon className="text-muted-foreground mb-1 h-5 w-5" />
-      <div className="relative">
-        <CountUp value={value} className="text-foreground text-xl font-bold" />
+    <div className="ring-border bg-card flex flex-col gap-2 rounded-xl p-4 ring-1">
+      <div className="text-muted-foreground flex items-center gap-2">
+        <Icon className="size-4 shrink-0" />
+        <span className="truncate text-xs font-medium">{label}</span>
+      </div>
+      <div className="relative w-fit">
+        <CountUp value={value} className="text-foreground text-2xl font-bold tabular-nums" />
         {bump && (
           <m.span
             key={bump.id}
@@ -65,7 +68,6 @@ function LandingStatCard({
           </m.span>
         )}
       </div>
-      <span className="text-muted-foreground text-xs">{label}</span>
     </div>
   );
 }
@@ -146,7 +148,7 @@ export function LandingStats({ initial }: LandingStatsProps) {
     return (
       <div className="grid w-full grid-cols-2 gap-4 sm:grid-cols-3" aria-busy="true">
         {Array.from({ length: STATS.length }).map((_, index) => (
-          <Skeleton key={index} className="h-28 rounded-xl" />
+          <Skeleton key={index} className="h-22 rounded-xl" />
         ))}
       </div>
     );

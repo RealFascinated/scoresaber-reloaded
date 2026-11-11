@@ -82,19 +82,5 @@ export function LandingBackground() {
     };
   }, []);
 
-  return (
-    <>
-      <div
-        className="pointer-events-none fixed inset-0 -z-50 select-none"
-        style={{
-          background: `
-            radial-gradient(ellipse 80% 60% at 50% 0%, hsl(var(--primary) / 0.08), transparent),
-            radial-gradient(ellipse 60% 50% at 80% 80%, hsl(var(--primary) / 0.05), transparent),
-            radial-gradient(ellipse 50% 40% at 20% 70%, hsl(var(--primary) / 0.04), transparent)
-          `,
-        }}
-      />
-      <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 -z-40 select-none" />
-    </>
-  );
+  return <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 -z-40 select-none" />;
 }
