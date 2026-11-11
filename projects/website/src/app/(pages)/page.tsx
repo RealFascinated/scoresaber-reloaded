@@ -121,7 +121,7 @@ export default async function LandingPage() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <SectionHeading title="Explore" desc="Jump straight into the data." />
+        <SectionHeading title="Explore" desc="Jump straight to one of our pages." />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {EXPLORE_LINKS.map(({ icon: Icon, label, href, desc }) => (
             <SimpleLink
