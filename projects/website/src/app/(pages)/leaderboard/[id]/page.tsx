@@ -54,20 +54,17 @@ const getLeaderboard = cache(async (id: number): Promise<LeaderboardFetchResult>
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { id } = await props.params;
 
-  let response: LeaderboardResponse | undefined;
-  try {
-    response = await ssrApi.fetchLeaderboard(id, "basic");
-  } catch (error) {
-    if (isBackendUnavailableError(error)) {
-      return {
-        title: "Backend Unavailable",
-        description: "The backend is currently offline or unreachable. Please try again later.",
-      };
-    }
-    throw error;
+  // Shares the page's request, so the leaderboard is only fetched once per render
+  const result = await getLeaderboard(id);
+
+  if (result.status === "unavailable") {
+    return {
+      title: "Backend Unavailable",
+      description: "The backend is currently offline or unreachable. Please try again later.",
+    };
   }
 
-  if (response === undefined) {
+  if (result.status === "not-found") {
     return {
       title: UNKNOWN_LEADERBOARD.title,
       description: UNKNOWN_LEADERBOARD.description,
@@ -80,7 +77,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     };
   }
 
-  const { leaderboard } = response;
+  const { leaderboard } = result.response;
 
   return {
     title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
