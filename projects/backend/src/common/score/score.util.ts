@@ -274,7 +274,7 @@ function getScoreButtons(
                 .setStyle(ButtonStyle.Link)
                 .setURL(
                   ReplayViewers.chroviewer.generateUrl(
-                    score.scoreId,
+                    beatLeaderScore.scoreId,
                     getBeatLeaderReplayRedirectUrl(beatLeaderScore)
                   )
                 ),
