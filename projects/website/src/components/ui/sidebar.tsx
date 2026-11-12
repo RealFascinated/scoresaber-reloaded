@@ -18,6 +18,14 @@ const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
+// Mobile edge drag: a touch starting within this many px of the left edge pulls the panel out
+// under the finger. Movement must be mostly horizontal to commit to the drag.
+const SIDEBAR_EDGE_SWIPE_ZONE = 24;
+const SIDEBAR_SWIPE_LOCK_PX = 8;
+// On release, the panel opens if it was pulled past this share of its width or flicked open quickly.
+const SIDEBAR_SWIPE_SETTLE_RATIO = 0.4;
+const SIDEBAR_SWIPE_FLING_PX_PER_MS = 0.5;
+const SIDEBAR_SETTLE_MS = 200;
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed";
@@ -85,6 +93,147 @@ const SidebarProvider = React.forwardRef<
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }, [toggleSidebar]);
+
+    // On mobile, a rightward drag from the left screen edge pulls the panel out under the finger.
+    // Releasing past the halfway point (or after a quick flick) opens it; otherwise it slides back.
+    // The panel and backdrop are moved directly in the DOM during the drag, so the gesture does not
+    // re-render React. Only listens while the panel is closed.
+    React.useEffect(() => {
+      if (!isMobile || openMobile) {
+        return;
+      }
+      let tracking = false;
+      let dragging = false;
+      let width = 0;
+      let startX = 0;
+      let startY = 0;
+      let lastX = 0;
+      let lastTime = 0;
+      let velocity = 0;
+      let offset = 0;
+      let clearTimer: number | undefined;
+
+      const getPanel = () => document.querySelector<HTMLElement>('[data-sidebar="sidebar"]');
+      const getBackdrop = () => document.querySelector<HTMLElement>('[data-sidebar="backdrop"]');
+
+      // Drops the inline drag styles so the class-based open/closed styles apply again.
+      const clearInlineStyles = () => {
+        for (const element of [getPanel(), getBackdrop()]) {
+          if (element) {
+            element.style.transition = "";
+            element.style.removeProperty("translate");
+            element.style.opacity = "";
+            element.style.visibility = "";
+          }
+        }
+      };
+
+      // nextOffset is how far the panel is pulled out, from 0 (closed) to width (open).
+      const applyOffset = (nextOffset: number, animate: boolean) => {
+        const panel = getPanel();
+        const backdrop = getBackdrop();
+        if (!panel || !backdrop) {
+          return;
+        }
+        panel.style.transition = animate ? `translate ${SIDEBAR_SETTLE_MS}ms ease-out` : "none";
+        panel.style.setProperty("translate", `${nextOffset - width}px`);
+        panel.style.visibility = "visible";
+        backdrop.style.transition = animate ? `opacity ${SIDEBAR_SETTLE_MS}ms ease-out` : "none";
+        backdrop.style.opacity = String(width > 0 ? nextOffset / width : 0);
+        backdrop.style.visibility = "visible";
+      };
+
+      const settle = (open: boolean) => {
+        applyOffset(open ? width : 0, true);
+        setOpenMobile(open);
+        window.clearTimeout(clearTimer);
+        // After the slide finishes, hand control back to the class-based styles.
+        clearTimer = window.setTimeout(clearInlineStyles, SIDEBAR_SETTLE_MS + 30);
+      };
+
+      const handleTouchStart = (event: TouchEvent) => {
+        const touch = event.touches[0];
+        tracking = event.touches.length === 1 && !!touch && touch.clientX <= SIDEBAR_EDGE_SWIPE_ZONE;
+        if (!tracking || !touch) {
+          tracking = false;
+          return;
+        }
+        width = getPanel()?.getBoundingClientRect().width ?? 0;
+        if (width === 0) {
+          tracking = false;
+          return;
+        }
+        dragging = false;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        lastX = touch.clientX;
+        lastTime = event.timeStamp;
+        velocity = 0;
+        offset = 0;
+      };
+
+      const handleTouchMove = (event: TouchEvent) => {
+        const touch = event.touches[0];
+        if (!tracking || !touch) {
+          return;
+        }
+        if (event.touches.length !== 1) {
+          tracking = false;
+          if (dragging) {
+            settle(false);
+          }
+          return;
+        }
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        if (!dragging) {
+          if (Math.abs(dx) < SIDEBAR_SWIPE_LOCK_PX && Math.abs(dy) < SIDEBAR_SWIPE_LOCK_PX) {
+            return;
+          }
+          // Leftward or mostly vertical movement is not a sidebar drag; leave it to the page.
+          if (dx <= 0 || Math.abs(dy) >= dx / 2) {
+            tracking = false;
+            return;
+          }
+          dragging = true;
+        }
+        // Keep the page from scrolling or navigating while the panel follows the finger.
+        if (event.cancelable) {
+          event.preventDefault();
+        }
+        const dt = event.timeStamp - lastTime;
+        if (dt > 0) {
+          velocity = (touch.clientX - lastX) / dt;
+        }
+        lastX = touch.clientX;
+        lastTime = event.timeStamp;
+        offset = Math.min(Math.max(touch.clientX - startX, 0), width);
+        applyOffset(offset, false);
+      };
+
+      const handleTouchEnd = () => {
+        const wasDragging = dragging;
+        tracking = false;
+        dragging = false;
+        if (!wasDragging) {
+          return;
+        }
+        settle(offset >= width * SIDEBAR_SWIPE_SETTLE_RATIO || velocity >= SIDEBAR_SWIPE_FLING_PX_PER_MS);
+      };
+
+      window.addEventListener("touchstart", handleTouchStart, { passive: true });
+      window.addEventListener("touchmove", handleTouchMove, { passive: false });
+      window.addEventListener("touchend", handleTouchEnd);
+      window.addEventListener("touchcancel", handleTouchEnd);
+      return () => {
+        window.clearTimeout(clearTimer);
+        clearInlineStyles();
+        window.removeEventListener("touchstart", handleTouchStart);
+        window.removeEventListener("touchmove", handleTouchMove);
+        window.removeEventListener("touchend", handleTouchEnd);
+        window.removeEventListener("touchcancel", handleTouchEnd);
+      };
+    }, [isMobile, openMobile, setOpenMobile]);
 
     const state = open ? "expanded" : "collapsed";
 
@@ -200,6 +349,7 @@ const Sidebar = React.forwardRef<
       {/* Mobile backdrop: dims and blurs the page behind the open panel; tapping it closes the panel. */}
       <div
         aria-hidden
+        data-sidebar="backdrop"
         className={cn(
           "fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-[opacity,visibility] duration-200 ease-out md:hidden",
           openMobile ? "opacity-100" : "invisible opacity-0"
