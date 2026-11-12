@@ -120,21 +120,10 @@ export class PlayerBeatLeaderScoresService {
         return { newTracked: 0, fullPageAlreadyTracked: true };
       }
 
-      let newTracked = 0;
-      for (const scoreToken of scores) {
-        if (existing.has(scoreToken.id)) {
-          continue;
-        }
-        const tracked = await BeatLeaderService.trackBeatLeaderScore(
-          scoreToken as BeatLeaderScoreToken,
-          false,
-          false,
-          account.id
-        );
-        if (tracked) {
-          newTracked++;
-        }
-      }
+      const newTracked = await BeatLeaderService.trackBeatLeaderScoresBatch(
+        scores as BeatLeaderScoreToken[],
+        account.id
+      );
 
       return { newTracked, fullPageAlreadyTracked: false };
     }

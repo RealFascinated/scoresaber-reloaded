@@ -82,29 +82,13 @@ export default class BeatLeaderService {
     const pendingBl = BeatLeaderService.beatLeaderScoreFromToken(scoreToken, false, getMisses, playerId);
     const savedReplay = await this.saveReplay(pendingBl, account, isTop50GlobalScore);
 
-    const timestamp = new Date(Number(scoreToken.timeset) * 1000);
-    const insertRow: BeatLeaderScoreInsert = {
-      id: scoreToken.id,
+    const insertRow = BeatLeaderService.insertRowFromToken(
+      scoreToken,
       playerId,
-      songHash: leaderboard.song.hash.toUpperCase(),
-      leaderboardId: leaderboard.id,
-      songDifficulty: difficulty.difficultyName as MapDifficulty,
-      songCharacteristic: difficulty.modeName as MapCharacteristic,
-      songScore: scoreToken.baseScore,
-      pauses: scoreToken.pauses,
-      fcAccuracy: scoreToken.fcAccuracy * 100,
-      fullCombo: scoreToken.fullCombo,
       savedReplay,
-      leftHandAccuracy: scoreToken.accLeft,
-      rightHandAccuracy: scoreToken.accRight,
-      misses: getMisses(scoreToken),
-      missedNotes: scoreToken.missedNotes,
-      bombCuts: scoreToken.bombCuts,
-      wallsHit: scoreToken.wallsHit,
-      badCuts: scoreToken.badCuts,
-      ...improvement,
-      timestamp,
-    };
+      improvement,
+      getMisses
+    );
     const row = await BeatLeaderScoresRepository.insertReturning(insertRow);
     if (!row) {
       // Another request inserted the same score between our check and insert
@@ -128,6 +112,101 @@ export default class BeatLeaderService {
       );
     }
     return beatLeaderScoreRowToType(row);
+  }
+
+  /**
+   * Builds the database row for a BeatLeader score payload.
+   *
+   * @param scoreToken the BeatLeader API score payload
+   * @param playerId the SSR account the score is attributed to
+   * @param savedReplay whether the replay was saved
+   * @param improvement the score improvement columns
+   * @param getMisses computes the misses of a score or improvement
+   */
+  private static insertRowFromToken(
+    scoreToken: BeatLeaderScoreToken,
+    playerId: string,
+    savedReplay: boolean,
+    improvement: ReturnType<typeof BeatLeaderService.improvementRowFromToken>,
+    getMisses: (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) => number
+  ): BeatLeaderScoreInsert {
+    const leaderboard = scoreToken.leaderboard;
+    const difficulty = leaderboard.difficulty;
+    return {
+      id: scoreToken.id,
+      playerId,
+      songHash: leaderboard.song.hash.toUpperCase(),
+      leaderboardId: leaderboard.id,
+      songDifficulty: difficulty.difficultyName as MapDifficulty,
+      songCharacteristic: difficulty.modeName as MapCharacteristic,
+      songScore: scoreToken.baseScore,
+      pauses: scoreToken.pauses,
+      fcAccuracy: scoreToken.fcAccuracy * 100,
+      fullCombo: scoreToken.fullCombo,
+      savedReplay,
+      leftHandAccuracy: scoreToken.accLeft,
+      rightHandAccuracy: scoreToken.accRight,
+      misses: getMisses(scoreToken),
+      missedNotes: scoreToken.missedNotes,
+      bombCuts: scoreToken.bombCuts,
+      wallsHit: scoreToken.wallsHit,
+      badCuts: scoreToken.badCuts,
+      ...improvement,
+      timestamp: new Date(Number(scoreToken.timeset) * 1000),
+    };
+  }
+
+  /**
+   * Tracks a page of BeatLeader scores for a known account with one lookup and one insert,
+   * instead of a lookup, an insert and an account resolution per score. Scores that are already
+   * stored are skipped; replays are still saved one at a time and score stats are saved in the background.
+   *
+   * @param scoreTokens the BeatLeader API score payloads
+   * @param accountId the SSR account the scores are attributed to
+   * @returns how many of the given scores were not stored before the call (0 if the account is not tracked)
+   */
+  public static async trackBeatLeaderScoresBatch(
+    scoreTokens: BeatLeaderScoreToken[],
+    accountId: string
+  ): Promise<number> {
+    const account = await PlayerCoreService.getAccount(accountId);
+    if (account == null || scoreTokens.length === 0) {
+      return 0;
+    }
+
+    const getMisses = (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) =>
+      score.missedNotes + score.badCuts + score.bombCuts;
+
+    const existing = await BeatLeaderScoresRepository.findExistingIds(scoreTokens.map(token => token.id));
+    const seen = new Set<number>();
+    const rows: BeatLeaderScoreInsert[] = [];
+    let missing = 0;
+    for (const scoreToken of scoreTokens) {
+      if (existing.has(scoreToken.id)) {
+        continue;
+      }
+      // A repeated id still counts as tracked, like it did when the stored row was returned for it
+      missing++;
+      if (seen.has(scoreToken.id)) {
+        continue;
+      }
+      seen.add(scoreToken.id);
+
+      const improvement = BeatLeaderService.improvementRowFromToken(scoreToken.scoreImprovement, getMisses);
+      const pendingBl = BeatLeaderService.beatLeaderScoreFromToken(scoreToken, false, getMisses, account.id);
+      const savedReplay = await BeatLeaderService.saveReplay(pendingBl, account, false);
+      rows.push(
+        BeatLeaderService.insertRowFromToken(scoreToken, account.id, savedReplay, improvement, getMisses)
+      );
+    }
+
+    const insertedIds = await BeatLeaderScoresRepository.insertManyReturningIds(rows);
+    for (const scoreId of insertedIds) {
+      void BeatLeaderService.saveScoreStats(scoreId).catch(error => {
+        BeatLeaderService.logger.error(`Failed to save score stats for "${scoreId}": ${error}`);
+      });
+    }
+    return missing;
   }
 
   /**

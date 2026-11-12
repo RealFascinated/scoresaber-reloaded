@@ -148,7 +148,11 @@ async function resetAndSeedScores(a: ScoreSaberLeaderboard, b: ScoreSaberLeaderb
 }
 
 async function snapshot() {
-  const withoutId = <T extends { id?: unknown }>(rows: T[]) => rows.map(({ id: _id, ...rest }) => rest);
+  const withoutId = <T extends object>(rows: T[]): Omit<T, "id">[] =>
+    rows.map(row => {
+      const { id: _id, ...rest } = row as T & { id?: number };
+      return rest;
+    });
   const [scores, realms, history] = await Promise.all([
     db.select().from(scoreSaberScoresTable),
     db.select().from(scoreSaberScoreRealmsTable),

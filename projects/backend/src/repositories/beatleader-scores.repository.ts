@@ -22,6 +22,25 @@ export class BeatLeaderScoresRepository {
     return inserted;
   }
 
+  /**
+   * Inserts many scores at once, skipping ids that already exist.
+   *
+   * @param rows the scores to store
+   * @returns the ids of the scores that were inserted
+   */
+  public static async insertManyReturningIds(rows: BeatLeaderScoreInsert[]): Promise<number[]> {
+    const ids: number[] = [];
+    for (let i = 0; i < rows.length; i += 500) {
+      const inserted = await db
+        .insert(beatLeaderScoresTable)
+        .values(rows.slice(i, i + 500))
+        .onConflictDoNothing()
+        .returning({ id: beatLeaderScoresTable.id });
+      ids.push(...inserted.map(row => row.id));
+    }
+    return ids;
+  }
+
   public static async findLatestBySong(
     playerId: string,
     songHashUpper: string,
