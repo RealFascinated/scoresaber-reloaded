@@ -50,13 +50,16 @@ export class ScoreEventService {
 
     let deleted = 0;
     for (;;) {
+      // Matched by physical row id (ctid): with "id IN (subquery)" Postgres plans a hash join and reads the
+      // whole table for every batch. Events are only ever inserted, never updated, so a row can't move
+      // between the subquery and the delete.
       const result = await db.execute(sql`
         DELETE FROM "scoresaber-score-events"
-        WHERE "id" IN (
-          SELECT "id" FROM "scoresaber-score-events"
+        WHERE ctid = ANY (ARRAY(
+          SELECT ctid FROM "scoresaber-score-events"
           WHERE "timestamp" < ${cutoff}
           LIMIT ${ScoreEventService.PURGE_BATCH_SIZE}
-        )
+        ))
       `);
       const count = result.rowCount ?? 0;
       deleted += count;

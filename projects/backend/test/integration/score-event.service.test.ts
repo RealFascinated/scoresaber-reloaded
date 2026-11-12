@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { sql } from "drizzle-orm";
 import { db } from "../../src/db";
 import { ScoreEventService } from "../../src/service/score-event/score-event.service";
+import { TEST_LEADERBOARD_ID, TEST_PLAYER_ID } from "../helpers/constants";
 import {
   readTrendingScores,
   seedTrendingScenario,
@@ -52,5 +53,40 @@ describe("ScoreEventService.updateTrendingLeaderboards", () => {
     await ScoreEventService.updateTrendingLeaderboards();
     const scores = await readTrendingScores();
     expect(scores.every(entry => entry.score === 0)).toBe(true);
+  });
+});
+
+describe("ScoreEventService.purgeOldEvents", () => {
+  async function insertEvents(daysAgo: number, count: number): Promise<void> {
+    await db.execute(sql`
+      INSERT INTO "scoresaber-score-events" ("playerId", "leaderboardId", "timestamp")
+      SELECT ${TEST_PLAYER_ID}, ${TEST_LEADERBOARD_ID}, now() - (${daysAgo} * interval '1 day') - (g * interval '1 second')
+      FROM generate_series(1, ${count}) AS g
+    `);
+  }
+
+  async function countEvents(): Promise<number> {
+    const result = await db.execute(sql`SELECT count(*)::int AS count FROM "scoresaber-score-events"`);
+    return Number(result.rows[0].count);
+  }
+
+  test("deletes events past the retention window and keeps the rest", async () => {
+    await db.execute(sql`DELETE FROM "scoresaber-score-events"`);
+    await insertEvents(30, 120);
+    await insertEvents(9, 40);
+    await insertEvents(1, 70);
+
+    expect(await ScoreEventService.purgeOldEvents()).toBe(160);
+    expect(await countEvents()).toBe(70);
+
+    const oldest = await db.execute(sql`SELECT min("timestamp") AS oldest FROM "scoresaber-score-events"`);
+    expect(new Date(oldest.rows[0].oldest as string).getTime()).toBeGreaterThan(Date.now() - 2 * 86_400_000);
+  });
+
+  test("deletes nothing when every event is recent", async () => {
+    await db.execute(sql`DELETE FROM "scoresaber-score-events"`);
+    await insertEvents(2, 25);
+    expect(await ScoreEventService.purgeOldEvents()).toBe(0);
+    expect(await countEvents()).toBe(25);
   });
 });
