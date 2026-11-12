@@ -4,6 +4,7 @@ import { isBackendUnavailableError } from "@/common/api-error";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import CountrySelector from "@/components/country-selector";
 import { PageTitle } from "@/components/page-title";
+import { PlayerRankCard } from "@/components/ranking/player-rank-card";
 import { PlayerTableSkeleton } from "@/components/ranking/player-table-skeleton";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
@@ -114,7 +115,26 @@ export default function MedalsData({ initial }: MedalsDataProps) {
 
           {rankingData && (
             <div className="flex flex-col gap-4">
-              <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
+              <div className="flex flex-col gap-2 sm:hidden">
+                {rankingData.items.length === 0 && (
+                  <p className="text-muted-foreground py-10 text-center">No players found</p>
+                )}
+                {rankingData.items.map((player, index) => (
+                  <PlayerRankCard
+                    key={player.id}
+                    player={player}
+                    rank={player.medalsRank}
+                    countryRank={player.medalsCountryRank}
+                    value={formatNumberWithCommas(player.medals)}
+                    valueClassName="text-medals"
+                    valueIcon={<SharedIcons.MedalsIcon className="size-4" />}
+                    deferAvatar={index >= 8}
+                    showFollow={!!me}
+                  />
+                ))}
+              </div>
+
+              <div className="ring-border bg-card overflow-hidden rounded-xl ring-1 max-sm:hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -150,7 +170,8 @@ export default function MedalsData({ initial }: MedalsDataProps) {
                           <MedalsRanking player={player} deferAvatar={index >= 8} />
                         </TableCell>
                         <TableCell className="py-2 text-right">
-                          <span className="text-medals font-semibold tabular-nums">
+                          <span className="text-medals inline-flex items-center gap-1 font-semibold tabular-nums">
+                            <SharedIcons.MedalsIcon className="size-4" />
                             {formatNumberWithCommas(player.medals)}
                           </span>
                         </TableCell>

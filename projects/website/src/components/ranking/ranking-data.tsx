@@ -23,6 +23,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { useQueryState } from "nuqs";
 import FollowButton from "../following/follow-button";
 import { PlayerAvatar } from "../ranking/player-avatar";
+import { PlayerRankCard } from "../ranking/player-rank-card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
@@ -183,7 +184,34 @@ export default function RankingData({ initial }: RankingDataProps) {
 
           {rankingData && (
             <div className="flex flex-col gap-4">
-              <div className="ring-border bg-card overflow-x-auto rounded-xl ring-1">
+              <div className="flex flex-col gap-2 sm:hidden">
+                {rankingData.items.length === 0 && (
+                  <p className="text-muted-foreground py-10 text-center">No players found</p>
+                )}
+                {rankingData.items.map((player, index) => (
+                  <PlayerRankCard
+                    key={player.id}
+                    player={player}
+                    rank={player.rank}
+                    countryRank={player.countryRank}
+                    value={`${formatPp(player.pp)}pp`}
+                    valueClassName="text-pp"
+                    subValue={
+                      showRelativePp && mainPlayer ? (
+                        <span className="text-xs">
+                          <PlayerPpDifference pp={player.pp} mainPp={mainPlayer.pp} />
+                        </span>
+                      ) : undefined
+                    }
+                    inactive={player.inactive}
+                    highlighted={mainPlayer?.id === player.id}
+                    deferAvatar={index >= EAGER_AVATAR_ROWS}
+                    showFollow={!!me}
+                  />
+                ))}
+              </div>
+
+              <div className="ring-border bg-card overflow-x-auto rounded-xl ring-1 max-sm:hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
