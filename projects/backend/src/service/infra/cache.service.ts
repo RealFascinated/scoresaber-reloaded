@@ -288,6 +288,17 @@ export default class CacheService {
   }
 
   /**
+   * Invalidates one in-memory entry of one cache. Prefer this over {@link invalidateMemoryPrefix} when the
+   * exact key is known: the prefix variant walks every key of every memory cache.
+   *
+   * @param cache the cache holding the entry
+   * @param cacheKey the key to invalidate
+   */
+  public static invalidateMemoryKey(cache: CacheId, cacheKey: string): void {
+    this.memoryCaches.get(cache)?.remove(cacheKey);
+  }
+
+  /**
    * Invalidates every in-memory entry whose key starts with the prefix. Use this instead of
    * {@link invalidatePrefix} for caches that only live in memory: it never touches Redis, whereas
    * `invalidatePrefix` walks Redis's whole keyspace with SCAN, which is wasted work (and a lot of it

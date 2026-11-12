@@ -11,7 +11,7 @@ import {
   type ScoreSaberV2PlayerToken,
 } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { chunkArray, isProduction } from "@ssr/common/utils/utils";
-import { miniRankingResponseCacheKeyPrefix, playerCacheKey } from "../../common/cache-keys";
+import { miniRankingResponseCacheKey, playerCacheKey } from "../../common/cache-keys";
 import { logNewTrackedPlayer } from "../../common/embds";
 import { redisClient } from "../../common/redis";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
@@ -21,7 +21,7 @@ import { QueueId, QueueManager } from "../../queue/queue-manager";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
-import CacheService from "../infra/cache.service";
+import CacheService, { CacheId } from "../infra/cache.service";
 import { RealmService } from "../realm/realm.service";
 
 export const accountCreationLock: Record<string, Promise<ScoreSaberAccount | undefined>> = {};
@@ -241,8 +241,14 @@ export class PlayerCoreService {
    * @param playerId the player's id
    */
   public static async invalidatePlayerCaches(playerId: string): Promise<void> {
-    // The mini-ranking response is cached in memory only, so there is nothing in Redis to scan for.
-    CacheService.invalidateMemoryPrefix(miniRankingResponseCacheKeyPrefix(playerId));
+    // The mini-ranking response is cached in memory only, under one key per realm, so remove those keys
+    // directly instead of scanning every key of every memory cache (this runs for every incoming score).
+    for (const realmId of await RealmService.getRealmIds()) {
+      CacheService.invalidateMemoryKey(
+        CacheId.SCORESABER_MINI_RANKING_RESPONSE,
+        miniRankingResponseCacheKey(playerId, realmId)
+      );
+    }
     await PlayerCoreService.invalidatePlayersCaches([playerId]);
   }
 

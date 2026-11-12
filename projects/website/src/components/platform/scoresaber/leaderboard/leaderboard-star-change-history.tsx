@@ -2,7 +2,7 @@
 
 import { buildChartConfig } from "@/common/chart/build-chart-config";
 import { Colors } from "@/common/colors";
-import GenericChart from "@/components/api/chart/generic-chart";
+import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import SimpleLink from "@/components/simple-link";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { formatDate, getDaysAgo, timeAgo } from "@ssr/common/utils/time-utils";
