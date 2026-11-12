@@ -40,7 +40,10 @@ import { registerTestPlayerTokens } from "./scoresaber-api-test-patches";
 const seededTables = [
   "scoresaber-player-history",
   "scoresaber-score-history",
-  "scoresaber-leaderboard-star-change",
+  "scoresaber-reweight-leaderboards",
+  "scoresaber-reweights",
+  "scoresaber-reweight-players",
+  "scoresaber-reweight-scores",
   "scoresaber-score-realms",
   "scoresaber-scores",
   "scoresaber-leaderboard-realms",

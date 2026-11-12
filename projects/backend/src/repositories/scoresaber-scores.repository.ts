@@ -787,6 +787,32 @@ export class ScoreSaberScoresRepository {
   }
 
   /**
+   * Lists the scores worth pp on a leaderboard in a realm, with that pp.
+   *
+   * @param realmId the realm to read pp for
+   * @param leaderboardId the leaderboard to read
+   */
+  public static async selectRealmPpByLeaderboardId(
+    realmId: number,
+    leaderboardId: number
+  ): Promise<{ scoreId: number; playerId: string; leaderboardId: number; pp: number }[]> {
+    return db
+      .select({
+        scoreId: scoreSaberScoreRealmsTable.scoreId,
+        playerId: scoreSaberScoreRealmsTable.playerId,
+        leaderboardId: scoreSaberScoreRealmsTable.leaderboardId,
+        pp: scoreSaberScoreRealmsTable.pp,
+      })
+      .from(scoreSaberScoreRealmsTable)
+      .where(
+        and(
+          eq(scoreSaberScoreRealmsTable.realmId, realmId),
+          eq(scoreSaberScoreRealmsTable.leaderboardId, leaderboardId)
+        )
+      );
+  }
+
+  /**
    * Counts the scores that have pp in a realm, stopping once `limit` have been found. Callers that
    * only display a capped total therefore never scan every ranked score.
    *

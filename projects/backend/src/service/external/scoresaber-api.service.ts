@@ -664,7 +664,9 @@ export class ScoreSaberApiService {
    *
    * @param status the status of the leaderboards to fetch
    * @param logProgress whether to log progress
-   * @returns the leaderboards
+   * @returns the leaderboards, and whether every one of them was fetched. A page that could not be
+   *   fetched ends the walk early, so an incomplete list must never be used to conclude that a
+   *   leaderboard is missing from ScoreSaber.
    */
   public static async getAllLeaderboards(
     status: "ranked" | "qualified",
@@ -673,8 +675,11 @@ export class ScoreSaberApiService {
   ): Promise<{
     leaderboards: ScoreSaberLeaderboard[];
     leaderboardDifficulties: Map<string, ScoreSaberLeaderboardDifficulty[]>;
+    complete: boolean;
   }> {
     const leaderboards: ScoreSaberLeaderboard[] = [];
+    let complete = true;
+    let expectedTotal: number | undefined;
     const leaderboardDifficulties: Map<string, ScoreSaberLeaderboardDifficulty[]> = new Map();
 
     let hasMorePages = true;
@@ -687,10 +692,12 @@ export class ScoreSaberApiService {
         realmId,
       });
       if (!response) {
+        complete = false;
         hasMorePages = false;
         continue;
       }
 
+      expectedTotal ??= response.metadata.totalItems;
       const totalPages = Math.ceil(response.metadata.totalItems / response.metadata.itemsPerPage);
       for (const token of response.data) {
         const leaderboard = getScoreSaberLeaderboardFromV2PageToken(token);
@@ -714,7 +721,11 @@ export class ScoreSaberApiService {
       hasMorePages = page <= totalPages;
     }
 
-    return { leaderboards, leaderboardDifficulties };
+    if (expectedTotal === undefined || leaderboards.length < expectedTotal) {
+      complete = false;
+    }
+
+    return { leaderboards, leaderboardDifficulties, complete };
   }
 
   private static log(message: string): void {

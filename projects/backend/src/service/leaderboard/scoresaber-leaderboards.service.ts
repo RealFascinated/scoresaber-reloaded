@@ -218,6 +218,7 @@ export class ScoreSaberLeaderboardsService {
           previousStars: starChange.previousStars,
           newStars: starChange.newStars,
           timestamp: starChange.timestamp,
+          reweightId: starChange.reweightId ?? undefined,
         }));
       }
     );

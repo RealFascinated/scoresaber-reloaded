@@ -11,6 +11,7 @@ import MetricsController from "../../src/controller/metrics/metrics.controller";
 import PlayerRankingController from "../../src/controller/player/player-ranking.controller";
 import PlayerController from "../../src/controller/player/player.controller";
 import PlaylistController from "../../src/controller/playlist/playlist.controller";
+import ReweightController from "../../src/controller/reweight/reweight.controller";
 import ScoresController from "../../src/controller/scores/scores.controller";
 import UserFollowingController from "../../src/controller/user/user-following.controller";
 import UserPinnedScoresController from "../../src/controller/user/user-pinned-scores.controller";
@@ -105,6 +106,8 @@ export function createTestApp() {
     .use(BeatLeaderController)
     .use(PlayerRankingController)
     .use(MetricsController);
+
+  app.use(ReweightController);
 
   registerWebsocketRoutes(app);
 

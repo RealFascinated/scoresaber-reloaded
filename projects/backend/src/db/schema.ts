@@ -375,7 +375,7 @@ export const scoreSaberScoreRealmsTable = pgTable(
 );
 
 export const scoreSaberLeaderboardStarChangeTable = pgTable(
-  "scoresaber-leaderboard-star-change",
+  "scoresaber-reweight-leaderboards",
   {
     id: serial().primaryKey(),
     leaderboardId: integer().notNull(),
@@ -383,9 +383,76 @@ export const scoreSaberLeaderboardStarChangeTable = pgTable(
     previousStars: doublePrecision().notNull(),
     newStars: doublePrecision().notNull(),
     timestamp: timestamp().notNull(),
+    /** The reweight this change belongs to. Null for changes recorded before reweights existed. */
+    reweightId: integer(),
+    /** Set while the pp changes of this star change still have to be captured. */
+    ppPending: boolean().notNull().default(false),
   },
   table => [
     index("leaderboard_star_change_leaderboard_time_idx").on(table.leaderboardId, table.timestamp.desc()),
+    index("leaderboard_star_change_reweight_idx").on(table.reweightId),
+  ]
+);
+
+/**
+ * A reweight: the star changes of a realm that happened within a few days of each other.
+ */
+export const scoreSaberReweightsTable = pgTable(
+  "scoresaber-reweights",
+  {
+    id: serial().primaryKey(),
+    realmId: integer().notNull().default(1),
+    /** Overrides the generated "Month Year Reweight" name. */
+    name: text(),
+    startedAt: timestamp().notNull(),
+    endedAt: timestamp().notNull(),
+    leaderboardCount: integer().notNull().default(0),
+    playerCount: integer().notNull().default(0),
+    scoreCount: integer().notNull().default(0),
+    /** When the reweight was announced, so merged late changes never announce it again. */
+    notifiedAt: timestamp(),
+  },
+  table => [index("reweights_realm_started_idx").on(table.realmId, table.startedAt.desc())]
+);
+
+/**
+ * The total pp change of a player for a reweight. Only players whose pp changed have a row.
+ */
+export const scoreSaberReweightPlayersTable = pgTable(
+  "scoresaber-reweight-players",
+  {
+    reweightId: integer().notNull(),
+    playerId: varchar({ length: 32 }).notNull(),
+    ppBefore: doublePrecision().notNull(),
+    ppAfter: doublePrecision().notNull(),
+    ppDelta: doublePrecision().notNull(),
+    scoresChanged: integer().notNull(),
+  },
+  table => [
+    primaryKey({ columns: [table.reweightId, table.playerId] }),
+    index("reweight_players_player_idx").on(table.playerId, table.reweightId.desc()),
+    index("reweight_players_delta_idx").on(table.reweightId, table.ppDelta),
+  ]
+);
+
+/**
+ * The pp change of a single score for a reweight. `ppBefore` is the pp stored before the
+ * reweight and `ppAfter` the pp ScoreSaber reports after it.
+ */
+export const scoreSaberReweightScoresTable = pgTable(
+  "scoresaber-reweight-scores",
+  {
+    reweightId: integer().notNull(),
+    scoreId: integer().notNull(),
+    playerId: varchar({ length: 32 }).notNull(),
+    leaderboardId: integer().notNull(),
+    ppBefore: doublePrecision().notNull(),
+    ppAfter: doublePrecision().notNull(),
+  },
+  table => [
+    primaryKey({ columns: [table.reweightId, table.scoreId] }),
+    index("reweight_scores_player_idx").on(table.playerId, table.reweightId),
+    index("reweight_scores_leaderboard_idx").on(table.reweightId, table.leaderboardId),
   ]
 );
 
@@ -812,6 +879,9 @@ export type ScoreSaberLeaderboardRealmRow = typeof scoreSaberLeaderboardRealmsTa
 export type ScoreSaberLeaderboardRow = ScoreSaberLeaderboardBaseRow &
   Pick<ScoreSaberLeaderboardRealmRow, "ranked" | "qualified" | "stars" | "rankedDate" | "qualifiedDate">;
 export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;
+export type ScoreSaberReweightRow = typeof scoreSaberReweightsTable.$inferSelect;
+export type ScoreSaberReweightPlayerRow = typeof scoreSaberReweightPlayersTable.$inferSelect;
+export type ScoreSaberReweightScoreRow = typeof scoreSaberReweightScoresTable.$inferSelect;
 export type BeatLeaderScoreRow = typeof beatLeaderScoresTable.$inferSelect;
 export type BeatLeaderPlayerRow = typeof beatLeaderPlayersTable.$inferSelect;
 export type BeatSaverUploaderRow = typeof beatSaverUploadersTable.$inferSelect;

@@ -29,6 +29,14 @@ import { ScoreSaberScoresPageResponse } from "../schemas/response/score/scoresab
 import { TopScoresPageResponse } from "../schemas/response/score/top-scores";
 import { AppStatisticsResponse } from "../schemas/response/ssr/app-statistics";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
+import type {
+  PlayerReweightScoresPageResponse,
+  PlayerReweightsResponse,
+  ReweightMarkersResponse,
+  ReweightPlayersPageResponse,
+  ReweightResponse,
+  ReweightsPageResponse,
+} from "../schemas/reweight/reweight-responses";
 import type { PlayerScoresQuery } from "../schemas/score/query/player-scores-query";
 import { ScoreSaberMedalScoreSortField } from "../schemas/score/query/sort/scoresaber-medal-scores-sort";
 import type { ScoreSaberScoreSortField } from "../schemas/score/query/sort/scoresaber-scores-sort";
@@ -147,6 +155,56 @@ class SSRApi {
     return await this.request<LeaderboardStarChange[]>(
       `/leaderboard/by-id/${leaderboardId}/star-history`,
       realmParam(realmId)
+    );
+  }
+
+  /**
+   * Fetches a page of reweights, newest first.
+   */
+  async getReweights(page: number = 1) {
+    return await this.request<ReweightsPageResponse>(`/reweights`, { page: page.toString() });
+  }
+
+  /**
+   * Fetches the minimal list of reweights used to annotate charts.
+   */
+  async getReweightMarkers() {
+    return await this.request<ReweightMarkersResponse>(`/reweights/markers`);
+  }
+
+  /**
+   * Fetches a reweight and the leaderboards it re-rated.
+   */
+  async getReweight(reweightId: number) {
+    return await this.request<ReweightResponse>(`/reweights/${reweightId}`);
+  }
+
+  /**
+   * Fetches a page of the players a reweight affected the most.
+   *
+   * @param direction which end of the pp change to list first
+   */
+  async getReweightPlayers(reweightId: number, page: number = 1, direction: "gain" | "loss" = "gain") {
+    return await this.request<ReweightPlayersPageResponse>(`/reweights/${reweightId}/players`, {
+      page: page.toString(),
+      direction,
+    });
+  }
+
+  /**
+   * Fetches the reweights that changed a player's pp.
+   */
+  async getPlayerReweights(playerId: string) {
+    return await this.request<PlayerReweightsResponse>(`/reweights/player/${playerId}`);
+  }
+
+  /**
+   * Fetches a page of the scores of a player that a reweight changed.
+   */
+  async getPlayerReweightScores(playerId: string, reweightId: number, page: number = 1) {
+    return await this.request<PlayerReweightScoresPageResponse>(
+      `/reweights/player/${playerId}/${reweightId}/scores`,
+      { page: page.toString() }
     );
   }
 

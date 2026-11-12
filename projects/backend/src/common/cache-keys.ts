@@ -60,6 +60,8 @@ export function leaderboardStarChangeCacheKey(leaderboardId: number, realmId: nu
   return `scoresaber:leaderboard-star-change:${leaderboardId}${realmKeySuffix(realmId)}`;
 }
 
+export const REWEIGHT_MARKERS_CACHE_KEY = "scoresaber:reweight-markers";
+
 // BeatSaver
 export function beatSaverMapCacheKey(
   hash: string,

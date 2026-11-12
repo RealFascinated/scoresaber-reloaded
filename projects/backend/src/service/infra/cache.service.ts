@@ -17,6 +17,7 @@ export enum CacheId {
   SCORESABER_MINI_RANKING_RESPONSE = "scoresaber_mini_ranking_response",
   SCORESABER_API_RESPONSE = "scoresaber_api_response",
   SCORESABER_LEADERBOARD_STAR_CHANGE = "scoresaber_leaderboard_star_change",
+  SCORESABER_REWEIGHT_MARKERS = "scoresaber_reweight_markers",
   SCORESABER_RANKING_QUEUE_LEADERBOARDS = "scoresaber_ranking_queue_leaderboards",
   SCORESABER_REALMS = "scoresaber_realms",
   SCORESABER_REALM_PP_CURVE = "scoresaber_realm_pp_curve",
@@ -63,6 +64,10 @@ export default class CacheService {
         mode: "MEMORY",
       },
       [CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_REWEIGHT_MARKERS]: {
         ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
         mode: "MEMORY",
       },

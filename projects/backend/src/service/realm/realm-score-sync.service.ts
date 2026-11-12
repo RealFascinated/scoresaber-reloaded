@@ -42,6 +42,26 @@ export class RealmScoreSyncService {
   }
 
   /**
+   * Removes a realm's pp from the scores of leaderboards that are no longer ranked there.
+   *
+   * @param leaderboardIds the unranked leaderboards
+   * @param realmId the realm to clear pp in
+   */
+  public static async clearLeaderboards(leaderboardIds: number[], realmId: number): Promise<void> {
+    for (const batch of chunkArray(leaderboardIds, LEADERBOARD_CONCURRENCY)) {
+      await Promise.all(
+        batch.map(async leaderboardId => {
+          const rows = await ScoreSaberScoresRepository.selectRealmPpByLeaderboardId(realmId, leaderboardId);
+          await ScoreSaberScoresRepository.setRealmPpForExistingScores(
+            realmId,
+            rows.map(row => ({ scoreId: row.scoreId, pp: 0 }))
+          );
+        })
+      );
+    }
+  }
+
+  /**
    * Syncs a realm's pp for several leaderboards, a few at a time.
    *
    * @param leaderboardIds the leaderboards to sync

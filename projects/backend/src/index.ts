@@ -31,6 +31,7 @@ import PlayerRankingController from "./controller/player/player-ranking.controll
 import PlayerController from "./controller/player/player.controller";
 import PlaylistController from "./controller/playlist/playlist.controller";
 import RealmController from "./controller/realm/realm.controller";
+import ReweightController from "./controller/reweight/reweight.controller";
 import ScoresController from "./controller/scores/scores.controller";
 import UserFollowingController from "./controller/user/user-following.controller";
 import UserOverlaysController from "./controller/user/user-overlays.controller";
@@ -131,12 +132,12 @@ export const app = new Elysia()
       protect: true,
       run: async () => {
         try {
-          const updates = await LeaderboardRankedSyncService.refreshRankedLeaderboards();
+          const result = await LeaderboardRankedSyncService.refreshRankedLeaderboards();
           // Isolated so a failed Discord batch notification (paste upload,
           // message or playlist send) is reported but never aborts the rest of
           // the sync.
           try {
-            await LeaderboardRankedSyncNotificationsService.handleRankedBatch(updates);
+            await LeaderboardRankedSyncNotificationsService.handleRankedBatch(result);
           } catch (error) {
             log.error("refresh-leaderboards-cron ranked batch notification failed:", error);
             reportErrorToDiscord("Cron: refresh-leaderboards (ranked batch notification)", error);
@@ -354,6 +355,8 @@ export const app = new Elysia()
 // OpenAPI docs (/swagger) are disabled: @elysiajs/openapi does not support Elysia 2 yet
 new WebsocketManager();
 
+// Registered outside of the chain above: it is at the compiler's type instantiation depth limit.
+app.use(ReweightController);
 app.use(websocketPlugin());
 
 for (const websocket of WebsocketManager.getAll()) {
