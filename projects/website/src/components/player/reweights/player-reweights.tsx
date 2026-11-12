@@ -4,7 +4,7 @@ import { cn } from "@/common/utils";
 import Card from "@/components/card";
 import { formatPpDelta, formatReweightDate, getDeltaClass } from "@/components/reweight/reweight-format";
 import type { PlayerReweight } from "@ssr/common/schemas/reweight/reweight";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
+import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -44,14 +44,9 @@ export default function PlayerReweights({ playerId }: { playerId: string }) {
                 {entry.scoresChanged === 1 ? "score" : "scores"} changed
               </span>
             </div>
-            <div className="flex shrink-0 flex-col items-end tabular-nums">
-              <span className={cn("text-sm font-semibold", getDeltaClass(entry.ppDelta))}>
-                {formatPpDelta(entry.ppDelta)}
-              </span>
-              <span className="text-muted-foreground text-xs">
-                {formatPp(entry.ppBefore)} {"->"} {formatPp(entry.ppAfter)}
-              </span>
-            </div>
+            <span className={cn("shrink-0 text-sm font-semibold tabular-nums", getDeltaClass(entry.ppDelta))}>
+              {formatPpDelta(entry.ppDelta)}
+            </span>
           </button>
         ))}
       </div>

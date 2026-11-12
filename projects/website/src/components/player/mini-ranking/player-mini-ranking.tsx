@@ -97,6 +97,16 @@ function PlayerMiniRanking({
     return (digits + commas + 1) * 6.5;
   })();
 
+  const deltaChars = (() => {
+    const lengths = players
+      .filter(p => p.id !== player.id)
+      .map(p => {
+        const diff = p.pp - player.pp;
+        return `${diff > 0 ? "+" : ""}${formatPp(diff, 2)}`.length;
+      });
+    return lengths.length > 0 ? Math.max(...lengths) : 0;
+  })();
+
   return (
     <Card className="flex w-full flex-col gap-2 p-3 text-xs select-none">
       <div className="flex items-center gap-2">
@@ -153,18 +163,27 @@ function PlayerMiniRanking({
                 >
                   <p
                     className={cn(
-                      "text-pp text-right sm:text-left",
+                      "text-pp text-right tabular-nums sm:text-left",
                       playerRanking.id === player.id ? "font-bold" : ""
                     )}
                   >
                     {formatPp(playerRanking.pp, isMobile ? 1 : 2)}pp
                   </p>
-                  {playerRanking.id !== player.id && !isMobile && (
-                    <p className={ppDifference > 0 ? "text-success" : "text-danger"}>
-                      {ppDifference > 0 ? "+" : ""}
-                      {formatPp(ppDifference, 2)}
-                    </p>
-                  )}
+                  {!isMobile &&
+                    (playerRanking.id !== player.id ? (
+                      <p
+                        className={cn(
+                          "text-left tabular-nums",
+                          ppDifference > 0 ? "text-success" : "text-danger"
+                        )}
+                        style={{ width: `${deltaChars}ch` }}
+                      >
+                        {ppDifference > 0 ? "+" : ""}
+                        {formatPp(ppDifference, 2)}
+                      </p>
+                    ) : (
+                      <span aria-hidden style={{ width: `${deltaChars}ch` }} />
+                    ))}
                 </div>
               </SimpleLink>
             );
