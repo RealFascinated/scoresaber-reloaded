@@ -63,7 +63,11 @@ export default async function ReweightsPage({ searchParams }: Props) {
       <PageTitle title={TITLE} description={DESCRIPTION} />
 
       {!reweights || reweights.items.length === 0 ? (
-        <EmptyState title="No reweights found" description="There are no reweights on this page." />
+        <EmptyState
+          className="ring-border rounded-xl ring-1"
+          title="No reweights found"
+          description="There are no reweights on this page."
+        />
       ) : (
         <>
           <ReweightList reweights={reweights.items} />
