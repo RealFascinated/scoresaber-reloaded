@@ -1,6 +1,6 @@
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
-import { parseSchema } from "@ssr/common/schemas/parse";
+import { checkSchema, parseSchema } from "@ssr/common/schemas/parse";
 import {
   ScoreSaberLeaderboard,
   ScoreSaberLeaderboardSchema,
@@ -36,7 +36,7 @@ export function leaderboardRowToType(
       ? "Qualified"
       : "Unranked";
 
-  return parseSchema(ScoreSaberLeaderboardSchema, {
+  const raw = {
     id: row.id,
     fullName: `${row.songName} ${row.songSubName}`.trim(),
     songHash: row.songHash.toUpperCase(),
@@ -57,5 +57,9 @@ export function leaderboardRowToType(
     plays: row.plays,
     dailyPlays: row.dailyPlays,
     timestamp: row.timestamp instanceof Date ? row.timestamp : new Date(row.timestamp),
-  });
+  };
+
+  // The object above already has the decoded shape (real Dates, nothing to default), so a compiled
+  // check replaces the full parse. Anything unexpected still goes through `parseSchema` and throws.
+  return checkSchema(ScoreSaberLeaderboardSchema, raw) ? raw : parseSchema(ScoreSaberLeaderboardSchema, raw);
 }

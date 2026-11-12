@@ -1,6 +1,7 @@
+import { env } from "./env";
 import type { HMD } from "./hmds";
 import { MapCharacteristic } from "./schemas/map/map-characteristic";
-import { parseSchema } from "./schemas/parse";
+import { checkSchema, parseSchema } from "./schemas/parse";
 import { ScoreSaberLeaderboardDifficulty } from "./schemas/scoresaber/leaderboard/difficulty";
 import {
   ScoreSaberLeaderboard,
@@ -14,6 +15,38 @@ import { ScoreSaberV2LeaderboardPageToken } from "./schemas/scoresaber/tokens/v2
 import { Modifier } from "./score/modifier";
 import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
 import { parseDate } from "./utils/time-utils";
+
+/**
+ * Whether the decoded leaderboard can skip `parseSchema`: the objects built here already have the final
+ * shape (real `Date`s, no extra keys, no defaults to fill), so a compiled check is all that is needed.
+ * Anything that fails the check goes through `parseSchema`, which throws or converts like before.
+ */
+function parseLeaderboard(raw: ScoreSaberLeaderboard): ScoreSaberLeaderboard {
+  return checkSchema(ScoreSaberLeaderboardSchema, raw) ? raw : parseSchema(ScoreSaberLeaderboardSchema, raw);
+}
+
+/**
+ * Same shortcut for scores, applying by hand what `parseSchema` would: the `hmd`, `pp`, `weight` and
+ * `avatar` defaults/null mapping. Anything that fails the check goes through `parseSchema`.
+ */
+function parseScore(raw: ScoreSaberScore): ScoreSaberScore {
+  if (!checkSchema(ScoreSaberScoreSchema, raw)) {
+    return parseSchema(ScoreSaberScoreSchema, raw);
+  }
+  const parsed: ScoreSaberScore = {
+    ...raw,
+    hmd: raw.hmd ?? "Unknown",
+    pp: raw.pp ?? 0,
+    weight: raw.weight ?? 0,
+  };
+  if (raw.playerInfo) {
+    parsed.playerInfo = {
+      ...raw.playerInfo,
+      avatar: raw.playerInfo.avatar ?? `${env.NEXT_PUBLIC_WEBSITE_URL}/assets/unknown.png`,
+    };
+  }
+  return parsed;
+}
 
 /**
  * Parses a {@link ScoreSaberV2LeaderboardPageToken} into a {@link ScoreSaberLeaderboard}.
@@ -39,7 +72,7 @@ export function getScoreSaberLeaderboardFromV2PageToken(
     status = "Ranked";
   }
 
-  return parseSchema(ScoreSaberLeaderboardSchema, {
+  return parseLeaderboard({
     id: token.id,
     songHash: token.map.hash.toUpperCase(),
     songName: token.map.songName,
@@ -85,7 +118,7 @@ export function getScoreSaberLeaderboardFromToken(token: ScoreSaberLeaderboardTo
     status = "Ranked";
   }
 
-  return parseSchema(ScoreSaberLeaderboardSchema, {
+  return parseLeaderboard({
     id: token.id,
     songHash: token.songHash.toUpperCase(),
     songName: token.songName,
@@ -129,7 +162,7 @@ export function getScoreSaberScoreFromToken(
           return modifier;
         });
 
-  return parseSchema(ScoreSaberScoreSchema, {
+  return parseScore({
     playerId: playerId ?? token.leaderboardPlayerInfo.id,
     leaderboardId: leaderboard.id,
     scoreId: token.id,
