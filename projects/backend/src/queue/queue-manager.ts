@@ -40,7 +40,7 @@ export class QueueManager implements EventListener {
    * @param name the name of the queue
    * @returns the queue
    */
-  public static getQueue<T>(name: QueueId): Queue<T> {
+  public static getQueue<T extends QueueItem<unknown>>(name: QueueId): Queue<T> {
     return QueueManager.queues.get(name) as Queue<T>;
   }
 
