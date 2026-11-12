@@ -1,13 +1,9 @@
 "use client";
 
-import { cn } from "@/common/utils";
-import Avatar from "@/components/avatar";
 import CountrySelector from "@/components/country-selector";
-import ScoreSaberScoreDisplay from "@/components/platform/scoresaber/score/scoresaber-score";
 import ScoresListPanel from "@/components/platform/shared/scores-list-panel";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { ScoreModeEnum } from "@/components/score/score-mode-switcher";
-import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
+import ScoreSaberLeaderboardScoreMobile from "../score/leaderboard-score-mobile";
 import { leaderboardScoresSearchParams, type LeaderboardScoresInitialData } from "./leaderboard-scores-query";
 
 function getScoreId(score: ScoreSaberScore) {
@@ -234,27 +231,11 @@ export default function LeaderboardScores({ leaderboard, initialScores }: Leader
             onPageChange={setPage}
             getKey={getScoreId}
             renderItem={playerScore => (
-              <div className={cn(highlight === playerScore.playerId && "bg-primary/10")}>
-                <div className="flex items-center gap-2 px-2 pt-2">
-                  <Avatar
-                    src={playerScore.playerInfo?.avatar ?? ""}
-                    alt={`${playerScore.playerInfo?.name ?? "Unknown"}'s Profile Picture`}
-                    size={20}
-                    className="shrink-0"
-                  />
-                  {playerScore.playerInfo ? (
-                    <SimpleLink
-                      href={`/player/${playerScore.playerId}`}
-                      className="hover:text-primary text-sm font-medium transition-colors"
-                    >
-                      {playerScore.playerInfo.name}
-                    </SimpleLink>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">Unknown Player</p>
-                  )}
-                </div>
-                <ScoreSaberScoreDisplay score={playerScore} leaderboard={leaderboard} />
-              </div>
+              <ScoreSaberLeaderboardScoreMobile
+                score={playerScore}
+                leaderboard={leaderboard}
+                highlightedPlayerId={highlight ?? undefined}
+              />
             )}
           />
         </div>
