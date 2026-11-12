@@ -169,5 +169,10 @@ export function patchScoreSaberApiForTests(): void {
     },
   });
 
+  // Reported as unreachable so the services take their built-in fallbacks (the default realm and
+  // pp curve) right away, instead of waiting for a real request to ScoreSaber to fail.
+  ScoreSaberApiService.lookupRealms = async () => undefined;
+  ScoreSaberApiService.lookupRealmPpCurve = async () => undefined;
+
   scoreSaberApiPatched = true;
 }
