@@ -1,114 +1,84 @@
 "use client";
 
-import { buildChartConfig } from "@/common/chart/build-chart-config";
-import { Colors } from "@/common/colors";
-import GenericChart from "@/components/api/chart/generic-chart-dynamic";
+import { cn } from "@/common/utils";
+import { getDeltaClass } from "@/components/reweight/reweight-format";
 import SimpleLink from "@/components/simple-link";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
-import { formatDate, getDaysAgo, timeAgo } from "@ssr/common/utils/time-utils";
-import { useRouter } from "next/navigation";
+import { formatDate } from "@ssr/common/utils/time-utils";
 import { useMemo } from "react";
+
+function formatStars(stars: number): string {
+  return stars === 0 ? "Unranked" : stars.toFixed(2);
+}
+
+function formatStarDelta(change: LeaderboardStarChange): string {
+  if (change.previousStars === 0 || change.newStars === 0) {
+    return "-";
+  }
+  const delta = change.newStars - change.previousStars;
+  return `${delta > 0 ? "+" : ""}${delta.toFixed(2)}`;
+}
 
 export function LeaderboardStarChangeHistory({
   starChangeHistory,
 }: {
   starChangeHistory: LeaderboardStarChange[];
 }) {
-  const router = useRouter();
-  const orderedPoints = useMemo(
-    () => starChangeHistory.toSorted((a, b) => a.timestamp.getTime() - b.timestamp.getTime()),
+  const changes = useMemo(
+    () => starChangeHistory.toSorted((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
     [starChangeHistory]
   );
 
-  const labels = orderedPoints.map(change => change.timestamp.getTime());
-  const formatRelativeDate = (value: number, withTime: boolean) => {
-    const date = new Date(value);
-    if (getDaysAgo(date) <= 7) {
-      return timeAgo(date, 1);
-    }
-    return formatDate(date, withTime ? "Do MMMM, YYYY HH:mm a" : "DD MMMM YYYY");
-  };
-
-  const chartConfig = buildChartConfig({
-    id: "leaderboard-star-change-history",
-    datasetConfig: [
-      {
-        field: "newStars",
-        title: "Stars",
-        color: Colors.generic.green,
-        axisId: "y",
-        pointRadius: 3,
-        labelFormatter: value => `Stars: ${value.toFixed(2)}`,
-        axisConfig: {
-          display: true,
-          displayName: "Star Rating",
-          position: "left",
-          valueFormatter: value => value.toFixed(2),
-        },
-      },
-    ],
-    seriesByField: {
-      newStars: orderedPoints.map(change => change.newStars),
-    },
-    options: {
-      // Changes that belong to a reweight open it
-      onHover: (event, elements) => {
-        const target = event.native?.target;
-        if (target instanceof HTMLElement) {
-          const reweightId = elements[0] ? orderedPoints[elements[0].index]?.reweightId : undefined;
-          target.style.cursor = reweightId !== undefined ? "pointer" : "";
-        }
-      },
-      onClick: (_event, elements) => {
-        const reweightId = elements[0] ? orderedPoints[elements[0].index]?.reweightId : undefined;
-        if (reweightId !== undefined) {
-          router.push(`/reweights/${reweightId}`);
-        }
-      },
-      scales: {
-        x: {
-          type: "linear",
-          ticks: {
-            callback: tickValue => {
-              const value = typeof tickValue === "number" ? tickValue : Number(tickValue);
-              return formatRelativeDate(value, false);
-            },
-          },
-        },
-      },
-    },
-  });
-  chartConfig.axes.x = {
-    display: true,
-    displayName: "",
-    valueFormatter: (value: number) => formatRelativeDate(value, true),
-  };
-
-  const reweightChanges = orderedPoints.filter(change => change.reweightId !== undefined).reverse();
-
   return (
-    <div className="flex w-full flex-col gap-3">
-      <div className="h-[450px] w-full">
-        <GenericChart config={chartConfig} labels={labels} />
-      </div>
-      {reweightChanges.length > 0 && (
-        <div className="flex flex-col gap-1 text-xs">
-          <p className="text-muted-foreground font-medium">Reweights</p>
-          {reweightChanges.map(change => (
-            <SimpleLink
-              key={change.timestamp.getTime()}
-              href={`/reweights/${change.reweightId}`}
-              className="hover:text-primary flex items-center justify-between gap-2 transition-colors"
-            >
-              <span>
-                {formatDate(change.timestamp, "DD MMMM YYYY")}: {change.previousStars.toFixed(2)} {"->"}{" "}
-                {change.newStars === 0 ? "Unranked" : `${change.newStars.toFixed(2)} stars`}
-              </span>
-              <span className="text-muted-foreground">View reweight</span>
-            </SimpleLink>
-          ))}
-        </div>
-      )}
+    <div className="ring-border bg-card max-h-[70vh] overflow-auto rounded-xl ring-1">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Date</TableHead>
+            <TableHead className="text-right">Before</TableHead>
+            <TableHead className="text-right">After</TableHead>
+            <TableHead className="text-right">Change</TableHead>
+            <TableHead className="w-24 text-right max-sm:hidden">Reweight</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {changes.map(change => {
+            const delta = change.newStars - change.previousStars;
+            return (
+              <TableRow
+                key={change.timestamp.getTime()}
+                className={cn(change.reweightId !== undefined && "relative cursor-pointer")}
+              >
+                <TableCell className="py-2.5 text-sm">
+                  {formatDate(change.timestamp, "DD MMMM YYYY")}
+                </TableCell>
+                <TableCell className="text-muted-foreground py-2.5 text-right text-sm tabular-nums">
+                  {formatStars(change.previousStars)}
+                </TableCell>
+                <TableCell className="py-2.5 text-right text-sm font-medium tabular-nums">
+                  {formatStars(change.newStars)}
+                </TableCell>
+                <TableCell className={cn("py-2.5 text-right text-sm tabular-nums", getDeltaClass(delta))}>
+                  {formatStarDelta(change)}
+                </TableCell>
+                <TableCell className="py-2.5 text-right text-sm max-sm:hidden">
+                  {change.reweightId !== undefined ? (
+                    <SimpleLink
+                      href={`/reweights/${change.reweightId}`}
+                      className="text-primary hover:text-primary/80 transition-colors after:absolute after:inset-0"
+                    >
+                      View
+                    </SimpleLink>
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 }

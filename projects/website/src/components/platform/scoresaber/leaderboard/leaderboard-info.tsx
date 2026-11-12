@@ -4,7 +4,6 @@ import FallbackLink from "@/components/fallback-link";
 import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-button";
 import { OneClickInstallButton } from "@/components/leaderboard/button/one-click-install-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
-import ScoreButton from "@/components/score/button/score-button";
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SharedIcons } from "@/shared-icons";
@@ -26,6 +25,7 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
   const { leaderboard: leaderboardData, beatsaver } = leaderboard;
 
   const showStarHistory = leaderboardData.ranked && starChangeHistory.length > 0;
+  const hasReweights = starChangeHistory.some(change => change.reweightId !== undefined);
 
   return (
     <section className="bg-card ring-border flex w-full flex-col gap-5 rounded-xl p-4 ring-1 sm:p-5">
@@ -39,8 +39,25 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
         />
 
         <div className="flex min-w-0 flex-1 flex-col items-center gap-2.5 text-center sm:items-start sm:text-left">
-          <div className="sm:mx-0">
+          <div className="flex items-center justify-center gap-2 sm:mx-0 sm:justify-start">
             <LeaderboardStatus leaderboard={leaderboardData} />
+            {showStarHistory && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button
+                    className="border-primary/50 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary focus-visible:ring-primary/50 flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-bold uppercase transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-hidden"
+                    title="View star history and reweights"
+                  >
+                    <SharedIcons.LeaderboardStarHistoryIcon className="h-3.5 w-3.5" />
+                    {hasReweights ? "Reweights" : "Star History"}
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-xl">
+                  <DialogTitle>Star History</DialogTitle>
+                  <LeaderboardStarChangeHistory starChangeHistory={starChangeHistory} />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
 
           <FallbackLink
@@ -71,19 +88,6 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
                   <MapPreviewButton leaderboard={leaderboardData} beatSaverMap={beatsaver} />
                   <OneClickInstallButton beatSaverMap={beatsaver} />
                 </>
-              )}
-              {showStarHistory && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <ScoreButton tooltip={<p>View Star History Graph</p>}>
-                      <SharedIcons.LeaderboardStarHistoryIcon className="h-4 w-4" />
-                    </ScoreButton>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-4xl">
-                    <DialogTitle>Star History</DialogTitle>
-                    <LeaderboardStarChangeHistory starChangeHistory={starChangeHistory} />
-                  </DialogContent>
-                </Dialog>
               )}
             </div>
           )}
