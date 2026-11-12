@@ -19,6 +19,7 @@ import { ScoresToolbarLeadingProvider } from "../score/scores-toolbar";
 import { UnderlineTab, UnderlineTabs } from "../ui/underline-tabs";
 import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
+import PlayerReweights from "./reweights/player-reweights";
 
 const platformRepository = PlatformRepository.getInstance();
 const PLATFORM_QUERY = parseAsStringEnum<PlatformType>(Object.values(PlatformType)).withDefault(
@@ -111,6 +112,8 @@ export default function PlayerData({ player: playerProp, initialScores }: Player
               <PlayerViews player={player} key={player.id} />
             </div>
           )}
+
+          <PlayerReweights playerId={player.id} />
 
           <PinnedScores playerId={player.id} />
 

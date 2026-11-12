@@ -1,5 +1,6 @@
 "use client";
 
+import { createChartMarkerPlugin, type ChartMarker } from "@/common/chart/chart-markers";
 import { applyChartTheme, CHART_THEME, chartTitle } from "@/common/chart/chart-theme";
 import { ChartConfig } from "@/common/chart/types";
 import { useIsMobile } from "@/contexts/viewport-context";
@@ -36,7 +37,8 @@ import {
 } from "chart.js";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Chart as ChartComponent } from "react-chartjs-2";
 
 dayjs.extend(utc);
@@ -57,6 +59,8 @@ applyChartTheme();
 type Props = {
   config: ChartConfig;
   labels: Date[] | string[] | number[];
+  /** Vertical lines to draw on the chart. Only valid for charts with a category x axis. */
+  markers?: ChartMarker[];
 };
 
 type LineChartOptions = ChartOptions<"line">;
@@ -65,12 +69,23 @@ type LineScales = NonNullable<LineChartOptions["scales"]>;
 // Datasets are either "bar" or "line" (points are drawn as lines with a point radius)
 type MixedChartMode = "bar" | "line";
 
-const GenericChart = ({ config, labels }: Props) => {
+const GenericChart = ({ config, labels, markers }: Props) => {
   const { id, datasets, axes, options: customOptions } = config;
   const isMobile = useIsMobile();
+  const router = useRouter();
   const chartLegends = useUserPreference("chartLegends");
   const { update: updatePreferences } = useUpdateUserPreferences();
   const { resolve: resolveColor } = useCanvasColors();
+
+  // Chart.js only reads the plugins it was created with, so the markers are handed to the plugin
+  const chartRef = useRef<Chart<MixedChartMode> | null>(null);
+  const [markerController] = useState(createChartMarkerPlugin);
+  const markerColor = resolveColor("var(--primary)");
+  const selectMarker = useCallback((marker: ChartMarker) => router.push(marker.href), [router]);
+  useEffect(() => {
+    markerController.setConfig({ markers: markers ?? [], color: markerColor, onSelect: selectMarker });
+    chartRef.current?.draw();
+  }, [markerController, markers, markerColor, selectMarker]);
 
   const isXAxisLinear = customOptions?.scales?.x?.type === "linear";
   const isNumericLabels = labels.length > 0 && typeof labels[0] === "number";
@@ -397,7 +412,9 @@ const GenericChart = ({ config, labels }: Props) => {
     <div className="relative flex h-full w-full">
       <div className="relative block h-full w-full">
         <ChartComponent<MixedChartMode>
+          ref={chartRef}
           type="line"
+          plugins={[markerController.plugin]}
           className="h-full max-w-full"
           options={chartOptions}
           data={{ labels: formattedLabels, datasets: chartDatasets }}

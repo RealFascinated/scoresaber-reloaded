@@ -25,6 +25,7 @@ import {
   ArrowDown,
   ArrowRight,
   ArrowUp,
+  ArrowUpDown,
   Award,
   BarChart3,
   BombIcon,
@@ -194,6 +195,7 @@ export const SharedIcons = {
   // Maps
   MapsLeaderboardsTabIcon: HeroTrophyIcon,
   MapsRankingQueueTabIcon: HourglassIcon,
+  ReweightsNavIcon: ArrowUpDown,
   MapsExternalLinkIcon: ExternalLinkIcon,
   MapLengthStatIcon: TimerIcon,
   MapBpmStatIcon: MusicIcon,

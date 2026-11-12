@@ -1,6 +1,7 @@
 "use client";
 
 import { buildChartConfig } from "@/common/chart/build-chart-config";
+import type { ChartMarker } from "@/common/chart/chart-markers";
 import { DatasetConfig } from "@/common/chart/types";
 import GenericChart from "@/components/api/chart/generic-chart-dynamic";
 import {
@@ -8,7 +9,9 @@ import {
   ScoreSaberPlayerHistoryEntries,
 } from "@ssr/common/schemas/scoresaber/player/history";
 import { getValueFromHistory } from "@ssr/common/utils/player-utils";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDateMinimal, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 type Props = {
@@ -83,6 +86,33 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     return { labels: labelsResult, histories };
   }, [statisticHistory, datasetConfig, daysAmount]);
 
+  // The marker list is tiny and shared by every chart, so it is fetched once and kept
+  const { data: reweightMarkers } = useQuery({
+    queryKey: ["reweight-markers"],
+    queryFn: () => ssrApi.getReweightMarkers(),
+    staleTime: Infinity,
+    retry: false,
+  });
+
+  const chartMarkers = useMemo<ChartMarker[]>(() => {
+    if (!reweightMarkers || labels.length === 0) {
+      return [];
+    }
+
+    // Snap each reweight to the first label on or after its UTC day, if that day is inside the chart
+    const labelDays = labels.map(label => getMidnightAlignedDate(label).getTime());
+    const markers: ChartMarker[] = [];
+    for (const reweight of reweightMarkers) {
+      const reweightDay = getMidnightAlignedDate(reweight.date).getTime();
+      const index = labelDays.findIndex(day => day >= reweightDay);
+      if (index === -1 || reweightDay < labelDays[0]) {
+        continue;
+      }
+      markers.push({ index, label: reweight.name, href: `/reweights/${reweight.id}` });
+    }
+    return markers;
+  }, [reweightMarkers, labels]);
+
   if (!statisticHistory || Object.keys(statisticHistory).length === 0) {
     return (
       <div className="flex h-[400px] items-center justify-center">
@@ -97,6 +127,7 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
         <GenericChart
           config={buildChartConfig({ id, datasetConfig, seriesByField: histories })}
           labels={labels}
+          markers={chartMarkers}
         />
       </div>
     </div>
