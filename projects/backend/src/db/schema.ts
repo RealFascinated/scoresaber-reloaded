@@ -510,12 +510,6 @@ export const beatLeaderScoresTable = pgTable(
     index("beatleader_scores_saved_replay_true_idx")
       .on(table.savedReplay)
       .where(sql`${table.savedReplay} = true`),
-    index("beatleader_scores_player_map_leaderboard_time_idx").on(
-      table.playerId,
-      table.songHash,
-      table.leaderboardId,
-      sql`${table.timestamp} DESC NULLS LAST`
-    ),
   ]
 );
 

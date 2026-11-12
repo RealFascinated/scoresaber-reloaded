@@ -1,0 +1,1 @@
+DROP INDEX "beatleader_scores_player_map_leaderboard_time_idx";
