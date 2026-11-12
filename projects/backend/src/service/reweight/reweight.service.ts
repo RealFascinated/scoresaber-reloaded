@@ -2,14 +2,9 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination } from "@ssr/common/pagination";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
+import type { PlayerReweight, Reweight, ReweightMarker } from "@ssr/common/schemas/reweight/reweight";
 import type {
-  PlayerReweight,
-  Reweight,
-  ReweightMarker,
-  ReweightScoreChange,
-} from "@ssr/common/schemas/reweight/reweight";
-import type {
-  PlayerReweightScoresPageResponse,
+  PlayerReweightScoresResponse,
   ReweightPlayersPageResponse,
   ReweightResponse,
   ReweightsPageResponse,
@@ -35,7 +30,6 @@ import {
 
 const REWEIGHTS_PER_PAGE = 12;
 const REWEIGHT_PLAYERS_PER_PAGE = 25;
-const PLAYER_REWEIGHT_SCORES_PER_PAGE = 20;
 const LEADERBOARD_CONCURRENCY = 5;
 const PLAYER_CHUNK_SIZE = 500;
 const UNRANKED_CHUNK_SIZE = 5_000;
@@ -400,44 +394,32 @@ export class ReweightService {
   }
 
   /**
-   * Gets a page of the scores of a player that a reweight changed.
+   * Gets every score of a player that a reweight changed, the biggest pp gain first.
    *
    * @throws NotFoundError if the player has no changed scores for the reweight
    */
   public static async getPlayerReweightScores(
     playerId: string,
-    reweightId: number,
-    page: number
-  ): Promise<PlayerReweightScoresPageResponse> {
-    const total = await ScoreSaberReweightPpRepository.countPlayerScoreChanges(playerId, reweightId);
-    if (total === 0) {
+    reweightId: number
+  ): Promise<PlayerReweightScoresResponse> {
+    const rows = await ScoreSaberReweightPpRepository.listPlayerScoreChanges(playerId, reweightId);
+    if (rows.length === 0) {
       throw new NotFoundError(`No score changes found for "${playerId}" in reweight "${reweightId}"`);
     }
-    return new Pagination<ReweightScoreChange>()
-      .setItemsPerPage(PLAYER_REWEIGHT_SCORES_PER_PAGE)
-      .setTotalItems(total)
-      .getPage(page, async ({ start }) => {
-        const rows = await ScoreSaberReweightPpRepository.listPlayerScoreChanges(
-          playerId,
-          reweightId,
-          PLAYER_REWEIGHT_SCORES_PER_PAGE,
-          start
-        );
-        return rows.map(row => ({
-          leaderboardId: row.leaderboardId,
-          songHash: row.songHash,
-          songName: row.songName,
-          songSubName: row.songSubName,
-          songAuthorName: row.songAuthorName,
-          levelAuthorName: row.levelAuthorName,
-          difficulty: row.difficulty,
-          characteristic: row.characteristic,
-          scoreId: row.scoreId,
-          ppBefore: row.ppBefore,
-          ppAfter: row.ppAfter,
-          ppDelta: row.ppAfter - row.ppBefore,
-        }));
-      });
+    return rows.map(row => ({
+      leaderboardId: row.leaderboardId,
+      songHash: row.songHash,
+      songName: row.songName,
+      songSubName: row.songSubName,
+      songAuthorName: row.songAuthorName,
+      levelAuthorName: row.levelAuthorName,
+      difficulty: row.difficulty,
+      characteristic: row.characteristic,
+      scoreId: row.scoreId,
+      ppBefore: row.ppBefore,
+      ppAfter: row.ppAfter,
+      ppDelta: row.ppAfter - row.ppBefore,
+    }));
   }
 
   private static async getRow(reweightId: number): Promise<ScoreSaberReweightRow> {

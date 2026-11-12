@@ -30,7 +30,7 @@ import { TopScoresPageResponse } from "../schemas/response/score/top-scores";
 import { AppStatisticsResponse } from "../schemas/response/ssr/app-statistics";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
 import type {
-  PlayerReweightScoresPageResponse,
+  PlayerReweightScoresResponse,
   PlayerReweightsResponse,
   ReweightMarkersResponse,
   ReweightPlayersPageResponse,
@@ -199,12 +199,11 @@ class SSRApi {
   }
 
   /**
-   * Fetches a page of the scores of a player that a reweight changed.
+   * Fetches every score of a player that a reweight changed, the biggest pp gain first.
    */
-  async getPlayerReweightScores(playerId: string, reweightId: number, page: number = 1) {
-    return await this.request<PlayerReweightScoresPageResponse>(
-      `/reweights/player/${playerId}/${reweightId}/scores`,
-      { page: page.toString() }
+  async getPlayerReweightScores(playerId: string, reweightId: number) {
+    return await this.request<PlayerReweightScoresResponse>(
+      `/reweights/player/${playerId}/${reweightId}/scores`
     );
   }
 

@@ -28,14 +28,11 @@ export const ReweightMarkersResponseSchema = Type.Array(ReweightMarkerSchema);
 
 export const PlayerReweightsResponseSchema = Type.Array(PlayerReweightSchema);
 
-export const PlayerReweightScoresPageResponseSchema = Type.Object({
-  items: Type.Array(ReweightScoreChangeSchema),
-  metadata: PaginationMetadataSchema,
-});
+export const PlayerReweightScoresResponseSchema = Type.Array(ReweightScoreChangeSchema);
 
 export type ReweightsPageResponse = StaticDecode<typeof ReweightsPageResponseSchema>;
 export type ReweightResponse = StaticDecode<typeof ReweightResponseSchema>;
 export type ReweightPlayersPageResponse = StaticDecode<typeof ReweightPlayersPageResponseSchema>;
 export type ReweightMarkersResponse = StaticDecode<typeof ReweightMarkersResponseSchema>;
 export type PlayerReweightsResponse = StaticDecode<typeof PlayerReweightsResponseSchema>;
-export type PlayerReweightScoresPageResponse = StaticDecode<typeof PlayerReweightScoresPageResponseSchema>;
+export type PlayerReweightScoresResponse = StaticDecode<typeof PlayerReweightScoresResponseSchema>;

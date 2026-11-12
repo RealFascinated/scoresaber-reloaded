@@ -1,7 +1,7 @@
 import { env } from "@ssr/common/env";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type {
-  PlayerReweightScoresPageResponse,
+  PlayerReweightScoresResponse,
   PlayerReweightsResponse,
   ReweightMarkersResponse,
   ReweightPlayersPageResponse,
@@ -1045,9 +1045,9 @@ describe("Reweight API integration", () => {
       const response = await request(app, `/reweights/player/${TEST_PLAYER_ID}/${reweightId}/scores`);
       expectStatus(response, 200);
 
-      const body = (await response.json()) as PlayerReweightScoresPageResponse;
-      expect(body.items).toHaveLength(1);
-      expect(body.items[0]).toMatchObject({
+      const body = (await response.json()) as PlayerReweightScoresResponse;
+      expect(body).toHaveLength(1);
+      expect(body[0]).toMatchObject({
         scoreId: TEST_SCORE_ID,
         leaderboardId: TEST_LEADERBOARD_ID,
         songName: "Test Song",
@@ -1055,7 +1055,35 @@ describe("Reweight API integration", () => {
         ppAfter: 300,
         ppDelta: 50,
       });
-      expectPaginationMetadata(body.metadata, 1);
+    });
+
+    test("returns every changed score, the biggest pp gain first", async () => {
+      const reweightId = await seedCapturedReweight();
+      await db.insert(scoreSaberReweightScoresTable).values([
+        {
+          reweightId,
+          scoreId: 9001,
+          playerId: TEST_PLAYER_ID,
+          leaderboardId: TEST_LEADERBOARD_ID,
+          ppBefore: 200,
+          ppAfter: 150,
+        },
+        {
+          reweightId,
+          scoreId: 9002,
+          playerId: TEST_PLAYER_ID,
+          leaderboardId: TEST_LEADERBOARD_ID,
+          ppBefore: 100,
+          ppAfter: 180,
+        },
+      ]);
+
+      const body = (await (
+        await request(app, `/reweights/player/${TEST_PLAYER_ID}/${reweightId}/scores`)
+      ).json()) as PlayerReweightScoresResponse;
+
+      // +80, +50 (the seeded score), -50: gains first, the biggest loss last.
+      expect(body.map(score => score.scoreId)).toEqual([9002, TEST_SCORE_ID, 9001]);
     });
 
     test("returns 404 when the player has no changed scores in the reweight", async () => {

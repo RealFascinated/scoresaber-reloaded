@@ -1,5 +1,5 @@
 import {
-  PlayerReweightScoresPageResponseSchema,
+  PlayerReweightScoresResponseSchema,
   PlayerReweightsResponseSchema,
   ReweightMarkersResponseSchema,
   ReweightPlayersPageResponseSchema,
@@ -65,14 +65,13 @@ export default function reweightController(app: Elysia) {
         {
           tags: ["Reweights"],
           params: PlayerReweightScoresParamsSchema,
-          query: ReweightPageQuerySchema,
-          response: PlayerReweightScoresPageResponseSchema,
+          response: PlayerReweightScoresResponseSchema,
           detail: {
-            description: "Fetch the scores of a player that a reweight changed",
+            description: "Fetch every score of a player that a reweight changed, the biggest pp gain first",
           },
         },
-        async ({ params: { playerId, reweightId }, query: { page = 1 } }) => {
-          return await ReweightService.getPlayerReweightScores(playerId, reweightId, page);
+        async ({ params: { playerId, reweightId } }) => {
+          return await ReweightService.getPlayerReweightScores(playerId, reweightId);
         }
       )
       .get(

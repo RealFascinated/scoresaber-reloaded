@@ -201,29 +201,14 @@ export class ScoreSaberReweightPpRepository {
       .orderBy(desc(scoreSaberReweightsTable.startedAt), desc(scoreSaberReweightsTable.id));
   }
 
-  public static async countPlayerScoreChanges(playerId: string, reweightId: number): Promise<number> {
-    const [row] = await db
-      .select({ value: count() })
-      .from(scoreSaberReweightScoresTable)
-      .where(
-        and(
-          eq(scoreSaberReweightScoresTable.playerId, playerId),
-          eq(scoreSaberReweightScoresTable.reweightId, reweightId)
-        )
-      );
-    return row?.value ?? 0;
-  }
-
   /**
-   * Lists a page of a player's score changes for a reweight, the biggest absolute change first.
+   * Lists every score change of a player for a reweight, the biggest pp gain first.
    */
   public static async listPlayerScoreChanges(
     playerId: string,
-    reweightId: number,
-    limit: number,
-    offset: number
+    reweightId: number
   ): Promise<ReweightScoreWithLeaderboardRow[]> {
-    const delta = sql`abs(${scoreSaberReweightScoresTable.ppAfter} - ${scoreSaberReweightScoresTable.ppBefore})`;
+    const delta = sql`${scoreSaberReweightScoresTable.ppAfter} - ${scoreSaberReweightScoresTable.ppBefore}`;
     return db
       .select({
         ...reweightScoreColumns,
@@ -246,9 +231,7 @@ export class ScoreSaberReweightPpRepository {
           eq(scoreSaberReweightScoresTable.reweightId, reweightId)
         )
       )
-      .orderBy(desc(delta), asc(scoreSaberReweightScoresTable.scoreId))
-      .limit(limit)
-      .offset(offset);
+      .orderBy(desc(delta), asc(scoreSaberReweightScoresTable.scoreId));
   }
 
   /**
