@@ -11,6 +11,15 @@ export class ScoreEventService {
   private static readonly RETENTION_DAYS = 8;
   private static readonly PURGE_BATCH_SIZE = 50_000;
 
+  /** How quickly a player's contribution fades; at 48h an old play counts half as much. */
+  private static readonly TRENDING_HALF_LIFE_HOURS = 48;
+  /** The "now" window compared against the rest of the week to detect growth. */
+  private static readonly TRENDING_RECENT_DAYS = 2;
+  /** Added to both daily rates so tiny maps can't produce huge ratios. */
+  private static readonly TRENDING_SMOOTHING = 5;
+  private static readonly TRENDING_MIN_MOMENTUM = 0.5;
+  private static readonly TRENDING_MAX_MOMENTUM = 3;
+
   /**
    * Inserts a score event.
    *
@@ -66,30 +75,68 @@ export class ScoreEventService {
 
   /**
    * Updates the trending leaderboards.
-   * This sorts the leaderboards by the amount of unique plays in the
-   * last week and gives them a score based on the amount of plays.
+   *
+   * The score is `100 * ln(1 + recencyWeightedPlayers) * momentum`:
+   * - recencyWeightedPlayers: each unique player in the last 7 days counts once, weighted by how
+   *   recently they last played (half-life of {@link TRENDING_HALF_LIFE_HOURS} hours), so a map
+   *   that peaked days ago fades out. Repeat plays by one player never add extra weight.
+   * - ln(): damps raw popularity so evergreen maps don't permanently dominate.
+   * - momentum: smoothed ratio of the last {@link TRENDING_RECENT_DAYS} days' daily players against
+   *   the daily players of the rest of the week, clamped. The smoothing constant acts as a volume
+   *   floor so a map going from 1 to 3 players doesn't count as a breakout.
    */
   public static async updateTrendingLeaderboards(): Promise<void> {
     const before = performance.now();
-    const oneWeekAgo = new Date(Date.now() - TimeUnit.toMillis(TimeUnit.Week, 1));
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - TimeUnit.toMillis(TimeUnit.Week, 1));
+    const recentCutoff = new Date(
+      now.getTime() - TimeUnit.toMillis(TimeUnit.Day, ScoreEventService.TRENDING_RECENT_DAYS)
+    );
+    const halfLifeSeconds = ScoreEventService.TRENDING_HALF_LIFE_HOURS * 3600;
+    const baselineDays = 7 - ScoreEventService.TRENDING_RECENT_DAYS;
 
     await db.execute(sql`
-      WITH agg AS (
+      WITH per_player AS (
         SELECT
           events."leaderboardId" AS leaderboard_id,
-          count(DISTINCT events."playerId")::int AS unique_players_7d,
-          count(*)::int AS plays_7d
+          events."playerId" AS player_id,
+          max(events."timestamp") AS last_played,
+          bool_or(events."timestamp" >= ${recentCutoff}) AS in_recent,
+          bool_or(events."timestamp" < ${recentCutoff}) AS in_baseline
         FROM "scoresaber-score-events" AS events
         WHERE events."timestamp" >= ${oneWeekAgo}
-        GROUP BY events."leaderboardId"
+        GROUP BY events."leaderboardId", events."playerId"
+      ),
+      agg AS (
+        SELECT
+          leaderboard_id,
+          sum(power(0.5, extract(epoch FROM (${now}::timestamp - last_played)) / ${halfLifeSeconds}::double precision)) AS weighted_players,
+          count(*) FILTER (WHERE in_recent) AS recent_players,
+          count(*) FILTER (WHERE in_baseline) AS baseline_players
+        FROM per_player
+        GROUP BY leaderboard_id
+      ),
+      scored AS (
+        SELECT
+          leaderboard_id,
+          (
+            100 * ln(1 + weighted_players)
+            * least(
+                ${ScoreEventService.TRENDING_MAX_MOMENTUM}::double precision,
+                greatest(
+                  ${ScoreEventService.TRENDING_MIN_MOMENTUM}::double precision,
+                  (recent_players / ${ScoreEventService.TRENDING_RECENT_DAYS}::double precision + ${ScoreEventService.TRENDING_SMOOTHING}::double precision)
+                    / (baseline_players / ${baselineDays}::double precision + ${ScoreEventService.TRENDING_SMOOTHING}::double precision)
+                )
+              )
+          )::double precision AS score
+        FROM agg
       )
       UPDATE "scoresaber-leaderboards" AS leaderboards
-      SET "trendingScore" =
-        (agg.unique_players_7d * 1000 + agg.plays_7d)::double precision
-      FROM agg
-      WHERE leaderboards."id" = agg.leaderboard_id
-        AND leaderboards."trendingScore" IS DISTINCT FROM
-          (agg.unique_players_7d * 1000 + agg.plays_7d)::double precision
+      SET "trendingScore" = scored.score
+      FROM scored
+      WHERE leaderboards."id" = scored.leaderboard_id
+        AND leaderboards."trendingScore" IS DISTINCT FROM scored.score
     `);
 
     await db.execute(sql`
