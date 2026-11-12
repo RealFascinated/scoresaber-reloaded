@@ -113,7 +113,10 @@ export default function PlayerData({ player: playerProp, initialScores }: Player
             </div>
           )}
 
-          <PlayerReweights playerId={player.id} />
+          {/* Shown in the sidebar below the mini rankings when that is visible */}
+          <div className={showRankings ? "@6xl:hidden" : undefined}>
+            <PlayerReweights playerId={player.id} />
+          </div>
 
           <PinnedScores playerId={player.id} />
 
@@ -122,7 +125,9 @@ export default function PlayerData({ player: playerProp, initialScores }: Player
 
         {showRankings && (
           <aside className="hidden w-full shrink-0 @6xl:block @6xl:w-80 @7xl:w-96">
-            <PlayerMiniRankings player={player} />
+            <PlayerMiniRankings player={player}>
+              <PlayerReweights playerId={player.id} />
+            </PlayerMiniRankings>
           </aside>
         )}
       </div>

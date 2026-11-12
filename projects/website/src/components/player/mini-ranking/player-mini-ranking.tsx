@@ -10,7 +10,7 @@ import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 import Card from "../../card";
 import CountryFlag from "../../ui/country-flag";
 import { miniRankingQueryKey } from "./mini-ranking-query";
@@ -32,7 +32,14 @@ const miniVariants: Variants = {
   },
 };
 
-export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlayer }) {
+export default function PlayerMiniRankings({
+  player,
+  children,
+}: {
+  player: ScoreSaberPlayer;
+  /** Extra content shown below the rankings, sticking with them. */
+  children?: ReactNode;
+}) {
   const {
     data: miniRankingResponse,
     isLoading,
@@ -58,6 +65,7 @@ export default function PlayerMiniRankings({ player }: { player: ScoreSaberPlaye
         isLoading={isLoading}
         isError={isError}
       />
+      {children}
     </div>
   );
 }
