@@ -24,7 +24,6 @@ import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-difficulty";
-import { processInBatches } from "@ssr/common/utils/batch-utils";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { SQL, asc, desc, eq, gt, gte, inArray, isNotNull, sql, type AnyColumn } from "drizzle-orm";
@@ -47,9 +46,6 @@ import { PlayerCoreService } from "./player-core.service";
 /**
  * Describes how to paginate and enrich a specific score table.
  */
-/** Scores of one API page tracked concurrently; an unbounded page fan-out exhausts the shared DB pool. */
-const SCORE_TRACKING_BATCH_SIZE = 20;
-
 type ScoreTableConfig<TRow, TScore, TContext = undefined> = {
   buildConditions: (playerIds: string[], leaderboardIds: number[] | null, hmd?: HMD) => SQL[];
   countRows: (conditions: SQL[], realmId: number) => Promise<number>;
@@ -178,21 +174,12 @@ export class PlayerScoresService {
         ScoreSaberScoreHistoryRepository.findExistingScoreIds(parsedScores.map(score => score.score.scoreId)),
       ]);
 
-      await processInBatches(parsedScores, SCORE_TRACKING_BATCH_SIZE, async ({ score, leaderboard }) => {
-        if (existingScores.has(score.scoreId) || existingHistory.has(score.scoreId)) {
-          return;
-        }
-
-        const trackingResult = await ScoreCoreService.trackScoreSaberScore(
-          score,
-          leaderboard,
-          false,
-          undefined,
-          {
-            skipDuplicateCheck: true,
-          }
-        );
-        if (trackingResult.tracked) {
+      const missingScores = parsedScores.filter(
+        ({ score }) => !existingScores.has(score.scoreId) && !existingHistory.has(score.scoreId)
+      );
+      const trackingResults = await ScoreCoreService.trackScoreSaberScoresBatch(missingScores);
+      missingScores.forEach(({ leaderboard }, index) => {
+        if (trackingResults[index].tracked) {
           result.missingScores++;
           if (leaderboard.ranked) {
             rankedLeaderboardsToRefresh.set(leaderboard.id, leaderboard);
@@ -240,9 +227,7 @@ export class PlayerScoresService {
       currentPage++;
     }
 
-    for (const leaderboard of rankedLeaderboardsToRefresh.values()) {
-      await PlayerMedalsService.refreshLeaderboardMedals(leaderboard);
-    }
+    await PlayerMedalsService.refreshLeaderboardsMedals([...rankedLeaderboardsToRefresh.values()]);
 
     result.totalScores = await ScoreSaberScoresRepository.countByPlayerId(playerId);
 
@@ -503,8 +488,8 @@ export class PlayerScoresService {
         return conditions;
       },
 
-      async countRows(conditions, realmId) {
-        return ScoreSaberScoresRepository.countByConditions(conditions, realmId);
+      async countRows(conditions) {
+        return ScoreSaberScoresRepository.countByConditions(conditions);
       },
 
       resolveOrderColumn(sort) {
@@ -589,8 +574,8 @@ export class PlayerScoresService {
           return conditions;
         },
 
-        async countRows(conditions, realmId) {
-          return ScoreSaberScoresRepository.countByConditions(conditions, realmId);
+        async countRows(conditions) {
+          return ScoreSaberScoresRepository.countByConditions(conditions);
         },
 
         resolveOrderColumn(sort) {

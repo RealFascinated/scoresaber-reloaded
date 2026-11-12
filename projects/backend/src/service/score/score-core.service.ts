@@ -13,6 +13,7 @@ import type { ScoreSaberAccountRow, ScoreSaberScoreRow } from "../../db/schema";
 import { scoreSaberAccountsTable } from "../../db/schema";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import {
+  playerLeaderboardKey,
   ScoreSaberScoresRepository,
   type ScoreSaberScoreInsertRow,
 } from "../../repositories/scoresaber-scores.repository";
@@ -112,7 +113,7 @@ export class ScoreCoreService {
       }
     }
 
-    await ScoreCoreService.trackRealmPp(score);
+    await ScoreCoreService.trackRealmPp([score]);
 
     if (newScore) {
       await PlayerCoreService.updatePlayer(playerId, { hmd: score.hmd });
@@ -141,33 +142,150 @@ export class ScoreCoreService {
   }
 
   /**
+   * Tracks many ScoreSaber scores of one ingest page (not live scores: `newScore` is false and there is no
+   * BeatLeader score) and returns the same results as calling {@link trackScoreSaberScore} on each of them.
+   *
+   * The common case, a score that isn't stored yet for a player with no current score on that leaderboard, is
+   * stored with a few queries for the whole page. Everything else (the player already has a score there, or
+   * the page repeats a score id or player/leaderboard pair) goes through {@link trackScoreSaberScore} one
+   * by one, in page order, so replace-PB and history behaviour is unchanged.
+   *
+   * The scores' players must already exist.
+   *
+   * @param entries the scores and their leaderboards
+   * @returns one result per entry, in the same order
+   */
+  public static async trackScoreSaberScoresBatch(
+    entries: { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }[]
+  ): Promise<Awaited<ReturnType<typeof ScoreCoreService.trackScoreSaberScore>>[]> {
+    type TrackResult = Awaited<ReturnType<typeof ScoreCoreService.trackScoreSaberScore>>;
+    const results: TrackResult[] = new Array(entries.length);
+    if (entries.length === 0) {
+      return results;
+    }
+
+    const [existingScoreIds, occupiedSlots] = await Promise.all([
+      ScoreSaberScoresRepository.findExistingScoreIds(entries.map(entry => entry.score.scoreId)),
+      ScoreSaberScoresRepository.findExistingPlayerLeaderboardKeys(
+        entries.map(entry => ({ playerId: entry.score.playerId, leaderboardId: entry.leaderboard.id }))
+      ),
+    ]);
+
+    // A score id or player/leaderboard slot that appears more than once in the page can't be decided
+    // from the state read above, so every occurrence is handled one at a time.
+    const scoreIdCounts = new Map<number, number>();
+    const slotCounts = new Map<string, number>();
+    for (const { score, leaderboard } of entries) {
+      scoreIdCounts.set(score.scoreId, (scoreIdCounts.get(score.scoreId) ?? 0) + 1);
+      const slot = playerLeaderboardKey(score.playerId, leaderboard.id);
+      slotCounts.set(slot, (slotCounts.get(slot) ?? 0) + 1);
+    }
+
+    const fresh: number[] = [];
+    const fallback: number[] = [];
+    entries.forEach(({ score, leaderboard }, index) => {
+      const slot = playerLeaderboardKey(score.playerId, leaderboard.id);
+      if (existingScoreIds.has(score.scoreId)) {
+        // Already stored: a duplicate, same as the check at the start of trackScoreSaberScore
+        results[index] = { score: undefined, hasPreviousScore: false, tracked: false };
+      } else if (
+        occupiedSlots.has(slot) ||
+        (scoreIdCounts.get(score.scoreId) ?? 0) > 1 ||
+        (slotCounts.get(slot) ?? 0) > 1
+      ) {
+        fallback.push(index);
+      } else {
+        fresh.push(index);
+      }
+    });
+
+    const insertedScores: ScoreSaberScore[] = [];
+    if (fresh.length > 0) {
+      const rows = fresh.map(index => ScoreCoreService.toInsertRow(entries[index].score));
+      const insertedIds = await ScoreSaberScoresRepository.insertScores(rows, DEFAULT_REALM_ID);
+
+      await Promise.all(
+        fresh.map(async (entryIndex, freshIndex) => {
+          const { score, leaderboard } = entries[entryIndex];
+          if (insertedIds.has(score.scoreId)) {
+            insertedScores.push(score);
+            results[entryIndex] = { score, hasPreviousScore: false, tracked: true };
+            return;
+          }
+          // Either a concurrent writer already recorded this scoreId (fine), or it took the
+          // (playerId, leaderboardId) slot with a different score: keep this play in history so it
+          // is not lost entirely.
+          if (!(await ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId))) {
+            await ScoreSaberScoreHistoryRepository.insertAttempt(
+              rows[freshIndex],
+              score.playerId,
+              leaderboard.id
+            );
+          }
+          results[entryIndex] = { score: undefined, hasPreviousScore: false, tracked: false };
+        })
+      );
+
+      await ScoreCoreService.trackRealmPp(insertedScores);
+    }
+
+    for (const index of fallback) {
+      const { score, leaderboard } = entries[index];
+      results[index] = await ScoreCoreService.trackScoreSaberScore(score, leaderboard, false);
+    }
+
+    return results;
+  }
+
+  /**
    * Stores the score's pp in every non-default realm where its leaderboard is ranked. ScoreSaber's
    * websocket and v1 APIs only carry the default realm's pp, so the other realms are computed from
    * the realm's stars and pp curve (and later corrected by the realm score sync).
    *
    * @param score the score that was just stored
    */
-  private static async trackRealmPp(score: ScoreSaberScore): Promise<void> {
+  private static async trackRealmPp(scores: ScoreSaberScore[]): Promise<void> {
+    if (scores.length === 0) {
+      return;
+    }
+
     try {
       const realmIds = (await RealmService.getRealmIds()).filter(id => id !== DEFAULT_REALM_ID);
+      const leaderboardIds = [...new Set(scores.map(score => score.leaderboardId))];
       await Promise.all(
         realmIds.map(async realmId => {
-          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(
-            score.leaderboardId,
-            realmId
+          // The realm's leaderboards and curve are the same for every score of the same leaderboard, so
+          // they are loaded once per realm instead of once per score
+          const leaderboards = new Map(
+            await Promise.all(
+              leaderboardIds.map(
+                async leaderboardId =>
+                  [
+                    leaderboardId,
+                    await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId),
+                  ] as const
+              )
+            )
           );
-          if (!leaderboard.ranked) {
+          const rankedScores = scores.filter(score => leaderboards.get(score.leaderboardId)?.ranked);
+          if (rankedScores.length === 0) {
             return;
           }
           const curve = await RealmService.getCalculationCurve(realmId);
-          const pp = ScoreSaberCurve.getPp(leaderboard.stars, score.accuracy, curve);
-          await ScoreSaberScoresRepository.setRealmPpForExistingScores(realmId, [
-            { scoreId: score.scoreId, pp },
-          ]);
+          await ScoreSaberScoresRepository.setRealmPpForExistingScores(
+            realmId,
+            rankedScores.map(score => ({
+              scoreId: score.scoreId,
+              pp: ScoreSaberCurve.getPp(leaderboards.get(score.leaderboardId)!.stars, score.accuracy, curve),
+            }))
+          );
         })
       );
     } catch (error) {
-      ScoreCoreService.logger.warn(`Failed to track realm pp for score "${score.scoreId}":`, error);
+      ScoreCoreService.logger.warn(
+        `Failed to track realm pp for score(s) ${scores.map(score => `"${score.scoreId}"`).join(", ")}:`,
+        error
+      );
     }
   }
 

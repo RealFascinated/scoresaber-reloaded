@@ -113,6 +113,11 @@ export const emptyScoreSaberPlayerScoreStatistics = (): ScoreSaberPlayerScoreSta
   godPlays: 0,
 });
 
+/** Identifies a player's score slot on a leaderboard. */
+export function playerLeaderboardKey(playerId: string, leaderboardId: number): string {
+  return `${playerId}:${leaderboardId}`;
+}
+
 export class ScoreSaberScoresRepository {
   /**
    * Finds which of the given players have a ScoreSaber score within the time range.
@@ -189,6 +194,33 @@ export class ScoreSaberScoresRepository {
     return new Set(rows.map(row => row.scoreId));
   }
 
+  /**
+   * Finds which (player, leaderboard) pairs already have a current score row.
+   *
+   * @returns the pairs that do, as `"<playerId>:<leaderboardId>"` (see {@link playerLeaderboardKey})
+   */
+  public static async findExistingPlayerLeaderboardKeys(
+    pairs: { playerId: string; leaderboardId: number }[]
+  ): Promise<Set<string>> {
+    if (pairs.length === 0) {
+      return new Set();
+    }
+
+    const rows = await db
+      .select({
+        playerId: scoreSaberScoresTable.playerId,
+        leaderboardId: scoreSaberScoresTable.leaderboardId,
+      })
+      .from(scoreSaberScoresTable)
+      .where(
+        sql`(${scoreSaberScoresTable.playerId}, ${scoreSaberScoresTable.leaderboardId}) in (${sql.join(
+          pairs.map(pair => sql`(${pair.playerId}, ${pair.leaderboardId})`),
+          sql`, `
+        )})`
+      );
+    return new Set(rows.map(row => playerLeaderboardKey(row.playerId, row.leaderboardId)));
+  }
+
   public static async existsByScoreIdAndScore(scoreId: number, scoreValue: number): Promise<boolean> {
     const rows = await db
       .select({ exists: sql`1` })
@@ -215,6 +247,45 @@ export class ScoreSaberScoresRepository {
       .orderBy(desc(scoreSaberScoresTable.timestamp), desc(scoreSaberScoresTable.scoreId))
       .limit(1);
     return row;
+  }
+
+  /**
+   * Inserts many new scores in one transaction. Like {@link insertScore}, rows that conflict on the
+   * scoreId or on the (playerId, leaderboardId) slot are skipped instead of raising.
+   *
+   * @param rows the scores to store
+   * @param realmId the realm the rows' pp belongs to
+   * @returns the ids of the scores that were inserted
+   */
+  public static async insertScores(rows: ScoreSaberScoreInsertRow[], realmId: number): Promise<Set<number>> {
+    if (rows.length === 0) {
+      return new Set();
+    }
+
+    // Always locked in the same order so concurrent batches (and single inserts) can't deadlock
+    const sorted = rows.map(splitInsertRow).sort((a, b) => a.base.scoreId - b.base.scoreId);
+    return await db.transaction(async tx => {
+      const inserted = await tx
+        .insert(scoreSaberScoresTable)
+        .values(sorted.map(entry => entry.base))
+        .onConflictDoNothing()
+        .returning({ scoreId: scoreSaberScoresTable.scoreId });
+      const insertedIds = new Set(inserted.map(row => row.scoreId));
+
+      await writeRealmPp(
+        tx,
+        realmId,
+        sorted
+          .filter(entry => insertedIds.has(entry.base.scoreId))
+          .map(entry => ({
+            scoreId: entry.base.scoreId,
+            playerId: entry.base.playerId,
+            leaderboardId: entry.base.leaderboardId,
+            pp: entry.pp,
+          }))
+      );
+      return insertedIds;
+    });
   }
 
   public static async insertScore(row: ScoreSaberScoreInsertRow, realmId: number): Promise<boolean> {
@@ -397,14 +468,14 @@ export class ScoreSaberScoresRepository {
   }
 
   /**
-   * Counts scores matching the conditions. Conditions may reference {@link scorePpExpr}; pp is
-   * resolved for `realmId`.
+   * Counts scores matching the conditions. The conditions must only use columns of the scores table: the
+   * realm pp join is left out because it can't change the count and it turns an index-only count into a
+   * heap scan.
    */
-  public static async countByConditions(conditions: SQL[], realmId: number): Promise<number> {
+  public static async countByConditions(conditions: SQL[]): Promise<number> {
     const [row] = await db
       .select({ count: sql<number>`cast(count(*) as integer)` })
       .from(scoreSaberScoresTable)
-      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
       .where(and(...conditions));
     return Number(row?.count ?? 0);
   }

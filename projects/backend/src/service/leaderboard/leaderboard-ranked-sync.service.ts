@@ -136,9 +136,9 @@ export class LeaderboardRankedSyncService {
 
     // Medals are awarded in the default realm only.
     if (isDefaultRealm) {
-      for (const update of diff.updates.filter(update => update.newLeaderboard.ranked)) {
-        await PlayerMedalsService.refreshLeaderboardMedals(update.newLeaderboard);
-      }
+      await PlayerMedalsService.refreshLeaderboardsMedals(
+        diff.updates.map(update => update.newLeaderboard).filter(leaderboard => leaderboard.ranked)
+      );
     }
 
     return { updates: diff.updates, reweight };

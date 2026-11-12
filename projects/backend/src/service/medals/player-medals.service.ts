@@ -55,6 +55,34 @@ export class PlayerMedalsService {
   }
 
   /**
+   * Recomputes score medals for many leaderboards and syncs medal totals once, for callers that don't need
+   * the per-player {@link MedalChange}s. Leaderboards that are not ranked are skipped.
+   *
+   * Each update only touches its own leaderboard's score rows, so they run concurrently; the account totals
+   * are derived from those rows, so one sync at the end gives the same totals as one sync per leaderboard
+   * (and the syncs never compete for the same account rows).
+   *
+   * @param leaderboards the leaderboards to refresh
+   */
+  public static async refreshLeaderboardsMedals(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
+    const ranked = leaderboards.filter(leaderboard => leaderboard.ranked);
+    const updatedPlayerIds = new Set<string>();
+
+    for (const batch of chunkArray(ranked, RANKED_MEDAL_RECOMPUTE_CONCURRENCY)) {
+      const updated = await Promise.all(
+        batch.map(leaderboard => ScoreSaberMedalsRepository.updateMedalsOnLeaderboard(leaderboard))
+      );
+      for (const playerIds of updated) {
+        for (const playerId of playerIds) {
+          updatedPlayerIds.add(playerId);
+        }
+      }
+    }
+
+    await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds([...updatedPlayerIds]);
+  }
+
+  /**
    * Recomputes score medals for every ranked leaderboard, then syncs all account medal totals from scores
    * and refreshes materialized medal rank columns.
    */

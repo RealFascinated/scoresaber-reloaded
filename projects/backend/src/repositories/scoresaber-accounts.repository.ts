@@ -18,6 +18,17 @@ export class ScoreSaberAccountsRepository {
     return db.select().from(scoreSaberAccountsTable).where(inArray(scoreSaberAccountsTable.id, ids));
   }
 
+  public static async findExistingIds(ids: string[]): Promise<Set<string>> {
+    if (ids.length === 0) {
+      return new Set();
+    }
+    const rows = await db
+      .select({ id: scoreSaberAccountsTable.id })
+      .from(scoreSaberAccountsTable)
+      .where(inArray(scoreSaberAccountsTable.id, ids));
+    return new Set(rows.map(row => row.id));
+  }
+
   public static async insert(row: ScoreSaberAccountInsert): Promise<void> {
     await db.insert(scoreSaberAccountsTable).values(row).onConflictDoNothing({
       target: scoreSaberAccountsTable.id,

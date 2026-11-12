@@ -6,6 +6,7 @@ import { TimeUnit } from "@ssr/common/utils/time-utils";
 import { asc, eq } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberLeaderboardsTable } from "../../db/schema";
+import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberApiService } from "../../service/external/scoresaber-api.service";
 import { ScoreSaberLeaderboardsService } from "../../service/leaderboard/scoresaber-leaderboards.service";
 import { PlayerMedalsService } from "../../service/medals/player-medals.service";
@@ -85,27 +86,27 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
       const parsedScores = response.scores.map(rawScore =>
         getScoreSaberScoreFromToken(rawScore, leaderboard, undefined)
       );
-      await processInBatches(parsedScores, SCORE_TRACKING_BATCH_SIZE, async score => {
-        // The player's account must exist before their score rows are written,
-        // so wait for creation (a no-op when the account is already tracked).
-        await PlayerCoreService.createIfMissing(score.playerId);
+      // The players' accounts must exist before their score rows are written, so wait for creation
+      // (accounts that are already tracked cost one query for the whole page).
+      const playerIds = [...new Set(parsedScores.map(score => score.playerId))];
+      const existingAccountIds = await ScoreSaberAccountsRepository.findExistingIds(playerIds);
+      await processInBatches(
+        playerIds.filter(playerId => !existingAccountIds.has(playerId)),
+        SCORE_TRACKING_BATCH_SIZE,
+        playerId => PlayerCoreService.createIfMissing(playerId)
+      );
 
-        const trackingResult = await ScoreCoreService.trackScoreSaberScore(
-          score,
-          leaderboard,
-          false,
-          undefined,
-          {
-            skipDuplicateCheck: true,
-          }
-        );
+      const trackingResults = await ScoreCoreService.trackScoreSaberScoresBatch(
+        parsedScores.map(score => ({ score, leaderboard }))
+      );
+      for (const trackingResult of trackingResults) {
         if (trackingResult.tracked) {
           newScoresTracked++;
           if (trackingResult.hasPreviousScore) {
             currentPbReplaced++;
           }
         }
-      });
+      }
 
       // Treat an empty leaderboard (totalPages 0) as complete after its first
       // page, and terminate on or after the last page.
