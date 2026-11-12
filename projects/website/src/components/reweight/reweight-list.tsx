@@ -24,7 +24,7 @@ export function ReweightList({ reweights }: { reweights: Reweight[] }) {
             <TableHead>Reweight</TableHead>
             <TableHead className="w-24 text-right">Maps</TableHead>
             <TableHead className="w-28 text-right max-sm:hidden">Players</TableHead>
-            <TableHead className="w-36 text-right max-sm:hidden">Scores changed</TableHead>
+            <TableHead className="w-36 text-right whitespace-nowrap max-sm:hidden">Scores changed</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
