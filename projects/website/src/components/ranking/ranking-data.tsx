@@ -23,7 +23,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { useQueryState } from "nuqs";
 import FollowButton from "../following/follow-button";
 import { PlayerAvatar } from "../ranking/player-avatar";
-import { PlayerRankCard } from "../ranking/player-rank-card";
+import { getRankChars, PlayerRankCard } from "../ranking/player-rank-card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
@@ -89,6 +89,7 @@ export default function RankingData({ initial }: RankingDataProps) {
   });
 
   const showBackendUnavailable = !rankingData && isError && isBackendUnavailableError(error);
+  const rankChars = getRankChars(rankingData?.items.map(player => player.rank) ?? []);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -193,6 +194,7 @@ export default function RankingData({ initial }: RankingDataProps) {
                     key={player.id}
                     player={player}
                     rank={player.rank}
+                    rankChars={rankChars}
                     countryRank={player.countryRank}
                     value={`${formatPp(player.pp)}pp`}
                     valueClassName="text-pp"

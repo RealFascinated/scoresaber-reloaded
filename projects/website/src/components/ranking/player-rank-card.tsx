@@ -9,6 +9,8 @@ import { ReactNode } from "react";
 type PlayerRankCardProps = {
   player: { id: string; name: string; avatar: string; country?: string | null };
   rank: number;
+  /** Characters the rank column reserves (including the "#"), so every card on a page lines up. */
+  rankChars: number;
   countryRank: number;
   /** The headline number (pp or medals), already formatted. */
   value: ReactNode;
@@ -23,12 +25,18 @@ type PlayerRankCardProps = {
   showFollow?: boolean;
 };
 
+/** Width in characters (including the "#") needed to show the longest of the given ranks. */
+export function getRankChars(ranks: number[]): number {
+  return Math.max(0, ...ranks.map(rank => String(rank).length)) + 1;
+}
+
 /**
  * Mobile card for the ranking / medals player lists, used in place of the table row.
  */
 export function PlayerRankCard({
   player,
   rank,
+  rankChars,
   countryRank,
   value,
   valueClassName,
@@ -42,12 +50,15 @@ export function PlayerRankCard({
   return (
     <div
       className={cn(
-        "ring-border bg-card relative flex items-center gap-3 rounded-xl px-3 py-2.5 ring-1",
+        "ring-border bg-card relative flex items-center gap-2 rounded-xl py-2.5 pr-3 pl-2.5 ring-1",
         highlighted && "bg-primary/5",
         inactive && "bg-inactive-account/10"
       )}
     >
-      <span className={cn("w-11 shrink-0 text-base font-bold tabular-nums", getRankColor(rank))}>
+      <span
+        className={cn("shrink-0 text-sm font-bold tabular-nums", getRankColor(rank))}
+        style={{ width: `${rankChars}ch` }}
+      >
         #{rank}
       </span>
 

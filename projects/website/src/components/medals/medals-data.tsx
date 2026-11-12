@@ -4,7 +4,7 @@ import { isBackendUnavailableError } from "@/common/api-error";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import CountrySelector from "@/components/country-selector";
 import { PageTitle } from "@/components/page-title";
-import { PlayerRankCard } from "@/components/ranking/player-rank-card";
+import { getRankChars, PlayerRankCard } from "@/components/ranking/player-rank-card";
 import { PlayerTableSkeleton } from "@/components/ranking/player-table-skeleton";
 import SimpleLink from "@/components/simple-link";
 import SimplePagination from "@/components/simple-pagination";
@@ -66,6 +66,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
   });
 
   const showBackendUnavailable = !rankingData && isError && isBackendUnavailableError(error);
+  const rankChars = getRankChars(rankingData?.items.map(player => player.medalsRank) ?? []);
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -124,6 +125,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
                     key={player.id}
                     player={player}
                     rank={player.medalsRank}
+                    rankChars={rankChars}
                     countryRank={player.medalsCountryRank}
                     value={formatNumberWithCommas(player.medals)}
                     valueClassName="text-medals"
