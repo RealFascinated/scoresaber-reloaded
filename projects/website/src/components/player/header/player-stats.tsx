@@ -3,8 +3,9 @@
 import { cn } from "@/common/utils";
 import SimpleTooltip from "@/components/simple-tooltip";
 import { SharedIcons } from "@/shared-icons";
-import { getHMDInfo, HMD } from "@ssr/common/hmds";
+import { getHMDInfo } from "@ssr/common/hmds";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import type { HMD } from "@ssr/common/schemas/hmd";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
 import { formatDate, timeAgo } from "@ssr/common/utils/time-utils";

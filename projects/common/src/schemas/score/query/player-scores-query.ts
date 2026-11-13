@@ -1,6 +1,6 @@
 import { Type, type StaticDecode } from "typebox";
-import { HmdSchema } from "../../../hmds";
 import { SHARED_CONSTS } from "../../../shared-consts";
+import { HmdSchema } from "../../hmd";
 import { RealmIdSchema } from "../../realm/realm-query";
 
 const maxPlayerIds = SHARED_CONSTS.maxFollowing + 1;

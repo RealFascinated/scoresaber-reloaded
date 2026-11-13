@@ -1,24 +1,7 @@
 import { USER_PREFERENCES_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
-import {
-  DEFAULT_USER_PREFERENCES,
-  UserPreferencesSchema,
-  type UserPreferences,
-  type UserPreferencesPatch,
-} from "@ssr/common/schemas/user/preferences";
-import { Value } from "typebox/value";
-
-/**
- * Validates a response of the preferences routes.
- *
- * @throws when the response does not match the preferences schema
- */
-export function assertUserPreferences(value: UserPreferences): UserPreferences {
-  if (!Value.Check(UserPreferencesSchema, value)) {
-    throw new Error("The backend returned invalid preferences");
-  }
-  return value;
-}
+import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/default-preferences";
+import type { UserPreferences, UserPreferencesPatch } from "@ssr/common/schemas/user/preferences";
 
 /**
  * Fetches the preferences of the signed-in user.
@@ -36,7 +19,7 @@ export async function fetchUserPreferences(): Promise<UserPreferences> {
   if (!response.ok) {
     throw new Error(`Failed to fetch preferences (${response.status})`);
   }
-  return assertUserPreferences((await response.json()) as UserPreferences);
+  return (await response.json()) as UserPreferences;
 }
 
 /**
@@ -55,5 +38,5 @@ export async function patchUserPreferences(patch: UserPreferencesPatch): Promise
   if (!response.ok) {
     throw new Error(`Failed to save preferences (${response.status})`);
   }
-  return assertUserPreferences((await response.json()) as UserPreferences);
+  return (await response.json()) as UserPreferences;
 }

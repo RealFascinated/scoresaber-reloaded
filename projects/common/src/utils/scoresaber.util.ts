@@ -1,5 +1,5 @@
-import { HMD } from "../hmds";
 import { ScoreSaberCurve } from "../leaderboard-curve/scoresaber-curve";
+import type { HMD } from "../schemas/hmd";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
 import { PlayerPpsResponse } from "../schemas/response/player/player-pps";
 

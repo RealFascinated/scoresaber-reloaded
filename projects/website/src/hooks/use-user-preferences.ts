@@ -1,7 +1,7 @@
 import { fetchUserPreferences, patchUserPreferences } from "@/common/preferences/preferences-api";
 import useMe from "@/hooks/use-me";
+import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/default-preferences";
 import {
-  DEFAULT_USER_PREFERENCES,
   type UserPreferenceKey,
   type UserPreferences,
   type UserPreferencesPatch,

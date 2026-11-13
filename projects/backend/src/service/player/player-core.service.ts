@@ -1,8 +1,8 @@
 import { DetailType } from "@ssr/common/detail-type";
 import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
+import type { HMD } from "@ssr/common/schemas/hmd";
 import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import {

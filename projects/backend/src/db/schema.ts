@@ -1,5 +1,5 @@
-import { HMD } from "@ssr/common/hmds";
 import { AuthConnectionProvider } from "@ssr/common/schemas/auth/connection-provider";
+import type { HMD } from "@ssr/common/schemas/hmd";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import type { OverlayConnectionSettings } from "@ssr/common/schemas/overlay/overlay-connection-settings";

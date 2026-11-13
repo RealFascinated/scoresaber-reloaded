@@ -1,5 +1,3 @@
-import { Type } from "typebox";
-
 export enum Modifier {
   NF = "NF",
   PM = "PM",
@@ -41,10 +39,6 @@ const modifierByLabel = Object.freeze(
     (Object.entries(ModifierLabels) as [Modifier, string][]).map(([code, label]) => [label, code])
   )
 ) as Readonly<Record<string, Modifier>>;
-
-export const ModifierSchema = Type.Enum(Modifier);
-
-export const ModifiersSchema = Type.Array(ModifierSchema);
 
 /**
  * Normalizes a modifier value (code or legacy label) into a modifier code.

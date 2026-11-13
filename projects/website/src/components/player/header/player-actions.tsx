@@ -10,10 +10,14 @@ import { useMainPlayerId } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { ssrConfig } from "config";
+import dynamic from "next/dynamic";
 import { ReactNode } from "react";
 import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
-import SelfPlaylistCreator from "../self/player-self-playlist-creator";
-import SnipePlaylistCreator from "../snipe/player-snipe-playlist-creator";
+
+// The playlist creators pull in the form resolver and schema validation, and are only shown to the signed-in
+// main player, so they are loaded separately instead of with every player page
+const SelfPlaylistCreator = dynamic(() => import("../self/player-self-playlist-creator"), { ssr: false });
+const SnipePlaylistCreator = dynamic(() => import("../snipe/player-snipe-playlist-creator"), { ssr: false });
 
 type PlayerLinkProps = {
   url?: string;

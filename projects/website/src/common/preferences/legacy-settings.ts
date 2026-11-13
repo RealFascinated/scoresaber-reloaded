@@ -1,12 +1,10 @@
-import {
-  DEFAULT_USER_PREFERENCES,
-  UserPreferencesSchema,
-  type UserPreferenceKey,
-  type UserPreferences,
-  type UserPreferencesPatch,
+import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/default-preferences";
+import type {
+  UserPreferenceKey,
+  UserPreferences,
+  UserPreferencesPatch,
 } from "@ssr/common/schemas/user/preferences";
 import { SHARED_CONSTS } from "@ssr/common/shared-consts";
-import { Value } from "typebox/value";
 
 const LEGACY_DATABASE_NAME = "ssr";
 const LEGACY_SETTINGS_STORE = "settings";
@@ -93,11 +91,18 @@ function deleteLegacyDatabase(): Promise<void> {
  * Builds the patch that moves the old browser settings into the account. Only valid values are
  * kept, and only for preferences the account hasn't changed yet, so an old browser never
  * overwrites settings made elsewhere.
+ *
+ * TypeBox and the preference schema are imported here instead of at the top of the file, so only
+ * browsers that still have old data download them.
  */
-export function buildLegacyImportPatch(
+export async function buildLegacyImportPatch(
   rows: LegacySettingRow[],
   current: UserPreferences
-): UserPreferencesPatch {
+): Promise<UserPreferencesPatch> {
+  const [{ Value }, { UserPreferencesSchema }] = await Promise.all([
+    import("typebox/value"),
+    import("@ssr/common/schemas/user/preferences"),
+  ]);
   const patch: Record<string, LegacySettingValue> = {};
   for (const { id, value } of rows) {
     if (!(id in UserPreferencesSchema.properties)) {
@@ -157,7 +162,7 @@ type LegacyImportTarget = {
 export async function importLegacySettings(target: LegacyImportTarget): Promise<void> {
   const rows = await readLegacySettings();
   if (rows) {
-    const patch = buildLegacyImportPatch(rows, target.preferences);
+    const patch = await buildLegacyImportPatch(rows, target.preferences);
     if (Object.keys(patch).length > 0) {
       await target.savePreferences(patch);
     }

@@ -6,7 +6,7 @@ import { cn } from "@/common/utils";
 import { FormDescription, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useUpdateUserPreferences, useUserPreference } from "@/hooks/use-user-preferences";
-import { BACKGROUND_COVER_CUSTOM, BACKGROUND_COVER_NONE } from "@ssr/common/schemas/user/preferences";
+import { BACKGROUND_COVER_CUSTOM, BACKGROUND_COVER_NONE } from "@ssr/common/schemas/user/default-preferences";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ReactNode, useEffect, useState } from "react";
 import { getMonotonicTimeMs, showSettingsSavedToast } from "./settings-feedback";
@@ -124,7 +124,7 @@ export function BackgroundCoverControl({ field }: BackgroundCoverControlProps) {
             selected={selected === preset.id}
             onSelect={() => field.onChange(preset.id)}
           >
-            <img src={preset.image} alt="" className="h-full w-full object-cover" loading="lazy" />
+            <img src={preset.thumbnail} alt="" className="h-full w-full object-cover" loading="lazy" />
           </CoverOption>
         ))}
         <CoverOption

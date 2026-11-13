@@ -1,4 +1,4 @@
-import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/preferences";
+import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/default-preferences";
 import { afterEach, describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { db } from "../../src/db";

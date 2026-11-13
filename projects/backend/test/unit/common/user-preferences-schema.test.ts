@@ -1,8 +1,5 @@
-import {
-  DEFAULT_USER_PREFERENCES,
-  UserPreferencesPatchSchema,
-  UserPreferencesSchema,
-} from "@ssr/common/schemas/user/preferences";
+import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/default-preferences";
+import { UserPreferencesPatchSchema, UserPreferencesSchema } from "@ssr/common/schemas/user/preferences";
 import { describe, expect, test } from "bun:test";
 import { Value } from "typebox/value";
 

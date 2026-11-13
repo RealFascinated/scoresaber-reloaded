@@ -1,11 +1,11 @@
 import { Type, type StaticDecode } from "typebox";
-import { HMD } from "../../../hmds";
-import { ModifiersSchema } from "../../../score/modifier";
 import { BeatLeaderScoreSchema } from "../../beatleader/score/score";
 import { DateSchema } from "../../date";
+import type { HMD } from "../../hmd";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
 import { MapDifficultySchema } from "../../map/map-difficulty";
 import { numberIncludingInfinitySchema } from "../../number";
+import { ModifiersSchema } from "../../score/modifiers-schema";
 import { ScoreSaberLeaderboardPlayerInfoSchema } from "../leaderboard/player-info";
 import { ScoreSaberHistoryScoreSchema } from "./history-score";
 

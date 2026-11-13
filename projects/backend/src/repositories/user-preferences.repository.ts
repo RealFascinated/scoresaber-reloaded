@@ -1,6 +1,6 @@
 import { checkSchema } from "@ssr/common/schemas/parse";
+import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/default-preferences";
 import {
-  DEFAULT_USER_PREFERENCES,
   UserPreferencesSchema,
   type UserPreferenceKey,
   type UserPreferences,

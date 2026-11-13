@@ -1,6 +1,7 @@
 import SimpleTooltip from "@/components/simple-tooltip";
 import { SharedIcons } from "@/shared-icons";
-import { getHMDInfo, HMD } from "@ssr/common/hmds";
+import { getHMDInfo } from "@ssr/common/hmds";
+import type { HMD } from "@ssr/common/schemas/hmd";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 
 export function ScoreSaberScoreHMD({

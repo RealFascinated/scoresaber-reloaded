@@ -1,4 +1,4 @@
-import { HMD } from "../../hmds";
+import type { HMD } from "../../schemas/hmd";
 import { ScoreSaberPeakRank } from "../../schemas/scoresaber/player/peak-rank";
 import { ScoreSaberPlayerStatistics } from "../../schemas/scoresaber/player/statistics";
 import Player, { StatisticChange } from "../player";

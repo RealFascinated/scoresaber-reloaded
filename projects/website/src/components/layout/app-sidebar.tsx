@@ -32,7 +32,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { USER_PREFERENCES_QUERY_KEY } from "@/hooks/use-user-preferences";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
-import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/preferences";
+import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/default-preferences";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";

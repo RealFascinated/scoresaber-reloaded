@@ -2,8 +2,9 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SharedIcons } from "@/shared-icons";
-import { getHMDInfo, HMD } from "@ssr/common/hmds";
+import { getHMDInfo } from "@ssr/common/hmds";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
+import type { HMD } from "@ssr/common/schemas/hmd";
 
 const ALL_HMDS = "All Hmds";
 

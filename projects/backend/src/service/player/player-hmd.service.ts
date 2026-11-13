@@ -1,4 +1,4 @@
-import { HMD } from "@ssr/common/hmds";
+import type { HMD } from "@ssr/common/schemas/hmd";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import CacheService, { CacheId } from "../infra/cache.service";

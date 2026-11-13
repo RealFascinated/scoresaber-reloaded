@@ -1,10 +1,10 @@
 import { Type, type StaticDecode } from "typebox";
-import { ModifiersSchema } from "../../../score/modifier";
 import { BeatLeaderScoreSchema } from "../../beatleader/score/score";
 import { DateSchema } from "../../date";
 import { MapCharacteristicSchema } from "../../map/map-characteristic";
 import { MapDifficultySchema } from "../../map/map-difficulty";
 import { nullToZeroNumberSchema, numberIncludingInfinitySchema } from "../../number";
+import { ModifiersSchema } from "../../score/modifiers-schema";
 import { ScoreSaberLeaderboardPlayerInfoSchema } from "../leaderboard/player-info";
 
 export const ScoreSaberHistoryScoreSchema = Type.Object({

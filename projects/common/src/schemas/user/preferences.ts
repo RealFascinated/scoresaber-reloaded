@@ -1,10 +1,10 @@
 import { Type, type StaticDecode } from "typebox";
 import { ReplayViewerIdSchema } from "../replay-viewer/replay-viewer-id";
-import { HistoryMode, HistoryModeSchema } from "./history-mode";
-import { WebsiteLanding, WebsiteLandingSchema } from "./website-landing";
+import { HistoryMode } from "./history-mode";
+import { WebsiteLanding } from "./website-landing";
 
-export const BACKGROUND_COVER_NONE = "none";
-export const BACKGROUND_COVER_CUSTOM = "custom";
+const HistoryModeSchema = Type.Enum(HistoryMode);
+const WebsiteLandingSchema = Type.Enum(WebsiteLanding);
 
 const AccuracySchema = Type.Number({ minimum: 0, maximum: 100 });
 
@@ -45,19 +45,3 @@ export type UserPreferenceKey = keyof UserPreferences;
  */
 export const UserPreferencesPatchSchema = Type.Partial(UserPreferencesSchema);
 export type UserPreferencesPatch = StaticDecode<typeof UserPreferencesPatchSchema>;
-
-export const DEFAULT_USER_PREFERENCES: UserPreferences = {
-  showKitty: false,
-  snowParticles: false,
-  whatIfRange: [90, 98.5],
-  plusPpDefaultAccuracy: 95,
-  historyMode: HistoryMode.ADVANCED,
-  replayViewer: "chroviewer",
-  websiteLanding: WebsiteLanding.PLAYER_HOME,
-  defaultLeaderboardCountry: null,
-  chartLegends: {},
-  backgroundCover: BACKGROUND_COVER_NONE,
-  customBackground: "",
-  backgroundCoverBrightness: 50,
-  backgroundCoverBlur: 6,
-};

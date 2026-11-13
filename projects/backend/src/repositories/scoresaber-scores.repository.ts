@@ -1,5 +1,5 @@
-import { HMD } from "@ssr/common/hmds";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
+import type { HMD } from "@ssr/common/schemas/hmd";
 import type { AnyColumn, SQL } from "drizzle-orm";
 import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "../db";

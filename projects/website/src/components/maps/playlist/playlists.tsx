@@ -4,8 +4,8 @@ import { downloadFile } from "@/common/browser-utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
+import dynamic from "next/dynamic";
 import { Button } from "../../ui/button";
-import CustomPlaylistCreator from "./custom-playlist-creator";
 
 type Playlist = {
   name: string;
@@ -34,6 +34,12 @@ const playlists: Playlist[] = [
 
 const MENU_ITEM_CLASS =
   "hover:bg-accent flex w-full cursor-pointer items-center rounded-md px-2 py-1.5 text-left text-sm transition-colors";
+
+// Pulls in the form resolver and schema validation, so it is only loaded once the menu is opened
+const CustomPlaylistCreator = dynamic(() => import("./custom-playlist-creator"), {
+  ssr: false,
+  loading: () => <div className={MENU_ITEM_CLASS}>Custom playlist…</div>,
+});
 
 export default function Playlists() {
   return (

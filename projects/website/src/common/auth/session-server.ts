@@ -3,11 +3,23 @@ import { env } from "@ssr/common/env";
 import { parseSchema } from "@ssr/common/schemas/parse";
 import { AuthMeResponseSchema, type AuthMeResponse } from "@ssr/common/schemas/response/auth/me";
 import { PlayerIdListResponseSchema } from "@ssr/common/schemas/response/user/following";
-import { type UserPreferences } from "@ssr/common/schemas/user/preferences";
+import { UserPreferencesSchema, type UserPreferences } from "@ssr/common/schemas/user/preferences";
 import { cache } from "react";
-import { assertUserPreferences } from "../preferences/preferences-api";
+import { Value } from "typebox/value";
 
 const SESSION_REQUEST_TIMEOUT_MS = 3000;
+
+/**
+ * Validates the preferences response. Only done on the server, so TypeBox stays out of the browser.
+ *
+ * @throws when the response does not match the preferences schema
+ */
+function assertUserPreferences(value: UserPreferences): UserPreferences {
+  if (!Value.Check(UserPreferencesSchema, value)) {
+    throw new Error("The backend returned invalid preferences");
+  }
+  return value;
+}
 
 export type ServerSession =
   | { status: "signed-in"; me: AuthMeResponse; preferences: UserPreferences; following: string[] }

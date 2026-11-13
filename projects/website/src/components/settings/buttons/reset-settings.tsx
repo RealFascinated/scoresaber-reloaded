@@ -2,7 +2,7 @@
 
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useUpdateUserPreferences } from "@/hooks/use-user-preferences";
-import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/preferences";
+import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/default-preferences";
 import { toast } from "sonner";
 import { Button } from "../../ui/button";
 

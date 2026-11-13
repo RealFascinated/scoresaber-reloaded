@@ -1,0 +1,32 @@
+import { Type, type StaticDecode } from "typebox";
+
+export const HmdSchema = Type.Union([
+  Type.Literal("Unknown"),
+  Type.Literal("Rift CV1"),
+  Type.Literal("Vive"),
+  Type.Literal("Vive Elite"),
+  Type.Literal("Vive Pro"),
+  Type.Literal("Vive Pro 2"),
+  Type.Literal("HTC Vive Elite"),
+  Type.Literal("HP Reverb G2"),
+  Type.Literal("Windows Mixed Reality"),
+  Type.Literal("Windows MR"),
+  Type.Literal("Rift S"),
+  Type.Literal("Quest"),
+  Type.Literal("Quest (Virtual Desktop)"),
+  Type.Literal("Quest 1"),
+  Type.Literal("Quest 2"),
+  Type.Literal("Quest 2 (Virtual Desktop)"),
+  Type.Literal("Quest Pro"),
+  Type.Literal("Quest 3"),
+  Type.Literal("Quest 3S"),
+  Type.Literal("Valve Index"),
+  Type.Literal("Vive Cosmos"),
+  Type.Literal("Bigscreen Beyond"),
+  Type.Literal("PICO 4"),
+  Type.Literal("PICO 4S"),
+  Type.Literal("Pico Neo 2"),
+  Type.Literal("Pico Neo 3"),
+  Type.Literal("PSVR2"),
+]);
+export type HMD = StaticDecode<typeof HmdSchema>;

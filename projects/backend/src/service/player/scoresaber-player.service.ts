@@ -1,9 +1,9 @@
 import { DetailType } from "@ssr/common/detail-type";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
+import type { HMD } from "@ssr/common/schemas/hmd";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import {
   isScoreSaberV2PlayerToken,

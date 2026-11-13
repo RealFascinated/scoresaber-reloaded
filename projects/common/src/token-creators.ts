@@ -1,5 +1,5 @@
 import { env } from "./env";
-import type { HMD } from "./hmds";
+import type { HMD } from "./schemas/hmd";
 import { MapCharacteristic } from "./schemas/map/map-characteristic";
 import { checkSchema, parseSchema } from "./schemas/parse";
 import { ScoreSaberLeaderboardDifficulty } from "./schemas/scoresaber/leaderboard/difficulty";

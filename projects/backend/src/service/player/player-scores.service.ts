@@ -1,11 +1,11 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { HMD } from "@ssr/common/hmds";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination, type Page } from "@ssr/common/pagination";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/query/query";
 import { ScoreResponse } from "@ssr/common/schemas/accsaber/score/score";
+import type { HMD } from "@ssr/common/schemas/hmd";
 import { PlayerScoresChartResponse } from "@ssr/common/schemas/response/player/scores-chart";
 import type { AccSaberScoresPageResponse } from "@ssr/common/schemas/response/score/accsaber-scores-page";
 import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
