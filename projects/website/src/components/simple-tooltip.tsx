@@ -4,7 +4,7 @@ import { cn } from "@/common/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/contexts/viewport-context";
 import { type SIDE_OPTIONS } from "@radix-ui/react-popper";
-import { isValidElement, ReactNode } from "react";
+import { isValidElement, ReactNode, useRef, useState } from "react";
 
 /**
  * True when the tooltip wraps a single already-interactive element (button, link, input...).
@@ -41,6 +41,8 @@ export default function SimpleTooltip({
   showOnMobile?: boolean;
 }) {
   const isMobile = useIsMobile();
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   // Tooltips don't trigger reliably on touch screens; only render them there when explicitly requested.
   if (isMobile && !showOnMobile) {
@@ -49,10 +51,21 @@ export default function SimpleTooltip({
 
   const interactive = isInteractiveChild(children);
 
+  // On touch devices Radix opens on focus/hover emulation and then closes again on the
+  // click, so the tooltip flashes. Control it manually there: tap toggles, tap outside closes.
+  const touchProps = isMobile
+    ? {
+        open,
+        onOpenChange: () => {},
+      }
+    : {};
+
   return (
-    <Tooltip>
+    <Tooltip {...touchProps}>
       <TooltipTrigger asChild>
         <div
+          ref={triggerRef}
+          onClick={isMobile ? () => setOpen(previous => !previous) : undefined}
           tabIndex={interactive ? undefined : 0}
           className={cn(
             !interactive &&
@@ -63,7 +76,19 @@ export default function SimpleTooltip({
           {children}
         </div>
       </TooltipTrigger>
-      <TooltipContent side={side} className="max-w-xs">
+      <TooltipContent
+        side={side}
+        className="max-w-xs"
+        onPointerDownOutside={event => {
+          if (!isMobile) {
+            return;
+          }
+          if (event.target instanceof Node && triggerRef.current?.contains(event.target)) {
+            return;
+          }
+          setOpen(false);
+        }}
+      >
         {typeof display === "string" ? <p>{display}</p> : display}
       </TooltipContent>
     </Tooltip>
