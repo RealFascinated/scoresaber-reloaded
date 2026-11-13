@@ -114,7 +114,7 @@ const playerStats: Stat[] = [
     },
   },
   {
-    name: "Replays Watched",
+    name: "Replay Views",
     defaultHidden: true,
     create: player => ({ value: formatNumberWithCommas(player.statistics.replaysWatched) }),
   },
