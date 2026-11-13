@@ -36,6 +36,7 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
           className="border-border/80 mx-auto shrink-0 rounded-xl border object-cover shadow-md sm:mx-0"
           width={160}
           height={160}
+          priority
         />
 
         <div className="flex min-w-0 flex-1 flex-col items-center gap-2.5 text-center sm:items-start sm:text-left">
