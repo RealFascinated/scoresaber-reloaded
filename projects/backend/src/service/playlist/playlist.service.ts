@@ -28,7 +28,9 @@ import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
+import { ReweightService } from "../reweight/reweight.service";
 import { scoreRowsToPlaylistSongs, takeTopUniqueSongRows } from "./playlist-song-utils";
+import { buildReweightPlaylist } from "./reweight-playlist";
 
 function getPlaylistTitleDate(date: Date): string {
   return formatDate(date, "MMM D, YYYY");
@@ -238,6 +240,19 @@ export default class PlaylistService {
         })),
       })),
     };
+  }
+
+  /**
+   * Creates a playlist of the maps a reweight re-rated that are still ranked
+   *
+   * @param reweightId the id of the reweight
+   * @returns the reweight playlist
+   * @throws NotFoundError if the reweight does not exist
+   */
+  public static async getReweightPlaylist(reweightId: number): Promise<Playlist> {
+    const { reweight, leaderboards } = await ReweightService.getReweight(reweightId);
+
+    return buildReweightPlaylist(reweight, leaderboards);
   }
 
   /**

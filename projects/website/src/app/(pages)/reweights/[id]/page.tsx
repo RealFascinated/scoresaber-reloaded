@@ -3,6 +3,7 @@ import BackendUnavailable from "@/components/api/backend-unavailable";
 import NotFound from "@/components/not-found";
 import { PageTitle } from "@/components/page-title";
 import { ReweightBreadcrumb } from "@/components/reweight/reweight-breadcrumb";
+import { ReweightDownloadPlaylist } from "@/components/reweight/reweight-download-playlist";
 import { formatReweightDate, hasTrackedPpChanges } from "@/components/reweight/reweight-format";
 import { ReweightLeaderboardsTable } from "@/components/reweight/reweight-leaderboards-table";
 import { ReweightPlayers } from "@/components/reweight/reweight-players";
@@ -113,7 +114,10 @@ export default async function ReweightPage({ params }: Props) {
     <section className="flex w-full flex-col gap-4">
       <ReweightBreadcrumb name={reweight.name} />
 
-      <PageTitle title={reweight.name} description={formatReweightDate(reweight)} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <PageTitle title={reweight.name} description={formatReweightDate(reweight)} />
+        <ReweightDownloadPlaylist reweightId={reweight.id} />
+      </div>
 
       <ReweightLeaderboardsTable leaderboards={leaderboards} />
 

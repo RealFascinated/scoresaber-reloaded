@@ -5,6 +5,7 @@ import { uploadPaste } from "@ssr/common/utils/paste-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { DiscordChannels, sendFile, sendMessageToChannel } from "../../bot/bot";
+import PlaylistService from "../playlist/playlist.service";
 import { ReweightService } from "../reweight/reweight.service";
 import type { LeaderboardUpdate, RankedSyncResult } from "./leaderboard-ranked-sync.service";
 
@@ -135,19 +136,21 @@ export class LeaderboardRankedSyncNotificationsService {
     }
 
     // Create a playlist of the changes
-    const playlist: Playlist = {
-      playlistTitle: `Ranked Batch (${formatDate(new Date(), "MMM D, YYYY")})`,
-      playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
-      songs: newlyRankedMaps.map(update => ({
-        songName: update.newLeaderboard.songName,
-        levelAuthorName: update.newLeaderboard.levelAuthorName,
-        hash: update.newLeaderboard.songHash,
-        difficulties: update.newLeaderboard.difficulties.map(difficulty => ({
-          difficulty: difficulty.difficulty,
-          characteristic: difficulty.characteristic,
-        })),
-      })),
-    };
+    const playlist: Playlist = reweight
+      ? await PlaylistService.getReweightPlaylist(reweight.reweightId)
+      : {
+          playlistTitle: `Ranked Batch (${formatDate(new Date(), "MMM D, YYYY")})`,
+          playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
+          songs: newlyRankedMaps.map(update => ({
+            songName: update.newLeaderboard.songName,
+            levelAuthorName: update.newLeaderboard.levelAuthorName,
+            hash: update.newLeaderboard.songHash,
+            difficulties: update.newLeaderboard.difficulties.map(difficulty => ({
+              difficulty: difficulty.difficulty,
+              characteristic: difficulty.characteristic,
+            })),
+          })),
+        };
 
     const date = formatDate(new Date(), "DD-MM-YYYY");
     await sendFile(
