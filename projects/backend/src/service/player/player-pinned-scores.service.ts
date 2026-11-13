@@ -13,12 +13,13 @@ export class PlayerPinnedScoresService {
    * @param realmId the realm to resolve pp for
    */
   public static async getPinnedScores(playerId: string, realmId: number): Promise<PinnedScoresResponse> {
-    const scoreIds = await UserPinnedScoresRepository.getScoreIdsByPlayerId(playerId);
+    const pins = await UserPinnedScoresRepository.getPinsByPlayerId(playerId);
 
     const scores = await Promise.all(
-      scoreIds.map(async scoreId => {
+      pins.map(async ({ scoreId, message }) => {
         try {
-          return await PlayerScoresService.getScore(scoreId, realmId);
+          const playerScore = await PlayerScoresService.getScore(scoreId, realmId);
+          return message ? { ...playerScore, message } : playerScore;
         } catch (error) {
           if (error instanceof NotFoundError) {
             return undefined;

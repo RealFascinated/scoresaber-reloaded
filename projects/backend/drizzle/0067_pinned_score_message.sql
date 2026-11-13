@@ -1,0 +1,1 @@
+ALTER TABLE "user-pinned-scores" ADD COLUMN "message" varchar(200);

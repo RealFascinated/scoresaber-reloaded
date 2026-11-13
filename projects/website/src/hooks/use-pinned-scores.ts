@@ -1,5 +1,6 @@
 import {
   changePinnedScore,
+  changePinnedScoreMessage,
   fetchPinnedScoreIds,
   fetchPlayerPinnedScores,
 } from "@/common/pinned-scores/pinned-scores-api";
@@ -23,6 +24,19 @@ export function usePlayerPinnedScores(playerId: string) {
     queryKey: ["player", playerId, "pinned-scores", realmId],
     queryFn: () => fetchPlayerPinnedScores(playerId, realmId),
     staleTime: 1000 * 60,
+  });
+}
+
+/**
+ * Saves the message of one of the signed-in user's pinned scores.
+ */
+export function usePinnedScoreMessage(playerId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ scoreId, message }: { scoreId: number; message: string }) =>
+      changePinnedScoreMessage(scoreId, message),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["player", playerId, "pinned-scores"] }),
+    onError: error => toast.error(error instanceof Error ? error.message : "Failed to save the message"),
   });
 }
 

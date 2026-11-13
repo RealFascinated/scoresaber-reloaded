@@ -32,6 +32,8 @@ interface ScoreSongInfoProps {
   imageSize?: number;
   shortDiffNames?: boolean;
   className?: string;
+  /** Extra content shown below the mapper line, next to the cover. */
+  children?: React.ReactNode;
 }
 
 export default function ScoreSongInfo({
@@ -45,6 +47,7 @@ export default function ScoreSongInfo({
   shortDiffNames = false,
   imageSize = 64,
   className,
+  children,
 }: ScoreSongInfoProps) {
   const mappersProfile =
     beatSaverMap != undefined ? `https://beatsaver.com/profile/${beatSaverMap.author.id}` : undefined;
@@ -114,6 +117,7 @@ export default function ScoreSongInfo({
             </p>
           </div>
         </div>
+        {children}
       </div>
     </div>
   );

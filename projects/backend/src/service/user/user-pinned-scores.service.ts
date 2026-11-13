@@ -39,6 +39,18 @@ export class UserPinnedScoresService {
   }
 
   /**
+   * Sets the message shown on a pinned score. A blank message removes it.
+   *
+   * @param userId the user that pinned the score
+   * @param scoreId the pinned score
+   * @param message the message to show
+   * @returns false if the score isn't pinned by the user
+   */
+  public static setMessage(userId: string, scoreId: number, message: string): Promise<boolean> {
+    return UserPinnedScoresRepository.setMessage(userId, scoreId, message.trim() || null);
+  }
+
+  /**
    * Unpins a score. Does nothing if it wasn't pinned.
    *
    * @param userId the user that unpins

@@ -20,18 +20,36 @@ export class UserPinnedScoresRepository {
   }
 
   /**
-   * Gets the ids of the scores a player pinned. Only players with an account can pin.
+   * Gets the scores a player pinned with their messages. Only players with an account can pin.
    *
    * @param playerId the player to get the pins of
    */
-  public static async getScoreIdsByPlayerId(playerId: string): Promise<number[]> {
-    const rows = await db
-      .select({ scoreId: userPinnedScoresTable.scoreId })
+  public static async getPinsByPlayerId(
+    playerId: string
+  ): Promise<{ scoreId: number; message: string | null }[]> {
+    return db
+      .select({ scoreId: userPinnedScoresTable.scoreId, message: userPinnedScoresTable.message })
       .from(userPinnedScoresTable)
       .innerJoin(authUsersTable, eq(authUsersTable.id, userPinnedScoresTable.userId))
       .where(eq(authUsersTable.playerId, playerId))
       .orderBy(asc(userPinnedScoresTable.createdAt), asc(userPinnedScoresTable.scoreId));
-    return rows.map(row => row.scoreId);
+  }
+
+  /**
+   * Sets the message of a pinned score.
+   *
+   * @param userId the user that pinned the score
+   * @param scoreId the pinned score
+   * @param message the message, or null to remove it
+   * @returns false if the score isn't pinned by the user
+   */
+  public static async setMessage(userId: string, scoreId: number, message: string | null): Promise<boolean> {
+    const updated = await db
+      .update(userPinnedScoresTable)
+      .set({ message })
+      .where(and(eq(userPinnedScoresTable.userId, userId), eq(userPinnedScoresTable.scoreId, scoreId)))
+      .returning({ scoreId: userPinnedScoresTable.scoreId });
+    return updated.length > 0;
   }
 
   /**

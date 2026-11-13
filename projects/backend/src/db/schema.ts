@@ -816,6 +816,7 @@ export const userPinnedScoresTable = pgTable(
       .notNull()
       .references(() => authUsersTable.id, { onDelete: "cascade" }),
     scoreId: integer().notNull(),
+    message: varchar({ length: 200 }),
     createdAt: timestamp().notNull().defaultNow(),
   },
   table => [primaryKey({ columns: [table.userId, table.scoreId] })]

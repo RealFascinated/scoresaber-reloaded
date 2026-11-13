@@ -45,6 +45,25 @@ export async function changePinnedScore(scoreId: number, action: "pin" | "unpin"
 }
 
 /**
+ * Sets the message shown on one of the signed-in user's pinned scores.
+ *
+ * @param message the message, empty to remove it
+ * @throws with the backend's message when it was refused
+ */
+export async function changePinnedScoreMessage(scoreId: number, message: string): Promise<void> {
+  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${USER_PINNED_SCORES_ROUTE}/${scoreId}/message`, {
+    method: "PUT",
+    credentials: "include",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ message }),
+  });
+  if (!response.ok) {
+    const body = (await response.json().catch(() => undefined)) as { message?: string } | undefined;
+    throw new Error(body?.message ?? `Failed to save the message (${response.status})`);
+  }
+}
+
+/**
  * Fetches the scores a player pinned to the top of their profile.
  *
  * @param realmId the realm to show pp for

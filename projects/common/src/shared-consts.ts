@@ -4,6 +4,7 @@ export const SHARED_CONSTS = {
   maxStars: 15,
   maxFollowing: 15,
   maxPinnedScores: 5,
+  maxPinnedScoreMessageLength: 200,
 };
 
 export const SERVER_PROXIES = [

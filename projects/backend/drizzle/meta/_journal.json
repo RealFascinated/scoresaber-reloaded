@@ -470,6 +470,13 @@
       "when": 1794505490461,
       "tag": "0066_drop_unused_beatleader_leaderboard_index",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1794590471515,
+      "tag": "0067_pinned_score_message",
+      "breakpoints": true
     }
   ]
 }

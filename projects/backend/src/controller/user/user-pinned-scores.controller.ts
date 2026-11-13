@@ -3,6 +3,7 @@ import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { RealmQuerySchema } from "@ssr/common/schemas/realm/realm-query";
 import {
   PinnedScoreIdsResponseSchema,
+  PinnedScoreMessageBodySchema,
   PinnedScoresResponseSchema,
 } from "@ssr/common/schemas/response/user/pinned-scores";
 import { Elysia, t } from "elysia";
@@ -46,6 +47,24 @@ export default function userPinnedScoresController(app: Elysia) {
         }
         if (result === "limit-reached") {
           return status(400, { statusCode: 400, message: "You have reached the maximum of pinned scores" });
+        }
+        return { scoreIds: await UserPinnedScoresService.getScoreIds(user.id) };
+      }
+    )
+    .put(
+      `${USER_PINNED_SCORES_ROUTE}/:scoreId/message`,
+      {
+        auth: true,
+        tags: ["User"],
+        params: ScoreParamsSchema,
+        body: PinnedScoreMessageBodySchema,
+        detail: { description: "Set the message of one of the signed-in user's pinned scores" },
+      },
+      async ({ user, params: { scoreId }, body, set, status }) => {
+        set.headers["cache-control"] = PRIVATE_NO_STORE;
+
+        if (!(await UserPinnedScoresService.setMessage(user.id, scoreId, body.message))) {
+          return status(404, { statusCode: 404, message: "That score isn't pinned" });
         }
         return { scoreIds: await UserPinnedScoresService.getScoreIds(user.id) };
       }
