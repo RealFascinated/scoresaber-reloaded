@@ -66,6 +66,13 @@ export default function SimpleTooltip({
         <div
           ref={triggerRef}
           onClick={isMobile ? () => setOpen(previous => !previous) : undefined}
+          onFocus={event => {
+            // Only open on keyboard focus; programmatic focus (e.g. a popover auto-focusing its
+            // first button after a click) must not pop the tooltip open.
+            if (!isMobile && !event.target.matches(":focus-visible")) {
+              event.preventDefault();
+            }
+          }}
           tabIndex={interactive ? undefined : 0}
           className={cn(
             !interactive &&
