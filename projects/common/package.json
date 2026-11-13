@@ -22,9 +22,9 @@
     "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "dependencies": {
-    "typebox": "^1.4.6",
+    "typebox": "^1.4.7",
     "dayjs": "^1.11.23",
     "devalue": "^6.0.3",
-    "ws": "^8.22.2"
+    "ws": "^8.23.0"
   }
 }
