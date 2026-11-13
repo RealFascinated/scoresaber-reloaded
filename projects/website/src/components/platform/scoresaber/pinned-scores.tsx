@@ -136,9 +136,30 @@ function PinnedScoreCard({
   return (
     <div
       data-ss-score-row
-      className="ring-border bg-background/40 @container flex min-w-0 flex-col gap-3 rounded-lg p-3 ring-1"
+      className="ring-border bg-background/40 @container flex min-w-0 flex-col gap-2 rounded-lg p-2.5 ring-1"
     >
-      <div className="flex min-w-0 items-center gap-2 text-sm">
+      <div className="flex min-w-0 items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <ScoreSongInfo
+            song={{
+              name: leaderboard.fullName,
+              authorName: leaderboard.songAuthorName,
+              art: leaderboard.songArt,
+            }}
+            level={{ authorName: leaderboard.levelAuthorName, difficulty: leaderboard.difficulty.difficulty }}
+            metric={{ value: leaderboard.stars, icon: SharedIcons.DifficultyStarIcon }}
+            beatSaverMap={beatSaver}
+            leaderboardId={leaderboard.id}
+            imageSize={64}
+          >
+            <div className="mt-1 flex flex-wrap items-center gap-1 [&>div]:px-2 [&>div:empty]:hidden">
+              <ScoreBadges badges={pinnedBadges} score={score} leaderboard={leaderboard} />
+            </div>
+          </ScoreSongInfo>
+        </div>
+      </div>
+
+      <div className="border-border/60 mt-auto flex min-w-0 items-center gap-2 border-t pt-2 text-xs">
         {score.rank === -1 ? null : (
           <SimpleLink
             href={`/leaderboard/${leaderboard.id}?page=${getPageFromRank(score.rank, 12)}&highlight=${score.playerId}`}
@@ -158,28 +179,9 @@ function PinnedScoreCard({
           message={message}
           editable={isOwnProfile}
         />
-      </div>
-
-      <div className="flex min-w-0 items-start gap-2">
-        <div className="min-w-0 flex-1">
-          <ScoreSongInfo
-            song={{
-              name: leaderboard.fullName,
-              authorName: leaderboard.songAuthorName,
-              art: leaderboard.songArt,
-            }}
-            level={{ authorName: leaderboard.levelAuthorName, difficulty: leaderboard.difficulty.difficulty }}
-            metric={{ value: leaderboard.stars, icon: SharedIcons.DifficultyStarIcon }}
-            beatSaverMap={beatSaver}
-            leaderboardId={leaderboard.id}
-            imageSize={64}
-          >
-            <div className="mt-1 flex flex-wrap gap-1 [&>div]:px-2 [&>div:empty]:hidden">
-              <ScoreBadges badges={pinnedBadges} score={score} leaderboard={leaderboard} />
-            </div>
-          </ScoreSongInfo>
+        <div className="shrink-0">
+          <ScoreSaberScoreButtons leaderboard={leaderboard} beatSaverMap={beatSaver} score={score} />
         </div>
-        <ScoreSaberScoreButtons leaderboard={leaderboard} beatSaverMap={beatSaver} score={score} />
       </div>
     </div>
   );
@@ -197,12 +199,12 @@ export default function PinnedScores({ playerId }: { playerId: string }) {
   const isOwnProfile = me?.playerId === playerId;
 
   return (
-    <section className="ring-border bg-card @container flex flex-col gap-3 rounded-xl p-4 ring-1">
+    <section className="ring-border bg-card @container flex flex-col gap-2 rounded-xl p-3 ring-1">
       <h3 className="text-muted-foreground flex items-center justify-center gap-2 text-sm font-semibold">
         <SharedIcons.PinScoreIcon className="size-4" />
         Pinned Scores
       </h3>
-      <div className="grid grid-cols-1 gap-2 @3xl:grid-cols-2 @6xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 @2xl:grid-cols-2 @5xl:grid-cols-3">
         {data.items.map(pinned => (
           <PinnedScoreCard
             key={pinned.score.scoreId}
