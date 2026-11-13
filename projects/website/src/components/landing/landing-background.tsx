@@ -27,11 +27,23 @@ export function LandingBackground() {
       color: string;
     }[] = [];
 
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    // Assigning canvas.width reallocates the bitmap, so coalesce a resize drag into one change per frame
+    let resizeFrame = 0;
+    const applySize = () => {
+      resizeFrame = 0;
+      if (canvas.width !== window.innerWidth) {
+        canvas.width = window.innerWidth;
+      }
+      if (canvas.height !== window.innerHeight) {
+        canvas.height = window.innerHeight;
+      }
     };
-    resize();
+    const resize = () => {
+      if (resizeFrame === 0) {
+        resizeFrame = requestAnimationFrame(applySize);
+      }
+    };
+    applySize();
     window.addEventListener("resize", resize);
 
     const particleCount = 60;
@@ -78,6 +90,7 @@ export function LandingBackground() {
 
     return () => {
       cancelAnimationFrame(animationId);
+      cancelAnimationFrame(resizeFrame);
       window.removeEventListener("resize", resize);
     };
   }, []);

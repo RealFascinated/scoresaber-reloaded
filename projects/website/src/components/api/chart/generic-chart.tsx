@@ -274,6 +274,7 @@ const GenericChart = ({ config, labels, markers }: Props) => {
     return {
       maintainAspectRatio: false,
       responsive: true,
+      resizeDelay: 150,
       interaction: { mode: "index" as const, intersect: false },
       scales: mergedScales,
       elements: {

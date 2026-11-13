@@ -65,7 +65,10 @@ export default function ScoreSaberScoreDisplay({
   const isTracked = score.beatLeaderScore != undefined;
 
   return (
-    <div data-ss-score-row className="group/score @container relative px-2 pt-2 pb-2 @3xl:pl-0">
+    <div
+      data-ss-score-row
+      className="group/score @container relative px-2 pt-2 pb-2 [contain-intrinsic-size:auto_120px] [content-visibility:auto] @3xl:pl-0"
+    >
       <div className="flex items-center">
         <div
           className={cn(

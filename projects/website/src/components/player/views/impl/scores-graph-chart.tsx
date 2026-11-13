@@ -284,6 +284,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
   const chartOptions = useMemo<ChartOptions<ChartMode>>(
     () => ({
       responsive: true,
+      resizeDelay: 150,
       maintainAspectRatio: false,
       scales,
       plugins: {
