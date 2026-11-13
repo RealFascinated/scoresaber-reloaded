@@ -20,8 +20,6 @@ import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { playerHistoryRowToType } from "../../db/converter/player-history";
 import { type PlayerHistoryRow } from "../../db/schema";
-import { FetchMissingScoresQueue } from "../../queue/impl/player-scoresaber-scores-queue";
-import { QueueId, QueueManager } from "../../queue/queue-manager";
 import {
   PlayerHistoryRepository,
   type DailyScoreCounterKey,
@@ -33,6 +31,7 @@ import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { RealmService } from "../realm/realm.service";
 import { PlayerCoreService } from "./player-core.service";
+import { PlayerScoresService } from "./player-scores.service";
 import ScoreSaberPlayerService from "./scoresaber-player.service";
 
 export class PlayerHistoryService {
@@ -100,14 +99,9 @@ export class PlayerHistoryService {
           ]);
           const recordedPlays = recordedScores + archivedScores;
           if (recordedPlays < player.stats.totalSubmittedPlays) {
-            PlayerHistoryService.logger.info(
-              `Player ${playerId} has missing scores. Adding them to the refresh queue...`
-            );
-            // Add the player to the refresh queue
-            (QueueManager.getQueue(QueueId.PlayerScoreRefreshQueue) as FetchMissingScoresQueue).add({
-              id: playerId,
-              data: playerId,
-            });
+            // Confirm against ScoreSaber's score total with one small page request; only a
+            // real mismatch is queued for the (expensive) full reconcile.
+            await PlayerScoresService.checkScoreCountFromApi(playerId);
           }
         }
 

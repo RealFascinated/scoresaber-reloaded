@@ -459,6 +459,76 @@ export class ScoreSaberScoresRepository {
     return row?.count ?? 0;
   }
 
+  /**
+   * Gets the ids of every current score row for a player.
+   *
+   * @param playerId the player's id
+   */
+  public static async findScoreIdsByPlayerId(playerId: string): Promise<Set<number>> {
+    const rows = await db
+      .select({ scoreId: scoreSaberScoresTable.scoreId })
+      .from(scoreSaberScoresTable)
+      .where(eq(scoreSaberScoresTable.playerId, playerId));
+    return new Set(rows.map(row => row.scoreId));
+  }
+
+  /**
+   * Gets the distinct leaderboard ids of the given score rows for a player.
+   *
+   * @param playerId the player's id
+   * @param scoreIds the ids of the scores to look up
+   */
+  public static async findLeaderboardIdsByScoreIds(playerId: string, scoreIds: number[]): Promise<number[]> {
+    if (scoreIds.length === 0) {
+      return [];
+    }
+
+    const ids = new Set<number>();
+    for (let i = 0; i < scoreIds.length; i += 10_000) {
+      const rows = await db
+        .selectDistinct({ leaderboardId: scoreSaberScoresTable.leaderboardId })
+        .from(scoreSaberScoresTable)
+        .where(
+          and(
+            eq(scoreSaberScoresTable.playerId, playerId),
+            inArray(scoreSaberScoresTable.scoreId, scoreIds.slice(i, i + 10_000))
+          )
+        );
+      for (const row of rows) {
+        ids.add(row.leaderboardId);
+      }
+    }
+    return [...ids];
+  }
+
+  /**
+   * Deletes the given score rows (and their realm pp rows) for a player.
+   *
+   * @param playerId the player's id; rows of other players are never touched
+   * @param scoreIds the ids of the scores to delete
+   */
+  public static async deleteByPlayerAndScoreIds(playerId: string, scoreIds: number[]): Promise<void> {
+    if (scoreIds.length === 0) {
+      return;
+    }
+
+    await db.transaction(async tx => {
+      await tx
+        .delete(scoreSaberScoreRealmsTable)
+        .where(
+          and(
+            eq(scoreSaberScoreRealmsTable.playerId, playerId),
+            inArray(scoreSaberScoreRealmsTable.scoreId, scoreIds)
+          )
+        );
+      await tx
+        .delete(scoreSaberScoresTable)
+        .where(
+          and(eq(scoreSaberScoresTable.playerId, playerId), inArray(scoreSaberScoresTable.scoreId, scoreIds))
+        );
+    });
+  }
+
   public static async countByLeaderboardId(leaderboardId: number): Promise<number> {
     const [row] = await db
       .select({ count: count() })

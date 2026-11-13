@@ -1,6 +1,7 @@
 import { EventListener } from "../event/event-listener";
 import { LeaderboardScoreSeedQueue } from "./impl/leaderboard-score-seed-queue";
 import { PlayerBeatLeaderScoreSeedQueue } from "./impl/player-beatleader-score-seed-queue";
+import { PlayerScoreReconcileQueue } from "./impl/player-score-reconcile-queue";
 import { FetchMissingScoresQueue } from "./impl/player-scoresaber-scores-queue";
 import { Queue, QueueItem } from "./queue";
 
@@ -8,6 +9,7 @@ export enum QueueId {
   PlayerScoreRefreshQueue = "player-score-refresh-queue",
   LeaderboardScoreSeedQueue = "leaderboard-score-seed-queue",
   PlayerBeatLeaderScoreSeedQueue = "player-beatleader-score-seed-queue",
+  PlayerScoreReconcileQueue = "player-score-reconcile-queue",
 }
 
 export class QueueManager implements EventListener {
@@ -17,6 +19,7 @@ export class QueueManager implements EventListener {
     QueueManager.addQueue(new FetchMissingScoresQueue());
     QueueManager.addQueue(new LeaderboardScoreSeedQueue());
     QueueManager.addQueue(new PlayerBeatLeaderScoreSeedQueue());
+    QueueManager.addQueue(new PlayerScoreReconcileQueue());
 
     // Start all queues
     for (const queue of QueueManager.queues.values()) {

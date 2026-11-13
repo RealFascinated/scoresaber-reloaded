@@ -11,6 +11,7 @@ import { TableCountsRepository } from "../../../src/repositories/table-counts.re
 import {
   TEST_LEADERBOARD_ID,
   TEST_LEADERBOARD_QUALIFIED_ID,
+  TEST_LEADERBOARD_SECOND_ID,
   TEST_PLAYER_ID,
   TEST_PLAYER_TWO_ID,
   TEST_SCORE_ID,
@@ -160,6 +161,69 @@ describe("ScoreSaberScoresRepository", () => {
         DEFAULT_REALM_ID
       );
       expect(current?.scoreId).toBe(replacementId);
+    });
+  });
+
+  describe("findScoreIdsByPlayerId", () => {
+    test("returns the ids of the player's score rows", async () => {
+      const ids = await ScoreSaberScoresRepository.findScoreIdsByPlayerId(TEST_PLAYER_ID);
+      expect(ids.has(TEST_SCORE_ID)).toBe(true);
+    });
+
+    test("returns an empty set for an unknown player", async () => {
+      expect((await ScoreSaberScoresRepository.findScoreIdsByPlayerId(UNKNOWN_PLAYER_ID)).size).toBe(0);
+    });
+  });
+
+  describe("findLeaderboardIdsByScoreIds", () => {
+    test("returns the leaderboards of the player's scores", async () => {
+      expect(
+        await ScoreSaberScoresRepository.findLeaderboardIdsByScoreIds(TEST_PLAYER_ID, [
+          TEST_SCORE_ID,
+          UNKNOWN_SCORE_ID,
+        ])
+      ).toEqual([TEST_LEADERBOARD_ID]);
+    });
+
+    test("ignores scores that belong to another player", async () => {
+      expect(
+        await ScoreSaberScoresRepository.findLeaderboardIdsByScoreIds(TEST_PLAYER_TWO_ID, [TEST_SCORE_ID])
+      ).toEqual([]);
+    });
+
+    test("returns an empty array for an empty input", async () => {
+      expect(await ScoreSaberScoresRepository.findLeaderboardIdsByScoreIds(TEST_PLAYER_ID, [])).toEqual([]);
+    });
+  });
+
+  describe("deleteByPlayerAndScoreIds", () => {
+    test("does not delete a score that belongs to another player", async () => {
+      await ScoreSaberScoresRepository.deleteByPlayerAndScoreIds(TEST_PLAYER_TWO_ID, [TEST_SCORE_ID]);
+      expect(await ScoreSaberScoresRepository.rowExistsByScoreId(TEST_SCORE_ID)).toBe(true);
+    });
+
+    test("is a no-op for an empty input", async () => {
+      await ScoreSaberScoresRepository.deleteByPlayerAndScoreIds(TEST_PLAYER_ID, []);
+      expect(await ScoreSaberScoresRepository.rowExistsByScoreId(TEST_SCORE_ID)).toBe(true);
+    });
+
+    test("deletes the score row and its realm pp row", async () => {
+      const scoreId = 900_020;
+      await ScoreSaberScoresRepository.insertScore(
+        buildScoreRow({
+          scoreId,
+          playerId: TEST_PLAYER_TWO_ID,
+          leaderboardId: TEST_LEADERBOARD_SECOND_ID,
+          pp: 10,
+        }),
+        DEFAULT_REALM_ID
+      );
+      expect(await ScoreSaberScoresRepository.rowExistsByScoreId(scoreId)).toBe(true);
+
+      await ScoreSaberScoresRepository.deleteByPlayerAndScoreIds(TEST_PLAYER_TWO_ID, [scoreId]);
+
+      expect(await ScoreSaberScoresRepository.rowExistsByScoreId(scoreId)).toBe(false);
+      expect(await ScoreSaberScoresRepository.findRowByScoreId(scoreId, DEFAULT_REALM_ID)).toBeUndefined();
     });
   });
 

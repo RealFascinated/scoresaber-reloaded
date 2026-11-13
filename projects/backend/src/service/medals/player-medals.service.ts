@@ -83,6 +83,16 @@ export class PlayerMedalsService {
   }
 
   /**
+   * Re-syncs account medal totals for players whose score rows were removed (deleted scores no longer
+   * show up in any leaderboard recompute, so their totals would otherwise keep the removed medals).
+   *
+   * @param playerIds the players to sync
+   */
+  public static async syncPlayersMedalTotals(playerIds: string[]): Promise<void> {
+    await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds(playerIds);
+  }
+
+  /**
    * Recomputes score medals for every ranked leaderboard, then syncs all account medal totals from scores
    * and refreshes materialized medal rank columns.
    */
