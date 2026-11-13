@@ -69,12 +69,11 @@ export class ScoreSaberMedalsRepository {
       return [];
     }
 
-    return db.transaction(async tx => {
-      const updated = await tx.execute(
-        ScoreSaberMedalsRepository.rankedLeaderboardMedalsUpdateSql(leaderboard.id, true)
-      );
-      return distinctPlayerIds(updated);
-    });
+    // A single statement is already atomic, so no explicit transaction (saves BEGIN/COMMIT round trips)
+    const updated = await db.execute(
+      ScoreSaberMedalsRepository.rankedLeaderboardMedalsUpdateSql(leaderboard.id, true)
+    );
+    return distinctPlayerIds(updated);
   }
 
   public static async selectPlayerIdsAffectedByMedalUpdate(
@@ -190,10 +189,19 @@ export class ScoreSaberMedalsRepository {
     });
   }
 
-  public static async syncMedalTotalsForPlayerIds(playerIds: string[]): Promise<void> {
+  /**
+   * Recomputes the given players' account medal totals from their score rows.
+   *
+   * @param playerIds the players to sync
+   * @returns the before/after totals of the players whose total actually changed
+   */
+  public static async syncMedalTotalsForPlayerIds(
+    playerIds: string[]
+  ): Promise<Map<string, { before: number; after: number }>> {
+    const changes = new Map<string, { before: number; after: number }>();
     const unique = [...new Set(playerIds)];
     if (unique.length === 0) {
-      return;
+      return changes;
     }
 
     const totalsByPlayer = new Map<string, number>(unique.map(id => [id, 0]));
@@ -222,15 +230,23 @@ export class ScoreSaberMedalsRepository {
     }
 
     const valueRows = unique.map(pid => sql`(${pid}::varchar(32), ${totalsByPlayer.get(pid) ?? 0}::int)`);
-    await db.transaction(async tx => {
-      await tx.execute(sql`
-        UPDATE "scoresaber-accounts" AS a
-        SET medals = v.medals
-        FROM (VALUES ${sql.join(valueRows, sql`, `)}) AS v(id, medals)
-        WHERE a.id = v.id
-          AND a.medals IS DISTINCT FROM v.medals
-      `);
-    });
+    // `o` is read from the statement's snapshot, so it holds the total from before this update
+    const result = await db.execute(sql`
+      UPDATE "scoresaber-accounts" AS a
+      SET medals = v.medals
+      FROM (VALUES ${sql.join(valueRows, sql`, `)}) AS v(id, medals)
+      INNER JOIN "scoresaber-accounts" AS o ON o.id = v.id
+      WHERE a.id = v.id
+        AND a.medals IS DISTINCT FROM v.medals
+      RETURNING a.id AS id, o.medals AS "beforeMedals", v.medals AS "afterMedals"
+    `);
+    const updated = (
+      result as unknown as { rows?: { id: string; beforeMedals: number; afterMedals: number }[] }
+    ).rows;
+    for (const row of updated ?? []) {
+      changes.set(row.id, { before: Number(row.beforeMedals ?? 0), after: Number(row.afterMedals) });
+    }
+    return changes;
   }
 
   public static async refreshMaterializedMedalRanks(): Promise<void> {

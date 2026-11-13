@@ -27,31 +27,9 @@ export class PlayerMedalsService {
       return new Map();
     }
 
-    const affectedIds = await ScoreSaberMedalsRepository.selectPlayerIdsAffectedByMedalUpdate(leaderboard);
-    if (affectedIds.length === 0) {
-      const updatedPlayerIds = await ScoreSaberMedalsRepository.updateMedalsOnLeaderboard(leaderboard);
-      await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds(updatedPlayerIds);
-      return new Map();
-    }
-
-    const beforeRows = await ScoreSaberMedalsRepository.selectIdAndMedalsByIds(affectedIds);
+    // The sync reports each player's total before and after, so no separate reads are needed
     const updatedPlayerIds = await ScoreSaberMedalsRepository.updateMedalsOnLeaderboard(leaderboard);
-
-    await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds(updatedPlayerIds);
-    const afterRows = await ScoreSaberMedalsRepository.selectIdAndMedalsByIds(affectedIds);
-
-    const beforeById = new Map(beforeRows.map(r => [r.id, r.medals ?? 0]));
-    const afterById = new Map(afterRows.map(r => [r.id, r.medals ?? 0]));
-
-    const changes = new Map<string, MedalChange>();
-    for (const id of affectedIds) {
-      const before = beforeById.get(id) ?? 0;
-      const after = afterById.get(id) ?? 0;
-      if (before !== after) {
-        changes.set(id, { before, after });
-      }
-    }
-    return changes;
+    return ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds(updatedPlayerIds);
   }
 
   /**
@@ -68,18 +46,22 @@ export class PlayerMedalsService {
     const ranked = leaderboards.filter(leaderboard => leaderboard.ranked);
     const updatedPlayerIds = new Set<string>();
 
-    for (const batch of chunkArray(ranked, RANKED_MEDAL_RECOMPUTE_CONCURRENCY)) {
-      const updated = await Promise.all(
-        batch.map(leaderboard => ScoreSaberMedalsRepository.updateMedalsOnLeaderboard(leaderboard))
-      );
-      for (const playerIds of updated) {
-        for (const playerId of playerIds) {
-          updatedPlayerIds.add(playerId);
+    try {
+      for (const batch of chunkArray(ranked, RANKED_MEDAL_RECOMPUTE_CONCURRENCY)) {
+        const updated = await Promise.all(
+          batch.map(leaderboard => ScoreSaberMedalsRepository.updateMedalsOnLeaderboard(leaderboard))
+        );
+        for (const playerIds of updated) {
+          for (const playerId of playerIds) {
+            updatedPlayerIds.add(playerId);
+          }
         }
       }
+    } finally {
+      // Score medals of finished batches are already committed, so their account totals must be synced
+      // even when a later batch fails; otherwise they would stay stale until the nightly recompute.
+      await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds([...updatedPlayerIds]);
     }
-
-    await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds([...updatedPlayerIds]);
   }
 
   /**
