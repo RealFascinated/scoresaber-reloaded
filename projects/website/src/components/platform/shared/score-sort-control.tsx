@@ -32,7 +32,7 @@ export default function ScoreSortControl<T extends string>({
       return option.icon;
     }
     if (isBusy) {
-      return <Spinner size="sm" className="size-4" />;
+      return <Spinner size="sm" className="size-4 text-current" />;
     }
     if (!hasDirection) {
       return option.icon;
