@@ -477,6 +477,13 @@
       "when": 1794590471515,
       "tag": "0067_pinned_score_message",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1794590785274,
+      "tag": "0068_huge_revanche",
+      "breakpoints": true
     }
   ]
 }

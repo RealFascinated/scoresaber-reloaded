@@ -11,6 +11,7 @@ import PlayerAccBadges from "./acc-badges";
 import PlayerActions from "./player-actions";
 import PlayerAvatar from "./player-avatar";
 import PlayerFollows from "./player-follows";
+import PlayerNameHistory from "./player-name-history";
 import PlayerOverview from "./player-overview";
 import PlayerStats, { PlayerStatsSettings } from "./player-stats";
 import PlayerStreak from "./player-streak";
@@ -47,6 +48,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                     {player.name}
                   </SimpleLink>
                 </h1>
+                <PlayerNameHistory previousNames={player.previousNames ?? []} />
                 {player.inactive && (
                   <span className="text-inactive-account rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium">
                     Inactive Account

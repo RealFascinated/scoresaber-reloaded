@@ -116,6 +116,22 @@ export const scoreSaberAccountsTable = pgTable(
   ]
 );
 
+/**
+ * Every name a player used before their current one. `changedAt` is when the name was replaced,
+ * and a name that is used again is removed from here so it is only ever the current one.
+ */
+export const scoreSaberAccountNamesTable = pgTable(
+  "scoresaber-account-names",
+  {
+    playerId: varchar({ length: 32 })
+      .notNull()
+      .references(() => scoreSaberAccountsTable.id, { onDelete: "cascade" }),
+    name: text().notNull(),
+    changedAt: timestamp().notNull().defaultNow(),
+  },
+  table => [primaryKey({ columns: [table.playerId, table.name] })]
+);
+
 export const playerHistoryTable = pgTable(
   "scoresaber-player-history",
   {

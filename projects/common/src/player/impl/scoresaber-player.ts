@@ -5,6 +5,11 @@ import Player, { StatisticChange } from "../player";
 
 export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   /**
+   * The names this player used before, most recent first.
+   */
+  previousNames?: string[];
+
+  /**
    * The contextual rank for this player
    */
   contextualRank?: number;

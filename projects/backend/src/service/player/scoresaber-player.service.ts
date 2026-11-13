@@ -14,6 +14,7 @@ import { getPageFromRank } from "@ssr/common/utils/utils";
 import { playerCacheKey } from "../../common/cache-keys";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
+import { ScoreSaberAccountNamesRepository } from "../../repositories/scoresaber-account-names.repository";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
@@ -109,7 +110,10 @@ export default class ScoreSaberPlayerService {
       throw new NotFoundError(`Player account "${id}" not found`);
     }
 
-    const basePlayer = ScoreSaberPlayerService.buildBasePlayer(player, account);
+    const basePlayer: ScoreSaberPlayer = {
+      ...ScoreSaberPlayerService.buildBasePlayer(player, account),
+      previousNames: await ScoreSaberAccountNamesRepository.findNamesByPlayerId(id),
+    };
 
     if (type === "basic") {
       return basePlayer;

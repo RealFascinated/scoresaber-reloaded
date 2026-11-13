@@ -18,6 +18,7 @@ import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-accoun
 import { type ScoreSaberAccountRow } from "../../db/schema";
 import { FetchMissingScoresQueue } from "../../queue/impl/player-scoresaber-scores-queue";
 import { QueueId, QueueManager } from "../../queue/queue-manager";
+import { ScoreSaberAccountNamesRepository } from "../../repositories/scoresaber-account-names.repository";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
@@ -74,11 +75,15 @@ export class PlayerCoreService {
     }
 
     let shouldSave = false;
-    const updates: Partial<Pick<ScoreSaberAccountRow, "country" | "banned" | "avatar">> = {};
-    // Only sync country/banned/avatar when a fresh player token is available.
+    const updates: Partial<Pick<ScoreSaberAccountRow, "name" | "country" | "banned" | "avatar">> = {};
+    // Only sync name/country/banned/avatar when a fresh player token is available.
     // Without one (e.g. score notifications), the stored values must not be
     // overwritten with null/false.
     if (playerToken) {
+      if (playerToken.name && playerToken.name !== account.name) {
+        updates.name = playerToken.name;
+        shouldSave = true;
+      }
       if (playerToken.country !== account.country) {
         updates.country = playerToken.country ?? null;
         shouldSave = true;
@@ -309,9 +314,17 @@ export class PlayerCoreService {
       return;
     }
 
+    // A name change pushes the old name onto the player's name history
+    const existing =
+      patch.name !== undefined ? await ScoreSaberAccountsRepository.findRowById(playerId) : undefined;
+
     const updated = await ScoreSaberAccountsRepository.updateAccount(playerId, patch);
     if (!updated) {
       return;
+    }
+
+    if (existing && patch.name !== undefined && existing.name !== patch.name) {
+      await ScoreSaberAccountNamesRepository.recordNameChange(playerId, existing.name, patch.name);
     }
 
     if (options?.invalidateCache !== false) {
