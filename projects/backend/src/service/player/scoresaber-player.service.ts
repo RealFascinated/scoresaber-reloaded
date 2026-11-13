@@ -15,6 +15,7 @@ import { playerCacheKey } from "../../common/cache-keys";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
 import ActiveAccountsMetric from "../../metrics/impl/player/active-accounts";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 import MetricsService, { MetricType } from "../infra/metrics.service";
@@ -115,9 +116,10 @@ export default class ScoreSaberPlayerService {
     }
 
     const statistics = await PlayerStatisticsService.getStatistics(player, realmId);
-    const [hmdBreakdown, history] = await Promise.all([
+    const [hmdBreakdown, history, topPp] = await Promise.all([
       PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages),
       PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30, realmId),
+      ScoreSaberScoresRepository.getTopPpByPlayer(id, realmId),
     ]);
 
     let rankPercentile =
@@ -141,6 +143,7 @@ export default class ScoreSaberPlayerService {
         monthly: getPlayerStatisticChanges(history, 30),
       },
       plusOnePp: statistics.plusOnePp,
+      topPp: topPp,
       // The peak rank is only tracked for the default realm.
       peakRank: realmId === DEFAULT_REALM_ID ? account.peakRank : undefined,
       hmdBreakdown: hmdBreakdown,

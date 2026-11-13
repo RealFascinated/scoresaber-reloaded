@@ -546,6 +546,29 @@ export class ScoreSaberScoresRepository {
       .limit(limit);
   }
 
+  /**
+   * Gets the highest pp a player has on a single score.
+   *
+   * @param playerId the player's account id
+   * @param realmId the realm to resolve pp for
+   * @returns the pp, or undefined when the player has no ranked scores
+   */
+  public static async getTopPpByPlayer(playerId: string, realmId: number): Promise<number | undefined> {
+    const [row] = await db
+      .select({ pp: scoreSaberScoreRealmsTable.pp })
+      .from(scoreSaberScoreRealmsTable)
+      .where(
+        and(
+          eq(scoreSaberScoreRealmsTable.realmId, realmId),
+          eq(scoreSaberScoreRealmsTable.playerId, playerId),
+          gt(scoreSaberScoreRealmsTable.pp, 0)
+        )
+      )
+      .orderBy(desc(scoreSaberScoreRealmsTable.pp))
+      .limit(1);
+    return row?.pp;
+  }
+
   public static async getPpAndScoreIdByPlayer(
     playerId: string,
     realmId: number

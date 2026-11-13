@@ -62,6 +62,7 @@ export const ScoreSaberPlayerSchema = Type.Evaluate(
       peakRank: Type.Optional(ScoreSaberPeakRankSchema),
       rankPages: ScoreSaberRankPagesSchema,
       plusOnePp: Type.Number(),
+      topPp: Type.Optional(Type.Number()),
       trackedSince: DateSchema,
       medals: Type.Number(),
       medalsRank: Type.Number(),

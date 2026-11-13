@@ -20,6 +20,7 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   websiteLanding: WebsiteLanding.PLAYER_HOME,
   defaultLeaderboardCountry: null,
   chartLegends: {},
+  playerStatsLayout: null,
   backgroundCover: BACKGROUND_COVER_NONE,
   customBackground: "",
   backgroundCoverBrightness: 50,

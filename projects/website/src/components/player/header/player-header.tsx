@@ -4,6 +4,7 @@ import FollowButton from "@/components/following/follow-button";
 import SimpleLink from "@/components/simple-link";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { getScoreSaberRoles } from "@ssr/common/utils/scoresaber.util";
+import { useState } from "react";
 import Card from "../../card";
 import PlayerBadges from "../player-badges";
 import PlayerAccBadges from "./acc-badges";
@@ -11,7 +12,7 @@ import PlayerActions from "./player-actions";
 import PlayerAvatar from "./player-avatar";
 import PlayerFollows from "./player-follows";
 import PlayerOverview from "./player-overview";
-import PlayerStats from "./player-stats";
+import PlayerStats, { PlayerStatsSettings } from "./player-stats";
 import PlayerStreak from "./player-streak";
 
 type PlayerHeaderProps = {
@@ -19,6 +20,8 @@ type PlayerHeaderProps = {
 };
 
 export default function PlayerHeader({ player }: PlayerHeaderProps) {
+  const [editingStats, setEditingStats] = useState(false);
+
   return (
     <Card className="flex flex-col gap-4 lg:gap-5">
       <div className="flex flex-col items-center gap-4 text-center select-none lg:flex-row lg:items-start lg:gap-6 lg:text-start">
@@ -59,6 +62,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 {/* Both are rendered and CSS picks one, as a viewport check in JS shifts the layout on hydration */}
                 <FollowButton player={player} iconOnly className="lg:hidden" />
                 <FollowButton player={player} className="hidden lg:inline-flex" />
+                <PlayerStatsSettings editing={editingStats} onEditingChange={setEditingStats} />
               </div>
             </div>
             <div className="flex justify-center lg:justify-start">
@@ -67,7 +71,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
             <PlayerOverview player={player} />
           </div>
 
-          <PlayerStats player={player} />
+          <PlayerStats player={player} editing={editingStats} />
           <div className="w-full lg:hidden">
             <PlayerStreak player={player} />
           </div>

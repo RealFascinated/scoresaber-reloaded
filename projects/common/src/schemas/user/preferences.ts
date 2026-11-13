@@ -28,6 +28,20 @@ export const UserPreferencesSchema = Type.Object(
       Type.String({ maxLength: 64 }),
       Type.Record(Type.String({ maxLength: 64 }), Type.Boolean())
     ),
+    /**
+     * The player profile stats: every stat name in display order, and the ones shown before the
+     * "Show more" collapse. Null for the defaults.
+     */
+    playerStatsLayout: Type.Union([
+      Type.Object(
+        {
+          order: Type.Array(Type.String({ maxLength: 64 }), { maxItems: 64 }),
+          pinned: Type.Array(Type.String({ maxLength: 64 }), { maxItems: 64 }),
+        },
+        { additionalProperties: false }
+      ),
+      Type.Null(),
+    ]),
     /** A preset id, "custom" or "none". */
     backgroundCover: Type.String({ minLength: 1, maxLength: 64, pattern: "^[a-z0-9-]+$" }),
     /** A hex color or an http(s) image url, used when the cover is "custom". */

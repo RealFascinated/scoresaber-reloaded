@@ -37,6 +37,11 @@ export default interface ScoreSaberPlayer extends ScoreSaberPlayerBase {
   plusOnePp: number;
 
   /**
+   * The highest pp the player has on a single score.
+   */
+  topPp?: number;
+
+  /**
    * The date the player was first tracked.
    */
   trackedSince: Date;
