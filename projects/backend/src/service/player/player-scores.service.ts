@@ -410,6 +410,17 @@ export class PlayerScoresService {
         (entry): entry is { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard } =>
           entry.score != null && entry.leaderboard != null
       );
+    const missingRemoteCount = remoteTokens.filter(token => !localIds.has(token.score.id)).length;
+    if (missingRemoteCount > missingEntries.length) {
+      PlayerScoresService.logger.warn(
+        `Score reconcile for "${playerId}": ${missingRemoteCount - missingEntries.length} missing score(s) skipped because their leaderboard or score could not be built`
+      );
+    }
+    if (remoteIds.size !== firstPage.metadata.total) {
+      PlayerScoresService.logger.warn(
+        `Score reconcile for "${playerId}": ScoreSaber reported ${firstPage.metadata.total} scores but its pages returned ${remoteIds.size} unique ids (${remoteTokens.length} total), so nothing will be deleted`
+      );
+    }
     const trackingResults = await ScoreCoreService.trackScoreSaberScoresBatch(missingEntries);
     const rankedLeaderboards = new Map<number, ScoreSaberLeaderboard>();
     let added = 0;
@@ -421,6 +432,11 @@ export class PlayerScoresService {
         }
       }
     });
+    if (added < missingEntries.length) {
+      PlayerScoresService.logger.warn(
+        `Score reconcile for "${playerId}": ${missingEntries.length - added} of ${missingEntries.length} missing score(s) were not stored (slot already taken or id already exists)`
+      );
+    }
 
     // Delete what ScoreSaber no longer has, but only when the remote list is provably complete.
     let deleted = 0;
