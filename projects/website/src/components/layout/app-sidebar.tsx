@@ -63,11 +63,6 @@ const resourceLinks: FooterLink[] = [
     shortName: "API",
     href: `${env.NEXT_PUBLIC_API_URL}/swagger`,
   },
-  {
-    name: "System Status",
-    shortName: "Status",
-    href: "https://status.fascinated.cc/status/scoresaber-reloaded",
-  },
 ];
 
 const appLinks: FooterLink[] = [
