@@ -139,7 +139,7 @@ export class ScoreEventService {
       SET "trendingScore" = scored.score
       FROM scored
       WHERE leaderboards."id" = scored.leaderboard_id
-        AND leaderboards."trendingScore" IS DISTINCT FROM scored.score
+        AND abs(leaderboards."trendingScore" - scored.score) > 0.001 * greatest(scored.score, 1)
     `);
 
     await db.execute(sql`
