@@ -50,8 +50,10 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 </h1>
                 <PlayerNameHistory previousNames={player.previousNames ?? []} />
                 {player.inactive && (
-                  <span className="text-inactive-account rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium">
-                    Inactive Account
+                  <span className="order-first flex w-full justify-center lg:order-none lg:w-auto">
+                    <span className="text-inactive-account rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium">
+                      Inactive Account
+                    </span>
                   </span>
                 )}
                 {player.banned && (
