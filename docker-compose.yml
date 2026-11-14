@@ -18,12 +18,14 @@ services:
       retries: 30
 
   redis:
-    image: redis:7-alpine
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:latest
+    ulimits:
+      memlock: -1
     container_name: ssr-redis
     ports:
       - "6380:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
       interval: 2s
       timeout: 5s
       retries: 30
