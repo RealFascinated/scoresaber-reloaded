@@ -34,6 +34,13 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
         </div>
         <div className="flex w-full min-w-0 flex-col items-center gap-3 lg:items-start lg:gap-4">
           <div className="flex w-full flex-col gap-2 lg:gap-3">
+            {player.inactive && (
+              <div className="flex justify-center lg:hidden">
+                <span className="text-inactive-account rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium">
+                  Inactive Account
+                </span>
+              </div>
+            )}
             <div className="flex w-full flex-wrap items-center justify-center gap-3 lg:justify-between">
               <div className="flex min-w-0 flex-wrap items-center justify-center gap-2 lg:justify-start">
                 <h1 className="contents">
@@ -50,10 +57,8 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 </h1>
                 <PlayerNameHistory previousNames={player.previousNames ?? []} />
                 {player.inactive && (
-                  <span className="order-first flex w-full justify-center lg:order-none lg:w-auto">
-                    <span className="text-inactive-account rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium">
-                      Inactive Account
-                    </span>
+                  <span className="text-inactive-account hidden rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium lg:inline-flex">
+                    Inactive Account
                   </span>
                 )}
                 {player.banned && (
