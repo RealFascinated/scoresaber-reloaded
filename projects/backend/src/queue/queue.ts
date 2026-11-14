@@ -20,9 +20,6 @@ const ITEM_SEPARATOR = "\n";
 const LEGACY_ITEM_PREFIX = "[";
 const MEMBER_BUCKETS = 1024;
 
-/** Must be the first line of every script: member keys are derived from the prefix inside the script, so they can't be declared in KEYS. */
-const LUA_HEADER = "#!lua flags=allow-undeclared-keys\n";
-
 /** Lua helpers shared by the scripts below: which member set an id belongs to, and an item's id. */
 const LUA_HELPERS = `
   local BUCKETS = ${MEMBER_BUCKETS}
@@ -49,7 +46,7 @@ const LUA_HELPERS = `
 redisClient.defineCommand("queueAdd", {
   numberOfKeys: 2,
   // KEYS: queue, members prefix. ARGV: itemId, element, itemId, element, ... Returns how many were new.
-  lua: `${LUA_HEADER}${LUA_HELPERS}
+  lua: `${LUA_HELPERS}
     local added = 0
     for i = 1, #ARGV, 2 do
       if redis.call('SADD', memberKey(KEYS[2], ARGV[i]), ARGV[i]) == 1 then
@@ -64,7 +61,7 @@ redisClient.defineCommand("queueAdd", {
 redisClient.defineCommand("queuePop", {
   numberOfKeys: 3,
   // KEYS: queue, processing, members prefix. ARGV: side of the queue to pop from (LEFT or RIGHT).
-  lua: `${LUA_HEADER}${LUA_HELPERS}
+  lua: `${LUA_HELPERS}
     local raw = redis.call('LMOVE', KEYS[1], KEYS[2], ARGV[1], 'LEFT')
     if raw then
       local id = itemId(raw)
@@ -81,7 +78,7 @@ redisClient.defineCommand("queueAckPop", {
   // KEYS: queue, processing, members prefix. ARGV: side to pop from (LEFT or RIGHT), the finished item,
   // and "1" to pop the next item (or "0" to only acknowledge the finished one).
   // The finished item leaves the processing list in the same step the next one enters it.
-  lua: `${LUA_HEADER}${LUA_HELPERS}
+  lua: `${LUA_HELPERS}
     redis.call('LREM', KEYS[2], 1, ARGV[2])
     if ARGV[3] ~= '1' then
       return false
@@ -100,7 +97,7 @@ redisClient.defineCommand("queueAckPop", {
 redisClient.defineCommand("queueRecover", {
   numberOfKeys: 3,
   // KEYS: queue, processing, members prefix. Moves every in-flight item back on the queue. Returns how many.
-  lua: `${LUA_HEADER}${LUA_HELPERS}
+  lua: `${LUA_HELPERS}
     local recovered = 0
     while true do
       local raw = redis.call('LMOVE', KEYS[2], KEYS[1], 'RIGHT', 'LEFT')
@@ -120,7 +117,7 @@ redisClient.defineCommand("queueRecover", {
 redisClient.defineCommand("queueHas", {
   numberOfKeys: 1,
   // KEYS: members prefix. ARGV: itemId. Returns 1 when that id is waiting.
-  lua: `${LUA_HEADER}${LUA_HELPERS}
+  lua: `${LUA_HELPERS}
     return redis.call('SISMEMBER', memberKey(KEYS[1], ARGV[1]), ARGV[1])
   `,
 });
