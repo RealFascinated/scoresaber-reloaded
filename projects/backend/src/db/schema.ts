@@ -113,6 +113,10 @@ export const scoreSaberAccountsTable = pgTable(
     index("accounts_streak_expiry_date_idx")
       .on(table.lastPlayedDate)
       .where(sql`${table.currentStreak} > 0 AND ${table.lastPlayedDate} IS NOT NULL`),
+    // Banned players are a tiny set; this lets "exclude banned players" subqueries read just them.
+    index("accounts_banned_true_idx")
+      .on(table.id)
+      .where(sql`${table.banned} = true`),
   ]
 );
 

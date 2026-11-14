@@ -114,6 +114,14 @@ export const emptyScoreSaberPlayerScoreStatistics = (): ScoreSaberPlayerScoreSta
 });
 
 /** Identifies a player's score slot on a leaderboard. */
+/**
+ * Excludes rows whose player is banned. Uses an anti-join against the (tiny) banned set so the
+ * planner hashes it once, rather than probing the accounts table for every row it walks.
+ */
+function notBannedPlayer(playerIdColumn: AnyColumn): SQL {
+  return sql`${playerIdColumn} NOT IN (SELECT ${scoreSaberAccountsTable.id} FROM ${scoreSaberAccountsTable} WHERE ${scoreSaberAccountsTable.banned} = true)`;
+}
+
 export function playerLeaderboardKey(playerId: string, leaderboardId: number): string {
   return `${playerId}:${leaderboardId}`;
 }
@@ -574,15 +582,16 @@ export class ScoreSaberScoresRepository {
   ): Promise<ScoreSaberScoreRow[]> {
     // Page through the realm rows first (the banned check uses the denormalised playerId), so the
     // scores table is only touched for the rows on the requested page instead of every skipped row.
+    // Banned players are excluded with a hashed anti-join against the tiny banned set instead of an
+    // accounts lookup per skipped row, which made deep pages cost one index probe per offset row.
     const page = db
       .select({ scoreId: scoreSaberScoreRealmsTable.scoreId, pp: scoreSaberScoreRealmsTable.pp })
       .from(scoreSaberScoreRealmsTable)
-      .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoreRealmsTable.playerId, scoreSaberAccountsTable.id))
       .where(
         and(
           eq(scoreSaberScoreRealmsTable.realmId, realmId),
           gt(scoreSaberScoreRealmsTable.pp, 0),
-          eq(scoreSaberAccountsTable.banned, false)
+          notBannedPlayer(scoreSaberScoreRealmsTable.playerId)
         )
       )
       .orderBy(
@@ -604,12 +613,11 @@ export class ScoreSaberScoresRepository {
     return db
       .select({ pp: scoreSaberScoreRealmsTable.pp })
       .from(scoreSaberScoreRealmsTable)
-      .innerJoin(scoreSaberAccountsTable, eq(scoreSaberScoreRealmsTable.playerId, scoreSaberAccountsTable.id))
       .where(
         and(
           eq(scoreSaberScoreRealmsTable.realmId, realmId),
           gt(scoreSaberScoreRealmsTable.pp, 0),
-          eq(scoreSaberAccountsTable.banned, false)
+          notBannedPlayer(scoreSaberScoreRealmsTable.playerId)
         )
       )
       .orderBy(descNullsLast(scoreSaberScoreRealmsTable.pp))

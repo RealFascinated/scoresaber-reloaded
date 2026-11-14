@@ -1,6 +1,5 @@
 import { env } from "@ssr/common/env";
 import { BadRequestError } from "@ssr/common/error/bad-request-error";
-import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import {
@@ -21,10 +20,14 @@ import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { eq, gt, gte, isNotNull, lte } from "drizzle-orm";
 import { Type, type Static } from "typebox";
+import { leaderboardRowToType } from "../../db/converter/scoresaber-leaderboard";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberLeaderboardRealmsTable, scoreSaberScoresTable } from "../../db/schema";
 import { scorePpExpr } from "../../repositories/realm-columns";
-import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
+import {
+  ScoreSaberLeaderboardsRepository,
+  type PlaylistLeaderboardEntry,
+} from "../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
@@ -107,19 +110,35 @@ export default class PlaylistService {
   }
 
   /**
+   * Groups leaderboard entries by song hash (first occurrence keeps its position) into playlist songs.
+   */
+  private static groupPlaylistSongs(entries: PlaylistLeaderboardEntry[]): Playlist["songs"] {
+    const songs = new Map<string, Playlist["songs"][number]>();
+    for (const entry of entries) {
+      let song = songs.get(entry.songHash);
+      if (!song) {
+        song = {
+          songName: entry.songName,
+          levelAuthorName: entry.songAuthorName,
+          hash: entry.songHash,
+          difficulties: [],
+        };
+        songs.set(entry.songHash, song);
+      }
+      song.difficulties.push({ difficulty: entry.difficulty, characteristic: entry.characteristic });
+    }
+    return Array.from(songs.values());
+  }
+
+  /**
    * Gets the ranked maps playlist
    *
    * @returns the ranked maps playlist
    */
   public static async getRankedMapsPlaylist(): Promise<Playlist> {
-    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(DEFAULT_REALM_ID);
-    const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
-    for (const leaderboard of rankedLeaderboards) {
-      if (!leaderboards.has(leaderboard.songHash)) {
-        leaderboards.set(leaderboard.songHash, { ...leaderboard, difficulties: [] });
-      }
-      leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
-    }
+    const songs = PlaylistService.groupPlaylistSongs(
+      await ScoreSaberLeaderboardsRepository.getPlaylistEntries({ ranked: true }, DEFAULT_REALM_ID)
+    );
 
     return {
       playlistTitle: `ScoreSaber Ranked (${getPlaylistTitleDate(new Date())})`,
@@ -127,15 +146,7 @@ export default class PlaylistService {
       customData: {
         syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-ranked-maps.bplist`,
       },
-      songs: Array.from(leaderboards.values()).map(leaderboard => ({
-        songName: leaderboard.songName,
-        levelAuthorName: leaderboard.songAuthorName,
-        hash: leaderboard.songHash,
-        difficulties: leaderboard.difficulties.map(difficulty => ({
-          difficulty: difficulty.difficulty,
-          characteristic: difficulty.characteristic,
-        })),
-      })),
+      songs,
     };
   }
 
@@ -145,15 +156,9 @@ export default class PlaylistService {
    * @returns the qualified maps playlist
    */
   public static async getQualifiedMapsPlaylist(): Promise<Playlist> {
-    const qualifiedLeaderboards =
-      await ScoreSaberLeaderboardsRepository.getQualifiedLeaderboards(DEFAULT_REALM_ID);
-    const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
-    for (const leaderboard of qualifiedLeaderboards) {
-      if (!leaderboards.has(leaderboard.songHash)) {
-        leaderboards.set(leaderboard.songHash, { ...leaderboard, difficulties: [] });
-      }
-      leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
-    }
+    const songs = PlaylistService.groupPlaylistSongs(
+      await ScoreSaberLeaderboardsRepository.getPlaylistEntries({ qualified: true }, DEFAULT_REALM_ID)
+    );
 
     return {
       playlistTitle: `ScoreSaber Qualified (${getPlaylistTitleDate(new Date())})`,
@@ -161,15 +166,7 @@ export default class PlaylistService {
       customData: {
         syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-qualified-maps.bplist`,
       },
-      songs: Array.from(leaderboards.values()).map(leaderboard => ({
-        songName: leaderboard.songName,
-        levelAuthorName: leaderboard.songAuthorName,
-        hash: leaderboard.songHash,
-        difficulties: leaderboard.difficulties.map(difficulty => ({
-          difficulty: difficulty.difficulty,
-          characteristic: difficulty.characteristic,
-        })),
-      })),
+      songs,
     };
   }
 
@@ -559,18 +556,14 @@ export default class PlaylistService {
       DEFAULT_REALM_ID
     );
 
-    const leaderboardIds = [...new Set(rows.map(r => r.lbRow.id))];
-    const leaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboardsByIds(
-      leaderboardIds,
-      false,
-      DEFAULT_REALM_ID
-    );
-    const leaderboardMap = new Map(leaderboards.map(lb => [lb.id, lb]));
+    // The joined rows already carry the realm-resolved leaderboard, so no second lookup is needed.
+    const leaderboardMap = new Map<number, ScoreSaberLeaderboard>();
 
     return rows.map(({ scoreRow, lbRow }) => {
-      const leaderboard = leaderboardMap.get(lbRow.id);
+      let leaderboard = leaderboardMap.get(lbRow.id);
       if (!leaderboard) {
-        throw new InternalServerError(`Missing leaderboard ${lbRow.id} for playlist scores`);
+        leaderboard = leaderboardRowToType(lbRow);
+        leaderboardMap.set(lbRow.id, leaderboard);
       }
       return {
         score: scoreSaberScoreRowToType(scoreRow),

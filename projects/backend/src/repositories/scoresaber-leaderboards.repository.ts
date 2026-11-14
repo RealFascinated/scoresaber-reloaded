@@ -200,6 +200,14 @@ export function buildLeaderboardQuery(filters?: ScoreSaberLeaderboardQueryFilter
   return { whereClause, orderParts };
 }
 
+export type PlaylistLeaderboardEntry = {
+  songHash: string;
+  songName: string;
+  songAuthorName: string;
+  difficulty: MapDifficulty;
+  characteristic: MapCharacteristic;
+};
+
 export class ScoreSaberLeaderboardsRepository {
   /**
    * Starts a select of leaderboard rows resolved for `realmId` (the realm table is left-joined, so
@@ -228,6 +236,33 @@ export class ScoreSaberLeaderboardsRepository {
       .where(whereClause)
       .orderBy(...orderParts);
     return rows.map(row => leaderboardRowToType(row));
+  }
+
+  /**
+   * The minimal columns a playlist needs for every matching leaderboard, in the same order as
+   * {@link ScoreSaberLeaderboardsRepository.getLeaderboards}. Playlists cover thousands of maps, so
+   * transferring and parsing only these columns is much cheaper than full leaderboard rows.
+   */
+  public static async getPlaylistEntries(
+    filters: ScoreSaberLeaderboardQueryFilters | undefined,
+    realmId: number
+  ): Promise<PlaylistLeaderboardEntry[]> {
+    const { whereClause, orderParts } = buildLeaderboardQuery(filters);
+    return db
+      .select({
+        songHash: scoreSaberLeaderboardsTable.songHash,
+        songName: scoreSaberLeaderboardsTable.songName,
+        songAuthorName: scoreSaberLeaderboardsTable.songAuthorName,
+        difficulty: scoreSaberLeaderboardsTable.difficulty,
+        characteristic: scoreSaberLeaderboardsTable.characteristic,
+      })
+      .from(scoreSaberLeaderboardsTable)
+      .leftJoin(
+        scoreSaberLeaderboardRealmsTable,
+        leaderboardRealmJoinOn(scoreSaberLeaderboardsTable, scoreSaberLeaderboardRealmsTable, realmId)
+      )
+      .where(whereClause)
+      .orderBy(...orderParts);
   }
 
   public static async getLeaderboardByHash(

@@ -39,7 +39,11 @@ export function resolvedScoreColumns() {
 export function scoreRealmJoinOn(realmId: number): SQL {
   return and(
     eq(scoreSaberScoreRealmsTable.scoreId, scoreSaberScoresTable.scoreId),
-    eq(scoreSaberScoreRealmsTable.realmId, realmId)
+    eq(scoreSaberScoreRealmsTable.realmId, realmId),
+    // Redundant for correctness (the realm row copies its score's player), but it lets the planner
+    // use the (realmId, playerId, pp) index when a player is filtered. Without it, a heavy player's
+    // aggregate hash-joins against a scan of the whole score-realms table.
+    eq(scoreSaberScoreRealmsTable.playerId, scoreSaberScoresTable.playerId)
   ) as SQL;
 }
 

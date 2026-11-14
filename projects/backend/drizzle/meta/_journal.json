@@ -484,6 +484,13 @@
       "when": 1794590785274,
       "tag": "0068_huge_revanche",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1794603058706,
+      "tag": "0069_classy_nextwave",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,1 @@
+CREATE INDEX "accounts_banned_true_idx" ON "scoresaber-accounts" USING btree ("id") WHERE "scoresaber-accounts"."banned" = true;
