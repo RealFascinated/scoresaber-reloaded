@@ -20,8 +20,11 @@ const ITEM_SEPARATOR = "\n";
 const LEGACY_ITEM_PREFIX = "[";
 const MEMBER_BUCKETS = 1024;
 
-/** Must be the first line of every script: member keys are derived from the prefix inside the script, so they can't be declared in KEYS. */
-const LUA_HEADER = "#!lua flags=allow-undeclared-keys\n";
+/**
+ * Must be the first line of every script: member keys are derived from the prefix inside the script, so they can't be
+ * declared in KEYS. Dragonfly reads this header (it does not understand Redis' `#!lua` shebang); Redis sees a comment.
+ */
+const LUA_HEADER = "--!df flags=allow-undeclared-keys\n";
 
 /** Lua helpers shared by the scripts below: which member set an id belongs to, and an item's id. */
 const LUA_HELPERS = `
