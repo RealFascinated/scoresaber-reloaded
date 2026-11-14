@@ -85,7 +85,7 @@ export default function ScoresListPanel<T>({
 
   return (
     <>
-      <div className="text-center">
+      <div className={cn("text-center", (isError || data.items.length === 0) && "pt-2")}>
         {isError || data.items.length === 0 ? (
           <EmptyState
             className="ring-border rounded-xl ring-1"
