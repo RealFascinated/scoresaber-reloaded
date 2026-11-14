@@ -74,7 +74,7 @@ export default function LeaderboardScoresDropdown({
       </div>
 
       {isMobile ? (
-        <div className="ring-border bg-card flex flex-col gap-2 overflow-hidden rounded-xl px-2 pb-2 ring-1">
+        <div className="ring-border bg-card flex flex-col gap-2 overflow-hidden rounded-xl px-2 pb-2 ring-1 [&>div:first-child:empty]:hidden">
           <ScoresListPanel
             page={page}
             data={scores}
