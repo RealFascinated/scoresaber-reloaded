@@ -99,7 +99,7 @@ export default function PlayerScoreAccuracyChart({ scoreStats, leaderboard }: Pr
 
   return (
     <div className="bg-card ring-border relative h-full min-h-[330px] w-full flex-1 rounded-xl ring-1">
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 px-2 pb-2">
         <GenericChart labels={labels} config={config} />
       </div>
     </div>
