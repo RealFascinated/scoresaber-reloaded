@@ -81,6 +81,11 @@ export class PlayerScoresService {
   private static readonly RECONCILE_PAGE_CONCURRENCY = 3;
   /** playerId -> earliest time the next count check may run */
   private static readonly scoreCountChecks = new Map<string, number>();
+  /**
+   * Players whose ScoreSaber total is higher than the scores its pages serve. A reconcile found nothing
+   * to add or delete for these counts, so the same mismatch isn't worth queueing again.
+   */
+  private static readonly unfetchableScoreGaps = new Map<string, { liveTotal: number; localTotal: number }>();
 
   /**
    * Fetches missing scores for a player.
@@ -339,6 +344,11 @@ export class PlayerScoresService {
   private static async queueReconcileIfCountMismatch(playerId: string, liveTotal: number): Promise<boolean> {
     const localTotal = await ScoreSaberScoresRepository.countByPlayerId(playerId);
     if (localTotal === liveTotal) {
+      PlayerScoresService.unfetchableScoreGaps.delete(playerId);
+      return false;
+    }
+    const knownGap = PlayerScoresService.unfetchableScoreGaps.get(playerId);
+    if (knownGap?.liveTotal === liveTotal && knownGap.localTotal === localTotal) {
       return false;
     }
 
@@ -477,6 +487,19 @@ export class PlayerScoresService {
     }
     if (added > 0 || deleted > 0) {
       await PlayerCoreService.invalidatePlayerCaches(playerId);
+    } else if (
+      missingRemoteCount === 0 &&
+      remoteIds.size === localIds.size &&
+      remoteIds.size !== firstPage.metadata.total
+    ) {
+      // We hold every score ScoreSaber serves, it just reports more than it returns
+      if (PlayerScoresService.unfetchableScoreGaps.size >= PlayerScoresService.COUNT_CHECK_PRUNE_SIZE) {
+        PlayerScoresService.unfetchableScoreGaps.clear();
+      }
+      PlayerScoresService.unfetchableScoreGaps.set(playerId, {
+        liveTotal: firstPage.metadata.total,
+        localTotal: remoteIds.size,
+      });
     }
 
     PlayerScoresService.logger.info(
