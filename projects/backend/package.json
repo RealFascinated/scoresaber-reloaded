@@ -36,11 +36,11 @@
     "drizzle-orm": "^0.45.4",
     "elysia": "2.0.0-rc.4",
     "elysia-helmet": "^3.1.0",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "globals": "^17.14.0",
     "ioredis": "^6.0.0",
     "pg": "^8.23.1",
-    "systeminformation": "^5.33.21",
+    "systeminformation": "^5.33.22",
     "typebox": "^1.4.7",
     "typescript-eslint": "^8.72.2"
   },
