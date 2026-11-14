@@ -15,7 +15,7 @@ type ScoresListPanelProps<T> = {
   isLoading: boolean;
   isRefetching: boolean;
   isError: boolean;
-  generatePageUrl: (page: number) => string;
+  generatePageUrl?: (page: number) => string;
   onPageChange: (page: number) => void;
   renderItem: (item: T) => ReactNode;
   getKey: (item: T) => string;

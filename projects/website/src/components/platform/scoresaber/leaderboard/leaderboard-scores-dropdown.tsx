@@ -1,10 +1,12 @@
 "use client";
 
+import ScoresListPanel from "@/components/platform/shared/scores-list-panel";
 import { useLeaderboardFilter } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import ScoreModeSwitcher, { ScoreModeEnum } from "@/components/score/score-mode-switcher";
 import { Spinner } from "@/components/spinner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useIsMobile } from "@/contexts/viewport-context";
 import { useLeaderboardScores } from "@/hooks/score/use-leaderboard-scores";
 import { useMainPlayerId } from "@/hooks/use-main-player";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
@@ -12,6 +14,7 @@ import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { useMemo, useState } from "react";
 import SimplePagination from "../../../simple-pagination";
 import ScoreSaberLeaderboardScore from "../score/leaderboard-score";
+import ScoreSaberLeaderboardScoreMobile from "../score/leaderboard-score-mobile";
 
 function getScoreId(score: ScoreSaberScore) {
   return score.scoreId + "-" + score.timestamp;
@@ -28,6 +31,7 @@ export default function LeaderboardScoresDropdown({
   highlightedPlayerId?: string;
   historyPlayerId?: string;
 }) {
+  const isMobile = useIsMobile();
   const mainPlayerId = useMainPlayerId();
   const filter = useLeaderboardFilter();
 
@@ -69,7 +73,26 @@ export default function LeaderboardScoresDropdown({
         <ScoreModeSwitcher initialMode={mode} onModeChange={setMode} />
       </div>
 
-      {isLoading && !scores ? (
+      {isMobile ? (
+        <div className="ring-border bg-card flex flex-col gap-2 overflow-hidden rounded-xl px-2 pb-2 ring-1">
+          <ScoresListPanel
+            page={page}
+            data={scores}
+            isLoading={isLoading}
+            isRefetching={isRefetching}
+            isError={isError}
+            onPageChange={setPage}
+            getKey={getScoreId}
+            renderItem={playerScore => (
+              <ScoreSaberLeaderboardScoreMobile
+                score={playerScore}
+                leaderboard={leaderboard}
+                highlightedPlayerId={highlightedPlayerId}
+              />
+            )}
+          />
+        </div>
+      ) : isLoading && !scores ? (
         <div className="flex items-center justify-center py-12">
           <Spinner size="lg" />
         </div>

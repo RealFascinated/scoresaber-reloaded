@@ -110,6 +110,7 @@ export default function ScoreSaberLeaderboardScoreMobile({
           </div>
         </div>
 
+        {!score.beatLeaderScore && <div className="size-6 shrink-0" aria-hidden />}
         {score.beatLeaderScore && (
           <button
             className="size-6 shrink-0 cursor-pointer"
