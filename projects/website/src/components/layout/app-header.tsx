@@ -1,9 +1,11 @@
 "use client";
 
+import Avatar from "@/components/avatar";
 import { useBreadcrumbPageTitle } from "@/components/layout/breadcrumb-context";
 import PlayerAndLeaderboardSearch from "@/components/navbar/player-and-leaderboard-search";
 import SimpleLink from "@/components/simple-link";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useMainPlayer, useMainPlayerId } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -110,6 +112,29 @@ function Breadcrumbs() {
 }
 
 /**
+ * Avatar-only link to the signed-in player's profile (mobile).
+ */
+function MyProfileButton() {
+  const mainPlayerId = useMainPlayerId();
+  const mainPlayer = useMainPlayer().data;
+
+  if (mainPlayerId == null || mainPlayerId === "") {
+    return null;
+  }
+
+  return (
+    <SimpleLink href={`/player/${mainPlayerId}`} draggable={false} aria-label="My Profile">
+      <Avatar
+        size={28}
+        src={mainPlayer?.avatar ?? ""}
+        className="border-border box-border size-7 shrink-0 rounded-full border"
+        alt="My Profile"
+      />
+    </SimpleLink>
+  );
+}
+
+/**
  * Top bar with the sidebar toggle and a breadcrumb. On mobile (where the sidebar is hidden)
  * it carries the logo and a search shortcut instead of the breadcrumb.
  */
@@ -131,8 +156,9 @@ export function AppHeader() {
         />
         <span className="text-sm font-semibold">SSR</span>
       </SimpleLink>
-      <div className="ml-auto md:hidden">
+      <div className="ml-auto flex items-center gap-2 md:hidden">
         <PlayerAndLeaderboardSearch variant="icon" />
+        <MyProfileButton />
       </div>
     </header>
   );
