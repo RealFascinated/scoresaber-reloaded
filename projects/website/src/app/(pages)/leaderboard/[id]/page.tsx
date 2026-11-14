@@ -131,16 +131,6 @@ export default async function LeaderboardPage(props: Props) {
         )
       : undefined;
 
-  let starChangeHistory;
-  try {
-    starChangeHistory = await ssrApi.getLeaderboardStarHistory(id);
-  } catch (error) {
-    if (isBackendUnavailableError(error)) {
-      return <BackendUnavailable />;
-    }
-    throw error;
-  }
-
   const prefetchedScores = await scoresRequest;
   const initialScores: LeaderboardScoresInitialData | undefined = prefetchedScores
     ? {
@@ -152,11 +142,7 @@ export default async function LeaderboardPage(props: Props) {
 
   return (
     <section className="flex w-full justify-center">
-      <ScoreSaberLeaderboardData
-        leaderboardData={result.response}
-        starChangeHistory={starChangeHistory ?? []}
-        initialScores={initialScores}
-      />
+      <ScoreSaberLeaderboardData leaderboardData={result.response} initialScores={initialScores} />
     </section>
   );
 }

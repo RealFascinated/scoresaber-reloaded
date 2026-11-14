@@ -7,21 +7,18 @@ import type { LeaderboardScoresInitialData } from "@/components/platform/scoresa
 import { LeaderboardFilterProvider } from "@/components/providers/leaderboard/leaderboard-filter-provider";
 import { useRealm } from "@/components/providers/realm-provider";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 
 type LeaderboardDataProps = {
   leaderboardData: LeaderboardResponse;
-  starChangeHistory: LeaderboardStarChange[];
   /** Global scores rendered on the server, used until the client has data of its own. */
   initialScores?: LeaderboardScoresInitialData;
 };
 
 export function ScoreSaberLeaderboardData({
   leaderboardData: serverLeaderboardData,
-  starChangeHistory: serverStarChangeHistory,
   initialScores,
 }: LeaderboardDataProps) {
   const { realmId } = useRealm();
@@ -35,24 +32,17 @@ export function ScoreSaberLeaderboardData({
     enabled: !isDefaultRealm,
     staleTime: 60_000,
   });
-  const { data: realmStarChanges } = useQuery({
-    queryKey: ["leaderboard-star-history", leaderboardId, realmId],
-    queryFn: () => ssrApi.getLeaderboardStarHistory(leaderboardId, realmId),
-    enabled: !isDefaultRealm,
-    staleTime: 60_000,
-  });
 
   const leaderboardData = isDefaultRealm
     ? serverLeaderboardData
     : (realmLeaderboard ?? serverLeaderboardData);
-  const starChangeHistory = isDefaultRealm ? serverStarChangeHistory : (realmStarChanges ?? []);
   const { leaderboard } = leaderboardData;
   useBreadcrumbTitle(leaderboard.songName);
 
   return (
     <LeaderboardFilterProvider>
       <div className="mx-auto flex w-full flex-col gap-4">
-        <LeaderboardInfo leaderboard={leaderboardData} starChangeHistory={starChangeHistory} />
+        <LeaderboardInfo leaderboard={leaderboardData} />
         <div className="flex w-full flex-col gap-4">
           <LeaderboardScores leaderboard={leaderboard} initialScores={initialScores} />
         </div>

@@ -1,11 +1,15 @@
 "use client";
 
 import { cn } from "@/common/utils";
+import { useRealm } from "@/components/providers/realm-provider";
 import { getDeltaClass } from "@/components/reweight/reweight-format";
 import SimpleLink from "@/components/simple-link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
+import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 function formatStars(stars: number): string {
@@ -20,15 +24,33 @@ function formatStarDelta(change: LeaderboardStarChange): string {
   return `${delta > 0 ? "+" : ""}${delta.toFixed(2)}`;
 }
 
-export function LeaderboardStarChangeHistory({
-  starChangeHistory,
-}: {
-  starChangeHistory: LeaderboardStarChange[];
-}) {
+/** Mounted only while the dialog is open, so the history is fetched on click. */
+export function LeaderboardStarChangeHistory({ leaderboardId }: { leaderboardId: number }) {
+  const { realmId } = useRealm();
+  const isDefaultRealm = realmId === DEFAULT_REALM_ID;
+
+  const {
+    data: starChangeHistory,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ["leaderboard-star-history", leaderboardId, realmId],
+    queryFn: () => ssrApi.getLeaderboardStarHistory(leaderboardId, isDefaultRealm ? undefined : realmId),
+    staleTime: 60_000,
+  });
+
   const changes = useMemo(
-    () => starChangeHistory.toSorted((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
+    () => (starChangeHistory ?? []).toSorted((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
     [starChangeHistory]
   );
+
+  if (isPending) {
+    return <p className="text-muted-foreground py-6 text-center text-sm">Loading star history…</p>;
+  }
+
+  if (isError) {
+    return <p className="text-muted-foreground py-6 text-center text-sm">Could not load star history.</p>;
+  }
 
   return (
     <div className="ring-border bg-card max-h-[70vh] overflow-auto rounded-xl ring-1">

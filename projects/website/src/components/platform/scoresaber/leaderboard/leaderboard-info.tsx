@@ -7,7 +7,6 @@ import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-but
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { SharedIcons } from "@/shared-icons";
-import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard";
 import { getBeatSaverMapperProfileUrl } from "@ssr/common/utils/beatsaver.util";
 import { formatNumber, formatNumberWithCommas } from "@ssr/common/utils/number-utils";
@@ -18,14 +17,13 @@ import { LeaderboardStatus } from "./leaderboard-status";
 
 type LeaderboardInfoProps = {
   leaderboard: LeaderboardResponse;
-  starChangeHistory: LeaderboardStarChange[];
 };
 
-export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardInfoProps) {
+export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   const { leaderboard: leaderboardData, beatsaver } = leaderboard;
 
-  const showStarHistory = leaderboardData.ranked && starChangeHistory.length > 0;
-  const hasReweights = starChangeHistory.some(change => change.reweightId !== undefined);
+  // The history is only fetched once the dialog opens, so ranked leaderboards always show the button
+  const showStarHistory = leaderboardData.ranked;
 
   return (
     <section className="bg-card ring-border flex w-full flex-col gap-5 rounded-xl p-4 ring-1 sm:p-5">
@@ -50,12 +48,12 @@ export function LeaderboardInfo({ leaderboard, starChangeHistory }: LeaderboardI
                     title="View star history and reweights"
                   >
                     <SharedIcons.LeaderboardStarHistoryIcon className="h-3.5 w-3.5" />
-                    {hasReweights ? "Reweights" : "Star History"}
+                    Star History
                   </button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-xl">
                   <DialogTitle>Star History</DialogTitle>
-                  <LeaderboardStarChangeHistory starChangeHistory={starChangeHistory} />
+                  <LeaderboardStarChangeHistory leaderboardId={leaderboardData.id} />
                 </DialogContent>
               </Dialog>
             )}
