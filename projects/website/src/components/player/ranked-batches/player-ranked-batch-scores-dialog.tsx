@@ -52,6 +52,11 @@ function PlayerRankedBatchScores({ playerId, rankedBatchId }: { playerId: string
 
   return (
     <div className="flex min-h-0 flex-col">
+      <div className="text-muted-foreground border-border/50 flex items-center gap-3 border-b pb-1.5 text-xs">
+        <span className="flex-1">Score</span>
+        <span className="shrink-0 max-sm:hidden">Stars</span>
+        <span className="w-28 shrink-0 text-right">Raw pp</span>
+      </div>
       <div className="flex min-h-0 scrollbar-none flex-col overflow-y-auto overscroll-contain">
         {scores.data.map(score => {
           const starChange = starChanges.get(score.leaderboardId);
@@ -115,13 +120,17 @@ export function PlayerRankedBatchScoresDialog({
               <DialogTitle>{entry.rankedBatch.name}</DialogTitle>
               <DialogDescription>
                 {entry.scoresChanged} {entry.scoresChanged === 1 ? "score" : "scores"} changed,{" "}
-                {formatPpDelta(entry.ppDelta)} in total.{" "}
+                <span className={cn("font-medium", getDeltaClass(entry.ppDelta))}>
+                  {formatPpDelta(entry.ppDelta)}
+                </span>{" "}
+                in total.{" "}
                 <SimpleLink
                   href={`/ranked-batches/${entry.rankedBatch.id}`}
                   className="text-primary hover:underline"
                 >
-                  View rankedBatch
+                  View ranked batch
                 </SimpleLink>
+                <span className="mt-1 block text-xs">The total is your weighted pp change.</span>
               </DialogDescription>
             </DialogHeader>
             <PlayerRankedBatchScores playerId={playerId} rankedBatchId={entry.rankedBatch.id} />
