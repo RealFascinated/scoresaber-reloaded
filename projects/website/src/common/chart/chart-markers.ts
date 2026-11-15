@@ -2,7 +2,7 @@ import type { Chart, Plugin } from "chart.js";
 import { CHART_THEME } from "./chart-theme";
 
 /**
- * A vertical line drawn on a category x axis chart, e.g. the day a reweight happened.
+ * A vertical line drawn on a category x axis chart, e.g. the day a ranked batch happened.
  */
 export type ChartMarker = {
   /** The index of the x axis label the marker sits on. */

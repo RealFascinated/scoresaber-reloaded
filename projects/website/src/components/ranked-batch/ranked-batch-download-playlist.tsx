@@ -7,20 +7,20 @@ import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import { useCallback, useState } from "react";
 
-export function ReweightDownloadPlaylist({ reweightId }: { reweightId: number }) {
+export function RankedBatchDownloadPlaylist({ rankedBatchId }: { rankedBatchId: number }) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = useCallback(async () => {
     setDownloading(true);
     try {
       await downloadFile(
-        `${env.NEXT_PUBLIC_API_URL}/playlist/reweight/${reweightId}.bplist`,
-        `ssr-reweight-${reweightId}.bplist`
+        `${env.NEXT_PUBLIC_API_URL}/playlist/ranked-batch/${rankedBatchId}.bplist`,
+        `ssr-ranked-batch-${rankedBatchId}.bplist`
       );
     } finally {
       setDownloading(false);
     }
-  }, [reweightId]);
+  }, [rankedBatchId]);
 
   return (
     <Button className="gap-2" disabled={downloading} onClick={handleDownload}>

@@ -258,7 +258,7 @@ export class PlayerCoreService {
   }
 
   /**
-   * Drops the cached profiles of many players, e.g. every player affected by a map reweight.
+   * Drops the cached profiles of many players, e.g. every player affected by a map ranked batch.
    *
    * @param playerIds the players' ids
    * @param scope limits what is dropped to some detail types and/or realms (everything when omitted)

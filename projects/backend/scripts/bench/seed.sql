@@ -2,7 +2,7 @@
 -- 600k score history rows, 1.8M player history rows. Run against an isolated database only.
 TRUNCATE "scoresaber-accounts", "scoresaber-leaderboards", "scoresaber-leaderboard-realms", "scoresaber-scores",
   "scoresaber-score-realms", "scoresaber-score-history", "beatleader-scores", "scoresaber-player-history",
-  "scoresaber-reweight-leaderboards" RESTART IDENTITY CASCADE;
+  "scoresaber-ranked-batch-leaderboards" RESTART IDENTITY CASCADE;
 
 INSERT INTO "scoresaber-accounts" (id, avatar, name, country, "seededScores", "seededBeatLeaderScores", "trackReplays", inactive, banned,
   hmd, pp, medals, "trackedSince", "joinedDate")
@@ -59,7 +59,7 @@ INSERT INTO "scoresaber-player-history" ("playerId", date, "realmId", rank, "cou
 SELECT (76561198000000000 + p)::text, (current_date - d)::timestamp, 1, p, 1 + p / 10, 0, 20000 - p * 0.4, 1e9, 5e8, 100, 400, 500, 90
 FROM generate_series(1, 40000) p, generate_series(0, 44) d;
 
-INSERT INTO "scoresaber-reweight-leaderboards" ("leaderboardId", "realmId", "previousStars", "newStars", timestamp, "ppPending")
+INSERT INTO "scoresaber-ranked-batch-leaderboards" ("leaderboardId", "realmId", "previousStars", "newStars", timestamp, "ppPending")
 SELECT 1 + (g * 3) % 25000, 1, 5, 5.5, now() - (g || ' hours')::interval, false FROM generate_series(1, 2000) g;
 
 VACUUM ANALYZE;
@@ -77,14 +77,14 @@ FROM "scoresaber-scores" s JOIN "scoresaber-leaderboard-realms" r ON r."leaderbo
 WHERE s."playerId" = '76561198099999999' ON CONFLICT DO NOTHING;
 ANALYZE;
 
--- One reweight covering every seeded star change, with 8k players and the whale's changed scores.
-INSERT INTO "scoresaber-reweights" (id, "realmId", "startedAt", "endedAt", "leaderboardCount", "playerCount", "scoreCount")
+-- One rankedBatch covering every seeded star change, with 8k players and the whale's changed scores.
+INSERT INTO "scoresaber-ranked-batches" (id, "realmId", "startedAt", "endedAt", "leaderboardCount", "playerCount", "scoreCount")
 VALUES (1, 1, now() - interval '10 days', now() - interval '8 days', 2000, 8000, 60000) ON CONFLICT DO NOTHING;
-UPDATE "scoresaber-reweight-leaderboards" SET "reweightId" = 1;
-INSERT INTO "scoresaber-reweight-players" ("reweightId", "playerId", "ppBefore", "ppAfter", "ppDelta", "scoresChanged")
+UPDATE "scoresaber-ranked-batch-leaderboards" SET "rankedBatchId" = 1;
+INSERT INTO "scoresaber-ranked-batch-players" ("rankedBatchId", "playerId", "ppBefore", "ppAfter", "ppDelta", "scoresChanged")
 SELECT 1, id, pp, pp - (random() * 50), -(random() * 50), 10 FROM "scoresaber-accounts" ORDER BY id LIMIT 8000 ON CONFLICT DO NOTHING;
-INSERT INTO "scoresaber-reweight-players" ("reweightId", "playerId", "ppBefore", "ppAfter", "ppDelta", "scoresChanged")
+INSERT INTO "scoresaber-ranked-batch-players" ("rankedBatchId", "playerId", "ppBefore", "ppAfter", "ppDelta", "scoresChanged")
 VALUES (1, '76561198099999999', 30000, 29800, -200, 3000) ON CONFLICT DO NOTHING;
-INSERT INTO "scoresaber-reweight-scores" ("reweightId", "scoreId", "playerId", "leaderboardId", "ppBefore", "ppAfter")
+INSERT INTO "scoresaber-ranked-batch-scores" ("rankedBatchId", "scoreId", "playerId", "leaderboardId", "ppBefore", "ppAfter")
 SELECT 1, "scoreId", "playerId", "leaderboardId", pp, pp - 5 FROM "scoresaber-score-realms" WHERE "playerId" = '76561198099999999' ON CONFLICT DO NOTHING;
 ANALYZE;

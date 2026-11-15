@@ -1,36 +1,36 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import { formatPpDelta, getDeltaClass } from "@/components/reweight/reweight-format";
+import { formatPpDelta, getDeltaClass } from "@/components/ranked-batch/ranked-batch-format";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import SimpleLink from "@/components/simple-link";
 import { Spinner } from "@/components/spinner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SharedIcons } from "@/shared-icons";
-import type { PlayerReweight } from "@ssr/common/schemas/reweight/reweight";
+import type { PlayerRankedBatch } from "@ssr/common/schemas/ranked-batch/ranked-batch";
 import { formatPp } from "@ssr/common/utils/number-utils";
 import { getScoreSaberLeaderboardCoverUrl } from "@ssr/common/utils/scoresaber.util";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 
-type PlayerReweightScoresDialogProps = {
+type PlayerRankedBatchScoresDialogProps = {
   playerId: string;
-  /** The reweight whose scores to show; the dialog is closed while this is undefined. */
-  entry: PlayerReweight | undefined;
+  /** The ranked batch whose scores to show; the dialog is closed while this is undefined. */
+  entry: PlayerRankedBatch | undefined;
   onClose: () => void;
 };
 
-function PlayerReweightScores({ playerId, reweightId }: { playerId: string; reweightId: number }) {
+function PlayerRankedBatchScores({ playerId, rankedBatchId }: { playerId: string; rankedBatchId: number }) {
   const scores = useQuery({
-    queryKey: ["player-reweight-scores", playerId, reweightId],
-    queryFn: () => ssrApi.getPlayerReweightScores(playerId, reweightId),
+    queryKey: ["player-ranked-batch-scores", playerId, rankedBatchId],
+    queryFn: () => ssrApi.getPlayerRankedBatchScores(playerId, rankedBatchId),
     staleTime: 5 * 60_000,
     retry: false,
   });
   // Used for the star change of each score's map
-  const reweight = useQuery({
-    queryKey: ["reweight", reweightId],
-    queryFn: () => ssrApi.getReweight(reweightId),
+  const rankedBatch = useQuery({
+    queryKey: ["rankedBatch", rankedBatchId],
+    queryFn: () => ssrApi.getRankedBatch(rankedBatchId),
     staleTime: 5 * 60_000,
     retry: false,
   });
@@ -47,7 +47,7 @@ function PlayerReweightScores({ playerId, reweightId }: { playerId: string; rewe
   }
 
   const starChanges = new Map(
-    (reweight.data?.leaderboards ?? []).map(leaderboard => [leaderboard.leaderboardId, leaderboard])
+    (rankedBatch.data?.leaderboards ?? []).map(leaderboard => [leaderboard.leaderboardId, leaderboard])
   );
 
   return (
@@ -99,25 +99,32 @@ function PlayerReweightScores({ playerId, reweightId }: { playerId: string; rewe
 }
 
 /**
- * Every score of a player that a reweight changed, with its pp and star change.
+ * Every score of a player that a ranked batch changed, with its pp and star change.
  */
-export function PlayerReweightScoresDialog({ playerId, entry, onClose }: PlayerReweightScoresDialogProps) {
+export function PlayerRankedBatchScoresDialog({
+  playerId,
+  entry,
+  onClose,
+}: PlayerRankedBatchScoresDialogProps) {
   return (
     <Dialog open={entry !== undefined} onOpenChange={open => !open && onClose()}>
       <DialogContent className="flex max-h-[85vh] flex-col sm:max-w-3xl">
         {entry && (
           <>
             <DialogHeader>
-              <DialogTitle>{entry.reweight.name}</DialogTitle>
+              <DialogTitle>{entry.rankedBatch.name}</DialogTitle>
               <DialogDescription>
                 {entry.scoresChanged} {entry.scoresChanged === 1 ? "score" : "scores"} changed,{" "}
                 {formatPpDelta(entry.ppDelta)} in total.{" "}
-                <SimpleLink href={`/reweights/${entry.reweight.id}`} className="text-primary hover:underline">
-                  View reweight
+                <SimpleLink
+                  href={`/ranked-batches/${entry.rankedBatch.id}`}
+                  className="text-primary hover:underline"
+                >
+                  View rankedBatch
                 </SimpleLink>
               </DialogDescription>
             </DialogHeader>
-            <PlayerReweightScores playerId={playerId} reweightId={entry.reweight.id} />
+            <PlayerRankedBatchScores playerId={playerId} rankedBatchId={entry.rankedBatch.id} />
           </>
         )}
       </DialogContent>

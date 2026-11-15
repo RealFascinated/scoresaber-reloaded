@@ -30,8 +30,8 @@ import MetricsController from "./controller/metrics/metrics.controller";
 import PlayerRankingController from "./controller/player/player-ranking.controller";
 import PlayerController from "./controller/player/player.controller";
 import PlaylistController from "./controller/playlist/playlist.controller";
+import RankedBatchController from "./controller/ranked-batch/ranked-batch.controller";
 import RealmController from "./controller/realm/realm.controller";
-import ReweightController from "./controller/reweight/reweight.controller";
 import ScoresController from "./controller/scores/scores.controller";
 import UserFollowingController from "./controller/user/user-following.controller";
 import UserOverlaysController from "./controller/user/user-overlays.controller";
@@ -356,7 +356,7 @@ export const app = new Elysia()
 new WebsocketManager();
 
 // Registered outside of the chain above: it is at the compiler's type instantiation depth limit.
-app.use(ReweightController);
+app.use(RankedBatchController);
 app.use(websocketPlugin());
 
 for (const websocket of WebsocketManager.getAll()) {

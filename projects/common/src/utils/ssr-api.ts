@@ -8,6 +8,14 @@ import { BeatSaverMap } from "../schemas/beatsaver/map/map";
 import { LeaderboardStarChange } from "../schemas/leaderboard/leaderboard-star-change";
 import { MapCharacteristic } from "../schemas/map/map-characteristic";
 import { MapDifficulty } from "../schemas/map/map-difficulty";
+import type {
+  PlayerRankedBatchScoresResponse,
+  PlayerRankedBatchesResponse,
+  RankedBatchMarkersResponse,
+  RankedBatchPlayersPageResponse,
+  RankedBatchResponse,
+  RankedBatchesPageResponse,
+} from "../schemas/ranked-batch/ranked-batch-responses";
 import { ScoreStatsResponse } from "../schemas/response/beatleader/score-stats";
 import { LeaderboardResponse } from "../schemas/response/leaderboard/leaderboard";
 import { LeaderboardScoresResponse } from "../schemas/response/leaderboard/leaderboard-scores";
@@ -29,14 +37,6 @@ import { ScoreSaberScoresPageResponse } from "../schemas/response/score/scoresab
 import { TopScoresPageResponse } from "../schemas/response/score/top-scores";
 import { AppStatisticsResponse } from "../schemas/response/ssr/app-statistics";
 import { StatisticsResponse } from "../schemas/response/ssr/platform-statistics";
-import type {
-  PlayerReweightScoresResponse,
-  PlayerReweightsResponse,
-  ReweightMarkersResponse,
-  ReweightPlayersPageResponse,
-  ReweightResponse,
-  ReweightsPageResponse,
-} from "../schemas/reweight/reweight-responses";
 import type { PlayerScoresQuery } from "../schemas/score/query/player-scores-query";
 import { ScoreSaberMedalScoreSortField } from "../schemas/score/query/sort/scoresaber-medal-scores-sort";
 import type { ScoreSaberScoreSortField } from "../schemas/score/query/sort/scoresaber-scores-sort";
@@ -159,51 +159,51 @@ class SSRApi {
   }
 
   /**
-   * Fetches a page of reweights, newest first.
+   * Fetches a page of ranked batches, newest first.
    */
-  async getReweights(page: number = 1) {
-    return await this.request<ReweightsPageResponse>(`/reweights`, { page: page.toString() });
+  async getRankedBatches(page: number = 1) {
+    return await this.request<RankedBatchesPageResponse>(`/ranked-batches`, { page: page.toString() });
   }
 
   /**
-   * Fetches the minimal list of reweights used to annotate charts.
+   * Fetches the minimal list of ranked batches used to annotate charts.
    */
-  async getReweightMarkers() {
-    return await this.request<ReweightMarkersResponse>(`/reweights/markers`);
+  async getRankedBatchMarkers() {
+    return await this.request<RankedBatchMarkersResponse>(`/ranked-batches/markers`);
   }
 
   /**
-   * Fetches a reweight and the leaderboards it re-rated.
+   * Fetches a ranked batch and the leaderboards it re-rated.
    */
-  async getReweight(reweightId: number) {
-    return await this.request<ReweightResponse>(`/reweights/${reweightId}`);
+  async getRankedBatch(rankedBatchId: number) {
+    return await this.request<RankedBatchResponse>(`/ranked-batches/${rankedBatchId}`);
   }
 
   /**
-   * Fetches a page of the players a reweight affected the most.
+   * Fetches a page of the players a ranked batch affected the most.
    *
    * @param direction which end of the pp change to list first
    */
-  async getReweightPlayers(reweightId: number, page: number = 1, direction: "gain" | "loss" = "gain") {
-    return await this.request<ReweightPlayersPageResponse>(`/reweights/${reweightId}/players`, {
+  async getRankedBatchPlayers(rankedBatchId: number, page: number = 1, direction: "gain" | "loss" = "gain") {
+    return await this.request<RankedBatchPlayersPageResponse>(`/ranked-batches/${rankedBatchId}/players`, {
       page: page.toString(),
       direction,
     });
   }
 
   /**
-   * Fetches the reweights that changed a player's pp.
+   * Fetches the ranked batches that changed a player's pp.
    */
-  async getPlayerReweights(playerId: string) {
-    return await this.request<PlayerReweightsResponse>(`/reweights/player/${playerId}`);
+  async getPlayerRankedBatches(playerId: string) {
+    return await this.request<PlayerRankedBatchesResponse>(`/ranked-batches/player/${playerId}`);
   }
 
   /**
-   * Fetches every score of a player that a reweight changed, the biggest pp gain first.
+   * Fetches every score of a player that a ranked batch changed, the biggest pp gain first.
    */
-  async getPlayerReweightScores(playerId: string, reweightId: number) {
-    return await this.request<PlayerReweightScoresResponse>(
-      `/reweights/player/${playerId}/${reweightId}/scores`
+  async getPlayerRankedBatchScores(playerId: string, rankedBatchId: number) {
+    return await this.request<PlayerRankedBatchScoresResponse>(
+      `/ranked-batches/player/${playerId}/${rankedBatchId}/scores`
     );
   }
 

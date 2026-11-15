@@ -2,16 +2,16 @@ import Card from "@/components/card";
 import { PlayerAvatar } from "@/components/ranking/player-avatar";
 import SimpleLink from "@/components/simple-link";
 import CountryFlag from "@/components/ui/country-flag";
-import type { ReweightPlayerChange } from "@ssr/common/schemas/reweight/reweight";
+import type { RankedBatchPlayerChange } from "@ssr/common/schemas/ranked-batch/ranked-batch";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { formatPpDelta, getDeltaClass } from "./reweight-format";
+import { formatPpDelta, getDeltaClass } from "./ranked-batch-format";
 
-type ReweightPlayersProps = {
+type RankedBatchPlayersProps = {
   title: string;
-  players: ReweightPlayerChange[];
+  players: RankedBatchPlayerChange[];
 };
 
-export function ReweightPlayers({ title, players }: ReweightPlayersProps) {
+export function RankedBatchPlayers({ title, players }: RankedBatchPlayersProps) {
   return (
     <Card className="min-w-0 flex-1 gap-2">
       <h2 className="text-base font-semibold">{title}</h2>

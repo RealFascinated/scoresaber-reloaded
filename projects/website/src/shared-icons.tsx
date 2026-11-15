@@ -201,7 +201,7 @@ export const SharedIcons = {
   // Maps
   MapsLeaderboardsTabIcon: HeroTrophyIcon,
   MapsRankingQueueTabIcon: HourglassIcon,
-  ReweightsNavIcon: ArrowUpDown,
+  RankedBatchesNavIcon: ArrowUpDown,
   MapsExternalLinkIcon: ExternalLinkIcon,
   MapLengthStatIcon: TimerIcon,
   MapBpmStatIcon: MusicIcon,

@@ -13,9 +13,9 @@ import CacheService from "../infra/cache.service";
 import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { PlayerScoreHistoryService } from "../player/player-score-history.service";
+import { RankedBatchService, type RecordedStarChanges } from "../ranked-batch/ranked-batch.service";
 import { RealmScoreSyncService } from "../realm/realm-score-sync.service";
 import { RealmService } from "../realm/realm.service";
-import { ReweightService, type RecordedStarChanges } from "../reweight/reweight.service";
 import {
   diffRankedLeaderboards,
   findUnrankedLeaderboards,
@@ -29,8 +29,8 @@ export type { LeaderboardUpdate } from "./ranked-leaderboard-diff";
 export type RankedSyncResult = {
   /** The leaderboards whose ranked/qualified/stars status changed. */
   updates: LeaderboardUpdate[];
-  /** The reweight the sync's star changes were recorded in, if there were any. */
-  reweight?: RecordedStarChanges;
+  /** The ranked batch the sync's star changes were recorded in, if there were any. */
+  rankedBatch?: RecordedStarChanges;
 };
 
 const UPSERT_BATCH_SIZE = 250;
@@ -99,9 +99,10 @@ export class LeaderboardRankedSyncService {
 
     // Recorded before the leaderboards are updated: once their stars are stored the change can no
     // longer be detected, so a failure after the update would lose it.
-    const reweight = await ReweightService.recordStarChanges(
+    const rankedBatch = await RankedBatchService.recordStarChanges(
       realmId,
-      diff.starChanges.map(change => ({ ...change, timestamp: new Date() }))
+      diff.starChanges.map(change => ({ ...change, timestamp: new Date() })),
+      diff.newlyRanked.map(map => ({ ...map, timestamp: new Date() }))
     );
     await Promise.all(
       diff.starChanges.map(change =>
@@ -141,7 +142,7 @@ export class LeaderboardRankedSyncService {
       );
     }
 
-    return { updates: diff.updates, reweight };
+    return { updates: diff.updates, rankedBatch };
   }
 
   /**
@@ -170,9 +171,9 @@ export class LeaderboardRankedSyncService {
     // Also retries the changes earlier syncs failed to capture, so it runs even without new ones.
     // A failure must not stop the rest of the sync.
     try {
-      await ReweightService.processPendingPpChanges();
+      await RankedBatchService.processPendingPpChanges();
     } catch (error) {
-      LeaderboardRankedSyncService.logger.error("Failed to capture reweight pp changes:", error);
+      LeaderboardRankedSyncService.logger.error("Failed to capture ranked batch pp changes:", error);
     }
   }
 

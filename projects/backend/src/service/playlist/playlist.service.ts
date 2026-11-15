@@ -31,9 +31,9 @@ import {
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
-import { ReweightService } from "../reweight/reweight.service";
+import { RankedBatchService } from "../ranked-batch/ranked-batch.service";
 import { scoreRowsToPlaylistSongs, takeTopUniqueSongRows } from "./playlist-song-utils";
-import { buildReweightPlaylist } from "./reweight-playlist";
+import { buildRankedBatchPlaylist } from "./ranked-batch-playlist";
 
 function getPlaylistTitleDate(date: Date): string {
   return formatDate(date, "MMM D, YYYY");
@@ -240,16 +240,17 @@ export default class PlaylistService {
   }
 
   /**
-   * Creates a playlist of the maps a reweight re-rated that are still ranked
+   * Creates a playlist of the maps a ranked batch re-rated or ranked that are still ranked
    *
-   * @param reweightId the id of the reweight
-   * @returns the reweight playlist
-   * @throws NotFoundError if the reweight does not exist
+   * @param rankedBatchId the id of the ranked batch
+   * @returns the ranked batch playlist
+   * @throws NotFoundError if the ranked batch does not exist
    */
-  public static async getReweightPlaylist(reweightId: number): Promise<Playlist> {
-    const { reweight, leaderboards } = await ReweightService.getReweight(reweightId);
+  public static async getRankedBatchPlaylist(rankedBatchId: number): Promise<Playlist> {
+    const { rankedBatch, leaderboards, newLeaderboards } =
+      await RankedBatchService.getRankedBatch(rankedBatchId);
 
-    return buildReweightPlaylist(reweight, leaderboards);
+    return buildRankedBatchPlaylist(rankedBatch, leaderboards, newLeaderboards);
   }
 
   /**

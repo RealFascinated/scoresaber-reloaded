@@ -2,7 +2,7 @@
 
 import { cn } from "@/common/utils";
 import { useRealm } from "@/components/providers/realm-provider";
-import { getDeltaClass } from "@/components/reweight/reweight-format";
+import { getDeltaClass } from "@/components/ranked-batch/ranked-batch-format";
 import SimpleLink from "@/components/simple-link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
@@ -61,7 +61,7 @@ export function LeaderboardStarChangeHistory({ leaderboardId }: { leaderboardId:
             <TableHead className="text-right">Before</TableHead>
             <TableHead className="text-right">After</TableHead>
             <TableHead className="text-right">Change</TableHead>
-            <TableHead className="w-24 text-right max-sm:hidden">Reweight</TableHead>
+            <TableHead className="w-24 text-right max-sm:hidden">Ranked Batch</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -70,7 +70,7 @@ export function LeaderboardStarChangeHistory({ leaderboardId }: { leaderboardId:
             return (
               <TableRow
                 key={change.timestamp.getTime()}
-                className={cn(change.reweightId !== undefined && "relative cursor-pointer")}
+                className={cn(change.rankedBatchId !== undefined && "relative cursor-pointer")}
               >
                 <TableCell className="py-2.5 text-sm">
                   {formatDate(change.timestamp, "DD MMMM YYYY")}
@@ -85,9 +85,9 @@ export function LeaderboardStarChangeHistory({ leaderboardId }: { leaderboardId:
                   {formatStarDelta(change)}
                 </TableCell>
                 <TableCell className="py-2.5 text-right text-sm max-sm:hidden">
-                  {change.reweightId !== undefined ? (
+                  {change.rankedBatchId !== undefined ? (
                     <SimpleLink
-                      href={`/reweights/${change.reweightId}`}
+                      href={`/ranked-batches/${change.rankedBatchId}`}
                       className="text-primary hover:text-primary/80 transition-colors after:absolute after:inset-0"
                     >
                       View

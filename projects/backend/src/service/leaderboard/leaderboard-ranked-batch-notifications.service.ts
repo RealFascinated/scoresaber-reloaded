@@ -6,39 +6,39 @@ import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { DiscordChannels, sendFile, sendMessageToChannel } from "../../bot/bot";
 import PlaylistService from "../playlist/playlist.service";
-import { ReweightService } from "../reweight/reweight.service";
+import { RankedBatchService } from "../ranked-batch/ranked-batch.service";
 import type { LeaderboardUpdate, RankedSyncResult } from "./leaderboard-ranked-sync.service";
 
 const RANKED_BATCH_ROLE_MENTION = "<@&1338261690952978442>";
 
 /**
- * Gets the URL of a reweight's page.
+ * Gets the URL of a ranked batch's page.
  */
-export function getReweightUrl(reweightId: number): string {
-  return `${env.NEXT_PUBLIC_WEBSITE_URL}/reweights/${reweightId}`;
+export function getRankedBatchUrl(rankedBatchId: number): string {
+  return `${env.NEXT_PUBLIC_WEBSITE_URL}/ranked-batches/${rankedBatchId}`;
 }
 
 /**
  * Builds the Discord message announcing a ranked batch.
  *
- * The role is not pinged for star changes that were merged into a reweight which was already
+ * The role is not pinged for star changes that were merged into a ranked batch which was already
  * announced, unless the batch also ranked new maps.
  *
  * @param pasteUrl the uploaded changelog
  * @param hasNewlyRankedMaps whether the batch ranked any new maps
- * @param reweight the reweight the batch's star changes were recorded in, if any
+ * @param rankedBatch the ranked batch the batch's star changes were recorded in, if any
  */
 export function buildRankedBatchMessage(
   pasteUrl: string,
   hasNewlyRankedMaps: boolean,
-  reweight: RankedSyncResult["reweight"]
+  rankedBatch: RankedSyncResult["rankedBatch"]
 ): string {
-  const isMergedUpdate = reweight?.alreadyNotified === true && !hasNewlyRankedMaps;
+  const isMergedUpdate = rankedBatch?.alreadyNotified === true && !hasNewlyRankedMaps;
   const header = isMergedUpdate
-    ? `Ranked Batch update (more maps were added to the reweight): ${pasteUrl}`
+    ? `Ranked Batch update (more maps were added to the ranked batch): ${pasteUrl}`
     : `${RANKED_BATCH_ROLE_MENTION} New Ranked Batch: ${pasteUrl}`;
 
-  return reweight ? `${header}\nReweight: ${getReweightUrl(reweight.reweightId)}` : header;
+  return rankedBatch ? `${header}\nRankedBatch: ${getRankedBatchUrl(rankedBatch.rankedBatchId)}` : header;
 }
 
 export class LeaderboardRankedSyncNotificationsService {
@@ -47,7 +47,7 @@ export class LeaderboardRankedSyncNotificationsService {
   /**
    * Logs the ranked batch to Discord.
    */
-  public static async handleRankedBatch({ updates, reweight }: RankedSyncResult): Promise<void> {
+  public static async handleRankedBatch({ updates, rankedBatch }: RankedSyncResult): Promise<void> {
     if (updates.length === 0) {
       return;
     }
@@ -129,15 +129,15 @@ export class LeaderboardRankedSyncNotificationsService {
     const pasteUrl = await uploadPaste(changelog);
     await sendMessageToChannel(
       DiscordChannels.RANKED_BATCH_LOGS,
-      buildRankedBatchMessage(pasteUrl, newlyRankedMaps.length > 0, reweight)
+      buildRankedBatchMessage(pasteUrl, newlyRankedMaps.length > 0, rankedBatch)
     );
-    if (reweight && !reweight.alreadyNotified) {
-      await ReweightService.markNotified(reweight.reweightId);
+    if (rankedBatch && !rankedBatch.alreadyNotified) {
+      await RankedBatchService.markNotified(rankedBatch.rankedBatchId);
     }
 
     // Create a playlist of the changes
-    const playlist: Playlist = reweight
-      ? await PlaylistService.getReweightPlaylist(reweight.reweightId)
+    const playlist: Playlist = rankedBatch
+      ? await PlaylistService.getRankedBatchPlaylist(rankedBatch.rankedBatchId)
       : {
           playlistTitle: `Ranked Batch (${formatDate(new Date(), "MMM D, YYYY")})`,
           playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,

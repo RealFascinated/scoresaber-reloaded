@@ -1,16 +1,16 @@
 import { describe, expect, test } from "bun:test";
-import type { ReweightStarChangeRow } from "../../../src/repositories/scoresaber-reweight.repository";
+import type { RankedBatchStarChangeRow } from "../../../src/repositories/scoresaber-ranked-batch.repository";
 import {
   aggregateLeaderboardChanges,
   calculatePlayerPpChange,
   getMergeCutoff,
-  getReweightName,
+  getRankedBatchName,
   hasPpChanged,
   PP_CHANGE_EPSILON,
-  REWEIGHT_MERGE_WINDOW_MS,
-} from "../../../src/service/reweight/reweight-calculations";
+  RANKED_BATCH_MERGE_WINDOW_MS,
+} from "../../../src/service/ranked-batch/ranked-batch-calculations";
 
-function starChange(overrides: Partial<ReweightStarChangeRow> = {}): ReweightStarChangeRow {
+function starChange(overrides: Partial<RankedBatchStarChangeRow> = {}): RankedBatchStarChangeRow {
   return {
     leaderboardId: 1,
     songHash: "hash",
@@ -30,23 +30,23 @@ function starChange(overrides: Partial<ReweightStarChangeRow> = {}): ReweightSta
 describe("getMergeCutoff", () => {
   test("is the merge window before the timestamp", () => {
     const timestamp = new Date("2026-01-10T12:00:00.000Z");
-    expect(getMergeCutoff(timestamp).getTime()).toBe(timestamp.getTime() - REWEIGHT_MERGE_WINDOW_MS);
+    expect(getMergeCutoff(timestamp).getTime()).toBe(timestamp.getTime() - RANKED_BATCH_MERGE_WINDOW_MS);
   });
 
   test("covers three days", () => {
-    expect(REWEIGHT_MERGE_WINDOW_MS).toBe(3 * 24 * 60 * 60 * 1000);
+    expect(RANKED_BATCH_MERGE_WINDOW_MS).toBe(3 * 24 * 60 * 60 * 1000);
   });
 });
 
-describe("getReweightName", () => {
+describe("getRankedBatchName", () => {
   test("generates a name from the start month in UTC", () => {
-    expect(getReweightName(null, new Date("2026-01-15T10:00:00.000Z"))).toBe("January 2026 Reweight");
-    expect(getReweightName(null, new Date("2026-01-31T23:59:59.000Z"))).toBe("January 2026 Reweight");
-    expect(getReweightName(null, new Date("2026-02-01T00:00:00.000Z"))).toBe("February 2026 Reweight");
+    expect(getRankedBatchName(null, new Date("2026-01-15T10:00:00.000Z"))).toBe("January 2026 Ranked Batch");
+    expect(getRankedBatchName(null, new Date("2026-01-31T23:59:59.000Z"))).toBe("January 2026 Ranked Batch");
+    expect(getRankedBatchName(null, new Date("2026-02-01T00:00:00.000Z"))).toBe("February 2026 Ranked Batch");
   });
 
   test("prefers the stored name", () => {
-    expect(getReweightName("The Big One", new Date("2026-01-15T10:00:00.000Z"))).toBe("The Big One");
+    expect(getRankedBatchName("The Big One", new Date("2026-01-15T10:00:00.000Z"))).toBe("The Big One");
   });
 });
 

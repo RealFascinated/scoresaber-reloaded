@@ -4,20 +4,20 @@ import SimplePagination from "@/components/simple-pagination";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
-type ReweightPaginationProps = {
+type RankedBatchPaginationProps = {
   page: number;
   totalItems: number;
   itemsPerPage: number;
 };
 
 function buildPageUrl(page: number): string {
-  return page > 1 ? `/reweights?page=${page}` : "/reweights";
+  return page > 1 ? `/ranked-batches?page=${page}` : "/ranked-batches";
 }
 
 /**
- * Pagination for the server rendered reweights list; each page is a navigation.
+ * Pagination for the server rendered ranked batches list; each page is a navigation.
  */
-export function ReweightPagination({ page, totalItems, itemsPerPage }: ReweightPaginationProps) {
+export function RankedBatchPagination({ page, totalItems, itemsPerPage }: RankedBatchPaginationProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 

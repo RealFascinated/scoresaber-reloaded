@@ -24,7 +24,7 @@ const STATIC_CRUMBS: Record<string, Crumb[]> = {
   "/medals": [{ label: "Medals" }],
   "/maps/leaderboards": [{ label: "Maps" }, { label: "Leaderboards" }],
   "/maps/ranking-queue": [{ label: "Maps" }, { label: "Ranking Queue" }],
-  "/reweights": [{ label: "Reweights" }],
+  "/ranked-batches": [{ label: "Ranked Batches" }],
   "/scores/top": [{ label: "Scores" }, { label: "Top Scores" }],
   "/scores/live": [{ label: "Scores" }, { label: "Live Scores" }],
   "/settings": [{ label: "Settings" }],
@@ -37,7 +37,7 @@ const STATIC_CRUMBS: Record<string, Crumb[]> = {
 const DYNAMIC_ROUTES: Record<string, { parent: Crumb; fallback: string }> = {
   player: { parent: { label: "Ranking", href: "/ranking" }, fallback: "Player" },
   leaderboard: { parent: { label: "Leaderboards", href: "/maps/leaderboards" }, fallback: "Leaderboard" },
-  reweights: { parent: { label: "Reweights", href: "/reweights" }, fallback: "Reweight" },
+  rankedBatches: { parent: { label: "Ranked Batches", href: "/ranked-batches" }, fallback: "Ranked Batch" },
   score: { parent: { label: "Scores", href: "/scores/top" }, fallback: "Score" },
 };
 

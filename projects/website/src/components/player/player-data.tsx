@@ -19,7 +19,7 @@ import { ScoresToolbarLeadingProvider } from "../score/scores-toolbar";
 import { UnderlineTab, UnderlineTabs } from "../ui/underline-tabs";
 import PlayerHeader from "./header/player-header";
 import PlayerMiniRankings from "./mini-ranking/player-mini-ranking";
-import PlayerReweights from "./reweights/player-reweights";
+import PlayerRankedBatches from "./ranked-batches/player-ranked-batches";
 
 const platformRepository = PlatformRepository.getInstance();
 const PLATFORM_QUERY = parseAsStringEnum<PlatformType>(Object.values(PlatformType)).withDefault(
@@ -115,7 +115,7 @@ export default function PlayerData({ player: playerProp, initialScores }: Player
 
           {/* Shown in the sidebar below the mini rankings when that is visible */}
           <div className={showRankings ? "@6xl:hidden" : undefined}>
-            <PlayerReweights playerId={player.id} />
+            <PlayerRankedBatches playerId={player.id} />
           </div>
 
           <PinnedScores playerId={player.id} />
@@ -126,7 +126,7 @@ export default function PlayerData({ player: playerProp, initialScores }: Player
         {showRankings && (
           <aside className="hidden w-full shrink-0 @6xl:block @6xl:w-80 @7xl:w-96">
             <PlayerMiniRankings player={player}>
-              <PlayerReweights playerId={player.id} />
+              <PlayerRankedBatches playerId={player.id} />
             </PlayerMiniRankings>
           </aside>
         )}

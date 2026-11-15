@@ -395,7 +395,7 @@ export const scoreSaberScoreRealmsTable = pgTable(
 );
 
 export const scoreSaberLeaderboardStarChangeTable = pgTable(
-  "scoresaber-reweight-leaderboards",
+  "scoresaber-ranked-batch-leaderboards",
   {
     id: serial().primaryKey(),
     leaderboardId: integer().notNull(),
@@ -403,45 +403,62 @@ export const scoreSaberLeaderboardStarChangeTable = pgTable(
     previousStars: doublePrecision().notNull(),
     newStars: doublePrecision().notNull(),
     timestamp: timestamp().notNull(),
-    /** The reweight this change belongs to. Null for changes recorded before reweights existed. */
-    reweightId: integer(),
+    /** The ranked batch this change belongs to. Null for changes recorded before ranked batches existed. */
+    rankedBatchId: integer(),
     /** Set while the pp changes of this star change still have to be captured. */
     ppPending: boolean().notNull().default(false),
   },
   table => [
     index("leaderboard_star_change_leaderboard_time_idx").on(table.leaderboardId, table.timestamp.desc()),
-    index("leaderboard_star_change_reweight_idx").on(table.reweightId),
+    index("leaderboard_star_change_ranked_batch_idx").on(table.rankedBatchId),
   ]
 );
 
 /**
- * A reweight: the star changes of a realm that happened within a few days of each other.
+ * A ranked batch: the star changes of a realm that happened within a few days of each other.
  */
-export const scoreSaberReweightsTable = pgTable(
-  "scoresaber-reweights",
+export const scoreSaberRankedBatchesTable = pgTable(
+  "scoresaber-ranked-batches",
   {
     id: serial().primaryKey(),
     realmId: integer().notNull().default(1),
-    /** Overrides the generated "Month Year Reweight" name. */
+    /** Overrides the generated "Month Year Ranked Batch" name. */
     name: text(),
     startedAt: timestamp().notNull(),
     endedAt: timestamp().notNull(),
+    /** Leaderboards that were re-rated. */
     leaderboardCount: integer().notNull().default(0),
+    /** Leaderboards that became ranked. */
+    newLeaderboardCount: integer().notNull().default(0),
     playerCount: integer().notNull().default(0),
     scoreCount: integer().notNull().default(0),
-    /** When the reweight was announced, so merged late changes never announce it again. */
+    /** When the ranked batch was announced, so merged late changes never announce it again. */
     notifiedAt: timestamp(),
   },
-  table => [index("reweights_realm_started_idx").on(table.realmId, table.startedAt.desc())]
+  table => [index("ranked_batches_realm_started_idx").on(table.realmId, table.startedAt.desc())]
 );
 
 /**
- * The total pp change of a player for a reweight. Only players whose pp changed have a row.
+ * A leaderboard that became ranked as part of a ranked batch, with its stars when it was ranked.
  */
-export const scoreSaberReweightPlayersTable = pgTable(
-  "scoresaber-reweight-players",
+export const scoreSaberRankedBatchNewLeaderboardsTable = pgTable(
+  "scoresaber-ranked-batch-new-leaderboards",
   {
-    reweightId: integer().notNull(),
+    rankedBatchId: integer().notNull(),
+    leaderboardId: integer().notNull(),
+    stars: doublePrecision().notNull(),
+    timestamp: timestamp().notNull(),
+  },
+  table => [primaryKey({ columns: [table.rankedBatchId, table.leaderboardId] })]
+);
+
+/**
+ * The total pp change of a player for a ranked batch. Only players whose pp changed have a row.
+ */
+export const scoreSaberRankedBatchPlayersTable = pgTable(
+  "scoresaber-ranked-batch-players",
+  {
+    rankedBatchId: integer().notNull(),
     playerId: varchar({ length: 32 }).notNull(),
     ppBefore: doublePrecision().notNull(),
     ppAfter: doublePrecision().notNull(),
@@ -449,20 +466,20 @@ export const scoreSaberReweightPlayersTable = pgTable(
     scoresChanged: integer().notNull(),
   },
   table => [
-    primaryKey({ columns: [table.reweightId, table.playerId] }),
-    index("reweight_players_player_idx").on(table.playerId, table.reweightId.desc()),
-    index("reweight_players_delta_idx").on(table.reweightId, table.ppDelta),
+    primaryKey({ columns: [table.rankedBatchId, table.playerId] }),
+    index("ranked_batch_players_player_idx").on(table.playerId, table.rankedBatchId.desc()),
+    index("ranked_batch_players_delta_idx").on(table.rankedBatchId, table.ppDelta),
   ]
 );
 
 /**
- * The pp change of a single score for a reweight. `ppBefore` is the pp stored before the
- * reweight and `ppAfter` the pp ScoreSaber reports after it.
+ * The pp change of a single score for a ranked batch. `ppBefore` is the pp stored before the
+ * ranked batch and `ppAfter` the pp ScoreSaber reports after it.
  */
-export const scoreSaberReweightScoresTable = pgTable(
-  "scoresaber-reweight-scores",
+export const scoreSaberRankedBatchScoresTable = pgTable(
+  "scoresaber-ranked-batch-scores",
   {
-    reweightId: integer().notNull(),
+    rankedBatchId: integer().notNull(),
     scoreId: integer().notNull(),
     playerId: varchar({ length: 32 }).notNull(),
     leaderboardId: integer().notNull(),
@@ -470,9 +487,9 @@ export const scoreSaberReweightScoresTable = pgTable(
     ppAfter: doublePrecision().notNull(),
   },
   table => [
-    primaryKey({ columns: [table.reweightId, table.scoreId] }),
-    index("reweight_scores_player_idx").on(table.playerId, table.reweightId),
-    index("reweight_scores_leaderboard_idx").on(table.reweightId, table.leaderboardId),
+    primaryKey({ columns: [table.rankedBatchId, table.scoreId] }),
+    index("ranked_batch_scores_player_idx").on(table.playerId, table.rankedBatchId),
+    index("ranked_batch_scores_leaderboard_idx").on(table.rankedBatchId, table.leaderboardId),
   ]
 );
 
@@ -894,9 +911,9 @@ export type ScoreSaberLeaderboardRealmRow = typeof scoreSaberLeaderboardRealmsTa
 export type ScoreSaberLeaderboardRow = ScoreSaberLeaderboardBaseRow &
   Pick<ScoreSaberLeaderboardRealmRow, "ranked" | "qualified" | "stars" | "rankedDate" | "qualifiedDate">;
 export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;
-export type ScoreSaberReweightRow = typeof scoreSaberReweightsTable.$inferSelect;
-export type ScoreSaberReweightPlayerRow = typeof scoreSaberReweightPlayersTable.$inferSelect;
-export type ScoreSaberReweightScoreRow = typeof scoreSaberReweightScoresTable.$inferSelect;
+export type ScoreSaberRankedBatchRow = typeof scoreSaberRankedBatchesTable.$inferSelect;
+export type ScoreSaberRankedBatchPlayerRow = typeof scoreSaberRankedBatchPlayersTable.$inferSelect;
+export type ScoreSaberRankedBatchScoreRow = typeof scoreSaberRankedBatchScoresTable.$inferSelect;
 export type BeatLeaderScoreRow = typeof beatLeaderScoresTable.$inferSelect;
 export type BeatLeaderPlayerRow = typeof beatLeaderPlayersTable.$inferSelect;
 export type BeatSaverUploaderRow = typeof beatSaverUploadersTable.$inferSelect;

@@ -45,7 +45,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
                 <DialogTrigger asChild>
                   <button
                     className="border-primary/50 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary focus-visible:ring-primary/50 flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-bold uppercase transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-hidden"
-                    title="View star history and reweights"
+                    title="View star history and ranked batches"
                   >
                     <SharedIcons.LeaderboardStarHistoryIcon className="h-3.5 w-3.5" />
                     Star History

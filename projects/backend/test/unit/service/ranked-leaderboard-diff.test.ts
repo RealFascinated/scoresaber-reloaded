@@ -48,7 +48,7 @@ describe("diffRankedLeaderboards", () => {
     expect(diff.newlyRankedLeaderboardIds).toEqual([]);
   });
 
-  test("records a star change as a reweight", () => {
+  test("records a star change as a ranked batch", () => {
     const rerated = api({ stars: 9 });
     const diff = diffRankedLeaderboards(storedMap(stored()), [rerated]);
 
@@ -61,6 +61,23 @@ describe("diffRankedLeaderboards", () => {
     expect(diff.newlyRankedLeaderboardIds).toEqual([]);
   });
 
+  test("only batches newly ranked leaderboards that were ranked recently", () => {
+    const now = new Date("2026-01-20T00:00:00.000Z");
+    const recent = api({ id: 2, stars: 5, rankedDate: new Date("2026-01-19T00:00:00.000Z") });
+    const old = api({ id: 3, stars: 6, rankedDate: new Date("2025-06-01T00:00:00.000Z") });
+    const diff = diffRankedLeaderboards(storedMap(stored()), [api(), recent, old], now);
+
+    expect(diff.newlyRankedLeaderboardIds).toEqual([2, 3]);
+    expect(diff.newlyRanked).toEqual([{ leaderboardId: 2, stars: 5 }]);
+  });
+
+  test("does not batch newly ranked leaderboards when nothing was stored as ranked", () => {
+    const diff = diffRankedLeaderboards(storedMap(), [api({ id: 2, stars: 5 })]);
+
+    expect(diff.newlyRankedLeaderboardIds).toEqual([2]);
+    expect(diff.newlyRanked).toEqual([]);
+  });
+
   test("treats a leaderboard that was not stored as newly ranked, not as a star change", () => {
     const fresh = api({ id: 2, stars: 5 });
     const diff = diffRankedLeaderboards(storedMap(stored()), [api(), fresh]);
@@ -68,6 +85,7 @@ describe("diffRankedLeaderboards", () => {
     expect(diff.starChanges).toEqual([]);
     expect(diff.reweightedLeaderboardIds).toEqual([]);
     expect(diff.newlyRankedLeaderboardIds).toEqual([2]);
+    expect(diff.newlyRanked).toEqual([{ leaderboardId: 2, stars: 5 }]);
     expect(diff.leaderboardsToUpsert).toEqual([fresh]);
     expect(diff.updates[0]?.previousLeaderboard).toBeUndefined();
   });

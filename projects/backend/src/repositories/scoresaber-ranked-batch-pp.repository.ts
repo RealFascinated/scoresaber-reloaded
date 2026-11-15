@@ -3,14 +3,14 @@ import { db } from "../db";
 import {
   scoreSaberAccountsTable,
   scoreSaberLeaderboardsTable,
-  scoreSaberReweightPlayersTable,
-  scoreSaberReweightScoresTable,
-  scoreSaberReweightsTable,
+  scoreSaberRankedBatchPlayersTable,
+  scoreSaberRankedBatchScoresTable,
+  scoreSaberRankedBatchesTable,
   scoreSaberScoreRealmsTable,
   scoreSaberScoresTable,
-  type ScoreSaberReweightPlayerRow,
-  type ScoreSaberReweightRow,
-  type ScoreSaberReweightScoreRow,
+  type ScoreSaberRankedBatchPlayerRow,
+  type ScoreSaberRankedBatchRow,
+  type ScoreSaberRankedBatchScoreRow,
 } from "../db/schema";
 
 /** A stored score together with the pp the realm currently has stored for it (0 when it has none). */
@@ -21,15 +21,15 @@ export type StoredScorePp = {
   pp: number;
 };
 
-/** A reweight's effect on a player, joined with the player's profile. */
-export type ReweightPlayerWithAccountRow = ScoreSaberReweightPlayerRow & {
+/** A ranked batch's effect on a player, joined with the player's profile. */
+export type RankedBatchPlayerWithAccountRow = ScoreSaberRankedBatchPlayerRow & {
   name: string;
   avatar: string;
   country: string | null;
 };
 
-/** A reweight's effect on a player's score, joined with the leaderboard identity. */
-export type ReweightScoreWithLeaderboardRow = ScoreSaberReweightScoreRow & {
+/** A ranked batch's effect on a player's score, joined with the leaderboard identity. */
+export type RankedBatchScoreWithLeaderboardRow = ScoreSaberRankedBatchScoreRow & {
   songHash: string;
   songName: string;
   songSubName: string;
@@ -39,7 +39,7 @@ export type ReweightScoreWithLeaderboardRow = ScoreSaberReweightScoreRow & {
   characteristic: (typeof scoreSaberLeaderboardsTable.$inferSelect)["characteristic"];
 };
 
-export class ScoreSaberReweightPpRepository {
+export class ScoreSaberRankedBatchPpRepository {
   /**
    * Reads the pp a realm has stored for scores. Scores that are not stored are left out, and
    * stored scores without a pp row have pp 0.
@@ -70,35 +70,35 @@ export class ScoreSaberReweightPpRepository {
   }
 
   /**
-   * Records the pp change of scores. When a score already has a row for the reweight only its
-   * `ppAfter` is updated: `ppBefore` must stay the pp stored before the reweight, even when this
+   * Records the pp change of scores. When a score already has a row for the ranked batch only its
+   * `ppAfter` is updated: `ppBefore` must stay the pp stored before the ranked batch, even when this
    * runs again after the stored pp was already overwritten.
    */
-  public static async upsertScoreChanges(rows: ScoreSaberReweightScoreRow[]): Promise<void> {
+  public static async upsertScoreChanges(rows: ScoreSaberRankedBatchScoreRow[]): Promise<void> {
     if (rows.length === 0) {
       return;
     }
     await db
-      .insert(scoreSaberReweightScoresTable)
+      .insert(scoreSaberRankedBatchScoresTable)
       .values(rows)
       .onConflictDoUpdate({
-        target: [scoreSaberReweightScoresTable.reweightId, scoreSaberReweightScoresTable.scoreId],
+        target: [scoreSaberRankedBatchScoresTable.rankedBatchId, scoreSaberRankedBatchScoresTable.scoreId],
         set: { ppAfter: sql`excluded."ppAfter"` },
       });
   }
 
   /**
-   * Replaces the pp change of players for a reweight.
+   * Replaces the pp change of players for a ranked batch.
    */
-  public static async upsertPlayerChanges(rows: ScoreSaberReweightPlayerRow[]): Promise<void> {
+  public static async upsertPlayerChanges(rows: ScoreSaberRankedBatchPlayerRow[]): Promise<void> {
     if (rows.length === 0) {
       return;
     }
     await db
-      .insert(scoreSaberReweightPlayersTable)
+      .insert(scoreSaberRankedBatchPlayersTable)
       .values(rows)
       .onConflictDoUpdate({
-        target: [scoreSaberReweightPlayersTable.reweightId, scoreSaberReweightPlayersTable.playerId],
+        target: [scoreSaberRankedBatchPlayersTable.rankedBatchId, scoreSaberRankedBatchPlayersTable.playerId],
         set: {
           ppBefore: sql`excluded."ppBefore"`,
           ppAfter: sql`excluded."ppAfter"`,
@@ -109,54 +109,54 @@ export class ScoreSaberReweightPpRepository {
   }
 
   /**
-   * Lists the players with a changed score on any of the leaderboards of a reweight.
+   * Lists the players with a changed score on any of the leaderboards of a ranked batch.
    */
   public static async selectChangedPlayerIds(
-    reweightId: number,
+    rankedBatchId: number,
     leaderboardIds: number[]
   ): Promise<string[]> {
     if (leaderboardIds.length === 0) {
       return [];
     }
     const rows = await db
-      .selectDistinct({ playerId: scoreSaberReweightScoresTable.playerId })
-      .from(scoreSaberReweightScoresTable)
+      .selectDistinct({ playerId: scoreSaberRankedBatchScoresTable.playerId })
+      .from(scoreSaberRankedBatchScoresTable)
       .where(
         and(
-          eq(scoreSaberReweightScoresTable.reweightId, reweightId),
-          inArray(scoreSaberReweightScoresTable.leaderboardId, leaderboardIds)
+          eq(scoreSaberRankedBatchScoresTable.rankedBatchId, rankedBatchId),
+          inArray(scoreSaberRankedBatchScoresTable.leaderboardId, leaderboardIds)
         )
       );
     return rows.map(row => row.playerId);
   }
 
   /**
-   * Lists every captured score change of the given players for a reweight.
+   * Lists every captured score change of the given players for a ranked batch.
    */
   public static async selectScoreChangesForPlayers(
-    reweightId: number,
+    rankedBatchId: number,
     playerIds: string[]
-  ): Promise<ScoreSaberReweightScoreRow[]> {
+  ): Promise<ScoreSaberRankedBatchScoreRow[]> {
     if (playerIds.length === 0) {
       return [];
     }
     return db
       .select()
-      .from(scoreSaberReweightScoresTable)
+      .from(scoreSaberRankedBatchScoresTable)
       .where(
         and(
-          eq(scoreSaberReweightScoresTable.reweightId, reweightId),
-          inArray(scoreSaberReweightScoresTable.playerId, playerIds)
+          eq(scoreSaberRankedBatchScoresTable.rankedBatchId, rankedBatchId),
+          inArray(scoreSaberRankedBatchScoresTable.playerId, playerIds)
         )
       );
   }
 
   /**
-   * Lists the pp of the given players' ranked scores in a realm that the reweight did not change.
+   * Lists the pp of the given players' ranked scores in a realm that the ranked batch did not change.
    */
   public static async selectUnchangedPps(
     realmId: number,
-    reweightId: number,
+    rankedBatchId: number,
     playerIds: string[]
   ): Promise<{ playerId: string; pp: number }[]> {
     if (playerIds.length === 0) {
@@ -172,11 +172,11 @@ export class ScoreSaberReweightPpRepository {
           notExists(
             db
               .select({ one: sql`1` })
-              .from(scoreSaberReweightScoresTable)
+              .from(scoreSaberRankedBatchScoresTable)
               .where(
                 and(
-                  eq(scoreSaberReweightScoresTable.reweightId, reweightId),
-                  eq(scoreSaberReweightScoresTable.scoreId, scoreSaberScoreRealmsTable.scoreId)
+                  eq(scoreSaberRankedBatchScoresTable.rankedBatchId, rankedBatchId),
+                  eq(scoreSaberRankedBatchScoresTable.scoreId, scoreSaberScoreRealmsTable.scoreId)
                 )
               )
           )
@@ -185,33 +185,33 @@ export class ScoreSaberReweightPpRepository {
   }
 
   /**
-   * Lists the reweights that changed a player's pp, newest first.
+   * Lists the ranked batches that changed a player's pp, newest first.
    */
-  public static async listPlayerReweights(
+  public static async listPlayerRankedBatches(
     playerId: string
-  ): Promise<{ reweight: ScoreSaberReweightRow; change: ScoreSaberReweightPlayerRow }[]> {
+  ): Promise<{ rankedBatch: ScoreSaberRankedBatchRow; change: ScoreSaberRankedBatchPlayerRow }[]> {
     return db
-      .select({ reweight: scoreSaberReweightsTable, change: scoreSaberReweightPlayersTable })
-      .from(scoreSaberReweightPlayersTable)
+      .select({ rankedBatch: scoreSaberRankedBatchesTable, change: scoreSaberRankedBatchPlayersTable })
+      .from(scoreSaberRankedBatchPlayersTable)
       .innerJoin(
-        scoreSaberReweightsTable,
-        eq(scoreSaberReweightPlayersTable.reweightId, scoreSaberReweightsTable.id)
+        scoreSaberRankedBatchesTable,
+        eq(scoreSaberRankedBatchPlayersTable.rankedBatchId, scoreSaberRankedBatchesTable.id)
       )
-      .where(eq(scoreSaberReweightPlayersTable.playerId, playerId))
-      .orderBy(desc(scoreSaberReweightsTable.startedAt), desc(scoreSaberReweightsTable.id));
+      .where(eq(scoreSaberRankedBatchPlayersTable.playerId, playerId))
+      .orderBy(desc(scoreSaberRankedBatchesTable.startedAt), desc(scoreSaberRankedBatchesTable.id));
   }
 
   /**
-   * Lists every score change of a player for a reweight, the biggest pp gain first.
+   * Lists every score change of a player for a ranked batch, the biggest pp gain first.
    */
   public static async listPlayerScoreChanges(
     playerId: string,
-    reweightId: number
-  ): Promise<ReweightScoreWithLeaderboardRow[]> {
-    const delta = sql`${scoreSaberReweightScoresTable.ppAfter} - ${scoreSaberReweightScoresTable.ppBefore}`;
+    rankedBatchId: number
+  ): Promise<RankedBatchScoreWithLeaderboardRow[]> {
+    const delta = sql`${scoreSaberRankedBatchScoresTable.ppAfter} - ${scoreSaberRankedBatchScoresTable.ppBefore}`;
     return db
       .select({
-        ...reweightScoreColumns,
+        ...rankedBatchScoreColumns,
         songHash: scoreSaberLeaderboardsTable.songHash,
         songName: scoreSaberLeaderboardsTable.songName,
         songSubName: scoreSaberLeaderboardsTable.songSubName,
@@ -220,36 +220,36 @@ export class ScoreSaberReweightPpRepository {
         difficulty: scoreSaberLeaderboardsTable.difficulty,
         characteristic: scoreSaberLeaderboardsTable.characteristic,
       })
-      .from(scoreSaberReweightScoresTable)
+      .from(scoreSaberRankedBatchScoresTable)
       .innerJoin(
         scoreSaberLeaderboardsTable,
-        eq(scoreSaberReweightScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
+        eq(scoreSaberRankedBatchScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
       )
       .where(
         and(
-          eq(scoreSaberReweightScoresTable.playerId, playerId),
-          eq(scoreSaberReweightScoresTable.reweightId, reweightId)
+          eq(scoreSaberRankedBatchScoresTable.playerId, playerId),
+          eq(scoreSaberRankedBatchScoresTable.rankedBatchId, rankedBatchId)
         )
       )
-      .orderBy(desc(delta), asc(scoreSaberReweightScoresTable.scoreId));
+      .orderBy(desc(delta), asc(scoreSaberRankedBatchScoresTable.scoreId));
   }
 
   /**
-   * Counts the visible players a reweight changed. Banned and inactive players are left out.
+   * Counts the visible players a ranked batch changed. Banned and inactive players are left out.
    *
    * @param direction only count players who gained (`gain`) or lost (`loss`) pp
    */
-  public static async countPlayers(reweightId: number, direction?: "gain" | "loss"): Promise<number> {
+  public static async countPlayers(rankedBatchId: number, direction?: "gain" | "loss"): Promise<number> {
     const [row] = await db
       .select({ value: count() })
-      .from(scoreSaberReweightPlayersTable)
+      .from(scoreSaberRankedBatchPlayersTable)
       .innerJoin(
         scoreSaberAccountsTable,
-        eq(scoreSaberReweightPlayersTable.playerId, scoreSaberAccountsTable.id)
+        eq(scoreSaberRankedBatchPlayersTable.playerId, scoreSaberAccountsTable.id)
       )
       .where(
         and(
-          eq(scoreSaberReweightPlayersTable.reweightId, reweightId),
+          eq(scoreSaberRankedBatchPlayersTable.rankedBatchId, rankedBatchId),
           eq(scoreSaberAccountsTable.banned, false),
           eq(scoreSaberAccountsTable.inactive, false),
           direction === undefined ? undefined : getDirectionFilter(direction)
@@ -259,31 +259,31 @@ export class ScoreSaberReweightPpRepository {
   }
 
   /**
-   * Lists a page of the visible players a reweight changed.
+   * Lists a page of the visible players a ranked batch changed.
    *
    * @param direction `gain` lists the players who gained pp, biggest first; `loss` those who lost pp, biggest first
    */
   public static async listPlayers(
-    reweightId: number,
+    rankedBatchId: number,
     direction: "gain" | "loss",
     limit: number,
     offset: number
-  ): Promise<ReweightPlayerWithAccountRow[]> {
+  ): Promise<RankedBatchPlayerWithAccountRow[]> {
     return db
       .select({
-        ...reweightPlayerColumns,
+        ...rankedBatchPlayerColumns,
         name: scoreSaberAccountsTable.name,
         avatar: scoreSaberAccountsTable.avatar,
         country: scoreSaberAccountsTable.country,
       })
-      .from(scoreSaberReweightPlayersTable)
+      .from(scoreSaberRankedBatchPlayersTable)
       .innerJoin(
         scoreSaberAccountsTable,
-        eq(scoreSaberReweightPlayersTable.playerId, scoreSaberAccountsTable.id)
+        eq(scoreSaberRankedBatchPlayersTable.playerId, scoreSaberAccountsTable.id)
       )
       .where(
         and(
-          eq(scoreSaberReweightPlayersTable.reweightId, reweightId),
+          eq(scoreSaberRankedBatchPlayersTable.rankedBatchId, rankedBatchId),
           eq(scoreSaberAccountsTable.banned, false),
           eq(scoreSaberAccountsTable.inactive, false),
           direction === undefined ? undefined : getDirectionFilter(direction)
@@ -291,35 +291,35 @@ export class ScoreSaberReweightPpRepository {
       )
       .orderBy(
         direction === "gain"
-          ? desc(scoreSaberReweightPlayersTable.ppDelta)
-          : asc(scoreSaberReweightPlayersTable.ppDelta),
-        asc(scoreSaberReweightPlayersTable.playerId)
+          ? desc(scoreSaberRankedBatchPlayersTable.ppDelta)
+          : asc(scoreSaberRankedBatchPlayersTable.ppDelta),
+        asc(scoreSaberRankedBatchPlayersTable.playerId)
       )
       .limit(limit)
       .offset(offset);
   }
 }
 
-const reweightScoreColumns = {
-  reweightId: scoreSaberReweightScoresTable.reweightId,
-  scoreId: scoreSaberReweightScoresTable.scoreId,
-  playerId: scoreSaberReweightScoresTable.playerId,
-  leaderboardId: scoreSaberReweightScoresTable.leaderboardId,
-  ppBefore: scoreSaberReweightScoresTable.ppBefore,
-  ppAfter: scoreSaberReweightScoresTable.ppAfter,
+const rankedBatchScoreColumns = {
+  rankedBatchId: scoreSaberRankedBatchScoresTable.rankedBatchId,
+  scoreId: scoreSaberRankedBatchScoresTable.scoreId,
+  playerId: scoreSaberRankedBatchScoresTable.playerId,
+  leaderboardId: scoreSaberRankedBatchScoresTable.leaderboardId,
+  ppBefore: scoreSaberRankedBatchScoresTable.ppBefore,
+  ppAfter: scoreSaberRankedBatchScoresTable.ppAfter,
 };
 
-const reweightPlayerColumns = {
-  reweightId: scoreSaberReweightPlayersTable.reweightId,
-  playerId: scoreSaberReweightPlayersTable.playerId,
-  ppBefore: scoreSaberReweightPlayersTable.ppBefore,
-  ppAfter: scoreSaberReweightPlayersTable.ppAfter,
-  ppDelta: scoreSaberReweightPlayersTable.ppDelta,
-  scoresChanged: scoreSaberReweightPlayersTable.scoresChanged,
+const rankedBatchPlayerColumns = {
+  rankedBatchId: scoreSaberRankedBatchPlayersTable.rankedBatchId,
+  playerId: scoreSaberRankedBatchPlayersTable.playerId,
+  ppBefore: scoreSaberRankedBatchPlayersTable.ppBefore,
+  ppAfter: scoreSaberRankedBatchPlayersTable.ppAfter,
+  ppDelta: scoreSaberRankedBatchPlayersTable.ppDelta,
+  scoresChanged: scoreSaberRankedBatchPlayersTable.scoresChanged,
 };
 
 function getDirectionFilter(direction: "gain" | "loss"): SQL {
   return direction === "gain"
-    ? gt(scoreSaberReweightPlayersTable.ppDelta, 0)
-    : lt(scoreSaberReweightPlayersTable.ppDelta, 0);
+    ? gt(scoreSaberRankedBatchPlayersTable.ppDelta, 0)
+    : lt(scoreSaberRankedBatchPlayersTable.ppDelta, 0);
 }

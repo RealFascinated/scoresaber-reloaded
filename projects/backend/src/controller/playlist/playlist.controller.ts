@@ -37,19 +37,19 @@ export default function playlistController(app: Elysia) {
         }
       )
       .get(
-        "/reweight/:reweightId",
+        "/ranked-batch/:rankedBatchId",
         {
           tags: ["Playlist"],
           params: t.Object({
-            reweightId: t.String({ pattern: "^[1-9][0-9]*(\\.bplist)?$" }),
+            rankedBatchId: t.String({ pattern: "^[1-9][0-9]*(\\.bplist)?$" }),
           }),
           response: PlaylistResponseSchema,
           detail: {
-            description: "Create a playlist of the maps a reweight re-rated (add .bplist for BPLIST)",
+            description: "Create a playlist of the maps a ranked batch re-rated (add .bplist for BPLIST)",
           },
         },
-        async ({ params: { reweightId }, path }) => {
-          const playlist = await PlaylistService.getReweightPlaylist(Number.parseInt(reweightId, 10));
+        async ({ params: { rankedBatchId }, path }) => {
+          const playlist = await PlaylistService.getRankedBatchPlaylist(Number.parseInt(rankedBatchId, 10));
           return toBplistIfRequested(playlist, path);
         }
       )

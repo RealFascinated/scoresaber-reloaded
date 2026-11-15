@@ -6,7 +6,16 @@ export type StoredLeaderboardState = Pick<ScoreSaberLeaderboard, "id" | "ranked"
 };
 
 /** The part of a leaderboard ScoreSaber reports that the ranked sync compares. */
-export type ApiLeaderboardState = Pick<ScoreSaberLeaderboard, "id" | "ranked" | "qualified" | "stars">;
+export type ApiLeaderboardState = Pick<
+  ScoreSaberLeaderboard,
+  "id" | "ranked" | "qualified" | "stars" | "rankedDate"
+>;
+
+/**
+ * A ranked leaderboard older than this is not a newly ranked one, e.g. a map that was ranked long
+ * ago and only turned up again because it was unranked in between.
+ */
+export const NEWLY_RANKED_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 export type LeaderboardUpdate<TLeaderboard extends ApiLeaderboardState = ScoreSaberLeaderboard> = {
   previousLeaderboard?: Pick<ScoreSaberLeaderboard, "ranked" | "qualified" | "stars">;
@@ -17,6 +26,11 @@ export type StarChange = {
   leaderboardId: number;
   previousStars: number;
   newStars: number;
+};
+
+export type NewlyRankedLeaderboard = {
+  leaderboardId: number;
+  stars: number;
 };
 
 export type RankedLeaderboardDiff<TLeaderboard extends ApiLeaderboardState = ScoreSaberLeaderboard> = {
@@ -30,6 +44,12 @@ export type RankedLeaderboardDiff<TLeaderboard extends ApiLeaderboardState = Sco
   reweightedLeaderboardIds: number[];
   /** Ranked leaderboards that were not stored yet, or were stored as unranked. */
   newlyRankedLeaderboardIds: number[];
+  /**
+   * The newly ranked leaderboards with the stars they were ranked at, for the ranked batch. Only
+   * leaderboards that were ranked recently, and never when nothing was stored as ranked yet (the
+   * first sync would otherwise list every ranked map).
+   */
+  newlyRanked: NewlyRankedLeaderboard[];
 };
 
 /**
@@ -55,10 +75,12 @@ export function hasLeaderboardStatusChanged(
  *
  * @param stored the stored ranked leaderboards by id
  * @param apiLeaderboards the ranked leaderboards ScoreSaber reports
+ * @param now the current time, to tell whether a leaderboard was ranked recently
  */
 export function diffRankedLeaderboards<TLeaderboard extends ApiLeaderboardState>(
   stored: ReadonlyMap<number, StoredLeaderboardState>,
-  apiLeaderboards: TLeaderboard[]
+  apiLeaderboards: TLeaderboard[],
+  now: Date = new Date()
 ): RankedLeaderboardDiff<TLeaderboard> {
   const diff: RankedLeaderboardDiff<TLeaderboard> = {
     leaderboardsToUpsert: [],
@@ -66,6 +88,7 @@ export function diffRankedLeaderboards<TLeaderboard extends ApiLeaderboardState>
     starChanges: [],
     reweightedLeaderboardIds: [],
     newlyRankedLeaderboardIds: [],
+    newlyRanked: [],
   };
 
   for (const api of apiLeaderboards) {
@@ -76,6 +99,11 @@ export function diffRankedLeaderboards<TLeaderboard extends ApiLeaderboardState>
     }
     if (!previous?.ranked && api.ranked) {
       diff.newlyRankedLeaderboardIds.push(api.id);
+      const rankedRecently =
+        !api.rankedDate || now.getTime() - new Date(api.rankedDate).getTime() <= NEWLY_RANKED_MAX_AGE_MS;
+      if (stored.size > 0 && rankedRecently) {
+        diff.newlyRanked.push({ leaderboardId: api.id, stars: api.stars });
+      }
     }
 
     if (!hasLeaderboardStatusChanged(previous, api)) {

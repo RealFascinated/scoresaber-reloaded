@@ -1,11 +1,11 @@
 import { isBackendUnavailableError } from "@/common/api-error";
 import BackendUnavailable from "@/components/api/backend-unavailable";
 import { PageTitle } from "@/components/page-title";
-import { ReweightList } from "@/components/reweight/reweight-list";
-import { ReweightPagination } from "@/components/reweight/reweight-pagination";
+import { RankedBatchList } from "@/components/ranked-batch/ranked-batch-list";
+import { RankedBatchPagination } from "@/components/ranked-batch/ranked-batch-pagination";
 import { EmptyState } from "@/components/ui/empty-state";
 import { env } from "@ssr/common/env";
-import type { ReweightsPageResponse } from "@ssr/common/schemas/reweight/reweight-responses";
+import type { RankedBatchesPageResponse } from "@ssr/common/schemas/ranked-batch/ranked-batch-responses";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ssrConfig } from "config";
 import { Metadata } from "next";
@@ -16,14 +16,14 @@ export const revalidate = 300;
 
 const MAX_PAGE = 10_000;
 
-const TITLE = "Reweights";
+const TITLE = "Ranked Batches";
 const DESCRIPTION = "Every time ScoreSaber re-rated a group of ranked maps, and how it moved player pp.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: {
-    canonical: "/reweights",
+    canonical: "/ranked-batches",
   },
   openGraph: {
     siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
@@ -33,19 +33,19 @@ export const metadata: Metadata = {
   },
 };
 
-const loadReweightsSearchParams = createLoader({ page: parseAsInteger.withDefault(1) });
+const loadRankedBatchesSearchParams = createLoader({ page: parseAsInteger.withDefault(1) });
 
 type Props = {
   searchParams: Promise<SearchParams>;
 };
 
-export default async function ReweightsPage({ searchParams }: Props) {
-  const { page: requestedPage } = loadReweightsSearchParams(await searchParams);
+export default async function RankedBatchesPage({ searchParams }: Props) {
+  const { page: requestedPage } = loadRankedBatchesSearchParams(await searchParams);
   const page = Math.min(Math.max(1, requestedPage), MAX_PAGE);
 
-  let reweights: ReweightsPageResponse | undefined;
+  let rankedBatches: RankedBatchesPageResponse | undefined;
   try {
-    reweights = await ssrApi.getReweights(page);
+    rankedBatches = await ssrApi.getRankedBatches(page);
   } catch (error) {
     if (isBackendUnavailableError(error)) {
       return <BackendUnavailable />;
@@ -54,27 +54,27 @@ export default async function ReweightsPage({ searchParams }: Props) {
   }
 
   // A page past the last one (or a clamped invalid one) has nothing to show, so send the user back to the start.
-  if ((!reweights || reweights.items.length === 0) && (page > 1 || requestedPage !== 1)) {
-    redirect("/reweights");
+  if ((!rankedBatches || rankedBatches.items.length === 0) && (page > 1 || requestedPage !== 1)) {
+    redirect("/ranked-batches");
   }
 
   return (
     <section className="flex w-full flex-col gap-4">
       <PageTitle title={TITLE} description={DESCRIPTION} />
 
-      {!reweights || reweights.items.length === 0 ? (
+      {!rankedBatches || rankedBatches.items.length === 0 ? (
         <EmptyState
           className="ring-border rounded-xl ring-1"
-          title="No reweights found"
-          description="There are no reweights on this page."
+          title="No ranked batches found"
+          description="There are no ranked batches on this page."
         />
       ) : (
         <>
-          <ReweightList reweights={reweights.items} />
-          <ReweightPagination
+          <RankedBatchList rankedBatches={rankedBatches.items} />
+          <RankedBatchPagination
             page={page}
-            totalItems={reweights.metadata.totalItems}
-            itemsPerPage={reweights.metadata.itemsPerPage}
+            totalItems={rankedBatches.metadata.totalItems}
+            itemsPerPage={rankedBatches.metadata.itemsPerPage}
           />
         </>
       )}

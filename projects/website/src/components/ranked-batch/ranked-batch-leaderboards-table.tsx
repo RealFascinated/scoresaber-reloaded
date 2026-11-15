@@ -2,11 +2,15 @@ import { cn } from "@/common/utils";
 import ScoreSongInfo from "@/components/score/score-song-info";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SharedIcons } from "@/shared-icons";
-import type { ReweightLeaderboardChange } from "@ssr/common/schemas/reweight/reweight";
+import type { RankedBatchLeaderboardChange } from "@ssr/common/schemas/ranked-batch/ranked-batch";
 import { getScoreSaberLeaderboardCoverUrl } from "@ssr/common/utils/scoresaber.util";
-import { getDeltaClass } from "./reweight-format";
+import { getDeltaClass } from "./ranked-batch-format";
 
-export function ReweightLeaderboardsTable({ leaderboards }: { leaderboards: ReweightLeaderboardChange[] }) {
+export function RankedBatchLeaderboardsTable({
+  leaderboards,
+}: {
+  leaderboards: RankedBatchLeaderboardChange[];
+}) {
   return (
     <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
       <Table>

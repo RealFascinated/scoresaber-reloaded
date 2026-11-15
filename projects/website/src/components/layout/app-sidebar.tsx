@@ -128,7 +128,12 @@ const navGroups: { label: string; items: NavItem[] }[] = [
         icon: SharedIcons.MapsRankingQueueTabIcon,
         href: "/maps/ranking-queue",
       },
-      { id: "reweights", name: "Reweights", icon: SharedIcons.ReweightsNavIcon, href: "/reweights" },
+      {
+        id: "rankedBatches",
+        name: "Ranked Batches",
+        icon: SharedIcons.RankedBatchesNavIcon,
+        href: "/ranked-batches",
+      },
     ],
   },
   {

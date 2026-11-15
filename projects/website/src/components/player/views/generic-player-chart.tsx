@@ -87,31 +87,31 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
   }, [statisticHistory, datasetConfig, daysAmount]);
 
   // The marker list is tiny and shared by every chart, so it is fetched once and kept
-  const { data: reweightMarkers } = useQuery({
-    queryKey: ["reweight-markers"],
-    queryFn: () => ssrApi.getReweightMarkers(),
+  const { data: rankedBatchMarkers } = useQuery({
+    queryKey: ["ranked-batch-markers"],
+    queryFn: () => ssrApi.getRankedBatchMarkers(),
     staleTime: Infinity,
     retry: false,
   });
 
   const chartMarkers = useMemo<ChartMarker[]>(() => {
-    if (!reweightMarkers || labels.length === 0) {
+    if (!rankedBatchMarkers || labels.length === 0) {
       return [];
     }
 
-    // Snap each reweight to the first label on or after its UTC day, if that day is inside the chart
+    // Snap each ranked batch to the first label on or after its UTC day, if that day is inside the chart
     const labelDays = labels.map(label => getMidnightAlignedDate(label).getTime());
     const markers: ChartMarker[] = [];
-    for (const reweight of reweightMarkers) {
-      const reweightDay = getMidnightAlignedDate(reweight.date).getTime();
-      const index = labelDays.findIndex(day => day >= reweightDay);
-      if (index === -1 || reweightDay < labelDays[0]) {
+    for (const rankedBatch of rankedBatchMarkers) {
+      const rankedBatchDay = getMidnightAlignedDate(rankedBatch.date).getTime();
+      const index = labelDays.findIndex(day => day >= rankedBatchDay);
+      if (index === -1 || rankedBatchDay < labelDays[0]) {
         continue;
       }
-      markers.push({ index, label: reweight.name, href: `/reweights/${reweight.id}` });
+      markers.push({ index, label: rankedBatch.name, href: `/ranked-batches/${rankedBatch.id}` });
     }
     return markers;
-  }, [reweightMarkers, labels]);
+  }, [rankedBatchMarkers, labels]);
 
   if (!statisticHistory || Object.keys(statisticHistory).length === 0) {
     return (
