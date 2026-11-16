@@ -5,6 +5,7 @@ import {
   DEFAULT_SUGGESTED_MAPS_PARAMS,
   estimatePlayerSkill,
   fitSuggestedMapsModel,
+  predictAccuracy,
   scoreWeight,
 } from "@ssr/common/suggested-maps/suggested-maps-model";
 import { Cron } from "croner";
@@ -197,6 +198,7 @@ export class SuggestedMapsService {
                   nps: map.nps,
                   ageDays: score.ageDays,
                   accuracy: score.accuracy,
+                  residual: score.accuracy - predictAccuracy(fit.skill, fit.slope, map.stars, map.ease),
                 },
               ]
             : [];

@@ -148,6 +148,12 @@ export type PlayerStyle = {
   familiarity: (stars: number, nps: number) => number;
   /** The best accuracy the player can be expected to reach at these stars, from their own record. */
   ceiling: (stars: number) => number | null;
+  /**
+   * Accuracy to add to the model's prediction at these stars so it matches what the player actually gets: the
+   * model is fitted over all stars and drifts at the player's own, so this is how far their scores there
+   * usually land from it. 0 without enough scores nearby.
+   */
+  correction: (stars: number) => number;
 };
 
 /** Width (in stars) of the neighbourhood that counts as the same kind of map. */
@@ -160,6 +166,14 @@ const CEILING_MARGIN = 0.1;
 /** Stars around a map that the player's best accuracy is taken from, widened once when nothing is found. */
 const CEILING_RADIUS = 0.75;
 const MIN_CEILING_SCORES = 3;
+/** Width (in stars) of the scores the prediction correction is taken from. */
+const CORRECTION_BANDWIDTH = 0.75;
+/** Scores' worth of weight needed nearby before the correction is trusted. */
+const MIN_CORRECTION_WEIGHT = 4;
+/** Quantile of the nearby residuals the correction uses: just above the middle, a decent attempt. */
+const CORRECTION_QUANTILE = 0.55;
+/** Lowest accuracy that counts toward the correction; worse scores are fails, not skill. */
+const CORRECTION_MIN_ACCURACY = 80;
 /** Effort discount: `1 / (1 + EFFORT_PER_STAR * extra stars + EFFORT_PER_NPS_SHARE * extra NPS share)`. */
 const EFFORT_PER_STAR = 0.25;
 const EFFORT_PER_NPS_SHARE = 0.5;
@@ -171,7 +185,15 @@ const EFFORT_PER_NPS_SHARE = 0.5;
  * @param played the player's scores, best pp first
  */
 export function derivePlayerStyle(
-  played: { stars: number; seconds: number; nps: number; ageDays: number; accuracy: number }[]
+  played: {
+    stars: number;
+    seconds: number;
+    nps: number;
+    ageDays: number;
+    accuracy: number;
+    /** Actual accuracy minus the model's prediction for the player on that map. */
+    residual?: number;
+  }[]
 ): PlayerStyle {
   const ranges = derivePlayerRanges(played);
   const top = played.slice(0, STYLE_SCORES).map((map, rank) => ({
@@ -205,6 +227,25 @@ export function derivePlayerStyle(
       const extraStars = Math.max(0, stars - medianStars);
       const extraNps = medianNps > 0 && nps > 0 ? Math.max(0, nps / medianNps - 1) : 0;
       return common / (1 + EFFORT_PER_STAR * extraStars + EFFORT_PER_NPS_SHARE * extraNps);
+    },
+    correction: stars => {
+      let kernelTotal = 0;
+      const near: { value: number; weight: number }[] = [];
+      played.forEach((map, rank) => {
+        if (map.residual === undefined || map.accuracy < CORRECTION_MIN_ACCURACY) {
+          return;
+        }
+        const kernel = Math.exp(-0.5 * ((stars - map.stars) / CORRECTION_BANDWIDTH) ** 2);
+        if (kernel < 0.01) {
+          return;
+        }
+        kernelTotal += kernel;
+        // What the player does now counts most: recent and high pp scores, like the rest of the style.
+        const current =
+          Math.pow(0.5, Math.max(0, map.ageDays) / STYLE_HALF_LIFE_DAYS) * Math.pow(STYLE_RANK_DECAY, rank);
+        near.push({ value: map.residual, weight: kernel * current });
+      });
+      return kernelTotal >= MIN_CORRECTION_WEIGHT ? weightedQuantile(near, CORRECTION_QUANTILE) : 0;
     },
     ceiling: stars => {
       for (const radius of [CEILING_RADIUS, CEILING_RADIUS * 2]) {
@@ -355,8 +396,10 @@ export function rankSuggestedMaps(args: {
       continue;
     }
 
+    // A prediction never goes beyond the best the player has shown on maps of these stars.
     const modelAccuracy = Math.min(
-      predictAccuracy(skill, slope, map.stars, map.ease),
+      predictAccuracy(skill, slope, map.stars, map.ease) + (style?.correction(map.stars) ?? 0),
+      style?.ceiling(map.stars) ?? MAX_PREDICTED_ACCURACY,
       MAX_PREDICTED_ACCURACY
     );
     const predictedAccuracy = current

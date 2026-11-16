@@ -7,6 +7,7 @@ import {
   DEFAULT_SUGGESTED_MAPS_PARAMS,
   estimatePlayerSkill,
   fitSuggestedMapsModel,
+  predictAccuracy,
   scoreWeight,
 } from "@ssr/common/suggested-maps/suggested-maps-model";
 import {
@@ -61,7 +62,16 @@ const style = derivePlayerStyle(
   scores.flatMap(s => {
     const m = byId.get(s.leaderboardId);
     return m
-      ? [{ stars: m.stars, seconds: m.seconds, nps: m.nps, ageDays: s.ageDays, accuracy: s.accuracy }]
+      ? [
+          {
+            stars: m.stars,
+            seconds: m.seconds,
+            nps: m.nps,
+            ageDays: s.ageDays,
+            accuracy: s.accuracy,
+            residual: s.accuracy - predictAccuracy(fit.skill, fit.slope, m.stars, m.ease),
+          },
+        ]
       : [];
   })
 );
