@@ -2,6 +2,19 @@ import PagesLayout from "@/app/(pages)/layout";
 import NotFound from "@/components/not-found";
 import { NotFoundSearchButton } from "@/components/not-found-search-button";
 import { DiscordButton } from "@/components/social/discord-button";
+import type { Metadata } from "next";
+
+// Replaces the root layout's "index, follow" robots (including googleBot) so 404s only emit noindex
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
+};
 
 export default function NotFoundPage() {
   return (
