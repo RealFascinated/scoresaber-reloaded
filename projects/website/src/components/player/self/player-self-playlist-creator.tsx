@@ -119,7 +119,10 @@ export default function SelfPlaylistCreator() {
           }
         >
           <PlayerActionButtonWrapper>
-            <SharedIcons.SelfPlaylistPlayerIcon className="size-5" />
+            <div className="flex items-center gap-2 text-sm">
+              <SharedIcons.SelfPlaylistPlayerIcon className="size-5" />
+              <span className="hidden sm:inline">Self Playlist</span>
+            </div>
           </PlayerActionButtonWrapper>
         </SimpleTooltip>
       </DialogTrigger>
