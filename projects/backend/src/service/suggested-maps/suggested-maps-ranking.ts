@@ -396,9 +396,11 @@ export function rankSuggestedMaps(args: {
       continue;
     }
 
-    // A prediction never goes beyond the best the player has shown on maps of these stars.
+    // A prediction never goes beyond the best the player has shown on maps of these stars. The correction only
+    // applies to maps they haven't played: a score they already have is better evidence than the correction.
     const modelAccuracy = Math.min(
-      predictAccuracy(skill, slope, map.stars, map.ease) + (style?.correction(map.stars) ?? 0),
+      predictAccuracy(skill, slope, map.stars, map.ease) +
+        (current ? 0 : (style?.correction(map.stars) ?? 0)),
       style?.ceiling(map.stars) ?? MAX_PREDICTED_ACCURACY,
       MAX_PREDICTED_ACCURACY
     );
@@ -453,7 +455,29 @@ export function rankSuggestedMaps(args: {
     }
     return b.bonusPp - a.bonusPp;
   });
-  return out.slice(0, filters.limit);
+  if (!playerScores || filters.hidePlayed) {
+    return out.slice(0, filters.limit);
+  }
+  return balancePlayed(out, filters.limit);
+}
+
+/** Share of the suggestions that are maps the player already has a score on (to improve) instead of new maps. */
+const PLAYED_SHARE = 0.5;
+
+/**
+ * Takes the best `limit` maps of a ranked list, aiming at `PLAYED_SHARE` played maps and the rest new, so
+ * neither kind crowds the other out. A kind that runs short leaves its places to the other. The order is kept.
+ */
+function balancePlayed(ranked: SuggestedMap[], limit: number): SuggestedMap[] {
+  const played = ranked.filter(map => map.currentAccuracy !== null);
+  const fresh = ranked.filter(map => map.currentAccuracy === null);
+  const freshCount = Math.min(
+    fresh.length,
+    limit - Math.min(played.length, Math.round(limit * PLAYED_SHARE))
+  );
+  const playedCount = Math.min(played.length, limit - freshCount);
+  const chosen = new Set([...played.slice(0, playedCount), ...fresh.slice(0, freshCount)]);
+  return ranked.filter(map => chosen.has(map));
 }
 
 /**
