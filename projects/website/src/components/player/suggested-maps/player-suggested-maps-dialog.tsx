@@ -57,7 +57,7 @@ export default function PlayerSuggestedMapsDialog({ player }: { player: ScoreSab
             <PlayerActionButtonWrapper>
               <div className="flex items-center gap-2 text-sm">
                 <SharedIcons.SuggestedMapsIcon className="size-5" />
-                <span>Suggested Maps</span>
+                <span className="hidden sm:inline">Suggested Maps</span>
               </div>
             </PlayerActionButtonWrapper>
           </SimpleTooltip>

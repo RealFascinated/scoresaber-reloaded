@@ -136,7 +136,10 @@ export default function SnipePlaylistCreator({ toSnipe }: Props) {
           }
         >
           <PlayerActionButtonWrapper>
-            <SharedIcons.SnipePlaylistIcon className="h-5 w-5" />
+            <div className="flex items-center gap-2 text-sm">
+              <SharedIcons.SnipePlaylistIcon className="h-5 w-5" />
+              <span className="hidden sm:inline">Snipe Playlist</span>
+            </div>
           </PlayerActionButtonWrapper>
         </SimpleTooltip>
       </DialogTrigger>

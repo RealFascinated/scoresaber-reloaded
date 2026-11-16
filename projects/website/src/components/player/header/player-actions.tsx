@@ -98,8 +98,6 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
         />
       )}
 
-      <SuggestedMapsDialog player={player} />
-
       {mainPlayerId && player.id !== mainPlayerId && (
         <>
           <div className="flex items-center">
@@ -119,6 +117,8 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
           <SelfPlaylistCreator />
         </>
       )}
+
+      <SuggestedMapsDialog player={player} />
     </div>
   );
 }
