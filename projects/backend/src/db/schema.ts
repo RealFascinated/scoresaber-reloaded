@@ -394,6 +394,28 @@ export const scoreSaberScoreRealmsTable = pgTable(
   ]
 );
 
+/**
+ * Per-realm "ease" of a ranked leaderboard, fitted from the accuracy of every score on it (see
+ * `@ssr/common/suggested-maps/suggested-maps-model`). Rewritten wholesale by the suggested maps refresh job.
+ */
+export const scoreSaberLeaderboardSuggestedMapsTable = pgTable(
+  "scoresaber-leaderboard-suggested-maps",
+  {
+    leaderboardId: integer().notNull(),
+    realmId: integer().notNull(),
+    /** Logit accuracy offset of the map, shrunk towards `prior`. */
+    ease: doublePrecision().notNull(),
+    /** The ease the map's stars alone predict. */
+    prior: doublePrecision().notNull(),
+    /** Number of scores the ease was fitted from. */
+    scoreCount: integer().notNull(),
+    /** Mean weight of the fitted scores, which the player ridge priors are relative to. */
+    weightScale: doublePrecision().notNull(),
+    updatedAt: timestamp().notNull(),
+  },
+  table => [primaryKey({ columns: [table.leaderboardId, table.realmId] })]
+);
+
 export const scoreSaberLeaderboardStarChangeTable = pgTable(
   "scoresaber-ranked-batch-leaderboards",
   {
@@ -910,6 +932,8 @@ export type ScoreSaberLeaderboardRealmRow = typeof scoreSaberLeaderboardRealmsTa
 /** A leaderboard row resolved for one realm: the base row plus that realm's ranking state. */
 export type ScoreSaberLeaderboardRow = ScoreSaberLeaderboardBaseRow &
   Pick<ScoreSaberLeaderboardRealmRow, "ranked" | "qualified" | "stars" | "rankedDate" | "qualifiedDate">;
+export type ScoreSaberLeaderboardSuggestedMapsRow =
+  typeof scoreSaberLeaderboardSuggestedMapsTable.$inferSelect;
 export type ScoreSaberLeaderboardStarChangeRow = typeof scoreSaberLeaderboardStarChangeTable.$inferSelect;
 export type ScoreSaberRankedBatchRow = typeof scoreSaberRankedBatchesTable.$inferSelect;
 export type ScoreSaberRankedBatchPlayerRow = typeof scoreSaberRankedBatchPlayersTable.$inferSelect;

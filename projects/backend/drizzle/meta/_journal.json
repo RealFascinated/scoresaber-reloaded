@@ -505,6 +505,13 @@
       "when": 1794743669880,
       "tag": "0071_ranked_batch_new_leaderboards",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "7",
+      "when": 1794839072904,
+      "tag": "0072_suggested_maps_leaderboards",
+      "breakpoints": true
     }
   ]
 }

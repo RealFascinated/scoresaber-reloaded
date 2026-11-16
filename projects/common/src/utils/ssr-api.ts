@@ -44,6 +44,7 @@ import type { SortDirection } from "../schemas/score/query/sort/sort-direction";
 import { ScoreSaberLeaderboardQueryFilters } from "../schemas/scoresaber/leaderboard/query-filters";
 import { ScoreSaberPlayerHistoryEntries } from "../schemas/scoresaber/player/history";
 import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
+import type { SuggestedMapsResponse } from "../schemas/suggested-maps/suggested-maps";
 import { PlayerScore } from "../score/player-score";
 import { ScoreSaberScoreSort } from "../score/score-sort";
 import { getQueryParamsFromObject } from "./utils";
@@ -156,6 +157,15 @@ class SSRApi {
       `/leaderboard/by-id/${leaderboardId}/star-history`,
       realmParam(realmId)
     );
+  }
+
+  /**
+   * Fetches the ranked maps ordered by how much more pp they pay than maps of the same stars.
+   *
+   * @param query the filters; `playerId` ranks them for that player's pp list
+   */
+  async getSuggestedMaps(query: Record<string, string> = {}) {
+    return await this.request<SuggestedMapsResponse>(`/suggested-maps`, query);
   }
 
   /**

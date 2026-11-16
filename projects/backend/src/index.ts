@@ -7,18 +7,15 @@ import {
   USER_PREFERENCES_ROUTE,
 } from "@ssr/common/api-routes";
 import Logger from "@ssr/common/logger";
-import { formatDuration } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
 import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
-import { Elysia, ValidationError } from "elysia";
+import { Elysia, ValidationError, type AnyElysia } from "elysia";
 import { helmet } from "elysia-helmet";
 import { trace } from "elysia/trace";
 import { websocket as websocketPlugin } from "elysia/websocket";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
-import { getAppVersion } from "./common/app.util";
-import { cron } from "./common/cron";
 import { registerGlobalErrorHandlers, reportErrorToDiscord } from "./common/discord/error-reporting";
 import { getHttpErrorCode } from "./common/error-code";
 import AppController from "./controller/app/app.controller";
@@ -33,6 +30,7 @@ import PlaylistController from "./controller/playlist/playlist.controller";
 import RankedBatchController from "./controller/ranked-batch/ranked-batch.controller";
 import RealmController from "./controller/realm/realm.controller";
 import ScoresController from "./controller/scores/scores.controller";
+import SuggestedMapsController from "./controller/suggested-maps/suggested-maps.controller";
 import UserFollowingController from "./controller/user/user-following.controller";
 import UserOverlaysController from "./controller/user/user-overlays.controller";
 import UserPinnedScoresController from "./controller/user/user-pinned-scores.controller";
@@ -41,24 +39,18 @@ import UserController from "./controller/user/user.controller";
 import { runMigrations } from "./db/run-migrations";
 import { EventsManager } from "./event/events-manager";
 import { authCors } from "./plugins/auth-cors";
+import { crons } from "./plugins/crons";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { privateNetworkCors } from "./plugins/private-network-cors";
 import { rateLimit } from "./plugins/rate-limit";
 import { QueueManager } from "./queue/queue-manager";
-import { ScoreSaberMedalsRepository } from "./repositories/scoresaber-medals.repository";
-import { TableCountsRepository } from "./repositories/table-counts.repository";
 import { AppService } from "./service/app/app.service";
 import CacheService from "./service/infra/cache.service";
 import MetricsService from "./service/infra/metrics.service";
 import StorageService from "./service/infra/storage.service";
-import { LeaderboardRankedSyncNotificationsService } from "./service/leaderboard/leaderboard-ranked-batch-notifications.service";
-import { LeaderboardRankedSyncService } from "./service/leaderboard/leaderboard-ranked-sync.service";
-import { PlayerMedalsService } from "./service/medals/player-medals.service";
 import { PlayerCacheLivenessService } from "./service/player/player-cache-liveness.service";
-import { PlayerHistoryService } from "./service/player/player-history.service";
 import PlaylistService from "./service/playlist/playlist.service";
-import { ScoreEventService } from "./service/score-event/score-event.service";
-import { PlayerPlayedStreakService } from "./service/streaks/player-streaks.service";
+import { SuggestedMapsService } from "./service/suggested-maps/suggested-maps.service";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
@@ -84,9 +76,36 @@ new MetricsService();
 AppService.startSampling();
 
 const httpMetricsHooks = createHttpMetricsHooks();
-const appVersion = await getAppVersion();
 
-export const app = new Elysia()
+/**
+ * Registers every controller on the app. A controller returns the app type extended with its routes, so
+ * chaining them all in the app expression blows the compiler's type instantiation depth. Taking the app as a
+ * generic and returning it unchanged keeps the route types out of the chain (they are not used anywhere).
+ */
+function registerControllers<TApp extends AnyElysia>(instance: TApp): TApp {
+  instance
+    .use(AppController)
+    .use(AuthController)
+    .use(UserPreferencesController)
+    .use(UserController)
+    .use(UserFollowingController)
+    .use(UserPinnedScoresController)
+    .use(UserOverlaysController)
+    .use(PlayerController)
+    .use(ScoresController)
+    .use(LeaderboardController)
+    .use(PlaylistController)
+    .use(BeatSaverController)
+    .use(BeatLeaderController)
+    .use(PlayerRankingController)
+    .use(MetricsController)
+    .use(RealmController)
+    .use(RankedBatchController)
+    .use(SuggestedMapsController);
+  return instance;
+}
+
+const baseApp = new Elysia()
   .use(
     logger({
       enabled: !isProduction(),
@@ -95,158 +114,7 @@ export const app = new Elysia()
   )
   .use(trace())
   .use(serverTiming())
-  .use(
-    cron({
-      name: "player-statistics-tracker-cron",
-      // pattern: "*/1 * * * *", // Every 1 minute
-      pattern: "59 23 * * *", // Every day at 23:59
-      timezone: "UTC",
-      protect: true,
-      run: async () => {
-        const before = Date.now();
-        try {
-          await sendEmbedToChannel(
-            DiscordChannels.BACKEND_LOGS,
-            new EmbedBuilder().setDescription(`Updating player statistics...`)
-          );
-          await PlayerHistoryService.updatePlayerStatistics();
-          await sendEmbedToChannel(
-            DiscordChannels.BACKEND_LOGS,
-            new EmbedBuilder().setDescription(
-              `Updated player statistics in ${formatDuration(Date.now() - before)}`
-            )
-          );
-        } catch (error) {
-          log.error("player-statistics-tracker-cron failed:", error);
-          reportErrorToDiscord("Cron: player-statistics-tracker", error);
-        }
-      },
-    })
-  )
-  .use(
-    cron({
-      name: "refresh-leaderboards-cron",
-      // pattern: "*/1 * * * *", // Every minute
-      pattern: "30 */2 * * *", // Every 2 hours at 30 minutes ex: 00:30, 02:30, 04:30, etc
-      timezone: "UTC",
-      protect: true,
-      run: async () => {
-        try {
-          const result = await LeaderboardRankedSyncService.refreshRankedLeaderboards();
-          // Isolated so a failed Discord batch notification (paste upload,
-          // message or playlist send) is reported but never aborts the rest of
-          // the sync.
-          try {
-            await LeaderboardRankedSyncNotificationsService.handleRankedBatch(result);
-          } catch (error) {
-            log.error("refresh-leaderboards-cron ranked batch notification failed:", error);
-            reportErrorToDiscord("Cron: refresh-leaderboards (ranked batch notification)", error);
-          }
-          await LeaderboardRankedSyncService.refreshQualifiedLeaderboards();
-        } catch (error) {
-          log.error("refresh-leaderboards-cron failed:", error);
-          reportErrorToDiscord("Cron: refresh-leaderboards", error);
-        }
-      },
-    })
-  )
-  .use(
-    cron({
-      name: "refresh-medal-scores",
-      pattern: "*/10 * * * *", // Every 10 minutes
-      timezone: "UTC",
-      protect: true,
-      run: async () => {
-        try {
-          await ScoreSaberMedalsRepository.refreshMaterializedMedalRanks();
-        } catch (error) {
-          log.error("refresh-medal-scores cron failed:", error);
-          reportErrorToDiscord("Cron: refresh-medal-scores", error);
-        }
-      },
-    })
-  )
-  .use(
-    cron({
-      name: "nightly-global-medal-refresh",
-      // pattern: "*/1 * * * *", // Every minute
-      pattern: "0 22 * * *", // Every day at 22:00
-      timezone: "UTC",
-      protect: true,
-      run: async () => {
-        const before = Date.now();
-        try {
-          await sendEmbedToChannel(
-            DiscordChannels.BACKEND_LOGS,
-            new EmbedBuilder()
-              .setTitle("Nightly global medal refresh")
-              .setDescription("Starting full recompute of score medals and account sync…")
-          );
-          await PlayerMedalsService.recomputeMedalsFromScoresAndRefreshAccounts();
-          await sendEmbedToChannel(
-            DiscordChannels.BACKEND_LOGS,
-            new EmbedBuilder()
-              .setTitle("Nightly global medal refresh")
-              .setDescription(`Finished in ${formatDuration(Date.now() - before)}.`)
-          );
-        } catch (error) {
-          log.error("nightly-global-medal-refresh cron failed:", error);
-          reportErrorToDiscord("Cron: nightly-global-medal-refresh", error);
-        }
-      },
-    })
-  )
-  .use(
-    cron({
-      name: "leaderboard-updates",
-      pattern: "0 * * * *", // Every 1 hour
-      timezone: "UTC",
-      protect: true,
-      run: async () => {
-        try {
-          await ScoreEventService.updateTrendingLeaderboards();
-          await ScoreEventService.updateLeaderboardDailyPlays();
-          await ScoreEventService.purgeOldEvents();
-        } catch (error) {
-          log.error("leaderboard-updates cron failed:", error);
-          reportErrorToDiscord("Cron: leaderboard-updates", error);
-        }
-      },
-    })
-  )
-  .use(
-    cron({
-      name: "reconcile-table-counts",
-      pattern: "0 3 * * *", // Every day at 03:00 UTC
-      timezone: "UTC",
-      protect: true,
-      run: async () => {
-        try {
-          await TableCountsRepository.reconcile();
-        } catch (error) {
-          log.error("reconcile-table-counts cron failed:", error);
-          reportErrorToDiscord("Cron: reconcile-table-counts", error);
-        }
-      },
-    })
-  )
-  .use(
-    cron({
-      name: "expire-broken-streaks",
-      // pattern: "*/1 * * * *", // Every minute
-      pattern: "0 0 * * *", // Every day at 00:00
-      timezone: "UTC",
-      protect: true,
-      run: async () => {
-        try {
-          await PlayerPlayedStreakService.expireBrokenStreaks();
-        } catch (error) {
-          log.error("expire-broken-streaks cron failed:", error);
-          reportErrorToDiscord("Cron: expire-broken-streaks", error);
-        }
-      },
-    })
-  )
+  .use(crons)
   .use(
     rateLimit({
       max: 300,
@@ -334,29 +202,13 @@ export const app = new Elysia()
       contentSecurityPolicy: false, // Disable CSP
       dnsPrefetchControl: true, // Enable DNS prefetch
     })
-  )
-  .use(AppController)
-  .use(AuthController)
-  .use(UserPreferencesController)
-  .use(UserController)
-  .use(UserFollowingController)
-  .use(UserPinnedScoresController)
-  .use(UserOverlaysController)
-  .use(PlayerController)
-  .use(ScoresController)
-  .use(LeaderboardController)
-  .use(PlaylistController)
-  .use(BeatSaverController)
-  .use(BeatLeaderController)
-  .use(PlayerRankingController)
-  .use(MetricsController)
-  .use(RealmController);
+  );
+
+export const app = registerControllers(baseApp);
 
 // OpenAPI docs (/swagger) are disabled: @elysiajs/openapi does not support Elysia 2 yet
 new WebsocketManager();
 
-// Registered outside of the chain above: it is at the compiler's type instantiation depth limit.
-app.use(RankedBatchController);
 app.use(websocketPlugin());
 
 for (const websocket of WebsocketManager.getAll()) {
@@ -367,6 +219,7 @@ for (const websocket of WebsocketManager.getAll()) {
 }
 
 app.onStart(async () => {
+  SuggestedMapsService.scheduleRefresh();
   EventsManager.getListeners().forEach(listener => {
     listener.onStart?.();
   });

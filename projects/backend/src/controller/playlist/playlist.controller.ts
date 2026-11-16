@@ -4,6 +4,7 @@ import {
   SelfPlaylistQuerySchema,
   SnipePlaylistQuerySchema,
 } from "@ssr/common/schemas/ssr/playlist/playlist-route";
+import { SuggestedMapsPlaylistQuerySchema } from "@ssr/common/schemas/suggested-maps/suggested-maps-route";
 import { Elysia, t } from "elysia";
 import { playlistToBplist } from "../../service/playlist/playlist-to-bplist";
 import PlaylistService, { PlaylistIdsSchema } from "../../service/playlist/playlist.service";
@@ -50,6 +51,28 @@ export default function playlistController(app: Elysia) {
         },
         async ({ params: { rankedBatchId }, path }) => {
           const playlist = await PlaylistService.getRankedBatchPlaylist(Number.parseInt(rankedBatchId, 10));
+          return toBplistIfRequested(playlist, path);
+        }
+      )
+      .get(
+        "/suggested-maps/:playerId",
+        {
+          tags: ["Playlist"],
+          params: t.Object({
+            playerId: t.String({ pattern: "^[0-9]+(\\.bplist)?$" }),
+          }),
+          query: SuggestedMapsPlaylistQuerySchema,
+          response: PlaylistResponseSchema,
+          detail: {
+            description:
+              "Create a playlist of the best suggested maps for a player (add .bplist for BPLIST), fitted to their current play style",
+          },
+        },
+        async ({ params: { playerId }, query, path }) => {
+          const playlist = await PlaylistService.getSuggestedMapsPlaylist(
+            playerId.replace(/\.bplist$/, ""),
+            query
+          );
           return toBplistIfRequested(playlist, path);
         }
       )

@@ -14,6 +14,7 @@ import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboar
 import { ScoreSaberLeaderboardQueryCategory } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
+import type { SuggestedMapsPlaylistQuery } from "@ssr/common/schemas/suggested-maps/suggested-maps-route";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import type { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
@@ -32,8 +33,10 @@ import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { RankedBatchService } from "../ranked-batch/ranked-batch.service";
+import { SuggestedMapsService } from "../suggested-maps/suggested-maps.service";
 import { scoreRowsToPlaylistSongs, takeTopUniqueSongRows } from "./playlist-song-utils";
 import { buildRankedBatchPlaylist } from "./ranked-batch-playlist";
+import { DEFAULT_PLAYLIST_SIZE, buildSuggestedMapsPlaylist } from "./suggested-maps-playlist";
 
 function getPlaylistTitleDate(date: Date): string {
   return formatDate(date, "MMM D, YYYY");
@@ -251,6 +254,25 @@ export default class PlaylistService {
       await RankedBatchService.getRankedBatch(rankedBatchId);
 
     return buildRankedBatchPlaylist(rankedBatch, leaderboards, newLeaderboards);
+  }
+
+  /**
+   * Gets the playlist of a player's best suggested maps
+   *
+   * @param playerId the player to suggest maps for
+   * @param filters the suggested maps filters; the player's own style fills in what is not set
+   * @returns the suggested maps playlist, synced from the suggested maps playlist endpoint
+   */
+  public static async getSuggestedMapsPlaylist(
+    playerId: string,
+    filters: SuggestedMapsPlaylistQuery = {}
+  ): Promise<Playlist> {
+    const { maps } = await SuggestedMapsService.getSuggestedMaps({
+      ...filters,
+      playerId,
+      limit: filters.limit ?? DEFAULT_PLAYLIST_SIZE,
+    });
+    return buildSuggestedMapsPlaylist(playerId, maps, filters);
   }
 
   /**
