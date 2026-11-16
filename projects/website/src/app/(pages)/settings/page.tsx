@@ -5,6 +5,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Settings",
     description: "Customize the site, scores, and player preferences.",
+    alternates: {
+      canonical: "/settings",
+    },
   };
 }
 

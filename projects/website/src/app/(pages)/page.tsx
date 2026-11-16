@@ -8,6 +8,13 @@ import { DiscordButton } from "@/components/social/discord-button";
 import { Button } from "@/components/ui/button";
 import { SharedIcons } from "@/shared-icons";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+};
 
 // The landing page would otherwise be prerendered once at build time, freezing the stats
 export const revalidate = 300;

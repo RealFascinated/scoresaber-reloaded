@@ -81,6 +81,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   return {
     title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,
+    alternates: {
+      canonical: `/leaderboard/${leaderboard.id}`,
+    },
     openGraph: {
       siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
       title: `${leaderboard.fullName} - ${leaderboard.songAuthorName}`,

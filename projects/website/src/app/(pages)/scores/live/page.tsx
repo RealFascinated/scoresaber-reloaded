@@ -6,6 +6,9 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Live Scores",
   description: "Watch scores as they are set on ScoreSaber in real time.",
+  alternates: {
+    canonical: "/scores/live",
+  },
   openGraph: {
     siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
     title: "Live Scores",

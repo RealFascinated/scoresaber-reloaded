@@ -12,6 +12,9 @@ import type { SearchParams } from "nuqs/server";
 
 export const metadata: Metadata = {
   title: "Top Scores",
+  alternates: {
+    canonical: "/scores/top",
+  },
   openGraph: {
     siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
     title: "Top Scores",

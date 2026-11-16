@@ -15,6 +15,9 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Medals Ranking",
+  alternates: {
+    canonical: "/medals",
+  },
   openGraph: {
     siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
     title: "Medals Ranking",

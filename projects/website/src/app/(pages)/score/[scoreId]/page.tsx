@@ -101,6 +101,9 @@ export async function generateMetadata(props: ScorePageProps): Promise<Metadata>
   return {
     title,
     description,
+    alternates: {
+      canonical: `/score/${scoreId}`,
+    },
     openGraph: {
       siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
       title,

@@ -80,6 +80,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   return {
     title: `${player.name}`,
+    description: `${player.name}'s Beat Saber profile: rank #${formatNumberWithCommas(player.rank)} globally, #${formatNumberWithCommas(player.countryRank)} in ${player.country}, ${formatPp(player.pp)}pp. View their scores, stats and history on ScoreSaber Reloaded.`,
+    alternates: {
+      canonical: `/player/${player.id}`,
+    },
     openGraph: {
       siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
       title: `${player.name}`,

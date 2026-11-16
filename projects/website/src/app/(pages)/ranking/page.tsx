@@ -27,6 +27,9 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   const title = `Ranking / ${fullCountry}`;
   return {
     title: title,
+    alternates: {
+      canonical: country === undefined ? "/ranking" : `/ranking?country=${country}`,
+    },
     openGraph: {
       siteName: env.NEXT_PUBLIC_WEBSITE_NAME ?? ssrConfig.siteName,
       title: title,
