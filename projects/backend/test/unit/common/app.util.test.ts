@@ -73,7 +73,6 @@ describe("getAppVersion", () => {
   }
 
   test("persists package version in APP_VERSION env after first call", async () => {
-    delete process.env.APP_VERSION;
     process.env.SOURCE_COMMIT = "deadbeef";
 
     await expect(getAppVersion()).resolves.toBe("1.0.0-deadbee");

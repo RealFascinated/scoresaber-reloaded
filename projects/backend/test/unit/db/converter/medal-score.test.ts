@@ -1,3 +1,5 @@
+import type { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
+import type { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
 import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { Modifier } from "@ssr/common/score/modifier";
 import { describe, expect, test } from "bun:test";
@@ -22,8 +24,8 @@ function baseRow(overrides: Partial<ScoreSaberScoreRow> = {}): ScoreSaberScoreRo
     badCuts: 2,
     maxCombo: 500,
     fullCombo: false,
-    modifiers: ["SS"],
-    hmd: "Index",
+    modifiers: ["SS", "invalid-modifier"],
+    hmd: "Valve Index",
     rightController: "knuckles",
     leftController: "knuckles",
     timestamp: new Date("2024-07-01T00:00:00.000Z"),
@@ -43,6 +45,7 @@ function baseScore(overrides: Partial<ScoreSaberScore> = {}): ScoreSaberScore {
     pp: 200,
     weight: 0.8,
     rank: 12,
+    misses: 4,
     missedNotes: 3,
     badCuts: 1,
     maxCombo: 250,
@@ -61,7 +64,7 @@ function baseScore(overrides: Partial<ScoreSaberScore> = {}): ScoreSaberScore {
 }
 
 describe("scoreSaberMedalScoreRowToType", () => {
-  const cases = [
+  const cases: { name: string; row: ScoreSaberScoreRow; expected: ScoreSaberMedalScore }[] = [
     {
       name: "maps all fields with default rank and null playerInfo",
       row: baseRow(),
@@ -82,7 +85,7 @@ describe("scoreSaberMedalScoreRowToType", () => {
         fullCombo: false,
         modifiers: [Modifier.SS],
         playerInfo: null,
-        hmd: "Index",
+        hmd: "Valve Index",
         rightController: "knuckles",
         leftController: "knuckles",
         timestamp: new Date("2024-07-01T00:00:00.000Z"),
@@ -117,13 +120,13 @@ describe("scoreSaberMedalScoreRowToType", () => {
         fullCombo: false,
         modifiers: [],
         playerInfo: null,
-        hmd: "Index",
+        hmd: "Valve Index",
         rightController: null,
         leftController: null,
         timestamp: new Date("2024-07-01T00:00:00.000Z"),
       },
     },
-  ] as const;
+  ];
 
   for (const { name, row, expected } of cases) {
     test(name, () => {
@@ -155,15 +158,42 @@ describe("scoreSaberScoreToMedalScore", () => {
     timestamp: new Date("2024-07-02T00:00:00.000Z"),
   };
 
-  const previousScore = {
+  const previousScore: ScoreSaberHistoryScore = {
+    playerId: "live-player",
+    leaderboardId: 301,
     scoreId: 7999,
+    difficulty: "Hard",
+    characteristic: "OneSaber",
     score: 850_000,
     accuracy: 0.9,
+    pp: 180,
+    weight: 0.7,
     rank: 20,
+    misses: 2,
+    missedNotes: 2,
+    badCuts: 0,
+    maxCombo: 240,
+    fullCombo: false,
+    modifiers: [],
+    hmd: "Quest",
+    rightController: "quest",
+    leftController: "quest",
+    playerInfo: {
+      id: "live-player",
+      avatar: "https://example.com/avatar.png",
+    },
+    change: {
+      score: 1_000,
+      accuracy: 0.01,
+      misses: 0,
+      missedNotes: 0,
+      badCuts: 0,
+      maxCombo: 1,
+    },
     timestamp: new Date("2024-06-01T00:00:00.000Z"),
   };
 
-  const cases = [
+  const cases: { name: string; score: ScoreSaberScore; expected: ScoreSaberMedalScore }[] = [
     {
       name: "maps live score with medals reset to zero",
       score: baseScore(),
@@ -225,10 +255,10 @@ describe("scoreSaberScoreToMedalScore", () => {
       },
     },
     {
-      name: "nulls playerInfo when absent and normalizes modifiers",
+      name: "nulls playerInfo when absent and keeps valid modifiers",
       score: baseScore({
         playerInfo: undefined,
-        modifiers: ["NF", "invalid-modifier"],
+        modifiers: [Modifier.NF],
         rank: 0,
         missedNotes: 0,
         badCuts: 0,
@@ -259,7 +289,7 @@ describe("scoreSaberScoreToMedalScore", () => {
         timestamp: new Date("2024-07-02T00:00:00.000Z"),
       },
     },
-  ] as const;
+  ];
 
   for (const { name, score, expected } of cases) {
     test(name, () => {

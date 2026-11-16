@@ -1,5 +1,6 @@
 import { encodeCustomRankedPlaylistSettings } from "@ssr/common/playlist/ranked/custom-ranked-playlist";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
+import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { describe, expect, test } from "bun:test";
 import { ScoreSaberLeaderboardsRepository } from "../../src/repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoresRepository } from "../../src/repositories/scoresaber-scores.repository";
@@ -36,7 +37,7 @@ async function seedSecondDifficultyScores(): Promise<void> {
     false,
     DEFAULT_REALM_ID
   );
-  const expertLeaderboard = {
+  const expertLeaderboard: ScoreSaberLeaderboard = {
     ...template!,
     id: TEST_LEADERBOARD_SECOND_ID,
     difficulty: { ...template!.difficulty, difficulty: "Expert" },

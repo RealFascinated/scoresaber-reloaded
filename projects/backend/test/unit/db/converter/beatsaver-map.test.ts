@@ -91,8 +91,14 @@ function baseDifficulty(overrides: Partial<BeatSaverMapDifficultyRow> = {}): Bea
   };
 }
 
+type BeatSaverMapCase = {
+  name: string;
+  args: Parameters<typeof beatSaverRowsToMap>[0];
+  expected: ReturnType<typeof beatSaverRowsToMap>;
+};
+
 describe("beatSaverRowsToMap", () => {
-  const cases = [
+  const cases: BeatSaverMapCase[] = [
     {
       name: "returns undefined when no matching difficulty exists",
       args: {
@@ -276,7 +282,7 @@ describe("beatSaverRowsToMap", () => {
       },
       expected: undefined,
     },
-  ] as const;
+  ];
 
   for (const { name, args, expected } of cases) {
     test(name, () => {

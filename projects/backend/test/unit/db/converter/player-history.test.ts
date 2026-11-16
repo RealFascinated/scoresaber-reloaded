@@ -7,6 +7,7 @@ function baseRow(overrides: Partial<PlayerHistoryRow> = {}): PlayerHistoryRow {
     id: 1,
     playerId: "player-1",
     date: new Date("2024-01-01T00:00:00.000Z"),
+    realmId: 1,
     rank: null,
     countryRank: null,
     medals: null,

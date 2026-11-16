@@ -28,8 +28,15 @@ function baseRow(overrides: Partial<ScoreSaberLeaderboardRow> = {}): ScoreSaberL
   };
 }
 
+type LeaderboardCase = {
+  name: string;
+  row: ScoreSaberLeaderboardRow;
+  difficulties?: ReturnType<typeof leaderboardRowToType>["difficulties"];
+  expected: ReturnType<typeof leaderboardRowToType>;
+};
+
 describe("leaderboardRowToType", () => {
-  const cases = [
+  const cases: LeaderboardCase[] = [
     {
       name: "maps unranked leaderboard with default difficulties",
       row: baseRow(),
@@ -233,7 +240,7 @@ describe("leaderboardRowToType", () => {
         timestamp: new Date("2024-03-01T00:00:00.000Z"),
       },
     },
-  ] as const;
+  ];
 
   for (const { name, row, difficulties, expected } of cases) {
     test(name, () => {

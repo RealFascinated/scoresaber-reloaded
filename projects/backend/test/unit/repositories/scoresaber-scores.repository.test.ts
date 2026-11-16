@@ -350,7 +350,7 @@ describe("ScoreSaberScoresRepository", () => {
   describe("countByConditions and findRowsByConditions", () => {
     test("filters rows by player id", async () => {
       const conditions = [eq(scoreSaberScoresTable.playerId, TEST_PLAYER_ID)];
-      expect(await ScoreSaberScoresRepository.countByConditions(conditions, DEFAULT_REALM_ID)).toBe(1);
+      expect(await ScoreSaberScoresRepository.countByConditions(conditions)).toBe(1);
       const rows = await ScoreSaberScoresRepository.findRowsByConditions(
         conditions,
         desc(scorePpExpr),

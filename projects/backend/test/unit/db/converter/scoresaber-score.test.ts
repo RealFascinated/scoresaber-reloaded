@@ -53,8 +53,14 @@ function baseHistoryRow(overrides: Partial<ScoreSaberScoreHistoryRow> = {}): Sco
   };
 }
 
+type ScoreSaberScoreCase = {
+  name: string;
+  row: ScoreSaberScoreRow | ScoreSaberScoreHistoryRow;
+  expected: ReturnType<typeof scoreSaberScoreRowToType>;
+};
+
 describe("scoreSaberScoreRowToType", () => {
-  const cases = [
+  const cases: ScoreSaberScoreCase[] = [
     {
       name: "maps score row with modifier codes",
       row: baseScoreRow(),
@@ -215,7 +221,7 @@ describe("scoreSaberScoreRowToType", () => {
         timestamp: new Date("2024-05-01T00:00:00.000Z"),
       },
     },
-  ] as const;
+  ];
 
   for (const { name, row, expected } of cases) {
     test(name, () => {

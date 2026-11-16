@@ -34,9 +34,14 @@ const PLAYER = "76561198000000010";
 const LEADERBOARD_ID = 1;
 
 // Any request that is not served by a stub must not reach the real network.
-globalThis.fetch = (async () => {
-  throw new Error("bench: network disabled");
-}) as typeof fetch;
+globalThis.fetch = Object.assign(
+  async () => {
+    throw new Error("bench: network disabled");
+  },
+  {
+    preconnect: () => {},
+  }
+);
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
@@ -46,6 +51,33 @@ interface SeedLeaderboard {
   id: number;
   songHash: string;
   difficulty: string;
+}
+
+interface ScoreRow {
+  scoreId: number;
+  playerId: string;
+  score: number;
+  accuracy: number;
+  missedNotes: number;
+  badCuts: number;
+  maxCombo: number;
+  fullCombo: boolean;
+  timestamp: Date;
+  pp: number | null;
+}
+
+interface PlayerScoreRow extends ScoreRow {
+  lid: number;
+  songHash: string;
+  songName: string;
+  difficulty: string;
+  maxScore: number;
+  ranked: boolean;
+  stars: number;
+}
+
+interface LeaderboardScoreRow extends ScoreRow {
+  name: string;
 }
 
 async function loadSeedLeaderboard(id: number): Promise<SeedLeaderboard> {
@@ -214,16 +246,16 @@ async function prepareStubs(): Promise<void> {
       [id]
     );
     playerScorePages.set(id, {
-      playerScores: rows.map((row: Record<string, unknown> & { scoreId: number }, i: number) => ({
-        score: scoreToken({ ...(row as never), name: "n", rank: i + 1 }),
+      playerScores: rows.map((row: PlayerScoreRow, i: number) => ({
+        score: scoreToken({ ...row, name: "n", rank: i + 1 }),
         leaderboard: leaderboardToken({
-          id: row.lid as number,
-          songHash: row.songHash as string,
-          songName: row.songName as string,
-          difficulty: row.difficulty as string,
-          maxScore: row.maxScore as number,
-          ranked: row.ranked as boolean,
-          stars: row.stars as number,
+          id: row.lid,
+          songHash: row.songHash,
+          songName: row.songName,
+          difficulty: row.difficulty,
+          maxScore: row.maxScore,
+          ranked: row.ranked,
+          stars: row.stars,
         }),
       })),
       metadata: { total: id === WHALE ? 12000 : 57, page: 1, itemsPerPage: 8 },
@@ -238,9 +270,7 @@ async function prepareStubs(): Promise<void> {
     [LEADERBOARD_ID]
   );
   leaderboardScoresPage = {
-    scores: lbScores.map((row: Record<string, unknown>, i: number) =>
-      scoreToken({ ...(row as never), rank: i + 1 })
-    ),
+    scores: lbScores.map((row: LeaderboardScoreRow, i: number) => scoreToken({ ...row, rank: i + 1 })),
     metadata: { total: 600, page: 1, itemsPerPage: 12 },
   };
 }
