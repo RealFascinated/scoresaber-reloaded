@@ -17,6 +17,9 @@ import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 // The playlist creators pull in the form resolver and schema validation, and are only shown to the signed-in
 // main player, so they are loaded separately instead of with every player page
 const SelfPlaylistCreator = dynamic(() => import("../self/player-self-playlist-creator"), { ssr: false });
+const SuggestedMapsDialog = dynamic(() => import("../suggested-maps/player-suggested-maps-dialog"), {
+  ssr: false,
+});
 const SnipePlaylistCreator = dynamic(() => import("../snipe/player-snipe-playlist-creator"), { ssr: false });
 
 type PlayerLinkProps = {
@@ -94,6 +97,8 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
           icon={<SharedIcons.TwitchProfileIcon className="size-[20px] select-none" />}
         />
       )}
+
+      <SuggestedMapsDialog player={player} />
 
       {mainPlayerId && player.id !== mainPlayerId && (
         <>

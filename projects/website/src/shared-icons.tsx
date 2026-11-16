@@ -311,6 +311,7 @@ export const SharedIcons = {
 
   // Downloads
   DownloadPlaylistIcon: Download,
+  SuggestedMapsIcon: SparklesIcon,
 
   // Pagination & loading
   PaginationLoadingIcon: ArrowPathIcon,
