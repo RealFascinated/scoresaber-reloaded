@@ -78,7 +78,7 @@ export default function CustomPlaylistCreator({ trigger }: CustomPlaylistCreator
         </DialogDescription>
 
         <Card className="relative m-0 flex h-full max-h-[85vh] flex-col rounded-lg">
-          <div className="border-border border-b px-(--spacing-lg) py-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
+          <div className="border-border border-b px-4 py-3">
             <h1 className="text-xl font-semibold md:text-2xl">Create Custom Playlist</h1>
             <p className="text-muted-foreground mt-1 text-sm">
               Build a ranked maps playlist with your own star range and sort order.
@@ -86,7 +86,7 @@ export default function CustomPlaylistCreator({ trigger }: CustomPlaylistCreator
           </div>
 
           <div className="flex-1 overflow-x-hidden overflow-y-auto">
-            <div className="p-(--spacing-lg) md:p-(--spacing-xl) lg:p-(--spacing-2xl)">
+            <div className="p-4">
               <Form {...form}>
                 <form id="custom-playlist-form" onSubmit={form.handleSubmit(onSubmit)}>
                   <ButtonGroup className="mb-(--spacing-xl)">
@@ -134,7 +134,7 @@ export default function CustomPlaylistCreator({ trigger }: CustomPlaylistCreator
             </div>
           </div>
 
-          <div className="border-border flex flex-wrap items-center justify-end gap-(--spacing-sm) border-t px-(--spacing-lg) py-(--spacing-lg) md:gap-(--spacing-lg) md:px-(--spacing-xl) md:py-(--spacing-xl)">
+          <div className="border-border flex flex-wrap items-center justify-end gap-2 border-t px-4 py-3">
             <Button type="submit" form="custom-playlist-form" className="gap-2" disabled={downloading}>
               {downloading ? (
                 <Spinner className="size-4" />

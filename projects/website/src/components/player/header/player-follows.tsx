@@ -48,7 +48,7 @@ function FollowListDialog({
         </button>
       </DialogTrigger>
       <DialogContent className="flex max-h-[80vh] max-w-lg flex-col gap-0 p-0">
-        <DialogHeader className="border-border border-b px-5 pt-5 pb-4 text-left">
+        <DialogHeader className="border-border border-b px-4 py-3 text-left">
           <DialogTitle className="flex items-center gap-2">
             {LIST_TITLES[list]}
             <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">

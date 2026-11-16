@@ -30,7 +30,7 @@ export default function PlayerRankingsButton({ player }: PlayerRankingsButtonPro
           </SimpleTooltip>
         </Button>
       </DialogTrigger>
-      <DialogContent className="gap-(--spacing-lg) p-(--spacing-lg)">
+      <DialogContent className="gap-3 p-4">
         <DialogHeader>
           <DialogTitle>Player Rankings</DialogTitle>
         </DialogHeader>
