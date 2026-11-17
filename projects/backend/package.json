@@ -42,7 +42,7 @@
     "pg": "^8.23.1",
     "systeminformation": "^5.33.23",
     "typebox": "^1.4.7",
-    "typescript-eslint": "^8.72.2"
+    "typescript-eslint": "^8.73.0"
   },
   "devDependencies": {
     "@types/bun": "^1.4.4",
