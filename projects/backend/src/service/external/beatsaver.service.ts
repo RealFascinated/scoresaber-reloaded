@@ -3,6 +3,7 @@ import { BeatSaverMapToken } from "@ssr/common/schemas/beatsaver/tokens/map";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { TimeUnit } from "@ssr/common/utils/time-utils";
+import { BatchLoader } from "../../common/batch-loader";
 import { beatSaverMapCacheKey, normalizeSongHash } from "../../common/cache-keys";
 import { beatSaverRowsToMap } from "../../db/converter/beatsaver-map";
 import { BeatSaverRepository } from "../../repositories/beatsaver.repository";
@@ -11,6 +12,11 @@ import CacheService, { CacheId } from "../infra/cache.service";
 const MISSING_RECHECK_MS = TimeUnit.toMillis(TimeUnit.Day, 1);
 
 export default class BeatSaverService {
+  private static readonly mapBundleLoader = new BatchLoader<
+    string,
+    Awaited<ReturnType<typeof BeatSaverRepository.findMapBundleByVersionHash>>
+  >(hashes => BeatSaverRepository.findMapBundlesByVersionHashes(hashes));
+
   /**
    * Fetches a BeatSaver map
    *
@@ -25,7 +31,7 @@ export default class BeatSaverService {
     const cacheKey = beatSaverMapCacheKey(normalizedHash, difficulty, characteristic);
 
     return CacheService.fetch(CacheId.BEATSAVER_MAP, cacheKey, async () => {
-      let rows = await BeatSaverRepository.findMapBundleByVersionHash(normalizedHash);
+      let rows = await this.mapBundleLoader.load(normalizedHash);
 
       if (!rows) {
         if (

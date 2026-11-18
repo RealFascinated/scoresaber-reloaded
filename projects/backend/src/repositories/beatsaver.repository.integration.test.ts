@@ -1,7 +1,7 @@
 import type { BeatSaverMapToken } from "@ssr/common/schemas/beatsaver/tokens/map";
 import { afterAll, describe, expect, test } from "bun:test";
 import { eq, sql } from "drizzle-orm";
-import { TEST_SONG_HASH } from "../../test/helpers/constants";
+import { TEST_SONG_HASH, TEST_SONG_HASH_SHA1 } from "../../test/helpers/constants";
 import { db } from "../db";
 import {
   beatSaverMapDifficultiesTable,
@@ -123,6 +123,39 @@ describe("BeatSaverRepository", () => {
 
   test("findMapBundleByVersionHash returns undefined for unknown hash", async () => {
     expect(await BeatSaverRepository.findMapBundleByVersionHash("deadbeef")).toBeUndefined();
+  });
+
+  describe("findMapBundlesByVersionHashes", () => {
+    test("returns bundles in input order with undefined for unknown hashes", async () => {
+      const bundles = await BeatSaverRepository.findMapBundlesByVersionHashes([
+        TEST_SONG_HASH_SHA1.toUpperCase(),
+        "deadbeef",
+        TEST_SONG_HASH,
+      ]);
+
+      expect(bundles).toHaveLength(3);
+      expect(bundles[0]?.map.id).toBe("testmap-sha1");
+      expect(bundles[0]?.version.hash).toBe(TEST_SONG_HASH_SHA1);
+      expect(bundles[0]?.difficulties.length).toBeGreaterThanOrEqual(1);
+      expect(bundles[1]).toBeUndefined();
+      expect(bundles[2]?.map.id).toBe("testmap");
+      expect(bundles[2]?.version.hash).toBe(TEST_SONG_HASH);
+    });
+
+    test("duplicate hashes each resolve to their bundle", async () => {
+      const bundles = await BeatSaverRepository.findMapBundlesByVersionHashes([
+        TEST_SONG_HASH,
+        TEST_SONG_HASH.toUpperCase(),
+      ]);
+
+      expect(bundles).toHaveLength(2);
+      expect(bundles[0]?.map.id).toBe("testmap");
+      expect(bundles[1]?.map.id).toBe("testmap");
+    });
+
+    test("returns an empty array for an empty input", async () => {
+      expect(await BeatSaverRepository.findMapBundlesByVersionHashes([])).toEqual([]);
+    });
   });
 
   describe("upsertMap", () => {

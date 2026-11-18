@@ -129,6 +129,13 @@ const isMarkedMissingQuery = db
   .limit(1)
   .prepare("");
 
+type BeatSaverMapBundle = {
+  map: typeof beatSaverMapsTable.$inferSelect;
+  uploader: typeof beatSaverUploadersTable.$inferSelect | null;
+  version: typeof beatSaverMapVersionsTable.$inferSelect;
+  difficulties: (typeof beatSaverMapDifficultiesTable.$inferSelect)[];
+};
+
 export class BeatSaverRepository {
   public static async isMarkedMissing(hash: string, since: Date) {
     const rows = await isMarkedMissingQuery.execute({ hash: hash.toLowerCase(), since });
@@ -332,5 +339,51 @@ export class BeatSaverRepository {
     const difficulties = rows.map(r => r.difficulty).filter(d => d != null);
 
     return { map, uploader: uploaderRow, version, difficulties };
+  }
+
+  /**
+   * Batch variant of {@link findMapBundleByVersionHash}: one query for many hashes.
+   *
+   * @param hashes the version hashes to look up, matched case-insensitively
+   * @returns the bundle of each hash, in the same order, `undefined` when not found
+   */
+  public static async findMapBundlesByVersionHashes(hashes: string[]) {
+    if (hashes.length === 0) {
+      return [];
+    }
+
+    const normalizedHashes = [...new Set(hashes.map(hash => hash.toLowerCase()))];
+    const rows = await db
+      .select({
+        version: beatSaverMapVersionsTable,
+        map: beatSaverMapsTable,
+        uploader: beatSaverUploadersTable,
+        difficulty: beatSaverMapDifficultiesTable,
+      })
+      .from(beatSaverMapVersionsTable)
+      .innerJoin(beatSaverMapsTable, eq(beatSaverMapVersionsTable.mapId, beatSaverMapsTable.id))
+      .leftJoin(beatSaverUploadersTable, eq(beatSaverMapsTable.uploaderId, beatSaverUploadersTable.id))
+      .leftJoin(
+        beatSaverMapDifficultiesTable,
+        eq(beatSaverMapDifficultiesTable.versionId, beatSaverMapVersionsTable.id)
+      )
+      .where(inArray(beatSaverMapVersionsTable.hash, normalizedHashes));
+
+    const bundles = new Map<string, BeatSaverMapBundle>();
+    for (const row of rows) {
+      const versionHash = row.version.hash.toLowerCase();
+      let bundle = bundles.get(versionHash);
+      if (!bundle) {
+        const uploaderRow =
+          row.map.uploaderId == null ? null : row.uploader?.id != null ? row.uploader : null;
+        bundle = { map: row.map, uploader: uploaderRow, version: row.version, difficulties: [] };
+        bundles.set(versionHash, bundle);
+      }
+      if (row.difficulty != null) {
+        bundle.difficulties.push(row.difficulty);
+      }
+    }
+
+    return hashes.map(hash => bundles.get(hash.toLowerCase()));
   }
 }
