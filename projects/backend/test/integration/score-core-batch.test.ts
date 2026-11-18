@@ -2,7 +2,8 @@ import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve"
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
+import { HttpResponse } from "msw";
 import { db } from "../../src/db";
 import {
   scoreSaberLeaderboardRealmsTable,
@@ -13,30 +14,40 @@ import {
 } from "../../src/db/schema";
 import { ScoreSaberLeaderboardsRepository } from "../../src/repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberScoresRepository } from "../../src/repositories/scoresaber-scores.repository";
-import { RealmService } from "../../src/service/realm/realm.service";
 import { ScoreCoreService } from "../../src/service/score/score-core.service";
+import { server } from "../helpers/msw-server";
+import { scoreSaberApi } from "../helpers/scoresaber-api.test-utils";
 
 const EXTRA_REALM_IDS = [DEFAULT_REALM_ID + 1, DEFAULT_REALM_ID + 2];
 const LEADERBOARD_ID = 920_001;
 const OTHER_LEADERBOARD_ID = 920_002;
 const BASE_TIME = new Date("2024-01-01T12:00:00Z");
-const minutes = (offset: number): Date => new Date(BASE_TIME.getTime() + offset * 60_000);
-const playerId = (index: number): string => `92000000000000000000000000000${String(index).padStart(3, "0")}`;
-
-let realmIdsSpy: ReturnType<typeof spyOn>;
-let curveSpy: ReturnType<typeof spyOn>;
+const minutes = (offset: number) => new Date(BASE_TIME.getTime() + offset * 60_000);
+const playerId = (index: number) => `92000000000000000000000000000${String(index).padStart(3, "0")}`;
 
 beforeEach(() => {
-  realmIdsSpy = spyOn(RealmService, "getRealmIds").mockResolvedValue([DEFAULT_REALM_ID, ...EXTRA_REALM_IDS]);
-  curveSpy = spyOn(RealmService, "getCalculationCurve").mockResolvedValue(ScoreSaberCurve.DEFAULT_CURVE);
+  server.use(
+    scoreSaberApi("/v2/realms", () =>
+      HttpResponse.json(
+        [DEFAULT_REALM_ID, ...EXTRA_REALM_IDS].map(id => ({
+          id,
+          name: `Realm ${id}`,
+          startDate: BASE_TIME.toISOString(),
+          endDate: null,
+          isAcceptingScores: true,
+          hasPP: true,
+          hasHistory: true,
+          decayFactor: 0.965,
+        }))
+      )
+    ),
+    scoreSaberApi("/v2/realms/:id/pp-curve", () =>
+      HttpResponse.json({ curve: ScoreSaberCurve.DEFAULT_CURVE, positiveModifierCurve: [] })
+    )
+  );
 });
 
-afterEach(() => {
-  realmIdsSpy.mockRestore();
-  curveSpy.mockRestore();
-});
-
-async function seedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
+async function seedLeaderboards() {
   const ids = [LEADERBOARD_ID, OTHER_LEADERBOARD_ID];
   await db.insert(scoreSaberLeaderboardsTable).values(
     ids.map(id => ({
@@ -61,7 +72,6 @@ async function seedLeaderboards(): Promise<ScoreSaberLeaderboard[]> {
       [DEFAULT_REALM_ID, ...EXTRA_REALM_IDS].map(realmId => ({
         leaderboardId: id,
         realmId,
-        // The second leaderboard is unranked in the last realm, so its pp is skipped there
         ranked: !(id === OTHER_LEADERBOARD_ID && realmId === EXTRA_REALM_IDS[1]),
         qualified: false,
         stars: 6 + realmId,
@@ -84,8 +94,8 @@ function makeScore(
   leaderboard: ScoreSaberLeaderboard,
   score: number,
   timestamp: Date
-): ScoreSaberScore {
-  return {
+) {
+  const built: ScoreSaberScore = {
     playerId: playerId(player),
     leaderboardId: leaderboard.id,
     scoreId,
@@ -107,38 +117,37 @@ function makeScore(
     leftController: null,
     timestamp,
   };
+  return built;
 }
 
-/** Scores already stored before the page is ingested. */
-function existingScores(a: ScoreSaberLeaderboard, b: ScoreSaberLeaderboard): ScoreSaberScore[] {
+function existingScores(a: ScoreSaberLeaderboard, b: ScoreSaberLeaderboard) {
   return [
-    makeScore(5001, 1, a, 900, minutes(-60)), // replaced by a newer play
-    makeScore(5002, 2, a, 950, minutes(60)), // newer than the incoming play
-    makeScore(5003, 3, a, 800, minutes(0)), // same timestamp as the incoming play, lower score
-    makeScore(5004, 4, a, 700, minutes(0)), // the incoming page repeats this exact score
-    makeScore(5011, 9, b, 600, minutes(-10)), // current score on the other leaderboard
+    makeScore(5001, 1, a, 900, minutes(-60)),
+    makeScore(5002, 2, a, 950, minutes(60)),
+    makeScore(5003, 3, a, 800, minutes(0)),
+    makeScore(5004, 4, a, 700, minutes(0)),
+    makeScore(5011, 9, b, 600, minutes(-10)),
   ];
 }
 
-/** The page being ingested, in order. */
 function incomingPage(a: ScoreSaberLeaderboard, b: ScoreSaberLeaderboard) {
   return [
-    { score: makeScore(6000, 0, a, 500, minutes(0)), leaderboard: a }, // fresh
-    { score: makeScore(6001, 1, a, 910, minutes(0)), leaderboard: a }, // replaces the current score
-    { score: makeScore(6002, 2, a, 920, minutes(0)), leaderboard: a }, // older than the current score
-    { score: makeScore(6003, 3, a, 850, minutes(0)), leaderboard: a }, // same timestamp, higher score
-    { score: makeScore(5004, 4, a, 700, minutes(0)), leaderboard: a }, // already stored
-    { score: makeScore(6005, 5, a, 400, minutes(0)), leaderboard: a }, // fresh...
-    { score: makeScore(6006, 5, a, 450, minutes(5)), leaderboard: a }, // ...and the same player again
-    { score: makeScore(6007, 6, a, 300, minutes(0)), leaderboard: a }, // fresh...
-    { score: makeScore(6007, 7, a, 310, minutes(0)), leaderboard: a }, // ...and the same score id again
-    { score: makeScore(6009, 8, b, 200, minutes(0)), leaderboard: b }, // fresh on the other leaderboard
-    { score: makeScore(6010, 8, a, 250, minutes(0)), leaderboard: a }, // same player, fresh on this one
-    { score: makeScore(6011, 9, b, 650, minutes(0)), leaderboard: b }, // replaces on the other leaderboard
+    { score: makeScore(6000, 0, a, 500, minutes(0)), leaderboard: a },
+    { score: makeScore(6001, 1, a, 910, minutes(0)), leaderboard: a },
+    { score: makeScore(6002, 2, a, 920, minutes(0)), leaderboard: a },
+    { score: makeScore(6003, 3, a, 850, minutes(0)), leaderboard: a },
+    { score: makeScore(5004, 4, a, 700, minutes(0)), leaderboard: a },
+    { score: makeScore(6005, 5, a, 400, minutes(0)), leaderboard: a },
+    { score: makeScore(6006, 5, a, 450, minutes(5)), leaderboard: a },
+    { score: makeScore(6007, 6, a, 300, minutes(0)), leaderboard: a },
+    { score: makeScore(6007, 7, a, 310, minutes(0)), leaderboard: a },
+    { score: makeScore(6009, 8, b, 200, minutes(0)), leaderboard: b },
+    { score: makeScore(6010, 8, a, 250, minutes(0)), leaderboard: a },
+    { score: makeScore(6011, 9, b, 650, minutes(0)), leaderboard: b },
   ];
 }
 
-async function resetAndSeedScores(a: ScoreSaberLeaderboard, b: ScoreSaberLeaderboard): Promise<void> {
+async function resetAndSeedScores(a: ScoreSaberLeaderboard, b: ScoreSaberLeaderboard) {
   await db.delete(scoreSaberScoreRealmsTable);
   await db.delete(scoreSaberScoreHistoryTable);
   await db.delete(scoreSaberScoresTable);
@@ -148,7 +157,7 @@ async function resetAndSeedScores(a: ScoreSaberLeaderboard, b: ScoreSaberLeaderb
 }
 
 async function snapshot() {
-  const withoutId = <T extends object>(rows: T[]): Omit<T, "id">[] =>
+  const withoutId = <T extends object>(rows: T[]) =>
     rows.map(row => {
       const { id: _id, ...rest } = row as T & { id?: number };
       return rest;
@@ -179,7 +188,6 @@ describe("ScoreCoreService.trackScoreSaberScoresBatch", () => {
     }
     const sequential = await snapshot();
 
-    // The scenario has to exercise the interesting paths, otherwise the comparison proves little
     expect(sequentialResults.filter(result => result.tracked).length).toBeGreaterThan(6);
     expect(sequentialResults.some(result => result.hasPreviousScore)).toBe(true);
     expect(sequential.history.length).toBeGreaterThan(0);

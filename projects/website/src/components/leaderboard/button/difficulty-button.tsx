@@ -36,8 +36,6 @@ export function DifficultyButton({ leaderboardDifficulty, selectedId }: Difficul
         )}
         style={
           {
-            // Selected: solid fill with dark text. Unselected: a tint with the difficulty color as text, so
-            // the label stays readable instead of being dimmed along with the background.
             "--diff-color": color,
             "--diff-hover": `color-mix(in oklab, ${color} 30%, transparent)`,
             backgroundColor: isSelected ? color : `color-mix(in oklab, ${color} 16%, transparent)`,

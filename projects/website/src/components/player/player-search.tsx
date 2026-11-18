@@ -44,8 +44,6 @@ const PlayerSearch = ({
       const playerResults = await ssrApi.searchPlayers(trimmedQuery);
       return playerResults || { players: [] };
     },
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
     refetchInterval: false,
     enabled: isOpen,

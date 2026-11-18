@@ -4,7 +4,6 @@ import { Chart, LegendItem, Plugin } from "chart.js";
  * Shared look for every Chart.js chart on the site, so each chart only defines its data.
  */
 export const CHART_THEME = {
-  // Mirrors --border, --muted-foreground and the secondary text tone in themes.css
   gridColor: "#2c2e34",
   tickColor: "#9b9ea6",
   titleColor: "#c2c4c9",
@@ -12,16 +11,9 @@ export const CHART_THEME = {
   fontSize: 11,
 };
 
-// Captured in applyChartTheme: the legend defaults only exist once the Legend plugin is registered,
-// which happens after this module is evaluated.
 let defaultGenerateLabels: ((chart: Chart) => LegendItem[]) | undefined;
 
-/**
- * Builds the legend items in the shared style: every series is a solid dot in its color, hidden
- * series stay toggleable but are shown as a dimmed ring instead of struck through, and series
- * without any data are left out.
- */
-function generateLegendLabels(chart: Chart): LegendItem[] {
+function generateLegendLabels(chart: Chart) {
   if (!defaultGenerateLabels) {
     throw new Error("applyChartTheme must be called before rendering a chart legend");
   }
@@ -42,15 +34,11 @@ function generateLegendLabels(chart: Chart): LegendItem[] {
         };
       }
 
-      // Lines are drawn with their border, bars and points with their fill
       const color = item.lineWidth && item.strokeStyle !== "transparent" ? item.strokeStyle : item.fillStyle;
       return { ...item, fillStyle: color, strokeStyle: color, lineWidth: 0 };
     });
 }
 
-/**
- * Adds a gap between the legend and the chart area.
- */
 const legendSpacingPlugin: Plugin = {
   id: "legendSpacing",
   beforeInit(chart) {

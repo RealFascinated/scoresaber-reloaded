@@ -91,7 +91,7 @@ export const MapFilterProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useMapFilter = (): FilterContextProps => {
+export const useMapFilter = () => {
   const context = useContext(MapFilterContext);
   if (!context) {
     throw new Error("useLeaderboardFilter must be used within a LeaderboardFilterProvider");

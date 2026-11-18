@@ -12,7 +12,7 @@ export class UserFollowsRepository {
    *
    * @param userId the user to get the followed players of
    */
-  public static async getFollowingIds(userId: string): Promise<string[]> {
+  public static async getFollowingIds(userId: string) {
     const rows = await db
       .select({ playerId: userFollowsTable.followingPlayerId })
       .from(userFollowsTable)
@@ -28,9 +28,8 @@ export class UserFollowsRepository {
    * @param playerId the player to follow
    * @param maxFollowing how many players a user can follow
    */
-  public static async follow(userId: string, playerId: string, maxFollowing: number): Promise<FollowResult> {
+  public static async follow(userId: string, playerId: string, maxFollowing: number) {
     return db.transaction(async tx => {
-      // Lock the user so two follows can't both slip under the limit
       await tx
         .select({ id: authUsersTable.id })
         .from(authUsersTable)
@@ -64,7 +63,7 @@ export class UserFollowsRepository {
    * @param userId the user that unfollows
    * @param playerId the player to unfollow
    */
-  public static async unfollow(userId: string, playerId: string): Promise<void> {
+  public static async unfollow(userId: string, playerId: string) {
     await db
       .delete(userFollowsTable)
       .where(and(eq(userFollowsTable.userId, userId), eq(userFollowsTable.followingPlayerId, playerId)));
@@ -75,7 +74,7 @@ export class UserFollowsRepository {
    *
    * @param playerId the player to get the followers of
    */
-  public static async getFollowerIds(playerId: string): Promise<string[]> {
+  public static async getFollowerIds(playerId: string) {
     const rows = await db
       .select({ playerId: authUsersTable.playerId })
       .from(userFollowsTable)
@@ -92,7 +91,7 @@ export class UserFollowsRepository {
    *
    * @param playerId the player to get the followed players of
    */
-  public static async getFollowingIdsByPlayerId(playerId: string): Promise<string[]> {
+  public static async getFollowingIdsByPlayerId(playerId: string) {
     const rows = await db
       .select({ playerId: userFollowsTable.followingPlayerId })
       .from(userFollowsTable)
@@ -107,7 +106,7 @@ export class UserFollowsRepository {
    *
    * @param playerId the player to count for
    */
-  public static async getCounts(playerId: string): Promise<{ followers: number; following: number }> {
+  public static async getCounts(playerId: string) {
     const [[followers], [following]] = await Promise.all([
       db
         .select({ total: count() })

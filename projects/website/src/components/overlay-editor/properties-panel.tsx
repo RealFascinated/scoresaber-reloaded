@@ -37,7 +37,6 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
   );
 }
 
-/** A number input with its label inside, so rows of them stay compact. */
 function NumberField({
   label,
   value,
@@ -379,7 +378,6 @@ function ConnectionProperties() {
 }
 
 function MultiProperties({ ids }: { ids: string[] }) {
-  // Select the stable array and filter it here: a selector that returns a new array every time loops forever
   const layoutElements = useOverlayEditorStore(state => state.layout.elements);
   const elements = useMemo(
     () => layoutElements.filter(element => ids.includes(element.id)),

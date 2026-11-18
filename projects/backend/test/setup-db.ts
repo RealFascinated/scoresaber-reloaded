@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach } from "bun:test";
+import { afterAll, afterEach, beforeAll, beforeEach } from "bun:test";
 import { QueueManager } from "../src/queue/queue-manager";
 import MetricsService from "../src/service/infra/metrics.service";
 import StorageService from "../src/service/infra/storage.service";
@@ -9,16 +9,16 @@ import {
   releaseTestSuiteLock,
   resetTestDatabase,
 } from "./helpers/database";
-import { patchScoreSaberApiForTests } from "./helpers/scoresaber-api-test-patches";
+import { server, startMockServer } from "./helpers/msw-server";
 
 let infraReady = false;
 
-function ensureInfra(): void {
+function ensureInfra() {
   if (infraReady) {
     return;
   }
 
-  patchScoreSaberApiForTests();
+  startMockServer();
   new MetricsService();
   new QueueManager();
   new StorageService();
@@ -33,6 +33,10 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await resetTestDatabase();
+});
+
+afterEach(() => {
+  server.resetHandlers();
 });
 
 afterAll(async () => {

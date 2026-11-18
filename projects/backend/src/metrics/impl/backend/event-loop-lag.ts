@@ -28,7 +28,7 @@ export default class EventLoopLagMetric extends Metric<number> {
   private startMeasuring() {
     this.measureInterval = setInterval(() => {
       const now = performance.now();
-      const expected = this.lastCheck + 1000; // We expect 1 second between measurements
+      const expected = this.lastCheck + 1000;
       this.lag = Math.max(0, now - expected);
       this.lastCheck = now;
       this.value = this.lag;

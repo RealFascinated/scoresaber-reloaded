@@ -53,7 +53,6 @@ export default async function RankedBatchesPage({ searchParams }: Props) {
     throw error;
   }
 
-  // A page past the last one (or a clamped invalid one) has nothing to show, so send the user back to the start.
   if ((!rankedBatches || rankedBatches.items.length === 0) && (page > 1 || requestedPage !== 1)) {
     redirect("/ranked-batches");
   }

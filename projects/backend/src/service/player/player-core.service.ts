@@ -3,7 +3,6 @@ import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import type { HMD } from "@ssr/common/schemas/hmd";
-import { PlayerRefreshResponse } from "@ssr/common/schemas/response/player/player-refresh";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import {
   isScoreSaberV2PlayerToken,
@@ -39,13 +38,9 @@ export class PlayerCoreService {
    * @returns the player document if found
    * @throws NotFoundError if the player doesn't exist on ScoreSaber
    */
-  public static async getOrCreateAccount(
-    id: string,
-    playerToken?: ScoreSaberPlayerLookupToken
-  ): Promise<ScoreSaberAccount> {
+  public static async getOrCreateAccount(id: string, playerToken?: ScoreSaberPlayerLookupToken) {
     id = String(id);
 
-    // Wait for the existing lock if it's in progress
     if (accountCreationLock[id] !== undefined) {
       const result = await accountCreationLock[id];
       if (result === undefined) {
@@ -76,9 +71,6 @@ export class PlayerCoreService {
 
     let shouldSave = false;
     const updates: Partial<Pick<ScoreSaberAccountRow, "name" | "country" | "banned" | "avatar">> = {};
-    // Only sync name/country/banned/avatar when a fresh player token is available.
-    // Without one (e.g. score notifications), the stored values must not be
-    // overwritten with null/false.
     if (playerToken) {
       if (playerToken.name && playerToken.name !== account.name) {
         updates.name = playerToken.name;
@@ -112,7 +104,7 @@ export class PlayerCoreService {
    * @param id the player's id
    * @returns the player document if found
    */
-  public static async getAccount(id: string): Promise<ScoreSaberAccount | undefined> {
+  public static async getAccount(id: string) {
     const account = await ScoreSaberAccountsRepository.findRowById(id);
     return account ? scoreSaberAccountRowToType(account) : undefined;
   }
@@ -124,15 +116,12 @@ export class PlayerCoreService {
    * @param playerToken an optional player token
    * @returns the player if successfully tracked, undefined otherwise
    */
-  public static async createPlayer(
-    id: string,
-    playerToken?: ScoreSaberV2PlayerToken
-  ): Promise<ScoreSaberAccount | undefined> {
+  public static async createPlayer(id: string, playerToken?: ScoreSaberV2PlayerToken) {
     id = String(id);
 
     let lockPromise = accountCreationLock[id];
     if (lockPromise === undefined) {
-      lockPromise = (async (): Promise<ScoreSaberAccount | undefined> => {
+      lockPromise = (async () => {
         try {
           const existingRow = await ScoreSaberAccountsRepository.findRowById(id);
           if (existingRow) {
@@ -175,7 +164,6 @@ export class PlayerCoreService {
             };
             await ScoreSaberAccountsRepository.insert(playerInsert);
 
-            // If the player has less scores tracked than the total play count, add them to the refresh queue
             const trackedScores = await ScoreSaberScoresRepository.countByPlayerId(id);
             if (trackedScores < token.stats.totalSubmittedPlays) {
               const seedQueue = QueueManager.getQueue(
@@ -188,7 +176,6 @@ export class PlayerCoreService {
                 });
               }
             } else {
-              // Mark player as seeded
               await ScoreSaberAccountsRepository.updateAccount(id, { seededScores: true });
             }
 
@@ -217,7 +204,7 @@ export class PlayerCoreService {
     return lockPromise;
   }
 
-  public static async createIfMissing(id: string): Promise<void> {
+  public static async createIfMissing(id: string) {
     if (await PlayerCoreService.playerExists(id)) {
       return;
     }
@@ -230,7 +217,7 @@ export class PlayerCoreService {
    * @param id the player's id
    * @returns whether the player exists
    */
-  public static async playerExists(id: string, throwIfNotFound: boolean = false): Promise<boolean> {
+  public static async playerExists(id: string, throwIfNotFound: boolean = false) {
     const exists = await ScoreSaberAccountsRepository.existsById(id);
     if (throwIfNotFound && !exists) {
       throw new NotFoundError(`Player "${id}" not found`);
@@ -245,9 +232,7 @@ export class PlayerCoreService {
    *
    * @param playerId the player's id
    */
-  public static async invalidatePlayerCaches(playerId: string): Promise<void> {
-    // The mini-ranking response is cached in memory only, under one key per realm, so remove those keys
-    // directly instead of scanning every key of every memory cache (this runs for every incoming score).
+  public static async invalidatePlayerCaches(playerId: string) {
     for (const realmId of await RealmService.getRealmIds()) {
       CacheService.invalidateMemoryKey(
         CacheId.SCORESABER_MINI_RANKING_RESPONSE,
@@ -266,7 +251,7 @@ export class PlayerCoreService {
   public static async invalidatePlayersCaches(
     playerIds: string[],
     scope?: { detailTypes?: DetailType[]; realmIds?: number[] }
-  ): Promise<void> {
+  ) {
     if (playerIds.length === 0) {
       return;
     }
@@ -288,7 +273,7 @@ export class PlayerCoreService {
    * @param id the player's id
    * @returns the player document if found
    */
-  public static async refreshPlayer(id: string): Promise<PlayerRefreshResponse> {
+  public static async refreshPlayer(id: string) {
     const response = await ScoreSaberApiService.refreshPlayer(id);
     if (response !== undefined) {
       await PlayerCoreService.invalidatePlayerCaches(id);
@@ -309,12 +294,11 @@ export class PlayerCoreService {
     playerId: string,
     patch: Partial<Omit<ScoreSaberAccountRow, "id">>,
     options?: { invalidateCache?: boolean }
-  ): Promise<void> {
+  ) {
     if (Object.keys(patch).length === 0) {
       return;
     }
 
-    // A name change pushes the old name onto the player's name history
     const existing =
       patch.name !== undefined ? await ScoreSaberAccountsRepository.findRowById(playerId) : undefined;
 

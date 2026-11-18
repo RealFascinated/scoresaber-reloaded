@@ -7,12 +7,7 @@ type BuildChartConfigParams = {
   options?: ChartConfig["options"];
 };
 
-export function buildChartConfig({
-  id,
-  datasetConfig,
-  seriesByField,
-  options,
-}: BuildChartConfigParams): ChartConfig {
+export function buildChartConfig({ id, datasetConfig, seriesByField, options }: BuildChartConfigParams) {
   const datasets: ChartConfig["datasets"] = datasetConfig.map(config => ({
     label: config.title,
     data: seriesByField[config.field],

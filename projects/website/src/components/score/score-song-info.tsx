@@ -73,7 +73,6 @@ export default function ScoreSongInfo({
             className="h-full w-full object-cover"
           />
         </div>
-        {/* A dark chip reads on any cover art; the difficulty color lives in the ring and the icon/label. */}
         <div
           className="bg-background/90 text-foreground absolute -right-2 bottom-1 inline-flex h-5.5 w-fit cursor-default items-center gap-1 rounded-md px-1.5 text-xs leading-none font-bold tabular-nums shadow-md ring-[1.5px] ring-(--diff-color) backdrop-blur-sm"
           style={{ "--diff-color": diff.color } as CSSProperties}

@@ -10,10 +10,7 @@ export type OverlayScorePp = { scoreSaber: number | undefined; beatLeader: numbe
  * Calculates the pp the current score is worth right now. It is what the score would be worth if it ended now.
  * Modifiers aren't known to the overlay, so they aren't part of it.
  */
-export function useOverlayScorePp({
-  data,
-  ratings,
-}: Pick<OverlayRuntime, "data" | "ratings">): OverlayScorePp {
+export function useOverlayScorePp({ data, ratings }: Pick<OverlayRuntime, "data" | "ratings">) {
   const calculateBeatLeader = useMemo(
     () => (ratings?.ranked ? BeatLeaderCurve.createCalculator(ratings) : undefined),
     [ratings]

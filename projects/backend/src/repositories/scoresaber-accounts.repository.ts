@@ -6,19 +6,19 @@ import { TableCountsRepository } from "./table-counts.repository";
 export type ScoreSaberAccountInsert = typeof scoreSaberAccountsTable.$inferInsert;
 
 export class ScoreSaberAccountsRepository {
-  public static async findRowById(id: string): Promise<ScoreSaberAccountRow | undefined> {
+  public static async findRowById(id: string) {
     const [row] = await db.select().from(scoreSaberAccountsTable).where(eq(scoreSaberAccountsTable.id, id));
     return row;
   }
 
-  public static async findManyByIds(ids: string[]): Promise<ScoreSaberAccountRow[]> {
+  public static async findManyByIds(ids: string[]) {
     if (ids.length === 0) {
       return [];
     }
     return db.select().from(scoreSaberAccountsTable).where(inArray(scoreSaberAccountsTable.id, ids));
   }
 
-  public static async findExistingIds(ids: string[]): Promise<Set<string>> {
+  public static async findExistingIds(ids: string[]) {
     if (ids.length === 0) {
       return new Set();
     }
@@ -29,13 +29,13 @@ export class ScoreSaberAccountsRepository {
     return new Set(rows.map(row => row.id));
   }
 
-  public static async insert(row: ScoreSaberAccountInsert): Promise<void> {
+  public static async insert(row: ScoreSaberAccountInsert) {
     await db.insert(scoreSaberAccountsTable).values(row).onConflictDoNothing({
       target: scoreSaberAccountsTable.id,
     });
   }
 
-  public static async existsById(id: string): Promise<boolean> {
+  public static async existsById(id: string) {
     const rows = await db
       .select({ exists: sql`1` })
       .from(scoreSaberAccountsTable)
@@ -43,10 +43,7 @@ export class ScoreSaberAccountsRepository {
     return rows.length > 0;
   }
 
-  public static async updateAccount(
-    id: string,
-    patch: Partial<Omit<ScoreSaberAccountRow, "id">>
-  ): Promise<boolean> {
+  public static async updateAccount(id: string, patch: Partial<Omit<ScoreSaberAccountRow, "id">>) {
     type UpdatableKey = Exclude<keyof ScoreSaberAccountRow, "id">;
     const entries = Object.entries(patch) as [UpdatableKey, ScoreSaberAccountRow[UpdatableKey]][];
     if (entries.length === 0) {
@@ -66,7 +63,7 @@ export class ScoreSaberAccountsRepository {
     return (result.rowCount ?? 0) > 0;
   }
 
-  public static async searchIdsByNameIlike(pattern: string, limit: number): Promise<{ id: string }[]> {
+  public static async searchIdsByNameIlike(pattern: string, limit: number) {
     return db
       .select({ id: scoreSaberAccountsTable.id })
       .from(scoreSaberAccountsTable)
@@ -75,7 +72,7 @@ export class ScoreSaberAccountsRepository {
       .limit(limit);
   }
 
-  public static async selectHmdCountsActiveAccounts(): Promise<{ hmd: string | null; c: number }[]> {
+  public static async selectHmdCountsActiveAccounts() {
     return db
       .select({
         hmd: scoreSaberAccountsTable.hmd,
@@ -95,7 +92,7 @@ export class ScoreSaberAccountsRepository {
    *
    * @returns the ids to queue
    */
-  public static async selectIdsNeedingBeatLeaderSeed(limit?: number): Promise<{ id: string }[]> {
+  public static async selectIdsNeedingBeatLeaderSeed(limit?: number) {
     const q = db
       .select({ id: scoreSaberAccountsTable.id })
       .from(scoreSaberAccountsTable)
@@ -122,9 +119,7 @@ export class ScoreSaberAccountsRepository {
    * @param id the player's id
    * @returns the processed page count and attempt count, or undefined if not tracked
    */
-  public static async findBeatLeaderSeedProgress(
-    id: string
-  ): Promise<{ page: number; attempts: number } | undefined> {
+  public static async findBeatLeaderSeedProgress(id: string) {
     const [row] = await db
       .select({
         page: scoreSaberAccountsTable.beatLeaderSeedPage,
@@ -135,7 +130,7 @@ export class ScoreSaberAccountsRepository {
     return row;
   }
 
-  public static async selectIdsNeedingScoreSeed(limit?: number): Promise<{ id: string }[]> {
+  public static async selectIdsNeedingScoreSeed(limit?: number) {
     const q = db
       .select({ id: scoreSaberAccountsTable.id })
       .from(scoreSaberAccountsTable)
@@ -143,8 +138,7 @@ export class ScoreSaberAccountsRepository {
     return limit != null ? q.limit(limit) : q;
   }
 
-  public static async markInactiveWhereIdNotIn(activeIds: string[]): Promise<{ rowCount: number | null }> {
-    // `notInArray` is NOT IN ($1..$N); tens of thousands of ids exceed driver/protocol limits.
+  public static async markInactiveWhereIdNotIn(activeIds: string[]) {
     const inactiveUpdate = await db
       .update(scoreSaberAccountsTable)
       .set({ inactive: true })
@@ -157,17 +151,17 @@ export class ScoreSaberAccountsRepository {
     return { rowCount: inactiveUpdate.rowCount ?? null };
   }
 
-  public static async countInactive(): Promise<number> {
+  public static async countInactive() {
     const counts = await TableCountsRepository.getCounts();
     return counts.scoresaberInactiveAccounts;
   }
 
-  public static async countTotal(): Promise<number> {
+  public static async countTotal() {
     const counts = await TableCountsRepository.getCounts();
     return counts.scoresaberAccounts;
   }
 
-  public static async countJoinedSince(date: Date): Promise<number> {
+  public static async countJoinedSince(date: Date) {
     const [row] = await db
       .select({ c: count() })
       .from(scoreSaberAccountsTable)
@@ -175,7 +169,7 @@ export class ScoreSaberAccountsRepository {
     return row?.c ?? 0;
   }
 
-  public static async selectAllIds(): Promise<{ id: string }[]> {
+  public static async selectAllIds() {
     return db.select({ id: scoreSaberAccountsTable.id }).from(scoreSaberAccountsTable);
   }
 }

@@ -19,7 +19,7 @@ export type ScoreHistoryAttemptRow = typeof scoreSaberScoreHistoryTable.$inferIn
  * History rows keep a single `pp` snapshot, taken from the row's resolved realm (the default realm
  * for replaced personal bests).
  */
-export function scoreRowToHistoryInsert(row: ScoreSaberScoreRow): ScoreHistoryAttemptRow {
+export function scoreRowToHistoryInsert(row: ScoreSaberScoreRow) {
   return {
     scoreId: row.scoreId,
     playerId: row.playerId,
@@ -48,7 +48,6 @@ const scoreCols = {
 };
 const histCols = getTableColumns(scoreSaberScoreHistoryTable);
 
-/** History rows projected to match `scoresaber-scores` columns for UNION with current scores. */
 const historyBulkUpdateCasts: Partial<Record<keyof ScoreSaberScoreHistoryRow, string>> = {
   accuracy: "double precision",
   pp: "double precision",
@@ -81,7 +80,7 @@ export class ScoreSaberScoreHistoryRepository {
   /**
    * Finds a score-history row by its score id.
    */
-  public static async findRowByScoreId(scoreId: number): Promise<ScoreSaberScoreHistoryRow | undefined> {
+  public static async findRowByScoreId(scoreId: number) {
     const [row] = await db
       .select()
       .from(scoreSaberScoreHistoryTable)
@@ -89,7 +88,7 @@ export class ScoreSaberScoreHistoryRepository {
     return row;
   }
 
-  public static async countByPlayerId(playerId: string): Promise<number> {
+  public static async countByPlayerId(playerId: string) {
     const [row] = await db
       .select({ count: sql<number>`cast(count(*) as integer)` })
       .from(scoreSaberScoreHistoryTable)
@@ -102,7 +101,7 @@ export class ScoreSaberScoreHistoryRepository {
    *
    * Used by the backfill to skip archived plays without per-score lookups.
    */
-  public static async findExistingScoreIds(scoreIds: number[]): Promise<Set<number>> {
+  public static async findExistingScoreIds(scoreIds: number[]) {
     if (scoreIds.length === 0) {
       return new Set();
     }
@@ -113,11 +112,7 @@ export class ScoreSaberScoreHistoryRepository {
     return new Set(rows.map(row => row.scoreId));
   }
 
-  public static async insertAttempt(
-    row: ScoreHistoryAttemptRow,
-    playerId: string,
-    leaderboardId: number
-  ): Promise<void> {
+  public static async insertAttempt(row: ScoreHistoryAttemptRow, playerId: string, leaderboardId: number) {
     await db
       .insert(scoreSaberScoreHistoryTable)
       .values({
@@ -208,10 +203,7 @@ export class ScoreSaberScoreHistoryRepository {
     );
   }
 
-  public static async countCombinedScoresForPlayerMap(
-    playerId: string,
-    leaderboardId: number
-  ): Promise<number> {
+  public static async countCombinedScoresForPlayerMap(playerId: string, leaderboardId: number) {
     const { onScores, onHistory } = playerMapFilters(playerId, leaderboardId);
     const [scoresCount, historyCount] = await Promise.all([
       db.$count(scoreSaberScoresTable, onScores),
@@ -226,7 +218,7 @@ export class ScoreSaberScoreHistoryRepository {
     limit: number,
     offset: number,
     realmId: number
-  ): Promise<ScoreSaberScoreRow[]> {
+  ) {
     const { onScores, onHistory } = playerMapFilters(playerId, leaderboardId);
     const fullRowsUnion = unionAll(
       db
@@ -246,10 +238,7 @@ export class ScoreSaberScoreHistoryRepository {
     return rawScores as ScoreSaberScoreRow[];
   }
 
-  public static async getAccuracySeriesForPlayerMap(
-    playerId: string,
-    leaderboardId: number
-  ): Promise<Array<{ timestamp: Date; accuracy: number }>> {
+  public static async getAccuracySeriesForPlayerMap(playerId: string, leaderboardId: number) {
     const { onScores, onHistory } = playerMapFilters(playerId, leaderboardId);
     const graph = unionAll(
       db
@@ -275,9 +264,7 @@ export class ScoreSaberScoreHistoryRepository {
     }));
   }
 
-  public static async getPpAccuracyByLeaderboardId(
-    leaderboardId: number
-  ): Promise<{ id: number; pp: number; accuracy: number }[]> {
+  public static async getPpAccuracyByLeaderboardId(leaderboardId: number) {
     return db
       .select({
         id: scoreSaberScoreHistoryTable.id,
@@ -299,7 +286,7 @@ export class ScoreSaberScoreHistoryRepository {
    *
    * @param updates the updates to upsert
    */
-  public static async bulkUpsetHistoryScores(updates: Partial<ScoreSaberScoreHistoryRow>[]): Promise<void> {
+  public static async bulkUpsetHistoryScores(updates: Partial<ScoreSaberScoreHistoryRow>[]) {
     const validUpdates = updates.filter(
       (u): u is Partial<ScoreSaberScoreHistoryRow> & { id: number } => u.id !== undefined
     );
@@ -307,9 +294,6 @@ export class ScoreSaberScoreHistoryRepository {
       return;
     }
 
-    // Every row updates the same columns; derive them from the first row. The
-    // keys come from the typed Partial<ScoreSaberScoreHistoryRow> passed by
-    // callers, so only schema column names are ever interpolated.
     const fields = Object.keys(validUpdates[0]).filter(
       (key): key is keyof ScoreSaberScoreHistoryRow => key !== "id"
     );
@@ -317,7 +301,6 @@ export class ScoreSaberScoreHistoryRepository {
       return;
     }
 
-    // 5,000 rows per chunk => 10,000 parameters, comfortably under the limit.
     await db.transaction(async tx => {
       for (const chunk of chunkArray(validUpdates, 5_000)) {
         await tx.execute(sql`
@@ -350,7 +333,7 @@ export class ScoreSaberScoreHistoryRepository {
     });
   }
 
-  public static async countTotal(): Promise<number> {
+  public static async countTotal() {
     const counts = await TableCountsRepository.getCounts();
     return counts.scoresaberScoreHistory;
   }

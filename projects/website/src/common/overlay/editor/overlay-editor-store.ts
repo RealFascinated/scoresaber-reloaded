@@ -8,7 +8,6 @@ import { create } from "zustand";
 type Snapshot = { layout: OverlayLayout; settings: OverlayConnectionSettings };
 
 const MAX_HISTORY = 100;
-/** Changes with the same key within this time (typing in a field, dragging a slider) are one undo step. */
 const COALESCE_MS = 1000;
 
 type OverlayEditorState = {
@@ -54,7 +53,7 @@ type OverlayEditorState = {
   redo: () => void;
 };
 
-function withHistory(state: OverlayEditorState, coalesceKey?: string): Partial<OverlayEditorState> {
+function withHistory(state: OverlayEditorState, coalesceKey?: string) {
   const now = Date.now();
   if (coalesceKey && state.lastCoalesce?.key === coalesceKey && now - state.lastCoalesce.at < COALESCE_MS) {
     return { lastCoalesce: { key: coalesceKey, at: now }, future: [] };
@@ -66,24 +65,22 @@ function withHistory(state: OverlayEditorState, coalesceKey?: string): Partial<O
   };
 }
 
-/** Renumbers `z` to match the order of the array, so the stacking order is always 0..n-1. */
-function normalizeZ(elements: OverlayElement[]): OverlayElement[] {
+function normalizeZ(elements: OverlayElement[]) {
   return elements.map((element, index) => ({ ...element, z: index }));
 }
 
-function selection(ids: string[]): Pick<OverlayEditorState, "selectedIds" | "selectedId"> {
+function selection(ids: string[]) {
   return { selectedIds: ids, selectedId: ids.length === 1 ? ids[0] : undefined };
 }
 
-/** Keeps the ids that still exist in the layout. */
-function existingIds(ids: string[], layout: OverlayLayout): string[] {
+function existingIds(ids: string[], layout: OverlayLayout) {
   return ids.filter(id => layout.elements.some(element => element.id === id));
 }
 
 function patchElements(
   layout: OverlayLayout,
   getPatch: (element: OverlayElement) => Partial<OverlayElement> | undefined
-): OverlayLayout {
+) {
   return {
     ...layout,
     elements: layout.elements.map(element => {
@@ -199,7 +196,6 @@ export const useOverlayEditorStore = create<OverlayEditorState>((set, get) => ({
             offset: { x: source.offset.x + 24, y: source.offset.y + 24 },
           }) as OverlayElement
       );
-      // Copies go on top of everything, in their original order
       const elements = normalizeZ([...[...state.layout.elements].sort((a, b) => a.z - b.z), ...copies]);
       return {
         ...withHistory(state),

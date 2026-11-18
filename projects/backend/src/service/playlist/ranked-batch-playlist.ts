@@ -20,7 +20,7 @@ export function buildRankedBatchPlaylist(
   rankedBatch: Pick<RankedBatch, "id" | "name" | "startedAt">,
   leaderboards: RankedBatchLeaderboardChange[],
   newLeaderboards: RankedBatchNewLeaderboard[] = []
-): Playlist {
+) {
   const rankedLeaderboards: RankedBatchLeaderboardInfo[] = [
     ...leaderboards.filter(leaderboard => leaderboard.newStars !== 0),
     ...newLeaderboards,

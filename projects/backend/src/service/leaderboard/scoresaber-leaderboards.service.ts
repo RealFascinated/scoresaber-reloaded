@@ -2,14 +2,8 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination } from "@ssr/common/pagination";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import { LeaderboardStarChange } from "@ssr/common/schemas/leaderboard/leaderboard-star-change";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
-import type { LeaderboardsPageResponse } from "@ssr/common/schemas/response/leaderboard/leaderboards-page";
-import {
-  RankingQueueLeaderboard,
-  RankingQueueLeaderboardsResponse,
-} from "@ssr/common/schemas/response/leaderboard/ranking-queue-leaderboards";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import type { ScoreSaberLeaderboardQueryFilters } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
 import { RankingRequestToken } from "@ssr/common/schemas/scoresaber/tokens/v1/ranking-request-token";
@@ -51,7 +45,7 @@ export class ScoreSaberLeaderboardsService {
    * @param realmId the realm to resolve ranking state (ranked, stars, ...) for
    * @returns the leaderboard
    */
-  public static async getLeaderboard(id: number, realmId: number): Promise<ScoreSaberLeaderboard> {
+  public static async getLeaderboard(id: number, realmId: number) {
     const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardById(id, true, realmId);
     if (leaderboard !== undefined) {
       return leaderboard;
@@ -73,7 +67,7 @@ export class ScoreSaberLeaderboardsService {
     difficulty: MapDifficulty,
     characteristic: MapCharacteristic,
     realmId: number
-  ): Promise<ScoreSaberLeaderboard> {
+  ) {
     const hashNorm = normalizeSongHash(hash);
     const leaderboard = await ScoreSaberLeaderboardsRepository.getLeaderboardByHash(
       hashNorm,
@@ -124,7 +118,7 @@ export class ScoreSaberLeaderboardsService {
     page: number,
     filters: ScoreSaberLeaderboardQueryFilters | undefined,
     realmId: number
-  ): Promise<LeaderboardsPageResponse> {
+  ) {
     const { whereClause, orderParts } = buildLeaderboardQuery(filters);
 
     const [countRow] = await db
@@ -164,7 +158,7 @@ export class ScoreSaberLeaderboardsService {
     id: number,
     token?: ScoreSaberV2LeaderboardPageToken,
     options?: { skipScoreSeedQueue?: boolean; leaderboard?: ScoreSaberLeaderboard }
-  ): Promise<ScoreSaberLeaderboard> {
+  ) {
     const before = performance.now();
     let leaderboard: ScoreSaberLeaderboard;
     if (options?.leaderboard) {
@@ -200,11 +194,7 @@ export class ScoreSaberLeaderboardsService {
    * @param realmId the realm whose star changes to fetch
    * @returns the star change history
    */
-  public static async getStarChangeHistory(
-    leaderboard: ScoreSaberLeaderboard,
-    realmId: number
-  ): Promise<LeaderboardStarChange[]> {
-    // Star changes only happen during the ranked sync, which invalidates this entry when it records one.
+  public static async getStarChangeHistory(leaderboard: ScoreSaberLeaderboard, realmId: number) {
     return CacheService.fetch(
       CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE,
       leaderboardStarChangeCacheKey(leaderboard.id, realmId),
@@ -239,7 +229,7 @@ export class ScoreSaberLeaderboardsService {
    *
    * @returns the ranking queue leaderboards
    */
-  public static async getRankingQueueLeaderboards(): Promise<RankingQueueLeaderboardsResponse> {
+  public static async getRankingQueueLeaderboards() {
     return CacheService.fetch(
       CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS,
       rankingQueueLeaderboardsCacheKey,
@@ -253,7 +243,7 @@ export class ScoreSaberLeaderboardsService {
           };
         }
 
-        function parseLeaderboard(token: RankingRequestToken): RankingQueueLeaderboard {
+        function parseLeaderboard(token: RankingRequestToken) {
           const leaderboard = getScoreSaberLeaderboardFromToken(token.leaderboardInfo);
           return {
             ...leaderboard,

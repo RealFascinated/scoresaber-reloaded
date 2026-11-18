@@ -26,7 +26,7 @@ export type ChartDataset = {
   stack?: string;
   stackOrder?: number;
   labelFormatter?: (value: number) => string;
-  field?: string; // Field name in the history object
+  field?: string;
 };
 
 export type ChartConfig = {

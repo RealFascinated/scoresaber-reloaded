@@ -95,7 +95,6 @@ function LayerList({ onAdd }: { onAdd: () => void }) {
   const duplicateElements = useOverlayEditorStore(state => state.duplicateElements);
   const removeElements = useOverlayEditorStore(state => state.removeElements);
 
-  // Top of the list is the front of the overlay
   const layers = [...elements].sort((a, b) => b.z - a.z);
 
   if (layers.length === 0) {
@@ -135,7 +134,6 @@ function LayerList({ onAdd }: { onAdd: () => void }) {
               <Icon className="text-muted-foreground size-4 shrink-0" />
               <span className="min-w-0 flex-1 truncate">{OVERLAY_WIDGETS[element.type].label}</span>
             </button>
-            {/* Secondary actions only show on hover or when selected, to keep the list calm */}
             <div className={cn("hidden items-center group-hover:flex", selected && "flex")}>
               <LayerButton
                 label="Bring forward"

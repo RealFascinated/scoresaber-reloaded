@@ -25,7 +25,6 @@ export function ScoreSaberLeaderboardData({
   const isDefaultRealm = realmId === DEFAULT_REALM_ID;
   const leaderboardId = serverLeaderboardData.leaderboard.id;
 
-  // The server renders the default realm, other realms are resolved on the client
   const { data: realmLeaderboard } = useQuery({
     queryKey: ["leaderboard", leaderboardId, realmId],
     queryFn: () => ssrApi.fetchLeaderboard(leaderboardId, "full", realmId),

@@ -33,9 +33,6 @@ export async function sendScoreNotification(
   beatLeaderScore: BeatLeaderScore | undefined,
   title: string
 ) {
-  // The real-time websocket pairing may have missed the BeatLeader event; fall
-  // back to the same read-time lookup the website uses so the replay button
-  // matches what the score page shows.
   const [beatSaver, previousScore, resolvedBeatLeaderScore] = await Promise.all([
     BeatSaverService.getMap(
       leaderboard.songHash,
@@ -133,8 +130,6 @@ export async function sendMedalScoreNotification(
   beatLeaderScore: BeatLeaderScore | undefined,
   changes: Map<string, MedalChange>
 ) {
-  // Fall back to the read-time lookup so the replay button matches the website
-  // even when the real-time websocket pairing missed the BeatLeader event.
   const [beatSaver, resolvedBeatLeaderScore] = await Promise.all([
     BeatSaverService.getMap(
       leaderboard.songHash,
@@ -156,26 +151,21 @@ export async function sendMedalScoreNotification(
     "",
     "**__Changes__**",
   ];
-  // Sort the changes by the number of medals gained -> most lost -> least lost
   const sortedChanges = Array.from(changes.entries()).sort((a, b) => {
     const changeA = a[1].after - a[1].before;
     const changeB = b[1].after - b[1].before;
-    // Positive changes come first
     if (changeA > 0 && changeB < 0) {
       return -1;
     }
     if (changeA < 0 && changeB > 0) {
       return 1;
     }
-    // Both positive: sort descending (most gained first)
     if (changeA > 0 && changeB > 0) {
       return changeB - changeA;
     }
-    // Both negative: sort ascending (most lost first, since -10 < -5)
     return changeA - changeB;
   });
 
-  // Find the player with the highest positive change for the title
   const topChangePlayerId = Array.from(changes.entries()).find(
     ([, change]) => change.after - change.before > 0
   )?.[0];
@@ -232,15 +222,6 @@ export async function sendMedalScoreNotification(
   );
 }
 
-/**
- * Gets the buttons for a score.
- *
- * @param score the score to get the buttons for
- * @param leaderboard the leaderboard the score was set on
- * @param beatSaver the beatSaver map
- * @param beatLeaderScore the beatLeader score
- * @returns the buttons for the score
- */
 function getScoreButtons(
   score: ScoreSaberScore,
   leaderboard: ScoreSaberLeaderboard,

@@ -27,11 +27,11 @@ const HIT_DISTANCE_PX = 6;
 const DIAMOND_SIZE_PX = 4;
 const LABEL_PADDING_PX = 6;
 
-function getMarkerX(chart: Chart, marker: ChartMarker): number {
+function getMarkerX(chart: Chart, marker: ChartMarker) {
   return chart.scales.x.getPixelForValue(marker.index);
 }
 
-function getNearestMarker(chart: Chart, markers: ChartMarker[], x: number): ChartMarker | undefined {
+function getNearestMarker(chart: Chart, markers: ChartMarker[], x: number) {
   let nearest: ChartMarker | undefined;
   let nearestDistance = HIT_DISTANCE_PX;
   for (const marker of markers) {
@@ -52,7 +52,7 @@ function getNearestMarker(chart: Chart, markers: ChartMarker[], x: number): Char
  * The markers can change without recreating the chart (Chart.js only reads the plugins it was created
  * with), so they are handed over through the returned controller.
  */
-export function createChartMarkerPlugin(): ChartMarkerController {
+export function createChartMarkerPlugin() {
   let hovered: ChartMarker | undefined;
   let config: ChartMarkerConfig = { markers: [], color: "", onSelect: () => {} };
   const getConfig = () => config;
@@ -124,7 +124,6 @@ export function createChartMarkerPlugin(): ChartMarkerController {
         return;
       }
 
-      // Draw the hovered label last (and unclipped) so it always sits on top of the other markers
       ctx.save();
       ctx.font = `600 ${CHART_THEME.fontSize}px ${chart.options.font?.family ?? "sans-serif"}`;
       const textWidth = ctx.measureText(hovered.label).width;
@@ -151,8 +150,8 @@ export function createChartMarkerPlugin(): ChartMarkerController {
 
   return {
     plugin,
-    setConfig(next) {
+    setConfig(next: ChartMarkerConfig) {
       config = next;
     },
-  };
+  } satisfies ChartMarkerController;
 }

@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gt, inArray, lt, notExists, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, inArray, lt, notExists, sql } from "drizzle-orm";
 import { db } from "../db";
 import {
   scoreSaberAccountsTable,
@@ -9,7 +9,6 @@ import {
   scoreSaberScoreRealmsTable,
   scoreSaberScoresTable,
   type ScoreSaberRankedBatchPlayerRow,
-  type ScoreSaberRankedBatchRow,
   type ScoreSaberRankedBatchScoreRow,
 } from "../db/schema";
 
@@ -47,7 +46,7 @@ export class ScoreSaberRankedBatchPpRepository {
    * @param realmId the realm to read pp for
    * @param scoreIds the scores to read
    */
-  public static async selectStoredScorePps(realmId: number, scoreIds: number[]): Promise<StoredScorePp[]> {
+  public static async selectStoredScorePps(realmId: number, scoreIds: number[]) {
     if (scoreIds.length === 0) {
       return [];
     }
@@ -74,7 +73,7 @@ export class ScoreSaberRankedBatchPpRepository {
    * `ppAfter` is updated: `ppBefore` must stay the pp stored before the ranked batch, even when this
    * runs again after the stored pp was already overwritten.
    */
-  public static async upsertScoreChanges(rows: ScoreSaberRankedBatchScoreRow[]): Promise<void> {
+  public static async upsertScoreChanges(rows: ScoreSaberRankedBatchScoreRow[]) {
     if (rows.length === 0) {
       return;
     }
@@ -90,7 +89,7 @@ export class ScoreSaberRankedBatchPpRepository {
   /**
    * Replaces the pp change of players for a ranked batch.
    */
-  public static async upsertPlayerChanges(rows: ScoreSaberRankedBatchPlayerRow[]): Promise<void> {
+  public static async upsertPlayerChanges(rows: ScoreSaberRankedBatchPlayerRow[]) {
     if (rows.length === 0) {
       return;
     }
@@ -111,10 +110,7 @@ export class ScoreSaberRankedBatchPpRepository {
   /**
    * Lists the players with a changed score on any of the leaderboards of a ranked batch.
    */
-  public static async selectChangedPlayerIds(
-    rankedBatchId: number,
-    leaderboardIds: number[]
-  ): Promise<string[]> {
+  public static async selectChangedPlayerIds(rankedBatchId: number, leaderboardIds: number[]) {
     if (leaderboardIds.length === 0) {
       return [];
     }
@@ -133,10 +129,7 @@ export class ScoreSaberRankedBatchPpRepository {
   /**
    * Lists every captured score change of the given players for a ranked batch.
    */
-  public static async selectScoreChangesForPlayers(
-    rankedBatchId: number,
-    playerIds: string[]
-  ): Promise<ScoreSaberRankedBatchScoreRow[]> {
+  public static async selectScoreChangesForPlayers(rankedBatchId: number, playerIds: string[]) {
     if (playerIds.length === 0) {
       return [];
     }
@@ -154,11 +147,7 @@ export class ScoreSaberRankedBatchPpRepository {
   /**
    * Lists the pp of the given players' ranked scores in a realm that the ranked batch did not change.
    */
-  public static async selectUnchangedPps(
-    realmId: number,
-    rankedBatchId: number,
-    playerIds: string[]
-  ): Promise<{ playerId: string; pp: number }[]> {
+  public static async selectUnchangedPps(realmId: number, rankedBatchId: number, playerIds: string[]) {
     if (playerIds.length === 0) {
       return [];
     }
@@ -187,9 +176,7 @@ export class ScoreSaberRankedBatchPpRepository {
   /**
    * Lists the ranked batches that changed a player's pp, newest first.
    */
-  public static async listPlayerRankedBatches(
-    playerId: string
-  ): Promise<{ rankedBatch: ScoreSaberRankedBatchRow; change: ScoreSaberRankedBatchPlayerRow }[]> {
+  public static async listPlayerRankedBatches(playerId: string) {
     return db
       .select({ rankedBatch: scoreSaberRankedBatchesTable, change: scoreSaberRankedBatchPlayersTable })
       .from(scoreSaberRankedBatchPlayersTable)
@@ -204,10 +191,7 @@ export class ScoreSaberRankedBatchPpRepository {
   /**
    * Lists every score change of a player for a ranked batch, the biggest pp gain first.
    */
-  public static async listPlayerScoreChanges(
-    playerId: string,
-    rankedBatchId: number
-  ): Promise<RankedBatchScoreWithLeaderboardRow[]> {
+  public static async listPlayerScoreChanges(playerId: string, rankedBatchId: number) {
     const delta = sql`${scoreSaberRankedBatchScoresTable.ppAfter} - ${scoreSaberRankedBatchScoresTable.ppBefore}`;
     return db
       .select({
@@ -239,7 +223,7 @@ export class ScoreSaberRankedBatchPpRepository {
    *
    * @param direction only count players who gained (`gain`) or lost (`loss`) pp
    */
-  public static async countPlayers(rankedBatchId: number, direction?: "gain" | "loss"): Promise<number> {
+  public static async countPlayers(rankedBatchId: number, direction?: "gain" | "loss") {
     const [row] = await db
       .select({ value: count() })
       .from(scoreSaberRankedBatchPlayersTable)
@@ -268,7 +252,7 @@ export class ScoreSaberRankedBatchPpRepository {
     direction: "gain" | "loss",
     limit: number,
     offset: number
-  ): Promise<RankedBatchPlayerWithAccountRow[]> {
+  ) {
     return db
       .select({
         ...rankedBatchPlayerColumns,
@@ -318,7 +302,7 @@ const rankedBatchPlayerColumns = {
   scoresChanged: scoreSaberRankedBatchPlayersTable.scoresChanged,
 };
 
-function getDirectionFilter(direction: "gain" | "loss"): SQL {
+function getDirectionFilter(direction: "gain" | "loss") {
   return direction === "gain"
     ? gt(scoreSaberRankedBatchPlayersTable.ppDelta, 0)
     : lt(scoreSaberRankedBatchPlayersTable.ppDelta, 0);

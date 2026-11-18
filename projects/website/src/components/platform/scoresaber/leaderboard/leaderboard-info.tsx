@@ -22,7 +22,6 @@ type LeaderboardInfoProps = {
 export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   const { leaderboard: leaderboardData, beatsaver } = leaderboard;
 
-  // The history is only fetched once the dialog opens, so ranked leaderboards always show the button
   const showStarHistory = leaderboardData.ranked;
 
   return (

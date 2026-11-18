@@ -27,10 +27,6 @@ export default class StorageService {
   constructor() {
     StorageService.CACHE = new SSRCache({
       maxObjects: 5_000,
-      // Bound how long file contents stay resident in heap. Every saved file
-      // (including BeatLeader replay buffers, which are never read back from
-      // this cache) is stored as a full Buffer, so without a TTL replay
-      // buffers would accumulate until the 5000-object cap forced eviction.
       ttl: TimeUnit.toMillis(TimeUnit.Minute, 10),
     });
     this.initBuckets();
@@ -43,7 +39,7 @@ export default class StorageService {
    * @param filename the filename to get
    * @returns the file
    */
-  public static async getFile(bucket: StorageBucket, filename: string): Promise<Buffer | undefined> {
+  public static async getFile(bucket: StorageBucket, filename: string) {
     const cacheKey = `${bucket}:${filename}`;
     const cached = StorageService.CACHE.get<Buffer>(cacheKey);
     if (cached !== undefined) {
@@ -59,7 +55,6 @@ export default class StorageService {
       StorageService.CACHE.set(cacheKey, file);
       return file;
     } catch (error) {
-      // A missing object is expected; anything else (network, auth) should be visible
       if (!StorageService.isNotFoundError(error as Error & { code?: string })) {
         StorageService.logger.warn(`Failed to read file from S3 (${bucket}/${filename}): ${error}`);
       }
@@ -67,9 +62,7 @@ export default class StorageService {
     }
   }
 
-  private static isNotFoundError(
-    error: Error | string | number | boolean | null | undefined | object
-  ): boolean {
+  private static isNotFoundError(error: Error | string | number | boolean | null | undefined | object) {
     const code = typeof error === "object" && error !== null && "code" in error ? error.code : undefined;
     return code === "NoSuchKey" || code === "ERR_S3_NO_SUCH_KEY";
   }
@@ -82,7 +75,7 @@ export default class StorageService {
    * @param data the data to save
    * @returns true if the file was saved, false if the save failed
    */
-  public static async saveFile(bucket: StorageBucket, filename: string, data: Buffer): Promise<boolean> {
+  public static async saveFile(bucket: StorageBucket, filename: string, data: Buffer) {
     try {
       const s3file = StorageService.getFileRef(bucket, filename);
       await s3file.write(data);
@@ -113,9 +106,6 @@ export default class StorageService {
   public async initBuckets() {
     for (const bucket of Object.values(StorageBucket)) {
       try {
-        // Bun's S3 client currently focuses on object operations (read/write/delete/list) and does not expose
-        // an API for creating buckets. We do a lightweight request as a sanity check so misconfiguration is
-        // surfaced early in dev/prod logs.
         await StorageService.S3_CLIENT.list(
           { maxKeys: 1 },
           {

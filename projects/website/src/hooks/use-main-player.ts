@@ -15,7 +15,7 @@ export function playerQuery(id: string) {
 /**
  * Gets the player id of the signed-in user. It comes from the session, undefined when signed out.
  */
-export function useMainPlayerId(): string | undefined {
+export function useMainPlayerId() {
   const { data: me } = useMe();
   return me?.playerId ?? undefined;
 }

@@ -6,14 +6,14 @@ import {
   fetchPlayerPbData,
 } from "@/common/overlay/overlay-api";
 import type { OverlayData } from "@/common/overlay/overlay-data";
-import { toOverlayPlayer, type OverlayPlayer } from "@/common/overlay/overlay-player";
+import { toOverlayPlayer } from "@/common/overlay/overlay-player";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 
 /**
  * Loads the player an overlay shows. Fails fast so an outage doesn't leave a spinner on stream.
  */
-export function useOverlayPlayer(playerId: string): { player: OverlayPlayer | undefined; isError: boolean } {
+export function useOverlayPlayer(playerId: string) {
   const { data, isError } = useQuery({
     queryKey: ["overlay", "player", playerId],
     queryFn: async () => {

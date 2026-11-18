@@ -19,7 +19,7 @@ export class UserOverlaysRepository {
    *
    * @param userId the user to get the overlays of
    */
-  public static getSummaries(userId: string): Promise<UserOverlaySummaryRow[]> {
+  public static getSummaries(userId: string) {
     return db
       .select({
         id: userOverlaysTable.id,
@@ -36,7 +36,7 @@ export class UserOverlaysRepository {
    *
    * @param id the id of the overlay
    */
-  public static async findById(id: string): Promise<UserOverlayRow | undefined> {
+  public static async findById(id: string) {
     const [row] = await db.select().from(userOverlaysTable).where(eq(userOverlaysTable.id, id)).limit(1);
     return row;
   }
@@ -48,13 +48,8 @@ export class UserOverlaysRepository {
    * @param values the content of the overlay
    * @param maxOverlays how many overlays a user can have
    */
-  public static async create(
-    userId: string,
-    values: NewUserOverlayValues,
-    maxOverlays: number
-  ): Promise<UserOverlayRow | "limit-reached"> {
+  public static async create(userId: string, values: NewUserOverlayValues, maxOverlays: number) {
     return db.transaction(async tx => {
-      // Lock the user so two creations can't both slip under the limit
       await tx
         .select({ id: authUsersTable.id })
         .from(authUsersTable)
@@ -89,7 +84,7 @@ export class UserOverlaysRepository {
     id: string,
     userId: string,
     patch: { name?: string; settings?: OverlayConnectionSettings; layout?: OverlayLayout }
-  ): Promise<UserOverlayRow | undefined> {
+  ) {
     const [row] = await db
       .update(userOverlaysTable)
       .set(patch)
@@ -105,7 +100,7 @@ export class UserOverlaysRepository {
    * @param userId the owner of the overlay
    * @returns whether an overlay was deleted
    */
-  public static async delete(id: string, userId: string): Promise<boolean> {
+  public static async delete(id: string, userId: string) {
     const rows = await db
       .delete(userOverlaysTable)
       .where(and(eq(userOverlaysTable.id, id), eq(userOverlaysTable.userId, userId)))

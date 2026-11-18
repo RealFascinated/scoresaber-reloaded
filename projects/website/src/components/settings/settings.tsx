@@ -44,7 +44,7 @@ const categories: Category[] = [
   },
 ];
 
-function categoryFromParam(param: string | null): Category {
+function categoryFromParam(param: string | null) {
   if (param === "website" || param === "scores" || param === "player") {
     return categories.find(c => c.slug === param) ?? categories[0];
   }

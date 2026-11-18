@@ -1,14 +1,8 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import {
-  BeatLeaderLeaderboardsByHashSchema,
-  type BeatLeaderLeaderboardsByHashToken,
-} from "@ssr/common/schemas/beatleader/tokens/leaderboards/leaderboards-by-hash";
+import { BeatLeaderLeaderboardsByHashSchema } from "@ssr/common/schemas/beatleader/tokens/leaderboards/leaderboards-by-hash";
 import { BeatLeaderPlayersTotalSchema } from "@ssr/common/schemas/beatleader/tokens/players/page";
-import {
-  BeatLeaderPlayerLookupSchema,
-  type BeatLeaderPlayerLookupToken,
-} from "@ssr/common/schemas/beatleader/tokens/players/player";
+import { BeatLeaderPlayerLookupSchema } from "@ssr/common/schemas/beatleader/tokens/players/player";
 import { ScoreStatsToken } from "@ssr/common/schemas/beatleader/tokens/score-stats/score-stats";
 import {
   BeatLeaderPlayerScoresPageSchema,
@@ -42,17 +36,14 @@ export class BeatLeaderApiService {
   public static failedRequests: number = 0;
   private static totalRequestLatencyMs: number = 0;
 
-  /** Max concurrent in-flight BeatLeader API requests (global cap). */
   private static readonly MAX_CONCURRENT_REQUESTS = 4;
   private static activeRequests = 0;
   private static readonly requestQueue: (() => void)[] = [];
 
-  /** Max attempts per logical request (including the first). */
   private static readonly MAX_ATTEMPTS = 5;
-  /** Per-request timeout (ms). */
   private static readonly REQUEST_TIMEOUT_MS = 15_000;
 
-  private static async acquireRequestSlot(): Promise<void> {
+  private static async acquireRequestSlot() {
     if (BeatLeaderApiService.activeRequests < BeatLeaderApiService.MAX_CONCURRENT_REQUESTS) {
       BeatLeaderApiService.activeRequests++;
       return;
@@ -60,33 +51,22 @@ export class BeatLeaderApiService {
     await new Promise<void>(resolve => BeatLeaderApiService.requestQueue.push(resolve));
   }
 
-  private static releaseRequestSlot(): void {
+  private static releaseRequestSlot() {
     const next = BeatLeaderApiService.requestQueue.shift();
     if (next) {
-      next(); // pass the slot on to the next waiter
+      next();
     } else {
       BeatLeaderApiService.activeRequests--;
     }
   }
 
-  /**
-   * Executes a BeatLeader API request with retries and returns the response
-   * status and parsed JSON.
-   *
-   * Transient failures (network error, timeout, JSON parse failure, 429, 5xx)
-   * are retried up to {@link MAX_ATTEMPTS} times with exponential backoff,
-   * honoring `Retry-After` when present; a definitive 404 (or any other 4xx)
-   * is returned immediately. Returns `undefined` only when every attempt
-   * failed on transport. All requests share a global concurrency cap so the
-   * seed queue and real-time paths cannot exceed the BeatLeader API budget.
-   */
   private static async request(
     url: string,
     options?: {
       searchParams?: Record<string, string>;
       useProxy?: boolean;
     }
-  ): Promise<{ status: number; data: unknown } | undefined> {
+  ) {
     await BeatLeaderApiService.acquireRequestSlot();
     try {
       BeatLeaderApiService.totalRequests++;
@@ -95,7 +75,6 @@ export class BeatLeaderApiService {
         const result = await BeatLeaderApiService.requestOnce(url, options);
 
         if (result == undefined) {
-          // Transport failure — retry unless we exhausted the attempts.
           if (attempt < BeatLeaderApiService.MAX_ATTEMPTS) {
             await backoff(attempt);
             continue;
@@ -104,8 +83,6 @@ export class BeatLeaderApiService {
           return undefined;
         }
 
-        // 429 / 5xx are transient — retry (honoring Retry-After). Every other
-        // status (2xx, 3xx, 4xx like 404) is a definitive answer.
         if ((result.status === 429 || result.status >= 500) && attempt < BeatLeaderApiService.MAX_ATTEMPTS) {
           await backoff(attempt, result.retryAfterMs);
           continue;
@@ -119,20 +96,13 @@ export class BeatLeaderApiService {
     }
   }
 
-  /**
-   * Executes a single BeatLeader API request attempt.
-   *
-   * @returns the response status, parsed JSON and `Retry-After` delay, or
-   *   `undefined` when the request failed before an HTTP response was received
-   *   (network error, timeout, JSON parse failure)
-   */
   private static async requestOnce(
     url: string,
     options?: {
       searchParams?: Record<string, string>;
       useProxy?: boolean;
     }
-  ): Promise<{ status: number; data: unknown; retryAfterMs?: number } | undefined> {
+  ) {
     const effectiveOptions = {
       useProxy: true,
       ...options,
@@ -160,8 +130,6 @@ export class BeatLeaderApiService {
       return undefined;
     }
 
-    // A non-JSON body is still a definitive HTTP status (e.g. an HTML 404
-    // page from the CDN) — don't treat it as a transport failure and retry.
     let data: unknown;
     try {
       data = await response.json();
@@ -179,7 +147,7 @@ export class BeatLeaderApiService {
       searchParams?: Record<string, string>;
       useProxy?: boolean;
     }
-  ): Promise<T | undefined> {
+  ) {
     const result = await BeatLeaderApiService.request(url, options);
     if (result == undefined) {
       return undefined;
@@ -191,7 +159,7 @@ export class BeatLeaderApiService {
     return result.data as T;
   }
 
-  public static async lookupScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
+  public static async lookupScoreStats(scoreId: number) {
     const before = performance.now();
     BeatLeaderApiService.log(`Looking up scorestats for "${scoreId}"...`);
 
@@ -211,7 +179,7 @@ export class BeatLeaderApiService {
     return response;
   }
 
-  public static async lookupPlayersTotal(): Promise<number | undefined> {
+  public static async lookupPlayersTotal() {
     const before = performance.now();
     BeatLeaderApiService.log("Looking up BeatLeader players total...");
 
@@ -238,7 +206,7 @@ export class BeatLeaderApiService {
    * @param playerId the player ID to look up
    * @returns the player with their linked account IDs, or undefined
    */
-  public static async lookupPlayer(playerId: string): Promise<BeatLeaderPlayerLookupToken | undefined> {
+  public static async lookupPlayer(playerId: string) {
     const before = performance.now();
     BeatLeaderApiService.log(`Looking up BeatLeader player "${playerId}"...`);
 
@@ -269,9 +237,7 @@ export class BeatLeaderApiService {
    * @param hash the hash of the map
    * @returns the leaderboards, or undefined when the map is unknown to BeatLeader or the request fails
    */
-  public static async lookupLeaderboardsByHash(
-    hash: string
-  ): Promise<BeatLeaderLeaderboardsByHashToken | undefined> {
+  public static async lookupLeaderboardsByHash(hash: string) {
     BeatLeaderApiService.log(`Looking up BeatLeader leaderboards for "${hash}"...`);
 
     const response = await BeatLeaderApiService.fetch<unknown>(
@@ -327,7 +293,7 @@ export class BeatLeaderApiService {
       stars_to?: string;
       eventId?: string;
     }
-  ): Promise<BeatLeaderPlayerScoresPageResult | undefined> {
+  ) {
     const before = performance.now();
     BeatLeaderApiService.log(`Looking up BeatLeader scores page ${page} for "${playerId}"...`);
 
@@ -381,11 +347,11 @@ export class BeatLeaderApiService {
     return { status: result.status, page: parsed };
   }
 
-  private static log(message: string): void {
+  private static log(message: string) {
     beatLeaderApiLog.debug(message);
   }
 
-  public static getAverageLatencyMs(): number {
+  public static getAverageLatencyMs() {
     if (BeatLeaderApiService.totalRequests <= 0) {
       return 0;
     }

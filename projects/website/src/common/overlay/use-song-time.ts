@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
  *
  * @returns undefined when not in a song
  */
-export function useSongTime(data: OverlayData): number | undefined {
+export function useSongTime(data: OverlayData) {
   const { songTime, songTimeSyncedAt, paused } = data;
   const [now, setNow] = useState(() => Date.now());
 

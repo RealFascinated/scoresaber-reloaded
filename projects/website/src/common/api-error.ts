@@ -8,7 +8,7 @@
  * make `instanceof` silently fail. `Error` itself is a global, so that part of
  * the check is safe.
  */
-export function isBackendUnavailableError(error: unknown): boolean {
+export function isBackendUnavailableError(error: unknown) {
   return (
     error instanceof Error &&
     (error as { isBackendUnavailableError?: unknown }).isBackendUnavailableError === true

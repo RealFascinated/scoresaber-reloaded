@@ -4,6 +4,6 @@ export const CHART_COLORS = {
   primary: Colors.hands.right,
 } as const;
 
-export function getEmptyStateClassName(height: number = 400): string {
+export function getEmptyStateClassName(height: number = 400) {
   return `border-border bg-muted flex h-[${height}px] w-full items-center justify-center rounded-xl border`;
 }

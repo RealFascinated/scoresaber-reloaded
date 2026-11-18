@@ -23,7 +23,6 @@ import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { ssrConfig } from "config";
-import { Metadata } from "next";
 import { cache } from "react";
 import CutDistributionChart from "../../../../components/score/page/components/charts/cut-distribution-chart";
 import SwingSpeedChart from "../../../../components/score/page/components/charts/swing-speed-chart";
@@ -44,22 +43,22 @@ type ScoreFetchResult =
   | { status: "not-found" }
   | { status: "unavailable" };
 
-const getPlayerScore = cache(async (scoreId: string): Promise<ScoreFetchResult> => {
+const getPlayerScore = cache(async (scoreId: string) => {
   try {
     const score = await ssrApi.getScore(scoreId);
-    if (score === undefined) {
-      return { status: "not-found" };
-    }
-    return { status: "found", score };
+    const result: ScoreFetchResult =
+      score === undefined ? { status: "not-found" } : { status: "found", score };
+    return result;
   } catch (error) {
     if (isBackendUnavailableError(error)) {
-      return { status: "unavailable" };
+      const result: ScoreFetchResult = { status: "unavailable" };
+      return result;
     }
     throw error;
   }
 });
 
-export async function generateMetadata(props: ScorePageProps): Promise<Metadata> {
+export async function generateMetadata(props: ScorePageProps) {
   const { scoreId } = await props.params;
   const result = await getPlayerScore(scoreId);
 

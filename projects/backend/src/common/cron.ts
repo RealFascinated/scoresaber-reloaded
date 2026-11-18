@@ -37,7 +37,7 @@ type CronPluginOptions = {
  * @param options the cron job options
  * @returns an Elysia plugin
  */
-export function cron({ name, pattern, timezone, protect, run }: CronPluginOptions): Elysia {
+export function cron({ name, pattern, timezone, protect, run }: CronPluginOptions) {
   const job = new Cron(pattern, { name, timezone, protect }, run);
   return new Elysia({ name: `cron-${name}` }).onStop(() => {
     job.stop();

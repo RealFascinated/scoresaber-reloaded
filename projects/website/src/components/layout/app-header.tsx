@@ -16,9 +16,6 @@ type Crumb = {
   href?: string;
 };
 
-/**
- * Crumbs for the static routes, keyed by path.
- */
 const STATIC_CRUMBS: Record<string, Crumb[]> = {
   "/ranking": [{ label: "Ranking" }],
   "/medals": [{ label: "Medals" }],
@@ -30,10 +27,6 @@ const STATIC_CRUMBS: Record<string, Crumb[]> = {
   "/settings": [{ label: "Settings" }],
 };
 
-/**
- * The parent crumb for the dynamic routes, keyed by the first path segment.
- * The page itself is labelled with the title it sets via the breadcrumb context.
- */
 const DYNAMIC_ROUTES: Record<string, { parent: Crumb; fallback: string }> = {
   player: { parent: { label: "Ranking", href: "/ranking" }, fallback: "Player" },
   leaderboard: { parent: { label: "Leaderboards", href: "/maps/leaderboards" }, fallback: "Leaderboard" },
@@ -41,10 +34,7 @@ const DYNAMIC_ROUTES: Record<string, { parent: Crumb; fallback: string }> = {
   score: { parent: { label: "Scores", href: "/scores/top" }, fallback: "Score" },
 };
 
-/**
- * Builds the crumbs (after "Home") for a path.
- */
-function getCrumbs(pathname: string, pageTitle: string | undefined): Crumb[] {
+function getCrumbs(pathname: string, pageTitle: string | undefined) {
   const staticCrumbs = STATIC_CRUMBS[pathname];
   if (staticCrumbs) {
     return staticCrumbs;
@@ -111,9 +101,6 @@ function Breadcrumbs() {
   );
 }
 
-/**
- * Avatar-only link to the signed-in player's profile (mobile).
- */
 function MyProfileButton() {
   const mainPlayerId = useMainPlayerId();
   const mainPlayer = useMainPlayer().data;

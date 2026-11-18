@@ -6,12 +6,10 @@ import {
   accuracyToLogit,
   buildMapFeatures,
   scoreWeight,
-  type SuggestedMapsFitData,
   type SuggestedMapsParams,
 } from "@ssr/common/suggested-maps/suggested-maps-model";
 import { sql } from "drizzle-orm";
 import { db } from "../../db";
-import type { RankableMap } from "./suggested-maps-ranking";
 
 const FETCH_SIZE = 200_000;
 
@@ -41,7 +39,7 @@ type ScoreRow = {
 /**
  * Lists every ranked map of the default realm with its BeatSaver length / density.
  */
-export async function listRankedMaps(): Promise<Omit<RankableMap, "ease" | "prior" | "scoreCount">[]> {
+export async function listRankedMaps() {
   const result = await db.execute<RankedMapRow>(sql`
     SELECT DISTINCT ON (l.id)
       l.id,
@@ -87,7 +85,7 @@ export async function listRankedMaps(): Promise<Omit<RankableMap, "ease" | "prio
 export async function loadFitData(
   maps: { leaderboardId: number; stars: number }[],
   params: SuggestedMapsParams
-): Promise<SuggestedMapsFitData> {
+) {
   const mapIndex = new Map<number, number>();
   maps.forEach((map, i) => mapIndex.set(map.leaderboardId, i));
 
@@ -175,16 +173,7 @@ export async function loadFitData(
 /**
  * Lists the pp-worthy scores of one player in the default realm, best first.
  */
-export async function listPlayerScores(playerId: string): Promise<
-  {
-    leaderboardId: number;
-    pp: number;
-    accuracy: number;
-    ageDays: number;
-    errors: number;
-    fullCombo: boolean;
-  }[]
-> {
+export async function listPlayerScores(playerId: string) {
   const result = await db.execute<{
     leaderboardId: number;
     pp: number;

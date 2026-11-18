@@ -1,29 +1,19 @@
 import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/default-preferences";
-import { afterEach, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { eq } from "drizzle-orm";
 import { db } from "../../src/db";
 import { authUsersTable, userPreferencesTable } from "../../src/db/schema";
 import { UserPreferencesRepository } from "../../src/repositories/user-preferences.repository";
 import { expectStatus, expectValidationError } from "../helpers/assertions";
-import {
-  WEBSITE_ORIGIN,
-  mockSteamVerification,
-  originalFetch,
-  signInWithSteam,
-  toCookieHeader,
-} from "../helpers/auth";
+import { WEBSITE_ORIGIN, respondToSteamVerification, signInWithSteam, toCookieHeader } from "../helpers/auth";
 import { createTestApp } from "../helpers/create-test-app";
 import { request } from "../helpers/request";
 
 describe("user preferences", () => {
   const app = createTestApp();
 
-  afterEach(() => {
-    globalThis.fetch = originalFetch;
-  });
-
-  async function signIn(steamId: string): Promise<string> {
-    mockSteamVerification(true);
+  async function signIn(steamId: string) {
+    respondToSteamVerification(true);
     return toCookieHeader(await signInWithSteam(app, steamId));
   }
 

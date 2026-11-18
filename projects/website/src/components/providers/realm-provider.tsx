@@ -12,21 +12,14 @@ import { createContext, ReactNode, useCallback, useContext, useMemo, useSyncExte
 const REALM_STORAGE_KEY = "ssr-realm-id";
 
 type RealmContextValue = {
-  /** All known realms (empty until loaded). */
   realms: RealmsResponse;
-  /** The selected realm ID. */
   realmId: number;
-  /** Selects a realm. */
   setRealmId: (realmId: number) => void;
-  /** The pp curve of the selected realm, sorted by ascending accuracy. */
   ppCurve: PpCurvePoint[];
-  /** The positive modifier curve of the selected realm, sorted by ascending accuracy. */
   positiveModifierCurve: PpCurvePoint[];
-  /** Calculates the pp of a score using the selected realm's curve. */
   getPp: (stars: number, accuracy: number) => number;
 };
 
-// Outside of the provider (e.g. the overlay) the default realm and curve are used
 const RealmContext = createContext<RealmContextValue>({
   realms: [],
   realmId: DEFAULT_REALM_ID,
@@ -47,18 +40,16 @@ function subscribeToRealmId(listener: () => void) {
   };
 }
 
-function getStoredRealmId(): number {
+function getStoredRealmId() {
   try {
     const stored = Number(localStorage.getItem(REALM_STORAGE_KEY));
     return Number.isInteger(stored) && stored > 0 ? stored : DEFAULT_REALM_ID;
   } catch {
-    // Storage is unavailable (private mode), use the default realm
     return DEFAULT_REALM_ID;
   }
 }
 
 export function RealmProvider({ children }: { children: ReactNode }) {
-  // The server (and first client render) use the default realm so the markup matches
   const realmId = useSyncExternalStore(subscribeToRealmId, getStoredRealmId, () => DEFAULT_REALM_ID);
 
   const { data: realms = [] } = useQuery({
@@ -67,7 +58,6 @@ export function RealmProvider({ children }: { children: ReactNode }) {
     staleTime: TimeUnit.toMillis(TimeUnit.Hour, 1),
   });
 
-  // A stored realm may no longer exist, fall back to the default one
   const activeRealmId =
     realms.length === 0 || realms.some(r => r.id === realmId) ? realmId : DEFAULT_REALM_ID;
 
@@ -89,9 +79,7 @@ export function RealmProvider({ children }: { children: ReactNode }) {
   const setRealmId = useCallback((id: number) => {
     try {
       localStorage.setItem(REALM_STORAGE_KEY, id.toString());
-    } catch {
-      // Storage is unavailable, the selection can't be persisted
-    }
+    } catch {}
     realmListeners.forEach(listener => listener());
   }, []);
 
@@ -108,6 +96,6 @@ export function RealmProvider({ children }: { children: ReactNode }) {
   return <RealmContext.Provider value={value}>{children}</RealmContext.Provider>;
 }
 
-export function useRealm(): RealmContextValue {
+export function useRealm() {
   return useContext(RealmContext);
 }

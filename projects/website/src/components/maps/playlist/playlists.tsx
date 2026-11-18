@@ -35,7 +35,6 @@ const playlists: Playlist[] = [
 const MENU_ITEM_CLASS =
   "hover:bg-accent flex w-full cursor-pointer items-center rounded-md px-2 py-1.5 text-left text-sm transition-colors";
 
-// Pulls in the form resolver and schema validation, so it is only loaded once the menu is opened
 const CustomPlaylistCreator = dynamic(() => import("./custom-playlist-creator"), {
   ssr: false,
   loading: () => <div className={MENU_ITEM_CLASS}>Custom playlist…</div>,

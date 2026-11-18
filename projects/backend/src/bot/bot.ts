@@ -92,7 +92,7 @@ export async function initDiscordBot() {
     setInterval(updatePresence, TimeUnit.toMillis(TimeUnit.Minute, 1));
   } catch (error) {
     discordBotLog.error("Failed to login to Discord:", error);
-    throw error; // Re-throw to handle it in the application
+    throw error;
   }
 }
 

@@ -39,11 +39,7 @@ export type PlayerLiveScoresInitialData = TimestampedData<PlayerScoresPageRespon
  * @param sort the sort
  * @param search the search text
  */
-export function buildPlayerLiveScoresQuery(
-  page: number,
-  sort: ScoreSaberScoreSort,
-  search: string | null
-): PlayerLiveScoresQuery {
+export function buildPlayerLiveScoresQuery(page: number, sort: ScoreSaberScoreSort, search: string | null) {
   return {
     page,
     sort,
@@ -51,6 +47,6 @@ export function buildPlayerLiveScoresQuery(
   };
 }
 
-export function isSamePlayerLiveScoresQuery(a: PlayerLiveScoresQuery, b: PlayerLiveScoresQuery): boolean {
+export function isSamePlayerLiveScoresQuery(a: PlayerLiveScoresQuery, b: PlayerLiveScoresQuery) {
   return a.page === b.page && a.sort === b.sort && a.search === b.search;
 }

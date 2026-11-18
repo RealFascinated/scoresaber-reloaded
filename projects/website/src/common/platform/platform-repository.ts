@@ -24,22 +24,22 @@ export class PlatformRepository {
     );
   }
 
-  public static getInstance(): PlatformRepository {
+  public static getInstance() {
     if (!PlatformRepository.instance) {
       PlatformRepository.instance = new PlatformRepository();
     }
     return PlatformRepository.instance;
   }
 
-  public getPlatform(type: PlatformType): Platform {
+  public getPlatform(type: PlatformType) {
     return this.platforms.find(platform => platform.getType() === type) as Platform;
   }
 
-  public getPlatforms(): Platform[] {
+  public getPlatforms() {
     return this.platforms;
   }
 
-  public getScoreSaberPlatform(): ScoreSaberPlatform {
+  public getScoreSaberPlatform() {
     return this.getPlatform(PlatformType.ScoreSaber) as ScoreSaberPlatform;
   }
 }

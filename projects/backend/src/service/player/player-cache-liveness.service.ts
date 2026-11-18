@@ -6,7 +6,6 @@ import { redisClient } from "../../common/redis";
 
 const HEARTBEAT_KEY = "backend:heartbeat";
 const HEARTBEAT_INTERVAL_MS = TimeUnit.toMillis(TimeUnit.Minute, 1);
-/** The player cache is kept live by score events, so it is unusable once the backend missed a day of them. */
 const MAX_DOWNTIME_MS = TimeUnit.toMillis(TimeUnit.Hour, 24);
 
 /**
@@ -20,7 +19,7 @@ export class PlayerCacheLivenessService {
   /**
    * Drops every cached player if the backend was down for more than 24 hours, then starts the heartbeat.
    */
-  public static async start(): Promise<void> {
+  public static async start() {
     if (!isProduction()) {
       return;
     }
@@ -28,7 +27,6 @@ export class PlayerCacheLivenessService {
     try {
       const lastHeartbeat = await redisClient.get(HEARTBEAT_KEY);
       const downtimeMs = lastHeartbeat === null ? Infinity : Date.now() - Number(lastHeartbeat);
-      // Written as a negation so a missing or malformed heartbeat also flushes
       if (!(downtimeMs <= MAX_DOWNTIME_MS)) {
         PlayerCacheLivenessService.logger.info(
           `No heartbeat in the last 24h (last: ${lastHeartbeat ?? "never"}), dropping all cached players...`
@@ -52,7 +50,7 @@ export class PlayerCacheLivenessService {
   /**
    * Stops the heartbeat, recording a last one so a clean restart counts as (almost) no downtime.
    */
-  public static async stop(): Promise<void> {
+  public static async stop() {
     if (PlayerCacheLivenessService.timer === undefined) {
       return;
     }
@@ -61,16 +59,11 @@ export class PlayerCacheLivenessService {
     await PlayerCacheLivenessService.beat();
   }
 
-  private static async beat(): Promise<void> {
+  private static async beat() {
     await redisClient.set(HEARTBEAT_KEY, Date.now().toString());
   }
 
-  /**
-   * Removes every cached player from Redis.
-   *
-   * @returns how many entries were removed
-   */
-  private static async flushPlayerCaches(): Promise<number> {
+  private static async flushPlayerCaches() {
     let removed = 0;
     const stream = redisClient.scanStream({ match: playerCacheKeysPattern, count: 1000 });
     for await (const keys of stream as AsyncIterable<string[]>) {

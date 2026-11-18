@@ -60,30 +60,33 @@ const HEX_COLOR_REGEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/
 /**
  * Parses a user-entered custom background (a hex color or an http(s) image url).
  */
-export function parseCustomBackground(value: string): ResolvedBackgroundCover | undefined {
+export function parseCustomBackground(value: string) {
   const trimmed = value.trim();
   if (HEX_COLOR_REGEX.test(trimmed)) {
-    return { type: "color", value: trimmed };
+    const resolved: ResolvedBackgroundCover = { type: "color", value: trimmed };
+    return resolved;
   }
 
   try {
     const url = new URL(trimmed);
     if (url.protocol === "http:" || url.protocol === "https:") {
-      return { type: "image", value: url.toString() };
+      const resolved: ResolvedBackgroundCover = { type: "image", value: url.toString() };
+      return resolved;
     }
-  } catch {
-    // Not a url, fall through to invalid
-  }
+  } catch {}
   return undefined;
 }
 
 /**
  * Resolves the selected background cover into something renderable.
  */
-export function resolveBackgroundCover(cover: string, custom: string): ResolvedBackgroundCover | undefined {
+export function resolveBackgroundCover(cover: string, custom: string) {
   if (cover === BACKGROUND_COVER_CUSTOM) {
     return parseCustomBackground(custom);
   }
   const preset = BACKGROUND_COVER_PRESETS.find(preset => preset.id === cover);
-  return preset ? { type: "image", value: preset.image } : undefined;
+  const resolved: ResolvedBackgroundCover | undefined = preset
+    ? { type: "image", value: preset.image }
+    : undefined;
+  return resolved;
 }

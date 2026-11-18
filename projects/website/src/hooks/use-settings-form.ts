@@ -12,9 +12,6 @@ export function useSettingsForm<T extends FieldValues>(
 ) {
   const { data: preferences, isPlaceholderData } = useUserPreferences();
 
-  // Only sync the saved values into the form once on initial load.
-  // Otherwise we overwrite user changes with stale values (e.g. theme dropdown
-  // reverting because the saved value hasn't been updated yet).
   const hasSyncedRef = useRef(false);
 
   useEffect(() => {
@@ -22,7 +19,6 @@ export function useSettingsForm<T extends FieldValues>(
       return;
     }
 
-    // Values that aren't available yet (like the theme before mounting) hold the sync back
     const values = getValues(preferences);
     if (Object.values(values).some(value => value === undefined)) {
       return;

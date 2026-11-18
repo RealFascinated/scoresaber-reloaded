@@ -2,7 +2,6 @@
 
 import { createContext, ReactNode, useContext, useMemo, useSyncExternalStore } from "react";
 
-// Tailwind breakpoints matching the project's theme (used by useIsMobile max-width queries)
 const Breakpoint = {
   xxs: 320,
   xs: 475,
@@ -20,19 +19,12 @@ type BreakpointStore = {
   getSnapshot: () => boolean;
 };
 
-/**
- * One store per breakpoint, shared by every component that reads it. A page renders hundreds of
- * tooltips and rows that call useIsMobile, so each of them must not own a MediaQueryList, a listener and a
- * fresh subscribe function (which makes React re-subscribe on every render). Nothing touches `window`
- * until a store is first read on the client.
- */
-function createBreakpointStore(breakpoint: BreakpointKey): BreakpointStore {
+function createBreakpointStore(breakpoint: BreakpointKey) {
   const listeners = new Set<() => void>();
   let query: MediaQueryList | undefined;
   let matches = false;
 
-  // Registered on first use, before any subscriber, so `matches` is always current when React reads it
-  function ensureQuery(): void {
+  function ensureQuery() {
     if (query) {
       return;
     }
@@ -47,7 +39,7 @@ function createBreakpointStore(breakpoint: BreakpointKey): BreakpointStore {
   }
 
   return {
-    subscribe: onStoreChange => {
+    subscribe: (onStoreChange: () => void) => {
       ensureQuery();
       listeners.add(onStoreChange);
       return () => {
@@ -65,16 +57,9 @@ const breakpointStores = Object.fromEntries(
   (Object.keys(Breakpoint) as BreakpointKey[]).map(key => [key, createBreakpointStore(key)])
 ) as Record<BreakpointKey, BreakpointStore>;
 
-// SSR: previous ViewportProvider used width 0 → isMobile was always true for any positive breakpoint
 const getServerSnapshotMobile = () => true;
 const getServerSnapshotDesktop = () => false;
 
-/**
- * Whether the request came from a phone, as far as the server can tell (undefined when it can't).
- * The server never knows the viewport, so hydration assumes "mobile", and every desktop visitor then paid for
- * a second render of everything that branches on useIsMobile (tooltips on every score row, for one).
- * Telling the hook a desktop browser is asking lets it hydrate with the right value the first time.
- */
 const ServerDeviceContext = createContext<{ isPhone: boolean } | undefined>(undefined);
 
 export function ServerDeviceProvider({ isPhone, children }: { isPhone: boolean; children: ReactNode }) {
@@ -89,11 +74,10 @@ export function ServerDeviceProvider({ isPhone, children }: { isPhone: boolean; 
  *
  * Default breakpoint is md (768px).
  */
-export function useIsMobile(breakpoint: BreakpointKey = "md"): boolean {
+export function useIsMobile(breakpoint: BreakpointKey = "md") {
   const store = breakpointStores[breakpoint];
   const serverDevice = useContext(ServerDeviceContext);
 
-  // Only the phone-sized breakpoint can be inferred from the device. A wrong guess just renders twice, as before.
   const getServerSnapshot =
     breakpoint === "md" && serverDevice?.isPhone === false
       ? getServerSnapshotDesktop

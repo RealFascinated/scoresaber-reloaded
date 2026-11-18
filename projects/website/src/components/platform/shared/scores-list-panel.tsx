@@ -48,17 +48,13 @@ export default function ScoresListPanel<T>({
   itemClassName = "cv-score-card",
   loadingRows = 8,
 }: ScoresListPanelProps<T>) {
-  // Mirrors the loaded list (same wrapper, one row per score, pagination) so the page keeps its height when
-  // the scores arrive. A smaller placeholder collapses the page and shifts the scroll position.
   if (isLoading && data === undefined) {
     return (
       <>
-        {/* Same (empty) element as the loaded state, since the parent's gap applies to it as well */}
         <div className="text-center" />
         <div
           className={cn(
             "divide-border grid min-w-full grid-cols-1 divide-y",
-            // Rows are 80px (72px for the first and last, which drop their outer padding) plus the 1px divider
             "[&>div:first-child]:h-[72px] [&>div:last-child]:h-[73px]"
           )}
         >

@@ -11,7 +11,7 @@ let canvasContext: CanvasRenderingContext2D | null | undefined;
  * @param color the color, e.g. `var(--pp)` or `#56d57b`
  * @param alpha the opacity to apply to a `var(--token)` color (0-1)
  */
-export function resolveCanvasColor(color: string, alpha = 1): string {
+export function resolveCanvasColor(color: string, alpha = 1) {
   const match = CSS_VARIABLE.exec(color);
   if (!match || typeof document === "undefined") {
     return color;
@@ -23,7 +23,6 @@ export function resolveCanvasColor(color: string, alpha = 1): string {
     throw new Error(`Unable to resolve the theme color ${color} for a chart`);
   }
 
-  // Paint one pixel with the color and read it back, which converts any CSS color syntax to rgb
   canvasContext.clearRect(0, 0, 1, 1);
   canvasContext.fillStyle = "#000";
   canvasContext.fillStyle = value;

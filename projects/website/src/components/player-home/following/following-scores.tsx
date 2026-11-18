@@ -36,8 +36,6 @@ export function FollowingScores() {
         playerIds: followingIds,
         realmId,
       }),
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
     enabled: followingIds !== undefined && followingIds.length > 0 && mainPlayerId !== undefined,
     placeholderData: prev => prev,

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { db } from "../../src/db";
 import { authConnectionsTable, authUsersTable, scoreSaberAccountsTable } from "../../src/db/schema";
 import { AuthConnectionsRepository } from "../../src/repositories/auth-connections.repository";
@@ -8,8 +8,7 @@ import {
   STEAM_ID,
   STEAM_OPENID_ENDPOINT,
   WEBSITE_ORIGIN,
-  mockSteamVerification,
-  originalFetch,
+  respondToSteamVerification,
   signInWithSteam,
   toCookieHeader,
 } from "../helpers/auth";
@@ -19,10 +18,6 @@ import { request } from "../helpers/request";
 
 describe("auth", () => {
   const app = createTestApp();
-
-  afterEach(() => {
-    globalThis.fetch = originalFetch;
-  });
 
   describe("GET /me", () => {
     test("rejects anonymous requests", async () => {
@@ -51,7 +46,7 @@ describe("auth", () => {
     });
 
     test("creates a session for the verified Steam player that unlocks protected routes", async () => {
-      mockSteamVerification(true);
+      respondToSteamVerification(true);
 
       const callback = await signInWithSteam(app, STEAM_ID);
       expectStatus(callback, 302);
@@ -69,7 +64,7 @@ describe("auth", () => {
     });
 
     test("uses the tracked ScoreSaber player's name and avatar", async () => {
-      mockSteamVerification(true);
+      respondToSteamVerification(true);
       await db.insert(scoreSaberAccountsTable).values({
         id: STEAM_ID,
         name: "TrackedSteamPlayer",
@@ -95,16 +90,15 @@ describe("auth", () => {
     });
 
     test("accepts the Steam callback when a proxy hides the public origin", async () => {
-      mockSteamVerification(true);
+      respondToSteamVerification(true);
 
-      // Behind a reverse proxy the backend sees its own origin instead of the public one
       const callback = await signInWithSteam(app, STEAM_ID, "http://backend.internal:3000");
       expectStatus(callback, 302);
       expect(callback.headers.get("location")).toBe(`${WEBSITE_ORIGIN}/`);
     });
 
     test("signing in twice reuses the same user", async () => {
-      mockSteamVerification(true);
+      respondToSteamVerification(true);
 
       await signInWithSteam(app, STEAM_ID);
       await signInWithSteam(app, STEAM_ID);
@@ -114,7 +108,7 @@ describe("auth", () => {
     });
 
     test("signing out ends the session", async () => {
-      mockSteamVerification(true);
+      respondToSteamVerification(true);
       const callback = await signInWithSteam(app, STEAM_ID);
       const cookie = toCookieHeader(callback);
 
@@ -130,7 +124,7 @@ describe("auth", () => {
     });
 
     test("does not sign in when Steam rejects the assertion", async () => {
-      mockSteamVerification(false);
+      respondToSteamVerification(false);
 
       const callback = await signInWithSteam(app, STEAM_ID);
       expectStatus(callback, 302);
@@ -175,7 +169,7 @@ describe("auth", () => {
   describe("connections", () => {
     const OCULUS_ID = "2538637699496776";
 
-    async function createUser(id: string): Promise<string> {
+    async function createUser(id: string) {
       await db.insert(authUsersTable).values({ id, name: id, email: `${id}@test.invalid` });
       return id;
     }

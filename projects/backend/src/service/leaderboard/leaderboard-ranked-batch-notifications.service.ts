@@ -14,7 +14,7 @@ const RANKED_BATCH_ROLE_MENTION = "<@&1338261690952978442>";
 /**
  * Gets the URL of a ranked batch's page.
  */
-export function getRankedBatchUrl(rankedBatchId: number): string {
+export function getRankedBatchUrl(rankedBatchId: number) {
   return `${env.NEXT_PUBLIC_WEBSITE_URL}/ranked-batches/${rankedBatchId}`;
 }
 
@@ -32,7 +32,7 @@ export function buildRankedBatchMessage(
   pasteUrl: string,
   hasNewlyRankedMaps: boolean,
   rankedBatch: RankedSyncResult["rankedBatch"]
-): string {
+) {
   const isMergedUpdate = rankedBatch?.alreadyNotified === true && !hasNewlyRankedMaps;
   const header = isMergedUpdate
     ? `Ranked Batch update (more maps were added to the ranked batch): ${pasteUrl}`
@@ -47,7 +47,7 @@ export class LeaderboardRankedSyncNotificationsService {
   /**
    * Logs the ranked batch to Discord.
    */
-  public static async handleRankedBatch({ updates, rankedBatch }: RankedSyncResult): Promise<void> {
+  public static async handleRankedBatch({ updates, rankedBatch }: RankedSyncResult) {
     if (updates.length === 0) {
       return;
     }
@@ -75,14 +75,11 @@ export class LeaderboardRankedSyncNotificationsService {
         update.newLeaderboard.stars < (update.previousLeaderboard?.stars ?? 0)
     );
 
-    /**
-     * Adds the changes to the changelog.
-     */
     function addChanges(
       changelog: string,
       updates: LeaderboardUpdate[],
       addChange: (update: LeaderboardUpdate) => string
-    ): string {
+    ) {
       if (updates.length === 0) {
         return changelog;
       }
@@ -93,34 +90,27 @@ export class LeaderboardRankedSyncNotificationsService {
       return changelog;
     }
 
-    /**
-     * Formats previous stars for changelog entries.
-     */
-    function formatPreviousStars(update: LeaderboardUpdate): string {
+    function formatPreviousStars(update: LeaderboardUpdate) {
       return update.previousLeaderboard?.stars?.toString() ?? "unranked";
     }
 
     let changelog = "";
 
-    // Newly ranked maps
     changelog = addChanges(changelog, newlyRankedMaps, update => {
       const difficulty = getDifficultyName(getDifficulty(update.newLeaderboard.difficulty.difficulty));
       return `now ranked ${update.newLeaderboard.fullName} (${difficulty}) mapped by ${update.newLeaderboard.levelAuthorName} at ${update.newLeaderboard.stars} stars\n`;
     });
 
-    // Unranked maps
     changelog = addChanges(changelog, unrankedMaps, update => {
       const difficulty = getDifficultyName(getDifficulty(update.newLeaderboard.difficulty.difficulty));
       return `unranked ${update.newLeaderboard.fullName} (${difficulty}) mapped by ${update.newLeaderboard.levelAuthorName} (was ${formatPreviousStars(update)} stars)\n`;
     });
 
-    // Buffed maps
     changelog = addChanges(changelog, buffedMaps, update => {
       const difficulty = getDifficultyName(getDifficulty(update.newLeaderboard.difficulty.difficulty));
       return `changed (buffed) ${update.newLeaderboard.fullName} (${difficulty}) mapped by ${update.newLeaderboard.levelAuthorName} from ${formatPreviousStars(update)} to ${update.newLeaderboard.stars} stars\n`;
     });
 
-    // Nerfed maps
     changelog = addChanges(changelog, nerfedMaps, update => {
       const difficulty = getDifficultyName(getDifficulty(update.newLeaderboard.difficulty.difficulty));
       return `nerfed (nerf) ${update.newLeaderboard.fullName} (${difficulty}) mapped by ${update.newLeaderboard.levelAuthorName} from ${formatPreviousStars(update)} to ${update.newLeaderboard.stars} stars\n`;
@@ -135,7 +125,6 @@ export class LeaderboardRankedSyncNotificationsService {
       await RankedBatchService.markNotified(rankedBatch.rankedBatchId);
     }
 
-    // Create a playlist of the changes
     const playlist: Playlist = rankedBatch
       ? await PlaylistService.getRankedBatchPlaylist(rankedBatch.rankedBatchId)
       : {

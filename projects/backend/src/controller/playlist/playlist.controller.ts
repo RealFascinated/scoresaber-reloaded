@@ -9,7 +9,6 @@ import { Elysia, t } from "elysia";
 import { playlistToBplist } from "../../service/playlist/playlist-to-bplist";
 import PlaylistService, { PlaylistIdsSchema } from "../../service/playlist/playlist.service";
 
-/** Serializes to BPLIST when the request path asks for it (`.bplist` suffix). */
 function toBplistIfRequested(
   playlist: Awaited<ReturnType<typeof PlaylistService.getSelfPlaylist>>,
   path: string

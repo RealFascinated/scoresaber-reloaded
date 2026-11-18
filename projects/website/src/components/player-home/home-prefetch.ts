@@ -2,7 +2,7 @@ import type { ServerSession } from "@/common/auth/session-server";
 import { prefetchInitialData } from "@/common/server-prefetch";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
-import { dehydrate, QueryClient, type DehydratedState } from "@tanstack/react-query";
+import { dehydrate, QueryClient } from "@tanstack/react-query";
 import { FOLLOWING_SCORES_FIRST_PAGE, followingScoresQueryKey, homePlayerQueryKey } from "./home-queries";
 
 /**
@@ -16,7 +16,7 @@ import { FOLLOWING_SCORES_FIRST_PAGE, followingScoresQueryKey, homePlayerQueryKe
  * @param session the session of the request
  * @returns the data to hydrate on the client, undefined when there is nothing to show
  */
-export async function prefetchHomeData(session: ServerSession): Promise<DehydratedState | undefined> {
+export async function prefetchHomeData(session: ServerSession) {
   if (session.status !== "signed-in" || !session.me.playerId) {
     return undefined;
   }

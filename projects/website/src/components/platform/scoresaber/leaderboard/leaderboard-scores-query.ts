@@ -3,6 +3,7 @@ import { ScoreModeEnum } from "@/components/score/score-mode";
 import { Pagination } from "@ssr/common/pagination";
 import type { LeaderboardScoresResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import type { ScoreSaberScoresPageResponse } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
+import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { createLoader, parseAsInteger, parseAsString, parseAsStringLiteral } from "nuqs/server";
 
 /**
@@ -28,7 +29,7 @@ export type LeaderboardScoresInitialData = TimestampedData<ScoreSaberScoresPageR
   query: LeaderboardScoresQuery;
 };
 
-export function isSameLeaderboardScoresQuery(a: LeaderboardScoresQuery, b: LeaderboardScoresQuery): boolean {
+export function isSameLeaderboardScoresQuery(a: LeaderboardScoresQuery, b: LeaderboardScoresQuery) {
   return a.leaderboardId === b.leaderboardId && a.page === b.page && a.country === b.country;
 }
 
@@ -37,15 +38,14 @@ export function isSameLeaderboardScoresQuery(a: LeaderboardScoresQuery, b: Leade
  *
  * @param response the response, undefined when the leaderboard has no scores page
  */
-export function toLeaderboardScoresPage(
-  response: LeaderboardScoresResponse | undefined
-): ScoreSaberScoresPageResponse {
+export function toLeaderboardScoresPage(response: LeaderboardScoresResponse | undefined) {
   if (response) {
-    return {
+    const page: ScoreSaberScoresPageResponse = {
       items: response.scores,
       metadata: response.metadata,
     };
+    return page;
   }
 
-  return Pagination.empty();
+  return Pagination.empty<ScoreSaberScore>();
 }

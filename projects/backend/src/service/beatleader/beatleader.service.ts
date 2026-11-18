@@ -8,7 +8,6 @@ import { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/scor
 import { BeatLeaderScoreImprovementToken } from "@ssr/common/schemas/beatleader/tokens/score/score-improvement";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
-import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { beatLeaderTimesetToMs, getBeatLeaderReplayId } from "@ssr/common/utils/beatleader-utils";
 import Request from "@ssr/common/utils/request";
@@ -19,11 +18,7 @@ import { beatLeaderScoreByIdCacheKey, beatLeaderScoreBySongCacheKey } from "../.
 import { createGenericEmbed } from "../../common/discord/embed";
 import { beatLeaderScoreRowToType } from "../../db/converter/beatleader-score";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
-import { type BeatLeaderPlayerRow } from "../../db/schema";
-import {
-  type BeatLeaderPlayerInsert,
-  BeatLeaderPlayersRepository,
-} from "../../repositories/beatleader-players.repository";
+import { BeatLeaderPlayersRepository } from "../../repositories/beatleader-players.repository";
 import {
   type BeatLeaderScoreInsert,
   BeatLeaderScoresRepository,
@@ -53,17 +48,14 @@ export default class BeatLeaderService {
     isTop50GlobalScore: boolean = false,
     log: boolean = true,
     accountId?: string
-  ): Promise<BeatLeaderScore | undefined> {
+  ) {
     const before = performance.now();
     const account = await BeatLeaderService.resolveScoreAccount(scoreToken, accountId);
 
-    // Only track for players that are being tracked
     if (account == null) {
       return undefined;
     }
 
-    // Attribute the score to the SSR account that actually set it. The score's own
-    // player ID can differ (e.g. a player whose BeatLeader ID is not their ScoreSaber ID).
     const playerId = account.id;
 
     const existing = await BeatLeaderScoresRepository.findRowById(scoreToken.id);
@@ -89,7 +81,6 @@ export default class BeatLeaderService {
     );
     const row = await BeatLeaderScoresRepository.insertReturning(insertRow);
     if (!row) {
-      // Another request inserted the same score between our check and insert
       const concurrent = await BeatLeaderScoresRepository.findRowById(scoreToken.id);
       if (!concurrent) {
         throw new Error(`BeatLeader score "${scoreToken.id}" could not be inserted`);
@@ -97,8 +88,6 @@ export default class BeatLeaderService {
       return beatLeaderScoreRowToType(concurrent);
     }
 
-    // Save the score stats alongside the score. Best-effort: failures are logged and
-    // the stats are still fetched lazily on first request (see getScoreStats).
     void BeatLeaderService.saveScoreStats(scoreToken.id).catch(error => {
       BeatLeaderService.logger.error(`Failed to save score stats for "${scoreToken.id}": ${error}`);
     });
@@ -112,22 +101,13 @@ export default class BeatLeaderService {
     return beatLeaderScoreRowToType(row);
   }
 
-  /**
-   * Builds the database row for a BeatLeader score payload.
-   *
-   * @param scoreToken the BeatLeader API score payload
-   * @param playerId the SSR account the score is attributed to
-   * @param savedReplay whether the replay was saved
-   * @param improvement the score improvement columns
-   * @param getMisses computes the misses of a score or improvement
-   */
   private static insertRowFromToken(
     scoreToken: BeatLeaderScoreToken,
     playerId: string,
     savedReplay: boolean,
     improvement: ReturnType<typeof BeatLeaderService.improvementRowFromToken>,
     getMisses: (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) => number
-  ): BeatLeaderScoreInsert {
+  ) {
     const leaderboard = scoreToken.leaderboard;
     const difficulty = leaderboard.difficulty;
     return {
@@ -163,10 +143,7 @@ export default class BeatLeaderService {
    * @param accountId the SSR account the scores are attributed to
    * @returns how many of the given scores were not stored before the call (0 if the account is not tracked)
    */
-  public static async trackBeatLeaderScoresBatch(
-    scoreTokens: BeatLeaderScoreToken[],
-    accountId: string
-  ): Promise<number> {
+  public static async trackBeatLeaderScoresBatch(scoreTokens: BeatLeaderScoreToken[], accountId: string) {
     const account = await PlayerCoreService.getAccount(accountId);
     if (account == null || scoreTokens.length === 0) {
       return 0;
@@ -183,7 +160,6 @@ export default class BeatLeaderService {
       if (existing.has(scoreToken.id)) {
         continue;
       }
-      // A repeated id still counts as tracked, like it did when the stored row was returned for it
       missing++;
       if (seen.has(scoreToken.id)) {
         continue;
@@ -207,21 +183,7 @@ export default class BeatLeaderService {
     return missing;
   }
 
-  /**
-   * Resolves the SSR account a BeatLeader score should be attributed to: the explicitly
-   * known account when one is passed (paired ScoreSaber score or seeding), otherwise the
-   * BeatLeader player's linked accounts (using the play time to disambiguate), and finally
-   * a ScoreSaber account sharing the player's ID. Only cached BeatLeader player mappings
-   * are used, so unknown players never trigger a BeatLeader API fetch.
-   *
-   * @param scoreToken the BeatLeader API score payload
-   * @param accountId the SSR account the score should be attributed to, when known
-   * @returns the SSR account, or undefined if none is tracked
-   */
-  private static async resolveScoreAccount(
-    scoreToken: BeatLeaderScoreToken,
-    accountId?: string
-  ): Promise<ScoreSaberAccount | undefined> {
+  private static async resolveScoreAccount(scoreToken: BeatLeaderScoreToken, accountId?: string) {
     if (accountId) {
       return await PlayerCoreService.getAccount(accountId);
     }
@@ -252,7 +214,7 @@ export default class BeatLeaderService {
     songDifficulty: string,
     songCharacteristic: string,
     songScore: number
-  ): Promise<BeatLeaderScore | undefined> {
+  ) {
     return CacheService.fetch(
       CacheId.BEATLEADER_SCORE,
       beatLeaderScoreBySongCacheKey(playerId, songHash, songDifficulty, songScore),
@@ -278,7 +240,7 @@ export default class BeatLeaderService {
    * @param scoreId the id of the score
    * @returns the BeatLeader score, or undefined if none
    */
-  public static async getBeatLeaderScore(scoreId: number): Promise<BeatLeaderScore | undefined> {
+  public static async getBeatLeaderScore(scoreId: number) {
     return CacheService.fetch(CacheId.BEATLEADER_SCORE, beatLeaderScoreByIdCacheKey(scoreId), async () => {
       const beatLeaderScore = await BeatLeaderScoresRepository.findRowById(scoreId);
       if (!beatLeaderScore) {
@@ -293,7 +255,7 @@ export default class BeatLeaderService {
    *
    * @param scoreId the id of the score
    */
-  public static async getScoreStats(scoreId: number): Promise<ScoreStatsToken | undefined> {
+  public static async getScoreStats(scoreId: number) {
     const scoreStatsFile = await StorageService.getFile(
       StorageBucket.BeatLeaderScoreStats,
       `${scoreId}.json`
@@ -301,7 +263,6 @@ export default class BeatLeaderService {
     if (scoreStatsFile != undefined) {
       return JSON.parse(scoreStatsFile.toString()) as ScoreStatsToken;
     }
-    // Only persist stats for scores we track, so arbitrary ids can't fill the storage
     if (await BeatLeaderScoresRepository.findRowById(scoreId)) {
       return this.saveScoreStats(scoreId);
     }
@@ -334,7 +295,7 @@ export default class BeatLeaderService {
    * @returns the score stats
    * @throws NotFoundError if the score stats are not found
    */
-  public static async getScoresFullScoreStats(scoreId: number): Promise<ScoreStatsResponse> {
+  public static async getScoresFullScoreStats(scoreId: number) {
     const current = await this.getBeatLeaderScore(scoreId);
     if (current == undefined) {
       const currentStats = await this.getScoreStats(scoreId);
@@ -409,9 +370,6 @@ export default class BeatLeaderService {
     return false;
   }
 
-  /**
-   * How long a BeatLeader player mapping (linked account IDs) is considered fresh.
-   */
   private static readonly BEATLEADER_PLAYER_TTL_MS = TimeUnit.toMillis(TimeUnit.Day, 1);
 
   /**
@@ -421,7 +379,7 @@ export default class BeatLeaderService {
    * @param blPlayerId the canonical BeatLeader player ID
    * @returns the player mapping, or undefined if unknown
    */
-  public static async getBeatLeaderPlayer(blPlayerId: string): Promise<BeatLeaderPlayerRow | undefined> {
+  public static async getBeatLeaderPlayer(blPlayerId: string) {
     const cached = await BeatLeaderPlayersRepository.findById(blPlayerId);
     if (cached && Date.now() - cached.lastFetched.getTime() < BeatLeaderService.BEATLEADER_PLAYER_TTL_MS) {
       return cached;
@@ -442,7 +400,7 @@ export default class BeatLeaderService {
    * @param playerId any ID the player is known by
    * @returns the cached player mapping, or undefined if the player is not on BeatLeader
    */
-  public static async upsertBeatLeaderPlayer(playerId: string): Promise<BeatLeaderPlayerRow | undefined> {
+  public static async upsertBeatLeaderPlayer(playerId: string) {
     const token = await BeatLeaderApiService.lookupPlayer(playerId);
     if (!token) {
       return undefined;
@@ -462,7 +420,7 @@ export default class BeatLeaderService {
    * @param blPlayerId the canonical BeatLeader player ID
    * @returns the persisted mapping when the player is tracked, or undefined
    */
-  public static async fetchMappingIfTracked(blPlayerId: string): Promise<BeatLeaderPlayerRow | undefined> {
+  public static async fetchMappingIfTracked(blPlayerId: string) {
     const token = await BeatLeaderApiService.lookupPlayer(blPlayerId);
     if (!token) {
       return undefined;
@@ -495,7 +453,7 @@ export default class BeatLeaderService {
    * @param ssAccountId the ScoreSaber account ID
    * @returns whether they are the same player
    */
-  public static async isSamePlayer(blPlayerId: string, ssAccountId: string): Promise<boolean> {
+  public static async isSamePlayer(blPlayerId: string, ssAccountId: string) {
     if (blPlayerId === ssAccountId) {
       return true;
     }
@@ -516,10 +474,7 @@ export default class BeatLeaderService {
    * @param timesetMs the play time of the score being attributed (unix milliseconds)
    * @returns the resolved SSR account, or undefined
    */
-  public static async resolveAccountForBlPlayer(
-    blPlayerId: string,
-    timesetMs?: number
-  ): Promise<ScoreSaberAccount | undefined> {
+  public static async resolveAccountForBlPlayer(blPlayerId: string, timesetMs?: number) {
     const player = await BeatLeaderService.getBeatLeaderPlayer(blPlayerId);
     if (!player) {
       return undefined;
@@ -534,8 +489,6 @@ export default class BeatLeaderService {
     }
 
     if (candidates.length > 1 && timesetMs != null) {
-      // Both platforms timestamp the same play, so the account that actually set this
-      // score is the one that has a ScoreSaber score around that time.
       const windowMs = TimeUnit.toMillis(TimeUnit.Minute, 5);
       const played = await ScoreSaberScoresRepository.findPlayerIdsInTimeRange(
         candidates.map(candidate => candidate.id),
@@ -548,15 +501,13 @@ export default class BeatLeaderService {
       }
     }
 
-    // Prefer the most recently active account (the player's current main).
     candidates.sort((a, b) => String(b.lastPlayedDate ?? "").localeCompare(String(a.lastPlayedDate ?? "")));
     return scoreSaberAccountRowToType(candidates[0]);
   }
 
-  private static playerRowFromToken(token: BeatLeaderPlayerLookupToken): BeatLeaderPlayerInsert {
+  private static playerRowFromToken(token: BeatLeaderPlayerLookupToken) {
     const linked = token.linkedIds;
-    // BeatLeader can return empty strings for unlinked platform IDs; normalize to null.
-    const toId = (id: string | number | null | undefined): string | null =>
+    const toId = (id: string | number | null | undefined) =>
       id == null || id.toString().length === 0 ? null : id.toString();
     return {
       id: token.id,
@@ -604,7 +555,7 @@ export default class BeatLeaderService {
     savedReplay: boolean,
     getMisses: (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) => number,
     playerId: string
-  ): BeatLeaderScore {
+  ) {
     const rawScoreImprovement = scoreToken.scoreImprovement;
     const scoreImprovement =
       rawScoreImprovement && rawScoreImprovement.score > 0

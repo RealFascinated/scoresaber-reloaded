@@ -11,7 +11,7 @@ import {
   TEST_PLAYER_ID,
   TEST_SCORE_ID,
 } from "../helpers/constants";
-import { buildLeaderboardRow, buildScoreRow } from "../helpers/fixtures";
+import { buildLeaderboardRow, buildScoreRow } from "../helpers/scoresaber.fixture";
 
 const NEW_SCORE_ID = 900_999;
 

@@ -44,7 +44,6 @@ export default class MetricsService {
     }
     MetricsService.initialized = true;
 
-    // Player metrics
     this.registerMetric(new TrackedScoresMetric());
     this.registerMetric(new TrackedPlayersMetric());
     this.registerMetric(new UniqueDailyPlayersMetric());
@@ -56,7 +55,6 @@ export default class MetricsService {
     this.registerMetric(new BeatLeaderUniqueDailyPlayersMetric());
     this.registerMetric(new BeatLeaderPlayersMetric());
 
-    // Backend metrics
     this.registerMetric(new MemoryUsageMetric());
     this.registerMetric(new EventLoopLagMetric());
     this.registerMetric(new ResponseTimeHistogramMetric());
@@ -68,11 +66,9 @@ export default class MetricsService {
     this.registerMetric(new ProcessCpuMetric());
     this.registerMetric(new RedisHealthMetric());
 
-    // Queue metrics
     this.registerMetric(new QueueSizesMetric());
     this.registerMetric(new QueueProcessingDurationMetric());
 
-    // Database metrics
     this.registerMetric(new PostgresDbSizeMetric());
     this.registerMetric(new LeaderboardCountMetric());
 
@@ -80,12 +76,7 @@ export default class MetricsService {
     MetricsService.startPersistenceLoop();
   }
 
-  /**
-   * Registers a metric with the service
-   *
-   * @param metric the metric to register
-   */
-  private registerMetric(metric: Metric<unknown>): void {
+  private registerMetric(metric: Metric<unknown>) {
     if (MetricsService.metrics.has(metric.id)) {
       MetricsService.logger.warn(`Metric ${metric.id} already registered, skipping duplicate registration`);
       return;
@@ -101,11 +92,11 @@ export default class MetricsService {
    * @param type the type of metric to retrieve
    * @returns the metric instance, or undefined if not found
    */
-  public static getMetric<T extends Metric<unknown>>(type: MetricType): T | undefined {
+  public static getMetric<T extends Metric<unknown>>(type: MetricType) {
     return MetricsService.metrics.get(type) as T | undefined;
   }
 
-  public static cleanup(): void {
+  public static cleanup() {
     if (MetricsService.persistInterval) {
       clearInterval(MetricsService.persistInterval);
       MetricsService.persistInterval = undefined;
@@ -117,7 +108,7 @@ export default class MetricsService {
     }
   }
 
-  private static startPersistenceLoop(): void {
+  private static startPersistenceLoop() {
     if (MetricsService.persistInterval) {
       return;
     }
@@ -127,7 +118,7 @@ export default class MetricsService {
     }, MetricsService.persistIntervalMs);
   }
 
-  private static async loadPersistedValues(): Promise<void> {
+  private static async loadPersistedValues() {
     try {
       const rows = await MetricsRepository.loadAll();
       for (const row of rows) {
@@ -147,7 +138,7 @@ export default class MetricsService {
     }
   }
 
-  private static async persistValues(): Promise<void> {
+  private static async persistValues() {
     if (MetricsService.persistInFlight) {
       return;
     }

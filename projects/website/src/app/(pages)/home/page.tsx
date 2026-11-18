@@ -12,7 +12,6 @@ interface HomePageProps {
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
-  // The layout resolves the same session, which is shared within the request
   const session = await getServerSession((await cookies()).toString());
   if (session.status === "anonymous") {
     const { error } = await searchParams;

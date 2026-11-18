@@ -1,4 +1,3 @@
-import type { OverlayData } from "@/common/overlay/overlay-data";
 import type { OverlayPlayer } from "@/common/overlay/overlay-player";
 import type { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import type { BeatLeaderOverlayDataResponse } from "@ssr/common/schemas/response/beatleader/overlay-data";
@@ -121,7 +120,7 @@ const STATIC_SONG_TIME = 62;
  * @param scenario what the game is doing
  * @param elapsedSeconds how long the scenario has been running, drives the simulated play
  */
-export function getMockOverlayData(scenario: MockScenario, elapsedSeconds: number): OverlayData {
+export function getMockOverlayData(scenario: MockScenario, elapsedSeconds: number) {
   if (scenario === "menu") {
     return {};
   }
@@ -129,7 +128,6 @@ export function getMockOverlayData(scenario: MockScenario, elapsedSeconds: numbe
   const map = { beatSaverMap: MOCK_BEAT_SAVER_MAP, leaderboard: MOCK_LEADERBOARD };
   const time = scenario === "playing" ? elapsedSeconds % MOCK_SONG_LENGTH : STATIC_SONG_TIME;
   const pbAtTime = MOCK_PB.accuracyBySecond[Math.floor(time)] ?? 96;
-  // Drifts above and below the PB so the delta changes sign
   const accuracy = Math.min(100, pbAtTime + Math.sin(time / 9) * 0.9 + 0.1);
   const combo = scenario === "playing" ? Math.floor(time * 4.2) : 260;
 
@@ -139,7 +137,6 @@ export function getMockOverlayData(scenario: MockScenario, elapsedSeconds: numbe
     paused: scenario === "paused",
     songTime: time,
     songLength: MOCK_SONG_LENGTH,
-    // Without a sync time the song time stands still, which is what the static scenarios are for
     songTimeSyncedAt: scenario === "playing" ? Date.now() : undefined,
   };
 }

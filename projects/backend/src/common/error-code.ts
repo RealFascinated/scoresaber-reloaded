@@ -10,7 +10,7 @@ export type HttpErrorCode =
  * @param error the error passed to the `onError` handler
  * @returns the legacy Elysia error code for the error
  */
-export function getHttpErrorCode<TError>(error: TError): HttpErrorCode {
+export function getHttpErrorCode<TError>(error: TError) {
   if (error instanceof ValidationError) {
     return "VALIDATION";
   }

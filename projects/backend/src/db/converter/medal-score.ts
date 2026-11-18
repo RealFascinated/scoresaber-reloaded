@@ -12,8 +12,8 @@ import { ScoreSaberScoreRow } from "../schema";
  * @param row the row to convert
  * @returns the converted ScoreSaberMedalScore
  */
-export function scoreSaberMedalScoreRowToType(row: ScoreSaberScoreRow): ScoreSaberMedalScore {
-  return {
+export function scoreSaberMedalScoreRowToType(row: ScoreSaberScoreRow) {
+  const medalScore: ScoreSaberMedalScore = {
     playerId: row.playerId,
     leaderboardId: row.leaderboardId,
     scoreId: row.scoreId,
@@ -35,14 +35,15 @@ export function scoreSaberMedalScoreRowToType(row: ScoreSaberScoreRow): ScoreSab
     leftController: row.leftController ?? null,
     timestamp: row.timestamp,
   };
+  return medalScore;
 }
 
 /**
  * Converts a live {@link ScoreSaberScore} into a {@link ScoreSaberMedalScore} for in-memory medal
  * recomputation (medals/rank are set by the caller).
  */
-export function scoreSaberScoreToMedalScore(score: ScoreSaberScore): ScoreSaberMedalScore {
-  return {
+export function scoreSaberScoreToMedalScore(score: ScoreSaberScore) {
+  const medalScore: ScoreSaberMedalScore = {
     playerId: score.playerId,
     leaderboardId: score.leaderboardId,
     scoreId: score.scoreId,
@@ -66,4 +67,5 @@ export function scoreSaberScoreToMedalScore(score: ScoreSaberScore): ScoreSaberM
     previousScore: score.previousScore,
     timestamp: score.timestamp,
   };
+  return medalScore;
 }

@@ -77,12 +77,7 @@ AppService.startSampling();
 
 const httpMetricsHooks = createHttpMetricsHooks();
 
-/**
- * Registers every controller on the app. A controller returns the app type extended with its routes, so
- * chaining them all in the app expression blows the compiler's type instantiation depth. Taking the app as a
- * generic and returning it unchanged keeps the route types out of the chain (they are not used anywhere).
- */
-function registerControllers<TApp extends AnyElysia>(instance: TApp): TApp {
+function registerControllers<TApp extends AnyElysia>(instance: TApp) {
   instance
     .use(AppController)
     .use(AuthController)
@@ -132,7 +127,6 @@ const baseApp = new Elysia()
   .onRequest(httpMetricsHooks.onRequest)
   .onError("global", ({ error, request, path, route }) => {
     const code = getHttpErrorCode(error);
-    // Return default error for type validation. JSON round-trip drops Elysia class instances (e.g. RequestParams in `value`) so mapResponse's devalue can serialize.
     if (code === "VALIDATION") {
       return JSON.parse(JSON.stringify((error as ValidationError).all));
     }
@@ -164,7 +158,6 @@ const baseApp = new Elysia()
       reportErrorToDiscord("HTTP 500", error, `${request.method} ${path}\nRoute: ${route}\nCode: ${code}`);
     }
 
-    // Never expose internals (e.g. SQL and its parameters) for server errors
     const errorMessage =
       status === 500
         ? "Internal server error"
@@ -193,20 +186,19 @@ const baseApp = new Elysia()
       });
     }
   })
-  .use(authCors) // Must be before cors()
-  .use(privateNetworkCors) // Must be before cors()
+  .use(authCors)
+  .use(privateNetworkCors)
   .use(cors())
   .use(
     helmet({
-      hsts: false, // Disable HSTS
-      contentSecurityPolicy: false, // Disable CSP
-      dnsPrefetchControl: true, // Enable DNS prefetch
+      hsts: false,
+      contentSecurityPolicy: false,
+      dnsPrefetchControl: true,
     })
   );
 
 export const app = registerControllers(baseApp);
 
-// OpenAPI docs (/swagger) are disabled: @elysiajs/openapi does not support Elysia 2 yet
 new WebsocketManager();
 
 app.use(websocketPlugin());
@@ -224,7 +216,6 @@ app.onStart(async () => {
     listener.onStart?.();
   });
 
-  // Before the score websockets start, so a stale cache is dropped before it can be served
   await PlayerCacheLivenessService.start();
 
   log.info("Listening on port http://localhost:8080");
@@ -232,17 +223,14 @@ app.onStart(async () => {
     await initDiscordBot();
     sendEmbedToChannel(DiscordChannels.BACKEND_LOGS, new EmbedBuilder().setDescription("Backend started!"));
   } catch (error) {
-    // A Discord outage must not stop the rest of the services from starting
     log.error("Failed to initialize the Discord bot:", error);
   }
 
-  // Log all registered routes
   log.info("Registered routes:");
   for (const route of app.routes) {
     log.info(`${route.method} ${route.path}`);
   }
 
-  // Must be registered first
   new ScoreWebsockets();
   new BeatSaverWebsocket();
   new StorageService();
@@ -255,10 +243,9 @@ app.onStart(async () => {
 
 app.listen({
   port: 8080,
-  idleTimeout: 120, // 2 minutes
+  idleTimeout: 120,
 });
 
-// Graceful shutdown
 let isShuttingDown = false;
 
 const gracefulShutdown = async (signal: string) => {

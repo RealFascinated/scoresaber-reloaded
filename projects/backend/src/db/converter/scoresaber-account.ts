@@ -1,5 +1,5 @@
 import { checkSchema, parseSchema } from "@ssr/common/schemas/parse";
-import { ScoreSaberAccount, ScoreSaberAccountSchema } from "@ssr/common/schemas/scoresaber/account";
+import { ScoreSaberAccountSchema } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberAccountRow } from "../schema";
 
 /**
@@ -8,7 +8,7 @@ import { ScoreSaberAccountRow } from "../schema";
  * @param row the row to convert
  * @returns the converted ScoreSaberAccount
  */
-export function scoreSaberAccountRowToType(row: ScoreSaberAccountRow): ScoreSaberAccount {
+export function scoreSaberAccountRowToType(row: ScoreSaberAccountRow) {
   const input = {
     id: row.id,
     name: row.name,
@@ -34,8 +34,6 @@ export function scoreSaberAccountRowToType(row: ScoreSaberAccountRow): ScoreSabe
     joinedDate: row.joinedDate?.toISOString(),
   };
 
-  // Compiled check instead of the full parse: a valid row only needs the country default and the
-  // ISO dates turned back into Dates. Anything unexpected still goes through `parseSchema`.
   if (!checkSchema(ScoreSaberAccountSchema, input)) {
     return parseSchema(ScoreSaberAccountSchema, input);
   }

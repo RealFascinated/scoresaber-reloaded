@@ -6,7 +6,7 @@ import { headers } from "next/headers";
  * the phone breakpoint anyway). It is only a hint for what to render first: the client still measures the
  * real viewport and corrects it.
  */
-export async function isPhoneRequest(): Promise<boolean> {
+export async function isPhoneRequest() {
   const requestHeaders = await headers();
 
   const mobileHint = requestHeaders.get("sec-ch-ua-mobile");

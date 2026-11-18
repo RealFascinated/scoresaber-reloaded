@@ -17,7 +17,6 @@ import { useState } from "react";
  * The full editor for one overlay. The overlay is copied into the editor store once and autosaved from there.
  */
 export default function OverlayEditor({ overlay }: { overlay: UserOverlay }) {
-  // Load before the first render of the children so they never see the previous overlay
   const [loadedId, setLoadedId] = useState<string>();
   if (loadedId !== overlay.id) {
     useOverlayEditorStore.getState().load(overlay);

@@ -4,14 +4,13 @@ import { fetchOverlayContent, getOverlayEventsUrl } from "@/common/overlay/overl
 import type { OverlayContent } from "@ssr/common/schemas/response/user/overlay";
 import { useEffect, useState } from "react";
 
-/** How often the overlay is polled when the event stream is not working. */
 const FALLBACK_POLL_MS = 30_000;
 
 /**
  * Keeps an overlay up to date: the server pushes layout changes through server-sent events, and the overlay
  * is polled slowly while the stream is down. `null` means the overlay was deleted.
  */
-export function useOverlayLive(overlayId: string, initial: OverlayContent): OverlayContent | null {
+export function useOverlayLive(overlayId: string, initial: OverlayContent) {
   const [content, setContent] = useState<OverlayContent | null>(initial);
 
   useEffect(() => {

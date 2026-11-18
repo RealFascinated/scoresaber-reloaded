@@ -9,7 +9,7 @@ export class UserFollowsService {
    *
    * @param userId the user to get the followed players of
    */
-  public static getFollowingIds(userId: string): Promise<string[]> {
+  public static getFollowingIds(userId: string) {
     return UserFollowsRepository.getFollowingIds(userId);
   }
 
@@ -20,10 +20,7 @@ export class UserFollowsService {
    * @param user the user that follows, with the player they play as (if any)
    * @param playerId the player to follow
    */
-  public static async follow(
-    user: { id: string; playerId?: string | null },
-    playerId: string
-  ): Promise<FollowPlayerResult> {
+  public static async follow(user: { id: string; playerId?: string | null }, playerId: string) {
     if (user.playerId === playerId) {
       return "self";
     }
@@ -36,7 +33,7 @@ export class UserFollowsService {
    * @param userId the user that unfollows
    * @param playerId the player to unfollow
    */
-  public static unfollow(userId: string, playerId: string): Promise<void> {
+  public static unfollow(userId: string, playerId: string) {
     return UserFollowsRepository.unfollow(userId, playerId);
   }
 
@@ -45,7 +42,7 @@ export class UserFollowsService {
    *
    * @param playerId the player to count for
    */
-  public static getCounts(playerId: string): Promise<{ followers: number; following: number }> {
+  public static getCounts(playerId: string) {
     return UserFollowsRepository.getCounts(playerId);
   }
 
@@ -54,7 +51,7 @@ export class UserFollowsService {
    *
    * @param playerId the player to get the followers of
    */
-  public static getFollowerIds(playerId: string): Promise<string[]> {
+  public static getFollowerIds(playerId: string) {
     return UserFollowsRepository.getFollowerIds(playerId);
   }
 
@@ -63,7 +60,7 @@ export class UserFollowsService {
    *
    * @param playerId the player to get the followed players of
    */
-  public static getFollowingIdsByPlayerId(playerId: string): Promise<string[]> {
+  public static getFollowingIdsByPlayerId(playerId: string) {
     return UserFollowsRepository.getFollowingIdsByPlayerId(playerId);
   }
 }

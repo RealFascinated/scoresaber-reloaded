@@ -98,7 +98,7 @@ const beatSaverMapChangedWhere = differsFromExcluded([
 ]);
 
 export class BeatSaverRepository {
-  public static async upsertMap(map: BeatSaverMapToken): Promise<void> {
+  public static async upsertMap(map: BeatSaverMapToken) {
     map.versions.forEach(version => {
       version.hash = version.hash.toLowerCase();
     });
@@ -212,8 +212,6 @@ export class BeatSaverRepository {
         versionRows.map(versionRow => [versionRow.hash.toLowerCase(), versionRow.id])
       );
 
-      // Versions that were already stored unchanged are skipped by the upsert, so they aren't
-      // returned by it; look their ids up instead.
       const unchangedHashes = map.versions
         .map(version => version.hash)
         .filter(hash => !versionIdByHash.has(hash.toLowerCase()));

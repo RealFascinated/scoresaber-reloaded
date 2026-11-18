@@ -1,6 +1,5 @@
 import { Pagination } from "@ssr/common/pagination";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import type { TopScoresPageResponse } from "@ssr/common/schemas/response/score/top-scores";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
@@ -9,7 +8,6 @@ import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores
 import BeatSaverService from "../external/beatsaver.service";
 import { ScoreCoreService } from "./score-core.service";
 
-/** The most top scores the page lets a user page through. */
 const MAX_DISPLAYED_SCORES = 50_000;
 
 export class TopScoresService {
@@ -21,11 +19,7 @@ export class TopScoresService {
    * @param realmId the realm to rank scores in
    * @returns the top scores with pagination metadata
    */
-  public static async getTopScores(
-    page: number = 1,
-    limit: number = 25,
-    realmId: number
-  ): Promise<TopScoresPageResponse> {
+  public static async getTopScores(page: number = 1, limit: number = 25, realmId: number) {
     const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
       .setItemsPerPage(limit)
       .setTotalItems(await ScoreSaberScoresRepository.countRealmScores(realmId, MAX_DISPLAYED_SCORES));
@@ -86,7 +80,7 @@ export class TopScoresService {
    * @param score the score to check
    * @returns whether the score is in the top 50 global scores
    */
-  public static async isTop50GlobalScore(score: ScoreSaberScore): Promise<boolean> {
+  public static async isTop50GlobalScore(score: ScoreSaberScore) {
     if (score.pp <= 0 || score.rank >= 10) {
       return false;
     }

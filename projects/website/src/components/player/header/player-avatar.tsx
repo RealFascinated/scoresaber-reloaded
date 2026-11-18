@@ -39,9 +39,6 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
       <Avatar
         src={player.avatar}
         size={128}
-        // Sized with CSS rather than a viewport check in JS, which is wrong in the server-rendered HTML on
-        // desktop and made the avatar resize (and the page shift) once hydrated. The important modifiers
-        // are needed to win over the inline minimum size Avatar sets.
         className="border-border pointer-events-none size-[88px]! min-h-0! min-w-0! border-2 lg:size-[128px]!"
         alt={`${player.name}'s Profile Picture`}
         priority

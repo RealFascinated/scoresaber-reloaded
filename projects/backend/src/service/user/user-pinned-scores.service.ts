@@ -11,7 +11,7 @@ export class UserPinnedScoresService {
    *
    * @param userId the user to get the pins of
    */
-  public static getScoreIds(userId: string): Promise<number[]> {
+  public static getScoreIds(userId: string) {
     return UserPinnedScoresRepository.getScoreIds(userId);
   }
 
@@ -22,10 +22,7 @@ export class UserPinnedScoresService {
    * @param user the user that pins, with the player they play as (if any)
    * @param scoreId the score to pin
    */
-  public static async pin(
-    user: { id: string; playerId?: string | null },
-    scoreId: number
-  ): Promise<PinScoreResult> {
+  public static async pin(user: { id: string; playerId?: string | null }, scoreId: number) {
     if (!user.playerId) {
       return "no-player";
     }
@@ -46,7 +43,7 @@ export class UserPinnedScoresService {
    * @param message the message to show
    * @returns false if the score isn't pinned by the user
    */
-  public static setMessage(userId: string, scoreId: number, message: string): Promise<boolean> {
+  public static setMessage(userId: string, scoreId: number, message: string) {
     return UserPinnedScoresRepository.setMessage(userId, scoreId, message.trim() || null);
   }
 
@@ -56,7 +53,7 @@ export class UserPinnedScoresService {
    * @param userId the user that unpins
    * @param scoreId the score to unpin
    */
-  public static unpin(userId: string, scoreId: number): Promise<void> {
+  public static unpin(userId: string, scoreId: number) {
     return UserPinnedScoresRepository.unpin(userId, scoreId);
   }
 }

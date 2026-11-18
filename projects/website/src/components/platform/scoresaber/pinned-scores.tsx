@@ -43,9 +43,6 @@ const pinnedBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   },
 ];
 
-/**
- * The comment on a pinned score. The owner can open an editor with the pencil, everyone else just reads it.
- */
 function PinnedScoreMessage({
   playerId,
   scoreId,
@@ -129,9 +126,6 @@ function PinnedScoreMessage({
   );
 }
 
-/**
- * A compact card for one pinned score.
- */
 function PinnedScoreCard({
   playerId,
   pinned: { score, leaderboard, beatSaver, message },

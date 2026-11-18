@@ -13,7 +13,7 @@ export type TableCountsRow = {
 };
 
 export class TableCountsRepository {
-  public static async getCounts(): Promise<TableCountsRow> {
+  public static async getCounts() {
     const [counts] = await db.select().from(tableCountsTable).where(eq(tableCountsTable.id, 1));
     if (!counts) {
       throw new Error('Table counts row missing from "ssr_table_counts"');
@@ -21,7 +21,7 @@ export class TableCountsRepository {
     return counts;
   }
 
-  public static async reconcile(): Promise<void> {
+  public static async reconcile() {
     await db.execute(sql`SELECT reconcile_ssr_table_counts()`);
   }
 }

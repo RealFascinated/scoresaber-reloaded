@@ -2,7 +2,6 @@ import type { TimestampedData } from "@/common/server-prefetch";
 import type { PlayerRankingsResponse } from "@ssr/common/schemas/response/player/player-rankings";
 import { createLoader, parseAsBoolean, parseAsInteger, parseAsString } from "nuqs/server";
 
-/** Searches shorter than this are ignored, matching the backend search. */
 const MIN_SEARCH_LENGTH = 3;
 
 /**
@@ -44,7 +43,7 @@ export function buildRankingQuery(
   country: string | null,
   search: string,
   includeInactives: boolean
-): RankingQuery {
+) {
   return {
     page,
     country: country?.toUpperCase() ?? undefined,
@@ -53,7 +52,7 @@ export function buildRankingQuery(
   };
 }
 
-export function isSameRankingQuery(a: RankingQuery, b: RankingQuery): boolean {
+export function isSameRankingQuery(a: RankingQuery, b: RankingQuery) {
   return (
     a.page === b.page &&
     a.country === b.country &&

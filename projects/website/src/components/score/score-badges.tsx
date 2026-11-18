@@ -45,7 +45,6 @@ export function ScoreBadges<TScore, TLeaderboard>({
         style={
           color
             ? ({
-                // Tint the badge with its color instead of filling it, so rows stay calm to scan
                 backgroundColor: `color-mix(in oklab, ${color} 18%, transparent)`,
                 "--tw-ring-color": `color-mix(in oklab, ${color} 50%, transparent)`,
               } as React.CSSProperties)

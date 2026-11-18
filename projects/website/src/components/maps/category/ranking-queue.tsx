@@ -35,8 +35,6 @@ export default function RankingQueue({ initial }: RankingQueueProps) {
     queryFn: async () => ssrApi.fetchRankingQueue(),
     initialData: initial?.data,
     initialDataUpdatedAt: initial?.fetchedAt,
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
   });
   const [showOpenRankUnrank, setShowOpenRankUnrank] = useState(false);

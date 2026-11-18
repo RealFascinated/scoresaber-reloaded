@@ -17,10 +17,9 @@ import type { OverlayElement } from "@ssr/common/schemas/overlay/overlay-element
 import { PointerEvent, useLayoutEffect, useRef, useState } from "react";
 import Moveable from "react-moveable";
 
-/** The stage's position on screen, and screen pixels per design pixel. */
 type StageInfo = { left: number; top: number; k: number };
 
-function getStageInfo(): StageInfo | undefined {
+function getStageInfo() {
   const stage = document.querySelector<HTMLElement>("[data-overlay-stage]");
   if (!stage) {
     return undefined;
@@ -33,15 +32,13 @@ type GestureMember = { element: OverlayElement; bounds: Bounds };
 
 type GestureStart = {
   members: GestureMember[];
-  /** The box around all members. */
   union: Bounds;
-  /** The visible elements that are not part of the gesture, which members snap to. */
   others: Bounds[];
   pointer: Point;
   stage: StageInfo;
 };
 
-function getUnion(boxes: Bounds[]): Bounds {
+function getUnion(boxes: Bounds[]) {
   const left = Math.min(...boxes.map(box => box.left));
   const top = Math.min(...boxes.map(box => box.top));
   const right = Math.max(...boxes.map(box => box.left + box.width));
@@ -49,8 +46,7 @@ function getUnion(boxes: Bounds[]): Bounds {
   return { left, top, width: right - left, height: bottom - top };
 }
 
-/** Starts an undo step and measures everything a drag or scale needs. Locked elements are left out. */
-function startGesture(elementIds: string[], pointer: Point): GestureStart | undefined {
+function startGesture(elementIds: string[], pointer: Point) {
   const { layout } = useOverlayEditorStore.getState();
   const stage = getStageInfo();
   const members: GestureMember[] = [];
@@ -88,11 +84,9 @@ function SelectionLayer({
 
   const selected = elements.filter(element => selectedIds.includes(element.id) && element.visible);
   const single = selected.length === 1 ? selected[0] : undefined;
-  // Moveable looks the elements up itself, once they are in the DOM
   const targets = selected.map(element => `[data-element-id="${element.id}"]`);
   const movable = selected.some(element => !element.locked);
 
-  // Keep the handles on the elements when their data changes (panel edits, undo, resize of the window)
   useLayoutEffect(() => {
     moveableRef.current?.updateRect();
   }, [elements, k, selectedIds]);
@@ -111,7 +105,6 @@ function SelectionLayer({
       left: start.union.left + delta.x,
       top: start.union.top + delta.y,
     };
-    // Holding alt turns snapping off
     const snapped = altKey ? { bounds: moved, guides: [] } : snapBounds(moved, start.others);
     onGuides(snapped.guides);
 
@@ -203,13 +196,11 @@ function SelectionLayer({
   );
 }
 
-/** A dotted outline around the 16:9 canvas, so it is clear where the overlay ends. */
 function CanvasBounds() {
   const k = useStageScale();
   return (
     <div
       className="border-foreground/50 pointer-events-none absolute inset-0 border-dotted"
-      // Keeps the line 2 screen pixels thick whatever the stage is scaled to
       style={{ borderWidth: 2 / k }}
       aria-hidden
     />
@@ -218,8 +209,7 @@ function CanvasBounds() {
 
 type Marquee = { startX: number; startY: number; x: number; y: number };
 
-/** Finds the visible elements that touch a rectangle given in screen coordinates. */
-function getElementsInRect(marquee: Marquee): string[] {
+function getElementsInRect(marquee: Marquee) {
   const stage = getStageInfo();
   if (!stage) {
     return [];
@@ -244,7 +234,6 @@ function getElementsInRect(marquee: Marquee): string[] {
     .map(element => element.id);
 }
 
-/** Moving less than this (screen px) is a click, not a selection rectangle. */
 const MARQUEE_THRESHOLD = 4;
 
 /**
@@ -255,7 +244,6 @@ export default function EditorCanvas() {
   const layout = useOverlayEditorStore(state => state.layout);
   const [guides, setGuides] = useState<SnapGuide[]>([]);
   const [marquee, setMarquee] = useState<Marquee>();
-  /** What was selected when the rectangle started, kept when shift is held. */
   const baseSelection = useRef<string[]>([]);
 
   const onElementPointerDown = (id: string) => (event: PointerEvent<HTMLDivElement>) => {
@@ -263,7 +251,6 @@ export default function EditorCanvas() {
     if (event.shiftKey || event.ctrlKey || event.metaKey) {
       store.toggleSelection(id);
     } else if (!store.selectedIds.includes(id)) {
-      // An element that is already part of a selection stays in it, so the whole group can be dragged
       store.select(id);
     }
   };

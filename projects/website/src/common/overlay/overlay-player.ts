@@ -12,7 +12,7 @@ export type OverlayPlayer = {
   daily: { rank: number; countryRank: number; medals: number; pp: number };
 };
 
-export function toOverlayPlayer(player: ScoreSaberPlayer): OverlayPlayer {
+export function toOverlayPlayer(player: ScoreSaberPlayer) {
   const daily = player.statisticChange?.daily;
   return {
     name: player.name,

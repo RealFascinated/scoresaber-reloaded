@@ -12,7 +12,6 @@ export default function ResetSettings() {
   async function reset() {
     await updateAsync(DEFAULT_USER_PREFERENCES);
     toast.success("Your settings have been reset");
-    // The settings forms only read the saved values when they open
     window.location.reload();
   }
 

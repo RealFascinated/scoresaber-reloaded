@@ -36,13 +36,10 @@ export function resolvedScoreColumns() {
  *
  * @param realmId the realm to resolve pp for
  */
-export function scoreRealmJoinOn(realmId: number): SQL {
+export function scoreRealmJoinOn(realmId: number) {
   return and(
     eq(scoreSaberScoreRealmsTable.scoreId, scoreSaberScoresTable.scoreId),
     eq(scoreSaberScoreRealmsTable.realmId, realmId),
-    // Redundant for correctness (the realm row copies its score's player), but it lets the planner
-    // use the (realmId, playerId, pp) index when a player is filtered. Without it, a heavy player's
-    // aggregate hash-joins against a scan of the whole score-realms table.
     eq(scoreSaberScoreRealmsTable.playerId, scoreSaberScoresTable.playerId)
   ) as SQL;
 }
@@ -58,7 +55,7 @@ export function leaderboardRealmJoinOn(
   leaderboard: { id: AnyColumn },
   leaderboardRealm: { leaderboardId: AnyColumn; realmId: AnyColumn },
   realmId: number
-): SQL {
+) {
   return and(
     eq(leaderboardRealm.leaderboardId, leaderboard.id),
     eq(leaderboardRealm.realmId, realmId)
@@ -76,9 +73,6 @@ export function resolvedLeaderboardColumns(
   leaderboard: LeaderboardTableOrAlias = scoreSaberLeaderboardsTable,
   leaderboardRealm: LeaderboardRealmTableOrAlias = scoreSaberLeaderboardRealmsTable
 ) {
-  // An alias exposes the same columns under another table name, so the base table's column types apply.
-  // The generated full-text search document is only ever used inside WHERE / ORDER BY, so it is left
-  // out of the selected columns instead of being transferred with every row.
   // oxlint-disable-next-line typescript/no-unused-vars
   const { searchVector: _searchVector, ...leaderboardColumns } = getTableColumns(leaderboard) as ReturnType<
     typeof getTableColumns<LeaderboardTable>

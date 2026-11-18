@@ -1,6 +1,5 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
-import { MiniRankingResponse } from "@ssr/common/schemas/response/player/around-player";
 import { miniRankingCacheKey, miniRankingResponseCacheKey } from "../../common/cache-keys";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
@@ -15,7 +14,7 @@ export default class MiniRankingService {
    * @param id the player to get around
    * @param realmId the realm to rank within
    */
-  public static async getPlayerMiniRankings(id: string, realmId: number): Promise<MiniRankingResponse> {
+  public static async getPlayerMiniRankings(id: string, realmId: number) {
     return CacheService.fetch(
       CacheId.SCORESABER_MINI_RANKING_RESPONSE,
       miniRankingResponseCacheKey(id, realmId),
@@ -23,7 +22,7 @@ export default class MiniRankingService {
     );
   }
 
-  private static async buildPlayerMiniRankings(id: string, realmId: number): Promise<MiniRankingResponse> {
+  private static async buildPlayerMiniRankings(id: string, realmId: number) {
     const player = await ScoreSaberPlayerService.getPlayer(id, "basic", undefined, realmId);
     if (player == undefined) {
       throw new NotFoundError(`Player "${id}" not found`);
@@ -40,19 +39,12 @@ export default class MiniRankingService {
     };
   }
 
-  /**
-   * Gets the mini rankings for a player.
-   *
-   * @param player the player to get around
-   * @param type the type to get around
-   * @param realmId the realm to rank within
-   */
   private static async getPlayerMiniRanking(
     player: ScoreSaberPlayer,
     type: MiniRankingType,
     realmId: number
-  ): Promise<ScoreSaberPlayer[]> {
-    const getRank = (player: ScoreSaberPlayer, type: MiniRankingType): number | undefined => {
+  ) {
+    const getRank = (player: ScoreSaberPlayer, type: MiniRankingType) => {
       switch (type) {
         case "global":
           return player.rank;
@@ -63,23 +55,19 @@ export default class MiniRankingService {
 
     const rank = getRank(player, type);
     if (rank == undefined || rank <= 0) {
-      return []; // Return empty array for invalid ranks
+      return [];
     }
 
-    // Calculate the range of ranks we need to fetch
     const startRank = Math.max(1, rank - 2);
     const endRank = rank + 2;
 
-    // Calculate the pages we need to fetch
     const itemsPerPage = 50;
     const startPage = Math.ceil(startRank / itemsPerPage);
     const endPage = Math.ceil(endRank / itemsPerPage);
 
-    // If we're near the top ranks, we need to fetch more pages below to ensure we have 5 players
     const extraPagesNeeded = rank <= 3 ? Math.ceil(5 / itemsPerPage) : 0;
     const finalEndPage = endPage + extraPagesNeeded;
 
-    // Fetch all required pages in parallel with caching for global and country rankings
     const pageResponses = await Promise.all(
       Array.from({ length: finalEndPage - startPage + 1 }, (_, i) => startPage + i).map(page =>
         CacheService.fetch(
@@ -94,8 +82,6 @@ export default class MiniRankingService {
       )
     );
 
-    // Combine all players and resolve their basic profiles with a single
-    // batched account lookup (instead of one DB query per player).
     const allPlayers = pageResponses
       .filter((response): response is NonNullable<typeof response> => response !== undefined)
       .flatMap(response => response.data);
@@ -105,21 +91,12 @@ export default class MiniRankingService {
     return this.processPlayersAndBuildResult(players, player, type, getRank);
   }
 
-  /**
-   * Processes the players and builds the result array with the target player and surrounding players.
-   *
-   * @param allPlayers the resolved players around the target
-   * @param targetPlayer the target player to find
-   * @param type the ranking type
-   * @param getRank the function to get rank for a player and type
-   * @returns the processed result array
-   */
   private static processPlayersAndBuildResult(
     allPlayers: ScoreSaberPlayer[],
     targetPlayer: ScoreSaberPlayer,
     type: MiniRankingType,
     getRank: (player: ScoreSaberPlayer, type: MiniRankingType) => number | undefined
-  ): ScoreSaberPlayer[] {
+  ) {
     const sortedPlayers = allPlayers.sort((a, b) => {
       const rankA = getRank(a, type);
       const rankB = getRank(b, type);
@@ -129,25 +106,20 @@ export default class MiniRankingService {
       return rankA - rankB;
     });
 
-    // Find the target player
     const playerIndex = sortedPlayers.findIndex(p => p.id === targetPlayer.id);
     if (playerIndex === -1) {
       return [];
     }
 
-    // Get exactly 5 players: 3 above, the player, and 1 below
     const result = [];
 
-    // Add 3 players above (if available)
     for (let i = Math.max(0, playerIndex - 3); i < playerIndex; i++) {
       result.push(sortedPlayers[i]);
     }
 
-    // Add the requested player
     result.push(sortedPlayers[playerIndex]);
 
-    // Add players below to fill up to 5 total players
-    const playersBelowNeeded = Math.max(1, 5 - result.length); // At least 1, but more if needed to reach 5
+    const playersBelowNeeded = Math.max(1, 5 - result.length);
 
     for (
       let i = playerIndex + 1;

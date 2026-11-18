@@ -7,7 +7,6 @@ import {
   scoreSaberRankedBatchNewLeaderboardsTable,
   scoreSaberRankedBatchPlayersTable,
   scoreSaberRankedBatchScoresTable,
-  type ScoreSaberRankedBatchRow,
 } from "../db/schema";
 
 export type ScoreSaberRankedBatchInsert = typeof scoreSaberRankedBatchesTable.$inferInsert;
@@ -36,12 +35,12 @@ export type ScoreSaberRankedBatchNewLeaderboardInsert =
   typeof scoreSaberRankedBatchNewLeaderboardsTable.$inferInsert;
 
 export class ScoreSaberRankedBatchRepository {
-  public static async insert(data: ScoreSaberRankedBatchInsert): Promise<ScoreSaberRankedBatchRow> {
+  public static async insert(data: ScoreSaberRankedBatchInsert) {
     const [row] = await db.insert(scoreSaberRankedBatchesTable).values(data).returning();
     return row;
   }
 
-  public static async getById(id: number): Promise<ScoreSaberRankedBatchRow | undefined> {
+  public static async getById(id: number) {
     const [row] = await db
       .select()
       .from(scoreSaberRankedBatchesTable)
@@ -57,10 +56,7 @@ export class ScoreSaberRankedBatchRepository {
    * @param realmId the realm to look in
    * @param cutoff the earliest `endedAt` that still counts
    */
-  public static async findLatestEndedSince(
-    realmId: number,
-    cutoff: Date
-  ): Promise<ScoreSaberRankedBatchRow | undefined> {
+  public static async findLatestEndedSince(realmId: number, cutoff: Date) {
     const [row] = await db
       .select()
       .from(scoreSaberRankedBatchesTable)
@@ -78,7 +74,7 @@ export class ScoreSaberRankedBatchRepository {
   /**
    * Moves the end of a ranked batch forward. Never moves it back.
    */
-  public static async extendEnd(id: number, endedAt: Date): Promise<void> {
+  public static async extendEnd(id: number, endedAt: Date) {
     await db
       .update(scoreSaberRankedBatchesTable)
       .set({
@@ -87,7 +83,7 @@ export class ScoreSaberRankedBatchRepository {
       .where(eq(scoreSaberRankedBatchesTable.id, id));
   }
 
-  public static async markNotified(id: number, notifiedAt: Date): Promise<void> {
+  public static async markNotified(id: number, notifiedAt: Date) {
     await db
       .update(scoreSaberRankedBatchesTable)
       .set({ notifiedAt })
@@ -97,7 +93,7 @@ export class ScoreSaberRankedBatchRepository {
   /**
    * Recounts the leaderboards of a ranked batch from its star changes.
    */
-  public static async refreshLeaderboardCount(id: number): Promise<void> {
+  public static async refreshLeaderboardCount(id: number) {
     await db
       .update(scoreSaberRankedBatchesTable)
       .set({
@@ -114,9 +110,7 @@ export class ScoreSaberRankedBatchRepository {
    * Records leaderboards that became ranked in a ranked batch. A leaderboard already recorded in the
    * ranked batch is left alone, so a sync that is retried does not duplicate it.
    */
-  public static async insertNewLeaderboards(
-    rows: ScoreSaberRankedBatchNewLeaderboardInsert[]
-  ): Promise<void> {
+  public static async insertNewLeaderboards(rows: ScoreSaberRankedBatchNewLeaderboardInsert[]) {
     if (rows.length === 0) {
       return;
     }
@@ -126,7 +120,7 @@ export class ScoreSaberRankedBatchRepository {
   /**
    * Recounts the newly ranked leaderboards of a ranked batch.
    */
-  public static async refreshNewLeaderboardCount(id: number): Promise<void> {
+  public static async refreshNewLeaderboardCount(id: number) {
     await db
       .update(scoreSaberRankedBatchesTable)
       .set({
@@ -141,7 +135,7 @@ export class ScoreSaberRankedBatchRepository {
   /**
    * Lists the leaderboards that became ranked in a ranked batch with their identity, highest stars first.
    */
-  public static async listNewLeaderboards(rankedBatchId: number): Promise<RankedBatchNewLeaderboardRow[]> {
+  public static async listNewLeaderboards(rankedBatchId: number) {
     return db
       .select({
         leaderboardId: scoreSaberLeaderboardsTable.id,
@@ -170,7 +164,7 @@ export class ScoreSaberRankedBatchRepository {
   /**
    * Recounts the players and scores of a ranked batch from its captured pp changes.
    */
-  public static async refreshPpCounts(id: number): Promise<void> {
+  public static async refreshPpCounts(id: number) {
     await db
       .update(scoreSaberRankedBatchesTable)
       .set({
@@ -186,7 +180,7 @@ export class ScoreSaberRankedBatchRepository {
       .where(eq(scoreSaberRankedBatchesTable.id, id));
   }
 
-  public static async count(realmId: number): Promise<number> {
+  public static async count(realmId: number) {
     const [row] = await db
       .select({ value: count() })
       .from(scoreSaberRankedBatchesTable)
@@ -197,11 +191,7 @@ export class ScoreSaberRankedBatchRepository {
   /**
    * Lists a page of a realm's ranked batches, newest first.
    */
-  public static async listPage(
-    realmId: number,
-    limit: number,
-    offset: number
-  ): Promise<ScoreSaberRankedBatchRow[]> {
+  public static async listPage(realmId: number, limit: number, offset: number) {
     return db
       .select()
       .from(scoreSaberRankedBatchesTable)
@@ -214,7 +204,7 @@ export class ScoreSaberRankedBatchRepository {
   /**
    * Lists every ranked batch of a realm, oldest first.
    */
-  public static async listAll(realmId: number): Promise<ScoreSaberRankedBatchRow[]> {
+  public static async listAll(realmId: number) {
     return db
       .select()
       .from(scoreSaberRankedBatchesTable)
@@ -225,7 +215,7 @@ export class ScoreSaberRankedBatchRepository {
   /**
    * Lists the star changes of a ranked batch with their leaderboards, oldest first.
    */
-  public static async listStarChanges(rankedBatchId: number): Promise<RankedBatchStarChangeRow[]> {
+  public static async listStarChanges(rankedBatchId: number) {
     return db
       .select({
         leaderboardId: scoreSaberLeaderboardsTable.id,
@@ -255,7 +245,7 @@ export class ScoreSaberRankedBatchRepository {
   /**
    * Finds which of the given ranked batches still have star changes whose pp changes are not captured yet.
    */
-  public static async selectPpPendingIds(rankedBatchIds: number[]): Promise<Set<number>> {
+  public static async selectPpPendingIds(rankedBatchIds: number[]) {
     if (rankedBatchIds.length === 0) {
       return new Set();
     }
@@ -274,7 +264,7 @@ export class ScoreSaberRankedBatchRepository {
   /**
    * Lists the distinct leaderboard ids of a ranked batch's star changes.
    */
-  public static async selectLeaderboardIds(rankedBatchId: number): Promise<number[]> {
+  public static async selectLeaderboardIds(rankedBatchId: number) {
     const rows = await db
       .selectDistinct({ leaderboardId: scoreSaberLeaderboardStarChangeTable.leaderboardId })
       .from(scoreSaberLeaderboardStarChangeTable)

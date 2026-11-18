@@ -1,4 +1,4 @@
-import type { AnyColumn, SQL } from "drizzle-orm";
+import type { AnyColumn } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
 /**
@@ -10,6 +10,6 @@ import { sql } from "drizzle-orm";
  * and sorting the whole table. Use this helper wherever a query should be served by one of those
  * descending indexes.
  */
-export function descNullsLast(column: AnyColumn): SQL {
+export function descNullsLast(column: AnyColumn) {
   return sql`${column} DESC NULLS LAST`;
 }

@@ -66,7 +66,6 @@ type Props = {
 type LineChartOptions = ChartOptions<"line">;
 type LineScales = NonNullable<LineChartOptions["scales"]>;
 
-// Datasets are either "bar" or "line" (points are drawn as lines with a point radius)
 type MixedChartMode = "bar" | "line";
 
 const GenericChart = ({ config, labels, markers }: Props) => {
@@ -77,7 +76,6 @@ const GenericChart = ({ config, labels, markers }: Props) => {
   const { update: updatePreferences } = useUpdateUserPreferences();
   const { resolve: resolveColor } = useCanvasColors();
 
-  // Chart.js only reads the plugins it was created with, so the markers are handed to the plugin
   const chartRef = useRef<Chart<MixedChartMode> | null>(null);
   const [markerController] = useState(createChartMarkerPlugin);
   const markerColor = resolveColor("var(--primary)");
@@ -157,7 +155,6 @@ const GenericChart = ({ config, labels, markers }: Props) => {
             ticks: {
               maxRotation: 45,
               minRotation: 45,
-              // First arg is tick.value (category index), second is position in ticks array. Use value for labels[].
               callback: (tickValue: number | string) => {
                 const labelIndex = Number(tickValue);
                 if (typeof labels[labelIndex] === "string") {
@@ -196,8 +193,6 @@ const GenericChart = ({ config, labels, markers }: Props) => {
 
     Object.entries(axes).forEach(([axisId, axis]) => {
       const previousAxis = generatedAxes[axisId];
-      // Do not replace x-axis tick formatting from the block above: category labels (and linear x
-      // with valueFormatter) must keep their callbacks; otherwise ticks show raw indices / numbers.
       const preserveXTicks = axisId === "x" && previousAxis?.ticks !== undefined;
 
       generatedAxes[axisId] = {
@@ -227,7 +222,6 @@ const GenericChart = ({ config, labels, markers }: Props) => {
       return labels.map(value => (typeof value === "number" ? value.toString() : value));
     }
 
-    // Same for every label, so work them out once instead of per label
     const todayLabel = formatDateMinimal(getDaysAgoDate(0));
     const yesterdayLabel = formatDateMinimal(getDaysAgoDate(1));
 
@@ -290,7 +284,6 @@ const GenericChart = ({ config, labels, markers }: Props) => {
             if (!dataset) {
               return 3;
             }
-            // Point datasets carry a pointRadius that chart.js's dataset typings don't declare
             const datasetType: string | undefined = dataset.type;
             const pointRadius =
               "pointRadius" in dataset && typeof dataset.pointRadius === "number"

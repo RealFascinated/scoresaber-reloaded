@@ -3,8 +3,6 @@ import { sortPpCurve } from "@ssr/common/leaderboard-curve/pp-curve";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import { RealmPpCurveResponse } from "@ssr/common/schemas/response/realm/realm-pp-curve";
-import { RealmsResponse } from "@ssr/common/schemas/response/realm/realms";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import CacheService, { CacheId } from "../infra/cache.service";
 
@@ -16,7 +14,7 @@ export class RealmService {
    *
    * @returns the realms
    */
-  public static async getRealms(): Promise<RealmsResponse> {
+  public static async getRealms() {
     return CacheService.fetch(CacheId.SCORESABER_REALMS, "realms", async () => {
       const realms = await ScoreSaberApiService.lookupRealms();
       if (realms === undefined) {
@@ -32,7 +30,7 @@ export class RealmService {
    *
    * @returns the realm IDs in ascending order
    */
-  public static async getRealmIds(): Promise<number[]> {
+  public static async getRealmIds() {
     try {
       return (await RealmService.getRealms()).map(realm => realm.id);
     } catch (error) {
@@ -47,7 +45,7 @@ export class RealmService {
    * @param realmId the ID of the realm
    * @returns the pp curve of the realm, sorted by ascending accuracy
    */
-  public static async getRealmPpCurve(realmId: number): Promise<RealmPpCurveResponse> {
+  public static async getRealmPpCurve(realmId: number) {
     return CacheService.fetch(CacheId.SCORESABER_REALM_PP_CURVE, `realm:${realmId}:pp-curve`, async () => {
       const curve = await ScoreSaberApiService.lookupRealmPpCurve(realmId);
       if (curve === undefined) {

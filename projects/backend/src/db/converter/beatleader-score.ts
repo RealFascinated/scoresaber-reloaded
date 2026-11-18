@@ -1,4 +1,3 @@
-import { BeatLeaderScore } from "../../../../common/src/schemas/beatleader/score/score";
 import { BeatLeaderScoreRow } from "../schema";
 
 /**
@@ -7,7 +6,7 @@ import { BeatLeaderScoreRow } from "../schema";
  * @param row the row to convert
  * @returns the converted BeatLeader score
  */
-export function beatLeaderScoreRowToType(row: BeatLeaderScoreRow): BeatLeaderScore {
+export function beatLeaderScoreRowToType(row: BeatLeaderScoreRow) {
   return {
     playerId: row.playerId,
     songHash: row.songHash,

@@ -1,5 +1,4 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
-import { BeatSaverMap } from "@ssr/common/schemas/beatsaver/map/map";
 import { BeatSaverMapToken } from "@ssr/common/schemas/beatsaver/tokens/map";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
@@ -10,14 +9,11 @@ import { BeatSaverRepository } from "../../repositories/beatsaver.repository";
 import CacheService, { CacheId } from "../infra/cache.service";
 
 export default class BeatSaverService {
-  /** How long a negative BeatSaver lookup (map not found) is remembered. */
   private static readonly NEGATIVE_CACHE_TTL_MS = TimeUnit.toMillis(TimeUnit.Minute, 30);
-  /** Upper bound on negative-cache entries (memory guard). */
   private static readonly NEGATIVE_CACHE_MAX_ENTRIES = 5_000;
-  /** cacheKey -> timestamp of the last failed lookup. */
   private static readonly negativeCache = new Map<string, number>();
 
-  private static isNegativelyCached(cacheKey: string): boolean {
+  private static isNegativelyCached(cacheKey: string) {
     const cachedAt = BeatSaverService.negativeCache.get(cacheKey);
     if (cachedAt == null) {
       return false;
@@ -29,10 +25,9 @@ export default class BeatSaverService {
     return true;
   }
 
-  private static recordNegative(cacheKey: string): void {
+  private static recordNegative(cacheKey: string) {
     BeatSaverService.negativeCache.set(cacheKey, Date.now());
     if (BeatSaverService.negativeCache.size > BeatSaverService.NEGATIVE_CACHE_MAX_ENTRIES) {
-      // Evict the oldest quarter of entries to bound memory.
       const oldest = [...BeatSaverService.negativeCache.entries()]
         .sort((a, b) => a[1] - b[1])
         .slice(0, Math.floor(BeatSaverService.NEGATIVE_CACHE_MAX_ENTRIES / 4));
@@ -50,16 +45,10 @@ export default class BeatSaverService {
    * @param token the optional token to use
    * @returns the map response or undefined if not found
    */
-  public static async getMap(
-    hash: string,
-    difficulty: MapDifficulty,
-    characteristic: MapCharacteristic
-  ): Promise<BeatSaverMap | undefined> {
+  public static async getMap(hash: string, difficulty: MapDifficulty, characteristic: MapCharacteristic) {
     const normalizedHash = normalizeSongHash(hash);
     const cacheKey = beatSaverMapCacheKey(normalizedHash, difficulty, characteristic);
 
-    // Negative caching: maps that are not found (DMCA'd/deleted or unknown
-    // hashes) must not re-hit the throttled BeatSaver API on every request.
     if (BeatSaverService.isNegativelyCached(cacheKey)) {
       return undefined;
     }
@@ -116,15 +105,10 @@ export default class BeatSaverService {
    * @param map the map to save
    * @returns the saved map
    */
-  public static async saveMap(map: BeatSaverMapToken): Promise<void> {
+  public static async saveMap(map: BeatSaverMapToken) {
     await BeatSaverRepository.upsertMap(map);
   }
 
-  /**
-   * When ScoreSaber's `songHash` no longer matches any BeatSaver `version.hash` (e.g. re-upload),
-   * BeatSaver may still resolve `/maps/hash/{songHash}` to the map. Pick a version from the token:
-   * prefer exact hash match, else newest version that has the requested difficulty, else newest overall.
-   */
   private static pickVersionForLeaderboard(
     token: BeatSaverMapToken,
     songHashNormalized: string,

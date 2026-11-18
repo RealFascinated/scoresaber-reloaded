@@ -1,7 +1,6 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import { LeaderboardScoresResponse } from "@ssr/common/schemas/response/leaderboard/leaderboard-scores";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import BeatSaverService from "../external/beatsaver.service";
@@ -25,8 +24,7 @@ export class ScoreSaberLeaderboardScoresService {
     page: number,
     country: string | undefined,
     realmId: number
-  ): Promise<LeaderboardScoresResponse | undefined> {
-    // The leaderboard and its page of scores don't depend on each other.
+  ) {
     const [leaderboard, leaderboardScores] = await Promise.all([
       ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId),
       ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page, { country: country }),
@@ -38,13 +36,10 @@ export class ScoreSaberLeaderboardScoresService {
       throw new NotFoundError(`Leaderboard scores for leaderboard "${leaderboardId}" not found`);
     }
 
-    // The v1 API only carries the default realm's pp, so that is what gets persisted below. Other
-    // realms show pp computed from the realm's stars and curve.
     const defaultRealmScores = leaderboardScores.scores.map(token =>
       getScoreSaberScoreFromToken(token, leaderboard, token.leaderboardPlayerInfo.id)
     );
 
-    // Fire-and-forget: persist scores from the ScoreSaber API without blocking the response
     void ScoreCoreService.upsertScoresFromApi(defaultRealmScores);
 
     let parsedScores = defaultRealmScores;
@@ -56,7 +51,6 @@ export class ScoreSaberLeaderboardScoresService {
       }));
     }
 
-    // The map doesn't need the scores, so it loads while they are enriched.
     const beatSaverPromise = BeatSaverService.getMap(
       leaderboard.songHash,
       leaderboard.difficulty.difficulty,

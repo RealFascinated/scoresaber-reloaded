@@ -44,7 +44,7 @@ export class LeaderboardRankedSyncService {
    *
    * @returns the default realm's result.
    */
-  public static async refreshRankedLeaderboards(): Promise<RankedSyncResult> {
+  public static async refreshRankedLeaderboards() {
     const realmIds = await RealmService.getRealmIds();
     const defaultResult = await LeaderboardRankedSyncService.refreshRealmRankedLeaderboards(DEFAULT_REALM_ID);
 
@@ -66,12 +66,7 @@ export class LeaderboardRankedSyncService {
     return defaultResult;
   }
 
-  /**
-   * Refreshes the ranked leaderboards of a single realm.
-   *
-   * @param realmId the realm to refresh
-   */
-  private static async refreshRealmRankedLeaderboards(realmId: number): Promise<RankedSyncResult> {
+  private static async refreshRealmRankedLeaderboards(realmId: number) {
     const isDefaultRealm = realmId === DEFAULT_REALM_ID;
     const before = performance.now();
 
@@ -87,7 +82,6 @@ export class LeaderboardRankedSyncService {
     const storedRows = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(realmId);
     const stored = new Map(storedRows.map(row => [row.id, row]));
 
-    // Whatever ScoreSaber's complete ranked list no longer contains was unranked.
     const { unranked, refusal } = findUnrankedLeaderboards(stored, leaderboards, complete);
     if (refusal) {
       LeaderboardRankedSyncService.logger.error(`Realm "${realmId}": ${refusal}`);
@@ -97,8 +91,6 @@ export class LeaderboardRankedSyncService {
     const diff = diffRankedLeaderboards(stored, [...leaderboards, ...unranked]);
     LeaderboardRankedSyncService.logger.info(`Found ${diff.updates.length} leaderboards with changes.`);
 
-    // Recorded before the leaderboards are updated: once their stars are stored the change can no
-    // longer be detected, so a failure after the update would lose it.
     const rankedBatch = await RankedBatchService.recordStarChanges(
       realmId,
       diff.starChanges.map(change => ({ ...change, timestamp: new Date() })),
@@ -116,7 +108,6 @@ export class LeaderboardRankedSyncService {
       await LeaderboardRankedSyncService.refreshDefaultRealmState(diff, [...leaderboards, ...unranked]);
     }
 
-    // Cached profiles show pp and statistics derived from these leaderboards, so they are stale now
     if (diff.reweightedLeaderboardIds.length > 0) {
       const playerIds = await ScoreSaberScoresRepository.selectDistinctPlayerIdsByLeaderboardIds(
         diff.reweightedLeaderboardIds
@@ -135,7 +126,6 @@ export class LeaderboardRankedSyncService {
       performance.now() - before
     );
 
-    // Medals are awarded in the default realm only.
     if (isDefaultRealm) {
       await PlayerMedalsService.refreshLeaderboardsMedals(
         diff.updates.map(update => update.newLeaderboard).filter(leaderboard => leaderboard.ranked)
@@ -145,21 +135,16 @@ export class LeaderboardRankedSyncService {
     return { updates: diff.updates, rankedBatch };
   }
 
-  /**
-   * Updates what only the default realm keeps: the score seeding of newly ranked leaderboards, the
-   * pp of archived scores, and the pp changes of reweighted leaderboards.
-   */
   private static async refreshDefaultRealmState(
     diff: RankedLeaderboardDiff,
     apiLeaderboards: ScoreSaberLeaderboard[]
-  ): Promise<void> {
+  ) {
     await Promise.all(
       diff.newlyRankedLeaderboardIds.map(leaderboardId =>
         ScoreSaberLeaderboardsRepository.updateLeaderboard(leaderboardId, { seededScores: false })
       )
     );
 
-    // History pp is a default realm snapshot, so only that realm reweights it.
     const starChangedIds = new Set(diff.starChanges.map(change => change.leaderboardId));
     const reweighted = apiLeaderboards.filter(leaderboard => starChangedIds.has(leaderboard.id));
     for (const batch of chunkArray(reweighted, HISTORY_REWEIGHT_CONCURRENCY)) {
@@ -168,8 +153,6 @@ export class LeaderboardRankedSyncService {
       );
     }
 
-    // Also retries the changes earlier syncs failed to capture, so it runs even without new ones.
-    // A failure must not stop the rest of the sync.
     try {
       await RankedBatchService.processPendingPpChanges();
     } catch (error) {
@@ -177,13 +160,7 @@ export class LeaderboardRankedSyncService {
     }
   }
 
-  /**
-   * Stores leaderboards in batches.
-   */
-  private static async upsertLeaderboards(
-    leaderboards: ScoreSaberLeaderboard[],
-    realmId: number
-  ): Promise<void> {
+  private static async upsertLeaderboards(leaderboards: ScoreSaberLeaderboard[], realmId: number) {
     if (leaderboards.length === 0) {
       return;
     }
@@ -198,7 +175,7 @@ export class LeaderboardRankedSyncService {
   /**
    * Refreshes the qualified leaderboards of every realm.
    */
-  public static async refreshQualifiedLeaderboards(): Promise<void> {
+  public static async refreshQualifiedLeaderboards() {
     for (const realmId of await RealmService.getRealmIds()) {
       try {
         await LeaderboardRankedSyncService.refreshRealmQualifiedLeaderboards(realmId);
@@ -211,12 +188,7 @@ export class LeaderboardRankedSyncService {
     }
   }
 
-  /**
-   * Refreshes the qualified leaderboards of a single realm.
-   *
-   * @param realmId the realm to refresh
-   */
-  private static async refreshRealmQualifiedLeaderboards(realmId: number): Promise<void> {
+  private static async refreshRealmQualifiedLeaderboards(realmId: number) {
     const before = performance.now();
 
     LeaderboardRankedSyncService.logger.info(`Refreshing qualified leaderboards for realm "${realmId}"...`);
@@ -239,16 +211,13 @@ export class LeaderboardRankedSyncService {
     );
   }
 
-  /**
-   * Logs the outcome of a sync to Discord.
-   */
   private static sendSyncEmbed(
     kind: "Ranked" | "Qualified",
     realmId: number,
     updated: number,
     total: number,
     durationMs: number
-  ): void {
+  ) {
     const description = `Updated ${updated}/${total} leaderboards in ${formatDuration(durationMs)}`;
     LeaderboardRankedSyncService.logger.info(description);
 

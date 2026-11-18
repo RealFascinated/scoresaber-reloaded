@@ -1,17 +1,13 @@
 import { ScoreSaberPlayerHistory } from "@ssr/common/schemas/scoresaber/player/history";
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { db } from "../db";
-import { type PlayerHistoryRow, playerHistoryTable } from "../db/schema";
+import { playerHistoryTable } from "../db/schema";
 
 export type DailyScoreCounterKey =
   "rankedScores" | "unrankedScores" | "rankedScoresImproved" | "unrankedScoresImproved";
 
 export class PlayerHistoryRepository {
-  public static async findByPlayerAndDate(
-    playerId: string,
-    date: Date,
-    realmId: number
-  ): Promise<PlayerHistoryRow | undefined> {
+  public static async findByPlayerAndDate(playerId: string, date: Date, realmId: number) {
     const [row] = await db
       .select()
       .from(playerHistoryTable)
@@ -30,7 +26,7 @@ export class PlayerHistoryRepository {
     date: Date,
     data: ScoreSaberPlayerHistory,
     realmId: number
-  ): Promise<void> {
+  ) {
     await db
       .insert(playerHistoryTable)
       .values({ playerId, date, realmId, ...data })
@@ -45,9 +41,6 @@ export class PlayerHistoryRepository {
           totalScore: sql`excluded."totalScore"`,
           totalRankedScore: sql`excluded."totalRankedScore"`,
           rankedScores: sql`excluded."rankedScores"`,
-          // The daily counters (rankedScores, unrankedScores and their improved variants) are owned
-          // by incrementDailyCounter, so a conflicting upsert leaves them alone. That also means the
-          // nightly tracker no longer has to read the row first just to carry them over.
           totalRankedScores: sql`excluded."totalRankedScores"`,
           totalUnrankedScores: sql`excluded."totalUnrankedScores"`,
           totalScores: sql`excluded."totalScores"`,
@@ -68,7 +61,7 @@ export class PlayerHistoryRepository {
     playerId: string,
     options: { count: number; alignedStart: Date; today: Date },
     realmId: number
-  ): Promise<PlayerHistoryRow[]> {
+  ) {
     const { count: dayCount, alignedStart, today } = options;
     const base = db
       .select()
@@ -87,7 +80,7 @@ export class PlayerHistoryRepository {
     return await (dayCount > 0 ? base.limit(dayCount) : base);
   }
 
-  public static async upsertRank(playerId: string, date: Date, rank: number, realmId: number): Promise<void> {
+  public static async upsertRank(playerId: string, date: Date, rank: number, realmId: number) {
     await db
       .insert(playerHistoryTable)
       .values({ playerId, date, realmId, rank })
@@ -102,7 +95,7 @@ export class PlayerHistoryRepository {
     date: Date,
     counterKey: DailyScoreCounterKey,
     realmId: number
-  ): Promise<void> {
+  ) {
     const incrementSet = (() => {
       switch (counterKey) {
         case "rankedScores":

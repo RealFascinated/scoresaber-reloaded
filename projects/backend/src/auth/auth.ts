@@ -17,10 +17,6 @@ import { AuthConnectionsRepository } from "../repositories/auth-connections.repo
 /** Origins allowed to make credentialed requests to the auth routes. */
 export const AUTH_TRUSTED_ORIGINS: string[] = [env.NEXT_PUBLIC_WEBSITE_URL];
 
-/**
- * Sign-in providers that prove ownership of a platform account, and the connection they create.
- * Meta and Quest players are both `OCULUS`, as on ScoreSaber.
- */
 const AUTH_PROVIDER_CONNECTIONS: Record<string, AuthConnectionProvider | undefined> = {
   steam: "STEAM",
 };
@@ -46,14 +42,12 @@ export const auth = betterAuth({
     },
   },
   session: {
-    expiresIn: 60 * 60 * 24 * 30, // 30 days
-    updateAge: 60 * 60 * 24, // Refresh the session once a day
+    expiresIn: 60 * 60 * 24 * 30,
+    updateAge: 60 * 60 * 24,
   },
   socialProviders: {
     steam: {
       apiKey: env.STEAM_API_KEY,
-      // Steam IDs are ScoreSaber player ids, so prefer the tracked player's name and avatar.
-      // Returns no fields for untracked players, keeping Steam's own name and avatar.
       mapProfileToUser: async profile => {
         const [player] = await db
           .select({ name: scoreSaberAccountsTable.name, avatar: scoreSaberAccountsTable.avatar })
@@ -68,9 +62,6 @@ export const auth = betterAuth({
   databaseHooks: {
     account: {
       create: {
-        // Record the verified platform account as a connection. `playerId` is not client-writable
-        // (`input: false`), so it is set from the connection instead of through the provider profile
-        // (Better Auth drops those fields).
         after: async account => {
           const provider = AUTH_PROVIDER_CONNECTIONS[account.providerId];
           if (provider) {
@@ -90,7 +81,6 @@ export const auth = betterAuth({
     }),
   },
   onAPIError: {
-    // OAuth failures redirect here with `?error=<code>`
     errorURL: env.NEXT_PUBLIC_WEBSITE_URL,
   },
 });

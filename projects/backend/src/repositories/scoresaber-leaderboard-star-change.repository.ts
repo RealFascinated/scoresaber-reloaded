@@ -1,25 +1,22 @@
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { db } from "../db";
-import { scoreSaberLeaderboardStarChangeTable, type ScoreSaberLeaderboardStarChangeRow } from "../db/schema";
+import { scoreSaberLeaderboardStarChangeTable } from "../db/schema";
 
 export type ScoreSaberLeaderboardStarChangeInsert = typeof scoreSaberLeaderboardStarChangeTable.$inferInsert;
 
 export class ScoreSaberLeaderboardStarChangeRepository {
-  public static async insertRow(data: ScoreSaberLeaderboardStarChangeInsert): Promise<void> {
+  public static async insertRow(data: ScoreSaberLeaderboardStarChangeInsert) {
     await db.insert(scoreSaberLeaderboardStarChangeTable).values(data);
   }
 
-  public static async insertRows(data: ScoreSaberLeaderboardStarChangeInsert[]): Promise<void> {
+  public static async insertRows(data: ScoreSaberLeaderboardStarChangeInsert[]) {
     if (data.length === 0) {
       return;
     }
     await db.insert(scoreSaberLeaderboardStarChangeTable).values(data);
   }
 
-  public static async listByLeaderboardIdOrderedByTimestampDesc(
-    leaderboardId: number,
-    realmId: number
-  ): Promise<ScoreSaberLeaderboardStarChangeRow[]> {
+  public static async listByLeaderboardIdOrderedByTimestampDesc(leaderboardId: number, realmId: number) {
     return db
       .select()
       .from(scoreSaberLeaderboardStarChangeTable)
@@ -37,7 +34,7 @@ export class ScoreSaberLeaderboardStarChangeRepository {
    *
    * @param realmId the realm to list for
    */
-  public static async listPpPending(realmId: number): Promise<ScoreSaberLeaderboardStarChangeRow[]> {
+  public static async listPpPending(realmId: number) {
     return db
       .select()
       .from(scoreSaberLeaderboardStarChangeTable)
@@ -55,7 +52,7 @@ export class ScoreSaberLeaderboardStarChangeRepository {
    *
    * @param ids the star change row ids
    */
-  public static async markPpCaptured(ids: number[]): Promise<void> {
+  public static async markPpCaptured(ids: number[]) {
     if (ids.length === 0) {
       return;
     }

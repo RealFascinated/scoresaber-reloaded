@@ -6,36 +6,36 @@
  * kept as `var(--token)` instead; charts resolve those with `useCanvasColors`.
  */
 export const Colors = {
-  secondary: "#0b0c0f", // --background
+  secondary: "#0b0c0f",
   pp: "var(--pp)",
-  rankedLight: "#59c5f5", // --info
-  medal: "#f0a556", // --medals
+  rankedLight: "#59c5f5",
+  medal: "#f0a556",
   hands: {
-    left: "#fa6863", // --hands-left
-    right: "#4dacf6", // --hands-right
+    left: "#fa6863",
+    right: "#4dacf6",
   },
   generic: {
-    green: "#56d57b", // --success
+    green: "#56d57b",
   },
   status: {
-    success: "#56d57b", // --success
-    danger: "#ff6367", // --danger
-    warning: "#fac131", // --warning
-    info: "#59c5f5", // --info
+    success: "#56d57b",
+    danger: "#ff6367",
+    warning: "#fac131",
+    info: "#59c5f5",
   },
   rank: {
-    global: "#56d57b", // --success
-    country: "#fac131", // --warning
+    global: "#56d57b",
+    country: "#fac131",
   },
   /** Accuracy tiers, the same "rarity" ramp as the accuracy badges. */
   accuracy: {
-    none: "#9b9ea6", // --acc-none
-    a: "#6ed889", // --acc-a
-    s: "#67caff", // --acc-s
-    sPlus: "#8fabff", // --acc-s-plus
-    ss: "#ca92ff", // --acc-ss
-    ssPlus: "#ff85c7", // --acc-ss-plus
-    god: "#f7c747", // --acc-god
+    none: "#9b9ea6",
+    a: "#6ed889",
+    s: "#67caff",
+    sPlus: "#8fabff",
+    ss: "#ca92ff",
+    ssPlus: "#ff85c7",
+    god: "#f7c747",
   },
   /** Bar/series colors for score-count charts. */
   series: {

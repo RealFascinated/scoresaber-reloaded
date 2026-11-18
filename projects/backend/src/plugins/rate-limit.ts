@@ -19,18 +19,12 @@ type Bucket = {
 
 const CLEANUP_INTERVAL_MS = 60_000;
 
-function getClientAddress(request: Request, socketAddress: string | undefined): string {
+function getClientAddress(request: Request, socketAddress: string | undefined) {
   const forwarded = request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for");
   return forwarded?.split(",")[0]?.trim() || socketAddress || "unknown";
 }
 
-/**
- * Whether the address is loopback, link-local or in a private range (10/8, 172.16/12, 192.168/16, fc00::/7).
- * The website's server reaches the backend over the internal network, and every one of its server renders
- * comes from the same address, so counting them as a single client throttles all visitors at once.
- * Public visitors always arrive through Cloudflare, which sets cf-connecting-ip to their real address.
- */
-function isPrivateAddress(address: string): boolean {
+function isPrivateAddress(address: string) {
   const normalized = address.toLowerCase().replace(/^::ffff:/, "");
 
   const ipv4 = normalized.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.\d{1,3}$/);
@@ -59,7 +53,6 @@ function isPrivateAddress(address: string): boolean {
  */
 export const rateLimit = ({ max, windowMs, routes = {} }: RateLimitOptions) => {
   const buckets = new Map<string, Bucket>();
-  // Addresses that are never limited, e.g. the website's server when it reaches the API through Cloudflare
   const allowlist = new Set(
     (env.RATE_LIMIT_ALLOWLIST ?? "")
       .split(",")
@@ -80,7 +73,6 @@ export const rateLimit = ({ max, windowMs, routes = {} }: RateLimitOptions) => {
 
   return new Elysia({ name: "rate-limit" }).onBeforeHandle("global", ({ request, server, set }) => {
     const { pathname } = new URL(request.url);
-    // Prometheus scrapes are authenticated separately
     if (pathname === "/metrics") {
       return;
     }
@@ -103,8 +95,6 @@ export const rateLimit = ({ max, windowMs, routes = {} }: RateLimitOptions) => {
     bucket.count++;
 
     if (bucket.count > limit) {
-      // Once per bucket per window, with every header the address was derived from, so it is visible
-      // who is being limited (e.g. whether the website's own requests show up as a shared address)
       if (bucket.count === limit + 1) {
         Logger.warn(
           `Rate limited ${key} (limit ${limit}/${windowMs / 1000}s) on ${request.method} ${pathname}; ` +

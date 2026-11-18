@@ -23,8 +23,6 @@ export function Player() {
   } = useQuery({
     queryKey: homePlayerQueryKey(mainPlayerId, realmId),
     queryFn: () => ssrApi.getScoreSaberPlayer(mainPlayerId!, "full", realmId),
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
     enabled: !!mainPlayerId,
   });

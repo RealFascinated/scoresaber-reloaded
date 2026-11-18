@@ -15,15 +15,13 @@ type AfterHandleHookContext = {
   set: { status?: number | string };
 };
 
-/** Prometheus scrape endpoint — exclude from HTTP request / latency / status metrics. */
 const METRICS_PATH = "/metrics";
 
-function isMetricsRequest(request: Request): boolean {
+function isMetricsRequest(request: Request) {
   return new URL(request.url).pathname === METRICS_PATH;
 }
 
 export const createHttpMetricsHooks = () => {
-  // Weakly keyed: requests that error never reach onAfterHandle, so they must not be retained
   const requestStartTimes = new WeakMap<Request, bigint>();
 
   let totalRequestsMetric: TotalRequestsMetric | undefined;
@@ -33,7 +31,7 @@ export const createHttpMetricsHooks = () => {
   let responseTimeMetric: ResponseTimeHistogramMetric | undefined;
   let responseTimeMetricLoaded = false;
 
-  const getStatusCode = (response: unknown, setStatus: unknown): number => {
+  const getStatusCode = (response: unknown, setStatus: unknown) => {
     if (typeof setStatus === "number") {
       return setStatus;
     }
@@ -49,7 +47,7 @@ export const createHttpMetricsHooks = () => {
     return 200;
   };
 
-  const getTotalRequestsMetric = async (): Promise<TotalRequestsMetric | undefined> => {
+  const getTotalRequestsMetric = async () => {
     if (totalRequestsMetricLoaded) {
       return totalRequestsMetric;
     }
@@ -62,7 +60,7 @@ export const createHttpMetricsHooks = () => {
     return totalRequestsMetric;
   };
 
-  const getResponseStatusMetric = async (): Promise<HttpResponseStatusMetric | undefined> => {
+  const getResponseStatusMetric = async () => {
     if (responseStatusMetricLoaded) {
       return responseStatusMetric;
     }
@@ -72,7 +70,7 @@ export const createHttpMetricsHooks = () => {
     return responseStatusMetric;
   };
 
-  const getResponseTimeMetric = async (): Promise<ResponseTimeHistogramMetric | undefined> => {
+  const getResponseTimeMetric = async () => {
     if (responseTimeMetricLoaded) {
       return responseTimeMetric;
     }
@@ -83,7 +81,7 @@ export const createHttpMetricsHooks = () => {
   };
 
   return {
-    onRequest: async ({ request }: RequestHookContext): Promise<void> => {
+    onRequest: async ({ request }: RequestHookContext) => {
       if (isMetricsRequest(request)) {
         return;
       }
@@ -91,7 +89,7 @@ export const createHttpMetricsHooks = () => {
       const requestsMetric = await getTotalRequestsMetric();
       requestsMetric?.increment();
     },
-    onAfterHandle: async ({ request, route, response, set }: AfterHandleHookContext): Promise<void> => {
+    onAfterHandle: async ({ request, route, response, set }: AfterHandleHookContext) => {
       if (isMetricsRequest(request)) {
         requestStartTimes.delete(request);
         return;

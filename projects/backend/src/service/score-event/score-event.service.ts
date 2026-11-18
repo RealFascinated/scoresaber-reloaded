@@ -7,15 +7,11 @@ import { db } from "../../db";
 import { scoreSaberScoreEventTable } from "../../db/schema";
 
 export class ScoreEventService {
-  /** Trending looks at the last 7 days; one extra day keeps a margin for clock and cron drift. */
   private static readonly RETENTION_DAYS = 8;
   private static readonly PURGE_BATCH_SIZE = 50_000;
 
-  /** How quickly a player's contribution fades; at 48h an old play counts half as much. */
   private static readonly TRENDING_HALF_LIFE_HOURS = 48;
-  /** The "now" window compared against the rest of the week to detect growth. */
   private static readonly TRENDING_RECENT_DAYS = 2;
-  /** Added to both daily rates so tiny maps can't produce huge ratios. */
   private static readonly TRENDING_SMOOTHING = 5;
   private static readonly TRENDING_MIN_MOMENTUM = 0.5;
   private static readonly TRENDING_MAX_MOMENTUM = 3;
@@ -25,7 +21,7 @@ export class ScoreEventService {
    *
    * @param score the score to insert the event for.
    */
-  public static async insertScoreEvent(score: ScoreSaberScore): Promise<void> {
+  public static async insertScoreEvent(score: ScoreSaberScore) {
     if (!isProduction()) {
       return;
     }
@@ -44,15 +40,12 @@ export class ScoreEventService {
    *
    * @returns how many events were deleted
    */
-  public static async purgeOldEvents(): Promise<number> {
+  public static async purgeOldEvents() {
     const before = performance.now();
     const cutoff = new Date(Date.now() - TimeUnit.toMillis(TimeUnit.Day, ScoreEventService.RETENTION_DAYS));
 
     let deleted = 0;
     for (;;) {
-      // Matched by physical row id (ctid): with "id IN (subquery)" Postgres plans a hash join and reads the
-      // whole table for every batch. Events are only ever inserted, never updated, so a row can't move
-      // between the subquery and the delete.
       const result = await db.execute(sql`
         DELETE FROM "scoresaber-score-events"
         WHERE ctid = ANY (ARRAY(
@@ -88,7 +81,7 @@ export class ScoreEventService {
    *   the daily players of the rest of the week, clamped. The smoothing constant acts as a volume
    *   floor so a map going from 1 to 3 players doesn't count as a breakout.
    */
-  public static async updateTrendingLeaderboards(): Promise<void> {
+  public static async updateTrendingLeaderboards() {
     const before = performance.now();
     const now = new Date();
     const oneWeekAgo = new Date(now.getTime() - TimeUnit.toMillis(TimeUnit.Week, 1));
@@ -160,7 +153,7 @@ export class ScoreEventService {
   /**
    * Recomputes and updates daily plays for all leaderboards using events from the last 24 hours.
    */
-  public static async updateLeaderboardDailyPlays(): Promise<void> {
+  public static async updateLeaderboardDailyPlays() {
     const before = performance.now();
     const oneDayAgo = new Date(Date.now() - TimeUnit.toMillis(TimeUnit.Day, 1));
 

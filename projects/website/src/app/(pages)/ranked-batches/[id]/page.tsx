@@ -15,7 +15,6 @@ import type {
 } from "@ssr/common/schemas/ranked-batch/ranked-batch-responses";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ssrConfig } from "config";
-import { Metadata } from "next";
 import { cache } from "react";
 
 export const revalidate = 300;
@@ -29,23 +28,27 @@ type Props = {
 type RankedBatchFetchResult =
   { status: "found"; response: RankedBatchResponse } | { status: "not-found" } | { status: "unavailable" };
 
-const getRankedBatch = cache(async (id: string): Promise<RankedBatchFetchResult> => {
+const getRankedBatch = cache(async (id: string) => {
   const rankedBatchId = Number(id);
   if (!Number.isInteger(rankedBatchId) || rankedBatchId < 1) {
-    return { status: "not-found" };
+    const result: RankedBatchFetchResult = { status: "not-found" };
+    return result;
   }
   try {
     const response = await ssrApi.getRankedBatch(rankedBatchId);
-    return response === undefined ? { status: "not-found" } : { status: "found", response };
+    const result: RankedBatchFetchResult =
+      response === undefined ? { status: "not-found" } : { status: "found", response };
+    return result;
   } catch (error) {
     if (isBackendUnavailableError(error)) {
-      return { status: "unavailable" };
+      const result: RankedBatchFetchResult = { status: "unavailable" };
+      return result;
     }
     throw error;
   }
 });
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props) {
   const { id } = await params;
   const result = await getRankedBatch(id);
 

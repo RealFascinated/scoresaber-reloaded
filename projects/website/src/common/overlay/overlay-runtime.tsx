@@ -34,6 +34,6 @@ const EMPTY_RUNTIME: OverlayRuntime = {
 
 export const OverlayRuntimeContext = createContext<OverlayRuntime>(EMPTY_RUNTIME);
 
-export function useOverlayRuntime(): OverlayRuntime {
+export function useOverlayRuntime() {
   return useContext(OverlayRuntimeContext);
 }

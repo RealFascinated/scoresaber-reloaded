@@ -17,9 +17,8 @@ export default function CutDistributionChart({ cutDistribution }: Props) {
       return { chartData: { datasets: [] }, labels: [] };
     }
 
-    const bins = new Array(16).fill(0);
+    const bins = Array.from({ length: 16 }, () => 0);
     cutDistribution.forEach(cut => {
-      // The score is already the distance to center score (0-15)
       bins[cut.score] = cut.count;
     });
     const allLabels = Array.from({ length: 16 }, (_, i) => i.toString());

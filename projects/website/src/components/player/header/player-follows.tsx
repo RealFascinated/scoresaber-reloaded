@@ -115,7 +115,6 @@ function FollowListDialog({
 export default function PlayerFollows({ player }: { player: ScoreSaberPlayer }) {
   const { data: follows } = usePlayerFollows(player.id);
   if (!follows) {
-    // Keep the row's height while the counts load (or can't load) so what is below it doesn't move
     return <div className="h-5" />;
   }
 

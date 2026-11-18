@@ -1,5 +1,4 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { PinnedScoresResponse } from "@ssr/common/schemas/response/user/pinned-scores";
 import { UserPinnedScoresRepository } from "../../repositories/user-pinned-scores.repository";
 import { PlayerScoresService } from "./player-scores.service";
 
@@ -12,7 +11,7 @@ export class PlayerPinnedScoresService {
    * @param playerId the player to get the pinned scores of
    * @param realmId the realm to resolve pp for
    */
-  public static async getPinnedScores(playerId: string, realmId: number): Promise<PinnedScoresResponse> {
+  public static async getPinnedScores(playerId: string, realmId: number) {
     const pins = await UserPinnedScoresRepository.getPinsByPlayerId(playerId);
 
     const scores = await Promise.all(

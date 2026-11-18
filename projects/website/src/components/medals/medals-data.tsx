@@ -40,10 +40,8 @@ export default function MedalsData({ initial }: MedalsDataProps) {
   const setCurrentCountry = (value: string | undefined) =>
     setCountryQuery(value ? value.toUpperCase() : null);
   const query = buildMedalsQuery(currentPage, countryQuery);
-  // The follow column only exists for a signed-in user, so signed-out tables don't reserve its space
   const { data: me } = useMe();
 
-  // The server data is only valid for the query it was fetched for
   const initialData = initial && isSameMedalsQuery(initial.query, query) ? initial.data : undefined;
 
   const {
@@ -58,8 +56,6 @@ export default function MedalsData({ initial }: MedalsDataProps) {
     queryFn: async () => ssrApi.getMedalRankedPlayers(currentPage, currentCountry),
     initialData,
     initialDataUpdatedAt: initial?.fetchedAt,
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
     refetchIntervalInBackground: false,
     placeholderData: prev => prev,
@@ -210,7 +206,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
   );
 }
 
-function buildPageUrl(country: string | undefined, page: number): string {
+function buildPageUrl(country: string | undefined, page: number) {
   const params = new URLSearchParams();
   if (country) {
     params.set("country", country);

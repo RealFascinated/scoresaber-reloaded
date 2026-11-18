@@ -26,7 +26,7 @@ type PlayerRankCardProps = {
 };
 
 /** Width in characters (including the "#") needed to show the longest of the given ranks. */
-export function getRankChars(ranks: number[]): number {
+export function getRankChars(ranks: number[]) {
   return Math.max(0, ...ranks.map(rank => String(rank).length)) + 1;
 }
 

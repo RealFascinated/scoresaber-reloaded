@@ -22,13 +22,10 @@ export function ApiHealth() {
         setOnline(online);
         return online;
       } catch {
-        // Backend is offline or unreachable, so surface it so the connectivity
-        // toast fires instead of silently keeping the previous status.
         setOnline(false);
         return false;
       }
     },
-    // Check quickly while the API is down so recovery is noticed, and relax while it is healthy
     refetchInterval: query => (query.state.data === false ? HEALTH_POLL_DOWN_MS : HEALTH_POLL_HEALTHY_MS),
   });
 

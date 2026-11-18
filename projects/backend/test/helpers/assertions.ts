@@ -2,15 +2,15 @@ import type { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
 import { expect } from "bun:test";
 import type { TestResponse } from "./request";
 
-export function expectStatus(response: TestResponse, status: number): void {
+export function expectStatus(response: TestResponse, status: number) {
   expect(response.status).toBe(status);
 }
 
-export function expectOneOfStatuses(response: TestResponse, statuses: number[]): void {
+export function expectOneOfStatuses(response: TestResponse, statuses: number[]) {
   expect(statuses).toContain(response.status);
 }
 
-export async function expectValidationError(response: TestResponse): Promise<void> {
+export async function expectValidationError(response: TestResponse) {
   expectStatus(response, 422);
   const body = await response.json();
   if (Array.isArray(body)) {
@@ -23,7 +23,7 @@ export async function expectValidationError(response: TestResponse): Promise<voi
   expect(error.message!.length).toBeGreaterThan(0);
 }
 
-export async function expectNotFound(response: TestResponse, messageIncludes?: string): Promise<void> {
+export async function expectNotFound(response: TestResponse, messageIncludes?: string) {
   expectStatus(response, 404);
   const body = (await response.json()) as { statusCode: number; message: string };
   expect(body.statusCode).toBe(404);
@@ -45,7 +45,7 @@ export function expectPlaylistShape(body: unknown): asserts body is Playlist {
  * `{ name, characteristic }` (the game parser's shape), not the SSR
  * `{ difficulty, characteristic }` shape.
  */
-export function expectPlaylistBplistShape(body: unknown): void {
+export function expectPlaylistBplistShape(body: unknown) {
   const playlist = body as {
     playlistTitle: string;
     songs: Array<{
@@ -67,7 +67,7 @@ export function expectPlaylistBplistShape(body: unknown): void {
   }
 }
 
-export function expectPaginationMetadata(metadata: unknown, page: number): void {
+export function expectPaginationMetadata(metadata: unknown, page: number) {
   const meta = metadata as {
     totalPages: number;
     totalItems: number;
@@ -80,18 +80,18 @@ export function expectPaginationMetadata(metadata: unknown, page: number): void 
   expect(typeof meta.itemsPerPage).toBe("number");
 }
 
-export function expectAppStatistic(value: unknown): void {
+export function expectAppStatistic(value: unknown) {
   const stat = value as { value: number; velocity: number };
   expect(typeof stat.value).toBe("number");
   expect(typeof stat.velocity).toBe("number");
 }
 
-export function expectPlayerSearchResponse(body: unknown): void {
+export function expectPlayerSearchResponse(body: unknown) {
   const response = body as { players: unknown[] };
   expect(Array.isArray(response.players)).toBe(true);
 }
 
-export function expectBasicPlayerShape(body: unknown, playerId: string): void {
+export function expectBasicPlayerShape(body: unknown, playerId: string) {
   const player = body as {
     id: string;
     name: string;
@@ -120,7 +120,7 @@ export function expectBasicPlayerShape(body: unknown, playerId: string): void {
   expect(player.joinedDate).toBeDefined();
 }
 
-export function expectScoresChartResponse(body: unknown): void {
+export function expectScoresChartResponse(body: unknown) {
   const response = body as {
     data: Array<{
       accuracy: number;
@@ -143,7 +143,7 @@ export function expectScoresChartResponse(body: unknown): void {
   }
 }
 
-export function expectPlayerPpsResponse(body: unknown): void {
+export function expectPlayerPpsResponse(body: unknown) {
   const response = body as {
     scores: Array<{ pp: number; weight: number; scoreId: number }>;
   };
@@ -155,18 +155,18 @@ export function expectPlayerPpsResponse(body: unknown): void {
   }
 }
 
-export function expectPlayerRefreshResponse(body: unknown): void {
+export function expectPlayerRefreshResponse(body: unknown) {
   const response = body as { result: boolean };
   expect(typeof response.result).toBe("boolean");
 }
 
-export function expectMiniRankingResponse(body: unknown): void {
+export function expectMiniRankingResponse(body: unknown) {
   const response = body as { globalRankings: unknown[]; countryRankings: unknown[] };
   expect(Array.isArray(response.globalRankings)).toBe(true);
   expect(Array.isArray(response.countryRankings)).toBe(true);
 }
 
-export function expectPlayerHistoryResponse(body: unknown): void {
+export function expectPlayerHistoryResponse(body: unknown) {
   expect(typeof body).toBe("object");
   expect(body).not.toBeNull();
   const entries = Object.entries(body as Record<string, { pp?: number | null; rank?: number | null }>);
@@ -177,13 +177,13 @@ export function expectPlayerHistoryResponse(body: unknown): void {
   }
 }
 
-export function expectScoreSaberScoresPage(body: unknown, page: number): void {
+export function expectScoreSaberScoresPage(body: unknown, page: number) {
   const response = body as { items: unknown[]; metadata: unknown };
   expect(Array.isArray(response.items)).toBe(true);
   expectPaginationMetadata(response.metadata, page);
 }
 
-export function expectPlayerScorePage(body: unknown, page: number): void {
+export function expectPlayerScorePage(body: unknown, page: number) {
   const response = body as {
     items: Array<{
       score: { scoreId: number; playerId: string; leaderboardId: number };
@@ -202,7 +202,7 @@ export function expectPlayerScorePage(body: unknown, page: number): void {
   }
 }
 
-export function expectPlayerScore(body: unknown): void {
+export function expectPlayerScore(body: unknown) {
   const response = body as {
     score: { scoreId: number; playerId: string; leaderboardId: number; score: number; pp: number };
     leaderboard: { id: number; songName: string; songHash: string };
@@ -217,7 +217,7 @@ export function expectPlayerScore(body: unknown): void {
   expect(typeof response.leaderboard.songHash).toBe("string");
 }
 
-export function expectScoreHistoryGraph(body: unknown): void {
+export function expectScoreHistoryGraph(body: unknown) {
   const response = body as Array<{ timestamp: string; accuracy: number }>;
   expect(Array.isArray(response)).toBe(true);
   for (const point of response) {
@@ -226,7 +226,7 @@ export function expectScoreHistoryGraph(body: unknown): void {
   }
 }
 
-export function expectLeaderboardScoresResponse(body: unknown, page: number): void {
+export function expectLeaderboardScoresResponse(body: unknown, page: number) {
   const response = body as {
     scores: unknown[];
     leaderboard: { id: number };
@@ -237,7 +237,7 @@ export function expectLeaderboardScoresResponse(body: unknown, page: number): vo
   expectPaginationMetadata(response.metadata, page);
 }
 
-export function expectAccSaberScoresPage(body: unknown, page: number): void {
+export function expectAccSaberScoresPage(body: unknown, page: number) {
   const response = body as { items: unknown[]; metadata: unknown };
   expect(Array.isArray(response.items)).toBe(true);
   expectPaginationMetadata(response.metadata, page);

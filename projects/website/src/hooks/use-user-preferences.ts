@@ -34,7 +34,7 @@ export function useUserPreferences() {
 /**
  * Gets a single preference. The component only re-renders when that preference changes.
  */
-export function useUserPreference<Key extends UserPreferenceKey>(key: Key): UserPreferences[Key] {
+export function useUserPreference<Key extends UserPreferenceKey>(key: Key) {
   const { data } = useQuery({
     queryKey: USER_PREFERENCES_QUERY_KEY,
     queryFn: fetchUserPreferences,
@@ -72,7 +72,6 @@ export function useUpdateUserPreferences() {
       return { previous };
     },
     onSuccess: saved => {
-      // While more updates are queued the cache already holds their values, don't undo them
       if (saved && queryClient.isMutating({ mutationKey: USER_PREFERENCES_MUTATION_KEY }) <= 1) {
         queryClient.setQueryData(USER_PREFERENCES_QUERY_KEY, saved);
       }

@@ -16,7 +16,6 @@ export const metadata: Metadata = {
   },
 };
 
-// The landing page would otherwise be prerendered once at build time, freezing the stats
 export const revalidate = 300;
 
 const TOP_PLAYER_COUNT = 5;

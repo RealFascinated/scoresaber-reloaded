@@ -1,4 +1,4 @@
-import { BeatSaverMap, BeatSaverMapSchema } from "@ssr/common/schemas/beatsaver/map/map";
+import { BeatSaverMapSchema } from "@ssr/common/schemas/beatsaver/map/map";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { parseSchema } from "@ssr/common/schemas/parse";
@@ -27,7 +27,7 @@ export function beatSaverRowsToMap({
   uploader,
   version,
   difficulties,
-}: BeatSaverRowsToMapArgs): BeatSaverMap | undefined {
+}: BeatSaverRowsToMapArgs) {
   const selectedDifficulty = difficulties.find(
     diff =>
       diff.versionId === version.id &&

@@ -3,7 +3,6 @@ import { DIRECTION_NAMES } from "../replay-takeaways";
 import SaberCut from "./saber-cut";
 import ScorePad, { PadCell } from "./score-pad";
 
-/** The 3x3 pad in screen order. */
 const PAD: CutDirection[] = [
   "upLeft",
   "up",

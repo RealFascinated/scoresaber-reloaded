@@ -1,6 +1,5 @@
 import { Pagination } from "@ssr/common/pagination";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import type { MedalChange } from "@ssr/common/schemas/medals/medal-changes";
 import {
   MedalRankingPlayer,
   PlayerMedalRankingsResponse,
@@ -20,21 +19,18 @@ export class PlayerMedalsService {
    * @param leaderboard the leaderboard (must be ranked for any work to run)
    * @returns map of account medal total changes (before/after) for players whose global medals changed
    */
-  public static async refreshLeaderboardMedals(
-    leaderboard: ScoreSaberLeaderboard
-  ): Promise<Map<string, MedalChange>> {
+  public static async refreshLeaderboardMedals(leaderboard: ScoreSaberLeaderboard) {
     if (!leaderboard.ranked) {
       return new Map();
     }
 
-    // The sync reports each player's total before and after, so no separate reads are needed
     const updatedPlayerIds = await ScoreSaberMedalsRepository.updateMedalsOnLeaderboard(leaderboard);
     return ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds(updatedPlayerIds);
   }
 
   /**
    * Recomputes score medals for many leaderboards and syncs medal totals once, for callers that don't need
-   * the per-player {@link MedalChange}s. Leaderboards that are not ranked are skipped.
+   * the per-player `MedalChange`s. Leaderboards that are not ranked are skipped.
    *
    * Each update only touches its own leaderboard's score rows, so they run concurrently; the account totals
    * are derived from those rows, so one sync at the end gives the same totals as one sync per leaderboard
@@ -42,7 +38,7 @@ export class PlayerMedalsService {
    *
    * @param leaderboards the leaderboards to refresh
    */
-  public static async refreshLeaderboardsMedals(leaderboards: ScoreSaberLeaderboard[]): Promise<void> {
+  public static async refreshLeaderboardsMedals(leaderboards: ScoreSaberLeaderboard[]) {
     const ranked = leaderboards.filter(leaderboard => leaderboard.ranked);
     const updatedPlayerIds = new Set<string>();
 
@@ -58,8 +54,6 @@ export class PlayerMedalsService {
         }
       }
     } finally {
-      // Score medals of finished batches are already committed, so their account totals must be synced
-      // even when a later batch fails; otherwise they would stay stale until the nightly recompute.
       await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds([...updatedPlayerIds]);
     }
   }
@@ -70,7 +64,7 @@ export class PlayerMedalsService {
    *
    * @param playerIds the players to sync
    */
-  public static async syncPlayersMedalTotals(playerIds: string[]): Promise<void> {
+  public static async syncPlayersMedalTotals(playerIds: string[]) {
     await ScoreSaberMedalsRepository.syncMedalTotalsForPlayerIds(playerIds);
   }
 
@@ -78,7 +72,7 @@ export class PlayerMedalsService {
    * Recomputes score medals for every ranked leaderboard, then syncs all account medal totals from scores
    * and refreshes materialized medal rank columns.
    */
-  public static async recomputeMedalsFromScoresAndRefreshAccounts(): Promise<void> {
+  public static async recomputeMedalsFromScoresAndRefreshAccounts() {
     const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(DEFAULT_REALM_ID);
 
     for (const batch of chunkArray(rankedLeaderboards, RANKED_MEDAL_RECOMPUTE_CONCURRENCY)) {
@@ -93,7 +87,7 @@ export class PlayerMedalsService {
    * Syncs every account medal total from scores and refreshes materialized medal rank columns (does not
    * recompute per-score medals).
    */
-  public static async resyncAccountMedalTotalsAndRefreshRanks(): Promise<void> {
+  public static async resyncAccountMedalTotalsAndRefreshRanks() {
     await ScoreSaberMedalsRepository.syncGlobalMedalTotalsFromScoresTable();
     await ScoreSaberMedalsRepository.refreshMaterializedMedalRanks();
   }
@@ -105,10 +99,7 @@ export class PlayerMedalsService {
    * @param country optional country filter
    * @returns players and pagination metadata
    */
-  public static async getPlayerMedalRanking(
-    page: number,
-    country?: string
-  ): Promise<PlayerMedalRankingsResponse> {
+  public static async getPlayerMedalRanking(page: number, country?: string) {
     const itemsPerPage = 50;
 
     const totalPlayers = await ScoreSaberMedalsRepository.countMedalRankingPlayers(country);
@@ -132,7 +123,7 @@ export class PlayerMedalsService {
         return [];
       }
 
-      return rows.map((row): MedalRankingPlayer => ({
+      return rows.map(row => ({
         id: row.id,
         name: row.name,
         avatar: row.avatar,

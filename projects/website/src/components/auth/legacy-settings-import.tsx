@@ -47,7 +47,6 @@ export function LegacySettingsImport() {
     }
 
     runImport().catch(error => {
-      // Leave the old database and the marker alone so the next page load retries
       console.error("Failed to import the old settings", error);
     });
   }, [ready, preferences, me, updateAsync, queryClient]);

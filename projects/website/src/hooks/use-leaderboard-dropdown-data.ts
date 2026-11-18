@@ -16,7 +16,6 @@ export function useLeaderboardDropdownData(
 ) {
   const [shouldFetch, setShouldFetch] = useState(false);
 
-  // Debounce the fetch to allow UI updates to complete first
   useEffect(() => {
     if (!isExpanded) {
       queueMicrotask(() => setShouldFetch(false));

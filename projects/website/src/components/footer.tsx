@@ -15,10 +15,6 @@ type FooterLink = {
 
   href: string;
 
-  /**
-   * The optional name to show
-   * when the screen size is small.
-   */
   shortName?: string;
 };
 

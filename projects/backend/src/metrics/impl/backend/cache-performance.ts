@@ -28,7 +28,7 @@ export default class CachePerformanceMetric extends NumberMetric {
     super(MetricType.CACHE_PERFORMANCE, 0, { persist: false });
   }
 
-  public static recordHit(cacheId: string, mode: "REDIS" | "MEMORY"): void {
+  public static recordHit(cacheId: string, mode: "REDIS" | "MEMORY") {
     this.cacheHitsCounter.inc({ cache_id: cacheId, mode });
     const hits = (this.cacheHitsByNamespace.get(cacheId) ?? 0) + 1;
     const misses = this.cacheMissesByNamespace.get(cacheId) ?? 0;
@@ -36,7 +36,7 @@ export default class CachePerformanceMetric extends NumberMetric {
     this.cacheHitRatioGauge.set({ cache_id: cacheId, mode }, hits / (hits + misses));
   }
 
-  public static recordMiss(cacheId: string, mode: "REDIS" | "MEMORY"): void {
+  public static recordMiss(cacheId: string, mode: "REDIS" | "MEMORY") {
     this.cacheMissesCounter.inc({ cache_id: cacheId, mode });
     const hits = this.cacheHitsByNamespace.get(cacheId) ?? 0;
     const misses = (this.cacheMissesByNamespace.get(cacheId) ?? 0) + 1;

@@ -19,7 +19,7 @@ export class UserPreferencesRepository {
    *
    * @param stored the sparse preferences from the database
    */
-  public static resolve(stored: UserPreferencesPatch | undefined): UserPreferences {
+  public static resolve(stored: UserPreferencesPatch | undefined) {
     const resolved: Record<string, UserPreferences[UserPreferenceKey]> = { ...DEFAULT_USER_PREFERENCES };
     for (const key of PREFERENCE_KEYS) {
       const value = stored?.[key];
@@ -35,7 +35,7 @@ export class UserPreferencesRepository {
    *
    * @param userId the user to get the preferences of
    */
-  public static async get(userId: string): Promise<UserPreferences> {
+  public static async get(userId: string) {
     const [row] = await db
       .select({ preferences: userPreferencesTable.preferences })
       .from(userPreferencesTable)
@@ -51,18 +51,16 @@ export class UserPreferencesRepository {
    * @param patch the validated preferences to replace
    * @returns the full preferences after the update
    */
-  public static async patch(userId: string, patch: UserPreferencesPatch): Promise<UserPreferences> {
+  public static async patch(userId: string, patch: UserPreferencesPatch) {
     return db.transaction(async tx => {
       await tx.insert(userPreferencesTable).values({ userId }).onConflictDoNothing();
 
-      // Lock the row so concurrent patches of the same user are applied one after another
       const [row] = await tx
         .select({ preferences: userPreferencesTable.preferences })
         .from(userPreferencesTable)
         .where(eq(userPreferencesTable.userId, userId))
         .for("update");
 
-      // Only known keys are ever stored
       const known = Object.fromEntries(
         Object.entries(patch).filter(([key]) => PREFERENCE_KEYS.some(preferenceKey => preferenceKey === key))
       );

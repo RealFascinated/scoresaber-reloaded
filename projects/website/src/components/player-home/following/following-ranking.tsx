@@ -16,7 +16,6 @@ export function FollowingRanking() {
 
   const [page, setPage] = useState(1);
 
-  // Derived while rendering (not in an effect) so the server-rendered HTML already has the list
   const sortedFollowing = following.toSorted((a, b) => {
     if (a.inactive && !b.inactive) {
       return 1;

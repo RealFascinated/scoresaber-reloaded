@@ -39,7 +39,6 @@ import {
   UserRound,
   type LucideIcon,
 } from "lucide-react";
-import { ReactNode } from "react";
 
 export type OverlayWidgetDefinition = {
   icon: LucideIcon;
@@ -173,7 +172,7 @@ export const OVERLAY_WIDGETS: Record<OverlayWidgetType, OverlayWidgetDefinition>
 export const OVERLAY_WIDGET_TYPES = Object.keys(OVERLAY_WIDGETS) as OverlayWidgetType[];
 
 /** Renders the content of an element. */
-export function OverlayWidget({ element }: { element: OverlayElement }): ReactNode {
+export function OverlayWidget({ element }: { element: OverlayElement }) {
   switch (element.type) {
     case OverlayWidgetTypes.PlayerAvatar:
       return <PlayerAvatarWidget />;

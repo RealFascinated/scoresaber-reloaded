@@ -44,7 +44,6 @@ export default function RankingData({ initial }: RankingDataProps) {
   const { realmId } = useRealm();
   const isDefaultRealm = realmId === DEFAULT_REALM_ID;
   const mainPlayer = useMainPlayer().data;
-  // The follow column only exists for a signed-in user, so signed-out tables don't reserve its space
   const { data: me } = useMe();
   const filtersId = useId();
 
@@ -59,7 +58,6 @@ export default function RankingData({ initial }: RankingDataProps) {
   const debouncedSearch = useDebounce(currentSearch, DEBOUNCE_MS_SEARCH);
   const query = buildRankingQuery(currentPage, countryQuery, debouncedSearch, includeInactives);
 
-  // The server only renders the default realm, and its data is only valid for the query it was fetched for
   const initialData =
     initial && isDefaultRealm && isSameRankingQuery(initial.query, query) ? initial.data : undefined;
 
@@ -81,11 +79,8 @@ export default function RankingData({ initial }: RankingDataProps) {
       }),
     initialData,
     initialDataUpdatedAt: initial?.fetchedAt,
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
     refetchIntervalInBackground: false,
-    // Don't carry the server's default realm data over to a realm it wasn't rendered for
     placeholderData: (previous, previousQuery) =>
       previousQuery?.options.initialData !== undefined && !isDefaultRealm ? undefined : previous,
   });
@@ -317,7 +312,7 @@ function buildPageUrl(
     includeInactives: boolean;
     showRelativePp: boolean;
   }
-): string {
+) {
   const params = new URLSearchParams();
   if (filters.country) {
     params.set("country", filters.country);
@@ -338,7 +333,6 @@ function buildPageUrl(
   return query ? `/ranking?${query}` : "/ranking";
 }
 
-// Rows that fit above the fold on a phone keep their avatar in the first paint; the rest wait for hydration
 const EAGER_AVATAR_ROWS = 8;
 
 function PlayerTableName({

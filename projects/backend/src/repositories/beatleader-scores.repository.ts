@@ -2,12 +2,12 @@ import type { MapCharacteristic } from "@ssr/common/schemas/map/map-characterist
 import type { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
 import { and, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import { db } from "../db";
-import { beatLeaderScoresTable, type BeatLeaderScoreRow } from "../db/schema";
+import { beatLeaderScoresTable } from "../db/schema";
 
 export type BeatLeaderScoreInsert = typeof beatLeaderScoresTable.$inferInsert;
 
 export class BeatLeaderScoresRepository {
-  public static async findRowById(scoreId: number): Promise<BeatLeaderScoreRow | undefined> {
+  public static async findRowById(scoreId: number) {
     const [row] = await db.select().from(beatLeaderScoresTable).where(eq(beatLeaderScoresTable.id, scoreId));
     return row;
   }
@@ -17,7 +17,7 @@ export class BeatLeaderScoresRepository {
    *
    * @returns the inserted row, or undefined if the score already existed
    */
-  public static async insertReturning(row: BeatLeaderScoreInsert): Promise<BeatLeaderScoreRow | undefined> {
+  public static async insertReturning(row: BeatLeaderScoreInsert) {
     const [inserted] = await db.insert(beatLeaderScoresTable).values(row).onConflictDoNothing().returning();
     return inserted;
   }
@@ -28,7 +28,7 @@ export class BeatLeaderScoresRepository {
    * @param rows the scores to store
    * @returns the ids of the scores that were inserted
    */
-  public static async insertManyReturningIds(rows: BeatLeaderScoreInsert[]): Promise<number[]> {
+  public static async insertManyReturningIds(rows: BeatLeaderScoreInsert[]) {
     const ids: number[] = [];
     for (let i = 0; i < rows.length; i += 500) {
       const inserted = await db
@@ -47,7 +47,7 @@ export class BeatLeaderScoresRepository {
     songDifficulty: MapDifficulty,
     songCharacteristic: MapCharacteristic,
     songScore: number
-  ): Promise<BeatLeaderScoreRow | undefined> {
+  ) {
     const rows = await db
       .select()
       .from(beatLeaderScoresTable)
@@ -73,7 +73,7 @@ export class BeatLeaderScoresRepository {
     songHashUpper: string,
     songDifficulty: MapDifficulty,
     songCharacteristic: MapCharacteristic
-  ): Promise<BeatLeaderScoreRow | undefined> {
+  ) {
     const rows = await db
       .select()
       .from(beatLeaderScoresTable)
@@ -94,7 +94,7 @@ export class BeatLeaderScoresRepository {
     return rows[0];
   }
 
-  public static async rowExistsById(scoreId: number): Promise<boolean> {
+  public static async rowExistsById(scoreId: number) {
     const rows = await db
       .select({ exists: sql`1` })
       .from(beatLeaderScoresTable)
@@ -102,7 +102,7 @@ export class BeatLeaderScoresRepository {
     return rows.length > 0;
   }
 
-  public static async findExistingIds(scoreIds: number[]): Promise<Set<number>> {
+  public static async findExistingIds(scoreIds: number[]) {
     if (scoreIds.length === 0) {
       return new Set();
     }
@@ -119,7 +119,7 @@ export class BeatLeaderScoresRepository {
     songHashUpper: string,
     leaderboardId: string,
     timestamp: Date
-  ): Promise<number | undefined> {
+  ) {
     const rows = await db
       .select({ id: beatLeaderScoresTable.id })
       .from(beatLeaderScoresTable)
@@ -136,7 +136,7 @@ export class BeatLeaderScoresRepository {
     return rows[0]?.id;
   }
 
-  public static async countSavedReplays(): Promise<number> {
+  public static async countSavedReplays() {
     const [row] = await db
       .select({ c: count() })
       .from(beatLeaderScoresTable)

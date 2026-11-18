@@ -4,15 +4,13 @@ import { createGenericEmbed } from "./embed";
 
 const errorLog = Logger.withTopic("Global Errors");
 
-/** Discord embed description limit */
 const EMBED_DESCRIPTION_MAX = 4096;
 
-/** Suppress duplicate reports for the same error within this window */
 const THROTTLE_MS = 30_000;
 
 const recentReports = new Map<string, number>();
 
-function shouldReport(fingerprint: string): boolean {
+function shouldReport(fingerprint: string) {
   const now = Date.now();
   const last = recentReports.get(fingerprint);
   if (last !== undefined && now - last < THROTTLE_MS) {
@@ -31,14 +29,14 @@ function shouldReport(fingerprint: string): boolean {
   return true;
 }
 
-function truncate(text: string, max: number): string {
+function truncate(text: string, max: number) {
   if (text.length <= max) {
     return text;
   }
   return `${text.slice(0, max - 20)}\n\n… (truncated)`;
 }
 
-function formatPgCause(error: unknown): string | undefined {
+function formatPgCause(error: unknown) {
   if (!(error instanceof Error) || !("cause" in error)) {
     return undefined;
   }
@@ -63,7 +61,7 @@ function formatPgCause(error: unknown): string | undefined {
   return parts.length > 0 ? parts.join("\n") : undefined;
 }
 
-export function formatErrorForDiscord(error: unknown): string {
+export function formatErrorForDiscord(error: unknown) {
   const pgCause = formatPgCause(error);
 
   if (error instanceof Error) {
@@ -92,7 +90,7 @@ export function formatErrorForDiscord(error: unknown): string {
  * Reports an error to the backend logs Discord channel (when configured).
  * Duplicate errors are throttled to avoid flooding the channel.
  */
-export function reportErrorToDiscord(title: string, error: unknown, extra?: string): void {
+export function reportErrorToDiscord(title: string, error: unknown, extra?: string) {
   const message = formatErrorForDiscord(error);
   const fingerprint = `${title}:${message.split("\n")[0] ?? message}`.slice(0, 500);
 
@@ -112,7 +110,7 @@ export function reportErrorToDiscord(title: string, error: unknown, extra?: stri
  * Hooks process-level handlers for uncaught exceptions and unhandled promise rejections.
  * Call once at startup before other async work when possible.
  */
-export function registerGlobalErrorHandlers(): void {
+export function registerGlobalErrorHandlers() {
   process.on("uncaughtException", error => {
     errorLog.error("Uncaught exception:", error);
     reportErrorToDiscord("Uncaught exception", error);

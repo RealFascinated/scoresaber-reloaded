@@ -18,29 +18,21 @@ type LegacySettingRow = { id: string; value: LegacySettingValue };
  * Whether the settings of the old browser database have already been moved to the account
  * (or there was nothing to move). Once true the old database is never opened again.
  */
-export function hasImportedLegacySettings(): boolean {
+export function hasImportedLegacySettings() {
   try {
     return localStorage.getItem(IMPORTED_MARKER_KEY) === "true";
   } catch {
-    // Storage is blocked, never block the app on it
     return true;
   }
 }
 
-export function markLegacySettingsImported(): void {
+export function markLegacySettingsImported() {
   try {
     localStorage.setItem(IMPORTED_MARKER_KEY, "true");
-  } catch {
-    // Nothing to do, the import just runs again next time
-  }
+  } catch {}
 }
 
-/**
- * Reads the settings of the old IndexedDB database without creating it.
- *
- * @returns the stored rows, or undefined when the database doesn't exist
- */
-async function readLegacySettings(): Promise<LegacySettingRow[] | undefined> {
+async function readLegacySettings() {
   if (typeof indexedDB === "undefined") {
     return undefined;
   }
@@ -50,7 +42,7 @@ async function readLegacySettings(): Promise<LegacySettingRow[] | undefined> {
     return undefined;
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise<LegacySettingRow[] | undefined>((resolve, reject) => {
     const open = indexedDB.open(LEGACY_DATABASE_NAME);
     open.onerror = () => reject(open.error ?? new Error("Failed to open the old settings database"));
     open.onsuccess = () => {
@@ -77,10 +69,9 @@ async function readLegacySettings(): Promise<LegacySettingRow[] | undefined> {
   });
 }
 
-function deleteLegacyDatabase(): Promise<void> {
-  return new Promise(resolve => {
+function deleteLegacyDatabase() {
+  return new Promise<void>(resolve => {
     const request = indexedDB.deleteDatabase(LEGACY_DATABASE_NAME);
-    // A failed or blocked delete only leaves unused data behind
     request.onsuccess = () => resolve();
     request.onerror = () => resolve();
     request.onblocked = () => resolve();
@@ -95,10 +86,7 @@ function deleteLegacyDatabase(): Promise<void> {
  * TypeBox and the preference schema are imported here instead of at the top of the file, so only
  * browsers that still have old data download them.
  */
-export async function buildLegacyImportPatch(
-  rows: LegacySettingRow[],
-  current: UserPreferences
-): Promise<UserPreferencesPatch> {
+export async function buildLegacyImportPatch(rows: LegacySettingRow[], current: UserPreferences) {
   const [{ Value }, { UserPreferencesSchema }] = await Promise.all([
     import("typebox/value"),
     import("@ssr/common/schemas/user/preferences"),
@@ -106,7 +94,7 @@ export async function buildLegacyImportPatch(
   const patch: Record<string, LegacySettingValue> = {};
   for (const { id, value } of rows) {
     if (!(id in UserPreferencesSchema.properties)) {
-      continue; // e.g. the old main player (comes from the session) and friends (see below)
+      continue;
     }
 
     const key = id as UserPreferenceKey;
@@ -131,7 +119,7 @@ export function buildLegacyFollowingIds(
   rows: LegacySettingRow[],
   followingIds: string[],
   ownPlayerId: string | undefined
-): string[] {
+) {
   const friends = rows.find(row => row.id === "friends")?.value;
   if (followingIds.length > 0 || !Array.isArray(friends)) {
     return [];
@@ -159,7 +147,7 @@ type LegacyImportTarget = {
 /**
  * Moves the old browser settings and friends into the account, once.
  */
-export async function importLegacySettings(target: LegacyImportTarget): Promise<void> {
+export async function importLegacySettings(target: LegacyImportTarget) {
   const rows = await readLegacySettings();
   if (rows) {
     const patch = await buildLegacyImportPatch(rows, target.preferences);
@@ -169,7 +157,6 @@ export async function importLegacySettings(target: LegacyImportTarget): Promise<
     for (const id of buildLegacyFollowingIds(rows, target.followingIds, target.playerId)) {
       await target.follow(id);
     }
-    // Only deleted after everything was saved, so a failed import can be retried
     await deleteLegacyDatabase();
   }
   markLegacySettingsImported();

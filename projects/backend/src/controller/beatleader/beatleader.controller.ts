@@ -13,7 +13,6 @@ import {
   BeatLeaderOverlayPlayerResponseSchema,
   BeatLeaderOverlayRatingsResponseSchema,
 } from "@ssr/common/schemas/response/beatleader/overlay-ratings";
-import { ScoreStatsResponse } from "@ssr/common/schemas/response/beatleader/score-stats";
 import { Elysia, redirect } from "elysia";
 import { BeatLeaderOverlayDataService } from "../../service/beatleader/beatleader-overlay-data.service";
 import { BeatLeaderOverlayLiveService } from "../../service/beatleader/beatleader-overlay-live.service";
@@ -34,7 +33,7 @@ export default function beatleaderController(app: Elysia) {
             description: "Fetch BeatLeader score stats",
           },
         },
-        async ({ params: { scoreId } }): Promise<ScoreStatsResponse> => {
+        async ({ params: { scoreId } }) => {
           return BeatLeaderService.getScoresFullScoreStats(scoreId);
         }
       )
@@ -113,7 +112,6 @@ export default function beatleaderController(app: Elysia) {
           },
         },
         async ({ params: { playerId, hash, difficulty, characteristic }, set }) => {
-          // The best score can change when the player sets a new one
           set.headers["cache-control"] = "public, max-age=60";
           return BeatLeaderOverlayDataService.getByPlayerAndMap(playerId, hash, difficulty, characteristic);
         }

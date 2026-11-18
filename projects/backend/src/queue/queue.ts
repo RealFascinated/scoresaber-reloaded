@@ -7,26 +7,12 @@ import { QueueId } from "./queue-manager";
 
 const queueLogger = Logger.withTopic("Queue");
 
-/**
- * Atomic queue operations. A queue is these keys:
- * - `queue::<id>`: the waiting items. An item whose data is its own id is stored as just the id,
- *   anything else as `<item id>\n<devalue data>`.
- * - `queue::<id>::members::<bucket>`: the ids that are waiting, split over MEMBER_BUCKETS small sets for
- *   O(1) de-duplication. Redis stores small all-integer sets as a packed intset (~8 bytes per id) instead
- *   of a hashtable (~60+ bytes per id), which only works while every set stays small.
- * - `queue::<id>::processing`: the items a worker has popped but not finished yet.
- */
 const ITEM_SEPARATOR = "\n";
 const LEGACY_ITEM_PREFIX = "[";
 const MEMBER_BUCKETS = 1024;
 
-/**
- * Must be the first line of every script: member keys are derived from the prefix inside the script, so they can't be
- * declared in KEYS. Dragonfly reads this header (it does not understand Redis' `#!lua` shebang); Redis sees a comment.
- */
 const LUA_HEADER = "--!df flags=allow-undeclared-keys\n";
 
-/** Lua helpers shared by the scripts below: which member set an id belongs to, and an item's id. */
 const LUA_HELPERS = `
   local BUCKETS = ${MEMBER_BUCKETS}
   local function memberKey(prefix, id)
@@ -51,7 +37,6 @@ const LUA_HELPERS = `
 
 redisClient.defineCommand("queueAdd", {
   numberOfKeys: 2,
-  // KEYS: queue, members prefix. ARGV: itemId, element, itemId, element, ... Returns how many were new.
   lua: `${LUA_HEADER}${LUA_HELPERS}
     local added = 0
     for i = 1, #ARGV, 2 do
@@ -66,7 +51,6 @@ redisClient.defineCommand("queueAdd", {
 
 redisClient.defineCommand("queuePop", {
   numberOfKeys: 3,
-  // KEYS: queue, processing, members prefix. ARGV: side of the queue to pop from (LEFT or RIGHT).
   lua: `${LUA_HEADER}${LUA_HELPERS}
     local raw = redis.call('LMOVE', KEYS[1], KEYS[2], ARGV[1], 'LEFT')
     if raw then
@@ -81,9 +65,6 @@ redisClient.defineCommand("queuePop", {
 
 redisClient.defineCommand("queueAckPop", {
   numberOfKeys: 3,
-  // KEYS: queue, processing, members prefix. ARGV: side to pop from (LEFT or RIGHT), the finished item,
-  // and "1" to pop the next item (or "0" to only acknowledge the finished one).
-  // The finished item leaves the processing list in the same step the next one enters it.
   lua: `${LUA_HEADER}${LUA_HELPERS}
     redis.call('LREM', KEYS[2], 1, ARGV[2])
     if ARGV[3] ~= '1' then
@@ -102,7 +83,6 @@ redisClient.defineCommand("queueAckPop", {
 
 redisClient.defineCommand("queueRecover", {
   numberOfKeys: 3,
-  // KEYS: queue, processing, members prefix. Moves every in-flight item back on the queue. Returns how many.
   lua: `${LUA_HEADER}${LUA_HELPERS}
     local recovered = 0
     while true do
@@ -122,7 +102,6 @@ redisClient.defineCommand("queueRecover", {
 
 redisClient.defineCommand("queueHas", {
   numberOfKeys: 1,
-  // KEYS: members prefix. ARGV: itemId. Returns 1 when that id is waiting.
   lua: `${LUA_HEADER}${LUA_HELPERS}
     return redis.call('SISMEMBER', memberKey(KEYS[1], ARGV[1]), ARGV[1])
   `,
@@ -178,22 +157,12 @@ export abstract class Queue<T extends QueueItem<unknown>> {
    */
   public readonly concurrency: number;
 
-  /** Max items pushed to Redis per command when adding a batch. */
   private static readonly ADD_BATCH_SIZE = 1_000;
 
-  /**
-   * Number of in-flight item processors
-   */
   private activeWorkers = 0;
 
-  /**
-   * Whether the queue is stopped
-   */
   private isStopped = false;
 
-  /**
-   * Whether items left in the processing list by a previous run were put back on the queue
-   */
   private recoveredInFlight = false;
 
   constructor(id: QueueId, queueMode: QueueMode = "lifo", concurrency: number = 1) {
@@ -202,7 +171,7 @@ export abstract class Queue<T extends QueueItem<unknown>> {
     this.concurrency = Math.max(1, Math.floor(concurrency));
   }
 
-  public static setProcessObserver(observer: ((event: QueueProcessEvent) => void) | undefined): void {
+  public static setProcessObserver(observer: ((event: QueueProcessEvent) => void) | undefined) {
     Queue.processObserver = observer;
   }
 
@@ -217,7 +186,6 @@ export abstract class Queue<T extends QueueItem<unknown>> {
     }
 
     await redisClient.queueAdd(this.queueKey, this.membersPrefix, item.id, this.serialize(item));
-    // Use setImmediate to ensure the item is committed before processing
     setImmediate(() => this.processQueue());
   }
 
@@ -231,8 +199,6 @@ export abstract class Queue<T extends QueueItem<unknown>> {
       return;
     }
 
-    // Pushed in batches over one pipeline: a seed queue takes hundreds of thousands of ids, and a round
-    // trip per item kept it filling for longer than a processing cycle. Items already waiting are skipped.
     const pipeline = redisClient.pipeline();
     for (let i = 0; i < items.length; i += Queue.ADD_BATCH_SIZE) {
       const entries = items
@@ -247,7 +213,6 @@ export abstract class Queue<T extends QueueItem<unknown>> {
       }
     }
 
-    // Use setImmediate to ensure the items are committed before processing
     setImmediate(() => this.processQueue());
   }
 
@@ -268,12 +233,10 @@ export abstract class Queue<T extends QueueItem<unknown>> {
     }
 
     while (this.activeWorkers < this.concurrency && !this.isStopped) {
-      // Reserve the worker slot before awaiting the pop so concurrent callers can't exceed the limit
       this.activeWorkers++;
 
       let rawItem: string | null;
       try {
-        // The item moves to a processing list and is only removed once handled, so a crash doesn't lose it
         rawItem = await redisClient.queuePop(
           this.queueKey,
           this.processingKey,
@@ -295,32 +258,31 @@ export abstract class Queue<T extends QueueItem<unknown>> {
     }
   }
 
-  private get queueKey(): string {
+  private get queueKey() {
     return `queue::${this.id}`;
   }
 
-  private get processingKey(): string {
+  private get processingKey() {
     return `queue::${this.id}::processing`;
   }
 
-  private get popSide(): "LEFT" | "RIGHT" {
+  private get popSide() {
     return this.queueMode === "fifo" ? "RIGHT" : "LEFT";
   }
 
-  private get membersPrefix(): string {
+  private get membersPrefix() {
     return `queue::${this.id}::members::`;
   }
 
-  private serialize(item: T): string {
+  private serialize(item: T) {
     if (item.id.includes(ITEM_SEPARATOR) || item.id.startsWith(LEGACY_ITEM_PREFIX)) {
       throw new Error(`Queue ${this.id} item id must not contain a newline or start with "[": ${item.id}`);
     }
     return item.data === item.id ? item.id : `${item.id}${ITEM_SEPARATOR}${stringify(item.data)}`;
   }
 
-  private deserialize(raw: string): T {
+  private deserialize(raw: string) {
     if (raw.startsWith(LEGACY_ITEM_PREFIX)) {
-      // Written before the id was split out of the payload
       return parse(raw) as T;
     }
     const separator = raw.indexOf(ITEM_SEPARATOR);
@@ -330,10 +292,7 @@ export abstract class Queue<T extends QueueItem<unknown>> {
     return { id: raw.slice(0, separator), data: parse(raw.slice(separator + 1)) } as T;
   }
 
-  /**
-   * Puts items that were being processed when the previous process stopped back on the queue.
-   */
-  private async recoverInFlightItems(): Promise<void> {
+  private async recoverInFlightItems() {
     if (this.recoveredInFlight) {
       return;
     }
@@ -345,11 +304,7 @@ export abstract class Queue<T extends QueueItem<unknown>> {
     }
   }
 
-  /**
-   * Processes items one after another until the queue is empty. Each finished item is acknowledged and the
-   * next one popped in a single Redis call, so a crash between the two can't lose or repeat an item.
-   */
-  private async runWorker(firstItem: string): Promise<void> {
+  private async runWorker(firstItem: string) {
     let rawItem: string | null = firstItem;
     while (rawItem !== null) {
       await this.runOneItem(rawItem);
@@ -371,7 +326,7 @@ export abstract class Queue<T extends QueueItem<unknown>> {
     this.activeWorkers--;
   }
 
-  private async runOneItem(rawItem: string): Promise<void> {
+  private async runOneItem(rawItem: string) {
     try {
       const item = this.deserialize(rawItem);
       if (!item) {
@@ -401,16 +356,15 @@ export abstract class Queue<T extends QueueItem<unknown>> {
    *
    * @returns the size of the queue
    */
-  public async getSize(): Promise<number> {
+  public async getSize() {
     return await redisClient.llen(this.queueKey);
   }
 
-  public getActiveWorkers(): number {
+  public getActiveWorkers() {
     return this.activeWorkers;
   }
 
-  public async hasItem(item: T): Promise<boolean> {
-    // Waiting items are looked up by id in the members set; the processing list only holds a few items
+  public async hasItem(item: T) {
     const [queued, inFlight] = await Promise.all([
       redisClient.queueHas(this.membersPrefix, item.id),
       redisClient.lpos(this.processingKey, this.serialize(item)),
@@ -423,7 +377,7 @@ export abstract class Queue<T extends QueueItem<unknown>> {
    *
    * @param timeoutMs the max time to wait for the workers
    */
-  public async stop(timeoutMs: number = 5_000): Promise<void> {
+  public async stop(timeoutMs: number = 5_000) {
     this.isStopped = true;
 
     const deadline = Date.now() + timeoutMs;
@@ -432,10 +386,5 @@ export abstract class Queue<T extends QueueItem<unknown>> {
     }
   }
 
-  /**
-   * Processes an item in the queue
-   *
-   * @param item the item to process
-   */
   protected abstract processItem(item: T): Promise<void>;
 }

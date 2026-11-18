@@ -10,7 +10,7 @@ export class UserPinnedScoresRepository {
    *
    * @param userId the user to get the pins of
    */
-  public static async getScoreIds(userId: string): Promise<number[]> {
+  public static async getScoreIds(userId: string) {
     const rows = await db
       .select({ scoreId: userPinnedScoresTable.scoreId })
       .from(userPinnedScoresTable)
@@ -24,9 +24,7 @@ export class UserPinnedScoresRepository {
    *
    * @param playerId the player to get the pins of
    */
-  public static async getPinsByPlayerId(
-    playerId: string
-  ): Promise<{ scoreId: number; message: string | null }[]> {
+  public static async getPinsByPlayerId(playerId: string) {
     return db
       .select({ scoreId: userPinnedScoresTable.scoreId, message: userPinnedScoresTable.message })
       .from(userPinnedScoresTable)
@@ -43,7 +41,7 @@ export class UserPinnedScoresRepository {
    * @param message the message, or null to remove it
    * @returns false if the score isn't pinned by the user
    */
-  public static async setMessage(userId: string, scoreId: number, message: string | null): Promise<boolean> {
+  public static async setMessage(userId: string, scoreId: number, message: string | null) {
     const updated = await db
       .update(userPinnedScoresTable)
       .set({ message })
@@ -59,9 +57,8 @@ export class UserPinnedScoresRepository {
    * @param scoreId the score to pin
    * @param maxPinned how many scores a user can pin
    */
-  public static async pin(userId: string, scoreId: number, maxPinned: number): Promise<PinResult> {
+  public static async pin(userId: string, scoreId: number, maxPinned: number) {
     return db.transaction(async tx => {
-      // Lock the user so two pins can't both slip under the limit
       await tx
         .select({ id: authUsersTable.id })
         .from(authUsersTable)
@@ -95,7 +92,7 @@ export class UserPinnedScoresRepository {
    * @param userId the user that unpins
    * @param scoreId the score to unpin
    */
-  public static async unpin(userId: string, scoreId: number): Promise<void> {
+  public static async unpin(userId: string, scoreId: number) {
     await db
       .delete(userPinnedScoresTable)
       .where(and(eq(userPinnedScoresTable.userId, userId), eq(userPinnedScoresTable.scoreId, scoreId)));

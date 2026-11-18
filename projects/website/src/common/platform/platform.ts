@@ -20,19 +20,19 @@ export abstract class Platform {
     this.options = options;
   }
 
-  public getType(): PlatformType {
+  public getType() {
     return this.type;
   }
 
-  public getDisplayName(): string {
+  public getDisplayName() {
     return this.displayName;
   }
 
-  public getOptions(): PlatformOptions {
+  public getOptions() {
     return this.options;
   }
 
-  public getLogo(): ReactNode | undefined {
+  public getLogo() {
     return this.options.logo;
   }
 }

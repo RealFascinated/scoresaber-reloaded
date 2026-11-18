@@ -34,9 +34,7 @@ export type QueryParamSelectorOptions<T extends NonNullable<unknown>> = {
   onStartTransition?: () => void;
 };
 
-export function useQueryParamSelector<T extends NonNullable<unknown>>(
-  options: QueryParamSelectorOptions<T>
-): { value: T; setValue: (next: T) => void } {
+export function useQueryParamSelector<T extends NonNullable<unknown>>(options: QueryParamSelectorOptions<T>) {
   const { param, parser, clearOtherParams = false, omitParamWhen, onStartTransition } = options;
 
   const pathname = usePathname();
@@ -63,10 +61,8 @@ export function useQueryParamSelector<T extends NonNullable<unknown>>(
       const qs = nextParams.toString();
       const nextUrl = qs ? `${pathname}?${qs}` : pathname;
 
-      // Replace URL immediately (and optionally clear unrelated params)
       window.history.replaceState({}, "", nextUrl);
 
-      // Keep nuqs state in-sync (default values won't be written to URL)
       setQueryState(shouldOmit ? null : next);
     },
     [onStartTransition, omitParamWhen, parser, clearOtherParams, searchParams, param, pathname, setQueryState]

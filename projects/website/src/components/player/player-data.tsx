@@ -113,7 +113,6 @@ export default function PlayerData({ player: playerProp, initialScores }: Player
             </div>
           )}
 
-          {/* Shown in the sidebar below the mini rankings when that is visible */}
           <div className={showRankings ? "@6xl:hidden" : undefined}>
             <PlayerRankedBatches playerId={player.id} />
           </div>

@@ -20,7 +20,7 @@ export class OverlayUpdateBroadcaster {
    * @param listener called for every change
    * @returns a function that stops watching, or undefined if the overlay has too many watchers
    */
-  public static subscribe(overlayId: string, listener: OverlayUpdateListener): (() => void) | undefined {
+  public static subscribe(overlayId: string, listener: OverlayUpdateListener) {
     let listeners = this.subscribers.get(overlayId);
     if (!listeners) {
       listeners = new Set();
@@ -49,12 +49,12 @@ export class OverlayUpdateBroadcaster {
    * @param overlayId the overlay that changed
    * @param event what happened
    */
-  public static publish(overlayId: string, event: OverlayUpdateEvent): void {
+  public static publish(overlayId: string, event: OverlayUpdateEvent) {
     const listeners = this.subscribers.get(overlayId);
     if (!listeners) {
       return;
     }
-    for (const listener of [...listeners]) {
+    for (const listener of listeners) {
       try {
         listener(event);
       } catch {

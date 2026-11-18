@@ -11,10 +11,10 @@
     "dev": "bun run --watch src/index.ts",
     "build": "bun build --compile --target bun --outfile ssr-backend src/index.ts",
     "start": "NODE_ENV=production ./ssr-backend",
-    "lint": "oxlint src",
+    "lint": "oxlint src test",
     "test": "bun run test:unit && bun run test:integration",
-    "test:unit": "bun test --concurrency 1 test/unit/common test/unit/db/converter test/unit/playlist-song-utils test/unit/playlist-to-bplist.test.ts test/unit/service",
-    "test:integration": "bun test --concurrency 1 --timeout 30000 --preload ./test/setup-db.ts test/integration test/unit/repositories",
+    "test:unit": "bun test --concurrency 1 --path-ignore-patterns '**/*.integration.test.ts' src test/unit",
+    "test:integration": "bun test --concurrency 1 --timeout 30000 --preload ./test/setup-db.ts test/integration .integration.test.ts",
     "test:docker": "cd ../.. && docker build -f projects/backend/Dockerfile.test -t ssr-backend-test . && docker run --rm --network host ssr-backend-test"
   },
   "dependencies": {
@@ -41,10 +41,12 @@
     "typebox": "^1.4.7"
   },
   "devDependencies": {
+    "@interfere/landmines": "^0.1.0",
     "@types/bun": "^1.4.4",
     "@types/pg": "^8.23.1",
     "@typescript/native": "npm:typescript@^7.0.2",
     "drizzle-kit": "^0.31.11",
+    "msw": "^2.15.0",
     "oxlint": "^1.94.0",
     "tsx": "^4.23.15",
     "typescript": "npm:@typescript/typescript6@^6.0.2"

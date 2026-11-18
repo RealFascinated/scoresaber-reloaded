@@ -3,9 +3,6 @@
 import { cn } from "@/common/utils";
 import { createContext, ReactNode, useContext } from "react";
 
-/**
- * Controls rendered at the start of every scores toolbar (e.g. the platform tabs on the player page).
- */
 const ScoresToolbarLeadingContext = createContext<ReactNode>(undefined);
 
 export function ScoresToolbarLeadingProvider({
@@ -33,7 +30,6 @@ export function ScoresToolbar({ actions, children }: { actions?: ReactNode; chil
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Bleeds over the card padding (Card is p-4) so the divider runs edge to edge like a card header */}
       <div className="border-border -mx-4 -mt-4 flex flex-wrap items-center justify-between gap-x-4 border-b px-4">
         <div className="flex h-12 min-w-0 items-center">
           {leading ?? <h2 className="text-base font-semibold">Scores</h2>}

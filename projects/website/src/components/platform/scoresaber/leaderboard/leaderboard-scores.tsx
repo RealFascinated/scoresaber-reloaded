@@ -37,7 +37,6 @@ function LeaderboardDifficultySelect({
   const router = useRouter();
   const currentId = current.id;
 
-  // Group difficulties by characteristic, making sure the current one is always present
   const allDifficulties = difficulties.some(d => d.id === currentId)
     ? difficulties
     : [current, ...difficulties];
@@ -48,7 +47,6 @@ function LeaderboardDifficultySelect({
     groups.set(d.characteristic, group);
   }
 
-  // Order characteristics by display preference
   const characteristicOrder = [
     "Standard",
     "OneSaber",

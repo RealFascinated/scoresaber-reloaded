@@ -46,7 +46,7 @@ interface Props {
   toSnipe: ScoreSaberPlayer;
 }
 
-function generateFilename(toSnipeId: string, data: SnipeSettings): string {
+function generateFilename(toSnipeId: string, data: SnipeSettings) {
   const scoreType =
     data.rankedStatus === "all" ? "all" : data.rankedStatus === "ranked" ? "ranked-only" : "unranked-only";
   const starRange =

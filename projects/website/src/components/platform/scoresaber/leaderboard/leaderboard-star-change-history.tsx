@@ -12,11 +12,11 @@ import { formatDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-function formatStars(stars: number): string {
+function formatStars(stars: number) {
   return stars === 0 ? "Unranked" : stars.toFixed(2);
 }
 
-function formatStarDelta(change: LeaderboardStarChange): string {
+function formatStarDelta(change: LeaderboardStarChange) {
   if (change.previousStars === 0 || change.newStars === 0) {
     return "-";
   }

@@ -42,7 +42,6 @@ export default function MockOverlayRuntime({ scenario, playerId, children }: Moc
       pb: scenario === "menu" ? undefined : MOCK_PB,
       blPlayer: MOCK_BL_PLAYER,
       ratings: scenario === "menu" ? undefined : MOCK_RATINGS,
-      // The menu shows what stream shows: widgets without data are hidden, not outlined
       editing: scenario !== "menu",
     }),
     [scenario, elapsed, player]

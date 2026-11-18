@@ -1,5 +1,4 @@
 import { env } from "@ssr/common/env";
-import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { normalizeModifiers } from "@ssr/common/score/modifier";
 import { ScoreSaberScoreHistoryRow, ScoreSaberScoreRow } from "../schema";
 
@@ -9,9 +8,7 @@ import { ScoreSaberScoreHistoryRow, ScoreSaberScoreRow } from "../schema";
  * @param row the row to convert
  * @returns the converted ScoreSaberScore
  */
-export function scoreSaberScoreRowToType(
-  row: ScoreSaberScoreRow | ScoreSaberScoreHistoryRow
-): ScoreSaberScore {
+export function scoreSaberScoreRowToType(row: ScoreSaberScoreRow | ScoreSaberScoreHistoryRow) {
   return {
     playerId: row.playerId,
     leaderboardId: row.leaderboardId,

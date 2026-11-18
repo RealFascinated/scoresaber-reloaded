@@ -11,13 +11,13 @@ export type Bounds = { left: number; top: number; width: number; height: number 
 export type Placement = { anchor: OverlayAnchor; offset: Point };
 
 /** Where an anchor sits on a box, as a fraction (0 start, 0.5 centre, 1 end) of each axis. */
-export function getAnchorFraction(anchor: OverlayAnchor): Point {
+export function getAnchorFraction(anchor: OverlayAnchor) {
   const x = anchor.includes("left") ? 0 : anchor.includes("right") ? 1 : 0.5;
   const y = anchor.includes("top") ? 0 : anchor.includes("bottom") ? 1 : 0.5;
   return { x, y };
 }
 
-function axisStart(fraction: number, offset: number, size: number, canvas: number): number {
+function axisStart(fraction: number, offset: number, size: number, canvas: number) {
   if (fraction === 0) {
     return offset;
   }
@@ -27,7 +27,7 @@ function axisStart(fraction: number, offset: number, size: number, canvas: numbe
   return canvas / 2 + offset - size / 2;
 }
 
-function axisOffset(fraction: number, start: number, size: number, canvas: number): number {
+function axisOffset(fraction: number, start: number, size: number, canvas: number) {
   if (fraction === 0) {
     return start;
   }
@@ -43,7 +43,7 @@ function axisOffset(fraction: number, start: number, size: number, canvas: numbe
  * @param placement the anchor and the offset inward from it
  * @param size the size of the element after scaling
  */
-export function getBounds(placement: Placement, size: Size): Bounds {
+export function getBounds(placement: Placement, size: Size) {
   const fraction = getAnchorFraction(placement.anchor);
   return {
     left: axisStart(fraction.x, placement.offset.x, size.w, OVERLAY_CANVAS_WIDTH),
@@ -56,7 +56,7 @@ export function getBounds(placement: Placement, size: Size): Bounds {
 /**
  * Gets the offset an element needs to cover the given bounds when placed on an anchor.
  */
-export function getOffsetForBounds(anchor: OverlayAnchor, bounds: Bounds): Point {
+export function getOffsetForBounds(anchor: OverlayAnchor, bounds: Bounds) {
   const fraction = getAnchorFraction(anchor);
   return {
     x: axisOffset(fraction.x, bounds.left, bounds.width, OVERLAY_CANVAS_WIDTH),
@@ -67,14 +67,14 @@ export function getOffsetForBounds(anchor: OverlayAnchor, bounds: Bounds): Point
 /**
  * Moves an element to a new anchor without it moving on the canvas.
  */
-export function changeAnchor(placement: Placement, size: Size, anchor: OverlayAnchor): Placement {
+export function changeAnchor(placement: Placement, size: Size, anchor: OverlayAnchor) {
   return { anchor, offset: getOffsetForBounds(anchor, getBounds(placement, size)) };
 }
 
 /**
  * Picks the anchor of the third of the canvas the centre of the bounds is in.
  */
-export function getAutoAnchor(bounds: Bounds): OverlayAnchor {
+export function getAutoAnchor(bounds: Bounds) {
   const centreX = bounds.left + bounds.width / 2;
   const centreY = bounds.top + bounds.height / 2;
   const column =
@@ -92,7 +92,7 @@ export function getAutoAnchor(bounds: Bounds): OverlayAnchor {
  * Applies a pointer movement (in design pixels, right and down positive) to an offset. Offsets are
  * measured inward from the anchor, so right and bottom anchored elements move the other way.
  */
-export function applyDelta(placement: Placement, delta: Point): Point {
+export function applyDelta(placement: Placement, delta: Point) {
   const fraction = getAnchorFraction(placement.anchor);
   return {
     x: placement.offset.x + (fraction.x === 1 ? -delta.x : delta.x),
@@ -100,7 +100,7 @@ export function applyDelta(placement: Placement, delta: Point): Point {
   };
 }
 
-export function clampScale(scale: number): number {
+export function clampScale(scale: number) {
   return Math.min(MAX_OVERLAY_SCALE, Math.max(MIN_OVERLAY_SCALE, scale));
 }
 
@@ -120,7 +120,7 @@ export function getScaleFromPointer(
   startPointer: Point,
   pointer: Point,
   step?: number
-): number {
+) {
   const startDistance = Math.hypot(startPointer.x - anchorPoint.x, startPointer.y - anchorPoint.y);
   if (startDistance < 1) {
     return startScale;
@@ -141,11 +141,7 @@ export const EDGE_MARGINS = [0, 24, 48];
  *
  * @returns the bounds moved onto the closest guides (per axis) and the guides that were hit
  */
-export function snapBounds(
-  bounds: Bounds,
-  others: Bounds[],
-  threshold: number = DEFAULT_SNAP_THRESHOLD
-): { bounds: Bounds; guides: SnapGuide[] } {
+export function snapBounds(bounds: Bounds, others: Bounds[], threshold: number = DEFAULT_SNAP_THRESHOLD) {
   const verticalLines = [
     ...EDGE_MARGINS.flatMap(margin => [margin, OVERLAY_CANVAS_WIDTH - margin]),
     OVERLAY_CANVAS_WIDTH / 2,
@@ -201,7 +197,7 @@ export type CssPlacement = {
  * Gets the CSS to place an element on the canvas: its anchor point sits on the matching canvas
  * anchor point plus the offset, and it scales around that point.
  */
-export function getCssPlacement(placement: Placement, scale: number): CssPlacement {
+export function getCssPlacement(placement: Placement, scale: number) {
   const fraction = getAnchorFraction(placement.anchor);
   const style: CssPlacement["style"] = {
     transform: "",

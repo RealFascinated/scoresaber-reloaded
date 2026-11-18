@@ -12,7 +12,6 @@ export default class ResponseTimeHistogramMetric extends Metric<number> {
       name: "response_time_ms",
       help: "Per-route response time in milliseconds",
       labelNames: ["route"],
-      // Buckets in milliseconds.
       buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2000, 5000, 10000],
       registers: [prometheusRegistry],
     });

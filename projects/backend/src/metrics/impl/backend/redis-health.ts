@@ -34,7 +34,7 @@ export default class RedisHealthMetric extends Metric<null> {
     });
   }
 
-  private async collectRedisMetrics(): Promise<void> {
+  private async collectRedisMetrics() {
     const now = Date.now();
     if (now - this.lastCollectedAt < REDIS_REFRESH_INTERVAL_MS) {
       return;

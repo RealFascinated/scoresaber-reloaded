@@ -1,9 +1,5 @@
 import { CutDirection } from "../replay-insights";
 
-/**
- * Rotation (degrees, clockwise) that turns the animation's travel direction (downwards)
- * into the direction the block has to be cut in.
- */
 const TRAVEL_ROTATION: Record<Exclude<CutDirection, "dot">, number> = {
   up: 180,
   upRight: 225,
@@ -16,27 +12,19 @@ const TRAVEL_ROTATION: Record<Exclude<CutDirection, "dot">, number> = {
 };
 
 const LOOP = "2s";
-/** Share of the loop at which the saber goes through the block. */
 const HIT = 0.3;
-/** How far each half of the sliced block drifts away, in viewBox units. */
 const SPLIT = 3.5;
 
-/** A Beat Saber style block seen from slightly above and to the right, centered on the origin. */
 function Cube({ arrowRotation }: { arrowRotation?: number }) {
   return (
     <g transform="translate(-1 0)">
-      {/* Front face */}
       <rect x="-4" y="-3" width="8" height="8" fill="var(--danger)" />
-      {/* Top face (lit) */}
       <polygon points="-4,-3 -2,-5 6,-5 4,-3" fill="var(--danger)" />
       <polygon points="-4,-3 -2,-5 6,-5 4,-3" fill="#fff" opacity="0.45" />
-      {/* Right face (in shadow) */}
       <polygon points="4,-3 6,-5 6,3 4,5" fill="var(--danger)" />
       <polygon points="4,-3 6,-5 6,3 4,5" fill="#000" opacity="0.4" />
-      {/* Edge highlight */}
       <rect x="-4" y="-3" width="8" height="1" fill="#fff" opacity="0.35" />
 
-      {/* Direction arrow, or a dot for any-direction blocks */}
       <g transform="translate(0 1)">
         {arrowRotation === undefined ? (
           <circle cx="0" cy="0" r="1.6" fill="#fff" />
@@ -60,7 +48,6 @@ export default function SaberCut({ direction, className }: { direction: CutDirec
   const rotation = direction === "dot" ? 0 : TRAVEL_ROTATION[direction];
   const arrowRotation = direction === "dot" ? undefined : rotation;
   const id = `saber-cut-${direction}`;
-  // The last keyframe stays open and invisible; the loop restart then snaps the block back whole
   const splitTimes = `0;${HIT};${HIT + 0.3};1`;
 
   return (
@@ -71,7 +58,6 @@ export default function SaberCut({ direction, className }: { direction: CutDirec
       aria-hidden="true"
     >
       <defs>
-        {/* Each half of the block, in the rotated frame, split down the line of the slash (travel is downwards) */}
         <clipPath id={`${id}-back`}>
           <rect x="-14" y="-14" width="14" height="28" />
         </clipPath>
@@ -80,7 +66,6 @@ export default function SaberCut({ direction, className }: { direction: CutDirec
         </clipPath>
       </defs>
 
-      {/* Floor shadow */}
       <ellipse cx="8" cy="14.5" rx="6" ry="1.2" fill="#000" opacity="0.3" />
 
       <g transform={`translate(8 8) rotate(${rotation})`}>
@@ -102,7 +87,6 @@ export default function SaberCut({ direction, className }: { direction: CutDirec
               repeatCount="indefinite"
             />
             <g clipPath={`url(#${id}-${half})`}>
-              {/* Undo the frame rotation so the block keeps its lighting */}
               <g transform={`rotate(${-rotation})`}>
                 <Cube arrowRotation={arrowRotation} />
               </g>
@@ -141,7 +125,6 @@ export default function SaberCut({ direction, className }: { direction: CutDirec
             </circle>
           </>
         ) : (
-          /* The slash streak runs along the swing direction, through the middle of the block */
           <g>
             <animate
               attributeName="opacity"

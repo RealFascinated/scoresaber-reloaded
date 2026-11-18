@@ -12,7 +12,7 @@ import { createContext, ReactNode, useContext, useLayoutEffect, useRef, useState
 const StageScaleContext = createContext(1);
 
 /** The scale of the stage: screen pixels per design pixel. */
-export function useStageScale(): number {
+export function useStageScale() {
   return useContext(StageScaleContext);
 }
 
@@ -51,7 +51,6 @@ export default function OverlayStage({
       const { clientWidth, clientHeight } = container;
       const fit = Math.min(clientWidth / OVERLAY_CANVAS_WIDTH, clientHeight / OVERLAY_CANVAS_HEIGHT);
       setScale(fit);
-      // Centre the canvas, any space left over is transparent
       setOffset({
         x: (clientWidth - OVERLAY_CANVAS_WIDTH * fit) / 2,
         y: (clientHeight - OVERLAY_CANVAS_HEIGHT * fit) / 2,

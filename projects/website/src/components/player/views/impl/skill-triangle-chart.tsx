@@ -14,9 +14,9 @@ const GYP_L = 57.74;
 const VIEWBOX_WIDTH = 100;
 const VIEWBOX_HEIGHT = 86.6;
 
-const DEFAULT_MAX_PASS = 14; // star rating
-const DEFAULT_MAX_ACC = 97; // accuracy %
-const DEFAULT_MAX_TECH = 0.5; // pp efficiency ratio
+const DEFAULT_MAX_PASS = 14;
+const DEFAULT_MAX_ACC = 97;
+const DEFAULT_MAX_TECH = 0.5;
 
 interface SkillMetrics {
   pass: number;
@@ -37,7 +37,7 @@ const monthFormatter = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
 });
 
-function computeSkillMetrics(scores: { stars: number; accuracy: number; pp: number }[]): SkillMetrics | null {
+function computeSkillMetrics(scores: { stars: number; accuracy: number; pp: number }[]) {
   const ranked = scores.filter(s => s.stars > 0 && s.pp > 0 && s.accuracy > 0);
   if (ranked.length === 0) {
     return null;
@@ -67,9 +67,7 @@ function computeSkillMetrics(scores: { stars: number; accuracy: number; pp: numb
   };
 }
 
-function buildTimeline(
-  scores: { stars: number; accuracy: number; pp: number; timestamp: Date }[]
-): TimelineEntry[] {
+function buildTimeline(scores: { stars: number; accuracy: number; pp: number; timestamp: Date }[]) {
   if (scores.length === 0) {
     return [];
   }

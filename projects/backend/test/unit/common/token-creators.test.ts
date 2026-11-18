@@ -6,9 +6,6 @@ import { ScoreSaberScoreToken } from "@ssr/common/schemas/scoresaber/tokens/v1/s
 import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
 import { describe, expect, test } from "bun:test";
 
-// The token creators skip `parseSchema` when a compiled check passes. These tests make sure that
-// shortcut stays equal to what `parseSchema` returns (e.g. when a schema gains a default or codec).
-
 const leaderboardToken = {
   id: 1,
   songHash: "abc",
@@ -50,7 +47,6 @@ const scoreToken = {
 
 const leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
 
-/** What the score creator returned before the shortcut: the object passed through `parseSchema`. */
 function parseScoreWithSchema(token: ScoreSaberScoreToken) {
   const score = getScoreSaberScoreFromToken(token, leaderboard);
   return parseSchema(ScoreSaberScoreSchema, {

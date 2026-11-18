@@ -33,7 +33,6 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
 
   return (
     <section className="ring-border bg-card relative overflow-hidden rounded-xl ring-1">
-      {/* Blurred cover backdrop */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <Image
           src={leaderboard.songArt}
@@ -46,7 +45,6 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
       </div>
 
       <div className="relative flex flex-col">
-        {/* Top bar: who / when / actions */}
         <div className="border-border/50 flex flex-wrap items-center gap-3 border-b px-4 py-2.5">
           <div className="flex min-w-0 basis-full items-center gap-2.5 sm:flex-1 sm:basis-0">
             <FallbackLink href={`/player/${playerInfo.id}`}>
@@ -84,7 +82,6 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
           </div>
         </div>
 
-        {/* Main: cover + song info + headline numbers */}
         <div className="flex flex-col gap-6 p-4 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left">
             <Image
@@ -160,7 +157,6 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
             </div>
           </div>
 
-          {/* Headline numbers */}
           <div className="flex shrink-0 flex-wrap items-center justify-center gap-x-8 gap-y-4 lg:justify-end">
             <div className="flex flex-col items-center gap-1 lg:items-end">
               {showPp ? (

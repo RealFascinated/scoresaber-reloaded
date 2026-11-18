@@ -6,7 +6,7 @@ import { db } from "../../src/db";
 import { runMigrations } from "../../src/db/run-migrations";
 import { ScoreSaberMedalsRepository } from "../../src/repositories/scoresaber-medals.repository";
 import { TableCountsRepository } from "../../src/repositories/table-counts.repository";
-import { seedCachedScoreSaberPlayerTokens, seedTestDatabase, truncateTestTables } from "./seed";
+import { seedTestDatabase, truncateTestTables } from "./seed";
 
 const ADVISORY_LOCK_ID = 900_001;
 const MAX_RESET_ATTEMPTS = 5;
@@ -16,7 +16,7 @@ let migrationsReady: Promise<void> | undefined;
 let lockClient: Client | undefined;
 let suiteLockHeld = false;
 
-function isTransientPostgresError(error: unknown): boolean {
+function isTransientPostgresError(error: unknown) {
   const message = error instanceof Error ? error.message : String(error);
   const code =
     typeof error === "object" && error !== null && "code" in error
@@ -33,7 +33,7 @@ function isTransientPostgresError(error: unknown): boolean {
   );
 }
 
-async function waitForPostgres(maxAttempts = 60): Promise<void> {
+async function waitForPostgres(maxAttempts = 60) {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await db.execute(sql`SELECT 1`);
@@ -48,7 +48,7 @@ async function waitForPostgres(maxAttempts = 60): Promise<void> {
   }
 }
 
-async function getLockClient(): Promise<Client> {
+async function getLockClient() {
   if (!lockClient) {
     lockClient = new Client({ connectionString: env.DATABASE_URL });
     await lockClient.connect();
@@ -62,7 +62,7 @@ async function getLockClient(): Promise<Client> {
  * concurrent `bun test` processes cannot truncate tables while another suite is
  * executing assertions.
  */
-export async function acquireTestSuiteLock(): Promise<void> {
+export async function acquireTestSuiteLock() {
   if (suiteLockHeld) {
     return;
   }
@@ -89,7 +89,7 @@ export async function acquireTestSuiteLock(): Promise<void> {
   );
 }
 
-export async function releaseTestSuiteLock(): Promise<void> {
+export async function releaseTestSuiteLock() {
   if (!lockClient || !suiteLockHeld) {
     return;
   }
@@ -100,17 +100,16 @@ export async function releaseTestSuiteLock(): Promise<void> {
   suiteLockHeld = false;
 }
 
-async function resetTestDatabaseOnce(): Promise<void> {
+async function resetTestDatabaseOnce() {
   await flushTestRedis();
   await truncateTestTables();
   await seedTestDatabase();
   await TableCountsRepository.reconcile();
   await ScoreSaberMedalsRepository.syncGlobalMedalTotalsFromScoresTable();
   await ScoreSaberMedalsRepository.refreshMaterializedMedalRanks();
-  await seedCachedScoreSaberPlayerTokens();
 }
 
-export async function resetTestDatabase(): Promise<void> {
+export async function resetTestDatabase() {
   await acquireTestSuiteLock();
   await ensureTestMigrations();
 
@@ -128,7 +127,7 @@ export async function resetTestDatabase(): Promise<void> {
   }
 }
 
-export async function ensureTestMigrations(): Promise<void> {
+export async function ensureTestMigrations() {
   migrationsReady ??= (async () => {
     await runMigrations();
   })();
@@ -136,12 +135,12 @@ export async function ensureTestMigrations(): Promise<void> {
   await migrationsReady;
 }
 
-export async function ensureTestDatabase(): Promise<void> {
+export async function ensureTestDatabase() {
   await acquireTestSuiteLock();
   await ensureTestMigrations();
   await resetTestDatabase();
 }
 
-async function flushTestRedis(): Promise<void> {
+async function flushTestRedis() {
   await redisClient.flushdb();
 }

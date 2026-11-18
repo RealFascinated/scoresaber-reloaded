@@ -14,7 +14,6 @@ export default function metricsController(app: Elysia) {
       },
     },
     async ({ headers, set }) => {
-      // Validate Bearer token (skip in development)
       if (isProduction()) {
         const authHeader = headers.authorization;
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -22,7 +21,7 @@ export default function metricsController(app: Elysia) {
           return { error: "Unauthorized" };
         }
 
-        const token = authHeader.substring(7); // Remove "Bearer " prefix
+        const token = authHeader.substring(7);
 
         const expectedToken = env.PROMETHEUS_AUTH_TOKEN;
         if (typeof expectedToken !== "string") {
@@ -38,7 +37,6 @@ export default function metricsController(app: Elysia) {
         }
       }
 
-      // Export Prometheus metrics
       set.headers["content-type"] = "text/plain; version=0.0.4; charset=utf-8";
       return await prometheusRegistry.metrics();
     }

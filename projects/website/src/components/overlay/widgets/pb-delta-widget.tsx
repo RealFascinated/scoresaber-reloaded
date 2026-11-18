@@ -7,7 +7,7 @@ import type { PbDeltaOptions } from "@ssr/common/schemas/overlay/overlay-element
 /**
  * The PB value to show at the current song time, undefined when there is nothing to compare to.
  */
-export function usePbDeltaValue(): { pbAccuracy: number; accuracy: number; finalOnly: boolean } | undefined {
+export function usePbDeltaValue() {
   const { data, pb } = useOverlayRuntime();
   const songTime = useSongTime(data);
   const pbAccuracy = getPbAccuracyAt(pb, songTime);

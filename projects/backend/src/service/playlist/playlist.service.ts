@@ -38,7 +38,7 @@ import { scoreRowsToPlaylistSongs, takeTopUniqueSongRows } from "./playlist-song
 import { buildRankedBatchPlaylist } from "./ranked-batch-playlist";
 import { DEFAULT_PLAYLIST_SIZE, buildSuggestedMapsPlaylist } from "./suggested-maps-playlist";
 
-function getPlaylistTitleDate(date: Date): string {
+function getPlaylistTitleDate(date: Date) {
   return formatDate(date, "MMM D, YYYY");
 }
 
@@ -50,7 +50,7 @@ function getSelfSnipePlaylistTitle({
   name: string;
   settings: SelfPlaylistSettings | SnipeSettings;
   date?: Date;
-}): string {
+}) {
   const parts = [
     `${capitalizeFirstLetter(settings.sort || "pp")} (${settings.sortDirection || "desc"})`,
     `${settings.starRange?.min} - ${settings.starRange?.max} stars`,
@@ -94,7 +94,7 @@ export default class PlaylistService {
    * @param id the id of the playlist
    * @returns the playlist
    */
-  public static async getPlaylist(id: PlaylistId): Promise<Playlist> {
+  public static async getPlaylist(id: PlaylistId) {
     const playlistId = parseSchema(PlaylistIdsSchema, id);
     const parts = playlistId.split(".");
     const normalizedPlaylistId = parts[0];
@@ -112,10 +112,7 @@ export default class PlaylistService {
     throw new NotFoundError(`Playlist ${id} not found`);
   }
 
-  /**
-   * Groups leaderboard entries by song hash (first occurrence keeps its position) into playlist songs.
-   */
-  private static groupPlaylistSongs(entries: PlaylistLeaderboardEntry[]): Playlist["songs"] {
+  private static groupPlaylistSongs(entries: PlaylistLeaderboardEntry[]) {
     const songs = new Map<string, Playlist["songs"][number]>();
     for (const entry of entries) {
       let song = songs.get(entry.songHash);
@@ -138,7 +135,7 @@ export default class PlaylistService {
    *
    * @returns the ranked maps playlist
    */
-  public static async getRankedMapsPlaylist(): Promise<Playlist> {
+  public static async getRankedMapsPlaylist() {
     const songs = PlaylistService.groupPlaylistSongs(
       await ScoreSaberLeaderboardsRepository.getPlaylistEntries({ ranked: true }, DEFAULT_REALM_ID)
     );
@@ -158,7 +155,7 @@ export default class PlaylistService {
    *
    * @returns the qualified maps playlist
    */
-  public static async getQualifiedMapsPlaylist(): Promise<Playlist> {
+  public static async getQualifiedMapsPlaylist() {
     const songs = PlaylistService.groupPlaylistSongs(
       await ScoreSaberLeaderboardsRepository.getPlaylistEntries({ qualified: true }, DEFAULT_REALM_ID)
     );
@@ -178,7 +175,7 @@ export default class PlaylistService {
    *
    * @returns the ranking queue maps playlist
    */
-  public static async getRankingQueueMapsPlaylist(): Promise<Playlist> {
+  public static async getRankingQueueMapsPlaylist() {
     const rankingQueueLeaderboards = await ScoreSaberLeaderboardsService.getRankingQueueLeaderboards();
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of rankingQueueLeaderboards.all) {
@@ -211,7 +208,7 @@ export default class PlaylistService {
    *
    * @returns the top trending leaderboards playlist
    */
-  public static async getTopTrendingMapsPlaylist(): Promise<Playlist> {
+  public static async getTopTrendingMapsPlaylist() {
     const trendingLeaderboards = await ScoreSaberLeaderboardsRepository.getTopTrendingLeaderboards(
       150,
       DEFAULT_REALM_ID
@@ -249,7 +246,7 @@ export default class PlaylistService {
    * @returns the ranked batch playlist
    * @throws NotFoundError if the ranked batch does not exist
    */
-  public static async getRankedBatchPlaylist(rankedBatchId: number): Promise<Playlist> {
+  public static async getRankedBatchPlaylist(rankedBatchId: number) {
     const { rankedBatch, leaderboards, newLeaderboards } =
       await RankedBatchService.getRankedBatch(rankedBatchId);
 
@@ -263,10 +260,7 @@ export default class PlaylistService {
    * @param filters the suggested maps filters; the player's own style fills in what is not set
    * @returns the suggested maps playlist, synced from the suggested maps playlist endpoint
    */
-  public static async getSuggestedMapsPlaylist(
-    playerId: string,
-    filters: SuggestedMapsPlaylistQuery = {}
-  ): Promise<Playlist> {
+  public static async getSuggestedMapsPlaylist(playerId: string, filters: SuggestedMapsPlaylistQuery = {}) {
     const { maps } = await SuggestedMapsService.getSuggestedMaps({
       ...filters,
       playerId,
@@ -281,7 +275,7 @@ export default class PlaylistService {
    * @param config the configuration for the custom ranked playlist
    * @returns the created custom ranked playlist
    */
-  public static async createCustomRankedPlaylist(settingsBase64?: string): Promise<Playlist> {
+  public static async createCustomRankedPlaylist(settingsBase64?: string) {
     const parsedConfig = parseCustomRankedPlaylistSettings(settingsBase64);
     const sort: Record<CustomRankedPlaylist["sort"], ScoreSaberLeaderboardQueryCategory> = {
       stars: "star_difficulty",
@@ -299,9 +293,6 @@ export default class PlaylistService {
       DEFAULT_REALM_ID
     );
 
-    // `getLeaderboards` returns each leaderboard without its `difficulties`
-    // array populated — group by song hash and collect the difficulties so
-    // songs actually carry the diffs to highlight in-game.
     const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
     for (const leaderboard of rankedLeaderboards) {
       if (!leaderboards.has(leaderboard.songHash)) {
@@ -337,7 +328,7 @@ export default class PlaylistService {
    * @param settingsBase64 optional base64 encoded settings
    * @returns the created self playlist
    */
-  public static async getSelfPlaylist(user: string, settingsBase64?: string): Promise<Playlist> {
+  public static async getSelfPlaylist(user: string, settingsBase64?: string) {
     const settings = parseSelfPlaylistSettings(settingsBase64);
 
     try {
@@ -393,11 +384,7 @@ export default class PlaylistService {
    * @param settingsBase64 optional base64 encoded settings
    * @returns the created snipe playlist
    */
-  public static async getSnipePlaylist(
-    user: string,
-    toSnipe: string,
-    settingsBase64?: string
-  ): Promise<Playlist> {
+  public static async getSnipePlaylist(user: string, toSnipe: string, settingsBase64?: string) {
     const settings = parseSnipePlaylistSettings(settingsBase64);
 
     if (user === toSnipe) {
@@ -405,7 +392,6 @@ export default class PlaylistService {
     }
 
     try {
-      // Validate users exist
       if (!(await PlayerCoreService.playerExists(user)) || !(await PlayerCoreService.playerExists(toSnipe))) {
         throw new NotFoundError(
           `Unable to create a snipe playlist for ${toSnipe} as one of the users isn't tracked.`
@@ -434,7 +420,6 @@ export default class PlaylistService {
         );
       }
 
-      // Build a map of user scores by leaderboard ID for quick lookup
       const userScoreMap = new Map<number, { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>();
       for (const userScore of userScores) {
         const leaderboardId = userScore.leaderboard.id;
@@ -449,7 +434,6 @@ export default class PlaylistService {
         const leaderboardId = toSnipeScore.leaderboard.id;
         const userScore = userScoreMap.get(leaderboardId);
 
-        // Skip if the score is outside the accuracy range
         if (
           settings.accuracyRange &&
           (toSnipeScore.score.accuracy < settings.accuracyRange.min ||
@@ -459,7 +443,6 @@ export default class PlaylistService {
         }
 
         if (settings.requireBothScores) {
-          // Only include if both players have scores AND toSnipe has a higher score
           if (!userScore) {
             continue;
           }
@@ -469,7 +452,6 @@ export default class PlaylistService {
             filteredScores.push(toSnipeScore);
           }
         } else {
-          // Normal snipe behavior: include if user doesn't have a score OR toSnipe has a better score
           if (!userScore) {
             filteredScores.push(toSnipeScore);
           } else {
@@ -510,14 +492,11 @@ export default class PlaylistService {
     }
   }
 
-  /**
-   * Sorts playlist rows in memory (we already load the full filtered set from Postgres).
-   */
   private static sortPlaylistScoreRows(
     rows: Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>,
     sort: SelfPlaylistSettings["sort"] | SnipeSettings["sort"] | undefined,
     sortDirection: SelfPlaylistSettings["sortDirection"] | SnipeSettings["sortDirection"] | undefined
-  ): void {
+  ) {
     const field = sort ?? "pp";
     const dir = sortDirection ?? "desc";
     const mult = dir === "asc" ? 1 : -1;
@@ -531,7 +510,7 @@ export default class PlaylistService {
     });
   }
 
-  private static scoreSortValue(score: ScoreSaberScore, field: string): number {
+  private static scoreSortValue(score: ScoreSaberScore, field: string) {
     switch (field) {
       case "pp":
         return score.pp;
@@ -552,14 +531,11 @@ export default class PlaylistService {
     }
   }
 
-  /**
-   * Loads ScoreSaber scores for a player with leaderboard rows
-   */
   private static async fetchPlayerScoreSaberScoresWithLeaderboards(
     playerId: string,
     rankedStatus: SelfPlaylistSettings["rankedStatus"] | SnipeSettings["rankedStatus"],
     starRange: SelfPlaylistSettings["starRange"] | SnipeSettings["starRange"]
-  ): Promise<Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>> {
+  ) {
     const conditions = [eq(scoreSaberScoresTable.playerId, playerId)];
 
     if (rankedStatus === "ranked") {
@@ -579,7 +555,6 @@ export default class PlaylistService {
       DEFAULT_REALM_ID
     );
 
-    // The joined rows already carry the realm-resolved leaderboard, so no second lookup is needed.
     const leaderboardMap = new Map<number, ScoreSaberLeaderboard>();
 
     return rows.map(({ scoreRow, lbRow }) => {

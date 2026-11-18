@@ -1,7 +1,6 @@
 import Settings from "@/components/settings/settings";
-import { Metadata } from "next";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata() {
   return {
     title: "Settings",
     description: "Customize the site, scores, and player preferences.",

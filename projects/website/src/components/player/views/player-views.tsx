@@ -13,7 +13,7 @@ import { HistoryMode } from "@ssr/common/schemas/user/history-mode";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import { ReactElement, useState } from "react";
+import { useState } from "react";
 import { cn } from "../../../common/utils";
 import PlayerRankingsButton from "../buttons/player-rankings-button";
 
@@ -131,7 +131,7 @@ function PlayerViewPanel({
   statisticHistory: ScoreSaberPlayerHistoryEntries;
   actualDaysAgo: number;
   historyMode: HistoryMode;
-}): ReactElement {
+}) {
   switch (viewIndex) {
     case 0:
       if (historyMode === HistoryMode.ADVANCED) {

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { expectStatus } from "../helpers/assertions";
+import { beatLeaderScoreStats } from "../helpers/beatleader-api.test-utils";
 import {
   TEST_BEATLEADER_SCORE_ID,
   TEST_SONG_HASH,
@@ -7,6 +8,7 @@ import {
   UNKNOWN_SCORE_ID,
 } from "../helpers/constants";
 import { createTestApp } from "../helpers/create-test-app";
+import { server } from "../helpers/msw-server";
 import { request } from "../helpers/request";
 
 describe("BeatSaver API integration", () => {
@@ -81,31 +83,12 @@ describe("BeatSaver API integration", () => {
   });
 });
 
-/**
- * Score stats only exist upstream, so this file's live test depends on
- * BeatLeader's CDN. A non-200 answer (outage, rate limit, or a Cloudflare block
- * on the runner's IP) is reported to clients as "not found", which would fail
- * the test on an unrelated upstream problem — so probe the CDN first and skip
- * the test with the upstream status logged.
- */
-const SCORE_STATS_CDN_URL = `https://cdn.scorestats.beatleader.xyz/${TEST_BEATLEADER_SCORE_ID}.json`;
-
-async function fetchScoreStatsCdnStatus(): Promise<number> {
-  try {
-    const response = await fetch(SCORE_STATS_CDN_URL);
-    return response.status;
-  } catch {
-    return 0;
-  }
-}
-
-const scoreStatsCdnStatus = await fetchScoreStatsCdnStatus();
-if (scoreStatsCdnStatus !== 200) {
-  console.warn(
-    `BeatLeader score stats CDN answered ${scoreStatsCdnStatus === 0 ? "no response" : scoreStatsCdnStatus}` +
-      ` for score ${TEST_BEATLEADER_SCORE_ID} (${SCORE_STATS_CDN_URL}), skipping the live score stats test`
-  );
-}
+const SEEDED_SCORE_STATS = {
+  hitTracker: { maxCombo: 500 },
+  accuracyTracker: { fcAcc: 95.5 },
+  winTracker: { won: true },
+  scoreGraphTracker: { graph: [0.99, 0.97, 0.95] },
+};
 
 describe("BeatLeader API integration", () => {
   const app = createTestApp();
@@ -116,7 +99,9 @@ describe("BeatLeader API integration", () => {
       expectStatus(response, 422);
     });
 
-    test.skipIf(scoreStatsCdnStatus !== 200)("returns live score stats for the seeded score", async () => {
+    test("returns the score stats BeatLeader published for the seeded score", async () => {
+      server.use(beatLeaderScoreStats(TEST_BEATLEADER_SCORE_ID, SEEDED_SCORE_STATS));
+
       const response = await request(app, `/beatleader/scorestats/${TEST_BEATLEADER_SCORE_ID}`);
       expectStatus(response, 200);
 
@@ -136,14 +121,10 @@ describe("BeatLeader API integration", () => {
       expect(body.previous).toBeUndefined();
     });
 
-    test(
-      "returns 404 for unknown score",
-      async () => {
-        const response = await request(app, `/beatleader/scorestats/${UNKNOWN_SCORE_ID}`);
-        expectStatus(response, 404);
-      },
-      { timeout: 30_000 }
-    );
+    test("returns 404 for unknown score", async () => {
+      const response = await request(app, `/beatleader/scorestats/${UNKNOWN_SCORE_ID}`);
+      expectStatus(response, 404);
+    });
   });
 
   describe("GET /beatleader/replay/:scoreId", () => {

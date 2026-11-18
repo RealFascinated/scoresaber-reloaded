@@ -36,7 +36,6 @@ export default function Leaderboards({ initial }: LeaderboardsProps) {
   const [page, setPage] = useQueryState("page", mapsSearchParams.page);
   const mapsQuery = buildMapsQuery(page, filterDebounced);
 
-  // The server only renders the default realm, and its data is only valid for the query it was fetched for
   const initialData =
     initial && isDefaultRealm && isSameMapsQuery(initial.query, mapsQuery) ? initial.data : undefined;
 
@@ -67,10 +66,7 @@ export default function Leaderboards({ initial }: LeaderboardsProps) {
     },
     initialData,
     initialDataUpdatedAt: initial?.fetchedAt,
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
-    // Don't carry the server's default realm data over to a realm it wasn't rendered for
     placeholderData: (previous, previousQuery) =>
       previousQuery?.options.initialData !== undefined && !isDefaultRealm ? undefined : previous,
   });

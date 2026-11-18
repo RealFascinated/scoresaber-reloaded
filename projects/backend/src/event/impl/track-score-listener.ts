@@ -28,8 +28,6 @@ export class TrackScoreListener implements EventListener {
 
     let beatLeaderScore: BeatLeaderScore | undefined;
     if (beatLeaderScoreToken) {
-      // The paired ScoreSaber score identifies the account that actually set the score;
-      // the BeatLeader player ID can differ from the ScoreSaber account ID.
       beatLeaderScore = await BeatLeaderService.trackBeatLeaderScore(
         beatLeaderScoreToken,
         isTop50GlobalScore,
@@ -48,10 +46,8 @@ export class TrackScoreListener implements EventListener {
       return;
     }
 
-    // Update player streak
     await PlayerPlayedStreakService.handleScoreSaberScore(score);
 
-    // Update player daily score stats
     PlayerHistoryService.updatePlayerDailyScoreStats(score.playerId, leaderboard.stars > 0, hasPreviousScore);
 
     await PlayerCoreService.invalidatePlayerCaches(player.id);
@@ -64,9 +60,7 @@ export class TrackScoreListener implements EventListener {
       `${playerInfo.name} just set a rank #${score.rank}!`
     );
 
-    // Only send ranked notifications if the map is ranked
     if (leaderboard.stars > 0) {
-      // Send #1 notification if applicable
       if (score.rank === 1) {
         sendScoreNotification(
           DiscordChannels.NUMBER_ONE_FEED,
@@ -77,7 +71,6 @@ export class TrackScoreListener implements EventListener {
         );
       }
 
-      // Send top 50 notification if applicable
       if (isTop50GlobalScore) {
         sendScoreNotification(
           DiscordChannels.TOP_50_SCORES_FEED,
@@ -89,11 +82,9 @@ export class TrackScoreListener implements EventListener {
       }
     }
 
-    // Update metric
     const trackedScoresMetric = MetricsService.getMetric<TrackedScoresMetric>(MetricType.TRACKED_SCORES);
     trackedScoresMetric?.increment();
 
-    // Publish the score to the websocket
     WebsocketManager.get<PlayerScore<ScoreSaberScore>>("score")?.publish({
       score: await ScoreCoreService.insertScoreData(trackedScore, leaderboard, {
         insertBeatLeaderScore: true,

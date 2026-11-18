@@ -9,7 +9,7 @@ export class PlayerHmdService {
    *
    * @returns the hmd usage
    */
-  public static async getActiveHmdUsage(): Promise<Record<string, number>> {
+  public static async getActiveHmdUsage() {
     const rows = await ScoreSaberAccountsRepository.selectHmdCountsActiveAccounts();
 
     return Object.fromEntries(rows.map(r => [r.hmd as string, r.c]));
@@ -22,7 +22,7 @@ export class PlayerHmdService {
    * @param limit the limit of scores to get
    * @returns the player's HMD breakdown
    */
-  public static async getPlayerHmdBreakdown(playerId: string, limit?: number): Promise<Record<HMD, number>> {
+  public static async getPlayerHmdBreakdown(playerId: string, limit?: number) {
     return CacheService.fetch(CacheId.PLAYER_HMD_BREAKDOWN, playerId, async () => {
       const rows = await ScoreSaberScoresRepository.getHmdCountsByPlayerId(playerId, limit);
 

@@ -1,31 +1,53 @@
 import type { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import { inArray } from "drizzle-orm";
+import { HttpResponse, http } from "msw";
 import { db } from "../../src/db";
 import { beatLeaderScoresTable } from "../../src/db/schema";
 import BeatLeaderService from "../../src/service/beatleader/beatleader.service";
 import { TEST_PLAYER_ID } from "../helpers/constants";
+import { server } from "../helpers/msw-server";
 
 const FIRST_ID = 930_000;
-const originalSaveScoreStats = BeatLeaderService.saveScoreStats;
-let savedStatsFor: number[] = [];
-
-beforeEach(() => {
-  savedStatsFor = [];
-  BeatLeaderService.saveScoreStats = async scoreId => {
-    savedStatsFor.push(scoreId);
-    return undefined;
-  };
-});
+const SCORE_STATS_CDN = "https://cdn.scorestats.beatleader.xyz";
 
 afterEach(async () => {
-  BeatLeaderService.saveScoreStats = originalSaveScoreStats;
   await db.delete(beatLeaderScoresTable).where(inArray(beatLeaderScoresTable.id, ids()));
 });
 
-const ids = (): number[] => Array.from({ length: 12 }, (_, i) => FIRST_ID + i);
+function recordScoreStatsRequests() {
+  const requestedIds: number[] = [];
+  const waiters: { count: number; resolve: () => void }[] = [];
 
-function token(id: number, patch: Record<string, unknown> = {}): BeatLeaderScoreToken {
+  server.use(
+    http.get(`${SCORE_STATS_CDN}/:file`, ({ params }) => {
+      requestedIds.push(Number.parseInt(String(params.file), 10));
+      for (const waiter of waiters) {
+        if (requestedIds.length >= waiter.count) {
+          waiter.resolve();
+        }
+      }
+      return new HttpResponse(null, { status: 404 });
+    })
+  );
+
+  return {
+    requestedIds,
+    reached(count: number) {
+      return new Promise<void>(resolve => {
+        if (requestedIds.length >= count) {
+          resolve();
+          return;
+        }
+        waiters.push({ count, resolve });
+      });
+    },
+  };
+}
+
+const ids = () => Array.from({ length: 12 }, (_, i) => FIRST_ID + i);
+
+function token(id: number, patch: Record<string, unknown> = {}) {
   return {
     id,
     playerId: TEST_PLAYER_ID,
@@ -101,12 +123,13 @@ describe("BeatLeaderService.trackBeatLeaderScoresBatch", () => {
       token(FIRST_ID),
       token(FIRST_ID + 1),
       token(FIRST_ID + 2),
-      token(FIRST_ID + 2), // the same score twice in a page
+      token(FIRST_ID + 2),
       token(FIRST_ID + 3),
       token(FIRST_ID + 4),
     ];
-    // One score is already stored before either path runs
+    const statsRequests = recordScoreStatsRequests();
     await BeatLeaderService.trackBeatLeaderScore(tokens[1], false, false, TEST_PLAYER_ID);
+    await statsRequests.reached(1);
     const before = await rows();
     expect(before).toHaveLength(1);
 
@@ -120,20 +143,23 @@ describe("BeatLeaderService.trackBeatLeaderScoresBatch", () => {
       }
     }
     const sequential = await rows();
-    const sequentialStats = [...savedStatsFor].sort();
+    await statsRequests.reached(sequential.length);
+    const sequentialStats = [...statsRequests.requestedIds].sort();
     expect(sequential.length).toBeGreaterThan(3);
 
     await db.delete(beatLeaderScoresTable).where(inArray(beatLeaderScoresTable.id, ids()));
+    statsRequests.requestedIds.splice(0);
     await BeatLeaderService.trackBeatLeaderScore(tokens[1], false, false, TEST_PLAYER_ID);
-    savedStatsFor = [];
+    await statsRequests.reached(1);
+    statsRequests.requestedIds.splice(0);
 
     const batchCount = await BeatLeaderService.trackBeatLeaderScoresBatch(tokens, TEST_PLAYER_ID);
     const batched = await rows();
+    await statsRequests.reached(batched.length - 1);
 
     expect(batched).toEqual(sequential);
     expect(batchCount).toBe(sequentialCount);
-    // Stats are only saved for newly inserted scores (the stored one was inserted before the reset)
-    expect([...savedStatsFor].sort()).toEqual(sequentialStats.filter(id => id !== FIRST_ID + 1));
+    expect([...statsRequests.requestedIds].sort()).toEqual(sequentialStats.filter(id => id !== FIRST_ID + 1));
   });
 
   test("tracks nothing for an untracked account or an empty page", async () => {

@@ -7,10 +7,8 @@ import type { OverlayConnectionSettings } from "@ssr/common/schemas/overlay/over
 import {
   MAX_USER_OVERLAYS,
   type CreateUserOverlayBody,
-  type OverlayContent,
   type UpdateUserOverlayBody,
   type UserOverlay,
-  type UserOverlaySummary,
 } from "@ssr/common/schemas/response/user/overlay";
 import { UserOverlaysRepository, type UserOverlayRow } from "../../repositories/user-overlays.repository";
 import { OverlayUpdateBroadcaster } from "../overlay/overlay-update-broadcaster";
@@ -19,11 +17,11 @@ export type OverlayOwner = { id: string; playerId?: string | null };
 
 export type CreateOverlayResult = UserOverlay | "limit-reached" | "unknown-preset";
 
-function toContent(row: UserOverlayRow): OverlayContent {
+function toContent(row: UserOverlayRow) {
   return { revision: row.updatedAt.getTime(), settings: row.settings, layout: row.layout };
 }
 
-function toOverlay(row: UserOverlayRow): UserOverlay {
+function toOverlay(row: UserOverlayRow) {
   return { id: row.id, name: row.name, ...toContent(row) };
 }
 
@@ -33,7 +31,7 @@ export class UserOverlaysService {
    *
    * @param userId the user to get the overlays of
    */
-  public static async list(userId: string): Promise<UserOverlaySummary[]> {
+  public static async list(userId: string) {
     const rows = await UserOverlaysRepository.getSummaries(userId);
     return rows.map(row => ({ id: row.id, name: row.name, updatedAt: row.updatedAt.getTime() }));
   }
@@ -44,7 +42,7 @@ export class UserOverlaysService {
    * @param userId the owner
    * @param id the id of the overlay
    */
-  public static async get(userId: string, id: string): Promise<UserOverlay | undefined> {
+  public static async get(userId: string, id: string) {
     const row = await UserOverlaysRepository.findById(id);
     return row && row.userId === userId ? toOverlay(row) : undefined;
   }
@@ -54,7 +52,7 @@ export class UserOverlaysService {
    *
    * @param id the id of the overlay
    */
-  public static async getContent(id: string): Promise<OverlayContent | undefined> {
+  public static async getContent(id: string) {
     const row = await UserOverlaysRepository.findById(id);
     return row ? toContent(row) : undefined;
   }
@@ -65,7 +63,7 @@ export class UserOverlaysService {
    * @param user the owner, with the player they play as (if any)
    * @param body the name and optional preset
    */
-  public static async create(user: OverlayOwner, body: CreateUserOverlayBody): Promise<CreateOverlayResult> {
+  public static async create(user: OverlayOwner, body: CreateUserOverlayBody) {
     let layout = createBlankOverlayLayout();
     if (body.presetId) {
       const preset = getOverlayPreset(body.presetId);
@@ -95,11 +93,7 @@ export class UserOverlaysService {
    * @param id the id of the overlay
    * @param patch the fields to change
    */
-  public static async update(
-    userId: string,
-    id: string,
-    patch: UpdateUserOverlayBody
-  ): Promise<UserOverlay | undefined> {
+  public static async update(userId: string, id: string, patch: UpdateUserOverlayBody) {
     const row = await UserOverlaysRepository.update(id, userId, patch);
     if (!row) {
       return undefined;
@@ -114,10 +108,7 @@ export class UserOverlaysService {
    * @param user the owner
    * @param id the id of the overlay to copy
    */
-  public static async duplicate(
-    user: { id: string },
-    id: string
-  ): Promise<UserOverlay | "limit-reached" | undefined> {
+  public static async duplicate(user: { id: string }, id: string) {
     const source = await UserOverlaysRepository.findById(id);
     if (!source || source.userId !== user.id) {
       return undefined;
@@ -140,7 +131,7 @@ export class UserOverlaysService {
    * @param userId the owner
    * @param id the id of the overlay
    */
-  public static async delete(userId: string, id: string): Promise<boolean> {
+  public static async delete(userId: string, id: string) {
     const deleted = await UserOverlaysRepository.delete(id, userId);
     if (deleted) {
       OverlayUpdateBroadcaster.publish(id, { type: "deleted" });

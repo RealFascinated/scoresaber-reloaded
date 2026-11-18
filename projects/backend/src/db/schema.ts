@@ -39,17 +39,12 @@ export const scoreSaberAccountsTable = pgTable(
     country: varchar({ length: 32 }),
     avatar: text().notNull().default("https://cdn.fascinated.cc/assets/unknown.png"),
 
-    // Peak rank
     peakRank: integer(),
     peakRankTimestamp: timestamp(),
 
     seededScores: boolean().notNull(),
     seededBeatLeaderScores: boolean().notNull(),
 
-    // BeatLeader backfill progress. `beatLeaderSeedPage` is how many score pages
-    // were processed on the last attempt and is where the next attempt resumes;
-    // the attempt counter and timestamp drive the retry backoff so a player that
-    // cannot be seeded is not retried on every 10-minute queue cycle forever.
     beatLeaderSeedPage: integer().notNull().default(0),
     beatLeaderSeedAttempts: integer().notNull().default(0),
     beatLeaderSeedLastAttempt: timestamp(),
@@ -65,7 +60,6 @@ export const scoreSaberAccountsTable = pgTable(
     medalsRank: integer().notNull().default(0),
     medalsCountryRank: integer().notNull().default(0),
 
-    // Played streak
     currentStreak: integer().notNull().default(0),
     longestStreak: integer().notNull().default(0),
     lastPlayedDate: date({ mode: "string" }),
@@ -113,7 +107,6 @@ export const scoreSaberAccountsTable = pgTable(
     index("accounts_streak_expiry_date_idx")
       .on(table.lastPlayedDate)
       .where(sql`${table.currentStreak} > 0 AND ${table.lastPlayedDate} IS NOT NULL`),
-    // Banned players are a tiny set; this lets "exclude banned players" subqueries read just them.
     index("accounts_banned_true_idx")
       .on(table.id)
       .where(sql`${table.banned} = true`),
@@ -139,24 +132,19 @@ export const scoreSaberAccountNamesTable = pgTable(
 export const playerHistoryTable = pgTable(
   "scoresaber-player-history",
   {
-    // Identifiers
     id: serial().primaryKey(),
     playerId: varchar({ length: 32 }).notNull(),
     date: timestamp().notNull(),
     realmId: integer().notNull().default(1),
 
-    // Rank stats
     rank: integer(),
     countryRank: integer(),
 
-    // Medals stats
     medals: integer(),
 
-    // PP stats
     pp: doublePrecision(),
     plusOnePp: doublePrecision(),
 
-    // Score stats
     totalScore: doublePrecision(),
     totalRankedScore: doublePrecision(),
     rankedScores: integer(),
@@ -167,12 +155,10 @@ export const playerHistoryTable = pgTable(
     totalUnrankedScores: integer(),
     totalScores: integer(),
 
-    // Accuracy stats
     averageRankedAccuracy: doublePrecision(),
     averageUnrankedAccuracy: doublePrecision(),
     averageAccuracy: doublePrecision(),
 
-    // Ranked play stats
     aPlays: integer(),
     sPlays: integer(),
     spPlays: integer(),
@@ -192,16 +178,13 @@ export const playerHistoryTable = pgTable(
 export const scoreSaberScoresTable = pgTable(
   "scoresaber-scores",
   {
-    // Identifiers
     scoreId: integer().primaryKey(),
     playerId: varchar({ length: 32 }).notNull(),
     leaderboardId: integer().notNull(),
 
-    // Leaderboard information
     difficulty: varchar({ length: 64 }).$type<MapDifficulty>().notNull(),
     characteristic: text().$type<MapCharacteristic>().notNull(),
 
-    // Score information
     score: integer().notNull(),
     accuracy: doublePrecision().notNull(),
     medals: integer().notNull().default(0),
@@ -211,7 +194,6 @@ export const scoreSaberScoresTable = pgTable(
     fullCombo: boolean().notNull(),
     modifiers: varchar({ length: 32 }).array(),
 
-    // Headset information
     hmd: varchar({ length: 32 }).$type<HMD>().notNull().default("Unknown"),
     rightController: varchar({ length: 32 }),
     leftController: varchar({ length: 32 }),
@@ -220,12 +202,7 @@ export const scoreSaberScoresTable = pgTable(
   },
   table => [
     uniqueIndex("scores_player_leaderboard_unique").on(table.playerId, table.leaderboardId),
-    // Time-window lookups per player (BL account resolution, score charts):
-    // playerId IN (...) AND timestamp BETWEEN ... would otherwise scan every
-    // row of each candidate player.
     index("scores_player_id_timestamp_idx").on(table.playerId, table.timestamp),
-    // Also serves every plain `leaderboardId = ?` lookup through its leading column, so a separate
-    // single-column leaderboardId index would only add write cost and size.
     index("scores_leaderboard_score_scoreid_desc_idx").on(
       table.leaderboardId,
       table.score.desc(),
@@ -243,17 +220,14 @@ export const scoreSaberScoresTable = pgTable(
 export const scoreSaberScoreHistoryTable = pgTable(
   "scoresaber-score-history",
   {
-    // Identifiers
     id: serial().primaryKey(),
     playerId: varchar({ length: 32 }).notNull(),
     leaderboardId: integer().notNull(),
     scoreId: integer().notNull(),
 
-    // Leaderboard information
     difficulty: varchar({ length: 64 }).$type<MapDifficulty>().notNull(),
     characteristic: text().$type<MapCharacteristic>().notNull(),
 
-    // Score information
     score: integer().notNull(),
     accuracy: doublePrecision().notNull(),
     pp: doublePrecision().notNull().default(0),
@@ -264,7 +238,6 @@ export const scoreSaberScoreHistoryTable = pgTable(
     fullCombo: boolean().notNull(),
     modifiers: varchar({ length: 32 }).array(),
 
-    // Headset information
     hmd: varchar({ length: 32 }).$type<HMD>().notNull().default("Unknown"),
     rightController: varchar({ length: 32 }),
     leftController: varchar({ length: 32 }),
@@ -272,8 +245,6 @@ export const scoreSaberScoreHistoryTable = pgTable(
     timestamp: timestamp().notNull(),
   },
   table => [
-    // Archived-score lookups by scoreId (GET /scores/:scoreId fallback) would
-    // otherwise seq-scan the whole history table.
     index("scoresaber_score_history_score_id_idx").on(table.scoreId),
     index("scoresaber_score_history_player_leaderboard_time_idx").on(
       table.playerId,
@@ -293,33 +264,25 @@ export const scoreSaberLeaderboardsTable = pgTable(
   {
     id: integer().primaryKey(),
 
-    // Song information
     songHash: varchar({ length: 64 }).notNull(),
     songName: text().notNull(),
     songSubName: text().notNull(),
     songAuthorName: text().notNull(),
 
-    // Level information
     levelAuthorName: text().notNull(),
 
-    // Difficulty information
     difficulty: varchar({ length: 64 }).$type<MapDifficulty>().notNull(),
     characteristic: text().$type<MapCharacteristic>().notNull(),
     maxScore: integer().notNull(),
 
-    // Play information
     plays: integer().notNull(),
     dailyPlays: integer().notNull(),
 
-    // Misc
     seededScores: boolean().notNull(),
     trendingScore: doublePrecision().notNull().default(0),
 
     timestamp: timestamp().notNull(),
 
-    // Full-text search document, kept up to date by Postgres. Storing it (instead of calling
-    // to_tsvector in every query) lets ts_rank read it directly rather than re-parsing the text
-    // of every matching row.
     searchVector: tsvector().generatedAlwaysAs(
       sql.raw(
         `to_tsvector('english', "songName" || ' ' || "songSubName" || ' ' || "songAuthorName" || ' ' || "levelAuthorName")`
@@ -518,7 +481,6 @@ export const scoreSaberRankedBatchScoresTable = pgTable(
 export const beatLeaderScoresTable = pgTable(
   "beatleader-scores",
   {
-    // Identifiers
     id: integer().primaryKey(),
     playerId: varchar({ length: 32 }).notNull(),
     songHash: varchar({ length: 64 }).notNull(),
@@ -527,24 +489,20 @@ export const beatLeaderScoresTable = pgTable(
     songCharacteristic: varchar({ length: 128 }).$type<MapCharacteristic>().notNull(),
     songScore: integer().notNull(),
 
-    // Score information
     pauses: integer().notNull(),
     fcAccuracy: doublePrecision().notNull(),
     fullCombo: boolean().notNull(),
     savedReplay: boolean().notNull(),
 
-    // Hand accuracy
     leftHandAccuracy: doublePrecision().notNull(),
     rightHandAccuracy: doublePrecision().notNull(),
 
-    // Misses
     misses: integer().notNull(),
     missedNotes: integer().notNull(),
     bombCuts: integer().notNull(),
     wallsHit: integer().notNull(),
     badCuts: integer().notNull(),
 
-    // Score improvement
     improvementScore: integer().notNull(),
     improvementPauses: integer().notNull(),
     improvementMisses: integer().notNull(),
@@ -602,10 +560,8 @@ export const beatSaverMapsTable = pgTable(
     name: text().notNull(),
     description: text().notNull(),
 
-    // Uploader
     uploaderId: integer().references(() => beatSaverUploadersTable.id),
 
-    // Metadata
     bpm: doublePrecision(),
     duration: integer(),
     songName: text(),
@@ -670,8 +626,6 @@ export const beatSaverMapDifficultiesTable = pgTable(
     label: text(),
   },
   table => [
-    // Also serves every plain `versionId = ?` lookup through its leading column, so a separate
-    // single-column versionId index would only add write cost and size.
     uniqueIndex("beatsaver_map_difficulties_version_char_diff_unique").on(
       table.versionId,
       table.characteristic,
@@ -689,7 +643,6 @@ export const metricsTable = pgTable("metrics", {
 export const scoreSaberScoreEventTable = pgTable(
   "scoresaber-score-events",
   {
-    // Identifiers
     id: serial().primaryKey(),
     playerId: varchar({ length: 32 })
       .notNull()
@@ -728,8 +681,6 @@ export const authUsersTable = pgTable(
     email: text().notNull().unique(),
     emailVerified: boolean().notNull().default(false),
     image: text(),
-    // Public player id: the primary connection's id (also the ScoreSaber player id).
-    // Only written through AuthConnectionService so it stays in sync with the connections.
     playerId: varchar({ length: 32 }),
     createdAt: timestamp().notNull().defaultNow(),
     updatedAt: timestamp()
@@ -923,7 +874,6 @@ export type ScoreSaberScoreRealmRow = typeof scoreSaberScoreRealmsTable.$inferSe
 /** A score row resolved for one realm: the base row plus that realm's pp (0 when unranked). */
 export type ScoreSaberScoreRow = ScoreSaberScoreBaseRow & { pp: number };
 export type ScoreSaberScoreHistoryRow = typeof scoreSaberScoreHistoryTable.$inferSelect;
-// The generated full-text search document is internal to the database and never read back.
 export type ScoreSaberLeaderboardBaseRow = Omit<
   typeof scoreSaberLeaderboardsTable.$inferSelect,
   "searchVector"

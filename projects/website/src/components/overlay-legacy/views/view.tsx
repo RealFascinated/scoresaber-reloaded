@@ -17,7 +17,7 @@ type OverlayViewProps = {
   children: ReactNode;
 };
 
-const getPositionClasses = (pos: OverlayViewPosition): string => {
+const getPositionClasses = (pos: OverlayViewPosition) => {
   switch (pos) {
     case OverlayViewPosition.TOP_LEFT:
       return "top-0 left-0";

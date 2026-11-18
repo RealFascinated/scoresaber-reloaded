@@ -30,7 +30,6 @@ type Props = {
 export default async function TopScoresPage({ searchParams }: Props) {
   const { page } = loadTopScoresSearchParams(await searchParams);
 
-  // Render the scores on the server so they are part of the HTML crawlers and users first receive
   const prefetched = await prefetchTimestampedData(ssrApi.fetchTopScores(page));
   const initial: TopScoresInitialData | undefined = prefetched ? { page, ...prefetched } : undefined;
 

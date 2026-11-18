@@ -24,7 +24,7 @@ function notFound(): never {
   throw new NotFoundError("Overlay not found");
 }
 
-function encodeEvent(event: OverlayUpdateEvent): string {
+function encodeEvent(event: OverlayUpdateEvent) {
   if (event.type === "deleted") {
     return "event: deleted\ndata: {}\n\n";
   }
@@ -177,9 +177,7 @@ export default function userOverlaysController(app: Elysia) {
               unsubscribe?.();
               try {
                 controller.close();
-              } catch {
-                // already closed by the client
-              }
+              } catch {}
             };
             const send = (text: string) => {
               if (closed) {
@@ -205,7 +203,6 @@ export default function userOverlaysController(app: Elysia) {
               return;
             }
 
-            // Tell the client the retry delay and send the current state (it may have missed a change)
             send("retry: 5000\n\n");
             const lastEventId = Number(request.headers.get("last-event-id"));
             if (!Number.isFinite(lastEventId) || content.revision > lastEventId) {

@@ -4,17 +4,13 @@ import { Button } from "@/components/ui/button";
 import { SharedIcons } from "@/shared-icons";
 import { ReactNode, useState, useSyncExternalStore } from "react";
 
-/**
- * Local storage key holding the ids of every announcement the user has closed.
- */
 const DISMISSED_ANNOUNCEMENTS_KEY = "dismissed-announcements";
 
-function getDismissedIds(): string[] {
+function getDismissedIds() {
   try {
     const dismissedIds: string[] = JSON.parse(localStorage.getItem(DISMISSED_ANNOUNCEMENTS_KEY) ?? "[]");
     return Array.isArray(dismissedIds) ? dismissedIds : [];
   } catch {
-    // Broken storage contents should never break the page.
     return [];
   }
 }
@@ -38,8 +34,6 @@ type AnnouncementBannerProps = {
 };
 
 export default function AnnouncementBanner({ id, children }: AnnouncementBannerProps) {
-  // The dismissed announcements are only known on the client, so nothing is
-  // rendered on the server and the banner mounts once the id was read.
   const [closed, setClosed] = useState(false);
   const dismissed = useSyncExternalStore(
     subscribe,
@@ -57,7 +51,6 @@ export default function AnnouncementBanner({ id, children }: AnnouncementBannerP
   };
 
   return (
-    // The brand tint is a gradient layered over a solid backing so the bar stays legible over a background cover
     <div className="border-primary/30 bg-background/80 from-primary/12 to-primary/12 flex w-full items-center justify-center gap-2 border-b bg-linear-to-r px-3 py-1.5 backdrop-blur">
       <p className="flex min-w-0 items-center justify-center gap-2 text-center text-xs sm:text-sm">
         <SharedIcons.AnnouncementIcon className="text-primary hidden size-4 shrink-0 sm:block" />

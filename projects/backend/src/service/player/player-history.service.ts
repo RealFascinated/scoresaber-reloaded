@@ -2,10 +2,7 @@ import { env } from "@ssr/common/env";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
-import {
-  ScoreSaberPlayerHistory,
-  ScoreSaberPlayerHistoryEntries,
-} from "@ssr/common/schemas/scoresaber/player/history";
+import { ScoreSaberPlayerHistoryEntries } from "@ssr/common/schemas/scoresaber/player/history";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { ScoreSaberV2PlayerPageToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/players-page";
@@ -75,23 +72,14 @@ export class PlayerHistoryService {
           DEFAULT_REALM_ID
         );
 
-        // Update the player's inactive status if it has changed
         if (account.inactive !== player.inactive) {
           await PlayerCoreService.updatePlayer(account.id, { inactive: player.inactive });
           account.inactive = player.inactive;
         }
 
-        // Ranks shift without the player doing anything, so the nightly tokens keep cached profiles live
         await ScoreSaberPlayerService.cacheBasicPlayer(player, account, DEFAULT_REALM_ID);
         refreshedPlayerIds.push(playerId);
 
-        // If the player has fewer recorded plays (current rows + archived attempts)
-        // than their total play count, add them to the refresh queue. Replays are
-        // archived to score history, so the current-rows count alone always looks
-        // incomplete and re-queued the whole player base every night. The same row
-        // counts as the refresh worker are used: `statistics.totalScores` is cached
-        // and skips rows without an accuracy, so it undercounted and queued players
-        // the worker then found complete.
         if (statistics && !player.banned) {
           const [recordedScores, archivedScores] = await Promise.all([
             ScoreSaberScoresRepository.countByPlayerId(playerId),
@@ -99,8 +87,6 @@ export class PlayerHistoryService {
           ]);
           const recordedPlays = recordedScores + archivedScores;
           if (recordedPlays < player.stats.totalSubmittedPlays) {
-            // Confirm against ScoreSaber's score total with one small page request; only a
-            // real mismatch is queued for the (expensive) full reconcile.
             await PlayerScoresService.checkScoreCountFromApi(playerId);
           }
         }
@@ -116,7 +102,6 @@ export class PlayerHistoryService {
       }
     });
 
-    // Full profiles hold statistics built from the old ranks and pp, so they are rebuilt on demand
     await PlayerCoreService.invalidatePlayersCaches(refreshedPlayerIds, {
       detailTypes: ["full"],
       realmIds: [DEFAULT_REALM_ID],
@@ -134,7 +119,6 @@ export class PlayerHistoryService {
     const activePlayerIdsArray = Array.from(playerIds);
     PlayerHistoryService.logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
 
-    // Mark players as inactive
     const inactiveUpdate = await ScoreSaberAccountsRepository.markInactiveWhereIdNotIn(activePlayerIdsArray);
     const inactivePlayers = inactiveUpdate.rowCount ?? 0;
 
@@ -163,15 +147,7 @@ export class PlayerHistoryService {
     );
   }
 
-  /**
-   * Fetches every player ranked in a realm from ScoreSaber.
-   *
-   * @param realmId the realm to fetch the players of
-   * @returns the players and how many pages failed, or undefined when the first page failed
-   */
-  private static async fetchAllPlayers(
-    realmId: number
-  ): Promise<{ players: ScoreSaberV2PlayerPageToken[]; failedPages: number } | undefined> {
+  private static async fetchAllPlayers(realmId: number) {
     const firstPage = await ScoreSaberApiService.lookupPlayers(1, { realmId });
     if (firstPage == undefined) {
       return undefined;
@@ -199,14 +175,7 @@ export class PlayerHistoryService {
     return { players, failedPages };
   }
 
-  /**
-   * Tracks the daily history of every player ranked in a non-default realm. Accounts, inactive
-   * status and score refreshes are driven by the default realm, so this only writes history.
-   *
-   * @param realmId the realm to track
-   * @param trackTime the time to track the history for
-   */
-  private static async updateRealmPlayerStatistics(realmId: number, trackTime: Date): Promise<void> {
+  private static async updateRealmPlayerStatistics(realmId: number, trackTime: Date) {
     PlayerHistoryService.logger.info(`Starting player statistics update for realm "${realmId}"...`);
     const fetched = await PlayerHistoryService.fetchAllPlayers(realmId);
     if (fetched === undefined) {
@@ -252,20 +221,17 @@ export class PlayerHistoryService {
     trackTime: Date,
     playerToken: ScoreSaberPlayerLookupToken,
     realmId: number
-  ): Promise<ScoreSaberPlayerStatistics | undefined> {
-    // Don't track inactive players
+  ) {
     if (!playerToken || playerToken.inactive) {
       return undefined;
     }
 
-    // The peak rank is only tracked for the default realm.
     if (realmId === DEFAULT_REALM_ID) {
       await PlayerCoreService.updatePeakRank(playerToken);
     }
 
     const date = getMidnightAlignedDate(trackTime);
 
-    // No read of the existing row: the upsert leaves the daily counters of an existing row untouched.
     const statistics = await PlayerStatisticsService.getStatistics(playerToken, realmId);
     await PlayerHistoryRepository.upsertByPlayerAndDate(
       player.id,
@@ -293,7 +259,7 @@ export class PlayerHistoryService {
     statistics: ScoreSaberPlayerStatistics,
     includeToday: boolean | undefined,
     realmId: number
-  ): Promise<ScoreSaberPlayerHistoryEntries> {
+  ) {
     const targetDate = getMidnightAlignedDate(date);
     const dateKey = formatDateMinimal(targetDate);
     const isTargetToday = isToday(date);
@@ -306,7 +272,6 @@ export class PlayerHistoryService {
       history[dateKey] = playerHistoryRowToType(entry);
     }
 
-    // Handle today's data if target is today or includeToday is true
     if (isTargetToday || includeToday) {
       const today = getMidnightAlignedDate(new Date());
       const todayKey = formatDateMinimal(today);
@@ -320,9 +285,6 @@ export class PlayerHistoryService {
       }
     }
 
-    // Past dates without a DB entry stay empty: ScoreSaber's v2 API no longer
-    // exposes the daily `histories` string, so the DB history table (populated
-    // by the nightly tracking job) is the only rank-history source.
     return history;
   }
 
@@ -338,7 +300,7 @@ export class PlayerHistoryService {
     statistics: ScoreSaberPlayerStatistics,
     count: number,
     realmId: number
-  ): Promise<ScoreSaberPlayerHistoryEntries> {
+  ) {
     const today = getMidnightAlignedDate(new Date());
     const allTime = count === -1;
 
@@ -365,7 +327,6 @@ export class PlayerHistoryService {
       history[formatDateMinimal(today)] = todayData;
     }
 
-    // Sort history by date
     return Object.fromEntries(
       Object.entries(history).sort((a, b) => {
         const dateA = new Date(a[0]);
@@ -382,7 +343,7 @@ export class PlayerHistoryService {
     playerToken: ScoreSaberPlayerLookupToken,
     statistics: ScoreSaberPlayerStatistics,
     realmId: number
-  ): Promise<ScoreSaberPlayerHistory | undefined> {
+  ) {
     const today = getMidnightAlignedDate(new Date());
     const existingEntry = await PlayerHistoryRepository.findByPlayerAndDate(playerToken.id, today, realmId);
     return PlayerHistoryService.createHistoryEntry(statistics, playerToken, existingEntry ?? undefined);
@@ -399,7 +360,7 @@ export class PlayerHistoryService {
     statistics: ScoreSaberPlayerStatistics,
     playerToken: ScoreSaberPlayerLookupToken,
     existingEntry?: PlayerHistoryRow
-  ): ScoreSaberPlayerHistory {
+  ) {
     return {
       pp: statistics.pp,
       countryRank: statistics.countryRank,
@@ -438,7 +399,7 @@ export class PlayerHistoryService {
     playerId: string,
     isRanked: boolean,
     isImprovement: boolean
-  ): Promise<void> {
+  ) {
     const getCounterToIncrement = (ranked: boolean, improvement: boolean) => {
       if (ranked) {
         return improvement ? "rankedScoresImproved" : "rankedScores";

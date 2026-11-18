@@ -8,9 +8,9 @@ import type {
   RankedBatchResponse,
   RankedBatchesPageResponse,
 } from "@ssr/common/schemas/ranked-batch/ranked-batch-responses";
-import type { ScoreSaberV2LeaderboardScoresPageToken } from "@ssr/common/schemas/scoresaber/tokens/v2/leaderboard/leaderboard-scores-page";
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { beforeEach, describe, expect, test } from "bun:test";
 import { and, eq } from "drizzle-orm";
+import { HttpResponse } from "msw";
 import { db } from "../../src/db";
 import {
   scoreSaberLeaderboardStarChangeTable,
@@ -22,7 +22,6 @@ import {
 } from "../../src/db/schema";
 import { ScoreSaberLeaderboardsRepository } from "../../src/repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberRankedBatchRepository } from "../../src/repositories/scoresaber-ranked-batch.repository";
-import { ScoreSaberApiService } from "../../src/service/external/scoresaber-api.service";
 import { buildRankedBatchMessage } from "../../src/service/leaderboard/leaderboard-ranked-batch-notifications.service";
 import { LeaderboardRankedSyncService } from "../../src/service/leaderboard/leaderboard-ranked-sync.service";
 import { RankedBatchService } from "../../src/service/ranked-batch/ranked-batch.service";
@@ -44,62 +43,54 @@ import {
   UNKNOWN_PLAYER_ID,
 } from "../helpers/constants";
 import { createTestApp } from "../helpers/create-test-app";
+import { server } from "../helpers/msw-server";
 import { request } from "../helpers/request";
+import { scoreSaberApi, scoreSaberRankedLeaderboards } from "../helpers/scoresaber-api.test-utils";
 
 const DAY = 24 * 60 * 60 * 1000;
 const BASE = new Date("2026-01-10T00:00:00.000Z");
 const EXTRA_SCORE_ID = 900_010;
 const UNSTORED_SCORE_ID = 999_001;
 
-/** ScoreSaber's pp for scores by leaderboard, served by the stubbed realm scores lookup. */
 type StubbedScores = Map<number, { id: number; pp: number }[]>;
 
-const originalLookupLeaderboardRealmScores = ScoreSaberApiService.lookupLeaderboardRealmScores;
-const originalGetAllLeaderboards = ScoreSaberApiService.getAllLeaderboards;
-
-/**
- * Replaces ScoreSaber's realm scores lookup.
- *
- * @param scores the scores each leaderboard returns
- * @param options.pageSize how many scores fit on a page
- * @param options.failingLeaderboardIds leaderboards whose lookup fails
- */
 function stubRealmScores(
   scores: StubbedScores,
   options: { pageSize?: number; failingLeaderboardIds?: Set<number> } = {}
-): { calls: number[] } {
+) {
   const { pageSize = 100, failingLeaderboardIds = new Set<number>() } = options;
   const calls: number[] = [];
 
-  ScoreSaberApiService.lookupLeaderboardRealmScores = async (
-    leaderboardId,
-    page
-  ): Promise<ScoreSaberV2LeaderboardScoresPageToken | undefined> => {
-    calls.push(leaderboardId);
-    if (failingLeaderboardIds.has(leaderboardId)) {
-      return undefined;
-    }
-    const all = scores.get(leaderboardId) ?? [];
-    return {
-      data: all.slice((page - 1) * pageSize, page * pageSize).map(score => ({
-        id: score.id,
-        pp: score.pp,
-        personalBest: true,
-        player: { id: "" },
-      })),
-      metadata: {
-        page,
-        itemsPerPage: pageSize,
-        totalItems: all.length,
-        totalPages: Math.max(Math.ceil(all.length / pageSize), 1),
-      },
-    };
-  };
+  server.use(
+    scoreSaberApi("/v2/leaderboards/:id/scores", ({ params, searchParams }) => {
+      const leaderboardId = Number(params.id);
+      const page = Number(searchParams.get("page") ?? "1");
+      calls.push(leaderboardId);
+      if (failingLeaderboardIds.has(leaderboardId)) {
+        return new HttpResponse(null, { status: 404 });
+      }
+
+      const all = scores.get(leaderboardId) ?? [];
+      return HttpResponse.json({
+        data: all.slice((page - 1) * pageSize, page * pageSize).map(score => ({
+          id: score.id,
+          pp: score.pp,
+          personalBest: true,
+          player: { id: "" },
+        })),
+        metadata: {
+          page,
+          itemsPerPage: pageSize,
+          totalItems: all.length,
+          totalPages: Math.max(Math.ceil(all.length / pageSize), 1),
+        },
+      });
+    })
+  );
   return { calls };
 }
 
-/** Gives the first player a second ranked score worth 100 pp, which no ranked batch changes. */
-async function seedUnchangedScore(): Promise<void> {
+async function seedUnchangedScore() {
   await db.insert(scoreSaberScoresTable).values({
     scoreId: EXTRA_SCORE_ID,
     playerId: TEST_PLAYER_ID,
@@ -125,7 +116,7 @@ async function seedUnchangedScore(): Promise<void> {
   });
 }
 
-async function getRealmPp(scoreId: number): Promise<number | undefined> {
+async function getRealmPp(scoreId: number) {
   const [row] = await db
     .select({ pp: scoreSaberScoreRealmsTable.pp })
     .from(scoreSaberScoreRealmsTable)
@@ -142,12 +133,7 @@ async function getRankedBatchRows() {
   return db.select().from(scoreSaberRankedBatchesTable).orderBy(scoreSaberRankedBatchesTable.id);
 }
 
-/** Records a star change on the seeded ranked leaderboard and returns its ranked batch id. */
-async function recordSeededStarChange(
-  timestamp: Date = BASE,
-  previousStars = 8.5,
-  newStars = 9
-): Promise<number> {
+async function recordSeededStarChange(timestamp: Date = BASE, previousStars = 8.5, newStars = 9) {
   const recorded = await RankedBatchService.recordStarChanges(DEFAULT_REALM_ID, [
     { leaderboardId: TEST_LEADERBOARD_ID, previousStars, newStars, timestamp },
   ]);
@@ -156,11 +142,6 @@ async function recordSeededStarChange(
   }
   return recorded.rankedBatchId;
 }
-
-afterEach(() => {
-  ScoreSaberApiService.lookupLeaderboardRealmScores = originalLookupLeaderboardRealmScores;
-  ScoreSaberApiService.getAllLeaderboards = originalGetAllLeaderboards;
-});
 
 describe("RankedBatchService.recordStarChanges", () => {
   test("starts a ranked batch for the first star changes", async () => {
@@ -350,7 +331,6 @@ describe("RankedBatchService.processPendingPpChanges", () => {
     });
     expect(scores[1]).toMatchObject({ scoreId: TEST_SCORE_TWO_ID, ppBefore: 200, ppAfter: 150 });
 
-    // The stored pp is now what ScoreSaber reports.
     expect(await getRealmPp(TEST_SCORE_ID)).toBe(300);
     expect(await getRealmPp(TEST_SCORE_TWO_ID)).toBe(150);
 
@@ -361,7 +341,6 @@ describe("RankedBatchService.processPendingPpChanges", () => {
     const playerOne = players.find(player => player.playerId === TEST_PLAYER_ID);
     const playerTwo = players.find(player => player.playerId === TEST_PLAYER_TWO_ID);
 
-    // 250 -> 300 on top of an unchanged 100: (250 + 0.965 * 100) -> (300 + 0.965 * 100)
     expect(playerOne?.ppBefore).toBeCloseTo(250 + 0.965 * 100, 6);
     expect(playerOne?.ppAfter).toBeCloseTo(300 + 0.965 * 100, 6);
     expect(playerOne?.ppDelta).toBeCloseTo(50, 6);
@@ -395,7 +374,6 @@ describe("RankedBatchService.processPendingPpChanges", () => {
           eq(scoreSaberRankedBatchPlayersTable.playerId, TEST_PLAYER_ID)
         )
       );
-    // The 100 pp score is now the best one: 250 + 96.5 -> 100 + 0.965 * 80
     expect(player?.ppBefore).toBeCloseTo(250 + 0.965 * 100, 6);
     expect(player?.ppAfter).toBeCloseTo(100 + 0.965 * 80, 6);
   });
@@ -515,7 +493,6 @@ describe("RankedBatchService.processPendingPpChanges", () => {
 
   test("keeps the original pp before when a capture is repeated after the stored pp was overwritten", async () => {
     const rankedBatchId = await recordSeededStarChange();
-    // A previous attempt recorded the change and overwrote the stored pp, then crashed.
     await db.insert(scoreSaberRankedBatchScoresTable).values({
       rankedBatchId,
       scoreId: TEST_SCORE_ID,
@@ -581,7 +558,6 @@ describe("RankedBatchService.processPendingPpChanges", () => {
       .where(eq(scoreSaberRankedBatchScoresTable.rankedBatchId, rankedBatchId));
     expect(scores.map(score => score.scoreId).sort()).toEqual([TEST_SCORE_ID, EXTRA_SCORE_ID].sort());
 
-    // Both scores changed: (250, 100) -> (300, 140)
     const [player] = await db
       .select()
       .from(scoreSaberRankedBatchPlayersTable)
@@ -598,17 +574,12 @@ describe("RankedBatchService.processPendingPpChanges", () => {
 });
 
 describe("LeaderboardRankedSyncService.refreshRankedLeaderboards", () => {
-  /** Makes ScoreSaber report the seeded ranked leaderboard with different stars. */
-  async function stubRerate(stars: number): Promise<void> {
+  async function stubRerate(stars: number) {
     const [stored] = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(DEFAULT_REALM_ID);
     if (!stored) {
       throw new Error("Expected a seeded ranked leaderboard");
     }
-    ScoreSaberApiService.getAllLeaderboards = async () => ({
-      leaderboards: [{ ...stored, stars }],
-      leaderboardDifficulties: new Map(),
-      complete: true,
-    });
+    server.use(scoreSaberRankedLeaderboards([{ ...stored, stars }]));
   }
 
   test("records a re-rated leaderboard as a ranked batch and captures its pp changes", async () => {
@@ -655,18 +626,13 @@ describe("LeaderboardRankedSyncService.refreshRankedLeaderboards", () => {
     expect(second.rankedBatch?.alreadyNotified).toBe(true);
     expect(await getRankedBatchRows()).toHaveLength(1);
 
-    // The map was re-rated twice, but the player's pp is compared from before the ranked batch.
     const [score] = await db.select().from(scoreSaberRankedBatchScoresTable);
     expect(score).toMatchObject({ ppBefore: 250, ppAfter: 330 });
   });
 
   test("records nothing when no leaderboard was re-rated", async () => {
     const [stored] = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(DEFAULT_REALM_ID);
-    ScoreSaberApiService.getAllLeaderboards = async () => ({
-      leaderboards: [stored!],
-      leaderboardDifficulties: new Map(),
-      complete: true,
-    });
+    server.use(scoreSaberRankedLeaderboards([stored!]));
     const { calls } = stubRealmScores(new Map());
 
     const result = await LeaderboardRankedSyncService.refreshRankedLeaderboards();
@@ -695,20 +661,19 @@ describe("LeaderboardRankedSyncService.refreshRankedLeaderboards", () => {
 });
 
 describe("Unranked leaderboards", () => {
-  /** ScoreSaber's ranked list containing only a brand new leaderboard, so the seeded one is missing. */
-  async function stubRankedListWithoutSeeded(complete: boolean, includeNew = true): Promise<void> {
+  async function stubRankedListWithoutSeeded(complete: boolean, includeNew = true) {
     const [stored] = await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(DEFAULT_REALM_ID);
     if (!stored) {
       throw new Error("Expected a seeded ranked leaderboard");
     }
-    ScoreSaberApiService.getAllLeaderboards = async () => ({
-      leaderboards: includeNew ? [{ ...stored, id: 900_099, songHash: "f".repeat(32) }] : [],
-      leaderboardDifficulties: new Map(),
-      complete,
-    });
+    server.use(
+      scoreSaberRankedLeaderboards(includeNew ? [{ ...stored, id: 900_099, songHash: "f".repeat(32) }] : [], {
+        complete,
+      })
+    );
   }
 
-  async function getRankedIds(): Promise<number[]> {
+  async function getRankedIds() {
     return (await ScoreSaberLeaderboardsRepository.getRankedLeaderboards(DEFAULT_REALM_ID)).map(lb => lb.id);
   }
 
@@ -724,7 +689,6 @@ describe("Unranked leaderboards", () => {
         ?.ranked
     ).toBe(true);
 
-    // Recorded as going to 0 stars, inside a ranked batch.
     const [change] = await db
       .select()
       .from(scoreSaberLeaderboardStarChangeTable)
@@ -736,7 +700,6 @@ describe("Unranked leaderboards", () => {
       ppPending: false,
     });
 
-    // Every score lost all of its pp, without asking ScoreSaber about the unranked leaderboard.
     expect(calls).not.toContain(TEST_LEADERBOARD_ID);
     expect(await getRealmPp(TEST_SCORE_ID)).toBeUndefined();
     expect(await getRealmPp(TEST_SCORE_TWO_ID)).toBeUndefined();
@@ -797,8 +760,7 @@ describe("Unranked leaderboards", () => {
 describe("Ranked Batch API integration", () => {
   const app = createTestApp();
 
-  /** Creates a ranked batch with captured pp changes for both seeded players. */
-  async function seedCapturedRankedBatch(): Promise<number> {
+  async function seedCapturedRankedBatch() {
     await seedUnchangedScore();
     const rankedBatchId = await recordSeededStarChange(BASE, 8, 8.5);
     await recordSeededStarChange(new Date(BASE.getTime() + DAY), 8.5, 9);
@@ -928,13 +890,12 @@ describe("Ranked Batch API integration", () => {
         name: "January 2026 Ranked Batch",
         leaderboardCount: 2,
         playerCount: 2,
-        scoreCount: 2, // the unchanged 100 pp score is not recorded
+        scoreCount: 2,
       });
       expect(body.leaderboards).toHaveLength(2);
       expect(body.rankedBatch.newLeaderboardCount).toBe(0);
       expect(body.newLeaderboards).toEqual([]);
 
-      // Re-rated twice (8 -> 8.5 -> 9) but shown as a single change.
       const ranked = body.leaderboards.find(leaderboard => leaderboard.leaderboardId === TEST_LEADERBOARD_ID);
       expect(ranked).toMatchObject({
         previousStars: 8,
@@ -942,7 +903,6 @@ describe("Ranked Batch API integration", () => {
         songName: "Test Song",
         difficulty: "ExpertPlus",
       });
-      // Biggest star gain first (tied here, so by id).
       expect(body.leaderboards[0]?.leaderboardId).toBe(TEST_LEADERBOARD_ID);
     });
 
@@ -1145,7 +1105,6 @@ describe("Ranked Batch API integration", () => {
         await request(app, `/ranked-batches/player/${TEST_PLAYER_ID}/${rankedBatchId}/scores`)
       ).json()) as PlayerRankedBatchScoresResponse;
 
-      // +80, +50 (the seeded score), -50: gains first, the biggest loss last.
       expect(body.map(score => score.scoreId)).toEqual([9002, TEST_SCORE_ID, 9001]);
     });
 

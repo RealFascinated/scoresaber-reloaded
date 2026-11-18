@@ -95,8 +95,6 @@ export default function AccSaberPlayerScores({ player }: Props) {
     <ScoresCard>
       <div className="flex w-full flex-col gap-3">
         <ScoresToolbar>
-          {/* On mobile, a single centered column so the toolbar doesn't draw a divider between the rows.
-              From sm up, `contents` drops this wrapper so the controls sit side by side with dividers again. */}
           <div className="flex flex-col items-center gap-2 sm:contents">
             <SegmentedControl>
               {scoreTypes.map(typeOption => (

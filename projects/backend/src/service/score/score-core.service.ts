@@ -57,17 +57,9 @@ export class ScoreCoreService {
     leaderboard: ScoreSaberLeaderboard,
     newScore: boolean = false,
     beatLeaderScore?: BeatLeaderScore
-  ): Promise<{
-    score: ScoreSaberScore | undefined;
-    hasPreviousScore: boolean;
-    tracked: boolean;
-  }> {
+  ) {
     const before = performance.now();
 
-    // A score already stored under this id (whatever its value) is a duplicate, so one primary key
-    // lookup covers both the "same id and score" and the "same id" cases.
-    // The two lookups are independent, so they share a round trip. The player's current row is
-    // wasted work for a duplicate, which is the rarer case.
     const playerId = score.playerId;
     const [alreadyTracked, currentRow] = await Promise.all([
       ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId),
@@ -86,9 +78,6 @@ export class ScoreCoreService {
         newScore || ScoreCoreService.shouldIncomingReplaceCurrent(score, currentRow);
 
       if (shouldReplaceCurrent) {
-        // Atomic replace: snapshots the previous PB to history and upserts the
-        // new row in one transaction, with the newest play winning under
-        // concurrent writes (see ScoreSaberScoresRepository.replaceScore).
         const inserted = await ScoreSaberScoresRepository.replaceScore(insertRow, DEFAULT_REALM_ID);
         if (!inserted) {
           return { score: undefined, hasPreviousScore, tracked: false };
@@ -100,9 +89,6 @@ export class ScoreCoreService {
     } else {
       const inserted = await ScoreSaberScoresRepository.insertScore(insertRow, DEFAULT_REALM_ID);
       if (!inserted) {
-        // Either a concurrent writer already recorded this scoreId (fine), or it
-        // took the (playerId, leaderboardId) slot with a different score — keep
-        // this play in history so it is not lost entirely.
         if (!(await ScoreSaberScoresRepository.rowExistsByScoreId(insertRow.scoreId))) {
           await ScoreSaberScoreHistoryRepository.insertAttempt(insertRow, playerId, leaderboard.id);
         }
@@ -154,9 +140,9 @@ export class ScoreCoreService {
    */
   public static async trackScoreSaberScoresBatch(
     entries: { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }[]
-  ): Promise<Awaited<ReturnType<typeof ScoreCoreService.trackScoreSaberScore>>[]> {
+  ) {
     type TrackResult = Awaited<ReturnType<typeof ScoreCoreService.trackScoreSaberScore>>;
-    const results: TrackResult[] = new Array(entries.length);
+    const results = Array.from<TrackResult>({ length: entries.length });
     if (entries.length === 0) {
       return results;
     }
@@ -168,8 +154,6 @@ export class ScoreCoreService {
       ),
     ]);
 
-    // A score id or player/leaderboard slot that appears more than once in the page can't be decided
-    // from the state read above, so every occurrence is handled one at a time.
     const scoreIdCounts = new Map<number, number>();
     const slotCounts = new Map<string, number>();
     for (const { score, leaderboard } of entries) {
@@ -183,7 +167,6 @@ export class ScoreCoreService {
     entries.forEach(({ score, leaderboard }, index) => {
       const slot = playerLeaderboardKey(score.playerId, leaderboard.id);
       if (existingScoreIds.has(score.scoreId)) {
-        // Already stored: a duplicate, same as the check at the start of trackScoreSaberScore
         results[index] = { score: undefined, hasPreviousScore: false, tracked: false };
       } else if (
         occupiedSlots.has(slot) ||
@@ -209,9 +192,6 @@ export class ScoreCoreService {
             results[entryIndex] = { score, hasPreviousScore: false, tracked: true };
             return;
           }
-          // Either a concurrent writer already recorded this scoreId (fine), or it took the
-          // (playerId, leaderboardId) slot with a different score: keep this play in history so it
-          // is not lost entirely.
           if (!(await ScoreSaberScoresRepository.rowExistsByScoreId(score.scoreId))) {
             await ScoreSaberScoreHistoryRepository.insertAttempt(
               rows[freshIndex],
@@ -234,14 +214,7 @@ export class ScoreCoreService {
     return results;
   }
 
-  /**
-   * Stores the score's pp in every non-default realm where its leaderboard is ranked. ScoreSaber's
-   * websocket and v1 APIs only carry the default realm's pp, so the other realms are computed from
-   * the realm's stars and pp curve (and later corrected by the realm score sync).
-   *
-   * @param score the score that was just stored
-   */
-  private static async trackRealmPp(scores: ScoreSaberScore[]): Promise<void> {
+  private static async trackRealmPp(scores: ScoreSaberScore[]) {
     if (scores.length === 0) {
       return;
     }
@@ -251,8 +224,6 @@ export class ScoreCoreService {
       const leaderboardIds = [...new Set(scores.map(score => score.leaderboardId))];
       await Promise.all(
         realmIds.map(async realmId => {
-          // The realm's leaderboards and curve are the same for every score of the same leaderboard, so
-          // they are loaded once per realm instead of once per score
           const leaderboards = new Map(
             await Promise.all(
               leaderboardIds.map(
@@ -286,13 +257,7 @@ export class ScoreCoreService {
     }
   }
 
-  /**
-   * Whether an ingested score should replace the stored current PB (sync/backfill paths).
-   */
-  private static shouldIncomingReplaceCurrent(
-    incoming: ScoreSaberScore,
-    current: ScoreSaberScoreRow
-  ): boolean {
+  private static shouldIncomingReplaceCurrent(incoming: ScoreSaberScore, current: ScoreSaberScoreRow) {
     if (incoming.timestamp.getTime() > current.timestamp.getTime()) {
       return true;
     }
@@ -308,7 +273,7 @@ export class ScoreCoreService {
     return incoming.pp > current.pp;
   }
 
-  public static toInsertRow(score: ScoreSaberScore): ScoreSaberScoreInsertRow {
+  public static toInsertRow(score: ScoreSaberScore) {
     const modifiers = score.modifiers.map(modifier => modifier.toString());
     return {
       scoreId: score.scoreId,
@@ -332,20 +297,17 @@ export class ScoreCoreService {
     };
   }
 
-  /** Scores persisted from the API recently, by `scoreId:score`, so repeated page views skip the write. */
   private static readonly recentlyUpserted = new Map<string, number>();
   private static readonly UPSERT_DEDUPE_MS = 10 * 60 * 1000;
   private static readonly UPSERT_DEDUPE_MAX = 50_000;
 
-  private static markUpserted(rows: ScoreSaberScoreInsertRow[], now: number): void {
+  private static markUpserted(rows: ScoreSaberScoreInsertRow[], now: number) {
     const recentlyUpserted = ScoreCoreService.recentlyUpserted;
     for (const row of rows) {
       const key = `${row.scoreId}:${row.score}`;
-      // Delete first so a refreshed key moves to the end of the Map's insertion order.
       recentlyUpserted.delete(key);
       recentlyUpserted.set(key, now);
     }
-    // Evict the oldest entries (Map iterates in insertion order) instead of rescanning the whole map.
     while (recentlyUpserted.size > ScoreCoreService.UPSERT_DEDUPE_MAX) {
       const oldest = recentlyUpserted.keys().next();
       if (oldest.done) {
@@ -369,7 +331,7 @@ export class ScoreCoreService {
    *
    * @param scores the scores to upsert
    */
-  public static async upsertScoresFromApi(scores: ScoreSaberScore[]): Promise<void> {
+  public static async upsertScoresFromApi(scores: ScoreSaberScore[]) {
     const insertRows: ScoreSaberScoreInsertRow[] = [];
     const now = Date.now();
     try {
@@ -381,7 +343,6 @@ export class ScoreCoreService {
         if (seenScoreIds.has(row.scoreId) || seenPlayerLeaderboards.has(playerLeaderboardKey)) {
           continue;
         }
-        // The same API page is served again and again; skip scores already persisted moments ago.
         const persistedAt = ScoreCoreService.recentlyUpserted.get(`${row.scoreId}:${row.score}`);
         if (persistedAt !== undefined && now - persistedAt < ScoreCoreService.UPSERT_DEDUPE_MS) {
           continue;
@@ -429,9 +390,7 @@ export class ScoreCoreService {
    * @param playerIds the ids of the players, duplicates are fine
    * @returns the info of the players that exist, by player id
    */
-  public static async getPlayerInfoByIds(
-    playerIds: Iterable<string>
-  ): Promise<Map<string, ScorePlayerInfoRow>> {
+  public static async getPlayerInfoByIds(playerIds: Iterable<string>) {
     const ids = [...new Set(playerIds)];
     if (ids.length === 0) {
       return new Map();
@@ -469,7 +428,7 @@ export class ScoreCoreService {
     score: ScoreSaberScore | ScoreSaberMedalScore,
     leaderboard: ScoreSaberLeaderboard,
     options?: InsertScoreDataOptions
-  ): Promise<ScoreSaberScore | ScoreSaberMedalScore> {
+  ) {
     options = {
       insertBeatLeaderScore: true,
       insertPreviousScore: true,

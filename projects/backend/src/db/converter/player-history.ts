@@ -1,7 +1,6 @@
-import { ScoreSaberPlayerHistory } from "@ssr/common/schemas/scoresaber/player/history";
 import { PlayerHistoryRow } from "../schema";
 
-function addKey(key: keyof PlayerHistoryRow, value: unknown): Record<string, unknown> {
+function addKey(key: keyof PlayerHistoryRow, value: unknown) {
   if (value === null) {
     return {};
   }
@@ -16,7 +15,7 @@ function addKey(key: keyof PlayerHistoryRow, value: unknown): Record<string, unk
  * @param row the row to convert
  * @returns the converted ScoreSaberPlayerHistory
  */
-export function playerHistoryRowToType(row: PlayerHistoryRow): ScoreSaberPlayerHistory {
+export function playerHistoryRowToType(row: PlayerHistoryRow) {
   return {
     ...addKey("rank", row.rank),
     ...addKey("countryRank", row.countryRank),

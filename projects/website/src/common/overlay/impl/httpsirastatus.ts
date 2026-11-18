@@ -100,7 +100,6 @@ async function loadStatusData(status: HttpSiraStatus_Status) {
       accuracy: performance.relativeScore * 100,
     },
     songTime: performance.currentSongTime,
-    // The map length is in milliseconds
     songLength: status.beatmap?.length === undefined ? undefined : status.beatmap.length / 1000,
     songTimeSyncedAt: Date.now(),
   });

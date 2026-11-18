@@ -7,10 +7,7 @@ import { formatDuration } from "@ssr/common/utils/time-utils";
 import { BeatLeaderScoresRepository } from "../../repositories/beatleader-scores.repository";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import BeatLeaderService from "../beatleader/beatleader.service";
-import {
-  BeatLeaderApiService,
-  type BeatLeaderPlayerScoresPageResult,
-} from "../external/beatleader-api.service";
+import { BeatLeaderApiService } from "../external/beatleader-api.service";
 import { PlayerCoreService } from "./player-core.service";
 
 type SeedMode = "backfill" | "requested";
@@ -25,10 +22,6 @@ type SeedResult = {
 export class PlayerBeatLeaderScoresService {
   private static readonly logger: ScopedLogger = Logger.withTopic("BeatLeader Player Scores");
 
-  /**
-   * Pages re-fetched before the saved checkpoint when a seed resumes, so scores that
-   * moved down a page while the seed was paused are not skipped.
-   */
   private static readonly RESUME_OVERLAP_PAGES = 1;
 
   /**
@@ -43,10 +36,7 @@ export class PlayerBeatLeaderScoresService {
    * @param options the options
    * @returns the result
    */
-  public static async fetchMissingBeatLeaderScores(
-    account: ScoreSaberAccount,
-    options: { mode: SeedMode }
-  ): Promise<SeedResult> {
+  public static async fetchMissingBeatLeaderScores(account: ScoreSaberAccount, options: { mode: SeedMode }) {
     const playerId = account.id;
     if (account.banned) {
       if (!account.seededBeatLeaderScores) {
@@ -61,51 +51,27 @@ export class PlayerBeatLeaderScoresService {
 
     const result = PlayerBeatLeaderScoresService.emptyResult();
 
-    /**
-     * Gets a page of BeatLeader scores for the player.
-     *
-     * @param page the page to get
-     * @returns the page along with the HTTP status BeatLeader answered with
-     */
-    async function getScoresPage(page: number): Promise<BeatLeaderPlayerScoresPageResult | undefined> {
+    async function getScoresPage(page: number) {
       return BeatLeaderApiService.requestPlayerScoresPage(playerId, page, {
         count: 100,
         sortBy: "date",
         order: "desc",
         leaderboardContext: "general",
-        // The page schema requires a non-null `scoreImprovement`; BeatLeader only
-        // includes it when includeIO=true (it is null otherwise), so request it.
         includeIO: true,
       });
     }
 
-    function maxPageFromMetadata(scoresPage: BeatLeaderPlayerScoresPageToken): number {
+    function maxPageFromMetadata(scoresPage: BeatLeaderPlayerScoresPageToken) {
       const { total, itemsPerPage } = scoresPage.metadata;
       const ipp = Math.max(1, itemsPerPage);
       return Math.ceil(total / ipp);
     }
 
-    /**
-     * Whether there is another page after this one.
-     *
-     * Uses BeatLeader’s `metadata.total` and `metadata.itemsPerPage` (same fields the API uses for paging).
-     *
-     * @param currentPage the page that was just processed
-     * @param scoresPage the page token
-     */
-    function hasMorePages(currentPage: number, scoresPage: BeatLeaderPlayerScoresPageToken): boolean {
+    function hasMorePages(currentPage: number, scoresPage: BeatLeaderPlayerScoresPageToken) {
       return currentPage < maxPageFromMetadata(scoresPage);
     }
 
-    /**
-     * Tracks scores on this page that are not already stored.
-     *
-     * @param scoresPage the page to process
-     * @returns counts and whether the page was already fully tracked
-     */
-    async function processPageScores(
-      scoresPage: BeatLeaderPlayerScoresPageToken
-    ): Promise<{ newTracked: number; fullPageAlreadyTracked: boolean }> {
+    async function processPageScores(scoresPage: BeatLeaderPlayerScoresPageToken) {
       const scores = scoresPage.data ?? [];
       if (scores.length === 0) {
         return { newTracked: 0, fullPageAlreadyTracked: true };
@@ -128,9 +94,6 @@ export class PlayerBeatLeaderScoresService {
       return { newTracked, fullPageAlreadyTracked: false };
     }
 
-    // Resume at the page the last attempt stopped on. Restarting from page 1 every
-    // time is what kept long score histories unseeded: a single failed page anywhere
-    // in the history threw away everything fetched before it.
     let currentPage = Math.max(1, (progress?.page ?? 0) - PlayerBeatLeaderScoresService.RESUME_OVERLAP_PAGES);
     let lastProcessedPage = 0;
     let pagesFetched = 0;
@@ -140,10 +103,6 @@ export class PlayerBeatLeaderScoresService {
     while (true) {
       const pageResult = await getScoresPage(currentPage);
       if (pageResult == undefined || pageResult.page == undefined) {
-        // A 404 is BeatLeader saying this page does not exist: on page 1 the player
-        // has no BeatLeader scores at all, deeper in the history simply ends there.
-        // Every other failure (429, 5xx, a body that failed validation) is transient
-        // and leaves the player unseeded to be resumed from the saved page.
         if (pageResult?.status === 404) {
           completed = true;
         }
@@ -183,10 +142,6 @@ export class PlayerBeatLeaderScoresService {
     if (!completed) {
       await PlayerBeatLeaderScoresService.recordAttempt(playerId, lastProcessedPage, previousAttempts);
     } else {
-      // Cache the player's linked BeatLeader account IDs so real-time scores are
-      // attributed to this account even when their BeatLeader ID differs. A player
-      // with no BeatLeader scores has nothing to attribute, so it is seeded without a
-      // mapping; the real-time path resolves the mapping for their first score.
       const mapping = await BeatLeaderService.upsertBeatLeaderPlayer(account.id);
       if (mapping || !sawScores) {
         await PlayerBeatLeaderScoresService.markSeeded(playerId);
@@ -211,12 +166,7 @@ export class PlayerBeatLeaderScoresService {
     return result;
   }
 
-  /**
-   * Marks a player's BeatLeader scores seeded and clears its backfill checkpoint.
-   *
-   * @param playerId the player's id
-   */
-  private static async markSeeded(playerId: string): Promise<void> {
+  private static async markSeeded(playerId: string) {
     await PlayerCoreService.updatePlayer(playerId, {
       seededBeatLeaderScores: true,
       beatLeaderSeedPage: 0,
@@ -225,15 +175,7 @@ export class PlayerBeatLeaderScoresService {
     });
   }
 
-  /**
-   * Records a failed attempt: the page the next attempt resumes from, and the attempt
-   * count that decides how soon the player is queued again.
-   *
-   * @param playerId the player's id
-   * @param page the last page that was processed
-   * @param attempts the attempts recorded before this one
-   */
-  private static async recordAttempt(playerId: string, page: number, attempts: number): Promise<void> {
+  private static async recordAttempt(playerId: string, page: number, attempts: number) {
     await PlayerCoreService.updatePlayer(playerId, {
       beatLeaderSeedPage: Math.max(0, page),
       beatLeaderSeedAttempts: attempts + 1,
@@ -241,7 +183,13 @@ export class PlayerBeatLeaderScoresService {
     });
   }
 
-  private static emptyResult(): SeedResult {
-    return { totalPagesFetched: 0, newScoresTracked: 0, stoppedBecauseAllTrackedPage: false, timeTaken: 0 };
+  private static emptyResult() {
+    const result: SeedResult = {
+      totalPagesFetched: 0,
+      newScoresTracked: 0,
+      stoppedBecauseAllTrackedPage: false,
+      timeTaken: 0,
+    };
+    return result;
   }
 }

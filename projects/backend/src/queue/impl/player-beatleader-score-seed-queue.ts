@@ -7,7 +7,6 @@ import { Queue, QueueItem } from "../queue";
 import { QueueId } from "../queue-manager";
 
 export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
-  /** Players enqueued per cycle; the rest are picked up by later cycles once the queue drains. */
   private static readonly SEED_CYCLE_LIMIT = 20_000;
 
   private static readonly logger: ScopedLogger = Logger.withTopic("Player BeatLeader Score Seed Queue");
@@ -19,7 +18,7 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
     setInterval(() => this.insertPlayers(), TimeUnit.toMillis(TimeUnit.Minute, 10));
   }
 
-  protected async processItem(item: QueueItem<string>): Promise<void> {
+  protected async processItem(item: QueueItem<string>) {
     const playerId = item.id;
 
     const account = await PlayerCoreService.getAccount(playerId);
@@ -28,7 +27,6 @@ export class PlayerBeatLeaderScoreSeedQueue extends Queue<QueueItem<string>> {
       return;
     }
 
-    // A seeded player's scores are tracked in real time; walking the whole history again only costs API calls
     if (account.seededBeatLeaderScores) {
       return;
     }

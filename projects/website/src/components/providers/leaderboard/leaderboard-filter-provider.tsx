@@ -15,14 +15,11 @@ const LeaderboardFilterContext = createContext<FilterContextProps | undefined>(u
 export const LeaderboardFilterProvider = ({ children }: { children: ReactNode }) => {
   const { update } = useUpdateUserPreferences();
   const defaultCountry = useUserPreference("defaultLeaderboardCountry");
-  // nuqs uses `null` as the "missing query param" value.
-  // Our app code prefers `undefined`, so we map at the boundary.
   const [countryQuery, setCountryQuery] = useQueryState("country", parseAsString);
   const country = countryQuery ?? undefined;
   const setCountry = (value: string | undefined) => setCountryQuery(value ?? null);
 
   useEffect(() => {
-    // Keep previous behaviour: if URL has no country, fall back to the saved default.
     if (countryQuery == null && defaultCountry) {
       setCountryQuery(defaultCountry);
     }
@@ -46,7 +43,7 @@ export const LeaderboardFilterProvider = ({ children }: { children: ReactNode })
   );
 };
 
-export const useLeaderboardFilter = (initialCountry?: string): FilterContextProps => {
+export const useLeaderboardFilter = (initialCountry?: string) => {
   const context = useContext(LeaderboardFilterContext);
   if (!context) {
     return {

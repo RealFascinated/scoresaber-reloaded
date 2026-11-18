@@ -16,7 +16,7 @@ export default class HttpResponseStatusMetric extends Metric<null> {
     });
   }
 
-  public increment(route: string, statusCode: number): void {
+  public increment(route: string, statusCode: number) {
     this.counter.inc({
       route,
       status_class: `${Math.floor(statusCode / 100)}xx`,

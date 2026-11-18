@@ -3,7 +3,6 @@
 import { useSidebar } from "@/components/ui/sidebar";
 import { useEffect } from "react";
 
-// Below this viewport width the content area gets too narrow with the sidebar expanded
 const AUTO_COLLAPSE_QUERY = "(min-width: 768px) and (max-width: 1279px)";
 
 /**

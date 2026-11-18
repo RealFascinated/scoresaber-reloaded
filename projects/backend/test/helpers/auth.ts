@@ -1,6 +1,8 @@
 import { expect } from "bun:test";
+import { HttpResponse, http } from "msw";
 import { expectStatus } from "./assertions";
 import type { createTestApp } from "./create-test-app";
+import { server } from "./msw-server";
 import { request, type TestResponse } from "./request";
 
 export const STEAM_ID = "76561198000000001";
@@ -8,23 +10,19 @@ export const STEAM_OPENID_ENDPOINT = "https://steamcommunity.com/openid/login";
 export const WEBSITE_ORIGIN = "http://localhost:3000";
 export const API_ORIGIN = "http://localhost:8080";
 
-export const originalFetch = globalThis.fetch;
-
 /**
- * Fakes Steam's `check_authentication` endpoint, the only network call of the Steam sign-in
+ * Answers Steam's `check_authentication` endpoint, the only network call of the Steam sign-in
  * when no Web API key is configured.
  */
-export function mockSteamVerification(isValid: boolean): void {
-  globalThis.fetch = (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    if (url.startsWith(STEAM_OPENID_ENDPOINT)) {
-      return new Response(`ns:http://specs.openid.net/auth/2.0\nis_valid:${isValid}\n`);
-    }
-    return originalFetch(input, init);
-  }) as typeof fetch;
+export function respondToSteamVerification(isValid: boolean) {
+  server.use(
+    http.all(STEAM_OPENID_ENDPOINT, () =>
+      HttpResponse.text(`ns:http://specs.openid.net/auth/2.0\nis_valid:${isValid}\n`)
+    )
+  );
 }
 
-export function toCookieHeader(response: TestResponse): string {
+export function toCookieHeader(response: TestResponse) {
   return response.headers
     .getSetCookie()
     .map(cookie => cookie.split(";")[0])

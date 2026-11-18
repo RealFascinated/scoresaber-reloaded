@@ -10,11 +10,11 @@ export class PlayerPlayedStreakService {
 
   private static readonly expireBrokenStreaksMaxAttempts = 4;
 
-  private static isPgDeadlock(e: unknown): boolean {
+  private static isPgDeadlock(e: unknown) {
     return typeof e === "object" && e !== null && "code" in e && (e as { code: unknown }).code === "40P01";
   }
 
-  private static delay(ms: number): Promise<void> {
+  private static delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
@@ -23,13 +23,12 @@ export class PlayerPlayedStreakService {
    *
    * @param score the score to handle
    */
-  public static async handleScoreSaberScore(score: ScoreSaberScore): Promise<void> {
+  public static async handleScoreSaberScore(score: ScoreSaberScore) {
     const player = await ScoreSaberAccountsRepository.findRowById(score.playerId);
     if (!player) {
       return;
     }
 
-    // UTC date, matching the UTC date used by expireBrokenStreaks
     const today = new Date().toISOString().slice(0, 10);
     if (player.lastPlayedDate === today) {
       return;
@@ -56,7 +55,7 @@ export class PlayerPlayedStreakService {
    *
    * Retries on deadlock: the bulk UPDATE can overlap concurrent row updates on this table (e.g. streak bumps from score ingestion).
    */
-  public static async expireBrokenStreaks(): Promise<void> {
+  public static async expireBrokenStreaks() {
     for (let attempt = 1; attempt <= PlayerPlayedStreakService.expireBrokenStreaksMaxAttempts; attempt++) {
       try {
         const before = performance.now();

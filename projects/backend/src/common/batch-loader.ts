@@ -10,7 +10,7 @@ export class BatchLoader<K, V> {
     private readonly maxBatchSize: number = 200
   ) {}
 
-  public load(key: K): Promise<V> {
+  public load(key: K) {
     return new Promise<V>((resolve, reject) => {
       this.queue.push({ key, resolve, reject });
       if (this.queue.length === 1) {
@@ -19,7 +19,7 @@ export class BatchLoader<K, V> {
     });
   }
 
-  private async flush(): Promise<void> {
+  private async flush() {
     const pending = this.queue.splice(0);
     const batches: (typeof pending)[] = [];
     for (let i = 0; i < pending.length; i += this.maxBatchSize) {

@@ -31,8 +31,6 @@ export function DualRangeSlider({
   const thumbGapPercent = Math.abs(maxPercent - minPercent);
 
   const getLabelOffsetPx = (thumbIndex: number) => {
-    // Smoothly push labels apart when thumbs get close to avoid overlap.
-    // 0px offset when far enough, up to +/- 22px when very close.
     const startPushingAtPercent = 14;
     const maxPushPx = 22;
     const t = Math.min(1, Math.max(0, (startPushingAtPercent - thumbGapPercent) / startPushingAtPercent));

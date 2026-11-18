@@ -11,10 +11,7 @@ export class ScoreSaberLeaderboardSuggestedMapsRepository {
   /**
    * Replaces every row of a realm in one transaction, so readers never see a half written fit.
    */
-  public static async replaceRealm(
-    realmId: number,
-    rows: ScoreSaberLeaderboardSuggestedMapsInsert[]
-  ): Promise<void> {
+  public static async replaceRealm(realmId: number, rows: ScoreSaberLeaderboardSuggestedMapsInsert[]) {
     await db.transaction(async tx => {
       await tx
         .delete(scoreSaberLeaderboardSuggestedMapsTable)

@@ -1,4 +1,4 @@
-import type { UserPreferences, UserPreferencesPatch } from "@ssr/common/schemas/user/preferences";
+import type { UserPreferencesPatch } from "@ssr/common/schemas/user/preferences";
 import { UserPreferencesRepository } from "../../repositories/user-preferences.repository";
 
 export class UserPreferencesService {
@@ -7,7 +7,7 @@ export class UserPreferencesService {
    *
    * @param userId the user to get the preferences of
    */
-  public static get(userId: string): Promise<UserPreferences> {
+  public static get(userId: string) {
     return UserPreferencesRepository.get(userId);
   }
 
@@ -18,7 +18,7 @@ export class UserPreferencesService {
    * @param patch the validated preferences to replace
    * @returns the full preferences after the update
    */
-  public static patch(userId: string, patch: UserPreferencesPatch): Promise<UserPreferences> {
+  public static patch(userId: string, patch: UserPreferencesPatch) {
     return UserPreferencesRepository.patch(userId, patch);
   }
 }

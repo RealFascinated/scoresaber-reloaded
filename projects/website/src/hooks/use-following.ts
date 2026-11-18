@@ -24,7 +24,7 @@ const NOT_FOLLOWING: string[] = [];
  * Gets the ids of the players the signed-in user follows (cached). It only changes through
  * `useFollowActions`, which keeps the cache current, so it is never refetched on its own.
  */
-export function useFollowingIds(includeSelf?: boolean): string[] {
+export function useFollowingIds(includeSelf?: boolean) {
   const { data } = useQuery({
     queryKey: FOLLOWING_QUERY_KEY,
     queryFn: fetchFollowing,
@@ -71,7 +71,6 @@ export function useFollowActions() {
       return { previous };
     },
     onSuccess: saved => {
-      // While more changes are queued the cache already holds their result, don't undo them
       if (queryClient.isMutating({ mutationKey: FOLLOWING_MUTATION_KEY }) <= 1) {
         queryClient.setQueryData(FOLLOWING_QUERY_KEY, saved);
       }
@@ -92,7 +91,7 @@ export function useFollowActions() {
   );
 
   const follow = useCallback(
-    (playerId: string): "followed" | "already-following" | "limit-reached" => {
+    (playerId: string) => {
       const following = getFollowing();
       if (following.includes(playerId)) {
         return "already-following";

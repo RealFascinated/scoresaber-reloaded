@@ -23,11 +23,9 @@ export function LandingBackground() {
       size: number;
       speedX: number;
       speedY: number;
-      // Built once: this is drawn on every frame for every particle
       color: string;
     }[] = [];
 
-    // Assigning canvas.width reallocates the bitmap, so coalesce a resize drag into one change per frame
     let resizeFrame = 0;
     const applySize = () => {
       resizeFrame = 0;

@@ -22,7 +22,7 @@ export type LeaderboardDifficultyJoinRow = {
 export function leaderboardRowToType(
   row: ScoreSaberLeaderboardRow,
   difficulties?: ScoreSaberLeaderboard["difficulties"]
-): ScoreSaberLeaderboard {
+) {
   const difficulty = {
     id: row.id,
     stars: row.stars,
@@ -59,7 +59,5 @@ export function leaderboardRowToType(
     timestamp: row.timestamp instanceof Date ? row.timestamp : new Date(row.timestamp),
   };
 
-  // The object above already has the decoded shape (real Dates, nothing to default), so a compiled
-  // check replaces the full parse. Anything unexpected still goes through `parseSchema` and throws.
   return checkSchema(ScoreSaberLeaderboardSchema, raw) ? raw : parseSchema(ScoreSaberLeaderboardSchema, raw);
 }

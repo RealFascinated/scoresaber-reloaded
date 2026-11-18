@@ -1,13 +1,13 @@
 import { sql } from "drizzle-orm";
 import { db } from "../db";
-import { metricsTable, type MetricRow } from "../db/schema";
+import { metricsTable } from "../db/schema";
 
 export class MetricsRepository {
-  public static async loadAll(): Promise<MetricRow[]> {
+  public static async loadAll() {
     return db.select().from(metricsTable);
   }
 
-  public static async upsertMany(rows: { id: string; value: unknown }[]): Promise<void> {
+  public static async upsertMany(rows: { id: string; value: unknown }[]) {
     if (rows.length === 0) {
       return;
     }

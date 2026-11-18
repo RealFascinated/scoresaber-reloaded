@@ -9,7 +9,6 @@ import {
 /** Predictions above this accuracy are not believable for anyone, whatever the fitted skill says. */
 export const MAX_PREDICTED_ACCURACY = 99.5;
 
-/** Only the best scores matter for the weighted total (0.965^300 is ~0). */
 const TOP_SCORES_CONSIDERED = 300;
 
 /** A ranked map with its fitted ease and display data. */
@@ -31,9 +30,7 @@ export type RankableMap = Omit<
 
 export type PlayerMapScore = { pp: number; accuracy: number };
 
-/** Share of the predicted improvement a played map is credited with when it is already the player's best pp. */
 const PLAYED_CREDIT_FLOOR = 0.4;
-/** The most accuracy (in percentage points) a suggestion expects the player to add to a score they already have. */
 const MAX_PLAYED_IMPROVEMENT = 0.4;
 
 /**
@@ -50,7 +47,7 @@ export function expectedAccuracyOnPlayed(
   current: PlayerMapScore,
   listFloorPp: number,
   listTopPp: number
-): number {
+) {
   if (predicted <= current.accuracy) {
     return predicted;
   }
@@ -77,19 +74,13 @@ export type PlayerRangeFilters = Pick<
   "minStars" | "maxStars" | "minSeconds" | "maxSeconds" | "maxNps"
 >;
 
-/** Scores a player needs before their own play style is trusted over no filtering. */
 const MIN_STYLE_SCORES = 20;
-/** Number of the player's best scores that define their style. */
 const STYLE_SCORES = 200;
-/** A score counts half as much for every this many days of age: the style is what the player plays now. */
 const STYLE_HALF_LIFE_DAYS = 45;
-/** Each place down the player's pp list multiplies a score's weight by this (the pp weighting itself). */
 const STYLE_RANK_DECAY = 0.985;
-/** The share of the weight outside the range on each side, so a few outlier maps do not stretch it. */
 const STYLE_TAIL = 0.04;
 
-/** The value below which `q` of the total weight lies. */
-function weightedQuantile(items: { value: number; weight: number }[], q: number): number {
+function weightedQuantile(items: { value: number; weight: number }[], q: number) {
   const sorted = [...items].sort((a, b) => a.value - b.value);
   const total = sorted.reduce((sum, item) => sum + item.weight, 0);
   let cumulative = 0;
@@ -112,7 +103,7 @@ function weightedQuantile(items: { value: number; weight: number }[], q: number)
  */
 export function derivePlayerRanges(
   playedMaps: { stars: number; seconds: number; nps: number; ageDays: number }[]
-): PlayerRangeFilters | null {
+) {
   const top = playedMaps.slice(0, STYLE_SCORES).map((map, rank) => ({
     ...map,
     weight: Math.pow(0.5, Math.max(0, map.ageDays) / STYLE_HALF_LIFE_DAYS) * Math.pow(STYLE_RANK_DECAY, rank),
@@ -120,11 +111,9 @@ export function derivePlayerRanges(
   if (top.length < MIN_STYLE_SCORES) {
     return null;
   }
-  const column = (pick: (map: (typeof top)[number]) => number): { value: number; weight: number }[] =>
+  const column = (pick: (map: (typeof top)[number]) => number) =>
     top.map(map => ({ value: pick(map), weight: map.weight }));
-  // BeatSaver data is missing for some maps (0), which says nothing about the player's style
-  const known = (pick: (map: (typeof top)[number]) => number): { value: number; weight: number }[] =>
-    column(pick).filter(item => item.value > 0);
+  const known = (pick: (map: (typeof top)[number]) => number) => column(pick).filter(item => item.value > 0);
   const seconds = known(map => map.seconds);
   const nps = known(map => map.nps);
   const hasSeconds = seconds.length >= MIN_STYLE_SCORES;
@@ -156,25 +145,16 @@ export type PlayerStyle = {
   correction: (stars: number) => number;
 };
 
-/** Width (in stars) of the neighbourhood that counts as the same kind of map. */
 const STYLE_BANDWIDTH = 0.5;
-/** Familiarity falls with the density of recent plays raised to this power, never below the floor. */
 const FAMILIARITY_POWER = 0.5;
 const FAMILIARITY_FLOOR = 0.15;
-/** Accuracy a prediction may exceed the player's best nearby score by. */
 const CEILING_MARGIN = 0.1;
-/** Stars around a map that the player's best accuracy is taken from, widened once when nothing is found. */
 const CEILING_RADIUS = 0.75;
 const MIN_CEILING_SCORES = 3;
-/** Width (in stars) of the scores the prediction correction is taken from. */
 const CORRECTION_BANDWIDTH = 0.75;
-/** Scores' worth of weight needed nearby before the correction is trusted. */
 const MIN_CORRECTION_WEIGHT = 4;
-/** Quantile of the nearby residuals the correction uses: just above the middle, a decent attempt. */
 const CORRECTION_QUANTILE = 0.55;
-/** Lowest accuracy that counts toward the correction; worse scores are fails, not skill. */
 const CORRECTION_MIN_ACCURACY = 80;
-/** Effort discount: `1 / (1 + EFFORT_PER_STAR * extra stars + EFFORT_PER_NPS_SHARE * extra NPS share)`. */
 const EFFORT_PER_STAR = 0.25;
 const EFFORT_PER_NPS_SHARE = 0.5;
 
@@ -194,14 +174,14 @@ export function derivePlayerStyle(
     /** Actual accuracy minus the model's prediction for the player on that map. */
     residual?: number;
   }[]
-): PlayerStyle {
+) {
   const ranges = derivePlayerRanges(played);
   const top = played.slice(0, STYLE_SCORES).map((map, rank) => ({
     stars: map.stars,
     nps: map.nps,
     weight: Math.pow(0.5, Math.max(0, map.ageDays) / STYLE_HALF_LIFE_DAYS) * Math.pow(STYLE_RANK_DECAY, rank),
   }));
-  const density = (stars: number): number =>
+  const density = (stars: number) =>
     top.reduce(
       (sum, map) => sum + map.weight * Math.exp(-0.5 * ((stars - map.stars) / STYLE_BANDWIDTH) ** 2),
       0
@@ -240,7 +220,6 @@ export function derivePlayerStyle(
           return;
         }
         kernelTotal += kernel;
-        // What the player does now counts most: recent and high pp scores, like the rest of the style.
         const current =
           Math.pow(0.5, Math.max(0, map.ageDays) / STYLE_HALF_LIFE_DAYS) * Math.pow(STYLE_RANK_DECAY, rank);
         near.push({ value: map.residual, weight: kernel * current });
@@ -256,10 +235,9 @@ export function derivePlayerStyle(
       }
       return null;
     },
-  };
+  } satisfies PlayerStyle;
 }
 
-/** Bonus pp (over a typical map of the same stars) that doubles a map's rank score, and halves it below zero. */
 const BONUS_SCALE_PP = 100;
 const BONUS_FACTOR_MIN = 0.25;
 const BONUS_FACTOR_MAX = 2;
@@ -268,7 +246,7 @@ const BONUS_FACTOR_MAX = 2;
  * The factor a map's bonus pp scales its rank score by: maps that pay more than their stars suggest rank
  * above maps that only pay well because they are hard.
  */
-export function bonusFactor(bonusPp: number): number {
+export function bonusFactor(bonusPp: number) {
   return Math.min(BONUS_FACTOR_MAX, Math.max(BONUS_FACTOR_MIN, 1 + bonusPp / BONUS_SCALE_PP));
 }
 
@@ -277,16 +255,14 @@ export function bonusFactor(bonusPp: number): number {
  */
 export class WeightedGain {
   private readonly pps: number[];
-  /** weights[i] = 0.965^i */
   private readonly weights: number[];
-  /** suffix[i] = sum over j >= i of weights[j] * pps[j] */
   private readonly suffix: number[];
 
   constructor(ppsDescending: number[]) {
     this.pps = ppsDescending.slice(0, TOP_SCORES_CONSIDERED);
     const n = this.pps.length;
-    this.weights = new Array<number>(n + 1);
-    this.suffix = new Array<number>(n + 1);
+    this.weights = Array.from({ length: n + 1 }, () => 0);
+    this.suffix = Array.from({ length: n + 1 }, () => 0);
     this.weights[0] = 1;
     for (let i = 1; i <= n; i++) {
       this.weights[i] = this.weights[i - 1] * ScoreSaberCurve.WEIGHT_COEFFICIENT;
@@ -298,7 +274,7 @@ export class WeightedGain {
   }
 
   /** The weighted pp gained by adding a score of `pp` (a new map). */
-  public add(pp: number): number {
+  public add(pp: number) {
     let lo = 0;
     let hi = this.pps.length;
     while (lo < hi) {
@@ -313,18 +289,17 @@ export class WeightedGain {
   }
 
   /** The weighted total of the considered scores. */
-  public get total(): number {
+  public get total() {
     return this.suffix[0];
   }
 
   /** The weighted pp gained by raising an existing score of `oldPp` to `pp`. */
-  public replace(oldPp: number, pp: number): number {
+  public replace(oldPp: number, pp: number) {
     if (pp <= oldPp) {
       return 0;
     }
     const at = this.pps.indexOf(oldPp);
     if (at === -1) {
-      // The old score is below the considered window, so it adds ~nothing to the total.
       return this.add(pp);
     }
     const without = new WeightedGain([...this.pps.slice(0, at), ...this.pps.slice(at + 1)]);
@@ -332,14 +307,13 @@ export class WeightedGain {
   }
 }
 
-/** The score that counts as "making your list": your 100th best. */
 const LIST_SIZE = 100;
 
 /**
  * The lowest accuracy (0-100) at which a map of the given stars pays at least `targetPp`, or null when even
  * a perfect score does not.
  */
-export function accuracyForPp(stars: number, targetPp: number): number | null {
+export function accuracyForPp(stars: number, targetPp: number) {
   if (targetPp <= 0) {
     return 0;
   }
@@ -374,7 +348,7 @@ export function rankSuggestedMaps(args: {
   playerPps: number[] | null;
   /** The player's style, null for the reference player. */
   style?: PlayerStyle | null;
-}): SuggestedMap[] {
+}) {
   const { maps, skill, slope, filters, playerScores, playerPps, style } = args;
   const gain = playerPps ? new WeightedGain(playerPps) : null;
   const out: SuggestedMap[] = [];
@@ -386,7 +360,6 @@ export function rankSuggestedMaps(args: {
       map.stars > filters.maxStars ||
       map.scoreCount < filters.minScores ||
       map.nps > filters.maxNps ||
-      // Maps without BeatSaber data (0 seconds) can't be length filtered, so they are kept.
       (map.seconds > 0 && (map.seconds < filters.minSeconds || map.seconds > filters.maxSeconds))
     ) {
       continue;
@@ -396,8 +369,6 @@ export function rankSuggestedMaps(args: {
       continue;
     }
 
-    // A prediction never goes beyond the best the player has shown on maps of these stars. The correction only
-    // applies to maps they haven't played: a score they already have is better evidence than the correction.
     const modelAccuracy = Math.min(
       predictAccuracy(skill, slope, map.stars, map.ease) +
         (current ? 0 : (style?.correction(map.stars) ?? 0)),
@@ -445,9 +416,7 @@ export function rankSuggestedMaps(args: {
     });
   }
 
-  // Without a player there is no gain; with one, maps that can't beat the list (gain 0) rank by how close
-  // the predicted accuracy comes to the accuracy needed.
-  const margin = (map: SuggestedMap): number =>
+  const margin = (map: SuggestedMap) =>
     map.requiredAccuracy === null ? Number.NEGATIVE_INFINITY : map.predictedAccuracy - map.requiredAccuracy;
   out.sort((a, b) => {
     if (filters.sort === "gain" && a.weightedGain !== null && b.weightedGain !== null) {
@@ -461,14 +430,9 @@ export function rankSuggestedMaps(args: {
   return balancePlayed(out, filters.limit);
 }
 
-/** Share of the suggestions that are maps the player already has a score on (to improve) instead of new maps. */
 const PLAYED_SHARE = 0.5;
 
-/**
- * Takes the best `limit` maps of a ranked list, aiming at `PLAYED_SHARE` played maps and the rest new, so
- * neither kind crowds the other out. A kind that runs short leaves its places to the other. The order is kept.
- */
-function balancePlayed(ranked: SuggestedMap[], limit: number): SuggestedMap[] {
+function balancePlayed(ranked: SuggestedMap[], limit: number) {
   const played = ranked.filter(map => map.currentAccuracy !== null);
   const fresh = ranked.filter(map => map.currentAccuracy === null);
   const freshCount = Math.min(
@@ -484,11 +448,7 @@ function balancePlayed(ranked: SuggestedMap[], limit: number): SuggestedMap[] {
  * The skill of a reference player who gets `accuracy` on a map of 5 stars where players score the typical
  * accuracy for the stars.
  */
-export function getReferenceSkill(
-  accuracy: number,
-  maps: RankableMap[],
-  params: SuggestedMapsParams
-): number {
+export function getReferenceSkill(accuracy: number, maps: RankableMap[], params: SuggestedMapsParams) {
   const near = maps.filter(map => map.stars >= 4.5 && map.stars <= 5.5).map(map => map.prior);
   near.sort((a, b) => a - b);
   const typicalPrior = near.length > 0 ? near[near.length >> 1] : 0;

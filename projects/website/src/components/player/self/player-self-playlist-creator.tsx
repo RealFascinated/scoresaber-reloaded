@@ -40,7 +40,7 @@ const RANKED_OPTIONS = [
 
 type SortOption = keyof typeof SORT_OPTIONS;
 
-function generateFilename(playerId: string, data: SelfPlaylistSettings): string {
+function generateFilename(playerId: string, data: SelfPlaylistSettings) {
   const scoreType =
     data.rankedStatus === "all" ? "all" : data.rankedStatus === "ranked" ? "ranked-only" : "unranked-only";
   const starRange =

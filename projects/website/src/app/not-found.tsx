@@ -4,7 +4,6 @@ import { NotFoundSearchButton } from "@/components/not-found-search-button";
 import { DiscordButton } from "@/components/social/discord-button";
 import type { Metadata } from "next";
 
-// Replaces the root layout's "index, follow" robots (including googleBot) so 404s only emit noindex
 export const metadata: Metadata = {
   robots: {
     index: false,

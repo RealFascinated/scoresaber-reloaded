@@ -6,17 +6,12 @@ import { useIsMobile } from "@/contexts/viewport-context";
 import { type SIDE_OPTIONS } from "@radix-ui/react-popper";
 import { isValidElement, ReactNode, useRef, useState } from "react";
 
-/**
- * True when the tooltip wraps a single already-interactive element (button, link, input...).
- * In that case the element itself is the keyboard focus target, so the wrapper must not
- * add a second tab stop.
- */
 type InteractiveChildProps = {
   onClick?: (...args: never[]) => void;
   href?: string;
 };
 
-function isInteractiveChild(child: React.ReactNode): boolean {
+function isInteractiveChild(child: React.ReactNode) {
   if (!isValidElement<InteractiveChildProps>(child)) {
     return false;
   }
@@ -44,15 +39,12 @@ export default function SimpleTooltip({
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
 
-  // Tooltips don't trigger reliably on touch screens; only render them there when explicitly requested.
   if (isMobile && !showOnMobile) {
     return <div className={className}>{children}</div>;
   }
 
   const interactive = isInteractiveChild(children);
 
-  // On touch devices Radix opens on focus/hover emulation and then closes again on the
-  // click, so the tooltip flashes. Control it manually there: tap toggles, tap outside closes.
   const touchProps = isMobile
     ? {
         open,
@@ -62,10 +54,6 @@ export default function SimpleTooltip({
 
   return (
     <Tooltip {...touchProps}>
-      {/* On touch screens a tap toggles the tooltip. A non-interactive child makes the wrapper
-          itself the toggle, so it is exposed (and keyboard operable) as a button; an interactive
-          child is the control and the wrapper only catches its bubbled tap. Radix composes these
-          handlers onto the wrapper. */}
       <TooltipTrigger
         asChild
         onClick={isMobile ? () => setOpen(previous => !previous) : undefined}
@@ -84,8 +72,6 @@ export default function SimpleTooltip({
           ref={triggerRef}
           role={isMobile && !interactive ? "button" : undefined}
           onFocus={event => {
-            // Only open on keyboard focus; programmatic focus (e.g. a popover auto-focusing its
-            // first button after a click) must not pop the tooltip open.
             if (!isMobile && !event.target.matches(":focus-visible")) {
               event.preventDefault();
             }

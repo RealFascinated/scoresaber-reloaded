@@ -1,7 +1,6 @@
 import { BeatLeaderCurve, type BeatLeaderPpDifficulty } from "@ssr/common/leaderboard-curve/beatleader-curve";
 import { describe, expect, it } from "bun:test";
 
-// A ranked map with the rebalanced ratings, and a real score on it (BeatLeader API, no modifiers)
 const REBALANCED: BeatLeaderPpDifficulty = {
   accRating: 15.981133,
   passRating: 18.005373,

@@ -24,7 +24,7 @@ export type PlayerPpChange = PpChange & {
 /**
  * Gets the earliest end a ranked batch can have and still absorb a star change made at `timestamp`.
  */
-export function getMergeCutoff(timestamp: Date): Date {
+export function getMergeCutoff(timestamp: Date) {
   return new Date(timestamp.getTime() - RANKED_BATCH_MERGE_WINDOW_MS);
 }
 
@@ -34,14 +34,14 @@ export function getMergeCutoff(timestamp: Date): Date {
  * @param name the stored name override, if any
  * @param startedAt when the ranked batch started
  */
-export function getRankedBatchName(name: string | null, startedAt: Date): string {
+export function getRankedBatchName(name: string | null, startedAt: Date) {
   return name ?? `${formatDate(startedAt, "MMMM YYYY")} Ranked Batch`;
 }
 
 /**
  * Whether a score's pp changed enough to be worth recording.
  */
-export function hasPpChanged(change: PpChange): boolean {
+export function hasPpChanged(change: PpChange) {
   return Math.abs(change.ppAfter - change.ppBefore) > PP_CHANGE_EPSILON;
 }
 
@@ -52,9 +52,7 @@ export function hasPpChanged(change: PpChange): boolean {
  *
  * @param rows the ranked batch's star changes, oldest first
  */
-export function aggregateLeaderboardChanges(
-  rows: RankedBatchStarChangeRow[]
-): RankedBatchLeaderboardChange[] {
+export function aggregateLeaderboardChanges(rows: RankedBatchStarChangeRow[]) {
   const byLeaderboard = new Map<number, RankedBatchLeaderboardChange>();
 
   for (const row of rows) {
@@ -90,8 +88,8 @@ export function aggregateLeaderboardChanges(
  * @param changes the pp before and after of the scores the ranked batch changed. A score that is
  *   worth no pp on one side has 0 there.
  */
-export function calculatePlayerPpChange(unchangedPps: number[], changes: PpChange[]): PlayerPpChange {
-  const total = (changed: number[]): number =>
+export function calculatePlayerPpChange(unchangedPps: number[], changes: PpChange[]) {
+  const total = (changed: number[]) =>
     ScoreSaberCurve.getTotalWeightedPp(
       [...unchangedPps, ...changed].filter(pp => pp > 0).sort((a, b) => b - a)
     );

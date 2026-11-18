@@ -2,17 +2,8 @@ import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination } from "@ssr/common/pagination";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import type {
-  PlayerRankedBatch,
-  RankedBatch,
-  RankedBatchMarker,
-} from "@ssr/common/schemas/ranked-batch/ranked-batch";
-import type {
-  PlayerRankedBatchScoresResponse,
-  RankedBatchPlayersPageResponse,
-  RankedBatchResponse,
-  RankedBatchesPageResponse,
-} from "@ssr/common/schemas/ranked-batch/ranked-batch-responses";
+import type { RankedBatch } from "@ssr/common/schemas/ranked-batch/ranked-batch";
+import type { RankedBatchPlayersPageResponse } from "@ssr/common/schemas/ranked-batch/ranked-batch-responses";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { RANKED_BATCH_MARKERS_CACHE_KEY } from "../../common/cache-keys";
 import type { ScoreSaberRankedBatchRow } from "../../db/schema";
@@ -38,10 +29,7 @@ const LEADERBOARD_CONCURRENCY = 5;
 const PLAYER_CHUNK_SIZE = 500;
 const UNRANKED_CHUNK_SIZE = 5_000;
 
-/**
- * Groups items by a key, keeping the order of the items within each group.
- */
-function groupBy<TItem, TKey>(items: TItem[], getKey: (item: TItem) => TKey): Map<TKey, TItem[]> {
+function groupBy<TItem, TKey>(items: TItem[], getKey: (item: TItem) => TKey) {
   const groups = new Map<TKey, TItem[]>();
   for (const item of items) {
     const key = getKey(item);
@@ -96,7 +84,7 @@ export class RankedBatchService {
     realmId: number,
     changes: StarChangeInput[],
     newlyRanked: NewlyRankedInput[] = []
-  ): Promise<RecordedStarChanges | undefined> {
+  ) {
     if (changes.length === 0 && newlyRanked.length === 0) {
       return undefined;
     }
@@ -151,7 +139,7 @@ export class RankedBatchService {
   /**
    * Marks a ranked batch as announced.
    */
-  public static async markNotified(rankedBatchId: number): Promise<void> {
+  public static async markNotified(rankedBatchId: number) {
     await ScoreSaberRankedBatchRepository.markNotified(rankedBatchId, new Date());
   }
 
@@ -159,7 +147,7 @@ export class RankedBatchService {
    * Captures the pp changes of every default realm star change that has not had them captured yet.
    * Leaderboards that fail stay pending and are retried by the next call.
    */
-  public static async processPendingPpChanges(): Promise<void> {
+  public static async processPendingPpChanges() {
     const pending = await ScoreSaberLeaderboardStarChangeRepository.listPpPending(DEFAULT_REALM_ID);
     const byRankedBatch = groupBy(
       pending.filter(row => row.rankedBatchId !== null),
@@ -169,7 +157,6 @@ export class RankedBatchService {
     for (const [rankedBatchId, rows] of byRankedBatch) {
       try {
         const leaderboardIds = [...new Set(rows.map(row => row.leaderboardId))];
-        // Rows are oldest first, so the last one of a leaderboard says where it ended up.
         const latestStars = new Map(rows.map(row => [row.leaderboardId, row.newStars]));
         const unrankedIds = new Set(leaderboardIds.filter(id => latestStars.get(id) === 0));
         const captured = await RankedBatchService.captureLeaderboards(
@@ -198,17 +185,11 @@ export class RankedBatchService {
     }
   }
 
-  /**
-   * Captures the pp changes of leaderboards, a few at a time.
-   *
-   * @param unrankedIds the leaderboards that were unranked, whose scores all lost their pp
-   * @returns the ids of the leaderboards that were captured completely
-   */
   private static async captureLeaderboards(
     rankedBatchId: number,
     leaderboardIds: number[],
     unrankedIds: ReadonlySet<number>
-  ): Promise<number[]> {
+  ) {
     const captured: number[] = [];
 
     for (const batch of chunkArray(leaderboardIds, LEADERBOARD_CONCURRENCY)) {
@@ -234,14 +215,7 @@ export class RankedBatchService {
     return captured;
   }
 
-  /**
-   * Captures the pp change of an unranked leaderboard: every score that was worth pp loses all of
-   * it, so ScoreSaber does not have to be asked.
-   */
-  private static async captureUnrankedLeaderboard(
-    rankedBatchId: number,
-    leaderboardId: number
-  ): Promise<void> {
+  private static async captureUnrankedLeaderboard(rankedBatchId: number, leaderboardId: number) {
     const scores = await ScoreSaberScoresRepository.selectRealmPpByLeaderboardId(
       DEFAULT_REALM_ID,
       leaderboardId
@@ -258,15 +232,7 @@ export class RankedBatchService {
     }
   }
 
-  /**
-   * Captures the pp change of every stored score on a leaderboard. The pp before is what the
-   * database has stored and the pp after is what ScoreSaber reports, so nothing is recomputed.
-   * Each page records its changes before overwriting the stored pp, so a retry after a failure
-   * still finds the original pp in the recorded rows.
-   *
-   * @throws if ScoreSaber's scores cannot be fetched, as the leaderboard would be captured partially
-   */
-  private static async captureLeaderboard(rankedBatchId: number, leaderboardId: number): Promise<void> {
+  private static async captureLeaderboard(rankedBatchId: number, leaderboardId: number) {
     let page = 1;
     let totalPages = 1;
 
@@ -305,15 +271,7 @@ export class RankedBatchService {
     } while (page <= totalPages);
   }
 
-  /**
-   * Recalculates the total pp change of every player with a changed score on the leaderboards.
-   *
-   * @returns the ids of the players that were updated
-   */
-  private static async updatePlayerChanges(
-    rankedBatchId: number,
-    leaderboardIds: number[]
-  ): Promise<string[]> {
+  private static async updatePlayerChanges(rankedBatchId: number, leaderboardIds: number[]) {
     const playerIds = await ScoreSaberRankedBatchPpRepository.selectChangedPlayerIds(
       rankedBatchId,
       leaderboardIds
@@ -346,7 +304,7 @@ export class RankedBatchService {
   /**
    * Gets a page of ranked batches, newest first.
    */
-  public static async getRankedBatches(page: number): Promise<RankedBatchesPageResponse> {
+  public static async getRankedBatches(page: number) {
     const total = await ScoreSaberRankedBatchRepository.count(DEFAULT_REALM_ID);
     return new Pagination<RankedBatch>()
       .setItemsPerPage(RANKED_BATCHES_PER_PAGE)
@@ -366,7 +324,7 @@ export class RankedBatchService {
    *
    * @throws NotFoundError if the ranked batch does not exist
    */
-  public static async getRankedBatch(rankedBatchId: number): Promise<RankedBatchResponse> {
+  public static async getRankedBatch(rankedBatchId: number) {
     const row = await RankedBatchService.getRow(rankedBatchId);
     const [starChanges, newLeaderboards] = await Promise.all([
       ScoreSaberRankedBatchRepository.listStarChanges(rankedBatchId),
@@ -383,7 +341,7 @@ export class RankedBatchService {
   /**
    * Gets the ranked batches as chart markers, oldest first.
    */
-  public static async getMarkers(): Promise<RankedBatchMarker[]> {
+  public static async getMarkers() {
     return CacheService.fetch(
       CacheId.SCORESABER_RANKED_BATCH_MARKERS,
       RANKED_BATCH_MARKERS_CACHE_KEY,
@@ -403,11 +361,7 @@ export class RankedBatchService {
    *
    * @throws NotFoundError if the ranked batch does not exist
    */
-  public static async getRankedBatchPlayers(
-    rankedBatchId: number,
-    page: number,
-    direction: "gain" | "loss"
-  ): Promise<RankedBatchPlayersPageResponse> {
+  public static async getRankedBatchPlayers(rankedBatchId: number, page: number, direction: "gain" | "loss") {
     await RankedBatchService.getRow(rankedBatchId);
     const total = await ScoreSaberRankedBatchPpRepository.countPlayers(rankedBatchId, direction);
     return new Pagination<RankedBatchPlayersPageResponse["items"][number]>()
@@ -436,7 +390,7 @@ export class RankedBatchService {
   /**
    * Gets the ranked batches that changed a player's pp, newest first.
    */
-  public static async getPlayerRankedBatches(playerId: string): Promise<PlayerRankedBatch[]> {
+  public static async getPlayerRankedBatches(playerId: string) {
     const rows = await ScoreSaberRankedBatchPpRepository.listPlayerRankedBatches(playerId);
     const pendingIds = await ScoreSaberRankedBatchRepository.selectPpPendingIds(
       rows.map(({ rankedBatch }) => rankedBatch.id)
@@ -455,10 +409,7 @@ export class RankedBatchService {
    *
    * @throws NotFoundError if the player has no changed scores for the ranked batch
    */
-  public static async getPlayerRankedBatchScores(
-    playerId: string,
-    rankedBatchId: number
-  ): Promise<PlayerRankedBatchScoresResponse> {
+  public static async getPlayerRankedBatchScores(playerId: string, rankedBatchId: number) {
     const rows = await ScoreSaberRankedBatchPpRepository.listPlayerScoreChanges(playerId, rankedBatchId);
     if (rows.length === 0) {
       throw new NotFoundError(`No score changes found for "${playerId}" in ranked batch "${rankedBatchId}"`);
@@ -479,7 +430,7 @@ export class RankedBatchService {
     }));
   }
 
-  private static async getRow(rankedBatchId: number): Promise<ScoreSaberRankedBatchRow> {
+  private static async getRow(rankedBatchId: number) {
     const row = await ScoreSaberRankedBatchRepository.getById(rankedBatchId);
     if (!row) {
       throw new NotFoundError(`Ranked Batch "${rankedBatchId}" not found`);
@@ -487,12 +438,12 @@ export class RankedBatchService {
     return row;
   }
 
-  private static async toRankedBatches(rows: ScoreSaberRankedBatchRow[]): Promise<RankedBatch[]> {
+  private static async toRankedBatches(rows: ScoreSaberRankedBatchRow[]) {
     const pendingIds = await ScoreSaberRankedBatchRepository.selectPpPendingIds(rows.map(row => row.id));
     return rows.map(row => RankedBatchService.toRankedBatch(row, pendingIds.has(row.id)));
   }
 
-  private static toRankedBatch(row: ScoreSaberRankedBatchRow, ppPending: boolean): RankedBatch {
+  private static toRankedBatch(row: ScoreSaberRankedBatchRow, ppPending: boolean) {
     return {
       id: row.id,
       name: getRankedBatchName(row.name, row.startedAt),

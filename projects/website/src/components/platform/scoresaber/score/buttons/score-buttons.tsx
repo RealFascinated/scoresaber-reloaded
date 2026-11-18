@@ -130,7 +130,6 @@ export default function ScoreSaberScoreButtons({
     return null;
   }
 
-  // When the row is narrow the buttons are folded into a menu so it stays compact
   return (
     <>
       <Popover>

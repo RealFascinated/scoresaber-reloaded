@@ -55,8 +55,6 @@ describe("GET /statistics", () => {
       trackedScores: { value: number };
       leaderboardCount: { value: number };
     };
-    // activePlayers is the live-sampled ACTIVE_ACCOUNTS metric (0 until the
-    // 60s sampler runs, and never seeded) — only its shape is assertable.
     expect(stats.activePlayers.value).toBeGreaterThanOrEqual(0);
     expect(stats.trackedScores.value).toBeGreaterThanOrEqual(2);
     expect(stats.leaderboardCount.value).toBeGreaterThanOrEqual(2);

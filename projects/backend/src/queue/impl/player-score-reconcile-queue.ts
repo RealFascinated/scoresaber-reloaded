@@ -11,7 +11,7 @@ export class PlayerScoreReconcileQueue extends Queue<QueueItem<string>> {
     super(QueueId.PlayerScoreReconcileQueue, "fifo", 1);
   }
 
-  protected async processItem(item: QueueItem<string>): Promise<void> {
+  protected async processItem(item: QueueItem<string>) {
     await PlayerScoresService.reconcilePlayerScores(item.id);
   }
 }

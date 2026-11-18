@@ -21,7 +21,6 @@ export class QueueManager implements EventListener {
     QueueManager.addQueue(new PlayerBeatLeaderScoreSeedQueue());
     QueueManager.addQueue(new PlayerScoreReconcileQueue());
 
-    // Start all queues
     for (const queue of QueueManager.queues.values()) {
       queue.processQueue();
     }
@@ -33,7 +32,6 @@ export class QueueManager implements EventListener {
    * @param queue the queue to add
    */
   public static async addQueue(queue: Queue<QueueItem<unknown>>) {
-    // Register the queue
     QueueManager.queues.set(queue.id, queue);
   }
 
@@ -43,7 +41,7 @@ export class QueueManager implements EventListener {
    * @param name the name of the queue
    * @returns the queue
    */
-  public static getQueue<T extends QueueItem<unknown>>(name: QueueId): Queue<T> {
+  public static getQueue<T extends QueueItem<unknown>>(name: QueueId) {
     return QueueManager.queues.get(name) as Queue<T>;
   }
 
@@ -52,7 +50,7 @@ export class QueueManager implements EventListener {
    *
    * @returns all queues
    */
-  public static getQueues(): Queue<QueueItem<unknown>>[] {
+  public static getQueues() {
     return Array.from(QueueManager.queues.values());
   }
 

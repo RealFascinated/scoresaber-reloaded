@@ -77,7 +77,7 @@ export type MapsInitialData = TimestampedData<LeaderboardsPageResponse> & {
  * @param page the page number
  * @param filter the (debounced) filter values
  */
-export function buildMapsQuery(page: number, filter: MapFilterValues): MapsQuery {
+export function buildMapsQuery(page: number, filter: MapFilterValues) {
   return {
     page,
     category: filter.category,
@@ -90,7 +90,7 @@ export function buildMapsQuery(page: number, filter: MapFilterValues): MapsQuery
   };
 }
 
-export function isSameMapsQuery(a: MapsQuery, b: MapsQuery): boolean {
+export function isSameMapsQuery(a: MapsQuery, b: MapsQuery) {
   return (
     a.page === b.page &&
     a.category === b.category &&

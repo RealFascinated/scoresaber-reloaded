@@ -132,7 +132,6 @@ export default function playerController(app: Elysia) {
             throw new NotFoundError(`Player "${playerId}" not found`);
           }
           const statistics = await PlayerStatisticsService.getStatistics(player, realmId);
-          // Elysia types transform properties by their raw input; at runtime count was decoded to a number.
           return await PlayerHistoryService.getPlayerStatisticHistories(
             player,
             statistics,

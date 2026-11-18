@@ -21,8 +21,8 @@ import { ScoreSaberApiService } from "../../src/service/external/scoresaber-api.
 import MetricsService from "../../src/service/infra/metrics.service";
 import StorageService from "../../src/service/infra/storage.service";
 import { createTestApp } from "../../test/helpers/create-test-app";
-import { buildScoreSaberV2PlayerToken } from "../../test/helpers/fixtures";
 import { request } from "../../test/helpers/request";
+import { buildScoreSaberV2PlayerToken } from "../../test/helpers/scoresaber.fixture";
 
 const label = process.argv[2] ?? "run";
 const filter = process.argv[3];
@@ -433,7 +433,6 @@ new StorageService();
 await prepareStubs();
 installStubs();
 const app = createTestApp();
-installStubs(); // createTestApp re-patches the API; re-assert the seeded stubs
 
 const lb = await loadSeedLeaderboard(LEADERBOARD_ID);
 const results: { name: string; status: number; median: number; p95: number; bytes: number }[] = [];

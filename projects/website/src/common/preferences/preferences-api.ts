@@ -9,7 +9,7 @@ import type { UserPreferences, UserPreferencesPatch } from "@ssr/common/schemas/
  * @returns the preferences, the defaults when nobody is signed in
  * @throws when the backend could not be reached or answered with an error
  */
-export async function fetchUserPreferences(): Promise<UserPreferences> {
+export async function fetchUserPreferences() {
   const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${USER_PREFERENCES_ROUTE}`, {
     credentials: "include",
   });
@@ -28,7 +28,7 @@ export async function fetchUserPreferences(): Promise<UserPreferences> {
  * @returns all the preferences after the update
  * @throws when the update was rejected or the backend could not be reached
  */
-export async function patchUserPreferences(patch: UserPreferencesPatch): Promise<UserPreferences> {
+export async function patchUserPreferences(patch: UserPreferencesPatch) {
   const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${USER_PREFERENCES_ROUTE}`, {
     method: "PATCH",
     credentials: "include",

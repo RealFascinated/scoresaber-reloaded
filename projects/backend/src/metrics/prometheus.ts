@@ -7,7 +7,6 @@ prometheusRegistry.setDefaultLabels({
 });
 
 export enum MetricType {
-  // Player metrics
   TRACKED_SCORES = "tracked_scores",
   TRACKED_PLAYERS = "tracked_players",
   UNIQUE_DAILY_PLAYERS = "unique_daily_players",
@@ -19,7 +18,6 @@ export enum MetricType {
   BEATLEADER_UNIQUE_DAILY_PLAYERS = "beatleader_unique_daily_players",
   BEATLEADER_PLAYERS = "beatleader_players",
 
-  // Backend metrics
   MEMORY_USAGE = "memory_usage",
   EVENT_LOOP_LAG = "event_loop_lag",
   RESPONSE_TIME_MS = "response_time_ms",
@@ -31,11 +29,9 @@ export enum MetricType {
   PROCESS_CPU = "process_cpu",
   REDIS_HEALTH = "redis_health",
 
-  // Queue metrics
   QUEUE_SIZES = "queue_sizes",
   QUEUE_PROCESSING_DURATION = "queue_processing_duration",
 
-  // Database metrics
   POSTGRES_DB_SIZE = "postgres_db_size",
   LEADERBOARD_COUNT = "leaderboard_count",
 }

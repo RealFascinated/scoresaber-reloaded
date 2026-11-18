@@ -46,7 +46,6 @@ export function ConfirmationDialog({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    // Only allow closing the dialog, not opening it from external sources
     if (!newOpen) {
       setOpen(false);
     }
@@ -89,7 +88,7 @@ export function ConfirmationDialog({
       {triggerElement}
       <DialogContent
         className="sm:max-w-md"
-        onClick={e => e.stopPropagation()} // Prevent backdrop clicks from closing parent modals
+        onClick={e => e.stopPropagation()}
         onMouseDown={e => e.stopPropagation()}
       >
         <DialogHeader>

@@ -10,7 +10,7 @@ import {
 } from "../helpers/trending-scenario";
 
 describe("ScoreEventService.updateTrendingLeaderboards", () => {
-  async function scoresByKey(): Promise<Record<keyof typeof TRENDING_LEADERBOARDS, number>> {
+  async function scoresByKey() {
     await seedTrendingScenario();
     await ScoreEventService.updateTrendingLeaderboards();
     const scores = await readTrendingScores();
@@ -57,7 +57,7 @@ describe("ScoreEventService.updateTrendingLeaderboards", () => {
 });
 
 describe("ScoreEventService.purgeOldEvents", () => {
-  async function insertEvents(daysAgo: number, count: number): Promise<void> {
+  async function insertEvents(daysAgo: number, count: number) {
     await db.execute(sql`
       INSERT INTO "scoresaber-score-events" ("playerId", "leaderboardId", "timestamp")
       SELECT ${TEST_PLAYER_ID}, ${TEST_LEADERBOARD_ID}, now() - (${daysAgo} * interval '1 day') - (g * interval '1 second')
@@ -65,7 +65,7 @@ describe("ScoreEventService.purgeOldEvents", () => {
     `);
   }
 
-  async function countEvents(): Promise<number> {
+  async function countEvents() {
     const result = await db.execute(sql`SELECT count(*)::int AS count FROM "scoresaber-score-events"`);
     return Number(result.rows[0].count);
   }

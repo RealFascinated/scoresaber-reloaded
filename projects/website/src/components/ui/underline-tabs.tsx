@@ -37,7 +37,6 @@ export function UnderlineTab({
       className={cn(
         "relative flex shrink-0 cursor-pointer items-center gap-2 text-sm font-medium whitespace-nowrap transition-colors duration-150",
         "focus-visible:ring-primary focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-hidden",
-        // The underline sits right on top of the parent's bottom border
         "after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:rounded-full after:transition-colors",
         isActive
           ? "text-foreground after:bg-brand"

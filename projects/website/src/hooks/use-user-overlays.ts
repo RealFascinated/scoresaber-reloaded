@@ -17,7 +17,6 @@ export function useUserOverlay(id: string) {
   return useQuery({
     queryKey: [...USER_OVERLAYS_QUERY_KEY, id],
     queryFn: () => fetchUserOverlay(id),
-    // The editor owns the document once it is loaded
     staleTime: Infinity,
     gcTime: 0,
     retry: false,

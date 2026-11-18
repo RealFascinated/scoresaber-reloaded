@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { SharedIcons } from "@/shared-icons";
-import { ReactElement, ReactNode, useId, useState } from "react";
+import { ReactNode, useId, useState } from "react";
 
 type ComboboxProps<T> = {
   placeholder?: string;
@@ -53,12 +53,11 @@ const Combobox = <T,>({
   onValueChange,
   className,
   clearable = false,
-}: ComboboxProps<T>): ReactElement => {
+}: ComboboxProps<T>) => {
   const [open, setOpen] = useState<boolean>(false);
   const [internalValue, setInternalValue] = useState<T | undefined>(() => controlledValue);
   const listId = useId();
 
-  // Derive value during render: controlled when prop provided, otherwise internal
   const value = controlledValue !== undefined ? controlledValue : internalValue;
 
   const handleValueChange = (newValue: T | undefined) => {

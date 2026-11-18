@@ -1,6 +1,5 @@
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import type { SuggestedMapsResponse } from "@ssr/common/schemas/suggested-maps/suggested-maps";
 import {
   DEFAULT_SUGGESTED_MAPS_PARAMS,
   estimatePlayerSkill,
@@ -36,7 +35,6 @@ const DEFAULT_FILTERS: SuggestedMapsFilters = {
   limit: 50,
 };
 
-/** How long the in-memory map list is trusted before the table is read again. */
 const MAP_CACHE_TTL_MS = 10 * 60 * 1000;
 
 type MapCache = { maps: RankableMap[]; updatedAt: Date; weightScale: number; loadedAt: number };
@@ -49,7 +47,7 @@ export class SuggestedMapsService {
   /**
    * Refits the maps every day, outside of the app's cron plugin chain (which is at the compiler's type depth limit).
    */
-  public static scheduleRefresh(): void {
+  public static scheduleRefresh() {
     new Cron("0 4 * * *", { name: "refresh-suggested-maps", timezone: "UTC", protect: true }, async () => {
       try {
         await this.refresh();
@@ -57,7 +55,6 @@ export class SuggestedMapsService {
         this.logger.error("Failed to refresh the suggested maps:", error);
       }
     });
-    // Fits right away when nothing has been fitted yet, so the first request does not wait for 04:00.
     this.getMaps().catch(error => this.logger.error("Failed to warm the suggested maps:", error));
   }
 
@@ -65,15 +62,14 @@ export class SuggestedMapsService {
    * Refits the model over every ranked score and stores the map eases. Takes about a minute, so it runs
    * from a cron job and never from a request.
    */
-  public static refresh(): Promise<void> {
-    // Share a refresh that is already running.
+  public static refresh() {
     this.refreshing ??= this.runRefresh().finally(() => {
       this.refreshing = undefined;
     });
     return this.refreshing;
   }
 
-  private static async runRefresh(): Promise<void> {
+  private static async runRefresh() {
     const params = DEFAULT_SUGGESTED_MAPS_PARAMS;
     const before = Date.now();
     const maps = await listRankedMaps();
@@ -103,10 +99,7 @@ export class SuggestedMapsService {
     );
   }
 
-  /**
-   * Gets the ranked maps with their stored ease, from memory when fresh.
-   */
-  private static async getMaps(): Promise<MapCache> {
+  private static async getMaps() {
     if (this.cache && Date.now() - this.cache.loadedAt < MAP_CACHE_TTL_MS) {
       return this.cache;
     }
@@ -133,7 +126,6 @@ export class SuggestedMapsService {
       rankable.push({ ...map, ease: row.ease, prior: row.prior, scoreCount: row.scoreCount });
     }
     if (rankable.length === 0) {
-      // First run after the table was added: fit now instead of waiting for the daily job.
       this.refresh().catch(error =>
         this.logger.error("Failed to run the first suggested maps refresh:", error)
       );
@@ -148,7 +140,7 @@ export class SuggestedMapsService {
    */
   public static async getSuggestedMaps(
     options: Partial<SuggestedMapsFilters> & { playerId?: string; referenceAccuracy?: number }
-  ): Promise<SuggestedMapsResponse> {
+  ) {
     const params = DEFAULT_SUGGESTED_MAPS_PARAMS;
     const { maps, updatedAt, weightScale } = await this.getMaps();
     const explicit = stripUndefined(options);
@@ -208,7 +200,6 @@ export class SuggestedMapsService {
       skill = getReferenceSkill(options.referenceAccuracy ?? 97.5, maps, params);
     }
 
-    // Explicit query values win over the ranges fitted to the player, which win over no limits.
     const filters: SuggestedMapsFilters = { ...DEFAULT_FILTERS, ...style?.ranges, ...explicit };
 
     return {
@@ -226,6 +217,6 @@ export class SuggestedMapsService {
   }
 }
 
-function stripUndefined<T extends object>(value: T): Partial<T> {
+function stripUndefined<T extends object>(value: T) {
   return Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as Partial<T>;
 }

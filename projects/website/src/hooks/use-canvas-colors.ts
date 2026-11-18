@@ -2,7 +2,6 @@ import { resolveCanvasColor } from "@/common/canvas-color";
 import { useMemo, useSyncExternalStore } from "react";
 
 function subscribe(onChange: () => void) {
-  // The color themes are classes on <html> (set by next-themes)
   const observer = new MutationObserver(onChange);
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
   return () => observer.disconnect();
@@ -21,7 +20,7 @@ export function useCanvasColors() {
 
   return useMemo(() => {
     const cache = new Map<string, string>();
-    const resolve = (color: string, alpha = 1): string => {
+    const resolve = (color: string, alpha = 1) => {
       const key = `${color}|${alpha}`;
       const cached = cache.get(key);
       if (cached !== undefined) {

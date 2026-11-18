@@ -11,7 +11,7 @@ export type SaveStatus = "saved" | "unsaved" | "saving" | "error";
 /**
  * Saves the overlay shortly after it stops changing. Saving pushes the change to every OBS page showing it.
  */
-export function useOverlayAutosave(): SaveStatus {
+export function useOverlayAutosave() {
   const version = useOverlayEditorStore(state => state.version);
   const [status, setStatus] = useState<SaveStatus>("saved");
   const savedVersion = useRef(0);
@@ -24,7 +24,6 @@ export function useOverlayAutosave(): SaveStatus {
     setStatus("unsaved");
 
     const save = async () => {
-      // One request at a time, the newest state is saved once the running one is done
       if (saving.current) {
         timer = setTimeout(save, AUTOSAVE_DELAY_MS);
         return;
@@ -51,7 +50,6 @@ export function useOverlayAutosave(): SaveStatus {
     return () => clearTimeout(timer);
   }, [version]);
 
-  // Warn before leaving with changes that are not saved
   useEffect(() => {
     if (status === "saved") {
       return;

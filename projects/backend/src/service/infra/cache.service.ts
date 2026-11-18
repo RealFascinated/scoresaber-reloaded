@@ -30,15 +30,10 @@ export type CacheMode = "REDIS" | "MEMORY";
 export default class CacheService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Cache");
   private static readonly memoryCaches = new Map<CacheId, SSRCache>();
-  /**
-   * In-flight request coalescing per cache key.
-   * Prevents cache stampedes under concurrent load for the same missing key.
-   */
   private static readonly inFlightRequests = new Map<string, Promise<unknown>>();
 
   public static readonly CACHE_INFO: Record<CacheId, { ttl: number; mode: CacheMode; negativeTtl?: number }> =
     {
-      // Memory caches
       [CacheId.PLAYER_HMD_BREAKDOWN]: {
         ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
         mode: "MEMORY",
@@ -85,9 +80,6 @@ export default class CacheService {
         mode: "MEMORY",
       },
 
-      // Redis caches
-      // Live-ish: entries are dropped by events (see PlayerCoreService.invalidatePlayerCaches), so the
-      // TTL is only a safety net that heals an invalidation that was missed.
       [CacheId.SCORESABER_PLAYER]: {
         ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
         mode: "REDIS",
@@ -98,8 +90,6 @@ export default class CacheService {
       },
       [CacheId.BEATLEADER_SCORE]: {
         ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-        // Most scores have no BeatLeader score; without this each page view re-queries the DB for all of them.
-        // Kept short because a BeatLeader score can arrive shortly after the ScoreSaber one.
         negativeTtl: TimeUnit.toSeconds(TimeUnit.Minute, 1),
         mode: "REDIS",
       },
@@ -109,8 +99,7 @@ export default class CacheService {
       },
     };
 
-  public static async get<T>(cache: CacheId, cacheKey: string): Promise<T | undefined> {
-    // Skip cache in development
+  public static async get<T>(cache: CacheId, cacheKey: string) {
     if (!isProduction()) {
       return undefined;
     }
@@ -146,8 +135,7 @@ export default class CacheService {
     return undefined;
   }
 
-  public static async insert<T>(cache: CacheId, cacheKey: string, data: T): Promise<void> {
-    // Skip cache in development
+  public static async insert<T>(cache: CacheId, cacheKey: string, data: T) {
     if (!isProduction()) {
       return;
     }
@@ -182,8 +170,7 @@ export default class CacheService {
    * @param cacheKey the key used for caching.
    * @param fetchFn the function to fetch data if it's not in cache.
    */
-  public static async fetch<T>(cache: CacheId, cacheKey: string, fetchFn: () => Promise<T>): Promise<T> {
-    // Skip cache in development
+  public static async fetch<T>(cache: CacheId, cacheKey: string, fetchFn: () => Promise<T>) {
     if (!isProduction()) {
       return fetchFn();
     }
@@ -205,7 +192,6 @@ export default class CacheService {
 
     const cacheAndReturn = async () => {
       if (mode === "REDIS") {
-        // A Redis outage must degrade to uncached fetches instead of failing requests
         let cachedData: string | null = null;
         try {
           cachedData = await redisClient.get(cacheKey);
@@ -233,7 +219,6 @@ export default class CacheService {
       CachePerformanceMetric.recordMiss(cache, mode);
       const data = await fetchFn();
 
-      // `undefined` is a "no result" signal: only caches that opt in with a `negativeTtl` remember it.
       const negativeTtl = this.CACHE_INFO[cache].negativeTtl;
       if (data === undefined && mode === "REDIS" && negativeTtl !== undefined) {
         try {
@@ -245,12 +230,7 @@ export default class CacheService {
       if (data !== undefined) {
         if (mode === "REDIS") {
           try {
-            const result = await redisClient.set(
-              cacheKey,
-              stringify(data),
-              "EX", // EX is used to set the TTL for the item
-              this.CACHE_INFO[cache].ttl // The TTL of the item
-            );
+            const result = await redisClient.set(cacheKey, stringify(data), "EX", this.CACHE_INFO[cache].ttl);
             if (result !== "OK") {
               CacheService.logger.warn(`Failed to set cache for ${cacheKey}`);
             }
@@ -280,7 +260,7 @@ export default class CacheService {
    *
    * @param cacheKey the key to invalidate
    */
-  public static async invalidate(cacheKey: string): Promise<void> {
+  public static async invalidate(cacheKey: string) {
     await redisClient.del(cacheKey);
     for (const cache of this.memoryCaches.values()) {
       cache.remove(cacheKey);
@@ -294,7 +274,7 @@ export default class CacheService {
    * @param cache the cache holding the entry
    * @param cacheKey the key to invalidate
    */
-  public static invalidateMemoryKey(cache: CacheId, cacheKey: string): void {
+  public static invalidateMemoryKey(cache: CacheId, cacheKey: string) {
     this.memoryCaches.get(cache)?.remove(cacheKey);
   }
 
@@ -306,7 +286,7 @@ export default class CacheService {
    *
    * @param prefix the key prefix to invalidate
    */
-  public static invalidateMemoryPrefix(prefix: string): void {
+  public static invalidateMemoryPrefix(prefix: string) {
     for (const cache of this.memoryCaches.values()) {
       cache.removeMatching(key => key.startsWith(prefix));
     }
@@ -317,12 +297,11 @@ export default class CacheService {
    *
    * @param prefix the key prefix to invalidate
    */
-  public static async invalidatePrefix(prefix: string): Promise<void> {
+  public static async invalidatePrefix(prefix: string) {
     for (const cache of this.memoryCaches.values()) {
       cache.removeMatching(key => key.startsWith(prefix));
     }
 
-    // SCAN walks the keyspace in pages, so it never blocks Redis the way KEYS does
     const globPrefix = prefix.replace(/[*?[\]\\]/g, "\\$&");
     let cursor = "0";
     do {
@@ -334,7 +313,7 @@ export default class CacheService {
     } while (cursor !== "0");
   }
 
-  private static getMemoryCache(cacheId: CacheId): SSRCache {
+  private static getMemoryCache(cacheId: CacheId) {
     const existing = this.memoryCaches.get(cacheId);
     if (existing) {
       return existing;

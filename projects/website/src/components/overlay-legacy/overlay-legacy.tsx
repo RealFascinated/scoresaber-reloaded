@@ -30,8 +30,6 @@ export default function OverlayLegacy({ settings }: OverlayLegacyProps) {
   } = useQuery({
     queryKey: ["player", settings.playerId],
     queryFn: () => ssrApi.getScoreSaberPlayer(settings.playerId, "full"),
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
     refetchInterval: 1000 * 30,
   });

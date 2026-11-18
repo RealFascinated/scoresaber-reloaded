@@ -7,7 +7,7 @@ const subscribeNothing = () => () => {};
  * Used to hold back images that are not needed for the first paint so they do not compete with the scripts
  * for bandwidth on a slow connection.
  */
-export function useHydrated(): boolean {
+export function useHydrated() {
   return useSyncExternalStore(
     subscribeNothing,
     () => true,

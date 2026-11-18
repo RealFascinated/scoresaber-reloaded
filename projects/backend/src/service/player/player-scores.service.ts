@@ -1,14 +1,11 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
-import { Pagination, type Page } from "@ssr/common/pagination";
+import { Pagination } from "@ssr/common/pagination";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { AccSaberScoreSort, AccSaberScoreType } from "@ssr/common/schemas/accsaber/query/query";
 import { ScoreResponse } from "@ssr/common/schemas/accsaber/score/score";
 import type { HMD } from "@ssr/common/schemas/hmd";
-import { PlayerScoresChartResponse } from "@ssr/common/schemas/response/player/scores-chart";
-import type { AccSaberScoresPageResponse } from "@ssr/common/schemas/response/score/accsaber-scores-page";
-import { PlayerScoresPageResponse } from "@ssr/common/schemas/response/score/player-scores";
 import { PlayerScoresQuery } from "@ssr/common/schemas/score/query/player-scores-query";
 import { ScoreSaberMedalScoreSortField } from "@ssr/common/schemas/score/query/sort/scoresaber-medal-scores-sort";
 import type { ScoreSaberScoreSortField } from "@ssr/common/schemas/score/query/sort/scoresaber-scores-sort";
@@ -46,9 +43,6 @@ import { PlayerMedalsService } from "../medals/player-medals.service";
 import { ScoreCoreService, type ScorePlayerInfoRow } from "../score/score-core.service";
 import { PlayerCoreService } from "./player-core.service";
 
-/**
- * Describes how to paginate and enrich a specific score table.
- */
 type ScoreTableConfig<TRow, TScore, TContext = undefined> = {
   buildConditions: (playerIds: string[], leaderboardIds: number[] | null, hmd?: HMD) => SQL[];
   countRows: (conditions: SQL[], realmId: number) => Promise<number>;
@@ -62,7 +56,6 @@ type ScoreTableConfig<TRow, TScore, TContext = undefined> = {
   ) => Promise<TRow[]>;
   getLeaderboardId: (row: TRow) => number;
   prepareContext?: (rows: TRow[]) => Promise<TContext>;
-  /** When set, the page's player info is loaded with one query and handed to `enrichRow`. */
   getPlayerId?: (row: TRow) => string;
   enrichRow: (
     row: TRow,
@@ -76,15 +69,9 @@ export class PlayerScoresService {
   private static readonly logger: ScopedLogger = Logger.withTopic("ScoreSaber Player Scores");
   private static readonly COUNT_CHECK_COOLDOWN_MS = 60 * 1000;
   private static readonly RECONCILE_COOLDOWN_MS = 15 * 60 * 1000;
-  /** Size at which expired cooldown entries are dropped. */
   private static readonly COUNT_CHECK_PRUNE_SIZE = 5_000;
   private static readonly RECONCILE_PAGE_CONCURRENCY = 3;
-  /** playerId -> earliest time the next count check may run */
   private static readonly scoreCountChecks = new Map<string, number>();
-  /**
-   * Players whose ScoreSaber total is higher than the scores its pages serve. A reconcile found nothing
-   * to add or delete for these counts, so the same mismatch isn't worth queueing again.
-   */
   private static readonly unfetchableScoreGaps = new Map<string, { liveTotal: number; localTotal: number }>();
 
   /**
@@ -97,12 +84,7 @@ export class PlayerScoresService {
   public static async fetchMissingPlayerScores(
     account: ScoreSaberAccount,
     playerToken: ScoreSaberPlayerLookupToken
-  ): Promise<{
-    missingScores: number;
-    totalScores: number;
-    totalPagesFetched: number;
-    timeTaken: number;
-  }> {
+  ) {
     if (account.banned) {
       if (!account.seededScores) {
         await PlayerCoreService.updatePlayer(account.id, { seededScores: true });
@@ -122,9 +104,6 @@ export class PlayerScoresService {
       ScoreSaberScoresRepository.countByPlayerId(playerId),
       ScoreSaberScoreHistoryRepository.countByPlayerId(playerId),
     ]);
-    // Replays are archived to the score-history table, so the scores-table count
-    // alone can never reach the player's total play count; only the sum of the
-    // current rows and archived attempts represents every recorded play.
     const recordedPlays = playerScoresCount + playerHistoryCount;
 
     if (recordedPlays >= playerToken.stats.totalSubmittedPlays) {
@@ -147,7 +126,7 @@ export class PlayerScoresService {
       timeTaken: 0,
     };
 
-    async function getScoresPage(page: number): Promise<ScoreSaberPlayerScoresPageToken | undefined> {
+    async function getScoresPage(page: number) {
       return ScoreSaberApiService.lookupPlayerScores({
         playerId: playerId,
         page: page,
@@ -156,10 +135,7 @@ export class PlayerScoresService {
       });
     }
 
-    function parseScoreToken(scoreToken: ScoreSaberPlayerScoreToken): {
-      score: ScoreSaberScore | undefined;
-      leaderboard: ScoreSaberLeaderboard | undefined;
-    } {
+    function parseScoreToken(scoreToken: ScoreSaberPlayerScoreToken) {
       const leaderboard = getScoreSaberLeaderboardFromToken(scoreToken.leaderboard);
       if (leaderboard !== undefined) {
         const score = getScoreSaberScoreFromToken(scoreToken.score, leaderboard, playerId);
@@ -170,10 +146,7 @@ export class PlayerScoresService {
       return { score: undefined, leaderboard: undefined };
     }
 
-    async function processPage(
-      currentPage: number,
-      scoresPage: ScoreSaberPlayerScoresPageToken
-    ): Promise<boolean> {
+    async function processPage(currentPage: number, scoresPage: ScoreSaberPlayerScoresPageToken) {
       const parsedScores = scoresPage.playerScores
         .map(parseScoreToken)
         .filter(
@@ -181,9 +154,6 @@ export class PlayerScoresService {
             parsed.score != null && parsed.leaderboard != null
         );
 
-      // Batched pre-filter: skip plays already recorded (as the current row or
-      // as an archived history entry) so already-tracked pages cost a single
-      // batched read instead of per-score reads and writes.
       const [existingScores, existingHistory] = await Promise.all([
         ScoreSaberScoresRepository.findExistingScoreIds(parsedScores.map(score => score.score.scoreId)),
         ScoreSaberScoreHistoryRepository.findExistingScoreIds(parsedScores.map(score => score.score.scoreId)),
@@ -202,8 +172,6 @@ export class PlayerScoresService {
         }
       });
 
-      // Count recorded plays across both current rows and archived attempts;
-      // the scores-table count alone can never match the API's total.
       const [scoresCount, historyCount] = await Promise.all([
         ScoreSaberScoresRepository.countByPlayerId(playerId),
         ScoreSaberScoreHistoryRepository.countByPlayerId(playerId),
@@ -220,9 +188,6 @@ export class PlayerScoresService {
     let currentPage = 1;
     let hasMoreScores = true;
     let pagesFetched = 0;
-    // Set when any page fails to load. ScoreSaberApiService collapses every
-    // failure (429/timeout/5xx) to undefined, so a missing page must not be
-    // treated as end-of-data: the player stays unseeded for the next cycle.
     let fetchFailed = false;
     while (hasMoreScores) {
       const scoresPage = await getScoresPage(currentPage);
@@ -265,16 +230,7 @@ export class PlayerScoresService {
     return result;
   }
 
-  /**
-   * Compares the live ScoreSaber total with our stored count and reconciles when they differ.
-   * Never throws; meant to be fired without awaiting.
-   *
-   * Throttled per player so a hot profile costs at most one count query per cooldown window.
-   *
-   * @param playerId the player's id
-   * @param liveTotal the total score count reported by ScoreSaber
-   */
-  private static async checkScoreCount(playerId: string, liveTotal: number): Promise<void> {
+  private static async checkScoreCount(playerId: string, liveTotal: number) {
     const now = Date.now();
     const nextCheck = PlayerScoresService.scoreCountChecks.get(playerId);
     if (nextCheck !== undefined && now < nextCheck) {
@@ -303,7 +259,7 @@ export class PlayerScoresService {
    * @param playerId the player's id
    * @returns whether a reconcile was queued
    */
-  public static async checkScoreCountFromApi(playerId: string): Promise<boolean> {
+  public static async checkScoreCountFromApi(playerId: string) {
     if (!(await PlayerScoresService.canReconcile(playerId))) {
       return false;
     }
@@ -320,17 +276,12 @@ export class PlayerScoresService {
     return PlayerScoresService.queueReconcileIfCountMismatch(playerId, page.metadata.total);
   }
 
-  /**
-   * Whether a player's scores may be reconciled. Unseeded players are still being backfilled by the
-   * refresh queue (which would overlap with a reconcile), and banned players have no scores page.
-   */
-  private static async canReconcile(playerId: string): Promise<boolean> {
+  private static async canReconcile(playerId: string) {
     const account = await PlayerCoreService.getAccount(playerId);
     return account?.seededScores === true && !account.banned;
   }
 
-  /** Drops expired entries so the map can't grow with every player ever viewed. */
-  private static pruneScoreCountChecks(now: number): void {
+  private static pruneScoreCountChecks(now: number) {
     if (PlayerScoresService.scoreCountChecks.size < PlayerScoresService.COUNT_CHECK_PRUNE_SIZE) {
       return;
     }
@@ -341,7 +292,7 @@ export class PlayerScoresService {
     }
   }
 
-  private static async queueReconcileIfCountMismatch(playerId: string, liveTotal: number): Promise<boolean> {
+  private static async queueReconcileIfCountMismatch(playerId: string, liveTotal: number) {
     const localTotal = await ScoreSaberScoresRepository.countByPlayerId(playerId);
     if (localTotal === liveTotal) {
       PlayerScoresService.unfetchableScoreGaps.delete(playerId);
@@ -355,7 +306,6 @@ export class PlayerScoresService {
     PlayerScoresService.logger.info(
       `Score count mismatch for "${playerId}" (ours: ${localTotal}, ScoreSaber: ${liveTotal}), queueing a reconcile...`
     );
-    // The queue de-duplicates by player id and runs the reconcile off the request path
     await (QueueManager.getQueue(QueueId.PlayerScoreReconcileQueue) as PlayerScoreReconcileQueue).add({
       id: playerId,
       data: playerId,
@@ -371,7 +321,7 @@ export class PlayerScoresService {
    *
    * @param playerId the player's id
    */
-  public static async reconcilePlayerScores(playerId: string): Promise<void> {
+  public static async reconcilePlayerScores(playerId: string) {
     const limit = 100;
     const firstPage = await ScoreSaberApiService.lookupPlayerScores({
       playerId,
@@ -405,7 +355,6 @@ export class PlayerScoresService {
     const remoteIds = new Set(remoteTokens.map(token => token.score.id));
     const localIds = await ScoreSaberScoresRepository.findScoreIdsByPlayerId(playerId);
 
-    // Add what we're missing. Tracking also archives a replaced play into the history table.
     const missingEntries = remoteTokens
       .filter(token => !localIds.has(token.score.id))
       .map(token => {
@@ -448,12 +397,10 @@ export class PlayerScoresService {
       );
     }
 
-    // Delete what ScoreSaber no longer has, but only when the remote list is provably complete.
     let deleted = 0;
     if (remoteIds.size === firstPage.metadata.total) {
       const currentIds = await ScoreSaberScoresRepository.findScoreIdsByPlayerId(playerId);
       const staleIds = [...currentIds].filter(id => !remoteIds.has(id));
-      // Removing a ranked score changes the medals on its leaderboard, so note them before the rows go
       const staleLeaderboardIds = await ScoreSaberScoresRepository.findLeaderboardIdsByScoreIds(
         playerId,
         staleIds
@@ -481,8 +428,6 @@ export class PlayerScoresService {
       await PlayerMedalsService.refreshLeaderboardsMedals([...rankedLeaderboards.values()]);
     }
     if (deleted > 0) {
-      // The removed rows carried this player's medals; the leaderboard refresh only syncs players
-      // whose remaining rows changed, so sync this player's total explicitly.
       await PlayerMedalsService.syncPlayersMedalTotals([playerId]);
     }
     if (added > 0 || deleted > 0) {
@@ -492,7 +437,6 @@ export class PlayerScoresService {
       remoteIds.size === localIds.size &&
       remoteIds.size !== firstPage.metadata.total
     ) {
-      // We hold every score ScoreSaber serves, it just reports more than it returns
       if (PlayerScoresService.unfetchableScoreGaps.size >= PlayerScoresService.COUNT_CHECK_PRUNE_SIZE) {
         PlayerScoresService.unfetchableScoreGaps.clear();
       }
@@ -513,10 +457,7 @@ export class PlayerScoresService {
    * @param playerId the player's id
    * @param realmId the realm to resolve pp and stars for
    */
-  public static async getPlayerScoreChart(
-    playerId: string,
-    realmId: number
-  ): Promise<PlayerScoresChartResponse> {
+  public static async getPlayerScoreChart(playerId: string, realmId: number) {
     const rows = await ScoreSaberScoresRepository.getChartRowsByPlayer(playerId, realmId);
 
     if (!rows.length) {
@@ -543,7 +484,7 @@ export class PlayerScoresService {
    * @param realmId the realm to resolve pp and leaderboard ranking for
    * @returns the score
    */
-  public static async getScore(scoreId: number, realmId: number): Promise<PlayerScore<ScoreSaberScore>> {
+  public static async getScore(scoreId: number, realmId: number) {
     const scoreRow = await ScoreSaberScoresRepository.findAnyRowByScoreId(scoreId, realmId);
     if (!scoreRow) {
       throw new NotFoundError("Score not found");
@@ -569,7 +510,7 @@ export class PlayerScoresService {
     pageNumber: number,
     sort: string,
     search?: string
-  ): Promise<PlayerScoresPageResponse> {
+  ) {
     const requestedPage = await ScoreSaberApiService.lookupPlayerScores({
       playerId,
       page: pageNumber,
@@ -587,10 +528,8 @@ export class PlayerScoresService {
       return { score, leaderboard };
     });
 
-    // Fire-and-forget: persist scores from the ScoreSaber API without blocking the response
     void ScoreCoreService.upsertScoresFromApi(parsedPlayerScores.map(({ score }) => score));
 
-    // A search filters the total, so only the unfiltered total is comparable to our count.
     if (!search?.trim()) {
       void PlayerScoresService.checkScoreCount(playerId, requestedPage.metadata.total);
     }
@@ -630,7 +569,7 @@ export class PlayerScoresService {
     sort: AccSaberScoreSort,
     direction: SortDirection,
     type: AccSaberScoreType
-  ): Promise<AccSaberScoresPageResponse> {
+  ) {
     const requested = await ApiServiceRegistry.getInstance()
       .getAccSaberService()
       .getPlayerScores(playerId, pageNumber, { sort, direction, type });
@@ -664,12 +603,11 @@ export class PlayerScoresService {
     direction: SortDirection,
     query: PlayerScoresQuery,
     config: ScoreTableConfig<TRow, TScore, TContext>
-  ): Promise<Page<PlayerScore<TScore>>> {
+  ) {
     const limit = 8;
     const offset = (page - 1) * limit;
     const uniquePlayerIds = Array.from(new Set([playerId, ...(query.playerIds ?? [])]));
 
-    // Only search leaderboards if a query is given; null means no filter
     let leaderboardIds: number[] | null = null;
     if (query.search?.trim()) {
       const ids = await ScoreSaberLeaderboardsRepository.searchLeaderboardIds(query.search);

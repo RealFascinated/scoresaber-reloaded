@@ -34,7 +34,6 @@ export default async function MedalsPage({ searchParams }: Props) {
   const { page, country } = loadMedalsSearchParams(await searchParams);
   const query = buildMedalsQuery(page, country);
 
-  // Render the players on the server so they are part of the HTML crawlers and users first receive
   const prefetched = await prefetchTimestampedData(ssrApi.getMedalRankedPlayers(query.page, query.country));
   const initial: MedalsInitialData | undefined = prefetched ? { query, ...prefetched } : undefined;
 

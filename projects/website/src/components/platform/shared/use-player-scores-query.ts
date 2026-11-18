@@ -132,7 +132,6 @@ export function usePlayerScoresQuery<T extends string, TData>({
     }
   }, [debouncedSearchTerm, setSearch]);
 
-  // The search the query requests, which is what the server data has to have been fetched for
   const requestedSearch = hasSearch && !invalidSearch ? debouncedSearchTerm || undefined : undefined;
   const initialData =
     initial &&
@@ -212,10 +211,6 @@ export function usePlayerScoresQuery<T extends string, TData>({
     [animateLeft, setIsLoading, setPage, setSearch]
   );
 
-  /**
-   * Resets to page 1 with a loading state + animation, then applies the filter change
-   * (e.g. HMD filter or AccSaber score type).
-   */
   const handleFilterChange = useCallback(
     (apply: () => void) => {
       setIsLoading(true);

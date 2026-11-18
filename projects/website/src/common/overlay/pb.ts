@@ -7,10 +7,7 @@ import type { BeatLeaderOverlayDataResponse } from "@ssr/common/schemas/response
  * @param songTime the song time in seconds
  * @returns undefined when the PB had no accuracy yet at that time (or the time is not known)
  */
-export function getPbAccuracyAt(
-  pb: BeatLeaderOverlayDataResponse | undefined,
-  songTime: number | undefined
-): number | undefined {
+export function getPbAccuracyAt(pb: BeatLeaderOverlayDataResponse | undefined, songTime: number | undefined) {
   if (!pb || songTime === undefined) {
     return undefined;
   }
@@ -42,7 +39,7 @@ export function getPbAccuracyAt(
 /**
  * Formats the difference between two accuracies with a leading sign.
  */
-export function formatAccuracyDelta(delta: number, precision: number): string {
+export function formatAccuracyDelta(delta: number, precision: number) {
   const rounded = Number(delta.toFixed(precision));
   return `${rounded < 0 ? "-" : "+"}${Math.abs(rounded).toFixed(precision)}%`;
 }

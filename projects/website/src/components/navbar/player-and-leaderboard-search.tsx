@@ -10,7 +10,6 @@ import { useSearch } from "@/components/providers/search-provider";
 import { Button } from "@/components/ui/button";
 import SearchDialog from "@/components/ui/search-dialog";
 import { SharedIcons } from "@/shared-icons";
-import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { truncateText } from "@ssr/common/string-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
@@ -91,10 +90,7 @@ export function PlayerAndLeaderboardSearchDialog() {
     error,
   } = useQuery({
     queryKey: ["playerAndLeaderboardSearch", trimmedQuery, realmId],
-    queryFn: async (): Promise<{
-      players: ScoreSaberPlayer[];
-      leaderboards: ScoreSaberLeaderboard[];
-    }> => {
+    queryFn: async () => {
       if (isPlayerSearchQueryTooShort(trimmedQuery)) {
         return { players: [], leaderboards: [] };
       }
@@ -126,15 +122,13 @@ export function PlayerAndLeaderboardSearchDialog() {
           }) ?? [],
       };
     },
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
     refetchInterval: false,
     enabled: isOpen,
   });
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent): void => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key === "k") {
         event.preventDefault();
         if (isOpen) {

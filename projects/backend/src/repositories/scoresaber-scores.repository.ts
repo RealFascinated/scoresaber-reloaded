@@ -1,5 +1,4 @@
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import type { HMD } from "@ssr/common/schemas/hmd";
 import type { AnyColumn, SQL } from "drizzle-orm";
 import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "../db";
@@ -11,9 +10,6 @@ import {
   scoreSaberScoreHistoryTable,
   scoreSaberScoreRealmsTable,
   scoreSaberScoresTable,
-  type ScoreSaberLeaderboardRow,
-  type ScoreSaberScoreHistoryRow,
-  type ScoreSaberScoreRow,
 } from "../db/schema";
 import {
   leaderboardRealmJoinOn,
@@ -34,24 +30,18 @@ import { TableCountsRepository } from "./table-counts.repository";
  */
 export type ScoreSaberScoreInsertRow = typeof scoreSaberScoresTable.$inferInsert & { pp: number };
 
-type ScoreBaseInsertRow = typeof scoreSaberScoresTable.$inferInsert;
-
-function splitInsertRow(row: ScoreSaberScoreInsertRow): { base: ScoreBaseInsertRow; pp: number } {
+function splitInsertRow(row: ScoreSaberScoreInsertRow) {
   const { pp, ...base } = row;
   return { base, pp };
 }
 
 type Executor = Pick<typeof db, "insert" | "delete">;
 
-/**
- * Writes the realm pp rows for the given scores: positive pp is upserted, anything else removes
- * the row so the table stays sparse.
- */
 async function writeRealmPp(
   executor: Executor,
   realmId: number,
   entries: { scoreId: number; playerId: string; leaderboardId: number; pp: number }[]
-): Promise<void> {
+) {
   const ranked = entries.filter(entry => entry.pp > 0);
   const unranked = entries.filter(entry => !(entry.pp > 0));
 
@@ -96,7 +86,7 @@ export type ScoreSaberPlayerScoreStatistics = {
   godPlays: number;
 };
 
-export const emptyScoreSaberPlayerScoreStatistics = (): ScoreSaberPlayerScoreStatistics => ({
+export const emptyScoreSaberPlayerScoreStatistics = () => ({
   totalScore: 0,
   totalRankedScore: 0,
   totalRankedScores: 0,
@@ -113,16 +103,11 @@ export const emptyScoreSaberPlayerScoreStatistics = (): ScoreSaberPlayerScoreSta
   godPlays: 0,
 });
 
-/** Identifies a player's score slot on a leaderboard. */
-/**
- * Excludes rows whose player is banned. Uses an anti-join against the (tiny) banned set so the
- * planner hashes it once, rather than probing the accounts table for every row it walks.
- */
-function notBannedPlayer(playerIdColumn: AnyColumn): SQL {
+function notBannedPlayer(playerIdColumn: AnyColumn) {
   return sql`${playerIdColumn} NOT IN (SELECT ${scoreSaberAccountsTable.id} FROM ${scoreSaberAccountsTable} WHERE ${scoreSaberAccountsTable.banned} = true)`;
 }
 
-export function playerLeaderboardKey(playerId: string, leaderboardId: number): string {
+export function playerLeaderboardKey(playerId: string, leaderboardId: number) {
   return `${playerId}:${leaderboardId}`;
 }
 
@@ -138,7 +123,7 @@ export class ScoreSaberScoresRepository {
    * @param to the end of the time range (inclusive)
    * @returns the player IDs that have a score in the range
    */
-  public static async findPlayerIdsInTimeRange(playerIds: string[], from: Date, to: Date): Promise<string[]> {
+  public static async findPlayerIdsInTimeRange(playerIds: string[], from: Date, to: Date) {
     const rows = await db
       .select({ playerId: scoreSaberScoresTable.playerId })
       .from(scoreSaberScoresTable)
@@ -153,10 +138,7 @@ export class ScoreSaberScoresRepository {
     return [...new Set(rows.map(row => row.playerId))];
   }
 
-  public static async findRowByScoreId(
-    scoreId: number,
-    realmId: number
-  ): Promise<ScoreSaberScoreRow | undefined> {
+  public static async findRowByScoreId(scoreId: number, realmId: number) {
     const [row] = await db
       .select(resolvedScoreColumns())
       .from(scoreSaberScoresTable)
@@ -172,17 +154,14 @@ export class ScoreSaberScoresRepository {
    * @param scoreId the score to find
    * @param realmId the realm to resolve pp for current scores
    */
-  public static async findAnyRowByScoreId(
-    scoreId: number,
-    realmId: number
-  ): Promise<ScoreSaberScoreRow | ScoreSaberScoreHistoryRow | undefined> {
+  public static async findAnyRowByScoreId(scoreId: number, realmId: number) {
     return (
       (await ScoreSaberScoresRepository.findRowByScoreId(scoreId, realmId)) ??
       (await ScoreSaberScoreHistoryRepository.findRowByScoreId(scoreId))
     );
   }
 
-  public static async rowExistsByScoreId(scoreId: number): Promise<boolean> {
+  public static async rowExistsByScoreId(scoreId: number) {
     const rows = await db
       .select({ scoreId: scoreSaberScoresTable.scoreId })
       .from(scoreSaberScoresTable)
@@ -190,7 +169,7 @@ export class ScoreSaberScoresRepository {
     return rows.length > 0;
   }
 
-  public static async findExistingScoreIds(scoreIds: number[]): Promise<Set<number>> {
+  public static async findExistingScoreIds(scoreIds: number[]) {
     if (scoreIds.length === 0) {
       return new Set();
     }
@@ -209,7 +188,7 @@ export class ScoreSaberScoresRepository {
    */
   public static async findExistingPlayerLeaderboardKeys(
     pairs: { playerId: string; leaderboardId: number }[]
-  ): Promise<Set<string>> {
+  ) {
     if (pairs.length === 0) {
       return new Set();
     }
@@ -229,7 +208,7 @@ export class ScoreSaberScoresRepository {
     return new Set(rows.map(row => playerLeaderboardKey(row.playerId, row.leaderboardId)));
   }
 
-  public static async existsByScoreIdAndScore(scoreId: number, scoreValue: number): Promise<boolean> {
+  public static async existsByScoreIdAndScore(scoreId: number, scoreValue: number) {
     const rows = await db
       .select({ exists: sql`1` })
       .from(scoreSaberScoresTable)
@@ -237,11 +216,7 @@ export class ScoreSaberScoresRepository {
     return rows.length > 0;
   }
 
-  public static async findByPlayerAndLeaderboard(
-    playerId: string,
-    leaderboardId: number,
-    realmId: number
-  ): Promise<ScoreSaberScoreRow | undefined> {
+  public static async findByPlayerAndLeaderboard(playerId: string, leaderboardId: number, realmId: number) {
     const [row] = await db
       .select(resolvedScoreColumns())
       .from(scoreSaberScoresTable)
@@ -265,12 +240,11 @@ export class ScoreSaberScoresRepository {
    * @param realmId the realm the rows' pp belongs to
    * @returns the ids of the scores that were inserted
    */
-  public static async insertScores(rows: ScoreSaberScoreInsertRow[], realmId: number): Promise<Set<number>> {
+  public static async insertScores(rows: ScoreSaberScoreInsertRow[], realmId: number) {
     if (rows.length === 0) {
       return new Set();
     }
 
-    // Always locked in the same order so concurrent batches (and single inserts) can't deadlock
     const sorted = rows.map(splitInsertRow).sort((a, b) => a.base.scoreId - b.base.scoreId);
     return await db.transaction(async tx => {
       const inserted = await tx
@@ -296,16 +270,12 @@ export class ScoreSaberScoresRepository {
     });
   }
 
-  public static async insertScore(row: ScoreSaberScoreInsertRow, realmId: number): Promise<boolean> {
+  public static async insertScore(row: ScoreSaberScoreInsertRow, realmId: number) {
     const { base, pp } = splitInsertRow(row);
     return await db.transaction(async tx => {
       const result = await tx
         .insert(scoreSaberScoresTable)
         .values(base)
-        // Untargeted so conflicts on both the scoreId primary key (same score
-        // re-ingested) and the (playerId, leaderboardId) unique index (a
-        // concurrent play from another ingestion path) are absorbed instead of
-        // raising a unique violation.
         .onConflictDoNothing()
         .returning({ scoreId: scoreSaberScoresTable.scoreId });
       if (result.length === 0) {
@@ -335,12 +305,9 @@ export class ScoreSaberScoresRepository {
    * @returns whether the new row was inserted (false when a concurrent, newer
    *   row already holds the slot)
    */
-  public static async replaceScore(row: ScoreSaberScoreInsertRow, realmId: number): Promise<boolean> {
+  public static async replaceScore(row: ScoreSaberScoreInsertRow, realmId: number) {
     const { base: insertRow, pp } = splitInsertRow(row);
     return await db.transaction(async tx => {
-      // Re-read the current row inside the transaction so the snapshot reflects
-      // the row actually being replaced (a concurrent writer may have changed
-      // it since the caller read it).
       const [previousRow] = await tx
         .select(resolvedScoreColumns())
         .from(scoreSaberScoresTable)
@@ -361,15 +328,11 @@ export class ScoreSaberScoresRepository {
           .onConflictDoUpdate({
             target: [scoreSaberScoresTable.playerId, scoreSaberScoresTable.leaderboardId],
             set: insertRow,
-            // Only overwrite the current row when the incoming play is newer, so
-            // a concurrent (already committed) newer play is never downgraded.
             setWhere: sql`${scoreSaberScoresTable.timestamp} < excluded."timestamp"`,
           })
           .returning({ scoreId: scoreSaberScoresTable.scoreId });
         inserted = result[0];
       } catch (error) {
-        // A concurrent writer inserted the same scoreId (primary key) — the play
-        // is already recorded, so nothing to do.
         if ((error as { code?: string }).code === "23505") {
           return false;
         }
@@ -377,7 +340,6 @@ export class ScoreSaberScoresRepository {
       }
 
       if (inserted != null && previousRow != null && previousRow.scoreId !== insertRow.scoreId) {
-        // The replaced score leaves the current table, so its per-realm pp goes with it.
         await tx
           .delete(scoreSaberScoreRealmsTable)
           .where(eq(scoreSaberScoreRealmsTable.scoreId, previousRow.scoreId));
@@ -418,7 +380,7 @@ export class ScoreSaberScoresRepository {
    * @param rows the score rows to upsert
    * @param realmId the realm the rows' pp belongs to
    */
-  public static async upsertScores(rows: ScoreSaberScoreInsertRow[], realmId: number): Promise<void> {
+  public static async upsertScores(rows: ScoreSaberScoreInsertRow[], realmId: number) {
     if (rows.length === 0) {
       return;
     }
@@ -428,12 +390,8 @@ export class ScoreSaberScoresRepository {
       await tx
         .insert(scoreSaberScoresTable)
         .values(split.map(({ base }) => base))
-        // Untargeted so a conflict on the (playerId, leaderboardId) unique index (the player
-        // already has a different score on this leaderboard) is skipped rather than raising.
         .onConflictDoNothing();
 
-      // A conflicting (playerId, leaderboardId) row holds a different scoreId, so only write pp for
-      // scores that now exist under the id we were given.
       const stored = await tx
         .select({ scoreId: scoreSaberScoresTable.scoreId })
         .from(scoreSaberScoresTable)
@@ -459,7 +417,7 @@ export class ScoreSaberScoresRepository {
     });
   }
 
-  public static async countByPlayerId(playerId: string): Promise<number> {
+  public static async countByPlayerId(playerId: string) {
     const [row] = await db
       .select({ count: count() })
       .from(scoreSaberScoresTable)
@@ -472,7 +430,7 @@ export class ScoreSaberScoresRepository {
    *
    * @param playerId the player's id
    */
-  public static async findScoreIdsByPlayerId(playerId: string): Promise<Set<number>> {
+  public static async findScoreIdsByPlayerId(playerId: string) {
     const rows = await db
       .select({ scoreId: scoreSaberScoresTable.scoreId })
       .from(scoreSaberScoresTable)
@@ -486,7 +444,7 @@ export class ScoreSaberScoresRepository {
    * @param playerId the player's id
    * @param scoreIds the ids of the scores to look up
    */
-  public static async findLeaderboardIdsByScoreIds(playerId: string, scoreIds: number[]): Promise<number[]> {
+  public static async findLeaderboardIdsByScoreIds(playerId: string, scoreIds: number[]) {
     if (scoreIds.length === 0) {
       return [];
     }
@@ -515,7 +473,7 @@ export class ScoreSaberScoresRepository {
    * @param playerId the player's id; rows of other players are never touched
    * @param scoreIds the ids of the scores to delete
    */
-  public static async deleteByPlayerAndScoreIds(playerId: string, scoreIds: number[]): Promise<void> {
+  public static async deleteByPlayerAndScoreIds(playerId: string, scoreIds: number[]) {
     if (scoreIds.length === 0) {
       return;
     }
@@ -537,7 +495,7 @@ export class ScoreSaberScoresRepository {
     });
   }
 
-  public static async countByLeaderboardId(leaderboardId: number): Promise<number> {
+  public static async countByLeaderboardId(leaderboardId: number) {
     const [row] = await db
       .select({ count: count() })
       .from(scoreSaberScoresTable)
@@ -550,7 +508,7 @@ export class ScoreSaberScoresRepository {
    * realm pp join is left out because it can't change the count and it turns an index-only count into a
    * heap scan.
    */
-  public static async countByConditions(conditions: SQL[]): Promise<number> {
+  public static async countByConditions(conditions: SQL[]) {
     const [row] = await db
       .select({ count: sql<number>`cast(count(*) as integer)` })
       .from(scoreSaberScoresTable)
@@ -564,7 +522,7 @@ export class ScoreSaberScoresRepository {
     limit: number,
     offset: number,
     realmId: number
-  ): Promise<ScoreSaberScoreRow[]> {
+  ) {
     return db
       .select(resolvedScoreColumns())
       .from(scoreSaberScoresTable)
@@ -575,15 +533,7 @@ export class ScoreSaberScoresRepository {
       .offset(offset);
   }
 
-  public static async getTopScores(
-    limit: number,
-    offset: number,
-    realmId: number
-  ): Promise<ScoreSaberScoreRow[]> {
-    // Page through the realm rows first (the banned check uses the denormalised playerId), so the
-    // scores table is only touched for the rows on the requested page instead of every skipped row.
-    // Banned players are excluded with a hashed anti-join against the tiny banned set instead of an
-    // accounts lookup per skipped row, which made deep pages cost one index probe per offset row.
+  public static async getTopScores(limit: number, offset: number, realmId: number) {
     const page = db
       .select({ scoreId: scoreSaberScoreRealmsTable.scoreId, pp: scoreSaberScoreRealmsTable.pp })
       .from(scoreSaberScoreRealmsTable)
@@ -609,7 +559,7 @@ export class ScoreSaberScoresRepository {
       .orderBy(descNullsLast(page.pp), descNullsLast(page.scoreId));
   }
 
-  public static async selectTopPp(limit: number = 50, realmId: number): Promise<{ pp: number }[]> {
+  public static async selectTopPp(limit: number = 50, realmId: number) {
     return db
       .select({ pp: scoreSaberScoreRealmsTable.pp })
       .from(scoreSaberScoreRealmsTable)
@@ -631,7 +581,7 @@ export class ScoreSaberScoresRepository {
    * @param realmId the realm to resolve pp for
    * @returns the pp, or undefined when the player has no ranked scores
    */
-  public static async getTopPpByPlayer(playerId: string, realmId: number): Promise<number | undefined> {
+  public static async getTopPpByPlayer(playerId: string, realmId: number) {
     const [row] = await db
       .select({ pp: scoreSaberScoreRealmsTable.pp })
       .from(scoreSaberScoreRealmsTable)
@@ -647,10 +597,7 @@ export class ScoreSaberScoresRepository {
     return row?.pp;
   }
 
-  public static async getPpAndScoreIdByPlayer(
-    playerId: string,
-    realmId: number
-  ): Promise<{ pp: number; scoreId: number }[]> {
+  public static async getPpAndScoreIdByPlayer(playerId: string, realmId: number) {
     return db
       .select({
         pp: scoreSaberScoreRealmsTable.pp,
@@ -667,10 +614,7 @@ export class ScoreSaberScoresRepository {
       .orderBy(desc(scoreSaberScoreRealmsTable.pp));
   }
 
-  public static async getRankedRowsByPlayerId(
-    playerId: string,
-    realmId: number
-  ): Promise<ScoreSaberScoreRow[]> {
+  public static async getRankedRowsByPlayerId(playerId: string, realmId: number) {
     return db
       .select({ ...resolvedScoreColumns(), pp: scoreSaberScoreRealmsTable.pp })
       .from(scoreSaberScoreRealmsTable)
@@ -684,10 +628,7 @@ export class ScoreSaberScoresRepository {
       );
   }
 
-  public static async getPlayerScoreStatistics(
-    playerId: string,
-    realmId: number
-  ): Promise<ScoreSaberPlayerScoreStatistics> {
+  public static async getPlayerScoreStatistics(playerId: string, realmId: number) {
     const [scoreStats] = await db
       .select({
         totalScore: sql<number>`(coalesce(sum(${scoreSaberScoresTable.score}), 0))::double precision`,
@@ -731,13 +672,7 @@ export class ScoreSaberScoresRepository {
     };
   }
 
-  public static async getAverageAccuracies(
-    playerId: string,
-    realmId: number
-  ): Promise<{
-    averageAccuracy: number;
-    unrankedAccuracy: number;
-  }> {
+  public static async getAverageAccuracies(playerId: string, realmId: number) {
     const [result] = await db
       .select({
         averageAccuracy: sql<number>`coalesce(avg(${scoreSaberScoresTable.accuracy}), 0)`,
@@ -759,10 +694,7 @@ export class ScoreSaberScoresRepository {
     };
   }
 
-  public static async countFollowingScoresOnLeaderboard(
-    followingIds: string[],
-    leaderboardId: number
-  ): Promise<number> {
+  public static async countFollowingScoresOnLeaderboard(followingIds: string[], leaderboardId: number) {
     const conditions = and(
       inArray(scoreSaberScoresTable.playerId, followingIds),
       eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
@@ -780,7 +712,7 @@ export class ScoreSaberScoresRepository {
     limit: number,
     offset: number,
     realmId: number
-  ): Promise<ScoreSaberScoreRow[]> {
+  ) {
     const conditions = and(
       inArray(scoreSaberScoresTable.playerId, followingIds),
       eq(scoreSaberScoresTable.leaderboardId, leaderboardId)
@@ -802,10 +734,7 @@ export class ScoreSaberScoresRepository {
    * @param playerId the player to count for
    * @param limit when set, only the first `limit` scores are counted
    */
-  public static async getHmdCountsByPlayerId(
-    playerId: string,
-    limit?: number
-  ): Promise<{ hmd: HMD; count: number }[]> {
+  public static async getHmdCountsByPlayerId(playerId: string, limit?: number) {
     const scores =
       limit != null
         ? db
@@ -826,20 +755,7 @@ export class ScoreSaberScoresRepository {
       .groupBy(scores.hmd);
   }
 
-  public static async getChartRowsByPlayer(
-    playerId: string,
-    realmId: number
-  ): Promise<
-    {
-      accuracy: number;
-      pp: number;
-      timestamp: Date;
-      leaderboardId: number;
-      difficulty: ScoreSaberScoreRow["difficulty"];
-      songName: string | null;
-      stars: number | null;
-    }[]
-  > {
+  public static async getChartRowsByPlayer(playerId: string, realmId: number) {
     return db
       .select({
         accuracy: scoreSaberScoresTable.accuracy,
@@ -881,7 +797,7 @@ export class ScoreSaberScoresRepository {
   public static async setRealmPpForExistingScores(
     realmId: number,
     entries: { scoreId: number; pp: number }[]
-  ): Promise<number> {
+  ) {
     if (entries.length === 0) {
       return 0;
     }
@@ -911,10 +827,7 @@ export class ScoreSaberScoresRepository {
    * Selects scores joined to their leaderboards, both resolved for `realmId`. Conditions may
    * reference {@link scorePpExpr}.
    */
-  public static async selectScoresJoinedLeaderboardsWhere(
-    conditions: SQL[],
-    realmId: number
-  ): Promise<{ scoreRow: ScoreSaberScoreRow; lbRow: ScoreSaberLeaderboardRow }[]> {
+  public static async selectScoresJoinedLeaderboardsWhere(conditions: SQL[], realmId: number) {
     return db
       .select({
         scoreRow: resolvedScoreColumns(),
@@ -933,7 +846,7 @@ export class ScoreSaberScoresRepository {
       .where(and(...conditions));
   }
 
-  public static async selectDistinctLeaderboardIdsByPlayerId(playerId: string): Promise<number[]> {
+  public static async selectDistinctLeaderboardIdsByPlayerId(playerId: string) {
     const rows = await db
       .select({ leaderboardId: scoreSaberScoresTable.leaderboardId })
       .from(scoreSaberScoresTable)
@@ -947,7 +860,7 @@ export class ScoreSaberScoresRepository {
    *
    * @param leaderboardIds the leaderboards to look at
    */
-  public static async selectDistinctPlayerIdsByLeaderboardIds(leaderboardIds: number[]): Promise<string[]> {
+  public static async selectDistinctPlayerIdsByLeaderboardIds(leaderboardIds: number[]) {
     if (leaderboardIds.length === 0) {
       return [];
     }
@@ -964,10 +877,7 @@ export class ScoreSaberScoresRepository {
    * @param realmId the realm to read pp for
    * @param leaderboardId the leaderboard to read
    */
-  public static async selectRealmPpByLeaderboardId(
-    realmId: number,
-    leaderboardId: number
-  ): Promise<{ scoreId: number; playerId: string; leaderboardId: number; pp: number }[]> {
+  public static async selectRealmPpByLeaderboardId(realmId: number, leaderboardId: number) {
     return db
       .select({
         scoreId: scoreSaberScoreRealmsTable.scoreId,
@@ -992,7 +902,7 @@ export class ScoreSaberScoresRepository {
    * @param limit the most scores to count
    * @returns the number of scores with pp, at most `limit`
    */
-  public static async countRealmScores(realmId: number, limit: number): Promise<number> {
+  public static async countRealmScores(realmId: number, limit: number) {
     const capped = db
       .select({ one: sql<number>`1`.as("one") })
       .from(scoreSaberScoreRealmsTable)
@@ -1003,7 +913,7 @@ export class ScoreSaberScoresRepository {
     return Number(row?.count ?? 0);
   }
 
-  public static async countTotal(): Promise<number> {
+  public static async countTotal() {
     const counts = await TableCountsRepository.getCounts();
     return counts.scoresaberScores;
   }

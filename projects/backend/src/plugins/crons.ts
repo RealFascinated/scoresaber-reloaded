@@ -21,8 +21,7 @@ export const crons = new Elysia({ name: "crons" })
   .use(
     cron({
       name: "player-statistics-tracker-cron",
-      // pattern: "*/1 * * * *", // Every 1 minute
-      pattern: "59 23 * * *", // Every day at 23:59
+      pattern: "59 23 * * *",
       timezone: "UTC",
       protect: true,
       run: async () => {
@@ -49,16 +48,12 @@ export const crons = new Elysia({ name: "crons" })
   .use(
     cron({
       name: "refresh-leaderboards-cron",
-      // pattern: "*/1 * * * *", // Every minute
-      pattern: "30 */2 * * *", // Every 2 hours at 30 minutes ex: 00:30, 02:30, 04:30, etc
+      pattern: "30 */2 * * *",
       timezone: "UTC",
       protect: true,
       run: async () => {
         try {
           const result = await LeaderboardRankedSyncService.refreshRankedLeaderboards();
-          // Isolated so a failed Discord batch notification (paste upload,
-          // message or playlist send) is reported but never aborts the rest of
-          // the sync.
           try {
             await LeaderboardRankedSyncNotificationsService.handleRankedBatch(result);
           } catch (error) {
@@ -76,7 +71,7 @@ export const crons = new Elysia({ name: "crons" })
   .use(
     cron({
       name: "refresh-medal-scores",
-      pattern: "*/10 * * * *", // Every 10 minutes
+      pattern: "*/10 * * * *",
       timezone: "UTC",
       protect: true,
       run: async () => {
@@ -92,8 +87,7 @@ export const crons = new Elysia({ name: "crons" })
   .use(
     cron({
       name: "nightly-global-medal-refresh",
-      // pattern: "*/1 * * * *", // Every minute
-      pattern: "0 22 * * *", // Every day at 22:00
+      pattern: "0 22 * * *",
       timezone: "UTC",
       protect: true,
       run: async () => {
@@ -122,7 +116,7 @@ export const crons = new Elysia({ name: "crons" })
   .use(
     cron({
       name: "leaderboard-updates",
-      pattern: "0 * * * *", // Every 1 hour
+      pattern: "0 * * * *",
       timezone: "UTC",
       protect: true,
       run: async () => {
@@ -140,7 +134,7 @@ export const crons = new Elysia({ name: "crons" })
   .use(
     cron({
       name: "reconcile-table-counts",
-      pattern: "0 3 * * *", // Every day at 03:00 UTC
+      pattern: "0 3 * * *",
       timezone: "UTC",
       protect: true,
       run: async () => {
@@ -156,8 +150,7 @@ export const crons = new Elysia({ name: "crons" })
   .use(
     cron({
       name: "expire-broken-streaks",
-      // pattern: "*/1 * * * *", // Every minute
-      pattern: "0 0 * * *", // Every day at 00:00
+      pattern: "0 0 * * *",
       timezone: "UTC",
       protect: true,
       run: async () => {

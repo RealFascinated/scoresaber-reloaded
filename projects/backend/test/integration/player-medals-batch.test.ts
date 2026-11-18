@@ -15,9 +15,9 @@ import { TEST_AVATAR } from "../helpers/constants";
 const LEADERBOARD_COUNT = 12;
 const PLAYER_COUNT = 15;
 const FIRST_LEADERBOARD_ID = 910_000;
-const playerId = (index: number): string => `9100000000000000000000000000${String(index).padStart(4, "0")}`;
+const playerId = (index: number) => `9100000000000000000000000000${String(index).padStart(4, "0")}`;
 
-async function seedMedalScenario(): Promise<number[]> {
+async function seedMedalScenario() {
   const now = new Date();
   const leaderboardIds = Array.from({ length: LEADERBOARD_COUNT }, (_, i) => FIRST_LEADERBOARD_ID + i);
 
@@ -31,10 +31,8 @@ async function seedMedalScenario(): Promise<number[]> {
       seededBeatLeaderScores: true,
       trackReplays: false,
       inactive: false,
-      // A few banned players: they must never hold medals
       banned: i % 7 === 3,
       pp: 100,
-      // Wrong on purpose so the sync has something to fix
       medals: 3,
       trackedSince: now,
       joinedDate: now,
@@ -64,7 +62,6 @@ async function seedMedalScenario(): Promise<number[]> {
     leaderboardIds.map((id, index) => ({
       leaderboardId: id,
       realmId: DEFAULT_REALM_ID,
-      // Every fourth leaderboard is unranked: it must be skipped by both paths
       ranked: index % 4 !== 3,
       qualified: index % 4 === 3,
       stars: 5 + index / 10,
@@ -80,10 +77,8 @@ async function seedMedalScenario(): Promise<number[]> {
         leaderboardId,
         difficulty: "ExpertPlus" as const,
         characteristic: "Standard" as const,
-        // Distinct scores per leaderboard so the top 10 differ between leaderboards
         score: 1000 + ((p * 37 + lbIndex * 11) % 97) * 10 + p,
         accuracy: 0.9,
-        // Wrong on purpose so the update has something to fix
         medals: (leaderboardId * 100 + p) % 3,
         missedNotes: 0,
         badCuts: 0,
@@ -98,7 +93,7 @@ async function seedMedalScenario(): Promise<number[]> {
   return leaderboardIds;
 }
 
-async function resetMedals(leaderboardIds: number[]): Promise<void> {
+async function resetMedals(leaderboardIds: number[]) {
   await db.update(scoreSaberAccountsTable).set({ medals: 3 });
   await db.execute(
     sql`UPDATE "scoresaber-scores" SET medals = "scoreId" % 3 WHERE "leaderboardId" IN (${sql.join(
@@ -144,7 +139,6 @@ describe("PlayerMedalsService.refreshLeaderboardsMedals", () => {
     }
     const sequential = await readMedals(leaderboardIds);
 
-    // The scenario has to actually award medals, otherwise the comparison proves nothing
     expect(sequential.scores.some(score => score.medals > 0)).toBe(true);
     expect(sequential.accounts.some(account => account.medals !== 3)).toBe(true);
 

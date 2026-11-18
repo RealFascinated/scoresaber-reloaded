@@ -10,7 +10,7 @@ import { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
  * highlight or falls back to the lowest one. This converter renames the field
  * so in-game highlighting works.
  */
-export function playlistToBplist(playlist: Playlist): string {
+export function playlistToBplist(playlist: Playlist) {
   return JSON.stringify({
     playlistTitle: playlist.playlistTitle,
     playlistAuthor: playlist.playlistAuthor,

@@ -5,7 +5,6 @@ import type {
 } from "@ssr/common/schemas/response/beatleader/overlay-ratings";
 import { BeatLeaderApiService } from "../external/beatleader-api.service";
 
-/** BeatLeader's status of a ranked difficulty. */
 const RANKED_STATUS = 3;
 
 const RATINGS_TTL_MS = 30 * 60 * 1000;
@@ -13,10 +12,6 @@ const PLAYER_TTL_MS = 60 * 1000;
 
 type CacheEntry<T> = { value: T; expiresAt: number };
 
-/**
- * A small in-memory cache that also shares the request between callers asking for the same key at the same time,
- * so a lot of overlays on one map don't each hit the BeatLeader API.
- */
 class TtlCache<T> {
   private readonly entries = new Map<string, CacheEntry<T>>();
   private readonly inFlight = new Map<string, Promise<T>>();
@@ -26,7 +21,7 @@ class TtlCache<T> {
     private readonly maxEntries: number
   ) {}
 
-  public async get(key: string, load: () => Promise<T>): Promise<T> {
+  public async get(key: string, load: () => Promise<T>) {
     const cached = this.entries.get(key);
     if (cached && cached.expiresAt > Date.now()) {
       return cached.value;
@@ -64,11 +59,7 @@ export class BeatLeaderOverlayLiveService {
    * @param difficulty the name of the difficulty, like `ExpertPlus`
    * @param characteristic the characteristic, like `Standard`
    */
-  public static getRatings(
-    hash: string,
-    difficulty: string,
-    characteristic: string
-  ): Promise<BeatLeaderOverlayRatingsResponse> {
+  public static getRatings(hash: string, difficulty: string, characteristic: string) {
     const key = `${hash.toLowerCase()}:${difficulty}:${characteristic}`;
     return this.ratings.get(key, async () => {
       const response = await BeatLeaderApiService.lookupLeaderboardsByHash(hash);
@@ -99,7 +90,7 @@ export class BeatLeaderOverlayLiveService {
    *
    * @param playerId the id of the player
    */
-  public static getPlayer(playerId: string): Promise<BeatLeaderOverlayPlayerResponse> {
+  public static getPlayer(playerId: string) {
     return this.players.get(playerId, async () => {
       const player = await BeatLeaderApiService.lookupPlayer(playerId);
       if (!player || player.pp === undefined) {

@@ -84,7 +84,6 @@ export function usePinnedScoreActions() {
       toast.error(error instanceof Error ? error.message : "Failed to update your pinned scores");
     },
     onSettled: () => {
-      // The pinned section shows the scores themselves, so reload it for every realm
       if (me?.playerId && queryClient.isMutating({ mutationKey: PINNED_MUTATION_KEY }) <= 1) {
         void queryClient.invalidateQueries({ queryKey: ["player", me.playerId, "pinned-scores"] });
       }
@@ -92,7 +91,7 @@ export function usePinnedScoreActions() {
   });
 
   const pin = useCallback(
-    (scoreId: number): "pinned" | "already-pinned" | "limit-reached" => {
+    (scoreId: number) => {
       const pinned = queryClient.getQueryData<number[]>(PINNED_QUERY_KEY) ?? NOTHING_PINNED;
       if (pinned.includes(scoreId)) {
         return "already-pinned";

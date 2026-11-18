@@ -2,11 +2,7 @@ import { AUTH_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
 import type { AuthMeResponse } from "@ssr/common/schemas/response/auth/me";
 
-/**
- * Calls the backend auth routes. The session lives in a cookie set by the backend, so every
- * request has to include credentials.
- */
-function authFetch(path: string, init: RequestInit = {}): Promise<Response> {
+function authFetch(path: string, init: RequestInit = {}) {
   return fetch(`${env.NEXT_PUBLIC_API_URL}${path}`, { ...init, credentials: "include" });
 }
 
@@ -16,7 +12,7 @@ function authFetch(path: string, init: RequestInit = {}): Promise<Response> {
  * @returns the signed-in user, or null when nobody is signed in
  * @throws when the backend could not be reached or answered with an error
  */
-export async function fetchMe(): Promise<AuthMeResponse | null> {
+export async function fetchMe() {
   const response = await authFetch("/me");
   if (response.status === 401) {
     return null;
@@ -32,7 +28,7 @@ export async function fetchMe(): Promise<AuthMeResponse | null> {
  *
  * @returns the redirect path, or "/" when it is missing or not a local path
  */
-export function getSafeRedirectPath(redirect: string | null | undefined): string {
+export function getSafeRedirectPath(redirect: string | null | undefined) {
   if (!redirect || !redirect.startsWith("/") || redirect.startsWith("//") || redirect.startsWith("/\\")) {
     return "/";
   }
@@ -43,7 +39,7 @@ export function getSafeRedirectPath(redirect: string | null | undefined): string
  * Starts the Steam sign-in by sending the browser to Steam. Steam returns to the backend,
  * which then redirects to the given path, or back to it with an `error` query param on failure.
  */
-export async function signInWithSteam(redirectPath: string = "/"): Promise<void> {
+export async function signInWithSteam(redirectPath: string = "/") {
   const safePath = getSafeRedirectPath(redirectPath);
   const response = await authFetch(`${AUTH_ROUTE}/sign-in/social`, {
     method: "POST",
@@ -62,7 +58,7 @@ export async function signInWithSteam(redirectPath: string = "/"): Promise<void>
   window.location.assign(url);
 }
 
-export async function signOut(): Promise<void> {
+export async function signOut() {
   const response = await authFetch(`${AUTH_ROUTE}/sign-out`, {
     method: "POST",
     headers: { "content-type": "application/json" },

@@ -18,11 +18,8 @@ const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
-// Mobile edge drag: a touch starting within this many px of the left edge pulls the panel out
-// under the finger. Movement must be mostly horizontal to commit to the drag.
 const SIDEBAR_EDGE_SWIPE_ZONE = 24;
 const SIDEBAR_SWIPE_LOCK_PX = 8;
-// On release, the panel opens if it was pulled past this share of its width or flicked open quickly.
 const SIDEBAR_SWIPE_SETTLE_RATIO = 0.4;
 const SIDEBAR_SWIPE_FLING_PX_PER_MS = 0.5;
 const SIDEBAR_SETTLE_MS = 200;
@@ -94,10 +91,6 @@ const SidebarProvider = React.forwardRef<
       return () => window.removeEventListener("keydown", handleKeyDown);
     }, [toggleSidebar]);
 
-    // On mobile, a rightward drag from the left screen edge pulls the panel out under the finger.
-    // Releasing past the halfway point (or after a quick flick) opens it; otherwise it slides back.
-    // The panel and backdrop are moved directly in the DOM during the drag, so the gesture does not
-    // re-render React. Only listens while the panel is closed.
     React.useEffect(() => {
       if (!isMobile || openMobile) {
         return;
@@ -116,7 +109,6 @@ const SidebarProvider = React.forwardRef<
       const getPanel = () => document.querySelector<HTMLElement>('[data-sidebar="sidebar"]');
       const getBackdrop = () => document.querySelector<HTMLElement>('[data-sidebar="backdrop"]');
 
-      // Drops the inline drag styles so the class-based open/closed styles apply again.
       const clearInlineStyles = () => {
         for (const element of [getPanel(), getBackdrop()]) {
           if (element) {
@@ -128,7 +120,6 @@ const SidebarProvider = React.forwardRef<
         }
       };
 
-      // nextOffset is how far the panel is pulled out, from 0 (closed) to width (open).
       const applyOffset = (nextOffset: number, animate: boolean) => {
         const panel = getPanel();
         const backdrop = getBackdrop();
@@ -147,7 +138,6 @@ const SidebarProvider = React.forwardRef<
         applyOffset(open ? width : 0, true);
         setOpenMobile(open);
         window.clearTimeout(clearTimer);
-        // After the slide finishes, hand control back to the class-based styles.
         clearTimer = window.setTimeout(clearInlineStyles, SIDEBAR_SETTLE_MS + 30);
       };
 
@@ -190,14 +180,12 @@ const SidebarProvider = React.forwardRef<
           if (Math.abs(dx) < SIDEBAR_SWIPE_LOCK_PX && Math.abs(dy) < SIDEBAR_SWIPE_LOCK_PX) {
             return;
           }
-          // Leftward or mostly vertical movement is not a sidebar drag; leave it to the page.
           if (dx <= 0 || Math.abs(dy) >= dx / 2) {
             tracking = false;
             return;
           }
           dragging = true;
         }
-        // Keep the page from scrolling or navigating while the panel follows the finger.
         if (event.cancelable) {
           event.preventDefault();
         }
@@ -293,8 +281,6 @@ const Sidebar = React.forwardRef<
         setOpenMobile(false);
       }
     };
-    // Tapping outside the panel closes it. The trigger toggles on its own, and popovers opened
-    // from inside the sidebar (realm selector, following list) are portaled outside the panel.
     const handlePointerDown = (event: PointerEvent) => {
       if (!(event.target instanceof Element)) {
         return;
@@ -308,7 +294,6 @@ const Sidebar = React.forwardRef<
       }
       setOpenMobile(false);
     };
-    // Lock page scroll while the panel is open; the panel's own content still scrolls.
     const root = document.documentElement;
     const previousOverflow = root.style.overflow;
     root.style.overflow = "hidden";
@@ -346,7 +331,6 @@ const Sidebar = React.forwardRef<
           "transition-[width] duration-200 ease-linear"
         )}
       />
-      {/* Mobile backdrop: dims and blurs the page behind the open panel; tapping it closes the panel. */}
       <div
         aria-hidden
         data-sidebar="backdrop"
@@ -363,11 +347,6 @@ const Sidebar = React.forwardRef<
           state === "collapsed" && side === "left" && "-translate-x-full",
           state === "collapsed" && side === "right" && "translate-x-full",
           "transition-[translate,visibility] duration-200 ease-linear",
-          // Below md the same panel is an overlay driven by openMobile. It stays mounted
-          // and only slides (a compositor-only transition), since mounting the whole sidebar on
-          // every open stalled the main thread before the slide could start. The breakpoint is
-          // applied in CSS (not via isMobile) so SSR/first paint is already correct on mobile,
-          // and `invisible` keeps the closed panel out of the tab order and accessibility tree.
           "max-md:z-50 max-md:w-3/4 max-md:max-w-sm max-md:shadow-lg max-md:ease-out max-md:will-change-[translate]",
           !openMobile && "max-md:invisible",
           !openMobile && (side === "left" ? "max-md:-translate-x-full" : "max-md:translate-x-full"),

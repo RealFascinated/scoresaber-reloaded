@@ -2,7 +2,7 @@ export const MIN_PLAYER_SEARCH_QUERY_LENGTH = 4;
 
 export const PLAYER_SEARCH_TOO_SHORT_MESSAGE = `Type at least ${MIN_PLAYER_SEARCH_QUERY_LENGTH} characters to search.`;
 
-export function isPlayerSearchQueryTooShort(query: string): boolean {
+export function isPlayerSearchQueryTooShort(query: string) {
   const trimmed = query.trim();
   return trimmed.length > 0 && trimmed.length < MIN_PLAYER_SEARCH_QUERY_LENGTH;
 }

@@ -86,11 +86,8 @@ export function LandingStats({ initial }: LandingStatsProps) {
   const { data, dataUpdatedAt, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["app-statistics"],
     queryFn: () => ssrApi.getAppStatistics(),
-    // Rendered on the server. It is stale by the time it is hydrated, so it is refetched right away
     initialData: initial?.data,
     initialDataUpdatedAt: initial?.fetchedAt,
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
     refetchInterval: 5 * 60 * 1000,
   });
@@ -99,10 +96,8 @@ export function LandingStats({ initial }: LandingStatsProps) {
 
   const shouldReduceMotion = useReducedMotion();
 
-  // Live values extrapolated from the last fetch, refreshed every second
   const [liveValues, setLiveValues] = useState<Partial<Record<StatKey, number>>>({});
 
-  // Active "+N" bump per statistic, removed once its animation completes
   const [bumps, setBumps] = useState<Partial<Record<StatKey, StatBump>>>({});
   const prevRoundedRef = useRef<Partial<Record<StatKey, number>>>({});
 
@@ -111,7 +106,6 @@ export function LandingStats({ initial }: LandingStatsProps) {
       return;
     }
 
-    // Baseline for increment detection resets when fresh data arrives
     prevRoundedRef.current = Object.fromEntries(STATS.map(({ key }) => [key, Math.round(data[key].value)]));
 
     const interval = setInterval(() => {
@@ -172,7 +166,6 @@ export function LandingStats({ initial }: LandingStatsProps) {
     return null;
   }
 
-  // Empty counters (e.g. features with no data yet) read as broken, so they're left out
   const visibleStats = STATS.filter(({ key }) => data[key].value > 0);
   if (visibleStats.length === 0) {
     return null;

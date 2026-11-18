@@ -10,7 +10,6 @@ export default class BeatLeaderUniqueDailyPlayersMetric extends Metric<null> {
   private readonly gauge: Gauge;
   private lastCollectedAt = 0;
   private lastKnownCount = 0;
-  /** Players already written to today's Redis set, so repeat scores from them cost no Redis commands. */
   private readonly knownToday = new Set<string>();
   private knownKey = "";
 
@@ -27,12 +26,12 @@ export default class BeatLeaderUniqueDailyPlayersMetric extends Metric<null> {
     });
   }
 
-  private getDateKey(): string {
+  private getDateKey() {
     const midnightDate = getMidnightAlignedDate(new Date());
     return `beatleader_unique_daily_players:${midnightDate.toISOString().split("T")[0]}`;
   }
 
-  public async addPlayer(playerId: string): Promise<void> {
+  public async addPlayer(playerId: string) {
     const key = this.getDateKey();
     if (key !== this.knownKey) {
       this.knownKey = key;
@@ -41,19 +40,17 @@ export default class BeatLeaderUniqueDailyPlayersMetric extends Metric<null> {
     if (this.knownToday.has(playerId)) {
       return;
     }
-    // One round trip for both commands; this runs for every score that comes in.
     await redisClient.multi().sadd(key, playerId).expire(key, TimeUnit.toSeconds(TimeUnit.Day, 2)).exec();
-    // Only remembered once Redis has the player, so a failed write is retried on their next score
     if (key === this.knownKey) {
       this.knownToday.add(playerId);
     }
   }
 
-  public async getUniqueCount(): Promise<number> {
+  public async getUniqueCount() {
     return await redisClient.scard(this.getDateKey());
   }
 
-  private async collectCount(): Promise<void> {
+  private async collectCount() {
     const now = Date.now();
     if (now - this.lastCollectedAt < 30_000) {
       this.gauge.set(this.lastKnownCount);

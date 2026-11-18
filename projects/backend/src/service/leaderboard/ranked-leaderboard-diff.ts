@@ -61,7 +61,7 @@ export type RankedLeaderboardDiff<TLeaderboard extends ApiLeaderboardState = Sco
 export function hasLeaderboardStatusChanged(
   stored: StoredLeaderboardState | undefined,
   api: ApiLeaderboardState
-): boolean {
+) {
   return (
     !stored ||
     stored.ranked !== api.ranked ||
@@ -81,7 +81,7 @@ export function diffRankedLeaderboards<TLeaderboard extends ApiLeaderboardState>
   stored: ReadonlyMap<number, StoredLeaderboardState>,
   apiLeaderboards: TLeaderboard[],
   now: Date = new Date()
-): RankedLeaderboardDiff<TLeaderboard> {
+) {
   const diff: RankedLeaderboardDiff<TLeaderboard> = {
     leaderboardsToUpsert: [],
     updates: [],
@@ -156,7 +156,7 @@ export function findUnrankedLeaderboards<TLeaderboard extends ScoreSaberLeaderbo
   stored: ReadonlyMap<number, TLeaderboard>,
   apiLeaderboards: Pick<ScoreSaberLeaderboard, "id">[],
   complete: boolean
-): UnrankDetection<TLeaderboard> {
+) {
   const apiIds = new Set(apiLeaderboards.map(leaderboard => leaderboard.id));
   const missing = [...stored.values()].filter(
     leaderboard => leaderboard.ranked && !apiIds.has(leaderboard.id)

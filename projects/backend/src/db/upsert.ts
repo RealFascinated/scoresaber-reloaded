@@ -1,4 +1,3 @@
-import type { SQL } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
@@ -10,7 +9,7 @@ import type { AnyPgColumn } from "drizzle-orm/pg-core";
  * @param columns the columns the conflict update sets, taken from the table being upserted into
  * @returns a condition comparing the existing row against `excluded`
  */
-export function differsFromExcluded(columns: AnyPgColumn[]): SQL {
+export function differsFromExcluded(columns: AnyPgColumn[]) {
   const current = sql.join(
     columns.map(column => sql`${column}`),
     sql`, `

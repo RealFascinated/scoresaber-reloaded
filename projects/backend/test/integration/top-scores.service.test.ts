@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { scoreSaberScoreRowToType } from "../../src/db/converter/scoresaber-score";
 import { TopScoresService } from "../../src/service/score/top-scores.service";
 import { TEST_SCORE_ID } from "../helpers/constants";
-import { buildScoreRow } from "../helpers/fixtures";
+import { buildScoreRow } from "../helpers/scoresaber.fixture";
 
 describe("TopScoresService", () => {
   describe("getTopScores", () => {

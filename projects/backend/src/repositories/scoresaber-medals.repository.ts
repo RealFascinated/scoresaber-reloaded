@@ -10,13 +10,13 @@ function sqlMedalPointsCase(rnColumnIdentifier: string) {
   return sql`CASE ${sql.raw(rnColumnIdentifier)} ${sql.join(whens, sql` `)} ELSE 0 END`;
 }
 
-function distinctPlayerIds(result: unknown): string[] {
+function distinctPlayerIds(result: unknown) {
   const rows = (result as { rows?: { playerId: string }[] }).rows ?? [];
   return [...new Set(rows.map(r => r.playerId))];
 }
 
 export class ScoreSaberMedalsRepository {
-  public static async updateMedalsOnRankedLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<void> {
+  public static async updateMedalsOnRankedLeaderboard(leaderboard: ScoreSaberLeaderboard) {
     if (!leaderboard.ranked) {
       return;
     }
@@ -64,21 +64,18 @@ export class ScoreSaberMedalsRepository {
       `;
   }
 
-  public static async updateMedalsOnLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<string[]> {
+  public static async updateMedalsOnLeaderboard(leaderboard: ScoreSaberLeaderboard) {
     if (!leaderboard.ranked) {
       return [];
     }
 
-    // A single statement is already atomic, so no explicit transaction (saves BEGIN/COMMIT round trips)
     const updated = await db.execute(
       ScoreSaberMedalsRepository.rankedLeaderboardMedalsUpdateSql(leaderboard.id, true)
     );
     return distinctPlayerIds(updated);
   }
 
-  public static async selectPlayerIdsAffectedByMedalUpdate(
-    leaderboard: ScoreSaberLeaderboard
-  ): Promise<string[]> {
+  public static async selectPlayerIdsAffectedByMedalUpdate(leaderboard: ScoreSaberLeaderboard) {
     if (!leaderboard.ranked) {
       return [];
     }
@@ -107,7 +104,7 @@ export class ScoreSaberMedalsRepository {
 
   public static async getMedalTableScoreRanksForScores(
     targets: { scoreId: number; leaderboardId: number }[]
-  ): Promise<Map<number, number>> {
+  ) {
     if (targets.length === 0) {
       return new Map();
     }
@@ -146,9 +143,7 @@ export class ScoreSaberMedalsRepository {
     return new Map(rows.map(r => [Number(r.scoreId), Number(r.rank)]));
   }
 
-  public static async selectIdAndMedalsByIds(
-    ids: string[]
-  ): Promise<{ id: string; medals: number | null }[]> {
+  public static async selectIdAndMedalsByIds(ids: string[]) {
     if (ids.length === 0) {
       return [];
     }
@@ -158,10 +153,8 @@ export class ScoreSaberMedalsRepository {
       .where(inArray(scoreSaberAccountsTable.id, ids));
   }
 
-  public static async syncGlobalMedalTotalsFromScoresTable(): Promise<void> {
+  public static async syncGlobalMedalTotalsFromScoresTable() {
     await db.transaction(async tx => {
-      // Accounts that no longer have any (counted) medals drop to 0. Done only for accounts that
-      // actually need it, instead of zeroing every medal holder and writing them all back again.
       await tx.execute(sql`
         UPDATE "scoresaber-accounts" AS a
         SET medals = 0
@@ -195,9 +188,7 @@ export class ScoreSaberMedalsRepository {
    * @param playerIds the players to sync
    * @returns the before/after totals of the players whose total actually changed
    */
-  public static async syncMedalTotalsForPlayerIds(
-    playerIds: string[]
-  ): Promise<Map<string, { before: number; after: number }>> {
+  public static async syncMedalTotalsForPlayerIds(playerIds: string[]) {
     const changes = new Map<string, { before: number; after: number }>();
     const unique = [...new Set(playerIds)];
     if (unique.length === 0) {
@@ -216,9 +207,6 @@ export class ScoreSaberMedalsRepository {
       .where(
         and(
           inArray(scoreSaberScoresTable.playerId, unique),
-          // Almost every score has 0 medals. Restricting to positive ones lets Postgres read just those
-          // from the partial scores_player_medals_positive_idx instead of every score of each player,
-          // and doesn't change the sums. Players with none keep the 0 they were seeded with above.
           gt(scoreSaberScoresTable.medals, 0),
           eq(scoreSaberAccountsTable.banned, false)
         )
@@ -230,7 +218,6 @@ export class ScoreSaberMedalsRepository {
     }
 
     const valueRows = unique.map(pid => sql`(${pid}::varchar(32), ${totalsByPlayer.get(pid) ?? 0}::int)`);
-    // `o` is read from the statement's snapshot, so it holds the total from before this update
     const result = await db.execute(sql`
       UPDATE "scoresaber-accounts" AS a
       SET medals = v.medals
@@ -249,7 +236,7 @@ export class ScoreSaberMedalsRepository {
     return changes;
   }
 
-  public static async refreshMaterializedMedalRanks(): Promise<void> {
+  public static async refreshMaterializedMedalRanks() {
     await db.transaction(async tx => {
       await tx.execute(sql`
         WITH ranked AS (
@@ -306,15 +293,13 @@ export class ScoreSaberMedalsRepository {
         );
   }
 
-  public static async countMedalRankingPlayers(country?: string): Promise<number> {
+  public static async countMedalRankingPlayers(country?: string) {
     const baseWhere = ScoreSaberMedalsRepository.medalRankingBaseWhere(country);
     const [row] = await db.select({ totalPlayers: count() }).from(scoreSaberAccountsTable).where(baseWhere);
     return row?.totalPlayers ?? 0;
   }
 
-  public static async selectMedalRankingCountryMetadata(
-    country?: string
-  ): Promise<{ country: string | null; count: number }[]> {
+  public static async selectMedalRankingCountryMetadata(country?: string) {
     const baseWhere = ScoreSaberMedalsRepository.medalRankingBaseWhere(country);
     return db
       .select({ country: scoreSaberAccountsTable.country, count: count() })

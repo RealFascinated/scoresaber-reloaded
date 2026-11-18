@@ -9,12 +9,7 @@ import { Value } from "typebox/value";
 
 const SESSION_REQUEST_TIMEOUT_MS = 3000;
 
-/**
- * Validates the preferences response. Only done on the server, so TypeBox stays out of the browser.
- *
- * @throws when the response does not match the preferences schema
- */
-function assertUserPreferences(value: UserPreferences): UserPreferences {
+function assertUserPreferences(value: UserPreferences) {
   if (!Value.Check(UserPreferencesSchema, value)) {
     throw new Error("The backend returned invalid preferences");
   }
@@ -24,10 +19,9 @@ function assertUserPreferences(value: UserPreferences): UserPreferences {
 export type ServerSession =
   | { status: "signed-in"; me: AuthMeResponse; preferences: UserPreferences; following: string[] }
   | { status: "anonymous" }
-  /** The backend could not answer, callers must not treat this as signed out. */
   | { status: "unavailable" };
 
-async function backendGet(path: string, cookie: string): Promise<Response> {
+async function backendGet(path: string, cookie: string) {
   return fetch(`${env.NEXT_PUBLIC_API_URL}${path}`, {
     headers: { cookie },
     cache: "no-store",
@@ -40,9 +34,10 @@ async function backendGet(path: string, cookie: string): Promise<Response> {
  * A body that does not match its schema counts as the backend being unavailable.
  * The result is shared by everything rendered in the same request, so the layout and a page can both ask for it.
  */
-export const getServerSession = cache(async (cookie: string): Promise<ServerSession> => {
+export const getServerSession = cache(async (cookie: string) => {
   if (!cookie) {
-    return { status: "anonymous" };
+    const session: ServerSession = { status: "anonymous" };
+    return session;
   }
 
   try {
@@ -52,17 +47,21 @@ export const getServerSession = cache(async (cookie: string): Promise<ServerSess
       backendGet(USER_FOLLOWING_ROUTE, cookie),
     ]);
     if (meResponse.status === 401) {
-      return { status: "anonymous" };
+      const session: ServerSession = { status: "anonymous" };
+      return session;
     }
     if (!meResponse.ok || !preferencesResponse.ok || !followingResponse.ok) {
-      return { status: "unavailable" };
+      const session: ServerSession = { status: "unavailable" };
+      return session;
     }
 
     const me = parseSchema(AuthMeResponseSchema, await meResponse.json());
     const preferences = assertUserPreferences(await preferencesResponse.json());
     const following = parseSchema(PlayerIdListResponseSchema, await followingResponse.json());
-    return { status: "signed-in", me, preferences, following: following.playerIds };
+    const session: ServerSession = { status: "signed-in", me, preferences, following: following.playerIds };
+    return session;
   } catch {
-    return { status: "unavailable" };
+    const session: ServerSession = { status: "unavailable" };
+    return session;
   }
 });

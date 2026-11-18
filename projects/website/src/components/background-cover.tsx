@@ -16,15 +16,11 @@ type Layer = {
   visible: boolean;
 };
 
-function backgroundKey(background: ResolvedBackgroundCover | undefined): string | undefined {
+function backgroundKey(background: ResolvedBackgroundCover | undefined) {
   return background ? `${background.type}:${background.value}` : undefined;
 }
 
-/**
- * Drops layers that are no longer needed: anything below the top-most visible
- * layer, and hidden layers that aren't the current target.
- */
-function pruneLayers(layers: Layer[], targetKey: string | undefined): Layer[] {
+function pruneLayers(layers: Layer[], targetKey: string | undefined) {
   const lastVisible = layers.findLastIndex(layer => layer.visible);
   return layers.filter((layer, index) => layer.key === targetKey || (layer.visible && index === lastVisible));
 }
@@ -39,7 +35,6 @@ function ColorLayer({
   onReady: (key: string) => void;
 }) {
   useEffect(() => {
-    // Wait a frame so the layer is painted at opacity 0 before fading in
     const frame = requestAnimationFrame(() => onReady(layerKey));
     return () => cancelAnimationFrame(frame);
   }, [layerKey, onReady]);
@@ -55,7 +50,6 @@ export default function BackgroundCover() {
   const brightness = useUserPreference("backgroundCoverBrightness");
   const blur = useUserPreference("backgroundCoverBlur");
 
-  // The landing page has its own animated background
   const background = pathname === "/" ? undefined : resolveBackgroundCover(cover, custom);
   const targetKey = backgroundKey(background);
 
@@ -92,7 +86,6 @@ export default function BackgroundCover() {
   }
 
   return (
-    // Fixed to the viewport so it stays put while scrolling; cards and tables are solid and sit on top of it
     <div className="pointer-events-none fixed inset-0 -z-50 overflow-hidden select-none">
       {layers.map(layer => (
         <div
@@ -111,18 +104,15 @@ export default function BackgroundCover() {
               alt=""
               aria-hidden
               fetchPriority="high"
-              // Custom backgrounds can be any url, so skip the remotePatterns check
               unoptimized
               fill
               onLoad={() => showLayer(layer.key)}
-              // Scale up slightly so the blur doesn't bleed the page background in at the edges
               className="scale-105 object-cover"
               style={{ filter: `blur(${blur ?? 0}px) brightness(${brightness ?? 100}%)` }}
             />
           )}
         </div>
       ))}
-      {/* Scrim: keeps text drawn straight onto the cover (page titles, breadcrumbs) readable on bright images */}
       <div className="from-background/50 to-background/20 absolute inset-0 bg-linear-to-b" />
     </div>
   );

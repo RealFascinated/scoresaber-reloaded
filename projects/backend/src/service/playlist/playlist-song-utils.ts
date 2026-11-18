@@ -13,7 +13,7 @@ export type PlaylistScoreRow = {
  * position; all difficulties a player scored on stay in the result so the
  * playlist can highlight them all in-game.
  */
-export function takeTopUniqueSongRows(rows: PlaylistScoreRow[], limit?: number): PlaylistScoreRow[] {
+export function takeTopUniqueSongRows(rows: PlaylistScoreRow[], limit?: number) {
   const groupedByHash = new Map<string, PlaylistScoreRow[]>();
   for (const row of rows) {
     const songRows = groupedByHash.get(row.leaderboard.songHash);
@@ -42,7 +42,7 @@ export function takeTopUniqueSongRows(rows: PlaylistScoreRow[], limit?: number):
  * a score was set on per song (highlighting them all in-game). Rows must be
  * sorted; difficulties are grouped per song hash in first-seen order.
  */
-export function scoreRowsToPlaylistSongs(rows: PlaylistScoreRow[]): Playlist["songs"] {
+export function scoreRowsToPlaylistSongs(rows: PlaylistScoreRow[]) {
   const songsByHash = new Map<string, Playlist["songs"][number]>();
 
   for (const { leaderboard } of rows) {

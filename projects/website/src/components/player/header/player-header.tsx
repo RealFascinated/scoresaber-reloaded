@@ -68,7 +68,6 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 )}
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                {/* Both are rendered and CSS picks one, as a viewport check in JS shifts the layout on hydration */}
                 <FollowButton player={player} iconOnly className="lg:hidden" />
                 <FollowButton player={player} className="hidden lg:inline-flex" />
                 <PlayerStatsSettings editing={editingStats} onEditingChange={setEditingStats} />

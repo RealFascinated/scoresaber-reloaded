@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db";
-import { beatLeaderPlayersTable, type BeatLeaderPlayerRow } from "../db/schema";
+import { beatLeaderPlayersTable } from "../db/schema";
 
 export type BeatLeaderPlayerInsert = typeof beatLeaderPlayersTable.$inferInsert;
 
 export class BeatLeaderPlayersRepository {
-  public static async findById(id: string): Promise<BeatLeaderPlayerRow | undefined> {
+  public static async findById(id: string) {
     const rows = await db
       .select()
       .from(beatLeaderPlayersTable)
@@ -14,7 +14,7 @@ export class BeatLeaderPlayersRepository {
     return rows[0];
   }
 
-  public static async upsert(row: BeatLeaderPlayerInsert): Promise<BeatLeaderPlayerRow> {
+  public static async upsert(row: BeatLeaderPlayerInsert) {
     const [inserted] = await db
       .insert(beatLeaderPlayersTable)
       .values(row)

@@ -10,13 +10,6 @@ export class WebsocketManager {
     this.register("score", new ScoreWebsocket());
   }
 
-  /**
-   * Registers a websocket.
-   *
-   * @param id the id of the websocket.
-   * @param websocket the websocket to register.
-   * @returns the websocket.
-   */
   private register<TPayload>(id: WebsocketId, websocket: Websocket<TPayload>) {
     if (WebsocketManager.WEBSOCKETS.has(id)) {
       throw new Error(`Websocket with id "${id}" is already registered.`);

@@ -7,7 +7,7 @@ import React, { useCallback } from "react";
 import { useIsMobile } from "../contexts/viewport-context";
 import { Button } from "./ui/button";
 
-function formatPageLabel(page: number, useCommaSeparators: boolean): string {
+function formatPageLabel(page: number, useCommaSeparators: boolean) {
   return useCommaSeparators ? formatNumberWithCommas(page) : String(page);
 }
 
@@ -43,7 +43,6 @@ const PageButton = React.memo(
         size="sm"
         className={cn(
           "relative h-9 min-w-10 shrink-0 px-3 whitespace-nowrap",
-          // Avoid animating background/border: primary↔ghost cross-fade interpolates through near-white in some engines.
           "transition-[transform,opacity,box-shadow]! duration-200 ease-out",
           "motion-safe:active:scale-[0.97]",
           isButtonLoading && "cursor-not-allowed opacity-50",
@@ -61,7 +60,6 @@ const PageButton = React.memo(
         >
           <span
             className={cn(
-              // Blur must not animate: filter interpolation reads as a flash on nearby controls (e.g. prev chevron).
               "transition-opacity duration-200 ease-out",
               isButtonLoading && "opacity-80 blur-[2px]"
             )}
@@ -88,7 +86,6 @@ type NavigationButtonProps = {
   generatePageUrl?: (page: number) => string;
   onClick: (page: number, event: React.MouseEvent) => void;
   ariaLabel?: string;
-  /** Nudge chevrons on hover to hint prev/next direction */
   chevronMotion?: "left" | "right";
 };
 
@@ -110,7 +107,6 @@ const NavigationButton = React.memo(
       disabled={disabled || isLoading}
       className={cn(
         "group shrink-0",
-        // Same as PageButton: don't animate colors (avoids flash when disabled/loading toggles ghost styles).
         "transition-[transform,box-shadow]! duration-200 ease-out",
         "motion-safe:active:scale-[0.96]",
         disabled && "cursor-not-allowed opacity-50",
@@ -168,7 +164,6 @@ export default function SimplePagination({
   const isMobile = useIsMobile();
 
   const page = pageProp == 0 ? 1 : pageProp;
-  // Empty result sets can report 0 items per page, which would make this NaN
   const totalPages = itemsPerPage > 0 ? Math.max(1, Math.ceil(totalItems / itemsPerPage)) : 1;
 
   const isLoading = Boolean(loadingPage);
@@ -199,7 +194,6 @@ export default function SimplePagination({
     let left = Math.max(1, page - halfVisibleCount);
     let right = Math.min(totalPages, page + halfVisibleCount);
 
-    // Keep a consistent 5-page window when possible by shifting near edges.
     const currentWindowSize = right - left + 1;
     if (currentWindowSize < visiblePageCount) {
       const remainingSlots = visiblePageCount - currentWindowSize;

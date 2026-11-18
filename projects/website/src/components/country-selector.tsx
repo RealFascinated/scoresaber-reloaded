@@ -30,11 +30,6 @@ type CountrySelectorProps = {
 const CLEAR_VALUE = "__clear__";
 const UNKNOWN_FLAG_SRC = "/assets/flags/unknown.png";
 
-/**
- * Lightweight flag for dropdown rows. The full `CountryFlag` renders a Radix tooltip
- * stack + `next/image`, which is far too heavy for the ~250 rows mounted at once when
- * the dropdown opens. Dropdown rows only need the image.
- */
 function CountryFlagImage({ code, size }: { code: string; size: number }) {
   return (
     <div
@@ -61,11 +56,6 @@ function CountryFlagImage({ code, size }: { code: string; size: number }) {
   );
 }
 
-/**
- * The ~250 country rows. This is its own component so none of them are built until the dropdown is
- * opened: a selector sits on every ranking page, and an inline `items.map` creates every row on each
- * render even while the popover is closed.
- */
 function CountryList({
   value,
   onValueChange,
@@ -85,7 +75,6 @@ function CountryList({
   const hasCounts = counts != undefined;
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // The list mounts when the dropdown opens, so focus the search input straight away.
   useEffect(() => {
     searchInputRef.current?.focus();
   }, []);

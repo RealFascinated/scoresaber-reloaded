@@ -8,7 +8,7 @@ export class BeatLeaderPbotRepository {
    *
    * @param scoreId the BeatLeader score id
    */
-  public static async findAccuracyBySecond(scoreId: number): Promise<(number | null)[] | undefined> {
+  public static async findAccuracyBySecond(scoreId: number) {
     const [row] = await db
       .select({ accuracyBySecond: beatLeaderPbotTable.accuracyBySecond })
       .from(beatLeaderPbotTable)
@@ -24,7 +24,7 @@ export class BeatLeaderPbotRepository {
    * @param scoreId the BeatLeader score id
    * @param accuracyBySecond accuracy x 100, null before the first note
    */
-  public static async insert(scoreId: number, accuracyBySecond: (number | null)[]): Promise<void> {
+  public static async insert(scoreId: number, accuracyBySecond: (number | null)[]) {
     await db.insert(beatLeaderPbotTable).values({ scoreId, accuracyBySecond }).onConflictDoNothing();
   }
 }

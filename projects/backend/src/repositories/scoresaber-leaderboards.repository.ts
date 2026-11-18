@@ -40,7 +40,7 @@ type JoinedRow = {
   difficulties: DifficultyRow | null;
 };
 
-function mergeJoinedRows(rows: JoinedRow[]): ScoreSaberLeaderboard[] {
+function mergeJoinedRows(rows: JoinedRow[]) {
   const acc = new Map<number, { main: ScoreSaberLeaderboardRow; difficulties: Map<number, DifficultyRow> }>();
   const order: number[] = [];
 
@@ -70,16 +70,12 @@ const difficultySortSql = (tableAlias: LeaderboardAlias) =>
     ELSE 999
   END`;
 
-/**
- * Selects a leaderboard (aliased as `mainAlias`) with its sibling difficulties, both resolved for `realmId`.
- * Rows repeat per difficulty and are folded together by {@link mergeJoinedRows}.
- */
 function selectWithDifficulties(
   mainAlias: LeaderboardAlias,
   realmId: number,
   where: SQL | undefined,
   extraOrder: SQL[] = []
-): Promise<JoinedRow[]> {
+) {
   const difficultiesAlias = alias(scoreSaberLeaderboardsTable, "difficulties");
   const mainRealmAlias: LeaderboardRealmAlias = alias(scoreSaberLeaderboardRealmsTable, "main_realm");
   const difficultiesRealmAlias: LeaderboardRealmAlias = alias(
@@ -108,11 +104,11 @@ function selectWithDifficulties(
     .orderBy(...extraOrder, asc(difficultySortSql(difficultiesAlias)));
 }
 
-export function aliasFtsMatch(tableAlias: SearchVectorSource, search: string): SQL {
+export function aliasFtsMatch(tableAlias: SearchVectorSource, search: string) {
   return sql`${tableAlias.searchVector} @@ plainto_tsquery('english', ${search})`;
 }
 
-export function aliasTsRankExpr(tableAlias: SearchVectorSource, search: string): SQL {
+export function aliasTsRankExpr(tableAlias: SearchVectorSource, search: string) {
   return sql`ts_rank(${tableAlias.searchVector}, plainto_tsquery('english', ${search}))`;
 }
 
@@ -122,7 +118,7 @@ export function aliasTsRankExpr(tableAlias: SearchVectorSource, search: string):
 export function leaderboardSearchCategoryOrderBy(
   category: ScoreSaberLeaderboardQueryCategory,
   ascending: boolean
-): SQL[] {
+) {
   const idTie = ascending ? asc(scoreSaberLeaderboardsTable.id) : desc(scoreSaberLeaderboardsTable.id);
   const starsCol = sql`coalesce(${scoreSaberLeaderboardRealmsTable.stars}, 0)`;
 
@@ -160,10 +156,7 @@ export function leaderboardSearchCategoryOrderBy(
  * @param filters the filters to apply
  * @returns the WHERE and ORDER BY clauses for a leaderboard query
  */
-export function buildLeaderboardQuery(filters?: ScoreSaberLeaderboardQueryFilters): {
-  whereClause: SQL | undefined;
-  orderParts: SQL[];
-} {
+export function buildLeaderboardQuery(filters?: ScoreSaberLeaderboardQueryFilters) {
   const conditions: SQL[] = [];
   if (filters?.ranked === true) {
     conditions.push(eq(scoreSaberLeaderboardRealmsTable.ranked, true));
@@ -230,7 +223,7 @@ export class ScoreSaberLeaderboardsRepository {
   public static async getLeaderboards(
     filters: ScoreSaberLeaderboardQueryFilters | undefined,
     realmId: number
-  ): Promise<ScoreSaberLeaderboard[]> {
+  ) {
     const { whereClause, orderParts } = buildLeaderboardQuery(filters);
     const rows = await ScoreSaberLeaderboardsRepository.selectResolved(realmId)
       .where(whereClause)
@@ -246,7 +239,7 @@ export class ScoreSaberLeaderboardsRepository {
   public static async getPlaylistEntries(
     filters: ScoreSaberLeaderboardQueryFilters | undefined,
     realmId: number
-  ): Promise<PlaylistLeaderboardEntry[]> {
+  ) {
     const { whereClause, orderParts } = buildLeaderboardQuery(filters);
     return db
       .select({
@@ -271,7 +264,7 @@ export class ScoreSaberLeaderboardsRepository {
     characteristic: MapCharacteristic,
     includeDifficulties: boolean = true,
     realmId: number
-  ): Promise<ScoreSaberLeaderboard | undefined> {
+  ) {
     const hashNorm = normalizeSongHash(hash);
     const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
     const where = and(
@@ -297,7 +290,7 @@ export class ScoreSaberLeaderboardsRepository {
     return rows[0] ? leaderboardRowToType(rows[0]) : undefined;
   }
 
-  public static async existsById(id: number): Promise<boolean> {
+  public static async existsById(id: number) {
     const rows = await db
       .select({ exists: sql`1` })
       .from(scoreSaberLeaderboardsTable)
@@ -305,11 +298,7 @@ export class ScoreSaberLeaderboardsRepository {
     return rows.length > 0;
   }
 
-  public static async getLeaderboardById(
-    id: number,
-    includeDifficulties: boolean = true,
-    realmId: number
-  ): Promise<ScoreSaberLeaderboard | undefined> {
+  public static async getLeaderboardById(id: number, includeDifficulties: boolean = true, realmId: number) {
     const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
 
     if (includeDifficulties) {
@@ -323,7 +312,7 @@ export class ScoreSaberLeaderboardsRepository {
     return rows[0] ? leaderboardRowToType(rows[0]) : undefined;
   }
 
-  public static async searchLeaderboardIds(search: string, limit: number = 50): Promise<number[]> {
+  public static async searchLeaderboardIds(search: string, limit: number = 50) {
     if (search.length < 3) {
       return [];
     }
@@ -343,7 +332,7 @@ export class ScoreSaberLeaderboardsRepository {
     ids: number[],
     includeDifficulties: boolean = true,
     realmId: number
-  ): Promise<ScoreSaberLeaderboard[]> {
+  ) {
     const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
 
     if (includeDifficulties) {
@@ -359,18 +348,15 @@ export class ScoreSaberLeaderboardsRepository {
     return rows.map(row => leaderboardRowToType(row));
   }
 
-  public static getRankedLeaderboards(realmId: number): Promise<ScoreSaberLeaderboard[]> {
+  public static getRankedLeaderboards(realmId: number) {
     return ScoreSaberLeaderboardsRepository.getLeaderboards({ ranked: true }, realmId);
   }
 
-  public static getQualifiedLeaderboards(realmId: number): Promise<ScoreSaberLeaderboard[]> {
+  public static getQualifiedLeaderboards(realmId: number) {
     return ScoreSaberLeaderboardsRepository.getLeaderboards({ qualified: true }, realmId);
   }
 
-  public static async getTopTrendingLeaderboards(
-    limit: number = 100,
-    realmId: number
-  ): Promise<ScoreSaberLeaderboard[]> {
+  public static async getTopTrendingLeaderboards(limit: number = 100, realmId: number) {
     const rows = await ScoreSaberLeaderboardsRepository.selectResolved(realmId)
       .orderBy(...leaderboardSearchCategoryOrderBy("trending", false))
       .limit(limit);
@@ -389,7 +375,7 @@ export class ScoreSaberLeaderboardsRepository {
     >[],
     realmId: number,
     executor: Pick<typeof db, "insert" | "delete"> = db
-  ): Promise<void> {
+  ) {
     const active = leaderboards.filter(lb => lb.ranked || lb.qualified);
     const inactive = leaderboards.filter(lb => !lb.ranked && !lb.qualified);
 
@@ -428,8 +414,6 @@ export class ScoreSaberLeaderboardsRepository {
             rankedDate: sql`excluded."rankedDate"`,
             qualifiedDate: sql`excluded."qualifiedDate"`,
           },
-          // Skip rewriting rows that already hold these values, so a re-sync of unchanged state
-          // doesn't produce dead tuples and index churn.
           setWhere: sql`(
             ${scoreSaberLeaderboardRealmsTable.ranked},
             ${scoreSaberLeaderboardRealmsTable.qualified},
@@ -443,7 +427,7 @@ export class ScoreSaberLeaderboardsRepository {
     }
   }
 
-  public static async insert(id: number, leaderboard: ScoreSaberLeaderboard, realmId: number): Promise<void> {
+  public static async insert(id: number, leaderboard: ScoreSaberLeaderboard, realmId: number) {
     await db.transaction(async tx => {
       const inserted = await tx
         .insert(scoreSaberLeaderboardsTable)
@@ -471,10 +455,7 @@ export class ScoreSaberLeaderboardsRepository {
     });
   }
 
-  public static async updateLeaderboard(
-    id: number,
-    partial: Partial<ScoreSaberLeaderboardBaseRow>
-  ): Promise<void> {
+  public static async updateLeaderboard(id: number, partial: Partial<ScoreSaberLeaderboardBaseRow>) {
     await db.update(scoreSaberLeaderboardsTable).set(partial).where(eq(scoreSaberLeaderboardsTable.id, id));
   }
 
@@ -487,7 +468,7 @@ export class ScoreSaberLeaderboardsRepository {
    * @returns whether the leaderboard exists. A leaderboard that doesn't is left untouched, so the
    *  caller can create it without having to check for it first.
    */
-  public static async updatePlaysAndMaxScore(id: number, plays: number, maxScore: number): Promise<boolean> {
+  public static async updatePlaysAndMaxScore(id: number, plays: number, maxScore: number) {
     const rows = await db
       .update(scoreSaberLeaderboardsTable)
       .set({ plays, maxScore })
@@ -496,10 +477,7 @@ export class ScoreSaberLeaderboardsRepository {
     return rows.length > 0;
   }
 
-  public static async upsertLeaderboards(
-    leaderboards: ScoreSaberLeaderboard[],
-    realmId: number
-  ): Promise<void> {
+  public static async upsertLeaderboards(leaderboards: ScoreSaberLeaderboard[], realmId: number) {
     if (leaderboards.length === 0) {
       return;
     }
@@ -541,8 +519,6 @@ export class ScoreSaberLeaderboardsRepository {
             timestamp: sql`excluded."timestamp"`,
             seededScores: sql`${scoreSaberLeaderboardsTable.seededScores}`,
           },
-          // Leaderboard rows carry several descending indexes (plays, timestamp), so skip the
-          // rewrite when nothing about the row changed.
           setWhere: sql`(
             ${scoreSaberLeaderboardsTable.songHash},
             ${scoreSaberLeaderboardsTable.songName},
@@ -566,7 +542,7 @@ export class ScoreSaberLeaderboardsRepository {
     });
   }
 
-  public static async countTotal(): Promise<number> {
+  public static async countTotal() {
     const counts = await TableCountsRepository.getCounts();
     return counts.scoresaberLeaderboards;
   }

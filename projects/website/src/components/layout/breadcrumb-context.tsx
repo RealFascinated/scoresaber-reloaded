@@ -4,15 +4,10 @@ import { createContext, Dispatch, ReactNode, SetStateAction, useContext, useEffe
 
 type SetBreadcrumbTitle = Dispatch<SetStateAction<string | undefined>>;
 
-// Split in two so the pages that set the title (which are heavy) don't re-render when the title they set
-// changes; only the header that displays it reads the title.
 const BreadcrumbTitleContext = createContext<string | undefined>(undefined);
 const BreadcrumbSetTitleContext = createContext<SetBreadcrumbTitle | undefined>(undefined);
 
 export function BreadcrumbProvider({ children }: { children: ReactNode }) {
-  /**
-   * The label of the current page, used as the last crumb for dynamic routes (e.g. a player's name).
-   */
   const [title, setTitle] = useState<string | undefined>(undefined);
 
   return (
@@ -25,7 +20,7 @@ export function BreadcrumbProvider({ children }: { children: ReactNode }) {
 /**
  * Gets the title of the current page set via {@link useBreadcrumbTitle}.
  */
-export function useBreadcrumbPageTitle(): string | undefined {
+export function useBreadcrumbPageTitle() {
   return useContext(BreadcrumbTitleContext);
 }
 

@@ -41,7 +41,6 @@ export default function CreateOverlayDialog({ open, onOpenChange }: CreateOverla
       <DialogContent
         className="sm:max-w-3xl"
         onOpenAutoFocus={event => {
-          // Radix would focus the first preset, but naming the overlay is the first thing to do
           const nameInput = nameInputRef.current;
           if (!nameInput) {
             return;

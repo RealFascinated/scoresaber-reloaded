@@ -21,22 +21,10 @@ type AppStatSample = {
 export class AppService {
   private static readonly logger: ScopedLogger = Logger.withTopic("App Statistics");
 
-  /**
-   * How long samples are kept for velocity calculations. Velocities are averaged
-   * over this window to stay stable against short-term noise.
-   */
   private static readonly SAMPLE_RETENTION_MS = TimeUnit.toMillis(TimeUnit.Hour, 1);
 
-  /**
-   * How often samples are taken when no requests are coming in.
-   */
   private static readonly SAMPLE_INTERVAL_MS = TimeUnit.toMillis(TimeUnit.Minute, 1);
 
-  /**
-   * How long after startup sampling waits before taking the first sample.
-   * Some metric values (e.g. active players) are only populated a minute or
-   * two after boot, so sampling earlier would skew velocities.
-   */
   private static readonly WARMUP_MS = TimeUnit.toMillis(TimeUnit.Minute, 2);
 
   private static readonly samples: AppStatSample[] = [];
@@ -46,7 +34,7 @@ export class AppService {
    * Starts sampling app statistics so velocities are available.
    * Call once at startup; safe to call multiple times.
    */
-  public static startSampling(): void {
+  public static startSampling() {
     if (AppService.samplingStarted) {
       return;
     }
@@ -60,10 +48,7 @@ export class AppService {
     }, AppService.WARMUP_MS);
   }
 
-  /**
-   * Takes a sample of the current app statistics and keeps it in the rolling window.
-   */
-  private static async sample(): Promise<void> {
+  private static async sample() {
     try {
       const values = await AppService.getRawValues();
       AppService.samples.push({ timestamp: Date.now(), values });
@@ -73,32 +58,16 @@ export class AppService {
     }
   }
 
-  /**
-   * Drops samples older than the retention window so velocities always reflect
-   * the last hour of statistics.
-   */
-  private static pruneSamples(): void {
+  private static pruneSamples() {
     const cutoff = Date.now() - AppService.SAMPLE_RETENTION_MS;
     while (AppService.samples.length > 0 && AppService.samples[0].timestamp < cutoff) {
       AppService.samples.shift();
     }
   }
 
-  /**
-   * The minimum time span (in seconds) the rolling window must cover before
-   * a velocity is reported. Below this, a couple of close samples (e.g. right
-   * after startup) produce wildly inflated per-second rates.
-   */
   private static readonly MIN_VELOCITY_SPAN_SECONDS = 60;
 
-  /**
-   * Gets the change per second for a statistic, derived via least squares regression
-   * over the rolling window of samples.
-   *
-   * @param key the statistic to get the velocity for
-   * @returns the change per second (0 when there are not enough samples)
-   */
-  private static getVelocity(key: AppStatKey): number {
+  private static getVelocity(key: AppStatKey) {
     const { samples } = AppService;
     if (samples.length < 2) {
       return 0;
@@ -115,7 +84,7 @@ export class AppService {
     let sumXY = 0;
     let sumXX = 0;
     for (const sample of samples) {
-      const x = (sample.timestamp - startTime) / 1000; // seconds since the first sample
+      const x = (sample.timestamp - startTime) / 1000;
       const y = sample.values[key];
       sumX += x;
       sumY += y;
@@ -130,10 +99,7 @@ export class AppService {
     return (samples.length * sumXY - sumX * sumY) / denominator;
   }
 
-  /**
-   * Gets the current raw values for all app statistics.
-   */
-  private static async getRawValues(): Promise<AppStatValues> {
+  private static async getRawValues() {
     const [
       trackedScores,
       scoreHistoryScores,
@@ -164,11 +130,7 @@ export class AppService {
     };
   }
 
-  /**
-   * Gets the latest sampled raw values, falling back to a live query when no
-   * sample has been taken yet (e.g. before the sampling warm-up completes).
-   */
-  private static async getLatestValues(): Promise<AppStatValues> {
+  private static async getLatestValues() {
     const latest = AppService.samples[AppService.samples.length - 1];
     if (latest !== undefined) {
       return latest.values;
@@ -183,7 +145,7 @@ export class AppService {
    * the count queries on every request (the heavy ones scan multi-million-row
    * tables); velocities are derived from the same rolling window.
    */
-  public static async getAppStatistics(): Promise<AppStatisticsResponse> {
+  public static async getAppStatistics() {
     const values = await AppService.getLatestValues();
 
     const statistics = {} as Record<AppStatKey, AppStatistic>;

@@ -13,7 +13,6 @@ import { getMonotonicTimeMs, showSettingsSavedToast } from "./settings-feedback"
 
 type BackgroundCoverControlProps = {
   field: {
-    // Shared settings form value union; this field only ever holds a cover id
     value: string | number | boolean;
     onChange: (value: string | number | boolean) => void;
   };
@@ -80,14 +79,12 @@ export function BackgroundCoverControl({ field }: BackgroundCoverControlProps) {
   const [customValue, setCustomValue] = useState<string | undefined>(undefined);
   const debouncedCustomValue = useDebounce(customValue, DEBOUNCE_MS_FORM);
 
-  // Seed the input from the database once it has loaded
   useEffect(() => {
     if (customValue === undefined && storedCustom !== undefined) {
       queueMicrotask(() => setCustomValue(storedCustom));
     }
   }, [customValue, storedCustom]);
 
-  // Persist the custom value once the user stops typing
   useEffect(() => {
     if (debouncedCustomValue === undefined || debouncedCustomValue === storedCustom) {
       return;

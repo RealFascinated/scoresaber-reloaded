@@ -35,9 +35,6 @@ type StatContent = {
 
   tooltip?: ReactNode;
 
-  /**
-   * Optional classes for the value (e.g. a color).
-   */
   valueClassName?: string;
 };
 
@@ -275,10 +272,8 @@ function SortablePlayerStat({
 }
 
 type StatsLayout = {
-  /** Every stat name in display order. */
   order: string[];
 
-  /** The stats shown before the "Show more" collapse. */
   pinned: string[];
 };
 
@@ -290,7 +285,6 @@ function useStatsLayout() {
   const { update } = useUpdateUserPreferences();
 
   const layout = useMemo<StatsLayout>(() => {
-    // Stats that were added after the layout was saved go to the end
     const savedOrder = saved?.order.filter(name => DEFAULT_ORDER.includes(name)) ?? [];
     return {
       order: [...savedOrder, ...DEFAULT_ORDER.filter(name => !savedOrder.includes(name))],
@@ -327,7 +321,6 @@ export function PlayerStatsSettings({
   const buttonClass =
     "text-muted-foreground hover:bg-control hover:text-foreground border-border flex h-9 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-md border px-2.5 text-sm transition-colors";
 
-  // The layout is saved to the account, so there is nothing to edit when signed out
   if (!isSignedIn) {
     return null;
   }
@@ -392,7 +385,6 @@ export default function PlayerStats({ player, editing }: Props) {
       return;
     }
 
-    // Stats without a value for this player aren't shown, so they keep their slot in the saved order
     const shownNames = allStats.map(({ name }) => name);
     const moved = arrayMove(
       shownNames,

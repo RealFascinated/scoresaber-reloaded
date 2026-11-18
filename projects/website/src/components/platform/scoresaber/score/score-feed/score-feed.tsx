@@ -29,26 +29,26 @@ type EmptyVariant = keyof typeof EMPTY_COPY;
 type FeedPhase =
   { kind: "list"; scores: PlayerScore<ScoreSaberScore>[] } | { kind: "empty"; variant: EmptyVariant };
 
-function sortByNewestFirst(a: PlayerScore<ScoreSaberScore>, b: PlayerScore<ScoreSaberScore>): number {
+function sortByNewestFirst(a: PlayerScore<ScoreSaberScore>, b: PlayerScore<ScoreSaberScore>) {
   return (
     parseDate(b.score.timestamp.toString()).getTime() - parseDate(a.score.timestamp.toString()).getTime()
   );
 }
 
-function getFeedPhase(readyState: ReadyState, scores: PlayerScore<ScoreSaberScore>[]): FeedPhase {
+function getFeedPhase(readyState: ReadyState, scores: PlayerScore<ScoreSaberScore>[]) {
   if (scores.length > 0) {
-    return { kind: "list", scores };
+    return { kind: "list", scores } satisfies FeedPhase;
   }
   if (readyState === ReadyState.CONNECTING) {
-    return { kind: "empty", variant: "connecting" };
+    return { kind: "empty", variant: "connecting" } satisfies FeedPhase;
   }
   if (readyState === ReadyState.CLOSED || readyState === ReadyState.CLOSING) {
-    return { kind: "empty", variant: "disconnected" };
+    return { kind: "empty", variant: "disconnected" } satisfies FeedPhase;
   }
   if (readyState === ReadyState.OPEN) {
-    return { kind: "empty", variant: "waiting" };
+    return { kind: "empty", variant: "waiting" } satisfies FeedPhase;
   }
-  return { kind: "empty", variant: "connecting" };
+  return { kind: "empty", variant: "connecting" } satisfies FeedPhase;
 }
 
 function FeedConnectionStatus({ readyState }: { readyState: ReadyState }) {

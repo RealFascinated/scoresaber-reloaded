@@ -20,13 +20,31 @@ import UserController from "../../src/controller/user/user.controller";
 import { authCors } from "../../src/plugins/auth-cors";
 import { privateNetworkCors } from "../../src/plugins/private-network-cors";
 import { WebsocketManager } from "../../src/websocket/websocket-manager";
-import { patchScoreSaberApiForTests } from "./scoresaber-api-test-patches";
 
 type TestWebsocketClient = { id: string; send(data: string): unknown };
 
 let websocketsRegistered = false;
+type WebsocketEvent = "open" | "close";
 
-function registerWebsocketRoutes(app: AnyElysia): void {
+const websocketListeners = new Map<string, (() => void)[]>();
+
+/** Resolves once the server has handled the next `open` or `close` of a client on `route`. */
+export function nextWebsocketEvent(event: WebsocketEvent, route: string) {
+  const key = `${event}:${route}`;
+  return new Promise<void>(resolve => {
+    websocketListeners.set(key, [...(websocketListeners.get(key) ?? []), resolve]);
+  });
+}
+
+function notifyWebsocketEvent(event: WebsocketEvent, route: string) {
+  const key = `${event}:${route}`;
+  for (const resolve of websocketListeners.get(key) ?? []) {
+    resolve();
+  }
+  websocketListeners.delete(key);
+}
+
+function registerWebsocketRoutes(app: AnyElysia) {
   if (!websocketsRegistered) {
     new WebsocketManager();
     websocketsRegistered = true;
@@ -36,8 +54,14 @@ function registerWebsocketRoutes(app: AnyElysia): void {
 
   for (const websocket of WebsocketManager.getAll()) {
     app.ws(websocket.route, {
-      open: (ws: TestWebsocketClient) => websocket.onOpen(ws),
-      close: (ws: TestWebsocketClient) => websocket.onClose(ws),
+      open: (ws: TestWebsocketClient) => {
+        websocket.onOpen(ws);
+        notifyWebsocketEvent("open", websocket.route);
+      },
+      close: (ws: TestWebsocketClient) => {
+        websocket.onClose(ws);
+        notifyWebsocketEvent("close", websocket.route);
+      },
     });
   }
 }
@@ -47,8 +71,6 @@ function registerWebsocketRoutes(app: AnyElysia): void {
  * websockets, or the production listen lifecycle.
  */
 export function createTestApp() {
-  patchScoreSaberApiForTests();
-
   const app = new Elysia()
     .onError("global", ({ error }) => {
       const code = getHttpErrorCode(error);

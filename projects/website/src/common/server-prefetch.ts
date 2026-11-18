@@ -1,6 +1,5 @@
 import { isBackendUnavailableError } from "@/common/api-error";
 
-/** How long a server render waits for the backend before falling back to client-side fetching. */
 const PREFETCH_TIMEOUT_MS = 3000;
 
 /**
@@ -15,7 +14,7 @@ const PREFETCH_TIMEOUT_MS = 3000;
 export async function prefetchInitialData<T>(
   request: Promise<T | undefined>,
   timeoutMs: number = PREFETCH_TIMEOUT_MS
-): Promise<T | undefined> {
+) {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<undefined>(resolve => {
     timer = setTimeout(() => resolve(undefined), timeoutMs);
@@ -48,9 +47,7 @@ export type TimestampedData<T> = {
  *
  * @param request the request to run
  */
-export async function prefetchTimestampedData<T>(
-  request: Promise<T | undefined>
-): Promise<TimestampedData<T> | undefined> {
+export async function prefetchTimestampedData<T>(request: Promise<T | undefined>) {
   const data = await prefetchInitialData(request);
   return data === undefined ? undefined : { data, fetchedAt: Date.now() };
 }

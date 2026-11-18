@@ -19,8 +19,7 @@ import {
   expectedAccuracyOnPlayed,
 } from "../../../src/service/suggested-maps/suggested-maps-ranking";
 
-/** Deterministic pseudo random numbers so the synthetic data is stable. */
-function rng(seed: number): () => number {
+function rng(seed: number) {
   let state = seed;
   return () => {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
@@ -38,7 +37,6 @@ describe("suggested maps model", () => {
     const mapCount = 40;
     const playerCount = 300;
     const stars = Array.from({ length: mapCount }, (_, i) => 4 + (i % 8) * 0.3);
-    // Every 5th map is 0.5 logit easier than the others.
     const trueEase = stars.map((_, i) => (i % 5 === 0 ? 0.5 : 0));
     const skills = Array.from({ length: playerCount }, () => 3 + random() * 1.5);
 
@@ -72,7 +70,7 @@ describe("suggested maps model", () => {
 
     const easy = [...model.ease].filter((_, m) => m % 5 === 0);
     const rest = [...model.ease].filter((_, m) => m % 5 !== 0);
-    const mean = (values: number[]): number => values.reduce((a, b) => a + b, 0) / values.length;
+    const mean = (values: number[]) => values.reduce((a, b) => a + b, 0) / values.length;
     expect(mean(easy) - mean(rest)).toBeGreaterThan(0.4);
     expect(mean(easy) - mean(rest)).toBeLessThan(0.6);
   });
@@ -92,7 +90,7 @@ describe("suggested maps model", () => {
 
 describe("WeightedGain", () => {
   const pps = [400, 380, 360, 340, 320];
-  const total = (list: number[]): number => ScoreSaberCurve.getTotalWeightedPp(list);
+  const total = (list: number[]) => ScoreSaberCurve.getTotalWeightedPp(list);
 
   it("matches inserting a score into the sorted list", () => {
     const gain = new WeightedGain(pps);
@@ -117,7 +115,6 @@ describe("derivePlayerRanges", () => {
   const map = (stars: number, ageDays: number, seconds = 120, nps = 3) => ({ stars, seconds, nps, ageDays });
 
   it("follows the recent play style and tolerates a few outliers", () => {
-    // 60 recent 4-5 star plays, 3 old high star plays and 1 recent outlier
     const recent = Array.from({ length: 60 }, (_, i) => map(4 + (i % 10) / 10, 5 + i));
     const outliers = [map(9, 10), ...Array.from({ length: 3 }, () => map(11, 700))];
     const ranges = derivePlayerRanges([...recent.slice(0, 20), ...outliers, ...recent.slice(20)]);

@@ -15,7 +15,6 @@ import type { LeaderboardResponse } from "@ssr/common/schemas/response/leaderboa
 import { getDifficultyName } from "@ssr/common/utils/song-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { ssrConfig } from "config";
-import { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { cache } from "react";
 
@@ -36,25 +35,24 @@ type Props = {
 type LeaderboardFetchResult =
   { status: "found"; response: LeaderboardResponse } | { status: "not-found" } | { status: "unavailable" };
 
-const getLeaderboard = cache(async (id: number): Promise<LeaderboardFetchResult> => {
+const getLeaderboard = cache(async (id: number) => {
   try {
     const response = await ssrApi.fetchLeaderboard(id, "full");
-    if (response === undefined) {
-      return { status: "not-found" };
-    }
-    return { status: "found", response };
+    const result: LeaderboardFetchResult =
+      response === undefined ? { status: "not-found" } : { status: "found", response };
+    return result;
   } catch (error) {
     if (isBackendUnavailableError(error)) {
-      return { status: "unavailable" };
+      const result: LeaderboardFetchResult = { status: "unavailable" };
+      return result;
     }
     throw error;
   }
 });
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props) {
   const { id } = await props.params;
 
-  // Shares the page's request, so the leaderboard is only fetched once per render
   const result = await getLeaderboard(id);
 
   if (result.status === "unavailable") {
@@ -119,8 +117,6 @@ export default async function LeaderboardPage(props: Props) {
     );
   }
 
-  // Render the global scores on the server so they are part of the HTML crawlers and users first receive.
-  // The other modes depend on the signed-in player, so the client fetches those.
   const { page, mode, country } = loadLeaderboardScoresSearchParams(await props.searchParams);
   const scoresQuery: LeaderboardScoresQuery = {
     leaderboardId: result.response.leaderboard.id,

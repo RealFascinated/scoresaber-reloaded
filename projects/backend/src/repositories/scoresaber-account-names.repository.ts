@@ -8,7 +8,7 @@ export class ScoreSaberAccountNamesRepository {
    *
    * @param playerId the player's id
    */
-  public static async findNamesByPlayerId(playerId: string): Promise<string[]> {
+  public static async findNamesByPlayerId(playerId: string) {
     const rows = await db
       .select({ name: scoreSaberAccountNamesTable.name })
       .from(scoreSaberAccountNamesTable)
@@ -25,7 +25,7 @@ export class ScoreSaberAccountNamesRepository {
    * @param oldName the name the player had
    * @param newName the name the player has now
    */
-  public static async recordNameChange(playerId: string, oldName: string, newName: string): Promise<void> {
+  public static async recordNameChange(playerId: string, oldName: string, newName: string) {
     await db.transaction(async tx => {
       await tx
         .delete(scoreSaberAccountNamesTable)

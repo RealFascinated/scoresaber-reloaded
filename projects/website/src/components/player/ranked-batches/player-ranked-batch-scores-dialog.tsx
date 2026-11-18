@@ -27,7 +27,6 @@ function PlayerRankedBatchScores({ playerId, rankedBatchId }: { playerId: string
     staleTime: 5 * 60_000,
     retry: false,
   });
-  // Used for the star change of each score's map
   const rankedBatch = useQuery({
     queryKey: ["rankedBatch", rankedBatchId],
     queryFn: () => ssrApi.getRankedBatch(rankedBatchId),

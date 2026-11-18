@@ -35,7 +35,7 @@ export default function ScoreSaberScoreEditorButton({
   const { getPp, realmId } = useRealm();
   const [open, setOpen] = useState(false);
 
-  const maxScore = leaderboard.maxScore || 1; // Use 1 to prevent division by zero
+  const maxScore = leaderboard.maxScore || 1;
   const accuracy = (score.score / maxScore) * 100 * (hasModifier(score.modifiers, Modifier.NF) ? 0.5 : 1);
 
   const [baseValue, setBaseValue] = useState(Math.max(MIN_ACCURACY, Math.floor(accuracy)));

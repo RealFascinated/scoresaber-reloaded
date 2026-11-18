@@ -1,5 +1,4 @@
 import type { AuthConnectionProvider } from "@ssr/common/schemas/auth/connection-provider";
-import type { AuthConnection } from "@ssr/common/schemas/response/auth/me";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "../db";
 import { authConnectionsTable, authUsersTable } from "../db/schema";
@@ -12,7 +11,7 @@ export class AuthConnectionsRepository {
    *
    * @param userId the user to get the connections of
    */
-  public static async getByUserId(userId: string): Promise<AuthConnection[]> {
+  public static async getByUserId(userId: string) {
     const rows = await db
       .select({
         provider: authConnectionsTable.provider,
@@ -23,7 +22,6 @@ export class AuthConnectionsRepository {
       .where(eq(authConnectionsTable.userId, userId))
       .orderBy(asc(authConnectionsTable.isPrimary), asc(authConnectionsTable.id));
 
-    // `false` sorts before `true`, so the primary connection is last
     return rows.reverse();
   }
 
@@ -37,11 +35,7 @@ export class AuthConnectionsRepository {
    * @param provider the platform of the account
    * @param providerPlayerId the player id on that platform
    */
-  public static async link(
-    userId: string,
-    provider: AuthConnectionProvider,
-    providerPlayerId: string
-  ): Promise<LinkConnectionResult> {
+  public static async link(userId: string, provider: AuthConnectionProvider, providerPlayerId: string) {
     return db.transaction(async tx => {
       const [primary] = await tx
         .select({ id: authConnectionsTable.id })

@@ -9,7 +9,7 @@ import ScoreSaberPlayerService from "../../src/service/player/scoresaber-player.
 import PlaylistService from "../../src/service/playlist/playlist.service";
 import { TopScoresService } from "../../src/service/score/top-scores.service";
 import "../../test/env";
-import { buildScoreSaberV2PlayerToken } from "../../test/helpers/fixtures";
+import { buildScoreSaberV2PlayerToken } from "../../test/helpers/scoresaber.fixture";
 
 BeatSaverService.getMap = async () => undefined;
 

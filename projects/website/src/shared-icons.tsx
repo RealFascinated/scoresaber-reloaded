@@ -126,7 +126,6 @@ import {
 } from "lucide-react";
 
 export const SharedIcons = {
-  // Player stats & platforms
   MedalsIcon: Medal,
   PerformancePointsIcon: Trophy,
   GlobalRankIcon: GlobeAmericasIcon,
@@ -138,7 +137,6 @@ export const SharedIcons = {
   SignOutIcon: LogOut,
   TwitchProfileIcon: TwitchIcon,
 
-  // Navbar
   RankingNavIcon: TrendingUpIcon,
   MedalsNavIcon: Medal,
   MapsNavIcon: MusicIcon,
@@ -147,7 +145,6 @@ export const SharedIcons = {
   SettingsNavIcon: Settings,
   FollowingNavIcon: UsersIcon,
 
-  // Player profile charts
   PlayerRankingViewIcon: GlobeAmericasIcon,
   PlayerAccuracyViewIcon: TrendingUpIcon,
   PlayerScoresViewIcon: SwordIcon,
@@ -161,7 +158,6 @@ export const SharedIcons = {
   ExpandPlayerStatsIcon: ChevronDown,
   CollapsePlayerStatsIcon: ChevronUp,
 
-  // Score list sort tabs & controls
   TopScoresTabIcon: TrendingUpIcon,
   RecentScoresTabIcon: ClockIcon,
   PerformancePointsSortIcon: Trophy,
@@ -174,7 +170,6 @@ export const SharedIcons = {
   SortDescendingIcon: ArrowDown,
   SortAscendingIcon: ArrowUp,
 
-  // AccSaber score sorts
   AccSaberApSortIcon: Trophy,
   AccSaberDateSortIcon: ClockIcon,
   AccSaberAccuracySortIcon: Target,
@@ -186,19 +181,16 @@ export const SharedIcons = {
   AccSaberBadgeIcon: SparklesIcon,
   AccSaberGlobalRankIcon: GlobeAmericasIcon,
 
-  // Score feed modes
   GlobalScoresModeIcon: GlobeAmericasIcon,
   FollowingScoresModeIcon: RadixPersonIcon,
   HistoryScoresModeIcon: TrendingUpIcon,
 
-  // Playlist & score filters
   AllScoresFilterIcon: Filter,
   RankedScoresFilterIcon: Trophy,
   UnrankedScoresFilterIcon: MusicIcon,
   SnipePlaylistIcon: Crosshair,
   SelfPlaylistPlayerIcon: User,
 
-  // Maps
   MapsLeaderboardsTabIcon: HeroTrophyIcon,
   MapsRankingQueueTabIcon: HourglassIcon,
   RankedBatchesNavIcon: ArrowUpDown,
@@ -230,7 +222,6 @@ export const SharedIcons = {
   TrendingMapsPlaylistIcon: FlameIcon,
   CustomPlaylistIcon: Star,
 
-  // Leaderboards & scores UI
   DifficultyStarIcon: StarIcon,
   QualifiedLeaderboardStarIcon: RadixStarFilledIcon,
   ScoreStarBadgeIcon: HeroStarIcon,
@@ -249,12 +240,10 @@ export const SharedIcons = {
   OpenScorePageIcon: ChevronRight,
   RankingQueueExpandIcon: ChevronDownIcon,
 
-  // Following
   FollowIcon: UserPlus,
   UnfollowIcon: UserMinus,
   RemoveFollowingFromListIcon: XIcon,
 
-  // Search
   SearchIcon: Search,
   SearchFieldIcon: SearchIcon,
   SearchLoadingIcon: LoaderCircle,
@@ -265,11 +254,9 @@ export const SharedIcons = {
   SearchLeaderboardsPlayersIcon: UserSearch,
   NotFoundSearchIcon: SearchIcon,
 
-  // Ranking pages
   GlobalPlayersRankingIcon: GlobeAmericasIcon,
   RankingPageLinkIcon: LinkIcon,
 
-  // Score page actions
   ScoreDateIcon: CalendarDays,
   WatchReplayIcon: PlayCircle,
   ViewLeaderboardIcon: ListOrdered,
@@ -278,12 +265,10 @@ export const SharedIcons = {
   FlagScoreIcon: Flag,
   UndoScoreEditIcon: Undo2,
 
-  // Medals
   MedalsInfoIcon: Medal,
   MedalsRankingHeaderIcon: Medal,
   OverlayPlayerMedalsIcon: Medal,
 
-  // Landing page
   OpenSourceBadgeIcon: Star,
   OpenSourceArrowIcon: ArrowRight,
   ComprehensiveDataFeatureIcon: Database,
@@ -293,7 +278,6 @@ export const SharedIcons = {
   CustomOverlaysFeatureIcon: Monitor,
   CommunityDrivenFeatureIcon: Heart,
 
-  // Settings
   WebsiteSettingsCategoryIcon: Globe,
   ScoreSettingsCategoryIcon: Box,
   PlayerSettingsCategoryIcon: User,
@@ -304,16 +288,13 @@ export const SharedIcons = {
   WebsiteGlobalSettingsIcon: Globe,
   WebsiteThemeSettingsIcon: Palette,
 
-  // Overlay builder
   OverlayPlayerLayerIcon: User,
   OverlayPreviewLayerIcon: Eye,
   OverlayDisplayLayerIcon: Monitor,
 
-  // Downloads
   DownloadPlaylistIcon: Download,
   SuggestedMapsIcon: SparklesIcon,
 
-  // Pagination & loading
   PaginationLoadingIcon: ArrowPathIcon,
   PaginationFirstPageIcon: ChevronsLeft,
   PaginationPreviousPageIcon: ChevronLeft,
@@ -322,7 +303,6 @@ export const SharedIcons = {
   AvatarRefreshIcon: ArrowPathIcon,
   PageLoadingIcon: Loader2,
 
-  // UI primitives
   DialogCloseIcon: XIcon,
   FilterClearIcon: XIcon,
   ComboBoxToggleIcon: ChevronsUpDown,
@@ -335,7 +315,6 @@ export const SharedIcons = {
   CommandPaletteSearchIcon: RadixMagnifyingGlassIcon,
   UnknownMapCharacteristicIcon: RadixQuestionMarkCircledIcon,
 
-  // Errors & notices
   PageErrorIcon: Frown,
   GoHomeIcon: HomeIcon,
   WarningAlertIcon: AlertCircle,
@@ -345,11 +324,9 @@ export const SharedIcons = {
   BackendOfflineIcon: ServerCrash,
   SiteNoticeWarningIcon: ExclamationTriangleIcon,
 
-  // Announcements
   AnnouncementIcon: MegaphoneIcon,
   AnnouncementCloseIcon: XIcon,
 
-  // Footer & misc
   ExternalNavigationIcon: ExternalLink,
   ScoresGraphFollowingIcon: Users,
   ScoresGraphRemoveIcon: X,

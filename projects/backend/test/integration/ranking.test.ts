@@ -20,7 +20,6 @@ describe("Ranking API integration", () => {
 
       const body = (await response.json()) as { items: Array<{ id: string }>; metadata: unknown };
       expect(body.items.some(player => player.id === TEST_PLAYER_ID)).toBe(true);
-      // Inactive players are excluded by default.
       expect(body.items.some(player => player.id === TEST_INACTIVE_PLAYER_ID)).toBe(false);
       expectPaginationMetadata(body.metadata, 1);
     });
@@ -40,7 +39,6 @@ describe("Ranking API integration", () => {
       const body = (await response.json()) as { items: Array<{ id: string }> };
       expect(body.items.some(player => player.id === TEST_PLAYER_ID)).toBe(true);
       expect(body.items.some(player => player.id === TEST_PLAYER_TWO_ID)).toBe(true);
-      // The flag is what brings the inactive fixture player into the results.
       expect(body.items.some(player => player.id === TEST_INACTIVE_PLAYER_ID)).toBe(true);
     });
 

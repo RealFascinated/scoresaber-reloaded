@@ -20,7 +20,6 @@ export const useLeaderboardScores = (
   page: number,
   mode: ScoreModeEnum,
   country?: string,
-  /** Global scores rendered on the server, used until the client has data of its own. */
   initial?: LeaderboardScoresInitialData
 ) => {
   const { realmId } = useRealm();
@@ -28,7 +27,6 @@ export const useLeaderboardScores = (
   const followingIds = useFollowingIds();
   const mainPlayer = useMainPlayer().data;
 
-  // The server only renders the global scores of the default realm, and only for the query it fetched
   const initialData =
     initial &&
     isDefaultRealm &&
@@ -37,8 +35,6 @@ export const useLeaderboardScores = (
       ? initial.data
       : undefined;
 
-  // Only what the query actually reads belongs in the key. Otherwise the global scores (which depend on
-  // neither) are refetched whenever the follow list or the signed-in player finishes loading.
   const modeKey =
     mode === ScoreModeEnum.Following
       ? [followingIds, mainPlayer?.id]
@@ -96,7 +92,6 @@ export const useLeaderboardScores = (
     },
     initialData,
     initialDataUpdatedAt: initial?.fetchedAt,
-    // Don't carry the server's default realm data over to a realm it wasn't rendered for
     placeholderData: (previous, previousQuery) =>
       previousQuery?.options.initialData !== undefined && !isDefaultRealm ? undefined : previous,
   });

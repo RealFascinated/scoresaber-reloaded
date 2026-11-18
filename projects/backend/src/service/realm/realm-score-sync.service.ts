@@ -17,7 +17,7 @@ export class RealmScoreSyncService {
    * @param realmId the realm to sync pp for
    * @returns the number of scores whose realm pp was written
    */
-  public static async syncLeaderboard(leaderboardId: number, realmId: number): Promise<number> {
+  public static async syncLeaderboard(leaderboardId: number, realmId: number) {
     let page = 1;
     let totalPages = 1;
     let written = 0;
@@ -47,7 +47,7 @@ export class RealmScoreSyncService {
    * @param leaderboardIds the unranked leaderboards
    * @param realmId the realm to clear pp in
    */
-  public static async clearLeaderboards(leaderboardIds: number[], realmId: number): Promise<void> {
+  public static async clearLeaderboards(leaderboardIds: number[], realmId: number) {
     for (const batch of chunkArray(leaderboardIds, LEADERBOARD_CONCURRENCY)) {
       await Promise.all(
         batch.map(async leaderboardId => {
@@ -67,7 +67,7 @@ export class RealmScoreSyncService {
    * @param leaderboardIds the leaderboards to sync
    * @param realmId the realm to sync pp for
    */
-  public static async syncLeaderboards(leaderboardIds: number[], realmId: number): Promise<void> {
+  public static async syncLeaderboards(leaderboardIds: number[], realmId: number) {
     let written = 0;
     for (const batch of chunkArray(leaderboardIds, LEADERBOARD_CONCURRENCY)) {
       const results = await Promise.allSettled(

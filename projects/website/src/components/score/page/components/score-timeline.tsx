@@ -33,7 +33,7 @@ export default function ScoreTimeline({ insights }: { insights: ReplayInsights }
     }
   }
 
-  const average = (hand: Hand): (number | null)[] =>
+  const average = (hand: Hand) =>
     slices.map(slice => (slice.count[hand] > 0 ? slice.sum[hand] / slice.count[hand] : null));
   const left = average("left");
   const right = average("right");

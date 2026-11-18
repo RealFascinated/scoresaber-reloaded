@@ -41,7 +41,6 @@ const MAX_COMPARISON_PLAYERS = 3;
 const STAR_TICK_SIZE = 0.5;
 const ACCURACY_TICK_SIZE = 2;
 
-// The chart is drawn as a "line" chart, but its datasets mix line (best/average) and scatter (scores) types
 type ChartMode = "line" | "scatter";
 
 type DataPoint = {
@@ -109,11 +108,9 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
     placeholderData: prev => prev,
   });
 
-  // Transform raw API data into chart data points (memoized, since the dataset pipeline is the
-  // most expensive part of this component and only depends on the query results)
   const { resolve: resolveColor } = useCanvasColors();
   const { hasData, minStar, maxStar, minAccuracy, maxAccuracy, datasets } = useMemo(() => {
-    const transformToDataPoints = (rawData: PlayerScoreChartDataPoint[]): DataPoint[] => {
+    const transformToDataPoints = (rawData: PlayerScoreChartDataPoint[]) => {
       const transformed = rawData.map(point => ({
         x: point.stars,
         y: point.accuracy,
@@ -186,7 +183,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
       }),
     ];
 
-    // Build best/average line datasets (only when not comparing with other players)
     let lineDatasets: LineDataset[] = [];
     if (comparisonPlayers.length === 0) {
       const groupedByStarRating: Record<number, number[]> = {};
@@ -291,7 +287,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
         tooltip: {
           callbacks: {
             label: (context: TooltipItem<ChartMode>) => {
-              // Scatter points are always the DataPoint objects built in this component
               const point = context.raw as DataPoint;
               const tooltipLines: string[] = [];
 
@@ -312,7 +307,6 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
                 tooltipLines.push(`Played on ${dateStr}`);
               }
 
-              // Click hint (desktop only)
               if (point.leaderboardId && !isMobile) {
                 tooltipLines.push("", "Click to view leaderboard!");
               }

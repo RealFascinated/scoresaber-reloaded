@@ -29,10 +29,10 @@ export type MedalsInitialData = TimestampedData<PlayerMedalRankingsResponse> & {
  * @param page the page number
  * @param country the country filter
  */
-export function buildMedalsQuery(page: number, country: string | null): MedalsQuery {
+export function buildMedalsQuery(page: number, country: string | null) {
   return { page, country: country?.toUpperCase() ?? undefined };
 }
 
-export function isSameMedalsQuery(a: MedalsQuery, b: MedalsQuery): boolean {
+export function isSameMedalsQuery(a: MedalsQuery, b: MedalsQuery) {
   return a.page === b.page && a.country === b.country;
 }

@@ -1,6 +1,4 @@
-import type { BeatLeaderPlayerScoresPageToken } from "@ssr/common/schemas/beatleader/tokens/score/page";
 import type { BeatLeaderScoreToken } from "@ssr/common/schemas/beatleader/tokens/score/score";
-import type { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { afterEach, describe, expect, test } from "bun:test";
 import { ScoreSaberAccountsRepository } from "../../src/repositories/scoresaber-accounts.repository";
 import BeatLeaderService from "../../src/service/beatleader/beatleader.service";
@@ -20,13 +18,7 @@ afterEach(() => {
   BeatLeaderService.upsertBeatLeaderPlayer = originalUpsertMapping;
 });
 
-/**
- * Stubs answering a scores page request with whatever the test wants, recording the
- * pages the seed asked for.
- */
-function stubScoresPages(
-  handler: (page: number) => Promise<BeatLeaderPlayerScoresPageResult | undefined>
-): number[] {
+function stubScoresPages(handler: (page: number) => Promise<BeatLeaderPlayerScoresPageResult | undefined>) {
   const requestedPages: number[] = [];
   BeatLeaderApiService.requestPlayerScoresPage = async (_playerId, page) => {
     requestedPages.push(page);
@@ -35,17 +27,14 @@ function stubScoresPages(
   return requestedPages;
 }
 
-/**
- * A page whose only score is already tracked, so seeding it writes nothing.
- */
-function trackedScorePage(page: number, total: number): BeatLeaderPlayerScoresPageToken {
+function trackedScorePage(page: number, total: number) {
   return {
     metadata: { itemsPerPage: 100, page, total },
     data: [{ id: TEST_BEATLEADER_SCORE_ID } as BeatLeaderScoreToken],
   };
 }
 
-async function unseededAccount(): Promise<ScoreSaberAccount> {
+async function unseededAccount() {
   await ScoreSaberAccountsRepository.updateAccount(TEST_PLAYER_ID, {
     seededBeatLeaderScores: false,
     beatLeaderSeedPage: 0,
@@ -111,8 +100,6 @@ describe("PlayerBeatLeaderScoresService", () => {
 
       await PlayerBeatLeaderScoresService.fetchMissingBeatLeaderScores(account, { mode: "backfill" });
 
-      // The page before the checkpoint is fetched again, so scores that shifted down a
-      // page are not skipped, and nothing earlier is re-fetched.
       expect(requestedPages).toEqual([4]);
     });
 

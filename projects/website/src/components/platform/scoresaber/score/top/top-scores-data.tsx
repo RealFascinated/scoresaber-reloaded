@@ -25,7 +25,6 @@ export function TopScoresData({ initial }: TopScoresDataProps) {
   const isDefaultRealm = realmId === DEFAULT_REALM_ID;
   const [page, setPage] = useQueryState("page", topScoresSearchParams.page);
 
-  // The server only renders the default realm, and its data is only valid for the page it was fetched for
   const initialData = initial && isDefaultRealm && initial.page === page ? initial.data : undefined;
 
   const {
@@ -40,11 +39,8 @@ export function TopScoresData({ initial }: TopScoresDataProps) {
     queryFn: () => ssrApi.fetchTopScores(page, realmId),
     initialData,
     initialDataUpdatedAt: initial?.fetchedAt,
-    // Fail fast so a backend outage surfaces as an error state instead of an
-    // endless retry spinner (the provider default is infinite retries).
     retry: false,
     refetchInterval: false,
-    // Don't carry the server's default realm data over to a realm it wasn't rendered for
     placeholderData: (previous, previousQuery) =>
       previousQuery?.options.initialData !== undefined && !isDefaultRealm ? undefined : previous,
   });
@@ -65,7 +61,6 @@ export function TopScoresData({ initial }: TopScoresDataProps) {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {/* One surface with dividers instead of a card per score, so the list reads as a list */}
           <div className="ring-border bg-card divide-border divide-y overflow-hidden rounded-xl ring-1">
             {scores.items.map(({ score, leaderboard, beatSaver }) => {
               const player = score.playerInfo;

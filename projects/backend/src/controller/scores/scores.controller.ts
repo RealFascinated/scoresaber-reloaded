@@ -102,7 +102,6 @@ export default function scoresController(app: Elysia) {
           },
         },
         async ({ params: { playerId, page, field, direction }, query }) => {
-          // Elysia types transform properties by their raw input; at runtime the query was decoded.
           return await PlayerScoresService.getScoreSaberPlayerScores(
             playerId,
             page,

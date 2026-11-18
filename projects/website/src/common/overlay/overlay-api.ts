@@ -11,19 +11,17 @@ import type {
   UpdateUserOverlayBody,
   UserOverlay,
   UserOverlayListResponse,
-  UserOverlaySummary,
 } from "@ssr/common/schemas/response/user/overlay";
 
 async function overlayRequest<TResponse>(
   path: string,
   method: "GET" | "POST" | "PATCH" | "DELETE" = "GET",
   body?: CreateUserOverlayBody | UpdateUserOverlayBody
-): Promise<TResponse> {
+) {
   const response = await fetch(`${env.NEXT_PUBLIC_API_URL}${path}`, {
     method,
     credentials: "include",
-    headers: body ? { "content-type": "application/json" } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
+    ...(body ? { headers: { "content-type": "application/json" }, body: JSON.stringify(body) } : {}),
   });
   if (!response.ok) {
     const error = (await response.json().catch(() => undefined)) as { message?: string } | undefined;
@@ -32,37 +30,37 @@ async function overlayRequest<TResponse>(
   return (await response.json()) as TResponse;
 }
 
-export async function fetchUserOverlays(): Promise<UserOverlaySummary[]> {
+export async function fetchUserOverlays() {
   return (await overlayRequest<UserOverlayListResponse>(USER_OVERLAYS_ROUTE)).items;
 }
 
-export function fetchUserOverlay(id: string): Promise<UserOverlay> {
+export function fetchUserOverlay(id: string) {
   return overlayRequest<UserOverlay>(`${USER_OVERLAYS_ROUTE}/${id}`);
 }
 
-export function createUserOverlay(body: CreateUserOverlayBody): Promise<UserOverlay> {
+export function createUserOverlay(body: CreateUserOverlayBody) {
   return overlayRequest<UserOverlay>(USER_OVERLAYS_ROUTE, "POST", body);
 }
 
-export function updateUserOverlay(id: string, body: UpdateUserOverlayBody): Promise<UserOverlay> {
+export function updateUserOverlay(id: string, body: UpdateUserOverlayBody) {
   return overlayRequest<UserOverlay>(`${USER_OVERLAYS_ROUTE}/${id}`, "PATCH", body);
 }
 
-export function duplicateUserOverlay(id: string): Promise<UserOverlay> {
+export function duplicateUserOverlay(id: string) {
   return overlayRequest<UserOverlay>(`${USER_OVERLAYS_ROUTE}/${id}/duplicate`, "POST");
 }
 
-export async function deleteUserOverlay(id: string): Promise<void> {
+export async function deleteUserOverlay(id: string) {
   await overlayRequest<{ deleted: boolean }>(`${USER_OVERLAYS_ROUTE}/${id}`, "DELETE");
 }
 
 /** Fetches what is needed to render an overlay (public, no sign in needed). */
-export function fetchOverlayContent(id: string): Promise<OverlayContent> {
+export function fetchOverlayContent(id: string) {
   return overlayRequest<OverlayContent>(`${OVERLAY_ROUTE}/${id}`);
 }
 
 /** The url of the server-sent events stream of an overlay. */
-export function getOverlayEventsUrl(id: string): string {
+export function getOverlayEventsUrl(id: string) {
   return `${env.NEXT_PUBLIC_API_URL}${OVERLAY_ROUTE}/${id}/events`;
 }
 
@@ -76,7 +74,7 @@ export async function fetchPlayerPbData(
   hash: string,
   difficulty: string,
   characteristic: string
-): Promise<BeatLeaderOverlayDataResponse | undefined> {
+) {
   const path = [playerId, hash, difficulty, characteristic].map(encodeURIComponent).join("/");
   const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/beatleader/overlay-data/player/${path}`);
   if (response.status === 404) {
@@ -93,11 +91,7 @@ export async function fetchPlayerPbData(
  *
  * @returns undefined when BeatLeader doesn't know the difficulty
  */
-export async function fetchBeatLeaderRatings(
-  hash: string,
-  difficulty: string,
-  characteristic: string
-): Promise<BeatLeaderOverlayRatingsResponse | undefined> {
+export async function fetchBeatLeaderRatings(hash: string, difficulty: string, characteristic: string) {
   const path = [hash, difficulty, characteristic].map(encodeURIComponent).join("/");
   const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/beatleader/overlay-data/ratings/${path}`);
   if (response.status === 404) {
@@ -114,9 +108,7 @@ export async function fetchBeatLeaderRatings(
  *
  * @returns undefined when the player is not on BeatLeader
  */
-export async function fetchBeatLeaderPlayer(
-  playerId: string
-): Promise<BeatLeaderOverlayPlayerResponse | undefined> {
+export async function fetchBeatLeaderPlayer(playerId: string) {
   const response = await fetch(
     `${env.NEXT_PUBLIC_API_URL}/beatleader/overlay-data/player/${encodeURIComponent(playerId)}`
   );

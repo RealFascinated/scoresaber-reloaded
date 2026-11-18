@@ -12,11 +12,9 @@ import BeatLeaderService from "./beatleader.service";
 
 const logger = Logger.withTopic("BeatLeader Overlay Data");
 
-/** Stored values are accuracy x 100. */
 const STORED_ACCURACY_SCALE = 100;
 
 export class BeatLeaderOverlayDataService {
-  /** Replays that are being decoded right now, so a burst of overlays decodes a replay once. */
   private static readonly inFlight = new Map<number, Promise<(number | null)[]>>();
 
   /**
@@ -25,7 +23,7 @@ export class BeatLeaderOverlayDataService {
    *
    * @param scoreId the BeatLeader score id
    */
-  public static async getByScoreId(scoreId: number): Promise<BeatLeaderOverlayDataResponse> {
+  public static async getByScoreId(scoreId: number) {
     const stored = await BeatLeaderPbotRepository.findAccuracyBySecond(scoreId);
     if (stored) {
       return this.toResponse(scoreId, stored);
@@ -36,8 +34,13 @@ export class BeatLeaderOverlayDataService {
       throw new NotFoundError(`BeatLeader score "${scoreId}" not found`);
     }
     if (!score.savedReplay) {
-      // There is no replay to decode, the only accuracy we know is the full combo accuracy
-      return { scoreId, source: "final-only", finalAccuracy: score.fcAccuracy, accuracyBySecond: [] };
+      const response: BeatLeaderOverlayDataResponse = {
+        scoreId,
+        source: "final-only",
+        finalAccuracy: score.fcAccuracy,
+        accuracyBySecond: [],
+      };
+      return response;
     }
 
     return this.toResponse(scoreId, await this.decode(scoreId));
@@ -56,7 +59,7 @@ export class BeatLeaderOverlayDataService {
     hash: string,
     difficulty: string,
     characteristic: string
-  ): Promise<BeatLeaderOverlayDataResponse> {
+  ) {
     const row = await BeatLeaderScoresRepository.findBestBySong(
       playerId,
       hash.toUpperCase(),
@@ -69,7 +72,7 @@ export class BeatLeaderOverlayDataService {
     return this.getByScoreId(row.id);
   }
 
-  private static decode(scoreId: number): Promise<(number | null)[]> {
+  private static decode(scoreId: number) {
     const existing = this.inFlight.get(scoreId);
     if (existing) {
       return existing;
@@ -88,7 +91,7 @@ export class BeatLeaderOverlayDataService {
     return promise;
   }
 
-  private static toResponse(scoreId: number, stored: (number | null)[]): BeatLeaderOverlayDataResponse {
+  private static toResponse(scoreId: number, stored: (number | null)[]) {
     const accuracyBySecond = stored.map(value => (value === null ? null : value / STORED_ACCURACY_SCALE));
     let finalAccuracy = 0;
     for (let i = accuracyBySecond.length - 1; i >= 0; i--) {
@@ -98,6 +101,12 @@ export class BeatLeaderOverlayDataService {
         break;
       }
     }
-    return { scoreId, source: "replay", finalAccuracy, accuracyBySecond };
+    const response: BeatLeaderOverlayDataResponse = {
+      scoreId,
+      source: "replay",
+      finalAccuracy,
+      accuracyBySecond,
+    };
+    return response;
   }
 }

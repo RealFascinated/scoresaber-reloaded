@@ -21,7 +21,7 @@ export function buildSuggestedMapsPlaylist(
   maps: Pick<SuggestedMap, "songHash" | "songName" | "levelAuthorName" | "difficulty" | "characteristic">[],
   query: Record<string, string | number | boolean | undefined>,
   date: Date = new Date()
-): Playlist {
+) {
   const songs = new Map<string, Playlist["songs"][number]>();
   for (const map of maps) {
     let song = songs.get(map.songHash);

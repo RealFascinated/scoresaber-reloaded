@@ -18,7 +18,8 @@ Working agreement for humans + AI agents contributing to this repo.
 
 ## TypeScript
 
-- Strict TS: don't weaken types to compile; prefer narrowing and explicit return types.
+- Strict TS: don't weaken types to compile; prefer narrowing. Don't annotate function return types (landmines `no-explicit-return-types`); pin a contract with a typed variable or `satisfies` at the return site.
+- No prose comments (landmines `no-comments`): only TSDoc on exported API, tool directives, and single-line `// WARNING:` comments. Rationale belongs in the commit/PR.
 - No `any` or `unknown`: use concrete types (interfaces, unions, generics, schema-inferred types).
 - Throw `Error` (or project error types) with actionable messages; never swallow exceptions.
 - `camelCase` variables/functions, `PascalCase` types/classes/components; filenames follow the folder (usually kebab-case).
@@ -35,6 +36,7 @@ if (bla) {
 ## Backend
 
 - Lint: `bun run lint` (in `projects/backend`).
+- Tests live beside their implementation (`*.test.ts` for unit, `*.integration.test.ts` for DB-backed); cross-module tests stay in `test/integration`. Use real implementations and MSW (`test/helpers/msw-server.ts`) for outbound HTTP, never mocks or stubs.
 - Runs on Bun; prefer Web-standard APIs.
 - Business logic in services; request handlers stay thin; validate input at boundaries.
 - No sequential awaits in loops when concurrency is safe (`Promise.all`); consider timeouts/retries for external calls.

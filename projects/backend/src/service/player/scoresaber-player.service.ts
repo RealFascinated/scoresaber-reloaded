@@ -25,7 +25,7 @@ import { PlayerCoreService } from "./player-core.service";
 import { PlayerHistoryService } from "./player-history.service";
 import { PlayerHmdService } from "./player-hmd.service";
 
-function computeHmdUsagePercentages(hmdUsage: Record<HMD, number>): Record<HMD, number> {
+function computeHmdUsagePercentages(hmdUsage: Record<HMD, number>) {
   const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, c) => sum + c, 0);
   return Object.fromEntries(
     Object.entries(hmdUsage).map(([hmd, c]) => [
@@ -56,7 +56,7 @@ export default class ScoreSaberPlayerService {
     type: DetailType = "basic",
     player: ScoreSaberPlayerLookupToken | undefined,
     realmId: number
-  ): Promise<ScoreSaberPlayer> {
+  ) {
     const cacheKey = playerCacheKey(id, type, realmId);
 
     if (player !== undefined) {
@@ -78,22 +78,12 @@ export default class ScoreSaberPlayerService {
     });
   }
 
-  /**
-   * Builds a player from a ScoreSaber token and the tracked data.
-   *
-   * @param id the player's account id
-   * @param type how much detail to include
-   * @param player the token to build from
-   * @param realmId the realm to resolve the player's rank, pp and statistics for
-   */
   private static async buildPlayer(
     id: string,
     type: DetailType,
     player: ScoreSaberPlayerLookupToken,
     realmId: number
-  ): Promise<ScoreSaberPlayer> {
-    // A token passed in can predate the v2 shape and lack `stats`; re-resolve from the API
-    // instead of crashing on it below.
+  ) {
     if (!player.stats) {
       const freshPlayer = await ScoreSaberApiService.lookupPlayer(id, realmId, { fresh: true });
       if (!freshPlayer?.stats) {
@@ -148,7 +138,6 @@ export default class ScoreSaberPlayerService {
       },
       plusOnePp: statistics.plusOnePp,
       topPp: topPp,
-      // The peak rank is only tracked for the default realm.
       peakRank: realmId === DEFAULT_REALM_ID ? account.peakRank : undefined,
       hmdBreakdown: hmdBreakdown,
       rankPages: {
@@ -175,7 +164,7 @@ export default class ScoreSaberPlayerService {
     token: ScoreSaberPlayerLookupToken,
     account: ScoreSaberAccount,
     realmId: number
-  ): Promise<void> {
+  ) {
     try {
       await CacheService.insert(
         CacheId.SCORESABER_PLAYER,
@@ -187,14 +176,7 @@ export default class ScoreSaberPlayerService {
     }
   }
 
-  /**
-   * Builds the base (basic-type) ScoreSaberPlayer object shared by all detail
-   * types, from the player token and the tracked account row.
-   */
-  private static buildBasePlayer(
-    player: ScoreSaberPlayerLookupToken,
-    account: ScoreSaberAccount
-  ): ScoreSaberPlayer {
+  private static buildBasePlayer(player: ScoreSaberPlayerLookupToken, account: ScoreSaberAccount) {
     return {
       id: player.id,
       name: player.name,
@@ -212,7 +194,6 @@ export default class ScoreSaberPlayerService {
       banned: player.banned,
       inactive: player.inactive,
       trackedSince: account.trackedSince,
-      // Page tokens carry no creation date, so fall back to the tracked one
       joinedDate: "createdAt" in player ? new Date(player.createdAt) : account.joinedDate,
     } as ScoreSaberPlayer;
   }
@@ -226,10 +207,7 @@ export default class ScoreSaberPlayerService {
    * @param realmId the realm the tokens were resolved for
    * @returns the players in the order of the tokens
    */
-  public static async getPlayersFromTokens(
-    tokens: ScoreSaberPlayerLookupToken[],
-    realmId: number
-  ): Promise<ScoreSaberPlayer[]> {
+  public static async getPlayersFromTokens(tokens: ScoreSaberPlayerLookupToken[], realmId: number) {
     const batched = await ScoreSaberPlayerService.getBasicPlayers(tokens);
     const batchedById = new Map(batched.map(player => [player.id, player]));
 
@@ -237,7 +215,6 @@ export default class ScoreSaberPlayerService {
       tokens.map(async token => {
         const player = batchedById.get(token.id);
         if (player === undefined) {
-          // No tracked account yet: the per-player path knows how to create it.
           return ScoreSaberPlayerService.getPlayer(token.id, "basic", token, realmId);
         }
         try {
@@ -262,7 +239,7 @@ export default class ScoreSaberPlayerService {
    * (matching getPlayer's behavior); page tokens that cannot be created are
    * skipped.
    */
-  public static async getBasicPlayers(players: ScoreSaberPlayerLookupToken[]): Promise<ScoreSaberPlayer[]> {
+  public static async getBasicPlayers(players: ScoreSaberPlayerLookupToken[]) {
     if (players.length === 0) {
       return [];
     }
@@ -277,7 +254,7 @@ export default class ScoreSaberPlayerService {
       let account = accountsById.get(player.id);
       if (!account) {
         if (!isScoreSaberV2PlayerToken(player)) {
-          continue; // page tokens do not carry the full profile needed to create an account
+          continue;
         }
         account = await PlayerCoreService.createPlayer(player.id, player);
         if (!account) {

@@ -3,8 +3,6 @@ import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve"
 import Logger, { ScopedLogger } from "@ssr/common/logger";
 import { Pagination } from "@ssr/common/pagination";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import { ScoreHistoryGraph } from "@ssr/common/schemas/response/score/score-history-graph";
-import type { ScoreSaberScoresPageResponse } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberHistoryScore } from "@ssr/common/schemas/scoresaber/score/history-score";
 import { ScoreSaberMedalScore } from "@ssr/common/schemas/scoresaber/score/medal-score";
@@ -22,7 +20,6 @@ import { ScoreCoreService } from "../score/score-core.service";
 export class PlayerScoreHistoryService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player Score History");
 
-  /** Resolves the previous-score lookups of a whole page of scores with one query. */
   private static readonly previousScoreLoader = new BatchLoader<
     { playerId: string; leaderboardId: number; beforeTimestamp: Date },
     Awaited<ReturnType<typeof ScoreSaberScoreHistoryRepository.findLatestRowBeforeTimestamp>> | undefined
@@ -33,7 +30,7 @@ export class PlayerScoreHistoryService {
    *
    * @param leaderboard the leaderboard to reweight
    */
-  public static async reweightHistoryScoresForLeaderboard(leaderboard: ScoreSaberLeaderboard): Promise<void> {
+  public static async reweightHistoryScoresForLeaderboard(leaderboard: ScoreSaberLeaderboard) {
     PlayerScoreHistoryService.logger.info(
       `Reweighting history scores for leaderboard "${leaderboard.id}"...`
     );
@@ -75,7 +72,7 @@ export class PlayerScoreHistoryService {
     leaderboardId: number,
     page: number,
     realmId: number
-  ): Promise<ScoreSaberScoresPageResponse> {
+  ) {
     const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
     if (!leaderboard) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
@@ -138,7 +135,7 @@ export class PlayerScoreHistoryService {
   public static async getPlayerPreviousScore(
     score: ScoreSaberScore | ScoreSaberMedalScore,
     leaderboard: ScoreSaberLeaderboard
-  ): Promise<ScoreSaberHistoryScore | undefined> {
+  ) {
     const previousScore = await PlayerScoreHistoryService.previousScoreLoader.load({
       playerId: score.playerId,
       leaderboardId: leaderboard.id,
@@ -163,10 +160,7 @@ export class PlayerScoreHistoryService {
     } as ScoreSaberHistoryScore;
   }
 
-  public static async getPlayerScoreHistoryGraph(
-    playerId: string,
-    leaderboardId: number
-  ): Promise<ScoreHistoryGraph> {
+  public static async getPlayerScoreHistoryGraph(playerId: string, leaderboardId: number) {
     return CacheService.fetch(
       CacheId.SCORESABER_SCORE_HISTORY_GRAPH,
       scoreHistoryGraphCacheKey(playerId, leaderboardId),

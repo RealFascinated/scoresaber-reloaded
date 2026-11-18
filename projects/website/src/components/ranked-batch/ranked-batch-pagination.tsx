@@ -10,7 +10,7 @@ type RankedBatchPaginationProps = {
   itemsPerPage: number;
 };
 
-function buildPageUrl(page: number): string {
+function buildPageUrl(page: number) {
   return page > 1 ? `/ranked-batches?page=${page}` : "/ranked-batches";
 }
 

@@ -27,7 +27,7 @@ type EventRow = typeof scoreSaberScoreEventTable.$inferInsert;
  * - grinder: 3 players replaying 400 times each today
  * - newMap: 10 players today
  */
-export async function seedTrendingScenario(): Promise<void> {
+export async function seedTrendingScenario() {
   const now = new Date();
   const playerIds = Array.from({ length: PLAYER_POOL_SIZE }, (_, i) => `trend-player-${i}`);
 
@@ -69,8 +69,7 @@ export async function seedTrendingScenario(): Promise<void> {
   );
 
   const events: EventRow[] = [];
-  /** `count` distinct players play on `daysAgo` (midday of that day). */
-  const playersOnDay = (leaderboardId: number, daysAgo: number, count: number, offset: number): void => {
+  const playersOnDay = (leaderboardId: number, daysAgo: number, count: number, offset: number) => {
     for (let i = 0; i < count; i++) {
       events.push({
         playerId: playerIds[(offset + i) % PLAYER_POOL_SIZE],
@@ -111,7 +110,7 @@ export async function seedTrendingScenario(): Promise<void> {
   }
 }
 
-export async function readTrendingScores(): Promise<{ name: string; score: number }[]> {
+export async function readTrendingScores() {
   const ids = Object.values(TRENDING_LEADERBOARDS).map(l => l.id);
   const rows = await db
     .select({ id: scoreSaberLeaderboardsTable.id, score: scoreSaberLeaderboardsTable.trendingScore })

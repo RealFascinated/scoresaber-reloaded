@@ -153,29 +153,26 @@ const TARGET_SECTIONS = 24;
 const GRID_LANES = 4;
 const GRID_LAYERS = 3;
 
-function clamp(value: number, min: number, max: number): number {
+function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
 type DecodedNoteId = { lane: number; layer: number; colorType: number; cutDirection: number };
 
-/**
- * Reads the grid position, color and cut direction out of a BeatLeader note id.
- */
-function decodeNoteId(noteId: number): DecodedNoteId {
+function decodeNoteId(noteId: number) {
   const large = noteId >= 100000;
-  const digit = (power: number): number => Math.floor(noteId / 10 ** power) % 10;
-  // Large ids carry one extra trailing digit
+  const digit = (power: number) => Math.floor(noteId / 10 ** power) % 10;
   const offset = large ? 1 : 0;
-  return {
+  const decoded: DecodedNoteId = {
     lane: digit(3 + offset),
     layer: digit(2 + offset),
     colorType: digit(1 + offset),
     cutDirection: digit(offset),
   };
+  return decoded;
 }
 
-function handOfNote(noteId: number): Hand | undefined {
+function handOfNote(noteId: number) {
   const { colorType } = decodeNoteId(noteId);
   if (colorType === 0) {
     return "left";
@@ -208,11 +205,11 @@ type MistakeRecord = {
   lost: number;
 };
 
-function outOf115(cut: CutRecord): number {
+function outOf115(cut: CutRecord) {
   return (cut.score / cut.max) * MAX_CUT;
 }
 
-export function computeReplayInsights(replay: Replay): ReplayInsights {
+export function computeReplayInsights(replay: Replay) {
   const notes: TimelineNote[] = [];
   const cuts: CutRecord[] = [];
   const mistakes: MistakeRecord[] = [];
@@ -230,7 +227,6 @@ export function computeReplayInsights(replay: Replay): ReplayInsights {
     if (note.eventType === NoteEventType.good && note.noteCutInfo) {
       const cut = note.noteCutInfo;
       const { score, max: noteMax } = getNoteScore(note.noteID, cut);
-      // saberType 0 is the left saber (matches BeatLeader's per-hand accuracy)
       const noteHand = hand ?? (cut.saberType === 0 ? "left" : "right");
       notes.push({
         time: note.eventTime,
@@ -307,13 +303,12 @@ export function computeReplayInsights(replay: Replay): ReplayInsights {
   ];
   const sections = summarizeSections(cuts, noteMistakes, lengthSeconds);
 
-  // One pass over the cuts and mistakes fills every per-hand / direction / grid tally
   const handTallies: Record<Hand, HandTally> = { left: newHandTally(), right: newHandTally() };
   const directionTallies = new Map<CutDirection, Tally>(
     CUT_DIRECTIONS.map(direction => [direction, newTally()])
   );
   const gridTallies = Array.from({ length: GRID_LANES * GRID_LAYERS }, newTally);
-  const gridTally = (lane: number, layer: number): Tally | undefined =>
+  const gridTally = (lane: number, layer: number) =>
     lane >= 0 && lane < GRID_LANES && layer >= 0 && layer < GRID_LAYERS
       ? gridTallies[layer * GRID_LANES + lane]
       : undefined;
@@ -409,11 +404,11 @@ export function computeReplayInsights(replay: Replay): ReplayInsights {
 
 type Tally = { cuts: number; mistakes: number; scoreSum: number };
 
-function newTally(): Tally {
+function newTally() {
   return { cuts: 0, mistakes: 0, scoreSum: 0 };
 }
 
-function averageOf(tally: Tally): number {
+function averageOf(tally: Tally) {
   return tally.cuts > 0 ? tally.scoreSum / tally.cuts : 0;
 }
 
@@ -427,11 +422,11 @@ type HandTally = {
   badCuts: number;
 };
 
-function newHandTally(): HandTally {
+function newHandTally() {
   return { cuts: 0, scoreSum: 0, speedSum: 0, great: 0, perfect: 0, misses: 0, badCuts: 0 };
 }
 
-function summarizeHand(tally: HandTally): HandSummary {
+function summarizeHand(tally: HandTally) {
   const cuts = Math.max(tally.cuts, 1);
   return {
     cuts: tally.cuts,
@@ -444,17 +439,13 @@ function summarizeHand(tally: HandTally): HandSummary {
   };
 }
 
-function summarizeSections(
-  cuts: CutRecord[],
-  mistakes: MistakeRecord[],
-  lengthSeconds: number
-): SectionSummary[] {
+function summarizeSections(cuts: CutRecord[], mistakes: MistakeRecord[], lengthSeconds: number) {
   if (lengthSeconds <= 0) {
     return [];
   }
   const sectionLength = Math.max(5, Math.round(lengthSeconds / TARGET_SECTIONS / 5) * 5);
   const count = Math.ceil(lengthSeconds / sectionLength);
-  const indexOf = (time: number): number => clamp(Math.floor(time / sectionLength), 0, count - 1);
+  const indexOf = (time: number) => clamp(Math.floor(time / sectionLength), 0, count - 1);
 
   const buckets = Array.from({ length: count }, () => ({
     cuts: 0,
@@ -490,7 +481,7 @@ function summarizeSections(
   });
 }
 
-function summarizeDensity(sections: SectionSummary[]): DensityBucket[] {
+function summarizeDensity(sections: SectionSummary[]) {
   const active = sections.filter(section => section.notes > 0).sort((a, b) => a.nps - b.nps);
   if (active.length < 3) {
     return [];
@@ -515,7 +506,7 @@ function summarizeDensity(sections: SectionSummary[]): DensityBucket[] {
   return buckets;
 }
 
-function summarizeStreaks(notes: TimelineNote[]): StreakSummary {
+function summarizeStreaks(notes: TimelineNote[]) {
   const great: Streak = { length: 0, start: 0, end: 0 };
   const perfect: Streak = { length: 0, start: 0, end: 0 };
   const comboBreaks: StreakSummary["comboBreaks"] = [];
@@ -524,7 +515,7 @@ function summarizeStreaks(notes: TimelineNote[]): StreakSummary {
   let perfectRun: Streak = { length: 0, start: 0, end: 0 };
   let combo = 0;
 
-  const extend = (run: Streak, hit: boolean, time: number): Streak => {
+  const extend = (run: Streak, hit: boolean, time: number) => {
     if (!hit) {
       return { length: 0, start: 0, end: 0 };
     }
@@ -553,10 +544,7 @@ function summarizeStreaks(notes: TimelineNote[]): StreakSummary {
   return { great, perfect, comboBreaks };
 }
 
-/**
- * Finds the non-overlapping windows where the most points were lost.
- */
-function findWeakMoments(events: { time: number; lost: number; miss: boolean }[]): WeakMoment[] {
+function findWeakMoments(events: { time: number; lost: number; miss: boolean }[]) {
   if (events.length === 0) {
     return [];
   }

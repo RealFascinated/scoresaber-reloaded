@@ -4,9 +4,6 @@ import { TrackScoreListener } from "./impl/track-score-listener";
 
 export class EventsManager {
   private static readonly logger: ScopedLogger = Logger.withTopic("Events");
-  /**
-   * The registered event listeners.
-   */
   private static events: EventListener[] = [];
 
   constructor() {

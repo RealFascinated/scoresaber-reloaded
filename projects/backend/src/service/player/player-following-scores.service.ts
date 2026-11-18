@@ -1,6 +1,5 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { Pagination } from "@ssr/common/pagination";
-import type { ScoreSaberScoresPageResponse } from "@ssr/common/schemas/response/score/scoresaber-scores-page";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
@@ -21,7 +20,7 @@ export class PlayerFollowingScoresService {
     leaderboardId: number,
     page: number,
     realmId: number
-  ): Promise<ScoreSaberScoresPageResponse> {
+  ) {
     const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(leaderboardId, realmId);
     if (!leaderboard) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);

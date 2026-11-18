@@ -16,7 +16,7 @@ type ChangeOverTimeProps = {
   tooltipChildren?: ReactElement | null;
 };
 
-const formatChangeValue = (type: PlayerStatValue, value: number | undefined): string | number => {
+const formatChangeValue = (type: PlayerStatValue, value: number | undefined) => {
   if (Object.is(value, -0)) {
     value = 0;
   }

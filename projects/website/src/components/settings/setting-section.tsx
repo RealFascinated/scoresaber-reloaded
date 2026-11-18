@@ -103,7 +103,7 @@ function renderCheckboxField<TFormValues extends FieldValues, TName extends Path
   );
 }
 
-function optionId(fieldName: string, value: string): string {
+function optionId(fieldName: string, value: string) {
   return `${fieldName}-${value.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
 }
 
@@ -193,7 +193,6 @@ function FormFieldComponent<TFormValues extends FieldValues, TName extends Path<
     setHasChanged(true);
     formField.onChange(value);
     if (field.type === "text" || field.type === "slider") {
-      // For text and slider inputs, we'll let the debounced effect handle the save
       return;
     }
     if (onFormSubmit) {

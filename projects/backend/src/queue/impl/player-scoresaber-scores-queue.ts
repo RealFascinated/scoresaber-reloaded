@@ -21,13 +21,12 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
     setInterval(() => this.addPlayersToQueue(), TimeUnit.toMillis(TimeUnit.Minute, 10));
   }
 
-  protected async processItem(item: QueueItem<string>): Promise<void> {
+  protected async processItem(item: QueueItem<string>) {
     const { id: playerId } = item;
 
     const playerToken = await ScoreSaberApiService.lookupPlayer(playerId);
     if (!playerToken) {
       FetchMissingScoresQueue.logger.warn(`Player "${playerId}" not found on ScoreSaber`);
-      // todo: delete player from database?
       return;
     }
 
@@ -73,7 +72,6 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
 
   private async addPlayersToQueue() {
     try {
-      // If there are already items in the queue, don't add more
       if ((await this.getSize()) !== 0 || this.getActiveWorkers() > 0) {
         return;
       }
@@ -86,7 +84,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
 
       await this.addAll(playerIds.map(playerId => ({ id: playerId, data: playerId })));
 
-      await this.processQueue(); // Process the queue immediately
+      await this.processQueue();
       FetchMissingScoresQueue.logger.info(`Added ${playerIds.length} players to score refresh queue`);
     } catch (error) {
       FetchMissingScoresQueue.logger.error("Failed to load unseeded players:", error);

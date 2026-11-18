@@ -1,5 +1,4 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
-import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { eq } from "drizzle-orm";
 import { db } from "../../db";
@@ -15,10 +14,7 @@ export class PlayerStatisticsService {
    * @param realmId the realm the token's stats and the scores belong to
    * @returns the statistics
    */
-  public static async getStatistics(
-    playerToken: ScoreSaberPlayerLookupToken,
-    realmId: number
-  ): Promise<ScoreSaberPlayerStatistics> {
+  public static async getStatistics(playerToken: ScoreSaberPlayerLookupToken, realmId: number) {
     const playerId = String(playerToken.id);
     const [account] = await db
       .select({
@@ -33,18 +29,14 @@ export class PlayerStatisticsService {
     const scoreStats = await PlayerStatisticsService.getScoreStats(playerId, realmId);
 
     return {
-      // Rank stats
       rank: playerToken.stats.rank,
       countryRank: playerToken.stats.countryRank,
 
-      // Medals stats
       medals: account.medals,
 
-      // PP stats
       pp: playerToken.stats.totalPP,
       plusOnePp: playerToken.stats.plusOnePP ?? 0,
 
-      // Score stats
       totalScore: scoreStats.totalScore,
       totalRankedScore: scoreStats.totalRankedScore,
       rankedScores: scoreStats.totalRankedScores,
@@ -54,12 +46,10 @@ export class PlayerStatisticsService {
       totalScores: scoreStats.totalScores,
       replaysWatched: playerToken.stats.totalReplayViews,
 
-      // Accuracy stats
       averageRankedAccuracy: scoreStats.averageRankedAccuracy,
       averageUnrankedAccuracy: scoreStats.averageUnrankedAccuracy,
       averageAccuracy: scoreStats.averageAccuracy,
 
-      // Ranked play stats
       aPlays: scoreStats.aPlays,
       sPlays: scoreStats.sPlays,
       spPlays: scoreStats.spPlays,

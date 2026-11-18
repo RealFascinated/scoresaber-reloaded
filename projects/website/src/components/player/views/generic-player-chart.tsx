@@ -28,7 +28,6 @@ type Props = {
 };
 
 export default function GenericPlayerChart({ id, statisticHistory, datasetConfig, daysAmount = 50 }: Props) {
-  // Captured once on mount so re-renders don't shift the chart's date window.
   const [today] = useState(() => getMidnightAlignedDate(new Date()));
 
   const { labels, histories } = useMemo(() => {
@@ -38,7 +37,6 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
 
     const allTime = daysAmount === -1;
 
-    // Determine the end date (prefer today if data exists, otherwise use latest available)
     const todayString = formatDateMinimal(today);
     const hasTodayData = dataMap.has(todayString);
 
@@ -54,7 +52,6 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
       endDate = getMidnightAlignedDate(latestDate);
     }
 
-    // Generate label dates: sliding window or every day we have data (all-time)
     const labelsResult: Date[] = [];
     if (allTime) {
       const sortedKeys = Array.from(dataMap.keys()).sort(
@@ -73,7 +70,6 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
       }
     }
 
-    // Each day's history is the same for every dataset, so look it up once per label instead of once per dataset
     const historyByLabel = labelsResult.map(currentDate => dataMap.get(formatDateMinimal(currentDate)));
 
     datasetConfig.forEach(config => {
@@ -88,7 +84,6 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     return { labels: labelsResult, histories };
   }, [statisticHistory, datasetConfig, daysAmount, today]);
 
-  // The marker list is tiny and shared by every chart, so it is fetched once and kept
   const { data: rankedBatchMarkers } = useQuery({
     queryKey: ["ranked-batch-markers"],
     queryFn: () => ssrApi.getRankedBatchMarkers(),
@@ -101,7 +96,6 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
       return [];
     }
 
-    // Snap each ranked batch to the first label on or after its UTC day, if that day is inside the chart
     const labelDays = labels.map(label => getMidnightAlignedDate(label).getTime());
     const markers: ChartMarker[] = [];
     for (const rankedBatch of rankedBatchMarkers) {

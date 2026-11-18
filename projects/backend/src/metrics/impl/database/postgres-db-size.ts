@@ -12,7 +12,7 @@ type TableSizeRow = {
   indexSizeBytes: number | string;
 };
 
-function toSafeNumber(value: number | string): number {
+function toSafeNumber(value: number | string) {
   return typeof value === "number" ? value : Number(value);
 }
 
@@ -46,7 +46,7 @@ export default class PostgresDbSizeMetric extends NumberMetric {
     });
   }
 
-  private async collectDbStats(): Promise<void> {
+  private async collectDbStats() {
     if (this.inFlightCollection) {
       return this.inFlightCollection;
     }

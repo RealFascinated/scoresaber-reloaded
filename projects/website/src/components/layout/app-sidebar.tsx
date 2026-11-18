@@ -200,9 +200,6 @@ function FollowingPopover() {
       <PopoverContent
         side={isMobile ? "bottom" : "right"}
         sideOffset={isMobile ? 4 : 8}
-        // Hover-triggered popover: don't steal focus on open. Otherwise Radix auto-focuses
-        // the first tabbable element (e.g. a country flag tooltip wrapper), which opens its
-        // tooltip even though the user never hovered it.
         onOpenAutoFocus={event => event.preventDefault()}
         className="flex max-h-[420px] w-screen flex-col overflow-hidden p-0 text-sm select-none md:w-[340px]"
         onMouseEnter={handleMouseEnter}
@@ -279,7 +276,6 @@ function ProfileSection() {
   async function handleSignOut() {
     try {
       await signOut();
-      // Everything that depends on the session reads these, so the whole UI signs out at once
       queryClient.setQueryData(ME_QUERY_KEY, null);
       queryClient.setQueryData(USER_PREFERENCES_QUERY_KEY, DEFAULT_USER_PREFERENCES);
       queryClient.setQueryData(FOLLOWING_QUERY_KEY, []);

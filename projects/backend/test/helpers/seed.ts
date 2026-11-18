@@ -34,8 +34,6 @@ import {
   TEST_SONG_HASH_SHA1,
   TEST_SONG_HASH_TWO,
 } from "./constants";
-import { buildScoreSaberV2PlayerToken } from "./fixtures";
-import { registerTestPlayerTokens } from "./scoresaber-api-test-patches";
 
 const seededTables = [
   "scoresaber-player-history",
@@ -56,18 +54,18 @@ const seededTables = [
   "beatsaver-map-versions",
   "beatsaver-maps",
   "beatsaver-uploaders",
-  "auth-users", // Cascades to auth-sessions, auth-accounts and user-preferences
+  "auth-users",
   "auth-verifications",
 ] as const;
 
 const now = new Date("2024-06-01T12:00:00.000Z");
 
-export async function truncateTestTables(): Promise<void> {
+export async function truncateTestTables() {
   const tableList = seededTables.map(table => `"${table}"`).join(", ");
   await db.execute(sql.raw(`TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE`));
 }
 
-export async function seedTestDatabase(): Promise<void> {
+export async function seedTestDatabase() {
   await db.insert(scoreSaberAccountsTable).values([
     {
       id: TEST_PLAYER_ID,
@@ -370,8 +368,6 @@ export async function seedTestDatabase(): Promise<void> {
     label: "Expert+",
   });
 
-  // A second map whose version hash uses the current 40-character (SHA1) style,
-  // covering the "new hash" path through the BeatSaver cache.
   await db.insert(beatSaverMapsTable).values({
     id: "testmap-sha1",
     name: "Test Song SHA1",
@@ -462,36 +458,4 @@ export async function seedTestDatabase(): Promise<void> {
     improvementRightHandAccuracy: 0,
     timestamp: now,
   });
-}
-
-export async function seedCachedScoreSaberPlayerTokens(): Promise<void> {
-  const tokens = [
-    buildScoreSaberV2PlayerToken(),
-    buildScoreSaberV2PlayerToken({
-      id: TEST_PLAYER_TWO_ID,
-      name: TEST_PLAYER_TWO_NAME,
-      playerNameInGame: TEST_PLAYER_TWO_NAME,
-      stats: {
-        realmId: 1,
-        realmName: "Steam",
-        rank: 200,
-        countryRank: 20,
-        rankChange: null,
-        totalPP: 80,
-        plusOnePP: 1,
-        totalScore: "800",
-        totalRankedScore: "800",
-        totalPlayedLeaderboards: 1,
-        totalPlayedRankedLeaderboards: 1,
-        totalSubmittedPlays: 1,
-        totalReplayViews: 0,
-        averageAccuracy: 0.9,
-        weightedAverageAccuracy: 0.9,
-        completionAccuracy: 0.9,
-        device: null,
-      },
-    }),
-  ];
-
-  registerTestPlayerTokens(tokens);
 }

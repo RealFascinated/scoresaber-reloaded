@@ -3,7 +3,7 @@
 import { useOverlayEditorStore } from "@/common/overlay/editor/overlay-editor-store";
 import { useEffect } from "react";
 
-function isTyping(target: EventTarget | null): boolean {
+function isTyping(target: EventTarget | null) {
   return (
     target instanceof HTMLElement &&
     (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
@@ -69,14 +69,12 @@ export function useEditorHotkeys() {
           if (element.locked) {
             continue;
           }
-          // Offsets are measured inward from the anchor, so on the right/bottom edges the signs flip
           const flipX = element.anchor.includes("right") ? -1 : 1;
           const flipY = element.anchor.includes("bottom") ? -1 : 1;
           patches[element.id] = {
             offset: { x: element.offset.x + dx * flipX, y: element.offset.y + dy * flipY },
           };
         }
-        // Holding an arrow key repeats, which should be one undo step
         store.nudge(patches);
       }
     };

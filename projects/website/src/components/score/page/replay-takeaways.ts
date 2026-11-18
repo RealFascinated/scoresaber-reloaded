@@ -24,7 +24,7 @@ export const DIRECTION_NAMES: Record<CutDirection, string> = {
 const LAYER_NAMES = ["bottom", "middle", "top"];
 const LANE_NAMES = ["far-left", "middle-left", "middle-right", "far-right"];
 
-export function describeGridCell(cell: GridCellSummary): string {
+export function describeGridCell(cell: GridCellSummary) {
   return `${LAYER_NAMES[cell.layer]} row, ${LANE_NAMES[cell.lane]} column`;
 }
 
@@ -32,30 +32,25 @@ const MAX_GOOD = 4;
 const MAX_IMPROVE = 6;
 const MAX_WEAK_SPOTS = 3;
 const MIN_HITS_PER_GROUP = 20;
-/** A gap below this (seconds) between two notes on the same hand leaves little time to prepare. */
 const QUICK_GAP = 0.3;
-/** A hit scoring below this (out of 115) is a clearly bad hit. */
 const BAD_HIT_SCORE = 105;
-/** A group must lose this share of the part maximum per hit, and be worth this much accuracy (%). */
 const MIN_RELATIVE_DEFICIT = 0.03;
 const MIN_GAIN = 0.02;
 const MAX_CUT = 115;
-/** Accuracy (%) from which scores are very hard to improve further. */
 const ELITE_ACCURACY = 98;
 
-function clock(seconds: number): string {
+function clock(seconds: number) {
   return formatTime(Math.floor(seconds));
 }
 
 /**
  * Turns the replay numbers into a short list of plain-language conclusions.
  */
-export function buildTakeaways(insights: ReplayInsights, score: ScoreSaberScore): Takeaway[] {
+export function buildTakeaways(insights: ReplayInsights, score: ScoreSaberScore) {
   const good: Takeaway[] = [];
   const improve: Takeaway[] = [];
   const { loss, totalNotes, avgScore } = insights;
 
-  // How the run went
   if (score.fullCombo && score.misses === 0 && score.badCuts === 0) {
     good.push({
       tone: "good",
@@ -105,8 +100,6 @@ export function buildTakeaways(insights: ReplayInsights, score: ScoreSaberScore)
     });
   }
 
-  // Where the points went. Every normal note is worth up to 115: 70 for the swing before the cut,
-  // 30 for the swing after it and 15 for how central the cut was.
   const accuracy = Number.isFinite(score.accuracy) ? score.accuracy : (avgScore / MAX_CUT) * 100;
   if (accuracy >= ELITE_ACCURACY) {
     good.push({
@@ -117,7 +110,7 @@ export function buildTakeaways(insights: ReplayInsights, score: ScoreSaberScore)
   }
 
   const noteScore = totalNotes * MAX_CUT;
-  const accuracyOf = (points: number): number => (noteScore > 0 ? (points / noteScore) * 100 : 0);
+  const accuracyOf = (points: number) => (noteScore > 0 ? (points / noteScore) * 100 : 0);
 
   const headline = describeMainLeak(insights, accuracyOf);
   if (headline) {
@@ -207,20 +200,14 @@ const PARTS: Record<Part, { max: number; name: string; short: string; rule: stri
 };
 const PART_KEYS = Object.keys(PARTS) as Part[];
 
-function share(details: CutDetail[], part: Part, atLeast = 0.99): number {
+function share(details: CutDetail[], part: Part, atLeast = 0.99) {
   if (details.length === 0) {
     return 0;
   }
   return details.filter(detail => detail[part] >= PARTS[part].max * atLeast).length / details.length;
 }
 
-/**
- * Says which part of the score is costing the most, and whether swing length is even the problem.
- */
-function describeMainLeak(
-  insights: ReplayInsights,
-  accuracyOf: (points: number) => number
-): Takeaway | undefined {
+function describeMainLeak(insights: ReplayInsights, accuracyOf: (points: number) => number) {
   const { loss, details, partAverages } = insights;
   const swingLoss = loss.preSwing + loss.postSwing + loss.center;
   if (swingLoss <= 0 || details.length === 0) {
@@ -230,34 +217,33 @@ function describeMainLeak(
   const ranked = [...PART_KEYS].sort((a, b) => loss[b] - loss[a]);
   const main = ranked[0];
   const mainShare = loss[main] / swingLoss;
-  const average = (part: Part): string => `${partAverages[part].toFixed(1)}/${PARTS[part].max}`;
-  const fullShare = (part: Part): number => Math.round(share(details, part) * 100);
+  const average = (part: Part) => `${partAverages[part].toFixed(1)}/${PARTS[part].max}`;
+  const fullShare = (part: Part) => Math.round(share(details, part) * 100);
 
   if (mainShare < 0.6) {
-    return {
+    const takeaway: Takeaway = {
       tone: "improve",
       title: "Your points are lost in several places",
       detail: ranked
         .map(part => `${PARTS[part].short} ${average(part)} (${accuracyOf(loss[part]).toFixed(2)}%)`)
         .join(", "),
     };
+    return takeaway;
   }
 
   const others = ranked.slice(1);
   const swingsMaxed = main === "center" && others.every(part => share(details, part, 0.95) >= 0.85);
-  return {
+  const takeaway: Takeaway = {
     tone: "improve",
     title: swingsMaxed ? "Only center accuracy is costing you" : `Most of your loss is ${PARTS[main].short}`,
     detail: swingsMaxed
       ? `Center ${average(main)} costs ${accuracyOf(loss[main]).toFixed(2)}% accuracy. Your swings are already full: ${fullShare("preSwing")}% of hits had a full pre-swing, ${fullShare("postSwing")}% a full follow-through.`
       : `${PARTS[main].short} ${average(main)} costs ${accuracyOf(loss[main]).toFixed(2)}% accuracy. ${PARTS[main].rule}`,
   };
+  return takeaway;
 }
 
-/**
- * Checks whether the lost points come from a few bad hits or are spread thinly over many.
- */
-function describeConcentration(insights: ReplayInsights): Takeaway | undefined {
+function describeConcentration(insights: ReplayInsights) {
   const { details } = insights;
   const totalLost = details.reduce((sum, detail) => sum + (MAX_CUT - detail.score), 0);
   if (details.length < 50 || totalLost <= 0) {
@@ -271,16 +257,17 @@ function describeConcentration(insights: ReplayInsights): Takeaway | undefined {
     return undefined;
   }
 
-  return {
+  const takeaway: Takeaway = {
     tone: "improve",
     title: "A few bad hits cost the most",
     detail: `${bad.length} hit${bad.length === 1 ? "" : "s"} under ${BAD_HIT_SCORE} points make up ${Math.round(badShare * 100)}% of the points lost on hits.`,
   };
+  return takeaway;
 }
 
 type Group = { dimension: string; name: string; details: CutDetail[]; note?: string };
 
-function buildGroups(insights: ReplayInsights): Group[] {
+function buildGroups(insights: ReplayInsights) {
   const { details } = insights;
   const groups: Group[] = [];
 
@@ -320,11 +307,7 @@ function buildGroups(insights: ReplayInsights): Group[] {
   return groups;
 }
 
-/**
- * Finds the kinds of notes (hand, direction, grid spot, tempo) that score worse than the rest of
- * your hits on one part of the score, ranked by how much accuracy matching your other hits would give.
- */
-function findWeakSpots(insights: ReplayInsights, accuracyOf: (points: number) => number): Takeaway[] {
+function findWeakSpots(insights: ReplayInsights, accuracyOf: (points: number) => number) {
   const { details } = insights;
   if (details.length < MIN_HITS_PER_GROUP * 2) {
     return [];
@@ -369,7 +352,6 @@ function findWeakSpots(insights: ReplayInsights, accuracyOf: (points: number) =>
     }
   }
 
-  // Best finding per kind of note, so the list isn't five versions of the same problem
   const best = new Map<string, Candidate>();
   for (const candidate of candidates) {
     const current = best.get(candidate.dimension);

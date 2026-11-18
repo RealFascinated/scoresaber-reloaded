@@ -46,10 +46,6 @@ export default function PageTransition({ children, className }: { children: Reac
   const transitionDuration = shouldReduceMotion ? 0 : 0.2;
   const filterDuration = shouldReduceMotion ? 0 : 0.15;
 
-  // The last view rendered while not loading. While loading we keep showing this, so the outgoing
-  // view stays put (and keeps its key) until the new data is ready, even when loading starts in the
-  // same update as a page change. It's updated during render (not in an effect) so the very first
-  // loading render already sees the right snapshot instead of a stale one from the previous load.
   const [idleView, setIdleView] = useState<{ page: number; children: ReactNode }>({
     page: currentPage,
     children,
@@ -62,7 +58,6 @@ export default function PageTransition({ children, className }: { children: Reac
   const displayChildren = isLoading ? idleView.children : children;
 
   return (
-    // The slide offsets would otherwise widen the page for a moment; the wrapper stays put and clips them
     <div className="overflow-x-clip">
       <AnimatePresence mode="wait">
         <m.div

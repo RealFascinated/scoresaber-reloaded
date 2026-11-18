@@ -18,7 +18,6 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDate } from "@ssr/common/utils/time-utils";
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { ssrConfig } from "config";
-import { Metadata } from "next";
 import type { SearchParams } from "nuqs/server";
 import { cache } from "react";
 
@@ -37,22 +36,22 @@ type Props = {
 type PlayerFetchResult =
   { status: "found"; player: ScoreSaberPlayer } | { status: "not-found" } | { status: "unavailable" };
 
-const getPlayer = cache(async (id: string): Promise<PlayerFetchResult> => {
+const getPlayer = cache(async (id: string) => {
   try {
     const player = await ssrApi.getScoreSaberPlayer(id, "full");
-    if (player === undefined) {
-      return { status: "not-found" };
-    }
-    return { status: "found", player };
+    const result: PlayerFetchResult =
+      player === undefined ? { status: "not-found" } : { status: "found", player };
+    return result;
   } catch (error) {
     if (isBackendUnavailableError(error)) {
-      return { status: "unavailable" };
+      const result: PlayerFetchResult = { status: "unavailable" };
+      return result;
     }
     throw error;
   }
 });
 
-export async function generateMetadata(props: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props) {
   const { id } = await props.params;
   const result = await getPlayer(id);
 
@@ -118,8 +117,6 @@ export default async function PlayerPage(props: Props) {
     );
   }
 
-  // Render the ScoreSaber scores on the server so they are part of the HTML crawlers and users first
-  // receive. The other score tabs are only shown when selected, so the client fetches those.
   const { page, sort, search, platform } = loadPlayerLiveScoresSearchParams(await props.searchParams);
   const followsPromise = prefetchInitialData(fetchPlayerFollows(result.player.id));
   const miniRankingPromise = prefetchInitialData(ssrApi.getPlayerMiniRanking(result.player.id));
@@ -132,8 +129,6 @@ export default async function PlayerPage(props: Props) {
     initialScores = prefetched ? { query, ...prefetched } : undefined;
   }
 
-  // The follower counts and the mini rankings are part of the page layout. Rendered later they push content
-  // around (or leave an empty row), so they are seeded into the client's cache like the scores.
   const queryClient = new QueryClient();
   const [follows, miniRanking] = await Promise.all([followsPromise, miniRankingPromise]);
   if (follows) {

@@ -1,5 +1,6 @@
 {
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "extends": ["../../node_modules/@interfere/landmines/configs/recommended.json"],
   "plugins": ["eslint", "typescript", "oxc", "react", "nextjs", "jsx-a11y"],
   "categories": {
     "correctness": "error"

@@ -1,7 +1,3 @@
-/**
- * Test environment variables. Loaded before any backend modules that read `env`.
- * Overrides connection targets when host shell env would point at non-test services.
- */
 const defaults: Record<string, string> = {
   NEXT_PUBLIC_APP_ENV: "development",
   NEXT_PUBLIC_APPLICATION_NAME: "backend",
@@ -29,7 +25,7 @@ const defaults: Record<string, string> = {
 
 const forcedKeys = new Set(["DATABASE_URL", "REDIS_URL", "S3_ENDPOINT", "ENABLE_QUEUES"]);
 
-function isConfiguredTestValue(key: string, value: string | undefined): boolean {
+function isConfiguredTestValue(key: string, value: string | undefined) {
   if (!value) {
     return false;
   }
