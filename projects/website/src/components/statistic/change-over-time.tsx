@@ -17,7 +17,7 @@ type ChangeOverTimeProps = {
 };
 
 const formatChangeValue = (type: PlayerStatValue, value: number | undefined): string | number => {
-  if (value == -0) {
+  if (Object.is(value, -0)) {
     value = 0;
   }
 

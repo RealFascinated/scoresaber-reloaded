@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { SharedIcons } from "@/shared-icons";
 import { countryFilter } from "@ssr/common/utils/country.util";
 import { pluralize } from "@ssr/common/utils/string.util";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 type CountrySelectorProps = {
   value?: string;
@@ -83,6 +83,12 @@ function CountryList({
   close: () => void;
 }) {
   const hasCounts = counts != undefined;
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // The list mounts when the dropdown opens, so focus the search input straight away.
+  useEffect(() => {
+    searchInputRef.current?.focus();
+  }, []);
 
   const items = countryFilter
     .map(country => {
@@ -105,7 +111,7 @@ function CountryList({
 
   return (
     <Command>
-      <CommandInput placeholder="Search countries..." autoFocus />
+      <CommandInput ref={searchInputRef} placeholder="Search countries..." />
       <CommandList id={listId} className="max-h-96">
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup>
@@ -172,7 +178,6 @@ export default function CountrySelector({
       <PopoverTrigger asChild>
         <button
           type="button"
-          role="combobox"
           aria-expanded={open}
           aria-haspopup="listbox"
           aria-controls={listId}

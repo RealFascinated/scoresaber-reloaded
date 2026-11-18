@@ -22,7 +22,7 @@ import { SHARED_CONSTS } from "@ssr/common/shared-consts";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getScoreBadgeFromAccuracy } from "@ssr/common/utils/song-utils";
 import { getPageFromRank } from "@ssr/common/utils/utils";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const pinnedBadges: ScoreBadge<ScoreSaberScore, ScoreSaberLeaderboard>[] = [
   {
@@ -60,6 +60,14 @@ function PinnedScoreMessage({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(message ?? "");
   const { mutate, isPending } = usePinnedScoreMessage(playerId);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!editing) {
+      return;
+    }
+    inputRef.current?.focus();
+  }, [editing]);
 
   function startEditing() {
     setDraft(message ?? "");
@@ -76,7 +84,7 @@ function PinnedScoreMessage({
   if (editing) {
     return (
       <Input
-        autoFocus
+        ref={inputRef}
         value={draft}
         disabled={isPending}
         maxLength={SHARED_CONSTS.maxPinnedScoreMessageLength}

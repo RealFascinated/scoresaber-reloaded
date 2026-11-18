@@ -12,7 +12,7 @@ import { getValueFromHistory } from "@ssr/common/utils/player-utils";
 import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { formatDateMinimal, getMidnightAlignedDate, parseDate } from "@ssr/common/utils/time-utils";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 type Props = {
   id: string;
@@ -28,6 +28,9 @@ type Props = {
 };
 
 export default function GenericPlayerChart({ id, statisticHistory, datasetConfig, daysAmount = 50 }: Props) {
+  // Captured once on mount so re-renders don't shift the chart's date window.
+  const [today] = useState(() => getMidnightAlignedDate(new Date()));
+
   const { labels, histories } = useMemo(() => {
     const histories: Record<string, (number | null)[]> = {};
 
@@ -36,7 +39,6 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     const allTime = daysAmount === -1;
 
     // Determine the end date (prefer today if data exists, otherwise use latest available)
-    const today = getMidnightAlignedDate(new Date());
     const todayString = formatDateMinimal(today);
     const hasTodayData = dataMap.has(todayString);
 
@@ -84,7 +86,7 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
     });
 
     return { labels: labelsResult, histories };
-  }, [statisticHistory, datasetConfig, daysAmount]);
+  }, [statisticHistory, datasetConfig, daysAmount, today]);
 
   // The marker list is tiny and shared by every chart, so it is fetched once and kept
   const { data: rankedBatchMarkers } = useQuery({

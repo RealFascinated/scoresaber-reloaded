@@ -17,8 +17,9 @@ export default function PlayerSearchResultItem({
   showInactiveLabel = false,
 }: PlayerSearchResultItemProps) {
   return (
-    <div
-      className={`group hover:bg-accent flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 hover:shadow-xs active:scale-[0.98] ${className ?? ""}`}
+    <button
+      type="button"
+      className={`group hover:bg-accent flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-200 hover:shadow-xs active:scale-[0.98] ${className ?? ""}`}
       onClick={onClick}
     >
       <Avatar
@@ -45,6 +46,6 @@ export default function PlayerSearchResultItem({
           )}
         </p>
       </div>
-    </div>
+    </button>
   );
 }

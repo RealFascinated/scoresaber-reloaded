@@ -344,9 +344,6 @@ export class PlayerHistoryService {
 
     const alignedStart = allTime ? today : getMidnightAlignedDate(getDaysAgoDate(Math.max(0, count - 1)));
 
-    const startTimestamp = alignedStart.getTime();
-    const endTimestamp = today.getTime();
-
     const entries = await PlayerHistoryRepository.getByPlayerOrderedByDateDesc(
       playerToken.id,
       {

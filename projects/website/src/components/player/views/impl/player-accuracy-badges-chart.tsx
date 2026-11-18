@@ -1,7 +1,7 @@
-import { Colors } from "@/common/colors";
-("use client");
+"use client";
 
 import { DatasetConfig } from "@/common/chart/types";
+import { Colors } from "@/common/colors";
 import GenericPlayerChart from "@/components/player/views/generic-player-chart";
 import { ScoreSaberPlayerHistoryEntries } from "@ssr/common/schemas/scoresaber/player/history";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";

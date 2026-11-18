@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "curly": ["error", "all"],
+    "typescript/no-explicit-any": "error",
+    "typescript/no-unused-vars": "error"
+  },
+  "ignorePatterns": ["dist/**", "drizzle/**"]
+}

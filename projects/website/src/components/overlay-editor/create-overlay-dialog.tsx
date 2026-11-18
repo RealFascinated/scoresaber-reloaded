@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useUserOverlayMutations } from "@/hooks/use-user-overlays";
 import { OVERLAY_PRESETS } from "@ssr/common/overlay/overlay-presets";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 type CreateOverlayDialogProps = {
@@ -24,6 +24,7 @@ export default function CreateOverlayDialog({ open, onOpenChange }: CreateOverla
   const { create } = useUserOverlayMutations();
   const [name, setName] = useState("My overlay");
   const [presetId, setPresetId] = useState(OVERLAY_PRESETS[1]?.id ?? OVERLAY_PRESETS[0].id);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const submit = () => {
     create.mutate(
@@ -37,7 +38,18 @@ export default function CreateOverlayDialog({ open, onOpenChange }: CreateOverla
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent
+        className="sm:max-w-3xl"
+        onOpenAutoFocus={event => {
+          // Radix would focus the first preset, but naming the overlay is the first thing to do
+          const nameInput = nameInputRef.current;
+          if (!nameInput) {
+            return;
+          }
+          event.preventDefault();
+          nameInput.focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>New overlay</DialogTitle>
           <DialogDescription>
@@ -74,11 +86,11 @@ export default function CreateOverlayDialog({ open, onOpenChange }: CreateOverla
           }}
         >
           <Input
+            ref={nameInputRef}
             value={name}
             maxLength={64}
             aria-label="Overlay name"
             placeholder="Overlay name"
-            autoFocus
             onChange={event => setName(event.target.value)}
           />
           <Button type="submit" variant="primary" disabled={!name.trim() || create.isPending}>

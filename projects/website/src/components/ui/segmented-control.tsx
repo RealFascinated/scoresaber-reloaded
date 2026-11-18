@@ -6,12 +6,14 @@ import { ReactNode } from "react";
  */
 export function SegmentedControl({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div
-      role="group"
-      className={cn("flex max-w-full [scrollbar-width:none] items-center gap-1 overflow-x-auto", className)}
+    <fieldset
+      className={cn(
+        "m-0 flex max-w-full min-w-0 [scrollbar-width:none] items-center gap-1 overflow-x-auto border-0 p-0",
+        className
+      )}
     >
       {children}
-    </div>
+    </fieldset>
   );
 }
 

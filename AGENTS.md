@@ -13,7 +13,7 @@ Working agreement for humans + AI agents contributing to this repo.
 
 - Match existing patterns in the file you're touching; no new abstractions without need.
 - Keep changes scoped to one problem; no drive-by refactors.
-- Prettier owns formatting (`bun run prettier` from root); ESLint/Next lint own correctness.
+- Prettier owns formatting (`bun run prettier` from root); oxlint (`.oxlintrc.json` per project) owns correctness.
 - Never commit secrets (`.env*`, tokens, credentials, private URLs).
 
 ## TypeScript

@@ -21,6 +21,7 @@ import { ssrApi } from "@ssr/common/utils/ssr-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useQueryState } from "nuqs";
+import { useId } from "react";
 import FollowButton from "../following/follow-button";
 import { PlayerAvatar } from "../ranking/player-avatar";
 import { getRankChars, PlayerRankCard } from "../ranking/player-rank-card";
@@ -45,6 +46,7 @@ export default function RankingData({ initial }: RankingDataProps) {
   const mainPlayer = useMainPlayer().data;
   // The follow column only exists for a signed-in user, so signed-out tables don't reserve its space
   const { data: me } = useMe();
+  const filtersId = useId();
 
   const [currentPage, setCurrentPage] = useQueryState("page", rankingSearchParams.page);
   const [countryQuery, setCountryQuery] = useQueryState("country", rankingSearchParams.country);
@@ -137,8 +139,12 @@ export default function RankingData({ initial }: RankingDataProps) {
           )}
 
           <div className="flex items-center gap-4 sm:ml-auto">
-            <label className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm">
+            <label
+              htmlFor={`${filtersId}-inactive`}
+              className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm"
+            >
               <Switch
+                id={`${filtersId}-inactive`}
                 checked={includeInactives}
                 onCheckedChange={value => {
                   setIncludeInactives(value);
@@ -148,12 +154,14 @@ export default function RankingData({ initial }: RankingDataProps) {
               Include inactive
             </label>
             <label
+              htmlFor={`${filtersId}-relative-pp`}
               className={cn(
                 "text-muted-foreground flex items-center gap-2 text-sm",
                 mainPlayer == undefined ? "cursor-not-allowed opacity-50" : "cursor-pointer"
               )}
             >
               <Switch
+                id={`${filtersId}-relative-pp`}
                 checked={showRelativePp}
                 onCheckedChange={value => {
                   setShowRelativePp(value);

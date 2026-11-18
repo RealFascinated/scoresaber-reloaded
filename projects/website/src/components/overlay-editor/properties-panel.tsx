@@ -15,7 +15,7 @@ import {
   OverlayWidgetTypes,
   type OverlayElement,
 } from "@ssr/common/schemas/overlay/overlay-element";
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useId, useMemo } from "react";
 
 const ANCHOR_GRID: OverlayAnchor[][] = [
   ["top-left", "top", "top-right"],
@@ -92,6 +92,8 @@ function SizeField({
   value: number | "auto";
   onChange: (value: number | "auto") => void;
 }) {
+  const fitContentId = useId();
+
   return (
     <div className="flex flex-col gap-1.5">
       <NumberField
@@ -103,8 +105,12 @@ function SizeField({
         disabled={value === "auto"}
         onChange={onChange}
       />
-      <label className="text-muted-foreground flex items-center gap-2 text-xs">
-        <Switch checked={value === "auto"} onCheckedChange={auto => onChange(auto ? "auto" : 200)} />
+      <label htmlFor={fitContentId} className="text-muted-foreground flex items-center gap-2 text-xs">
+        <Switch
+          id={fitContentId}
+          checked={value === "auto"}
+          onCheckedChange={auto => onChange(auto ? "auto" : 200)}
+        />
         Fit content
       </label>
     </div>
@@ -113,6 +119,7 @@ function SizeField({
 
 function ElementProperties({ element }: { element: OverlayElement }) {
   const updateElement = useOverlayEditorStore(state => state.updateElement);
+  const controlsId = useId();
   const key = (field: string) => `${element.id}:${field}`;
   const percent = Math.round(element.scale * 100);
 
@@ -155,9 +162,10 @@ function ElementProperties({ element }: { element: OverlayElement }) {
         element.type === OverlayWidgetTypes.ScorePp ||
         element.type === OverlayWidgetTypes.ScoreBlPp) && (
         <Section title="Display">
-          <label className="flex items-center justify-between text-sm">
+          <label htmlFor={`${controlsId}-platform`} className="flex items-center justify-between text-sm">
             Show platform
             <Switch
+              id={`${controlsId}-platform`}
               checked={element.options.showPlatform ?? true}
               onCheckedChange={showPlatform =>
                 updateElement(element.id, { options: { ...element.options, showPlatform } })
@@ -199,9 +207,10 @@ function ElementProperties({ element }: { element: OverlayElement }) {
               )
             }
           />
-          <label className="flex items-center justify-between text-sm">
+          <label htmlFor={`${controlsId}-label`} className="flex items-center justify-between text-sm">
             Show label
             <Switch
+              id={`${controlsId}-label`}
               checked={element.options.showLabel}
               onCheckedChange={showLabel =>
                 updateElement(element.id, { options: { ...element.options, showLabel } })
@@ -304,6 +313,7 @@ function ElementProperties({ element }: { element: OverlayElement }) {
 function ConnectionProperties() {
   const settings = useOverlayEditorStore(state => state.settings);
   const setSettings = useOverlayEditorStore(state => state.setSettings);
+  const liveDataId = useId();
 
   return (
     <>
@@ -320,9 +330,10 @@ function ConnectionProperties() {
         />
       </Section>
       <Section title="Game connection">
-        <label className="flex items-center justify-between text-sm">
+        <label htmlFor={liveDataId} className="flex items-center justify-between text-sm">
           Use live game data
           <Switch
+            id={liveDataId}
             checked={settings.useRealTimeData}
             onCheckedChange={useRealTimeData => setSettings({ ...settings, useRealTimeData })}
           />

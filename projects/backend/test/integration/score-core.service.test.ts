@@ -53,9 +53,7 @@ describe("ScoreCoreService", () => {
       const score = scoreSaberScoreRowToType(row);
       const leaderboard = leaderboardRowToType(buildLeaderboardRow());
 
-      const result = await ScoreCoreService.trackScoreSaberScore(score, leaderboard, false, undefined, {
-        skipDuplicateCheck: true,
-      });
+      const result = await ScoreCoreService.trackScoreSaberScore(score, leaderboard, false);
 
       expect(result.tracked).toBe(true);
       expect(result.score?.scoreId).toBe(NEW_SCORE_ID);

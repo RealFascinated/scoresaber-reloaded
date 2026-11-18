@@ -77,14 +77,13 @@ export default function EditorToolbar({
           aria-label="Overlay name"
           onChange={event => rename(event.target.value)}
         />
-        <span
+        <output
           className="text-muted-foreground ml-2 flex shrink-0 items-center gap-1.5 text-xs"
-          role="status"
           title="Changes are saved automatically and show up in OBS right away"
         >
           <span className={cn("size-2 rounded-full", STATUS[status].dot)} />
           {STATUS[status].label}
-        </span>
+        </output>
       </div>
 
       <div className="flex items-center gap-2">

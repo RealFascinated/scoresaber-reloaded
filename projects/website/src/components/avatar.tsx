@@ -20,9 +20,7 @@ export default function Avatar({ src, size = 32, className, alt, priority = fals
 
   if (showFallback) {
     return (
-      <div
-        role="img"
-        aria-label={alt}
+      <span
         className={cn(
           "bg-muted text-muted-foreground flex items-center justify-center rounded-full",
           className
@@ -34,8 +32,9 @@ export default function Avatar({ src, size = 32, className, alt, priority = fals
           minHeight: size,
         }}
       >
-        {fallbackText}
-      </div>
+        <span aria-hidden="true">{fallbackText}</span>
+        <span className="sr-only">{alt}</span>
+      </span>
     );
   }
 

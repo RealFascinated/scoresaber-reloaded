@@ -219,9 +219,10 @@ export function PlayerAndLeaderboardSearchDialog() {
                 </div>
                 <div className="flex flex-col gap-0.5">
                   {results.leaderboards.map(leaderboard => (
-                    <div
+                    <button
                       key={leaderboard.id}
-                      className="group hover:bg-accent flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 hover:shadow-xs active:scale-[0.98]"
+                      type="button"
+                      className="group hover:bg-accent flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-200 hover:shadow-xs active:scale-[0.98]"
                       onClick={() => {
                         closeSearch();
                         router.push(`/leaderboard/${leaderboard.id}`);
@@ -267,7 +268,7 @@ export function PlayerAndLeaderboardSearchDialog() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>

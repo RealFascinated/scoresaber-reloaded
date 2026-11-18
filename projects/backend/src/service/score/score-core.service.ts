@@ -56,10 +56,7 @@ export class ScoreCoreService {
     score: ScoreSaberScore,
     leaderboard: ScoreSaberLeaderboard,
     newScore: boolean = false,
-    beatLeaderScore?: BeatLeaderScore,
-    options?: {
-      skipDuplicateCheck?: boolean;
-    }
+    beatLeaderScore?: BeatLeaderScore
   ): Promise<{
     score: ScoreSaberScore | undefined;
     hasPreviousScore: boolean;

@@ -74,8 +74,6 @@ export default class BeatLeaderService {
     const getMisses = (score: BeatLeaderScoreToken | BeatLeaderScoreImprovementToken) =>
       score.missedNotes + score.badCuts + score.bombCuts;
 
-    const leaderboard = scoreToken.leaderboard;
-    const difficulty = leaderboard.difficulty;
     const rawScoreImprovement = scoreToken.scoreImprovement;
     const improvement = BeatLeaderService.improvementRowFromToken(rawScoreImprovement, getMisses);
 

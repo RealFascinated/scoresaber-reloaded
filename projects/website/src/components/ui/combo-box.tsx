@@ -88,7 +88,7 @@ const Combobox = <T,>({
               )}
               variant="outline"
               size="lg"
-              role="combobox"
+              aria-haspopup="listbox"
               aria-expanded={open}
               aria-controls={listId}
             >

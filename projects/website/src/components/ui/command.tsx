@@ -39,10 +39,7 @@ const CommandDialog = ({ children, ...props }: DialogProps) => {
   );
 };
 
-const CommandInput = ({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>) => (
+const CommandInput = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Input>) => (
   <div
     className="border-border hover:border-primary/50 flex items-center border-b px-3 transition-colors duration-200"
     cmdk-input-wrapper=""

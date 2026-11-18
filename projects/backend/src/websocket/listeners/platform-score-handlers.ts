@@ -257,14 +257,13 @@ export class ScoreWebsockets implements EventListener {
           );
           beatLeaderUniquePlayersMetric?.addPlayer(beatLeaderScore.player!.id);
 
-          const player = beatLeaderScore.player!;
           const leaderboard = beatLeaderScore.leaderboard;
           const mapKey =
             `${leaderboard.song.hash}-${leaderboard.difficulty.difficultyName}-${leaderboard.difficulty.modeName}`.toUpperCase();
           const key = `${beatLeaderScore.playerId}-${mapKey}`;
           const timesetMs = beatLeaderTimesetToMs(beatLeaderScore.timeset);
 
-          //beatLeaderWsLog.info(`Received score for player ${player.id}(${player.platform}) with key ${key}`);
+          //beatLeaderWsLog.info(`Received score for player ${beatLeaderScore.player!.id}(${beatLeaderScore.player!.platform}) with key ${key}`);
 
           const pendingScore = ScoreWebsockets.PENDING_SCORES.get(key);
           if (

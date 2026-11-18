@@ -117,19 +117,24 @@ function LayerList({ onAdd }: { onAdd: () => void }) {
         return (
           <li
             key={element.id}
-            onClick={event =>
-              event.shiftKey || event.ctrlKey || event.metaKey
-                ? toggleSelection(element.id)
-                : select(element.id)
-            }
             className={cn(
-              "group flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors",
+              "group flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors",
               selected ? "bg-primary/15 ring-primary/60 ring-1" : "hover:bg-hover",
               !element.visible && "opacity-50"
             )}
           >
-            <Icon className="text-muted-foreground size-4 shrink-0" />
-            <span className="min-w-0 flex-1 truncate">{OVERLAY_WIDGETS[element.type].label}</span>
+            <button
+              type="button"
+              onClick={event =>
+                event.shiftKey || event.ctrlKey || event.metaKey
+                  ? toggleSelection(element.id)
+                  : select(element.id)
+              }
+              className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
+            >
+              <Icon className="text-muted-foreground size-4 shrink-0" />
+              <span className="min-w-0 flex-1 truncate">{OVERLAY_WIDGETS[element.type].label}</span>
+            </button>
             {/* Secondary actions only show on hover or when selected, to keep the list calm */}
             <div className={cn("hidden items-center group-hover:flex", selected && "flex")}>
               <LayerButton

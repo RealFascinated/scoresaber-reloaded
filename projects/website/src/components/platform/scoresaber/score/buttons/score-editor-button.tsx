@@ -168,10 +168,11 @@ export default function ScoreSaberScoreEditorButton({
               <div className="flex w-full flex-col gap-(--spacing-md)">
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-muted-foreground text-sm">Base</label>
+                    <span className="text-muted-foreground text-sm">Base</span>
                     <span className="text-muted-foreground text-sm">{baseValue}</span>
                   </div>
                   <Slider
+                    aria-label="Base accuracy"
                     className="w-full"
                     min={MIN_ACCURACY}
                     max={99}
@@ -183,10 +184,11 @@ export default function ScoreSaberScoreEditorButton({
 
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-muted-foreground text-sm">Decimal</label>
+                    <span className="text-muted-foreground text-sm">Decimal</span>
                     <span className="text-muted-foreground text-sm">{decimalValue.toFixed(2)}</span>
                   </div>
                   <Slider
+                    aria-label="Decimal accuracy"
                     className="w-full"
                     min={0}
                     max={0.99}

@@ -62,10 +62,27 @@ export default function SimpleTooltip({
 
   return (
     <Tooltip {...touchProps}>
-      <TooltipTrigger asChild>
+      {/* On touch screens a tap toggles the tooltip. A non-interactive child makes the wrapper
+          itself the toggle, so it is exposed (and keyboard operable) as a button; an interactive
+          child is the control and the wrapper only catches its bubbled tap. Radix composes these
+          handlers onto the wrapper. */}
+      <TooltipTrigger
+        asChild
+        onClick={isMobile ? () => setOpen(previous => !previous) : undefined}
+        onKeyDown={
+          isMobile && !interactive
+            ? event => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setOpen(previous => !previous);
+                }
+              }
+            : undefined
+        }
+      >
         <div
           ref={triggerRef}
-          onClick={isMobile ? () => setOpen(previous => !previous) : undefined}
+          role={isMobile && !interactive ? "button" : undefined}
           onFocus={event => {
             // Only open on keyboard focus; programmatic focus (e.g. a popover auto-focusing its
             // first button after a click) must not pop the tooltip open.

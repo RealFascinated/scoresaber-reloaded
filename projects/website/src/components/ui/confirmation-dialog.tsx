@@ -74,9 +74,14 @@ export function ConfirmationDialog({
       }
     )
   ) : (
-    <div onClick={handleTriggerClick} onMouseDown={handleTriggerMouseDown} className="inline-block">
+    <button
+      type="button"
+      onClick={handleTriggerClick}
+      onMouseDown={handleTriggerMouseDown}
+      className="inline-block text-left"
+    >
       {trigger}
-    </div>
+    </button>
   );
 
   return (
