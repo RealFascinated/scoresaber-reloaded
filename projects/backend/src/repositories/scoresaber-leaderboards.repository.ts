@@ -5,7 +5,7 @@ import type {
   ScoreSaberLeaderboardQueryCategory,
   ScoreSaberLeaderboardQueryFilters,
 } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
-import type { AnyColumn, SQL } from "drizzle-orm";
+import type { AnyColumn, Placeholder, SQL } from "drizzle-orm";
 import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { normalizeSongHash } from "../common/cache-keys";
@@ -72,7 +72,7 @@ const difficultySortSql = (tableAlias: LeaderboardAlias) =>
 
 function selectWithDifficulties(
   mainAlias: LeaderboardAlias,
-  realmId: number,
+  realmId: number | Placeholder<string, number>,
   where: SQL | undefined,
   extraOrder: SQL[] = []
 ) {
@@ -103,6 +103,15 @@ function selectWithDifficulties(
     .where(where)
     .orderBy(...extraOrder, asc(difficultySortSql(difficultiesAlias)));
 }
+
+const leaderboardByIdAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
+
+// WARNING: empty name keeps the statement unnamed (pgbouncer)
+const findLeaderboardByIdWithDifficultiesQuery = selectWithDifficulties(
+  leaderboardByIdAlias,
+  sql.placeholder("realmId"),
+  eq(leaderboardByIdAlias.id, sql.placeholder("id"))
+).prepare("");
 
 export function aliasFtsMatch(tableAlias: SearchVectorSource, search: string) {
   return sql`${tableAlias.searchVector} @@ plainto_tsquery('english', ${search})`;
@@ -299,10 +308,8 @@ export class ScoreSaberLeaderboardsRepository {
   }
 
   public static async getLeaderboardById(id: number, includeDifficulties: boolean = true, realmId: number) {
-    const mainAlias = alias(scoreSaberLeaderboardsTable, "leaderboard");
-
     if (includeDifficulties) {
-      const rows = await selectWithDifficulties(mainAlias, realmId, eq(mainAlias.id, id));
+      const rows = await findLeaderboardByIdWithDifficultiesQuery.execute({ id, realmId });
       return mergeJoinedRows(rows)[0];
     }
 

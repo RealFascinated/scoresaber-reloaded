@@ -5,9 +5,16 @@ import { TableCountsRepository } from "./table-counts.repository";
 
 export type ScoreSaberAccountInsert = typeof scoreSaberAccountsTable.$inferInsert;
 
+// WARNING: empty name keeps the statement unnamed (pgbouncer)
+const findRowByIdQuery = db
+  .select()
+  .from(scoreSaberAccountsTable)
+  .where(eq(scoreSaberAccountsTable.id, sql.placeholder("id")))
+  .prepare("");
+
 export class ScoreSaberAccountsRepository {
   public static async findRowById(id: string) {
-    const [row] = await db.select().from(scoreSaberAccountsTable).where(eq(scoreSaberAccountsTable.id, id));
+    const [row] = await findRowByIdQuery.execute({ id });
     return row;
   }
 

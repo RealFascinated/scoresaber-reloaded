@@ -1,4 +1,4 @@
-import type { AnyColumn, SQL } from "drizzle-orm";
+import type { AnyColumn, Placeholder, SQL } from "drizzle-orm";
 import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import type { alias } from "drizzle-orm/pg-core";
 import {
@@ -55,7 +55,7 @@ export function scoreRealmJoinOn(realmId: number) {
 export function leaderboardRealmJoinOn(
   leaderboard: { id: AnyColumn },
   leaderboardRealm: { leaderboardId: AnyColumn; realmId: AnyColumn },
-  realmId: number
+  realmId: number | Placeholder<string, number>
 ) {
   return and(
     eq(leaderboardRealm.leaderboardId, leaderboard.id),

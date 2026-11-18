@@ -45,28 +45,29 @@ async function writeRealmPp(
   const ranked = entries.filter(entry => entry.pp > 0);
   const unranked = entries.filter(entry => !(entry.pp > 0));
 
-  if (unranked.length > 0) {
-    await executor.delete(scoreSaberScoreRealmsTable).where(
-      and(
-        eq(scoreSaberScoreRealmsTable.realmId, realmId),
-        inArray(
-          scoreSaberScoreRealmsTable.scoreId,
-          unranked.map(entry => entry.scoreId)
+  await Promise.all([
+    unranked.length > 0
+      ? executor.delete(scoreSaberScoreRealmsTable).where(
+          and(
+            eq(scoreSaberScoreRealmsTable.realmId, realmId),
+            inArray(
+              scoreSaberScoreRealmsTable.scoreId,
+              unranked.map(entry => entry.scoreId)
+            )
+          )
         )
-      )
-    );
-  }
-
-  if (ranked.length > 0) {
-    await executor
-      .insert(scoreSaberScoreRealmsTable)
-      .values(ranked.map(entry => ({ ...entry, realmId })))
-      .onConflictDoUpdate({
-        target: [scoreSaberScoreRealmsTable.scoreId, scoreSaberScoreRealmsTable.realmId],
-        set: { pp: sql`excluded."pp"` },
-        setWhere: sql`${scoreSaberScoreRealmsTable.pp} is distinct from excluded."pp"`,
-      });
-  }
+      : undefined,
+    ranked.length > 0
+      ? executor
+          .insert(scoreSaberScoreRealmsTable)
+          .values(ranked.map(entry => ({ ...entry, realmId })))
+          .onConflictDoUpdate({
+            target: [scoreSaberScoreRealmsTable.scoreId, scoreSaberScoreRealmsTable.realmId],
+            set: { pp: sql`excluded."pp"` },
+            setWhere: sql`${scoreSaberScoreRealmsTable.pp} is distinct from excluded."pp"`,
+          })
+      : undefined,
+  ]);
 }
 
 export type ScoreSaberPlayerScoreStatistics = {
@@ -372,7 +373,7 @@ export class ScoreSaberScoresRepository {
   }
 
   /**
-   * Upserts scores into the scores table in a single statement.
+   * Upserts scores into the scores table.
    *
    * New scores are inserted. Scores that already exist (same scoreId) keep their row; only
    * the realm's pp is updated, and only when the value actually differs.
@@ -386,35 +387,33 @@ export class ScoreSaberScoresRepository {
     }
 
     const split = rows.map(splitInsertRow);
-    await db.transaction(async tx => {
-      await tx
-        .insert(scoreSaberScoresTable)
-        .values(split.map(({ base }) => base))
-        .onConflictDoNothing();
+    await db
+      .insert(scoreSaberScoresTable)
+      .values(split.map(({ base }) => base))
+      .onConflictDoNothing();
 
-      const stored = await tx
-        .select({ scoreId: scoreSaberScoresTable.scoreId })
-        .from(scoreSaberScoresTable)
-        .where(
-          inArray(
-            scoreSaberScoresTable.scoreId,
-            split.map(({ base }) => base.scoreId)
-          )
-        );
-      const storedIds = new Set(stored.map(row => row.scoreId));
-      await writeRealmPp(
-        tx,
-        realmId,
-        split
-          .filter(({ base }) => storedIds.has(base.scoreId))
-          .map(({ base, pp }) => ({
-            scoreId: base.scoreId,
-            playerId: base.playerId,
-            leaderboardId: base.leaderboardId,
-            pp,
-          }))
+    const stored = await db
+      .select({ scoreId: scoreSaberScoresTable.scoreId })
+      .from(scoreSaberScoresTable)
+      .where(
+        inArray(
+          scoreSaberScoresTable.scoreId,
+          split.map(({ base }) => base.scoreId)
+        )
       );
-    });
+    const storedIds = new Set(stored.map(row => row.scoreId));
+    await writeRealmPp(
+      db,
+      realmId,
+      split
+        .filter(({ base }) => storedIds.has(base.scoreId))
+        .map(({ base, pp }) => ({
+          scoreId: base.scoreId,
+          playerId: base.playerId,
+          leaderboardId: base.leaderboardId,
+          pp,
+        }))
+    );
   }
 
   public static async countByPlayerId(playerId: string) {

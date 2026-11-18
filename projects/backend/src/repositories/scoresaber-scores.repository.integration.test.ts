@@ -141,6 +141,69 @@ describe("ScoreSaberScoresRepository", () => {
     });
   });
 
+  describe("upsertScores", () => {
+    const UPSERT_ID = 900_020;
+    const UPSERT_CONFLICT_ID = 900_021;
+
+    test("inserts new scores and writes realm pp", async () => {
+      await ScoreSaberScoresRepository.upsertScores(
+        [
+          buildScoreRow({
+            scoreId: UPSERT_ID,
+            playerId: TEST_PLAYER_TWO_ID,
+            leaderboardId: TEST_LEADERBOARD_QUALIFIED_ID,
+            modifiers: ["NF", "SS"],
+            pp: 120,
+          }),
+        ],
+        DEFAULT_REALM_ID
+      );
+      const row = await ScoreSaberScoresRepository.findRowByScoreId(UPSERT_ID, DEFAULT_REALM_ID);
+      expect(row?.pp).toBe(120);
+      expect(row?.modifiers).toEqual(["NF", "SS"]);
+    });
+
+    test("updates pp of an existing score and drops it when unranked", async () => {
+      const base = buildScoreRow({
+        scoreId: UPSERT_ID,
+        playerId: TEST_PLAYER_TWO_ID,
+        leaderboardId: TEST_LEADERBOARD_QUALIFIED_ID,
+      });
+      await ScoreSaberScoresRepository.upsertScores([{ ...base, pp: 150 }], DEFAULT_REALM_ID);
+      expect((await ScoreSaberScoresRepository.findRowByScoreId(UPSERT_ID, DEFAULT_REALM_ID))?.pp).toBe(150);
+
+      await ScoreSaberScoresRepository.upsertScores([{ ...base, pp: 0 }], DEFAULT_REALM_ID);
+      expect((await ScoreSaberScoresRepository.findRowByScoreId(UPSERT_ID, DEFAULT_REALM_ID))?.pp).toBe(0);
+    });
+
+    test("ignores a player and leaderboard conflict without throwing", async () => {
+      await ScoreSaberScoresRepository.upsertScores(
+        [
+          buildScoreRow({
+            scoreId: UPSERT_ID,
+            playerId: TEST_PLAYER_TWO_ID,
+            leaderboardId: TEST_LEADERBOARD_QUALIFIED_ID,
+          }),
+        ],
+        DEFAULT_REALM_ID
+      );
+      await ScoreSaberScoresRepository.upsertScores(
+        [
+          buildScoreRow({
+            scoreId: UPSERT_CONFLICT_ID,
+            playerId: TEST_PLAYER_TWO_ID,
+            leaderboardId: TEST_LEADERBOARD_QUALIFIED_ID,
+            pp: 99,
+          }),
+        ],
+        DEFAULT_REALM_ID
+      );
+      expect(
+        await ScoreSaberScoresRepository.findRowByScoreId(UPSERT_CONFLICT_ID, DEFAULT_REALM_ID)
+      ).toBeUndefined();
+    });
+  });
+
   describe("replaceScore", () => {
     test("replaces the current row and archives the previous attempt", async () => {
       const original = await ScoreSaberScoresRepository.findRowByScoreId(TEST_SCORE_ID, DEFAULT_REALM_ID);
