@@ -22,7 +22,12 @@ import { CoalescingLoader } from "@ssr/common/utils/coalescing-loader";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import { scoreSaberApiResponseCacheKey } from "../../common/cache-keys";
+import ScoreSaberApiCallMetric, {
+  type ScoreSaberApiOutcome,
+} from "../../metrics/impl/backend/scoresaber-api-call";
+import { MetricType } from "../../metrics/prometheus";
 import CacheService, { CacheId } from "../infra/cache.service";
+import MetricsService from "../infra/metrics.service";
 import { backoff, parseRetryAfterMs } from "./http-retry";
 
 const scoreSaberApiLog = Logger.withTopic("ScoreSaber API");
@@ -70,6 +75,46 @@ function fillEndpoint(template: string, values: Record<string, string | number>)
   return result;
 }
 
+type UpstreamResult = {
+  status: number;
+  data: SerializableValue | undefined;
+  retryAfterMs: number | undefined;
+};
+
+const TIMEOUT_REASON = "scoresaber-request-timeout";
+const SUPERSEDED_REASON = "scoresaber-request-superseded";
+
+const ENDPOINT_LABELS: [RegExp, string][] = [
+  [/^v2\/players\/count$/, "v2/players/count"],
+  [/^v2\/players$/, "v2/players"],
+  [/^v2\/players\/[^/]+$/, "v2/players/:id"],
+  [/^player\/[^/]+\/scores$/, "player/:id/scores"],
+  [/^user\/[^/]+\/refresh$/, "user/:id/refresh"],
+  [/^leaderboard\/by-id\/[^/]+\/info$/, "leaderboard/by-id/:id/info"],
+  [/^leaderboard\/by-id\/[^/]+\/scores$/, "leaderboard/by-id/:id/scores"],
+  [/^leaderboard\/by-hash\/[^/]+\/info$/, "leaderboard/by-hash/:hash/info"],
+  [/^ranking\/requests\/[^/]+$/, "ranking/requests/:query"],
+  [/^v2\/leaderboards$/, "v2/leaderboards"],
+  [/^v2\/leaderboards\/[^/]+\/scores$/, "v2/leaderboards/:id/scores"],
+  [/^v2\/realms$/, "v2/realms"],
+  [/^v2\/realms\/[^/]+\/pp-curve$/, "v2/realms/:id/pp-curve"],
+];
+
+function scoreSaberEndpointLabel(url: string) {
+  const path = new URL(url).pathname.replace(/^\/api\//, "");
+  return ENDPOINT_LABELS.find(([pattern]) => pattern.test(path))?.[1] ?? "other";
+}
+
+function outcomeForStatus(status: number) {
+  const outcome: ScoreSaberApiOutcome =
+    status === 429 ? "http_429" : status >= 500 ? "http_5xx" : status >= 400 ? "http_4xx" : "ok";
+  return outcome;
+}
+
+function isUsableResult(result: UpstreamResult | undefined) {
+  return result !== undefined && result.status !== 429 && result.status < 500;
+}
+
 export class ScoreSaberApiService {
   public static totalRequests: number = 0;
   public static failedRequests: number = 0;
@@ -77,7 +122,9 @@ export class ScoreSaberApiService {
   private static coalescingLoader = new CoalescingLoader<string, SerializableValue | undefined>();
 
   private static readonly MAX_ATTEMPTS = 5;
-  private static readonly REQUEST_TIMEOUT_MS = 15_000;
+  private static readonly REQUEST_TIMEOUT_MS = 5_000;
+  private static readonly HEDGE_AFTER_MS = 750;
+  private static readonly TOTAL_DEADLINE_MS = 10_000;
 
   private static async fetch<T>(
     url: string,
@@ -120,58 +167,139 @@ export class ScoreSaberApiService {
   ) {
     ScoreSaberApiService.totalRequests++;
 
+    const startedAt = performance.now();
+    const endpoint = scoreSaberEndpointLabel(url);
+
     for (let attempt = 1; attempt <= ScoreSaberApiService.MAX_ATTEMPTS; attempt++) {
-      const result = await ScoreSaberApiService.requestOnce(url, options);
+      const remainingMs = ScoreSaberApiService.TOTAL_DEADLINE_MS - (performance.now() - startedAt);
+      if (remainingMs <= 0) {
+        break;
+      }
+
+      const result = await ScoreSaberApiService.requestHedged(
+        url,
+        endpoint,
+        options,
+        Math.min(ScoreSaberApiService.REQUEST_TIMEOUT_MS, remainingMs)
+      );
+      const canRetry = attempt < ScoreSaberApiService.MAX_ATTEMPTS;
 
       if (result == undefined) {
-        if (attempt < ScoreSaberApiService.MAX_ATTEMPTS) {
+        if (canRetry) {
           await backoff(attempt);
           continue;
         }
-        ScoreSaberApiService.failedRequests++;
-        return undefined;
+        break;
       }
 
-      if ((result.status === 429 || result.status >= 500) && attempt < ScoreSaberApiService.MAX_ATTEMPTS) {
-        await backoff(attempt, result.retryAfterMs);
-        continue;
+      if (result.status === 429 || result.status >= 500) {
+        const waitMs = result.retryAfterMs ?? 0;
+        const deadlineLeftMs = ScoreSaberApiService.TOTAL_DEADLINE_MS - (performance.now() - startedAt);
+        if (canRetry && waitMs < deadlineLeftMs) {
+          await backoff(attempt, result.retryAfterMs);
+          continue;
+        }
+        break;
       }
 
       if (result.status !== 200) {
-        ScoreSaberApiService.failedRequests++;
-        return undefined;
+        break;
       }
 
       return result.data;
     }
 
+    ScoreSaberApiService.failedRequests++;
     return undefined;
+  }
+
+  private static async requestHedged(
+    url: string,
+    endpoint: string,
+    options: { searchParams?: Record<string, string> } | undefined,
+    timeoutMs: number
+  ) {
+    const controllers: AbortController[] = [];
+    let hedgeTimer: ReturnType<typeof setTimeout> | undefined;
+    let timeoutTimer: ReturnType<typeof setTimeout> | undefined;
+
+    try {
+      return await new Promise<UpstreamResult | undefined>(resolve => {
+        let inFlight = 0;
+        let finished = false;
+
+        const finish = (result: UpstreamResult | undefined) => {
+          if (finished) {
+            return;
+          }
+          finished = true;
+          resolve(result);
+        };
+
+        const launch = () => {
+          const controller = new AbortController();
+          controllers.push(controller);
+          inFlight++;
+          void ScoreSaberApiService.requestOnce(url, endpoint, options, controller.signal).then(result => {
+            inFlight--;
+            if (isUsableResult(result) || inFlight === 0) {
+              finish(result);
+            }
+          });
+        };
+
+        timeoutTimer = setTimeout(() => {
+          for (const controller of controllers) {
+            controller.abort(TIMEOUT_REASON);
+          }
+          finish(undefined);
+        }, timeoutMs);
+
+        if (timeoutMs > ScoreSaberApiService.HEDGE_AFTER_MS) {
+          hedgeTimer = setTimeout(launch, ScoreSaberApiService.HEDGE_AFTER_MS);
+        }
+
+        launch();
+      });
+    } finally {
+      clearTimeout(hedgeTimer);
+      clearTimeout(timeoutTimer);
+      for (const controller of controllers) {
+        controller.abort(SUPERSEDED_REASON);
+      }
+    }
   }
 
   private static async requestOnce(
     url: string,
-    options?: {
-      searchParams?: Record<string, string>;
-    }
+    endpoint: string,
+    options: { searchParams?: Record<string, string> } | undefined,
+    signal: AbortSignal
   ) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), ScoreSaberApiService.REQUEST_TIMEOUT_MS);
+    const startedAt = performance.now();
+    const observe = (outcome: ScoreSaberApiOutcome) => {
+      MetricsService.getMetric<ScoreSaberApiCallMetric>(MetricType.SCORESABER_API_CALLS)?.observe(
+        endpoint,
+        outcome,
+        performance.now() - startedAt
+      );
+    };
+    const observeFailure = () => {
+      if (!signal.aborted) {
+        observe("network");
+      } else if (signal.reason === TIMEOUT_REASON) {
+        observe("timeout");
+      }
+    };
 
-    let response: Response | undefined;
+    let response: Response;
     try {
       response = await fetch(
         `${env.PROXY_URL}/${encodeURIComponent(`${url}${getQueryParamsFromObject(options?.searchParams || {})}`)}`,
-        {
-          signal: controller.signal,
-        }
+        { signal }
       );
     } catch {
-      return undefined;
-    } finally {
-      clearTimeout(timeoutId);
-    }
-
-    if (!response) {
+      observeFailure();
       return undefined;
     }
 
@@ -179,18 +307,18 @@ export class ScoreSaberApiService {
     try {
       data = (await response.json()) as SerializableValue;
     } catch {
-      return {
-        status: response.status,
-        data: undefined,
-        retryAfterMs: parseRetryAfterMs(response),
-      };
+      if (signal.aborted) {
+        observeFailure();
+        return undefined;
+      }
     }
 
+    observe(outcomeForStatus(response.status));
     return {
       status: response.status,
       data,
       retryAfterMs: parseRetryAfterMs(response),
-    };
+    } satisfies UpstreamResult;
   }
 
   /**

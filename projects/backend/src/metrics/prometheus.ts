@@ -24,6 +24,7 @@ export enum MetricType {
   TOTAL_REQUESTS = "total_requests",
   HTTP_RESPONSES = "http_responses",
   API_SERVICES = "api_services",
+  SCORESABER_API_CALLS = "scoresaber_api_calls",
   CACHE_PERFORMANCE = "cache_performance",
   PROCESS_UPTIME = "process_uptime",
   PROCESS_CPU = "process_cpu",

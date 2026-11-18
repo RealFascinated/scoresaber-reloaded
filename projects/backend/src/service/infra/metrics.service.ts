@@ -7,6 +7,7 @@ import MemoryUsageMetric from "../../metrics/impl/backend/memory-usage";
 import ProcessCpuMetric from "../../metrics/impl/backend/process-cpu";
 import RedisHealthMetric from "../../metrics/impl/backend/redis-health";
 import ResponseTimeHistogramMetric from "../../metrics/impl/backend/response-time";
+import ScoreSaberApiCallMetric from "../../metrics/impl/backend/scoresaber-api-call";
 import TotalRequestsMetric from "../../metrics/impl/backend/total-requests";
 import ProcessUptimeMetric from "../../metrics/impl/backend/uptime";
 import LeaderboardCountMetric from "../../metrics/impl/database/leaderboard-count";
@@ -61,6 +62,7 @@ export default class MetricsService {
     this.registerMetric(new TotalRequestsMetric());
     this.registerMetric(new HttpResponseStatusMetric());
     this.registerMetric(new ApiServicesMetric());
+    this.registerMetric(new ScoreSaberApiCallMetric());
     this.registerMetric(new CachePerformanceMetric());
     this.registerMetric(new ProcessUptimeMetric());
     this.registerMetric(new ProcessCpuMetric());

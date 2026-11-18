@@ -43,6 +43,8 @@ import {
 const PORT = Number(process.env.FAKE_UPSTREAM_PORT ?? 3128);
 const DELAY_MS = Number(process.env.FAKE_UPSTREAM_DELAY_MS ?? 20);
 const ERROR_RATE = Number(process.env.FAKE_UPSTREAM_ERROR_RATE ?? 0);
+const SLOW_RATE = Number(process.env.FAKE_UPSTREAM_SLOW_RATE ?? 0);
+const SLOW_MS = Number(process.env.FAKE_UPSTREAM_SLOW_MS ?? 3000);
 
 const V1_SCORES_PER_PAGE = 12;
 const V2_SCORES_PER_PAGE = 12;
@@ -693,6 +695,10 @@ Bun.serve({
   async fetch(request) {
     await Bun.sleep(DELAY_MS);
 
+    if (SLOW_RATE > 0 && Math.random() < SLOW_RATE) {
+      await Bun.sleep(SLOW_MS);
+    }
+
     if (ERROR_RATE > 0 && Math.random() < ERROR_RATE) {
       return new Response("upstream error", { status: 500 });
     }
@@ -708,4 +714,6 @@ Bun.serve({
   },
 });
 
-console.log(`fake upstream on :${PORT} delay=${DELAY_MS}ms errorRate=${ERROR_RATE}`);
+console.log(
+  `fake upstream on :${PORT} delay=${DELAY_MS}ms errorRate=${ERROR_RATE} slowRate=${SLOW_RATE} slowMs=${SLOW_MS}ms`
+);
