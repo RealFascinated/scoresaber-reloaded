@@ -85,8 +85,14 @@ export default class MiniRankingService {
     const allPlayers = pageResponses
       .filter((response): response is NonNullable<typeof response> => response !== undefined)
       .flatMap(response => response.data);
+    const tokenRank = (token: (typeof allPlayers)[number]) =>
+      type === "global" ? token.stats.rank : token.stats.countryRank;
+    const windowTokens = allPlayers.filter(token => {
+      const tokenPlayerRank = tokenRank(token);
+      return token.id === player.id || (tokenPlayerRank >= startRank - 2 && tokenPlayerRank <= endRank + 5);
+    });
 
-    const players = await ScoreSaberPlayerService.getBasicPlayers(allPlayers);
+    const players = await ScoreSaberPlayerService.getBasicPlayers(windowTokens);
 
     return this.processPlayersAndBuildResult(players, player, type, getRank);
   }
