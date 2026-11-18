@@ -23,8 +23,6 @@ export const SuggestedMapSchema = Type.Object({
   predictedAccuracy: Type.Number(),
   /** Raw pp that accuracy is worth. */
   predictedPp: Type.Number(),
-  /** Extra pp over a map of the same stars where players score the typical accuracy. */
-  bonusPp: Type.Number(),
   /** Weighted pp the player gains by setting the predicted score, null without a player. */
   weightedGain: Type.Union([Type.Number(), Type.Null()]),
   /** Accuracy needed to match the pp of the player's 100th best score, null without a player or when unreachable. */

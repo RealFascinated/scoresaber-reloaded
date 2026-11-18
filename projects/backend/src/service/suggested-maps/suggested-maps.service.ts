@@ -212,7 +212,9 @@ export class SuggestedMapsService {
           }
         : null,
       updatedAt: updatedAt.toISOString(),
-      maps: rankSuggestedMaps({ maps, skill, slope, params, filters, playerScores, playerPps, style }),
+      maps: rankSuggestedMaps({ maps, skill, slope, params, filters, playerScores, playerPps, style }).map(
+        ({ bonusPp: _bonusPp, ...map }) => map
+      ),
     };
   }
 }

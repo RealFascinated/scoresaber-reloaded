@@ -16,7 +16,6 @@ export type RankableMap = Omit<
   SuggestedMap,
   | "predictedAccuracy"
   | "predictedPp"
-  | "bonusPp"
   | "weightedGain"
   | "requiredAccuracy"
   | "currentAccuracy"
@@ -27,6 +26,8 @@ export type RankableMap = Omit<
   ease: number;
   prior: number;
 };
+
+export type RankedSuggestedMap = SuggestedMap & { bonusPp: number };
 
 export type PlayerMapScore = { pp: number; accuracy: number };
 
@@ -351,7 +352,7 @@ export function rankSuggestedMaps(args: {
 }) {
   const { maps, skill, slope, filters, playerScores, playerPps, style } = args;
   const gain = playerPps ? new WeightedGain(playerPps) : null;
-  const out: SuggestedMap[] = [];
+  const out: RankedSuggestedMap[] = [];
   const listFloorPp = playerPps ? (playerPps[Math.min(LIST_SIZE, playerPps.length) - 1] ?? 0) : 0;
 
   for (const map of maps) {
@@ -416,7 +417,7 @@ export function rankSuggestedMaps(args: {
     });
   }
 
-  const margin = (map: SuggestedMap) =>
+  const margin = (map: RankedSuggestedMap) =>
     map.requiredAccuracy === null ? Number.NEGATIVE_INFINITY : map.predictedAccuracy - map.requiredAccuracy;
   out.sort((a, b) => {
     if (filters.sort === "gain" && a.weightedGain !== null && b.weightedGain !== null) {
@@ -432,7 +433,7 @@ export function rankSuggestedMaps(args: {
 
 const PLAYED_SHARE = 0.5;
 
-function balancePlayed(ranked: SuggestedMap[], limit: number) {
+function balancePlayed(ranked: RankedSuggestedMap[], limit: number) {
   const played = ranked.filter(map => map.currentAccuracy !== null);
   const fresh = ranked.filter(map => map.currentAccuracy === null);
   const freshCount = Math.min(

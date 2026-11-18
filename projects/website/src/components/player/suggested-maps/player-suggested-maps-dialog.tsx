@@ -139,10 +139,6 @@ export default function PlayerSuggestedMapsDialog({ player }: { player: ScoreSab
                       </td>
                       <td className="px-3 py-2 text-right whitespace-nowrap">
                         {map.weightedGain !== null ? `+${map.weightedGain.toFixed(1)}pp` : "-"}
-                        <span className="block text-xs text-muted-foreground">
-                          {map.bonusPp >= 0 ? "+" : ""}
-                          {map.bonusPp.toFixed(0)}pp vs. avg
-                        </span>
                       </td>
                     </tr>
                   ))}
