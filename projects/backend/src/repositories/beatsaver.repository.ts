@@ -1,11 +1,12 @@
 import { BeatSaverMapToken } from "@ssr/common/schemas/beatsaver/tokens/map";
 import { parseDate } from "@ssr/common/utils/time-utils";
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq, gte, and, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
 import {
   beatSaverMapDifficultiesTable,
   beatSaverMapsTable,
   beatSaverMapVersionsTable,
+  beatSaverMissingMapsTable,
   beatSaverUploadersTable,
 } from "../db/schema";
 import { differsFromExcluded } from "../db/upsert";
@@ -97,7 +98,51 @@ const beatSaverMapChangedWhere = differsFromExcluded([
   beatSaverMapsTable.tags,
 ]);
 
+// WARNING: empty name keeps the statement unnamed (pgbouncer)
+const findMapBundleByVersionHashQuery = db
+  .select({
+    version: beatSaverMapVersionsTable,
+    map: beatSaverMapsTable,
+    uploader: beatSaverUploadersTable,
+    difficulty: beatSaverMapDifficultiesTable,
+  })
+  .from(beatSaverMapVersionsTable)
+  .innerJoin(beatSaverMapsTable, eq(beatSaverMapVersionsTable.mapId, beatSaverMapsTable.id))
+  .leftJoin(beatSaverUploadersTable, eq(beatSaverMapsTable.uploaderId, beatSaverUploadersTable.id))
+  .leftJoin(
+    beatSaverMapDifficultiesTable,
+    eq(beatSaverMapDifficultiesTable.versionId, beatSaverMapVersionsTable.id)
+  )
+  .where(eq(beatSaverMapVersionsTable.hash, sql.placeholder("hash")))
+  .prepare("");
+
+// WARNING: empty name keeps the statement unnamed (pgbouncer)
+const isMarkedMissingQuery = db
+  .select({ hash: beatSaverMissingMapsTable.hash })
+  .from(beatSaverMissingMapsTable)
+  .where(
+    and(
+      eq(beatSaverMissingMapsTable.hash, sql.placeholder("hash")),
+      gte(beatSaverMissingMapsTable.checkedAt, sql.placeholder("since"))
+    )
+  )
+  .limit(1)
+  .prepare("");
+
 export class BeatSaverRepository {
+  public static async isMarkedMissing(hash: string, since: Date) {
+    const rows = await isMarkedMissingQuery.execute({ hash: hash.toLowerCase(), since });
+    return rows.length > 0;
+  }
+
+  public static async markMissing(hash: string) {
+    const checkedAt = new Date();
+    await db
+      .insert(beatSaverMissingMapsTable)
+      .values({ hash: hash.toLowerCase(), checkedAt })
+      .onConflictDoUpdate({ target: beatSaverMissingMapsTable.hash, set: { checkedAt } });
+  }
+
   public static async upsertMap(map: BeatSaverMapToken) {
     map.versions.forEach(version => {
       version.hash = version.hash.toLowerCase();
@@ -276,21 +321,7 @@ export class BeatSaverRepository {
   public static async findMapBundleByVersionHash(hash: string) {
     const normalizedHash = hash.toLowerCase();
 
-    const rows = await db
-      .select({
-        version: beatSaverMapVersionsTable,
-        map: beatSaverMapsTable,
-        uploader: beatSaverUploadersTable,
-        difficulty: beatSaverMapDifficultiesTable,
-      })
-      .from(beatSaverMapVersionsTable)
-      .innerJoin(beatSaverMapsTable, eq(beatSaverMapVersionsTable.mapId, beatSaverMapsTable.id))
-      .leftJoin(beatSaverUploadersTable, eq(beatSaverMapsTable.uploaderId, beatSaverUploadersTable.id))
-      .leftJoin(
-        beatSaverMapDifficultiesTable,
-        eq(beatSaverMapDifficultiesTable.versionId, beatSaverMapVersionsTable.id)
-      )
-      .where(eq(beatSaverMapVersionsTable.hash, normalizedHash));
+    const rows = await findMapBundleByVersionHashQuery.execute({ hash: normalizedHash });
 
     if (rows.length === 0) {
       return undefined;

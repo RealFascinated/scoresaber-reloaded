@@ -8,34 +8,9 @@ import { beatSaverRowsToMap } from "../../db/converter/beatsaver-map";
 import { BeatSaverRepository } from "../../repositories/beatsaver.repository";
 import CacheService, { CacheId } from "../infra/cache.service";
 
+const MISSING_RECHECK_MS = TimeUnit.toMillis(TimeUnit.Day, 1);
+
 export default class BeatSaverService {
-  private static readonly NEGATIVE_CACHE_TTL_MS = TimeUnit.toMillis(TimeUnit.Minute, 30);
-  private static readonly NEGATIVE_CACHE_MAX_ENTRIES = 5_000;
-  private static readonly negativeCache = new Map<string, number>();
-
-  private static isNegativelyCached(cacheKey: string) {
-    const cachedAt = BeatSaverService.negativeCache.get(cacheKey);
-    if (cachedAt == null) {
-      return false;
-    }
-    if (Date.now() - cachedAt >= BeatSaverService.NEGATIVE_CACHE_TTL_MS) {
-      BeatSaverService.negativeCache.delete(cacheKey);
-      return false;
-    }
-    return true;
-  }
-
-  private static recordNegative(cacheKey: string) {
-    BeatSaverService.negativeCache.set(cacheKey, Date.now());
-    if (BeatSaverService.negativeCache.size > BeatSaverService.NEGATIVE_CACHE_MAX_ENTRIES) {
-      const oldest = [...BeatSaverService.negativeCache.entries()]
-        .sort((a, b) => a[1] - b[1])
-        .slice(0, Math.floor(BeatSaverService.NEGATIVE_CACHE_MAX_ENTRIES / 4));
-      for (const [key] of oldest) {
-        BeatSaverService.negativeCache.delete(key);
-      }
-    }
-  }
   /**
    * Fetches a BeatSaver map
    *
@@ -49,20 +24,25 @@ export default class BeatSaverService {
     const normalizedHash = normalizeSongHash(hash);
     const cacheKey = beatSaverMapCacheKey(normalizedHash, difficulty, characteristic);
 
-    if (BeatSaverService.isNegativelyCached(cacheKey)) {
-      return undefined;
-    }
-
-    const result = await CacheService.fetch(CacheId.BEATSAVER_MAP, cacheKey, async () => {
+    return CacheService.fetch(CacheId.BEATSAVER_MAP, cacheKey, async () => {
       let rows = await BeatSaverRepository.findMapBundleByVersionHash(normalizedHash);
 
       if (!rows) {
-        const fetchedToken = await ApiServiceRegistry.getInstance()
-          .getBeatSaverService()
-          .lookupMap(normalizedHash);
-        if (!fetchedToken) {
+        if (
+          await BeatSaverRepository.isMarkedMissing(normalizedHash, new Date(Date.now() - MISSING_RECHECK_MS))
+        ) {
           return undefined;
         }
+        const lookup = await ApiServiceRegistry.getInstance()
+          .getBeatSaverService()
+          .lookupMapResult(normalizedHash);
+        if (lookup.status === "missing") {
+          await BeatSaverRepository.markMissing(normalizedHash);
+        }
+        if (lookup.status !== "found") {
+          return undefined;
+        }
+        const fetchedToken = lookup.map;
         await this.saveMap(fetchedToken);
         rows = await BeatSaverRepository.findMapBundleByVersionHash(normalizedHash);
         if (!rows) {
@@ -92,11 +72,6 @@ export default class BeatSaverService {
       });
       return map;
     });
-
-    if (result === undefined) {
-      BeatSaverService.recordNegative(cacheKey);
-    }
-    return result;
   }
 
   /**

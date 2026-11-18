@@ -553,6 +553,11 @@ export const beatSaverUploadersTable = pgTable("beatsaver-uploaders", {
   playlistUrl: text(),
 });
 
+export const beatSaverMissingMapsTable = pgTable("beatsaver-missing-maps", {
+  hash: text().primaryKey(),
+  checkedAt: timestamp().notNull(),
+});
+
 export const beatSaverMapsTable = pgTable(
   "beatsaver-maps",
   {

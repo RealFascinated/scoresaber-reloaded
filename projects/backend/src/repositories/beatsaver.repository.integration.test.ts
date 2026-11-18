@@ -7,6 +7,7 @@ import {
   beatSaverMapDifficultiesTable,
   beatSaverMapsTable,
   beatSaverMapVersionsTable,
+  beatSaverMissingMapsTable,
   beatSaverUploadersTable,
 } from "../db/schema";
 import { BeatSaverRepository } from "./beatsaver.repository";
@@ -155,6 +156,51 @@ describe("BeatSaverRepository", () => {
       expect(bundle?.map.name).toBe("Renamed Map");
       expect(bundle?.map.tags).toEqual(["tech", "speed"]);
       expect(bundle?.difficulties[0]?.notes).toBe(450);
+    });
+  });
+
+  describe("missing maps", () => {
+    const MISSING_HASH = "ffeeddccbbaa99887766554433221100ffeeddcc";
+
+    afterAll(async () => {
+      await db.delete(beatSaverMissingMapsTable).where(eq(beatSaverMissingMapsTable.hash, MISSING_HASH));
+    });
+
+    test("an unmarked hash is not missing", async () => {
+      expect(await BeatSaverRepository.isMarkedMissing(MISSING_HASH, new Date(0))).toBe(false);
+    });
+
+    test("a marked hash is missing within the window, case-insensitively", async () => {
+      await BeatSaverRepository.markMissing(MISSING_HASH.toUpperCase());
+
+      expect(await BeatSaverRepository.isMarkedMissing(MISSING_HASH, new Date(Date.now() - 60_000))).toBe(
+        true
+      );
+    });
+
+    test("a mark older than the window is ignored", async () => {
+      await BeatSaverRepository.markMissing(MISSING_HASH);
+
+      expect(await BeatSaverRepository.isMarkedMissing(MISSING_HASH, new Date(Date.now() + 60_000))).toBe(
+        false
+      );
+    });
+
+    test("marking again refreshes checkedAt", async () => {
+      const stale = new Date(Date.now() - 86_400_000);
+      await db
+        .update(beatSaverMissingMapsTable)
+        .set({ checkedAt: stale })
+        .where(eq(beatSaverMissingMapsTable.hash, MISSING_HASH));
+      expect(await BeatSaverRepository.isMarkedMissing(MISSING_HASH, new Date(Date.now() - 60_000))).toBe(
+        false
+      );
+
+      await BeatSaverRepository.markMissing(MISSING_HASH);
+
+      expect(await BeatSaverRepository.isMarkedMissing(MISSING_HASH, new Date(Date.now() - 60_000))).toBe(
+        true
+      );
     });
   });
 });
