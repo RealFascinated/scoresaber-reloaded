@@ -304,6 +304,12 @@ export const scoreSaberLeaderboardsTable = pgTable(
     index("leaderboards_plays_desc_idx").on(table.plays.desc()),
     index("leaderboards_daily_plays_desc_idx").on(table.dailyPlays.desc()),
     index("leaderboards_trending_score_desc_idx").on(table.trendingScore.desc()),
+    index("leaderboards_trending_score_nonzero_idx")
+      .on(table.id)
+      .where(sql`${table.trendingScore} <> 0`),
+    index("leaderboards_daily_plays_nonzero_idx")
+      .on(table.id)
+      .where(sql`${table.dailyPlays} <> 0`),
   ]
 );
 

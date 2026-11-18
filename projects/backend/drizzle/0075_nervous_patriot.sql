@@ -1,0 +1,2 @@
+CREATE INDEX "leaderboards_trending_score_nonzero_idx" ON "scoresaber-leaderboards" USING btree ("id") WHERE "scoresaber-leaderboards"."trendingScore" <> 0;--> statement-breakpoint
+CREATE INDEX "leaderboards_daily_plays_nonzero_idx" ON "scoresaber-leaderboards" USING btree ("id") WHERE "scoresaber-leaderboards"."dailyPlays" <> 0;
