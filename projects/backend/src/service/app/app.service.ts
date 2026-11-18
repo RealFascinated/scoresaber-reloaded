@@ -29,6 +29,8 @@ export class AppService {
 
   private static readonly samples: AppStatSample[] = [];
   private static samplingStarted = false;
+  private static warmupValues: Promise<AppStatValues> | undefined;
+  private static warmupValuesAt = 0;
 
   /**
    * Starts sampling app statistics so velocities are available.
@@ -135,7 +137,21 @@ export class AppService {
     if (latest !== undefined) {
       return latest.values;
     }
-    return AppService.getRawValues();
+    const now = Date.now();
+    if (
+      AppService.warmupValues === undefined ||
+      now - AppService.warmupValuesAt >= AppService.SAMPLE_INTERVAL_MS
+    ) {
+      AppService.warmupValuesAt = now;
+      const values = AppService.getRawValues();
+      AppService.warmupValues = values;
+      values.catch(() => {
+        if (AppService.warmupValues === values) {
+          AppService.warmupValues = undefined;
+        }
+      });
+    }
+    return AppService.warmupValues;
   }
 
   /**
@@ -143,7 +159,8 @@ export class AppService {
    *
    * Values come from the latest minute-by-minute sample rather than re-running
    * the count queries on every request (the heavy ones scan multi-million-row
-   * tables); velocities are derived from the same rolling window.
+   * tables); velocities are derived from the same rolling window. Until the first
+   * sample exists, concurrent requests share one count run per sample interval.
    */
   public static async getAppStatistics() {
     const values = await AppService.getLatestValues();

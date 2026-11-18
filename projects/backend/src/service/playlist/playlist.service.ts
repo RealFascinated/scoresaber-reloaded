@@ -12,29 +12,22 @@ import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { parseSchema } from "@ssr/common/schemas/parse";
 import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import { ScoreSaberLeaderboardQueryCategory } from "@ssr/common/schemas/scoresaber/leaderboard/query-filters";
-import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
 import type { SuggestedMapsPlaylistQuery } from "@ssr/common/schemas/suggested-maps/suggested-maps-route";
 import { parseSnipePlaylistSettings } from "@ssr/common/snipe/snipe-playlist-utils";
 import type { SnipeSettings } from "@ssr/common/snipe/snipe-settings-schema";
 import { capitalizeFirstLetter, truncateText } from "@ssr/common/string-utils";
 import { formatDate } from "@ssr/common/utils/time-utils";
-import { eq, gt, gte, isNotNull, lte } from "drizzle-orm";
 import { Type, type Static } from "typebox";
-import { leaderboardRowToType } from "../../db/converter/scoresaber-leaderboard";
-import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
-import { scoreSaberLeaderboardRealmsTable, scoreSaberScoresTable } from "../../db/schema";
-import { scorePpExpr } from "../../repositories/realm-columns";
+import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-leaderboards.repository";
 import {
-  ScoreSaberLeaderboardsRepository,
-  type PlaylistLeaderboardEntry,
-} from "../../repositories/scoresaber-leaderboards.repository";
-import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+  ScoreSaberScoresRepository,
+  type PlaylistScoreFilters,
+} from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerCoreService } from "../player/player-core.service";
 import { RankedBatchService } from "../ranked-batch/ranked-batch.service";
 import { SuggestedMapsService } from "../suggested-maps/suggested-maps.service";
-import { scoreRowsToPlaylistSongs, takeTopUniqueSongRows } from "./playlist-song-utils";
+import { groupPlaylistSongs, takeTopUniqueSongRows } from "./playlist-song-utils";
 import { buildRankedBatchPlaylist } from "./ranked-batch-playlist";
 import { DEFAULT_PLAYLIST_SIZE, buildSuggestedMapsPlaylist } from "./suggested-maps-playlist";
 
@@ -112,31 +105,13 @@ export default class PlaylistService {
     throw new NotFoundError(`Playlist ${id} not found`);
   }
 
-  private static groupPlaylistSongs(entries: PlaylistLeaderboardEntry[]) {
-    const songs = new Map<string, Playlist["songs"][number]>();
-    for (const entry of entries) {
-      let song = songs.get(entry.songHash);
-      if (!song) {
-        song = {
-          songName: entry.songName,
-          levelAuthorName: entry.songAuthorName,
-          hash: entry.songHash,
-          difficulties: [],
-        };
-        songs.set(entry.songHash, song);
-      }
-      song.difficulties.push({ difficulty: entry.difficulty, characteristic: entry.characteristic });
-    }
-    return Array.from(songs.values());
-  }
-
   /**
    * Gets the ranked maps playlist
    *
    * @returns the ranked maps playlist
    */
   public static async getRankedMapsPlaylist() {
-    const songs = PlaylistService.groupPlaylistSongs(
+    const songs = groupPlaylistSongs(
       await ScoreSaberLeaderboardsRepository.getPlaylistEntries({ ranked: true }, DEFAULT_REALM_ID)
     );
 
@@ -156,7 +131,7 @@ export default class PlaylistService {
    * @returns the qualified maps playlist
    */
   public static async getQualifiedMapsPlaylist() {
-    const songs = PlaylistService.groupPlaylistSongs(
+    const songs = groupPlaylistSongs(
       await ScoreSaberLeaderboardsRepository.getPlaylistEntries({ qualified: true }, DEFAULT_REALM_ID)
     );
 
@@ -283,7 +258,7 @@ export default class PlaylistService {
       plays: "plays",
       dailyPlays: "daily_plays",
     };
-    const rankedLeaderboards = await ScoreSaberLeaderboardsRepository.getLeaderboards(
+    const entries = await ScoreSaberLeaderboardsRepository.getPlaylistEntries(
       {
         ranked: true,
         minStars: parsedConfig.stars.min,
@@ -292,14 +267,9 @@ export default class PlaylistService {
       },
       DEFAULT_REALM_ID
     );
-
-    const leaderboards: Map<string, ScoreSaberLeaderboard> = new Map();
-    for (const leaderboard of rankedLeaderboards) {
-      if (!leaderboards.has(leaderboard.songHash)) {
-        leaderboards.set(leaderboard.songHash, { ...leaderboard, difficulties: [] });
-      }
-      leaderboards.get(leaderboard.songHash)!.difficulties.push(leaderboard.difficulty);
-    }
+    const songs = groupPlaylistSongs(
+      entries.map(entry => ({ ...entry, songHash: entry.songHash.toUpperCase() }))
+    );
 
     return {
       playlistTitle: `ScoreSaber Custom (${parsedConfig.stars.min} - ${parsedConfig.stars.max} stars, ${
@@ -309,15 +279,7 @@ export default class PlaylistService {
       customData: {
         syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/scoresaber-custom-ranked-maps.bplist?config=${encodeURIComponent(settingsBase64 ?? "")}`,
       },
-      songs: Array.from(leaderboards.values()).map(leaderboard => ({
-        songName: leaderboard.songName,
-        levelAuthorName: leaderboard.songAuthorName,
-        hash: leaderboard.songHash,
-        difficulties: leaderboard.difficulties.map(difficulty => ({
-          difficulty: difficulty.difficulty,
-          characteristic: difficulty.characteristic,
-        })),
-      })),
+      songs,
     };
   }
 
@@ -336,30 +298,27 @@ export default class PlaylistService {
         throw new NotFoundError(`Unable to create a self playlist as the user isn't tracked.`);
       }
 
-      const scoredLeaderboards = await PlaylistService.fetchPlayerScoreSaberScoresWithLeaderboards(
+      const filters = {
+        rankedStatus: settings.rankedStatus,
+        starRange: settings.starRange,
+      } satisfies PlaylistScoreFilters;
+
+      const entries = await ScoreSaberScoresRepository.selectPlaylistScoreEntries(
         user,
-        settings.rankedStatus,
-        settings.starRange
+        { ...filters, accuracyRange: settings.accuracyRange },
+        settings.sort ?? "pp",
+        settings.sortDirection ?? "desc",
+        DEFAULT_REALM_ID
       );
 
-      if (scoredLeaderboards.length === 0) {
+      if (entries.length === 0) {
+        if (await ScoreSaberScoresRepository.hasPlaylistScores(user, filters, DEFAULT_REALM_ID)) {
+          throw new NotFoundError(`Unable to create a self playlist as no scores match the filters.`);
+        }
         throw new NotFoundError(`Unable to create a self playlist as the user has no scores.`);
       }
 
-      const filtered = scoredLeaderboards.filter(({ score }) => {
-        if (!settings.accuracyRange) {
-          return true;
-        }
-        return score.accuracy >= settings.accuracyRange.min && score.accuracy <= settings.accuracyRange.max;
-      });
-
-      if (filtered.length === 0) {
-        throw new NotFoundError(`Unable to create a self playlist as no scores match the filters.`);
-      }
-
-      PlaylistService.sortPlaylistScoreRows(filtered, settings.sort, settings.sortDirection);
-
-      const songs = scoreRowsToPlaylistSongs(takeTopUniqueSongRows(filtered, settings.limit));
+      const songs = groupPlaylistSongs(takeTopUniqueSongRows(entries, settings.limit));
 
       return {
         playlistTitle: getSelfSnipePlaylistTitle({ name: "Self Playlist", settings }),
@@ -398,73 +357,45 @@ export default class PlaylistService {
         );
       }
 
-      async function getScores(playerId: string) {
-        const results = await PlaylistService.fetchPlayerScoreSaberScoresWithLeaderboards(
-          playerId,
-          settings.rankedStatus,
-          settings.starRange
-        );
+      const filters = {
+        rankedStatus: settings.rankedStatus,
+        starRange: settings.starRange,
+      } satisfies PlaylistScoreFilters;
 
-        if (results.length === 0) {
-          throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
-        }
+      const [userScores, toSnipeScores] = await Promise.all([
+        ScoreSaberScoresRepository.selectPlaylistScoreValues(user, filters, DEFAULT_REALM_ID),
+        ScoreSaberScoresRepository.selectPlaylistScoreEntries(
+          toSnipe,
+          { ...filters, accuracyRange: settings.accuracyRange },
+          settings.sort ?? "pp",
+          settings.sortDirection ?? "desc",
+          DEFAULT_REALM_ID
+        ),
+      ]);
 
-        return results;
+      if (userScores.length === 0) {
+        throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
       }
 
-      const [userScores, toSnipeScores] = await Promise.all([getScores(user), getScores(toSnipe)]);
-
-      if (userScores.length === 0 || toSnipeScores.length === 0) {
-        throw new NotFoundError(
-          `Unable to create a snipe playlist for ${toSnipe} as one of the users has no scores.`
-        );
+      if (
+        toSnipeScores.length === 0 &&
+        !(await ScoreSaberScoresRepository.hasPlaylistScores(toSnipe, filters, DEFAULT_REALM_ID))
+      ) {
+        throw new NotFoundError(`Unable to create a snipe playlist for ${toSnipe} as they have no scores.`);
       }
 
-      const userScoreMap = new Map<number, { score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>();
+      const userScoreByLeaderboard = new Map<number, number>();
       for (const userScore of userScores) {
-        const leaderboardId = userScore.leaderboard.id;
-        if (!userScoreMap.has(leaderboardId)) {
-          userScoreMap.set(leaderboardId, userScore);
-        }
+        userScoreByLeaderboard.set(userScore.leaderboardId, userScore.score);
       }
 
-      const filteredScores: Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }> = [];
-
-      for (const toSnipeScore of toSnipeScores) {
-        const leaderboardId = toSnipeScore.leaderboard.id;
-        const userScore = userScoreMap.get(leaderboardId);
-
-        if (
-          settings.accuracyRange &&
-          (toSnipeScore.score.accuracy < settings.accuracyRange.min ||
-            toSnipeScore.score.accuracy > settings.accuracyRange.max)
-        ) {
-          continue;
+      const filteredScores = toSnipeScores.filter(toSnipeScore => {
+        const userScore = userScoreByLeaderboard.get(toSnipeScore.leaderboardId);
+        if (userScore === undefined) {
+          return !settings.requireBothScores;
         }
-
-        if (settings.requireBothScores) {
-          if (!userScore) {
-            continue;
-          }
-          const userScoreValue = userScore.score.score;
-          const toSnipeScoreValue = toSnipeScore.score.score;
-          if (toSnipeScoreValue > userScoreValue) {
-            filteredScores.push(toSnipeScore);
-          }
-        } else {
-          if (!userScore) {
-            filteredScores.push(toSnipeScore);
-          } else {
-            const userScoreValue = userScore.score.score;
-            const toSnipeScoreValue = toSnipeScore.score.score;
-            if (toSnipeScoreValue > userScoreValue) {
-              filteredScores.push(toSnipeScore);
-            }
-          }
-        }
-      }
-
-      PlaylistService.sortPlaylistScoreRows(filteredScores, settings.sort, settings.sortDirection);
+        return toSnipeScore.score > userScore;
+      });
 
       const player = await PlayerCoreService.getAccount(toSnipe);
       if (!player) {
@@ -473,7 +404,7 @@ export default class PlaylistService {
         );
       }
 
-      const songs = scoreRowsToPlaylistSongs(takeTopUniqueSongRows(filteredScores, settings.limit));
+      const songs = groupPlaylistSongs(takeTopUniqueSongRows(filteredScores, settings.limit));
 
       return {
         playlistTitle: getSelfSnipePlaylistTitle({
@@ -490,83 +421,5 @@ export default class PlaylistService {
       PlaylistService.logger.error("Error creating snipe playlist", error);
       throw error;
     }
-  }
-
-  private static sortPlaylistScoreRows(
-    rows: Array<{ score: ScoreSaberScore; leaderboard: ScoreSaberLeaderboard }>,
-    sort: SelfPlaylistSettings["sort"] | SnipeSettings["sort"] | undefined,
-    sortDirection: SelfPlaylistSettings["sortDirection"] | SnipeSettings["sortDirection"] | undefined
-  ) {
-    const field = sort ?? "pp";
-    const dir = sortDirection ?? "desc";
-    const mult = dir === "asc" ? 1 : -1;
-    rows.sort((a, b) => {
-      const va = PlaylistService.scoreSortValue(a.score, field);
-      const vb = PlaylistService.scoreSortValue(b.score, field);
-      if (va !== vb) {
-        return (va - vb) * mult;
-      }
-      return (a.score.scoreId - b.score.scoreId) * mult;
-    });
-  }
-
-  private static scoreSortValue(score: ScoreSaberScore, field: string) {
-    switch (field) {
-      case "pp":
-        return score.pp;
-      case "score":
-        return score.score;
-      case "acc":
-        return score.accuracy;
-      case "date":
-        return score.timestamp.getTime();
-      case "misses":
-        return score.misses;
-      case "maxcombo":
-        return score.maxCombo;
-      case "medals":
-        return score.rank;
-      default:
-        return score.pp;
-    }
-  }
-
-  private static async fetchPlayerScoreSaberScoresWithLeaderboards(
-    playerId: string,
-    rankedStatus: SelfPlaylistSettings["rankedStatus"] | SnipeSettings["rankedStatus"],
-    starRange: SelfPlaylistSettings["starRange"] | SnipeSettings["starRange"]
-  ) {
-    const conditions = [eq(scoreSaberScoresTable.playerId, playerId)];
-
-    if (rankedStatus === "ranked") {
-      conditions.push(gt(scorePpExpr, 0));
-    } else if (rankedStatus === "unranked") {
-      conditions.push(lte(scorePpExpr, 0));
-    }
-
-    if (rankedStatus === "ranked" && starRange.min !== undefined && starRange.max !== undefined) {
-      conditions.push(isNotNull(scoreSaberLeaderboardRealmsTable.stars));
-      conditions.push(gte(scoreSaberLeaderboardRealmsTable.stars, starRange.min));
-      conditions.push(lte(scoreSaberLeaderboardRealmsTable.stars, starRange.max));
-    }
-
-    const rows = await ScoreSaberScoresRepository.selectScoresJoinedLeaderboardsWhere(
-      conditions,
-      DEFAULT_REALM_ID
-    );
-
-    const leaderboardMap = new Map<number, ScoreSaberLeaderboard>();
-
-    return rows.map(({ scoreRow, lbRow }) => {
-      let leaderboard = leaderboardMap.get(lbRow.id);
-      if (!leaderboard) {
-        leaderboard = leaderboardRowToType(lbRow);
-        leaderboardMap.set(lbRow.id, leaderboard);
-      }
-      return {
-        score: scoreSaberScoreRowToType(scoreRow),
-        leaderboard,
-      };
-    });
   }
 }

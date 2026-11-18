@@ -1,11 +1,5 @@
-import { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
-import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
-
-export type PlaylistScoreRow = {
-  score: ScoreSaberScore;
-  leaderboard: ScoreSaberLeaderboard;
-};
+import type { PlaylistLeaderboardEntry } from "../../repositories/scoresaber-leaderboards.repository";
 
 /**
  * Keeps every row for the top `limit` unique songs, grouped by song hash.
@@ -13,18 +7,21 @@ export type PlaylistScoreRow = {
  * position; all difficulties a player scored on stay in the result so the
  * playlist can highlight them all in-game.
  */
-export function takeTopUniqueSongRows(rows: PlaylistScoreRow[], limit?: number) {
-  const groupedByHash = new Map<string, PlaylistScoreRow[]>();
+export function takeTopUniqueSongRows<Row extends Pick<PlaylistLeaderboardEntry, "songHash">>(
+  rows: Row[],
+  limit?: number
+) {
+  const groupedByHash = new Map<string, Row[]>();
   for (const row of rows) {
-    const songRows = groupedByHash.get(row.leaderboard.songHash);
+    const songRows = groupedByHash.get(row.songHash);
     if (songRows) {
       songRows.push(row);
     } else {
-      groupedByHash.set(row.leaderboard.songHash, [row]);
+      groupedByHash.set(row.songHash, [row]);
     }
   }
 
-  const result: PlaylistScoreRow[] = [];
+  const result: Row[] = [];
   let songCount = 0;
   for (const songRows of groupedByHash.values()) {
     result.push(...songRows);
@@ -38,28 +35,25 @@ export function takeTopUniqueSongRows(rows: PlaylistScoreRow[], limit?: number) 
 }
 
 /**
- * Builds playlist songs from scored leaderboard rows, emitting every difficulty
- * a score was set on per song (highlighting them all in-game). Rows must be
- * sorted; difficulties are grouped per song hash in first-seen order.
+ * Builds playlist songs from leaderboard entries, emitting every difficulty per song
+ * (highlighting them all in-game). Entries must be sorted; difficulties are grouped per
+ * song hash in first-seen order.
  */
-export function scoreRowsToPlaylistSongs(rows: PlaylistScoreRow[]) {
+export function groupPlaylistSongs(entries: PlaylistLeaderboardEntry[]) {
   const songsByHash = new Map<string, Playlist["songs"][number]>();
 
-  for (const { leaderboard } of rows) {
-    let song = songsByHash.get(leaderboard.songHash);
+  for (const entry of entries) {
+    let song = songsByHash.get(entry.songHash);
     if (!song) {
       song = {
-        songName: leaderboard.songName,
-        levelAuthorName: leaderboard.songAuthorName,
-        hash: leaderboard.songHash,
+        songName: entry.songName,
+        levelAuthorName: entry.songAuthorName,
+        hash: entry.songHash,
         difficulties: [],
       };
-      songsByHash.set(leaderboard.songHash, song);
+      songsByHash.set(entry.songHash, song);
     }
-    song.difficulties.push({
-      difficulty: leaderboard.difficulty.difficulty,
-      characteristic: leaderboard.difficulty.characteristic,
-    });
+    song.difficulties.push({ difficulty: entry.difficulty, characteristic: entry.characteristic });
   }
 
   return Array.from(songsByHash.values());
