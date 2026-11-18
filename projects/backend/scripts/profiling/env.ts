@@ -1,7 +1,10 @@
 const local: Record<string, string> = {
   NEXT_PUBLIC_APP_ENV: "production",
   NEXT_PUBLIC_APPLICATION_NAME: "backend",
+  NEXT_PUBLIC_WEBSITE_NAME: "ScoreSaber Reloaded",
   NEXT_PUBLIC_WEBSITE_URL: "http://localhost:3000",
+  NEXT_PUBLIC_CDN_URL: "http://localhost:19000",
+  NEXT_PUBLIC_WEBSOCKET_URL: "ws://localhost:8080",
   NEXT_PUBLIC_API_URL: "http://localhost:8080",
   DATABASE_URL: "postgresql://test:test@localhost:55432/ssr_prof",
   DATABASE_POOL_MAX: "100",
