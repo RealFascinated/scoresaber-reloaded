@@ -30,6 +30,10 @@ import CacheService, { CacheId } from "../infra/cache.service";
 import StorageService from "../infra/storage.service";
 import { PlayerCoreService } from "../player/player-core.service";
 
+export function beatLeaderScoreLookupKey(playerId: string, score: number) {
+  return `${playerId}:${score}`;
+}
+
 export default class BeatLeaderService {
   private static readonly logger: ScopedLogger = Logger.withTopic("BeatLeader");
 
@@ -196,6 +200,57 @@ export default class BeatLeaderService {
     }
 
     return await PlayerCoreService.getAccount(scoreToken.playerId);
+  }
+
+  /**
+   * Batch variant of {@link getBeatLeaderScoreFromSong} for the scores of one leaderboard: one cache read
+   * and at most one query for the whole set instead of one of each per score.
+   *
+   * @param scores the player id and ScoreSaber score of each score to look up
+   * @returns the BeatLeader score by {@link beatLeaderScoreLookupKey}, absent when none exists
+   */
+  public static async getBeatLeaderScoresFromSong(
+    scores: { playerId: string; score: number }[],
+    songHash: string,
+    songDifficulty: string,
+    songCharacteristic: string
+  ) {
+    const cacheKeyToScore = new Map(
+      scores.map(({ playerId, score }) => [
+        beatLeaderScoreBySongCacheKey(playerId, songHash, songDifficulty, score),
+        { playerId, score },
+      ])
+    );
+    const cached = await CacheService.fetchMany<BeatLeaderScore>(
+      CacheId.BEATLEADER_SCORE,
+      [...cacheKeyToScore.keys()],
+      async missingKeys => {
+        const missing = missingKeys.map(key => cacheKeyToScore.get(key)!);
+        const rows = await BeatLeaderScoresRepository.findLatestBySongForPlayers(
+          [...new Set(missing.map(({ playerId }) => playerId))],
+          songHash.toUpperCase(),
+          songDifficulty as MapDifficulty,
+          songCharacteristic as MapCharacteristic,
+          [...new Set(missing.map(({ score }) => score))]
+        );
+        const rowByLookupKey = new Map(
+          rows.map(row => [beatLeaderScoreLookupKey(row.playerId, row.songScore), row])
+        );
+        return new Map(
+          missingKeys.map(key => {
+            const { playerId, score } = cacheKeyToScore.get(key)!;
+            const row = rowByLookupKey.get(beatLeaderScoreLookupKey(playerId, score));
+            return [key, row ? beatLeaderScoreRowToType(row) : undefined];
+          })
+        );
+      }
+    );
+    return new Map(
+      scores.map(({ playerId, score }) => [
+        beatLeaderScoreLookupKey(playerId, score),
+        cached.get(beatLeaderScoreBySongCacheKey(playerId, songHash, songDifficulty, score)),
+      ])
+    );
   }
 
   /**

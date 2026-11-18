@@ -3,6 +3,7 @@ import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve"
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import { getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import BeatLeaderService from "../beatleader/beatleader.service";
 import BeatSaverService from "../external/beatsaver.service";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { RealmService } from "../realm/realm.service";
@@ -56,9 +57,15 @@ export class ScoreSaberLeaderboardScoresService {
       leaderboard.difficulty.difficulty,
       leaderboard.difficulty.characteristic
     );
-    const playerInfoById = await ScoreCoreService.getPlayerInfoByIds(
-      parsedScores.map(score => score.playerId)
-    );
+    const [playerInfoById, beatLeaderScoreByLookupKey] = await Promise.all([
+      ScoreCoreService.getPlayerInfoByIds(parsedScores.map(score => score.playerId)),
+      BeatLeaderService.getBeatLeaderScoresFromSong(
+        parsedScores.map(score => ({ playerId: score.playerId, score: score.score })),
+        leaderboard.songHash,
+        leaderboard.difficulty.difficulty,
+        leaderboard.difficulty.characteristic
+      ),
+    ]);
 
     const scores = (
       await Promise.all(
@@ -71,6 +78,7 @@ export class ScoreSaberLeaderboardScoresService {
             insertPlayerInfo: true,
             insertPreviousScore: false,
             playerInfoById,
+            beatLeaderScoreByLookupKey,
           });
         })
       )

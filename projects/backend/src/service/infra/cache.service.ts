@@ -256,6 +256,98 @@ export default class CacheService {
   }
 
   /**
+   * Batch variant of {@link fetch}: reads every key with one round trip and loads only the missing ones
+   * through a single call, so a page of N lookups costs one cache read and one loader call instead of N each.
+   *
+   * @param cache the cache to fetch from
+   * @param cacheKeys the keys to look up, duplicates are fine
+   * @param loadMissing loads the values of the missing keys; keys it leaves out are treated as `undefined`
+   * @returns the value of every requested key, `undefined` when none exists
+   */
+  public static async fetchMany<T>(
+    cache: CacheId,
+    cacheKeys: string[],
+    loadMissing: (missingKeys: string[]) => Promise<Map<string, T | undefined>>
+  ) {
+    const uniqueKeys = [...new Set(cacheKeys)];
+    const values = new Map<string, T | undefined>();
+    if (uniqueKeys.length === 0) {
+      return values;
+    }
+    if (!isProduction()) {
+      const loaded = await loadMissing(uniqueKeys);
+      return new Map(uniqueKeys.map(key => [key, loaded.get(key)]));
+    }
+
+    const { mode, ttl, negativeTtl } = this.CACHE_INFO[cache];
+    const missing: string[] = [];
+
+    if (mode === "REDIS") {
+      let cachedValues: (string | null)[] = uniqueKeys.map(() => null);
+      try {
+        cachedValues = await redisClient.mget(uniqueKeys);
+      } catch (error) {
+        CacheService.logger.warn(`Failed to read ${uniqueKeys.length} keys from Redis:`, error);
+      }
+      uniqueKeys.forEach((key, index) => {
+        const cachedData = cachedValues[index];
+        if (cachedData !== null) {
+          try {
+            values.set(key, parse(cachedData) as T | undefined);
+            CachePerformanceMetric.recordHit(cache, mode);
+            return;
+          } catch {
+            CacheService.logger.warn(`Failed to parse cached data for ${key}`);
+          }
+        }
+        CachePerformanceMetric.recordMiss(cache, mode);
+        missing.push(key);
+      });
+    } else {
+      const memoryCache = this.getMemoryCache(cache);
+      for (const key of uniqueKeys) {
+        const cached = memoryCache.get<T>(key);
+        if (cached !== undefined) {
+          CachePerformanceMetric.recordHit(cache, mode);
+          values.set(key, cached);
+        } else {
+          CachePerformanceMetric.recordMiss(cache, mode);
+          missing.push(key);
+        }
+      }
+    }
+
+    if (missing.length === 0) {
+      return values;
+    }
+
+    const loaded = await loadMissing(missing);
+    const pipeline = mode === "REDIS" ? redisClient.pipeline() : undefined;
+    for (const key of missing) {
+      const value = loaded.get(key);
+      values.set(key, value);
+      if (value !== undefined) {
+        if (pipeline) {
+          pipeline.set(key, stringify(value), "EX", ttl);
+        } else {
+          this.getMemoryCache(cache).set(key, value);
+        }
+      } else if (pipeline && negativeTtl !== undefined) {
+        pipeline.set(key, stringify(undefined), "EX", negativeTtl);
+      }
+    }
+    if (pipeline && pipeline.length > 0) {
+      try {
+        await pipeline.exec();
+      } catch (error) {
+        CacheService.logger.warn(`Failed to write ${missing.length} keys to Redis:`, error);
+      }
+    }
+
+    return values;
+  }
+
+  /**
    * Invalidates a cache key.
    *
    * @param cacheKey the key to invalidate

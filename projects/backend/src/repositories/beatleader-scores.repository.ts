@@ -66,6 +66,45 @@ export class BeatLeaderScoresRepository {
   }
 
   /**
+   * Gets the latest BeatLeader score of many players on one map, matching each player's ScoreSaber score.
+   * One query replaces a {@link findLatestBySong} call per player.
+   *
+   * @returns the latest row per `playerId` and `songScore` pair that exists
+   */
+  public static async findLatestBySongForPlayers(
+    playerIds: string[],
+    songHashUpper: string,
+    songDifficulty: MapDifficulty,
+    songCharacteristic: MapCharacteristic,
+    songScores: number[]
+  ) {
+    if (playerIds.length === 0) {
+      return [];
+    }
+    const rows = await db
+      .select()
+      .from(beatLeaderScoresTable)
+      .where(
+        and(
+          inArray(beatLeaderScoresTable.playerId, playerIds),
+          eq(beatLeaderScoresTable.songHash, songHashUpper),
+          eq(beatLeaderScoresTable.songDifficulty, songDifficulty),
+          eq(beatLeaderScoresTable.songCharacteristic, songCharacteristic),
+          inArray(beatLeaderScoresTable.songScore, songScores)
+        )
+      )
+      .orderBy(desc(beatLeaderScoresTable.timestamp));
+    const latest = new Map<string, (typeof rows)[number]>();
+    for (const row of rows) {
+      const key = `${row.playerId}:${row.songScore}`;
+      if (!latest.has(key)) {
+        latest.set(key, row);
+      }
+    }
+    return [...latest.values()];
+  }
+
+  /**
    * Gets the best score of a player on a map, preferring scores with a saved replay on ties.
    */
   public static async findBestBySong(

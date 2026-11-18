@@ -512,6 +512,13 @@
       "when": 1794839072904,
       "tag": "0072_suggested_maps_leaderboards",
       "breakpoints": true
+    },
+    {
+      "idx": 73,
+      "version": "7",
+      "when": 1795039033865,
+      "tag": "0073_skip_noop_table_count_updates",
+      "breakpoints": true
     }
   ]
 }
