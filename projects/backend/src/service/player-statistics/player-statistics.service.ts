@@ -26,7 +26,7 @@ export class PlayerStatisticsService {
       throw new NotFoundError(`Account "${playerId}" not found`);
     }
 
-    const scoreStats = await PlayerStatisticsService.getScoreStats(playerId, realmId);
+    const { statistics: scoreStats } = await PlayerStatisticsService.getScoreStats(playerId, realmId);
 
     return {
       rank: playerToken.stats.rank,
@@ -59,7 +59,14 @@ export class PlayerStatisticsService {
     };
   }
 
-  private static async getScoreStats(playerId: string, realmId: number) {
+  /**
+   * Gets the player's score statistics and headset breakdown, read from the database in one pass.
+   *
+   * @param playerId the player's id
+   * @param realmId the realm the statistics are resolved for
+   * @returns the score statistics and the per-headset score counts
+   */
+  public static async getScoreStats(playerId: string, realmId: number) {
     return CacheService.fetch(CacheId.PLAYER_SCORE_STATISTICS, `${playerId}:${realmId}`, async () => {
       return ScoreSaberScoresRepository.getPlayerScoreStatistics(playerId, realmId);
     });

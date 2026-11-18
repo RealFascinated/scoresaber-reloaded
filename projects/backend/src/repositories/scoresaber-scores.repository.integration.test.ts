@@ -343,18 +343,24 @@ describe("ScoreSaberScoresRepository", () => {
 
   describe("getPlayerScoreStatistics", () => {
     test("returns aggregate statistics for a seeded player", async () => {
-      const stats = await ScoreSaberScoresRepository.getPlayerScoreStatistics(
+      const { statistics, hmdBreakdown } = await ScoreSaberScoresRepository.getPlayerScoreStatistics(
         TEST_PLAYER_ID,
         DEFAULT_REALM_ID
       );
-      expect(stats.totalScores).toBeGreaterThanOrEqual(1);
-      expect(stats.totalRankedScores).toBeGreaterThanOrEqual(1);
+      expect(statistics.totalScores).toBeGreaterThanOrEqual(1);
+      expect(statistics.totalRankedScores).toBeGreaterThanOrEqual(1);
+      expect(Object.values(hmdBreakdown).reduce((total, count) => total + count, 0)).toBe(
+        statistics.totalScores
+      );
     });
 
     test("returns zeroed statistics for an unknown player", async () => {
-      expect(
-        await ScoreSaberScoresRepository.getPlayerScoreStatistics(UNKNOWN_PLAYER_ID, DEFAULT_REALM_ID)
-      ).toEqual(emptyScoreSaberPlayerScoreStatistics());
+      const { statistics, hmdBreakdown } = await ScoreSaberScoresRepository.getPlayerScoreStatistics(
+        UNKNOWN_PLAYER_ID,
+        DEFAULT_REALM_ID
+      );
+      expect(statistics).toEqual(emptyScoreSaberPlayerScoreStatistics());
+      expect(Object.keys(hmdBreakdown)).toHaveLength(0);
     });
   });
 

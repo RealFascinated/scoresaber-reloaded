@@ -1,6 +1,8 @@
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
+import type { HMD } from "@ssr/common/schemas/hmd";
+import type { ScoreSaberScoreSortField } from "@ssr/common/schemas/score/query/sort/scoresaber-scores-sort";
 import type { AnyColumn, SQL } from "drizzle-orm";
-import { and, count, desc, eq, gt, gte, inArray, lte, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, lte, sql } from "drizzle-orm";
 import { db } from "../db";
 import { descNullsLast } from "../db/order";
 import {
@@ -11,13 +13,7 @@ import {
   scoreSaberScoreRealmsTable,
   scoreSaberScoresTable,
 } from "../db/schema";
-import {
-  leaderboardRealmJoinOn,
-  resolvedLeaderboardColumns,
-  resolvedScoreColumns,
-  scorePpExpr,
-  scoreRealmJoinOn,
-} from "./realm-columns";
+import { leaderboardRealmJoinOn, resolvedScoreColumns, scorePpExpr, scoreRealmJoinOn } from "./realm-columns";
 import {
   ScoreSaberScoreHistoryRepository,
   scoreRowToHistoryInsert,
@@ -34,6 +30,12 @@ function splitInsertRow(row: ScoreSaberScoreInsertRow) {
   const { pp, ...base } = row;
   return { base, pp };
 }
+
+export type PlaylistScoreFilters = {
+  rankedStatus: "all" | "ranked" | "unranked";
+  starRange: { min?: number; max?: number };
+  accuracyRange?: { min: number; max: number };
+};
 
 type Executor = Pick<typeof db, "insert" | "delete">;
 
@@ -627,47 +629,82 @@ export class ScoreSaberScoresRepository {
       );
   }
 
+  /**
+   * Reads a player's scores once and returns both the realm's score statistics and the per-headset
+   * score counts (every score of the player, regardless of realm or accuracy).
+   *
+   * @param playerId the player to aggregate
+   * @param realmId the realm to resolve pp for
+   */
   public static async getPlayerScoreStatistics(playerId: string, realmId: number) {
-    const [scoreStats] = await db
+    const accuracy = scoreSaberScoresTable.accuracy;
+    const score = scoreSaberScoresTable.score;
+    const valid = sql`filter (where ${accuracy} >= 0)`;
+    const ranked = sql`${scorePpExpr} > 0`;
+    const rankedPlays = (min: number, max?: number) =>
+      max === undefined
+        ? sql<number>`(coalesce(sum(case when ${ranked} and ${accuracy} >= ${min} then 1 else 0 end) ${valid}, 0))::double precision`
+        : sql<number>`(coalesce(sum(case when ${ranked} and ${accuracy} >= ${min} and ${accuracy} < ${max} then 1 else 0 end) ${valid}, 0))::double precision`;
+
+    const rows = await db
       .select({
-        totalScore: sql<number>`(coalesce(sum(${scoreSaberScoresTable.score}), 0))::double precision`,
-        totalRankedScore: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 then ${scoreSaberScoresTable.score} else 0 end), 0))::double precision`,
-        totalRankedScores: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 then 1 else 0 end), 0))::double precision`,
-        totalUnrankedScores: sql<number>`(coalesce(sum(case when ${scorePpExpr} = 0 then 1 else 0 end), 0))::double precision`,
-        totalScores: sql<number>`(coalesce(count(*), 0))::double precision`,
-        averageRankedAccuracy: sql<number>`coalesce(avg(case when ${scorePpExpr} > 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
-        averageUnrankedAccuracy: sql<number>`coalesce(avg(case when ${scorePpExpr} = 0 then ${scoreSaberScoresTable.accuracy} end), 0)`,
-        averageAccuracy: sql<number>`coalesce(avg(${scoreSaberScoresTable.accuracy}), 0)`,
-        aPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 70 and ${scoreSaberScoresTable.accuracy} < 80 then 1 else 0 end), 0))::double precision`,
-        sPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 80 and ${scoreSaberScoresTable.accuracy} < 85 then 1 else 0 end), 0))::double precision`,
-        spPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 85 and ${scoreSaberScoresTable.accuracy} < 90 then 1 else 0 end), 0))::double precision`,
-        ssPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 90 and ${scoreSaberScoresTable.accuracy} < 95 then 1 else 0 end), 0))::double precision`,
-        sspPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 95 and ${scoreSaberScoresTable.accuracy} < 98 then 1 else 0 end), 0))::double precision`,
-        godPlays: sql<number>`(coalesce(sum(case when ${scorePpExpr} > 0 and ${scoreSaberScoresTable.accuracy} >= 98 then 1 else 0 end), 0))::double precision`,
+        hmd: scoreSaberScoresTable.hmd,
+        hmdCount: sql<number>`cast(count(*) as integer)`,
+        totalScore: sql<number>`(coalesce(sum(${score}) ${valid}, 0))::double precision`,
+        totalRankedScore: sql<number>`(coalesce(sum(case when ${ranked} then ${score} else 0 end) ${valid}, 0))::double precision`,
+        totalRankedScores: sql<number>`(coalesce(sum(case when ${ranked} then 1 else 0 end) ${valid}, 0))::double precision`,
+        totalScores: sql<number>`(coalesce(count(*) ${valid}, 0))::double precision`,
+        rankedAccuracySum: sql<number>`(coalesce(sum(case when ${ranked} then ${accuracy} end) ${valid}, 0))::double precision`,
+        accuracySum: sql<number>`(coalesce(sum(${accuracy}) ${valid}, 0))::double precision`,
+        aPlays: rankedPlays(70, 80),
+        sPlays: rankedPlays(80, 85),
+        spPlays: rankedPlays(85, 90),
+        ssPlays: rankedPlays(90, 95),
+        sspPlays: rankedPlays(95, 98),
+        godPlays: rankedPlays(98),
       })
       .from(scoreSaberScoresTable)
       .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
-      .where(and(eq(scoreSaberScoresTable.playerId, playerId), gte(scoreSaberScoresTable.accuracy, 0)));
+      .where(eq(scoreSaberScoresTable.playerId, playerId))
+      .groupBy(scoreSaberScoresTable.hmd);
 
-    if (!scoreStats) {
-      return emptyScoreSaberPlayerScoreStatistics();
+    const hmdBreakdown = Object.fromEntries(
+      rows
+        .filter(row => row.hmd != null)
+        .sort((a, b) => b.hmdCount - a.hmdCount)
+        .map(row => [row.hmd, row.hmdCount])
+    ) as Record<HMD, number>;
+
+    const sum = (pick: (row: (typeof rows)[number]) => number) =>
+      rows.reduce((total, row) => total + Number(pick(row)), 0);
+    const totalScores = sum(row => row.totalScores);
+    if (totalScores === 0) {
+      return { statistics: emptyScoreSaberPlayerScoreStatistics(), hmdBreakdown };
     }
+    const totalRankedScores = sum(row => row.totalRankedScores);
+    const totalUnrankedScores = totalScores - totalRankedScores;
+    const rankedAccuracySum = sum(row => row.rankedAccuracySum);
+    const accuracySum = sum(row => row.accuracySum);
 
     return {
-      totalScore: Number(scoreStats.totalScore),
-      totalRankedScore: Number(scoreStats.totalRankedScore),
-      totalRankedScores: Number(scoreStats.totalRankedScores),
-      totalUnrankedScores: Number(scoreStats.totalUnrankedScores),
-      totalScores: Number(scoreStats.totalScores),
-      averageRankedAccuracy: Number(scoreStats.averageRankedAccuracy),
-      averageUnrankedAccuracy: Number(scoreStats.averageUnrankedAccuracy),
-      averageAccuracy: Number(scoreStats.averageAccuracy),
-      aPlays: Number(scoreStats.aPlays),
-      sPlays: Number(scoreStats.sPlays),
-      spPlays: Number(scoreStats.spPlays),
-      ssPlays: Number(scoreStats.ssPlays),
-      sspPlays: Number(scoreStats.sspPlays),
-      godPlays: Number(scoreStats.godPlays),
+      statistics: {
+        totalScore: sum(row => row.totalScore),
+        totalRankedScore: sum(row => row.totalRankedScore),
+        totalRankedScores,
+        totalUnrankedScores,
+        totalScores,
+        averageRankedAccuracy: totalRankedScores > 0 ? rankedAccuracySum / totalRankedScores : 0,
+        averageUnrankedAccuracy:
+          totalUnrankedScores > 0 ? (accuracySum - rankedAccuracySum) / totalUnrankedScores : 0,
+        averageAccuracy: accuracySum / totalScores,
+        aPlays: sum(row => row.aPlays),
+        sPlays: sum(row => row.sPlays),
+        spPlays: sum(row => row.spPlays),
+        ssPlays: sum(row => row.ssPlays),
+        sspPlays: sum(row => row.sspPlays),
+        godPlays: sum(row => row.godPlays),
+      },
+      hmdBreakdown,
     };
   }
 
@@ -724,34 +761,6 @@ export class ScoreSaberScoresRepository {
       .orderBy(desc(scoreSaberScoresTable.score))
       .limit(limit)
       .offset(offset);
-  }
-
-  /**
-   * Counts a player's scores per headset, grouped in the database so only a handful of rows come
-   * back instead of one row per score.
-   *
-   * @param playerId the player to count for
-   * @param limit when set, only the first `limit` scores are counted
-   */
-  public static async getHmdCountsByPlayerId(playerId: string, limit?: number) {
-    const scores =
-      limit != null
-        ? db
-            .select({ hmd: scoreSaberScoresTable.hmd })
-            .from(scoreSaberScoresTable)
-            .where(eq(scoreSaberScoresTable.playerId, playerId))
-            .limit(limit)
-            .as("limited_scores")
-        : db
-            .select({ hmd: scoreSaberScoresTable.hmd })
-            .from(scoreSaberScoresTable)
-            .where(eq(scoreSaberScoresTable.playerId, playerId))
-            .as("player_scores");
-
-    return db
-      .select({ hmd: scores.hmd, count: sql<number>`cast(count(*) as integer)` })
-      .from(scores)
-      .groupBy(scores.hmd);
   }
 
   public static async getChartRowsByPlayer(playerId: string, realmId: number) {
@@ -822,15 +831,69 @@ export class ScoreSaberScoresRepository {
     return existing.length;
   }
 
+  private static playlistScoreConditions(playerId: string, filters: PlaylistScoreFilters) {
+    const conditions = [eq(scoreSaberScoresTable.playerId, playerId)];
+
+    if (filters.rankedStatus === "ranked") {
+      conditions.push(gt(scorePpExpr, 0));
+    } else if (filters.rankedStatus === "unranked") {
+      conditions.push(lte(scorePpExpr, 0));
+    }
+
+    const { min, max } = filters.starRange;
+    if (filters.rankedStatus === "ranked" && min !== undefined && max !== undefined) {
+      conditions.push(isNotNull(scoreSaberLeaderboardRealmsTable.stars));
+      conditions.push(gte(scoreSaberLeaderboardRealmsTable.stars, min));
+      conditions.push(lte(scoreSaberLeaderboardRealmsTable.stars, max));
+    }
+
+    if (filters.accuracyRange) {
+      conditions.push(gte(scoreSaberScoresTable.accuracy, filters.accuracyRange.min));
+      conditions.push(lte(scoreSaberScoresTable.accuracy, filters.accuracyRange.max));
+    }
+
+    return conditions;
+  }
+
+  private static playlistSortExpr(field: ScoreSaberScoreSortField) {
+    switch (field) {
+      case "score":
+        return scoreSaberScoresTable.score;
+      case "acc":
+        return scoreSaberScoresTable.accuracy;
+      case "date":
+        return scoreSaberScoresTable.timestamp;
+      case "misses":
+        return sql`${scoreSaberScoresTable.missedNotes} + ${scoreSaberScoresTable.badCuts}`;
+      case "maxcombo":
+        return scoreSaberScoresTable.maxCombo;
+      default:
+        return scorePpExpr;
+    }
+  }
+
   /**
-   * Selects scores joined to their leaderboards, both resolved for `realmId`. Conditions may
-   * reference {@link scorePpExpr}.
+   * A player's scores that match the playlist filters, with only the columns a playlist needs
+   * from the score and its leaderboard. Sorted by `sort` with the score id as tie-break, in the
+   * given direction, resolved for `realmId`.
    */
-  public static async selectScoresJoinedLeaderboardsWhere(conditions: SQL[], realmId: number) {
+  public static async selectPlaylistScoreEntries(
+    playerId: string,
+    filters: PlaylistScoreFilters,
+    sort: ScoreSaberScoreSortField,
+    direction: "asc" | "desc",
+    realmId: number
+  ) {
+    const order = direction === "asc" ? asc : desc;
     return db
       .select({
-        scoreRow: resolvedScoreColumns(),
-        lbRow: resolvedLeaderboardColumns(),
+        leaderboardId: scoreSaberScoresTable.leaderboardId,
+        score: scoreSaberScoresTable.score,
+        songHash: sql<string>`upper(${scoreSaberLeaderboardsTable.songHash})`,
+        songName: scoreSaberLeaderboardsTable.songName,
+        songAuthorName: scoreSaberLeaderboardsTable.songAuthorName,
+        difficulty: scoreSaberLeaderboardsTable.difficulty,
+        characteristic: scoreSaberLeaderboardsTable.characteristic,
       })
       .from(scoreSaberScoresTable)
       .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
@@ -842,7 +905,59 @@ export class ScoreSaberScoresRepository {
         scoreSaberLeaderboardRealmsTable,
         leaderboardRealmJoinOn(scoreSaberLeaderboardsTable, scoreSaberLeaderboardRealmsTable, realmId)
       )
-      .where(and(...conditions));
+      .where(and(...ScoreSaberScoresRepository.playlistScoreConditions(playerId, filters)))
+      .orderBy(
+        order(ScoreSaberScoresRepository.playlistSortExpr(sort)),
+        order(scoreSaberScoresTable.scoreId)
+      );
+  }
+
+  /**
+   * The score value per leaderboard of a player's scores that match the playlist filters,
+   * resolved for `realmId`.
+   */
+  public static async selectPlaylistScoreValues(
+    playerId: string,
+    filters: PlaylistScoreFilters,
+    realmId: number
+  ) {
+    return db
+      .select({
+        leaderboardId: scoreSaberScoresTable.leaderboardId,
+        score: scoreSaberScoresTable.score,
+      })
+      .from(scoreSaberScoresTable)
+      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
+      .innerJoin(
+        scoreSaberLeaderboardsTable,
+        eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
+      )
+      .leftJoin(
+        scoreSaberLeaderboardRealmsTable,
+        leaderboardRealmJoinOn(scoreSaberLeaderboardsTable, scoreSaberLeaderboardRealmsTable, realmId)
+      )
+      .where(and(...ScoreSaberScoresRepository.playlistScoreConditions(playerId, filters)));
+  }
+
+  /**
+   * Whether a player has any score that matches the playlist filters, resolved for `realmId`.
+   */
+  public static async hasPlaylistScores(playerId: string, filters: PlaylistScoreFilters, realmId: number) {
+    const rows = await db
+      .select({ exists: sql`1` })
+      .from(scoreSaberScoresTable)
+      .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
+      .innerJoin(
+        scoreSaberLeaderboardsTable,
+        eq(scoreSaberScoresTable.leaderboardId, scoreSaberLeaderboardsTable.id)
+      )
+      .leftJoin(
+        scoreSaberLeaderboardRealmsTable,
+        leaderboardRealmJoinOn(scoreSaberLeaderboardsTable, scoreSaberLeaderboardRealmsTable, realmId)
+      )
+      .where(and(...ScoreSaberScoresRepository.playlistScoreConditions(playerId, filters)))
+      .limit(1);
+    return rows.length > 0;
   }
 
   public static async selectDistinctLeaderboardIdsByPlayerId(playerId: string) {

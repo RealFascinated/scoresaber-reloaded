@@ -111,7 +111,7 @@ export default class ScoreSaberPlayerService {
 
     const statistics = await PlayerStatisticsService.getStatistics(player, realmId);
     const [hmdBreakdown, history, topPp] = await Promise.all([
-      PlayerHmdService.getPlayerHmdBreakdown(id).then(computeHmdUsagePercentages),
+      PlayerHmdService.getPlayerHmdBreakdown(id, realmId).then(computeHmdUsagePercentages),
       PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30, realmId),
       ScoreSaberScoresRepository.getTopPpByPlayer(id, realmId),
     ]);
