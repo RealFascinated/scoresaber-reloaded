@@ -82,5 +82,4 @@ next-env.d.ts
 .elysia-openapi/
 *~
 secret.yaml
-scoresaber-api.json
 projects/backend/ssr-backend
