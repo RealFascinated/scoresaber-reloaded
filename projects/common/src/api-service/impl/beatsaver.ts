@@ -33,6 +33,20 @@ export class BeatSaverService extends ApiService {
   }
 
   /**
+   * Looks up a map by hash, telling a map BeatSaver does not have (404) apart from a failed request.
+   */
+  async lookupMapResult(hash: string) {
+    const response = await this.fetchResponse(LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", hash));
+    if (response?.status === 404) {
+      return { status: "missing" } as const;
+    }
+    if (!response?.ok) {
+      return { status: "error" } as const;
+    }
+    return { status: "found", map: (await response.json()) as BeatSaverMapToken } as const;
+  }
+
+  /**
    * Gets the map that match the query.
    */
   async lookupMaps(hashes: string[]): Promise<BeatSaverMultiMapLookup | undefined> {

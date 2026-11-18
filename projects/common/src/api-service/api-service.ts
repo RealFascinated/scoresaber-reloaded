@@ -76,10 +76,7 @@ export default class ApiService {
     return (isServer() ? (this.config.useProxy ? this.currentProxy : "") : CLIENT_PROXY) + url;
   }
 
-  public async fetch<T>(
-    url: string,
-    options?: RequestOptions & { priority?: CooldownPriority }
-  ): Promise<T | undefined> {
+  private async executeTracked(url: string, options?: RequestOptions & { priority?: CooldownPriority }) {
     const startedAt = performance.now();
     await this.cooldown.waitAndUse(options?.priority || CooldownPriority.NORMAL);
 
@@ -107,12 +104,30 @@ export default class ApiService {
       this.lastRateLimitSeen = Number(remaining);
     }
 
-    if (!response) {
+    if (!response || !response.ok) {
       this.failedCallCount++;
+    }
+    return response;
+  }
+
+  public async fetch<T>(
+    url: string,
+    options?: RequestOptions & { priority?: CooldownPriority }
+  ): Promise<T | undefined> {
+    const response = await this.executeTracked(url, options);
+    if (!response) {
       return undefined;
     }
-
     return response.json() as Promise<T>;
+  }
+
+  /**
+   * Like {@link ApiService.fetch}, but also resolves non-2xx responses so callers can act on the status.
+   *
+   * @returns the response, or undefined when no response was received
+   */
+  public async fetchResponse(url: string, options?: RequestOptions & { priority?: CooldownPriority }) {
+    return this.executeTracked(url, { ...options, returnErrorResponses: true });
   }
 
   public static getTotalServerProxies(): number {

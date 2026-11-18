@@ -9,6 +9,7 @@ type BaseRequestOptions = {
   };
   searchParams?: Record<string, unknown>;
   throwOnError?: boolean;
+  returnErrorResponses?: boolean;
   returns?: RequestReturns;
   priority?: CooldownPriority;
 };
@@ -73,6 +74,7 @@ class Request {
       searchParams,
       returns = "json",
       throwOnError = false,
+      returnErrorResponses = false,
       priority = CooldownPriority.NORMAL,
       ...fetchOptions
     } = options || {};
@@ -101,7 +103,9 @@ class Request {
               `Request ${fullUrl} failed with status ${response.status}: ${response.statusText}`
             );
           }
-          return undefined;
+          if (!returnErrorResponses) {
+            return undefined;
+          }
         }
 
         return response;
