@@ -35,27 +35,28 @@ describe("BeatLeaderScoresRepository", () => {
     expect(row?.id).toBe(TEST_BEATLEADER_SCORE_ID);
   });
 
-  test("findLatestBySongForPlayers returns the seeded score and skips unknown players", async () => {
-    const rows = await BeatLeaderScoresRepository.findLatestBySongForPlayers(
-      [TEST_PLAYER_ID, "unknown-player"],
-      TEST_SONG_HASH,
-      "ExpertPlus",
-      "Standard",
-      [950]
-    );
-    expect(rows.map(row => row.id)).toEqual([TEST_BEATLEADER_SCORE_ID]);
+  test("findLatestBySongs returns each lookup's row in order and undefined for misses", async () => {
+    const rows = await BeatLeaderScoresRepository.findLatestBySongs([
+      {
+        playerId: "unknown-player",
+        songHashUpper: TEST_SONG_HASH,
+        songDifficulty: "ExpertPlus",
+        songCharacteristic: "Standard",
+        songScore: 950,
+      },
+      {
+        playerId: TEST_PLAYER_ID,
+        songHashUpper: TEST_SONG_HASH,
+        songDifficulty: "ExpertPlus",
+        songCharacteristic: "Standard",
+        songScore: 950,
+      },
+    ]);
+    expect(rows.map(row => row?.id)).toEqual([undefined, TEST_BEATLEADER_SCORE_ID]);
   });
 
-  test("findLatestBySongForPlayers returns nothing for an empty player list", async () => {
-    expect(
-      await BeatLeaderScoresRepository.findLatestBySongForPlayers(
-        [],
-        TEST_SONG_HASH,
-        "ExpertPlus",
-        "Standard",
-        [950]
-      )
-    ).toEqual([]);
+  test("findLatestBySongs returns nothing for no lookups", async () => {
+    expect(await BeatLeaderScoresRepository.findLatestBySongs([])).toEqual([]);
   });
 
   test("countSavedReplays counts replay-backed scores", async () => {

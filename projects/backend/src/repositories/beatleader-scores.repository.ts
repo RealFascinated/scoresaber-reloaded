@@ -1,8 +1,27 @@
 import type { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import type { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
-import { and, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { beatLeaderScoresTable } from "../db/schema";
+
+/** One {@link BeatLeaderScoresRepository.findLatestBySong} lookup. */
+export type BeatLeaderSongScoreLookup = {
+  playerId: string;
+  songHashUpper: string;
+  songDifficulty: MapDifficulty;
+  songCharacteristic: MapCharacteristic;
+  songScore: number;
+};
+
+function songScoreLookupKey(
+  playerId: string,
+  songHash: string,
+  songDifficulty: string,
+  songCharacteristic: string,
+  songScore: number
+) {
+  return `${playerId}:${songHash}:${songDifficulty}:${songCharacteristic}:${songScore}`;
+}
 
 export type BeatLeaderScoreInsert = typeof beatLeaderScoresTable.$inferInsert;
 
@@ -66,42 +85,55 @@ export class BeatLeaderScoresRepository {
   }
 
   /**
-   * Gets the latest BeatLeader score of many players on one map, matching each player's ScoreSaber score.
-   * One query replaces a {@link findLatestBySong} call per player.
+   * Batch variant of {@link findLatestBySong}: one query for many lookups.
    *
-   * @returns the latest row per `playerId` and `songScore` pair that exists
+   * @returns the latest row of each lookup, in the same order, `undefined` when none exists
    */
-  public static async findLatestBySongForPlayers(
-    playerIds: string[],
-    songHashUpper: string,
-    songDifficulty: MapDifficulty,
-    songCharacteristic: MapCharacteristic,
-    songScores: number[]
-  ) {
-    if (playerIds.length === 0) {
+  public static async findLatestBySongs(lookups: BeatLeaderSongScoreLookup[]) {
+    if (lookups.length === 0) {
       return [];
     }
     const rows = await db
       .select()
       .from(beatLeaderScoresTable)
       .where(
-        and(
-          inArray(beatLeaderScoresTable.playerId, playerIds),
-          eq(beatLeaderScoresTable.songHash, songHashUpper),
-          eq(beatLeaderScoresTable.songDifficulty, songDifficulty),
-          eq(beatLeaderScoresTable.songCharacteristic, songCharacteristic),
-          inArray(beatLeaderScoresTable.songScore, songScores)
+        or(
+          ...lookups.map(lookup =>
+            and(
+              eq(beatLeaderScoresTable.playerId, lookup.playerId),
+              eq(beatLeaderScoresTable.songHash, lookup.songHashUpper),
+              eq(beatLeaderScoresTable.songDifficulty, lookup.songDifficulty),
+              eq(beatLeaderScoresTable.songCharacteristic, lookup.songCharacteristic),
+              eq(beatLeaderScoresTable.songScore, lookup.songScore)
+            )
+          )
         )
       )
       .orderBy(desc(beatLeaderScoresTable.timestamp));
     const latest = new Map<string, (typeof rows)[number]>();
     for (const row of rows) {
-      const key = `${row.playerId}:${row.songScore}`;
+      const key = songScoreLookupKey(
+        row.playerId,
+        row.songHash,
+        row.songDifficulty,
+        row.songCharacteristic,
+        row.songScore
+      );
       if (!latest.has(key)) {
         latest.set(key, row);
       }
     }
-    return [...latest.values()];
+    return lookups.map(lookup =>
+      latest.get(
+        songScoreLookupKey(
+          lookup.playerId,
+          lookup.songHashUpper,
+          lookup.songDifficulty,
+          lookup.songCharacteristic,
+          lookup.songScore
+        )
+      )
+    );
   }
 
   /**

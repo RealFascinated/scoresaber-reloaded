@@ -4,6 +4,6 @@ import Redis from "ioredis";
 
 const logger = Logger.withTopic("Redis");
 logger.info("Connecting to Redis...");
-export const redisClient = new Redis(env.REDIS_URL);
+export const redisClient = new Redis(env.REDIS_URL, { enableAutoPipelining: true });
 redisClient.on("ready", () => logger.info("Connected to Redis :)"));
 redisClient.on("error", error => logger.error("Redis error:", error));

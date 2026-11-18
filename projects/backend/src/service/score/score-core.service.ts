@@ -17,7 +17,7 @@ import {
   ScoreSaberScoresRepository,
   type ScoreSaberScoreInsertRow,
 } from "../../repositories/scoresaber-scores.repository";
-import BeatLeaderService, { beatLeaderScoreLookupKey } from "../beatleader/beatleader.service";
+import BeatLeaderService from "../beatleader/beatleader.service";
 import { ScoreSaberLeaderboardsService } from "../leaderboard/scoresaber-leaderboards.service";
 import { PlayerMedalsService } from "../medals/player-medals.service";
 import { PlayerCoreService } from "../player/player-core.service";
@@ -38,12 +38,6 @@ type InsertScoreDataOptions = {
    * individually.
    */
   playerInfoById?: ReadonlyMap<string, ScorePlayerInfoRow>;
-  /**
-   * BeatLeader scores already loaded for the scores being enriched (see
-   * {@link BeatLeaderService.getBeatLeaderScoresFromSong}), keyed by {@link beatLeaderScoreLookupKey}.
-   * Scores missing from it are looked up individually.
-   */
-  beatLeaderScoreByLookupKey?: ReadonlyMap<string, BeatLeaderScore | undefined>;
 };
 
 export class ScoreCoreService {
@@ -453,9 +447,6 @@ export class ScoreCoreService {
     async function getBeatLeaderScore() {
       if (options?.insertBeatLeaderScore === false) {
         return undefined;
-      }
-      if (options?.beatLeaderScoreByLookupKey?.has(beatLeaderScoreLookupKey(score.playerId, score.score))) {
-        return options.beatLeaderScoreByLookupKey.get(beatLeaderScoreLookupKey(score.playerId, score.score));
       }
       return BeatLeaderService.getBeatLeaderScoreFromSong(
         score.playerId,
