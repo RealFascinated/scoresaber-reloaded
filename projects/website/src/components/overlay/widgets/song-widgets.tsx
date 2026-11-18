@@ -50,9 +50,9 @@ export function SongInfoWidget() {
       <div className="flex flex-col gap-0.5">
         <p className="text-4xl leading-tight font-extrabold whitespace-nowrap">{map.metadata.songName}</p>
         {map.metadata.songAuthorName && (
-          <p className="text-muted-foreground text-xl whitespace-nowrap">{map.metadata.songAuthorName}</p>
+          <p className="text-xl whitespace-nowrap text-muted-foreground">{map.metadata.songAuthorName}</p>
         )}
-        <p className="text-muted-foreground/70 text-base whitespace-nowrap">
+        <p className="text-base whitespace-nowrap text-muted-foreground/70">
           Mapped by {truncateText(map.metadata.levelAuthorName, 48)}
         </p>
       </div>

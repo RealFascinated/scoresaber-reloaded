@@ -114,7 +114,7 @@ function PlayerMiniRanking({
         <p className="font-bold">{type} Ranking</p>
       </div>
 
-      <div className="divide-border bg-accent/50 divide-y rounded-md">
+      <div className="divide-y divide-border rounded-md bg-accent/50">
         {players.length > 0 ? (
           players.map(playerRanking => {
             const rank = type == "Global" ? playerRanking.rank : playerRanking.countryRank;
@@ -124,7 +124,7 @@ function PlayerMiniRanking({
               <SimpleLink
                 key={playerRanking.id}
                 href={`/player/${playerRanking.id}`}
-                className="group hover:bg-accent/50 grid cursor-pointer items-center gap-2 px-2 py-1.5 transition-colors duration-200 first:rounded-t-md last:rounded-b-md"
+                className="group grid cursor-pointer items-center gap-2 px-2 py-1.5 transition-colors duration-200 first:rounded-t-md last:rounded-b-md hover:bg-accent/50"
                 style={{
                   gridTemplateColumns: isMobile
                     ? `${playerRankWidth}px minmax(0,1fr) auto`
@@ -196,11 +196,11 @@ function PlayerMiniRanking({
               </div>
             ) : isError ? (
               <div className="flex items-center justify-center py-6">
-                <p className="text-muted-foreground text-sm">Failed to load rankings</p>
+                <p className="text-sm text-muted-foreground">Failed to load rankings</p>
               </div>
             ) : (
               <div className="flex items-center justify-center py-6">
-                <p className="text-muted-foreground text-sm">No rankings found</p>
+                <p className="text-sm text-muted-foreground">No rankings found</p>
               </div>
             )}
           </>

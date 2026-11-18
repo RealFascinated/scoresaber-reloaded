@@ -32,7 +32,7 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
   const weightedPp = score.weight ? score.pp * score.weight : undefined;
 
   return (
-    <section className="ring-border bg-card relative overflow-hidden rounded-xl ring-1">
+    <section className="relative overflow-hidden rounded-xl bg-card ring-1 ring-border">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <Image
           src={leaderboard.songArt}
@@ -41,11 +41,11 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
           sizes="100vw"
           className="scale-125 object-cover opacity-30 blur-2xl"
         />
-        <div className="from-card/40 via-card/70 to-card absolute inset-0 bg-gradient-to-b" />
+        <div className="absolute inset-0 bg-gradient-to-b from-card/40 via-card/70 to-card" />
       </div>
 
       <div className="relative flex flex-col">
-        <div className="border-border/50 flex flex-wrap items-center gap-3 border-b px-4 py-2.5">
+        <div className="flex flex-wrap items-center gap-3 border-b border-border/50 px-4 py-2.5">
           <div className="flex min-w-0 basis-full items-center gap-2.5 sm:flex-1 sm:basis-0">
             <FallbackLink href={`/player/${playerInfo.id}`}>
               <PlayerAvatar
@@ -57,17 +57,17 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
             <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
               <FallbackLink
                 href={`/player/${playerInfo.id}`}
-                className="hover:text-primary truncate text-sm font-medium transition-colors"
+                className="truncate text-sm font-medium transition-colors hover:text-primary"
               >
                 {playerInfo.name}
               </FallbackLink>
               <SimpleTooltip display={formatDate(score.timestamp, "DD MMMM YYYY HH:mm")}>
-                <span className="text-muted-foreground cursor-default text-xs">
+                <span className="cursor-default text-xs text-muted-foreground">
                   {timeAgo(score.timestamp, 1)}
                 </span>
               </SimpleTooltip>
               {score.hmd && (
-                <span className="text-muted-foreground flex items-center gap-1 text-xs">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd)} />
                   <span className="hidden sm:inline">{score.hmd}</span>
                 </span>
@@ -87,7 +87,7 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
             <Image
               src={leaderboard.songArt}
               alt={`${leaderboard.fullName} cover`}
-              className="border-border/80 shrink-0 rounded-xl border object-cover shadow-lg"
+              className="shrink-0 rounded-xl border border-border/80 object-cover shadow-lg"
               width={128}
               height={128}
               priority
@@ -96,19 +96,19 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
             <div className="flex min-w-0 flex-col items-center gap-2 sm:items-start">
               <FallbackLink
                 href={`/leaderboard/${leaderboard.id}`}
-                className="hover:text-primary/80 transition-all"
+                className="transition-all hover:text-primary/80"
               >
                 <h1 className="text-xl leading-tight font-bold sm:text-3xl">{leaderboard.fullName}</h1>
               </FallbackLink>
 
-              <p className="text-muted-foreground text-sm">
-                by <span className="text-foreground font-medium">{leaderboard.songAuthorName}</span>
+              <p className="text-sm text-muted-foreground">
+                by <span className="font-medium text-foreground">{leaderboard.songAuthorName}</span>
                 {beatSaver?.author.name && (
                   <>
                     {" · "}mapped by{" "}
                     <FallbackLink
                       href={`https://beatsaver.com/profile/${beatSaver.author.id}`}
-                      className="text-foreground hover:text-primary/80 font-medium transition-all"
+                      className="font-medium text-foreground transition-all hover:text-primary/80"
                     >
                       {beatSaver.author.name}
                     </FallbackLink>
@@ -126,11 +126,11 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
                 >
                   {getDifficultyName(leaderboard.difficulty.difficulty)}
                 </span>
-                <span className="text-muted-foreground/70 text-xs">
+                <span className="text-xs text-muted-foreground/70">
                   {leaderboard.difficulty.characteristic}
                 </span>
                 {isRanked && (
-                  <span className="bg-control ring-border text-warning inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold ring-1">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-control px-1.5 py-0.5 text-xs font-semibold text-warning ring-1 ring-border">
                     <SharedIcons.DifficultyStarIcon className="size-3" />
                     {leaderboard.stars.toFixed(2)}
                   </span>
@@ -145,7 +145,7 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
                       </div>
                     }
                   >
-                    <span className="bg-control ring-border inline-flex cursor-default items-center gap-1.5 rounded-md px-2 py-0.5 text-xs ring-1">
+                    <span className="inline-flex cursor-default items-center gap-1.5 rounded-md bg-control px-2 py-0.5 text-xs ring-1 ring-border">
                       <span className="text-muted-foreground">Mods</span>
                       <span className="font-medium">
                         <ScoreSaberScoreModifiers type="simple" score={score} />
@@ -160,7 +160,7 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
           <div className="flex shrink-0 flex-wrap items-center justify-center gap-x-8 gap-y-4 lg:justify-end">
             <div className="flex flex-col items-center gap-1 lg:items-end">
               {showPp ? (
-                <span className="text-pp text-4xl leading-none font-extrabold tabular-nums lg:text-5xl">
+                <span className="text-4xl leading-none font-extrabold text-pp tabular-nums lg:text-5xl">
                   {formatPp(score.pp)}
                   <span className="text-2xl">pp</span>
                 </span>
@@ -174,14 +174,14 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
                   <DeltaChip value={previous.change.pp} format={v => `${formatPp(Math.abs(v))}pp`} />
                 )}
                 {showPp && weightedPp !== undefined && weightedPp > 0 && (
-                  <span className="text-muted-foreground text-xs tabular-nums">
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     {formatPp(weightedPp)}pp weighted
                   </span>
                 )}
               </div>
             </div>
 
-            <div className="bg-border hidden h-14 w-px sm:block" />
+            <div className="hidden h-14 w-px bg-border sm:block" />
 
             <div className="flex flex-col items-center gap-1 lg:items-end">
               <span className="text-3xl leading-none font-bold tabular-nums lg:text-4xl">
@@ -191,18 +191,18 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
                 {previous && (
                   <DeltaChip value={previous.change.accuracy} format={v => `${Math.abs(v).toFixed(2)}%`} />
                 )}
-                {score.fullCombo && <span className="text-success text-xs font-semibold">Full Combo</span>}
+                {score.fullCombo && <span className="text-xs font-semibold text-success">Full Combo</span>}
               </div>
             </div>
 
             {score.rank > 0 && (
               <>
-                <div className="bg-border hidden h-14 w-px sm:block" />
+                <div className="hidden h-14 w-px bg-border sm:block" />
                 <div className="flex flex-col items-center gap-1 lg:items-end">
                   <span className="text-3xl leading-none font-bold tabular-nums lg:text-4xl">
                     #{score.rank}
                   </span>
-                  <span className="text-muted-foreground text-xs">Leaderboard rank</span>
+                  <span className="text-xs text-muted-foreground">Leaderboard rank</span>
                 </div>
               </>
             )}

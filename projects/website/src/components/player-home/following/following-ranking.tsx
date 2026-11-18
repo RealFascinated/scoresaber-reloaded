@@ -33,7 +33,7 @@ export function FollowingRanking() {
     <Card className="flex flex-col">
       <div className="mb-4">
         <h2 className="text-lg font-semibold">Following Ranking</h2>
-        <p className="text-muted-foreground mt-1 text-sm">
+        <p className="mt-1 text-sm text-muted-foreground">
           See how the players you follow rank compared to each other.
         </p>
       </div>
@@ -48,9 +48,9 @@ export function FollowingRanking() {
             <SimpleLink
               key={player.id}
               href={`/player/${player.id}`}
-              className="bg-card ring-border hover:bg-hover flex items-center gap-4 rounded-xl p-4 ring-1 transition-colors"
+              className="flex items-center gap-4 rounded-xl bg-card p-4 ring-1 ring-border transition-colors hover:bg-hover"
             >
-              <span className="text-muted-foreground w-8 shrink-0 text-right text-sm font-semibold tabular-nums">
+              <span className="w-8 shrink-0 text-right text-sm font-semibold text-muted-foreground tabular-nums">
                 #{player.rank}
               </span>
               <Avatar
@@ -61,12 +61,12 @@ export function FollowingRanking() {
               />
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate text-sm font-medium">{player.name}</span>
-                <span className="text-muted-foreground text-xs">
+                <span className="text-xs text-muted-foreground">
                   #{formatNumberWithCommas(player.countryRank)} · {player.country}
                 </span>
               </div>
               <div className="shrink-0 text-right">
-                <p className="text-primary text-sm font-semibold">{formatPp(player.pp)}pp</p>
+                <p className="text-sm font-semibold text-primary">{formatPp(player.pp)}pp</p>
               </div>
             </SimpleLink>
           ))}

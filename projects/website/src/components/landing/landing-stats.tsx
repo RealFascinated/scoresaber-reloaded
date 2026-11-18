@@ -48,13 +48,13 @@ function LandingStatCard({
   onBumpComplete: () => void;
 }) {
   return (
-    <div className="ring-border bg-card flex flex-col gap-2 rounded-xl p-4 ring-1">
-      <div className="text-muted-foreground flex items-center gap-2">
+    <div className="flex flex-col gap-2 rounded-xl bg-card p-4 ring-1 ring-border">
+      <div className="flex items-center gap-2 text-muted-foreground">
         <Icon className="size-4 shrink-0" />
         <span className="truncate text-xs font-medium">{label}</span>
       </div>
       <div className="relative w-fit">
-        <CountUp value={value} className="text-foreground text-2xl font-bold tabular-nums" />
+        <CountUp value={value} className="text-2xl font-bold text-foreground tabular-nums" />
         {bump && (
           <m.span
             key={bump.id}
@@ -62,7 +62,7 @@ function LandingStatCard({
             animate={{ opacity: [0, 1, 1, 0], y: -16, scale: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
             onAnimationComplete={onBumpComplete}
-            className="text-primary absolute top-1/2 left-full ml-1 -translate-y-1/2 text-sm font-bold select-none"
+            className="absolute top-1/2 left-full ml-1 -translate-y-1/2 text-sm font-bold text-primary select-none"
           >
             +{bump.amount}
           </m.span>
@@ -151,8 +151,8 @@ export function LandingStats({ initial }: LandingStatsProps) {
   if (showBackendUnavailable) {
     return (
       <div className="flex w-full flex-col items-center gap-2 py-8 text-center">
-        <SharedIcons.StatsUnavailableIcon className="text-muted-foreground size-10" />
-        <p className="text-muted-foreground text-sm">
+        <SharedIcons.StatsUnavailableIcon className="size-10 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">
           Statistics are unavailable because the backend is offline.
         </p>
         <Button variant="outline" size="sm" onClick={() => refetch()}>

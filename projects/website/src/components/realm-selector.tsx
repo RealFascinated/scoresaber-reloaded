@@ -25,14 +25,14 @@ export default function RealmSelector() {
         <button
           type="button"
           aria-label="Select realm"
-          className="text-muted-foreground hover:bg-sidebar-accent hover:text-foreground border-border flex size-8 shrink-0 items-center justify-center rounded-md border transition-colors"
+          className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
         >
           <SharedIcons.ComboBoxToggleIcon className="size-4" />
         </button>
       </PopoverTrigger>
       <PopoverContent side="right" align="start" sideOffset={12} className="w-64 p-0 text-sm select-none">
         <div className="px-4 pt-3 pb-2">
-          <span className="text-muted-foreground text-xs font-medium">Active Realm</span>
+          <span className="text-xs font-medium text-muted-foreground">Active Realm</span>
         </div>
 
         <div className="flex flex-col p-1.5">
@@ -43,10 +43,10 @@ export default function RealmSelector() {
                 <button
                   type="button"
                   onClick={() => selectRealm(realm.id)}
-                  className="hover:bg-accent flex flex-1 items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors"
+                  className="flex flex-1 items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors hover:bg-accent"
                 >
                   <span className="flex size-4 shrink-0 items-center justify-center">
-                    {isActive && <SharedIcons.SelectCheckIcon className="text-primary size-4" />}
+                    {isActive && <SharedIcons.SelectCheckIcon className="size-4 text-primary" />}
                   </span>
                   <span className={isActive ? "font-medium" : "text-muted-foreground"}>
                     {realm.name}
@@ -58,7 +58,7 @@ export default function RealmSelector() {
                     type="button"
                     aria-label="Leave realm"
                     onClick={() => selectRealm(DEFAULT_REALM_ID)}
-                    className="text-muted-foreground hover:text-foreground mr-1 flex size-7 items-center justify-center rounded-md"
+                    className="mr-1 flex size-7 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
                   >
                     <SharedIcons.RealmLeaveIcon className="size-4" />
                   </button>

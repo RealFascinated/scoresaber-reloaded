@@ -15,7 +15,7 @@ export default function SearchInput({
 }) {
   return (
     <div className="relative w-full sm:w-auto">
-      <SharedIcons.SearchFieldIcon className="text-muted-foreground absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2" />
+      <SharedIcons.SearchFieldIcon className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="search"
         placeholder="Search scores..."
@@ -25,7 +25,7 @@ export default function SearchInput({
       />
       {search && search.length > 0 && (
         <SharedIcons.ClearSearchInputIcon
-          className="text-muted-foreground absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer"
+          className="absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer text-muted-foreground"
           onClick={() => onSearchChange("")}
         />
       )}

@@ -112,7 +112,7 @@ export default function GenericPlayerChart({ id, statisticHistory, datasetConfig
   if (!statisticHistory || Object.keys(statisticHistory).length === 0) {
     return (
       <div className="flex h-[400px] items-center justify-center">
-        <p className="text-muted-foreground text-sm">No data for this period yet</p>
+        <p className="text-sm text-muted-foreground">No data for this period yet</p>
       </div>
     );
   }

@@ -51,14 +51,14 @@ export default function AnnouncementBanner({ id, children }: AnnouncementBannerP
   };
 
   return (
-    <div className="border-primary/30 bg-background/80 from-primary/12 to-primary/12 flex w-full items-center justify-center gap-2 border-b bg-linear-to-r px-3 py-1.5 backdrop-blur">
+    <div className="flex w-full items-center justify-center gap-2 border-b border-primary/30 bg-background/80 bg-linear-to-r from-primary/12 to-primary/12 px-3 py-1.5 backdrop-blur">
       <p className="flex min-w-0 items-center justify-center gap-2 text-center text-xs sm:text-sm">
-        <SharedIcons.AnnouncementIcon className="text-primary hidden size-4 shrink-0 sm:block" />
+        <SharedIcons.AnnouncementIcon className="hidden size-4 shrink-0 text-primary sm:block" />
         <span className="text-balance">{children}</span>
       </p>
       <Button
         aria-label="Close announcement"
-        className="text-muted-foreground hover:text-foreground size-6 shrink-0"
+        className="size-6 shrink-0 text-muted-foreground hover:text-foreground"
         onClick={close}
         size="icon"
         variant="ghost"

@@ -32,7 +32,7 @@ function AverageCutValues({ cuts, hand }: { cuts: number[]; hand: Hand }) {
     <div className="flex flex-col gap-0.5">
       {cuts.map((cut, i) => (
         <div key={i} className={cn("flex gap-1", hand === "right" ? "justify-end" : "justify-start")}>
-          <p className="text-muted-foreground text-xs font-medium">{cut.toFixed(2)}</p>
+          <p className="text-xs font-medium text-muted-foreground">{cut.toFixed(2)}</p>
         </div>
       ))}
     </div>
@@ -99,7 +99,7 @@ function HandStat({ hand, name, value }: { hand: Hand; name: string; value: stri
       className="inline-flex w-full min-w-0 items-center justify-between rounded-lg px-2 py-1.5 transition-[filter] hover:brightness-110 md:px-3"
       style={{ backgroundColor: `${handColors[hand]}20` }}
     >
-      <p className="text-foreground/80 shrink-0 text-xs font-semibold tracking-wide uppercase">{name}</p>
+      <p className="shrink-0 text-xs font-semibold tracking-wide text-foreground/80 uppercase">{name}</p>
       <p className="ml-2 truncate text-sm font-bold text-white">{value}</p>
     </div>
   );
@@ -142,7 +142,7 @@ export default function ScoreAccuracyStats({ scoreStats }: ScoreAccuracyStatProp
   return (
     <div className="flex w-full items-start justify-between gap-3 overflow-hidden md:gap-6">
       <HandAccuracy scoreStats={scoreStats.current} hand="left" />
-      <div className="bg-border hidden h-full w-px shrink-0 self-stretch md:block" />
+      <div className="hidden h-full w-px shrink-0 self-stretch bg-border md:block" />
       <HandAccuracy scoreStats={scoreStats.current} hand="right" />
     </div>
   );

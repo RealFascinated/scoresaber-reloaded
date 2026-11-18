@@ -98,10 +98,10 @@ export default async function LandingPage() {
         <div
           className={`flex flex-col ${hasTopPlayers ? "items-center text-center lg:items-start lg:text-left" : "items-center"}`}
         >
-          <h1 className="text-foreground mb-5 text-5xl font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl">
+          <h1 className="mb-5 text-5xl font-bold tracking-tight text-balance text-foreground sm:text-6xl lg:text-7xl">
             ScoreSaber <span className="text-brand">Reloaded</span>
           </h1>
-          <p className="text-muted-foreground mb-8 max-w-xl text-lg leading-relaxed text-balance">
+          <p className="mb-8 max-w-xl text-lg leading-relaxed text-balance text-muted-foreground">
             A modern companion for Beat Saber players. Track your stats, analyse your scores, and keep up with
             friends.
           </p>
@@ -133,11 +133,11 @@ export default async function LandingPage() {
             <SimpleLink
               key={label}
               href={href}
-              className="group ring-border bg-card hover:bg-accent hover:ring-brand/40 flex flex-col gap-1 rounded-xl p-4 ring-1 transition-colors"
+              className="group flex flex-col gap-1 rounded-xl bg-card p-4 ring-1 ring-border transition-colors hover:bg-accent hover:ring-brand/40"
             >
-              <Icon className="text-muted-foreground group-hover:text-brand mb-2 size-5 transition-colors" />
-              <span className="text-foreground font-semibold">{label}</span>
-              <span className="text-muted-foreground text-xs leading-relaxed">{desc}</span>
+              <Icon className="mb-2 size-5 text-muted-foreground transition-colors group-hover:text-brand" />
+              <span className="font-semibold text-foreground">{label}</span>
+              <span className="text-xs leading-relaxed text-muted-foreground">{desc}</span>
             </SimpleLink>
           ))}
         </div>
@@ -147,22 +147,22 @@ export default async function LandingPage() {
         <SectionHeading title="Why Reloaded" desc="See some reasons why people choose us." />
         <div className="grid gap-3 sm:grid-cols-2">
           {FEATURES.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="ring-border bg-card flex items-start gap-4 rounded-xl p-5 ring-1">
-              <div className="bg-primary/15 flex size-10 shrink-0 items-center justify-center rounded-lg">
-                <Icon className="text-brand size-5" />
+            <div key={title} className="flex items-start gap-4 rounded-xl bg-card p-5 ring-1 ring-border">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/15">
+                <Icon className="size-5 text-brand" />
               </div>
               <div>
-                <h3 className="text-foreground mb-1 font-semibold">{title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
+                <h3 className="mb-1 font-semibold text-foreground">{title}</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">{desc}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="ring-border bg-card flex flex-col items-center gap-5 rounded-2xl px-6 py-12 text-center ring-1">
-        <h2 className="text-foreground text-3xl font-bold tracking-tight">Ready to dive in?</h2>
-        <p className="text-muted-foreground max-w-lg text-balance">
+      <section className="flex flex-col items-center gap-5 rounded-2xl bg-card px-6 py-12 text-center ring-1 ring-border">
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">Ready to dive in?</h2>
+        <p className="max-w-lg text-balance text-muted-foreground">
           Look yourself up, browse the rankings, or explore what maps are out there.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
@@ -185,8 +185,8 @@ export default async function LandingPage() {
 function SectionHeading({ title, desc }: { title: string; desc: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <h2 className="text-foreground text-xl font-bold tracking-tight">{title}</h2>
-      <p className="text-muted-foreground text-sm">{desc}</p>
+      <h2 className="text-xl font-bold tracking-tight text-foreground">{title}</h2>
+      <p className="text-sm text-muted-foreground">{desc}</p>
     </div>
   );
 }

@@ -39,7 +39,7 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
       <Avatar
         src={player.avatar}
         size={128}
-        className="border-border pointer-events-none size-[88px]! min-h-0! min-w-0! border-2 lg:size-[128px]!"
+        className="pointer-events-none size-[88px]! min-h-0! min-w-0! border-2 border-border lg:size-[128px]!"
         alt={`${player.name}'s Profile Picture`}
         priority
       />
@@ -49,7 +49,7 @@ export default function PlayerAvatar({ player }: PlayerAvatarProps) {
             onClick={handleRefresh}
             disabled={isRefreshing}
             aria-label="Refresh player data"
-            className="bg-muted/90 hover:bg-muted focus-visible:ring-primary/50 flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex size-7 cursor-pointer items-center justify-center rounded-md bg-muted/90 transition-colors duration-200 hover:bg-muted focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
           >
             <SharedIcons.AvatarRefreshIcon className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
           </button>

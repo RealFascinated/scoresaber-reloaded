@@ -72,7 +72,7 @@ export default function OverlayLegacy({ settings }: OverlayLegacyProps) {
       <div className="flex h-full w-full items-center justify-center">
         <div className="flex flex-col items-center gap-1 text-center">
           <p className="text-danger">Backend unavailable</p>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             The backend is currently offline. Please try again later.
           </p>
         </div>

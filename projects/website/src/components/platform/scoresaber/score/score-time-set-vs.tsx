@@ -14,7 +14,7 @@ export function ScoreSaberScoreTimeSetVs({ score }: { score: ScoreSaberScore }) 
       showOnMobile
     >
       <div>
-        <div className="text-muted-foreground flex flex-row items-center gap-2 text-xs">
+        <div className="flex flex-row items-center gap-2 text-xs text-muted-foreground">
           <p>vs</p>
           <p>{timeAgo(new Date(score.previousScore.timestamp))}</p>
         </div>

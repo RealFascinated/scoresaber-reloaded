@@ -11,7 +11,8 @@
     ]
   },
   "scripts": {
-    "prettier": "prettier --write .",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "lint": "bun run lint:all",
     "lint:backend": "cd projects/backend && bun run lint",
     "lint:website": "cd projects/website && bun run lint",
@@ -27,13 +28,13 @@
   "author": "fascinated7",
   "license": "MIT",
   "dependencies": {
-    "cross-env": "^10.1.0",
-    "prettier": "^3.10.1",
-    "prettier-plugin-organize-imports": "^4.3.0",
-    "prettier-plugin-tailwindcss": "^0.8.1"
+    "cross-env": "^10.1.0"
   },
   "overrides": {
     "elysia": "2.0.0-rc.4",
     "@better-auth/core": "file:vendor/better-auth/better-auth-core-1.7.7.tgz"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.79.0"
   }
 }

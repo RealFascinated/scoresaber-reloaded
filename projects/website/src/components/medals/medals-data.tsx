@@ -114,7 +114,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2 sm:hidden">
                 {rankingData.items.length === 0 && (
-                  <p className="text-muted-foreground py-10 text-center">No players found</p>
+                  <p className="py-10 text-center text-muted-foreground">No players found</p>
                 )}
                 {rankingData.items.map((player, index) => (
                   <PlayerRankCard
@@ -132,7 +132,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
                 ))}
               </div>
 
-              <div className="ring-border bg-card overflow-hidden rounded-xl ring-1 max-sm:hidden">
+              <div className="overflow-hidden rounded-xl bg-card ring-1 ring-border max-sm:hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -146,7 +146,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
                   <TableBody>
                     {rankingData.items.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={me ? 5 : 4} className="text-muted-foreground py-10 text-center">
+                        <TableCell colSpan={me ? 5 : 4} className="py-10 text-center text-muted-foreground">
                           No players found
                         </TableCell>
                       </TableRow>
@@ -159,7 +159,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
                         <TableCell className="py-2">
                           <div className="flex items-center gap-2">
                             <CountryFlag code={player.country ?? ""} size={14} />
-                            <span className="text-foreground text-sm tabular-nums">
+                            <span className="text-sm text-foreground tabular-nums">
                               #{player.medalsCountryRank}
                             </span>
                           </div>
@@ -168,7 +168,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
                           <MedalsRanking player={player} deferAvatar={index >= 8} />
                         </TableCell>
                         <TableCell className="py-2 text-right">
-                          <span className="text-medals inline-flex items-center gap-1 font-semibold tabular-nums">
+                          <span className="inline-flex items-center gap-1 font-semibold text-medals tabular-nums">
                             <SharedIcons.MedalsIcon className="size-4" />
                             {formatNumberWithCommas(player.medals)}
                           </span>

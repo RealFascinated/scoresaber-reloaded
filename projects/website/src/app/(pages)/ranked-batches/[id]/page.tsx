@@ -26,7 +26,9 @@ type Props = {
 };
 
 type RankedBatchFetchResult =
-  { status: "found"; response: RankedBatchResponse } | { status: "not-found" } | { status: "unavailable" };
+  | { status: "found"; response: RankedBatchResponse }
+  | { status: "not-found" }
+  | { status: "unavailable" };
 
 const getRankedBatch = cache(async (id: string) => {
   const rankedBatchId = Number(id);

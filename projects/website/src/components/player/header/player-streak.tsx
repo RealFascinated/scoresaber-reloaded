@@ -36,41 +36,41 @@ export default function PlayerStreak({ player }: PlayerStreakProps) {
       showOnMobile
     >
       <div className="w-full lg:w-fit">
-        <div className="bg-control ring-border flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 ring-1 lg:hidden">
+        <div className="flex w-full items-center justify-between gap-3 rounded-lg bg-control px-3 py-2 ring-1 ring-border lg:hidden">
           <div className="flex items-center gap-2">
-            <SharedIcons.PlayerStreakIcon className="text-streak size-4 shrink-0" />
+            <SharedIcons.PlayerStreakIcon className="size-4 shrink-0 text-streak" />
             <span className="text-sm font-semibold tabular-nums">
               {formatNumberWithCommas(currentStreak)} {pluralize(currentStreak, "day")}
             </span>
-            <span className="text-muted-foreground text-xs">streak</span>
+            <span className="text-xs text-muted-foreground">streak</span>
           </div>
-          <span className="text-muted-foreground text-xs">
+          <span className="text-xs text-muted-foreground">
             Best {formatNumberWithCommas(longestStreak)} {pluralize(longestStreak, "day")}
           </span>
         </div>
 
-        <div className="bg-control ring-border relative hidden w-32 rounded-lg px-3 py-2 ring-1 lg:block">
+        <div className="relative hidden w-32 rounded-lg bg-control px-3 py-2 ring-1 ring-border lg:block">
           <div className="relative flex items-center justify-between">
-            <span className="text-muted-foreground text-[10px] font-semibold tracking-wide uppercase">
+            <span className="text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
               Streak
             </span>
-            <SharedIcons.PlayerStreakIcon className="text-streak size-3.5" />
+            <SharedIcons.PlayerStreakIcon className="size-3.5 text-streak" />
           </div>
 
           <div className="relative mt-0.5 flex items-end gap-1">
             <span className="text-base leading-none font-semibold tabular-nums">
               {formatNumberWithCommas(currentStreak)}
             </span>
-            <span className="text-muted-foreground text-[11px] leading-none">
+            <span className="text-[11px] leading-none text-muted-foreground">
               {pluralize(currentStreak, "day")}
             </span>
           </div>
 
           <div className="relative mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/8">
-            <div className="bg-streak h-full rounded-full" style={{ width: `${progress}%` }} />
+            <div className="h-full rounded-full bg-streak" style={{ width: `${progress}%` }} />
           </div>
 
-          <div className="text-muted-foreground relative mt-1 text-[10px]">
+          <div className="relative mt-1 text-[10px] text-muted-foreground">
             Best {formatNumberWithCommas(longestStreak)} {pluralize(longestStreak, "day")}
           </div>
         </div>

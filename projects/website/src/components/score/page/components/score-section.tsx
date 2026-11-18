@@ -30,7 +30,7 @@ export function ScoreSectionNav({ sections }: ScoreSectionNavProps) {
         <a
           key={section.id}
           href={`#${section.id}`}
-          className="bg-control ring-border hover:bg-accent text-muted-foreground hover:text-foreground rounded-full px-3 py-1 text-xs font-medium ring-1 transition-colors"
+          className="rounded-full bg-control px-3 py-1 text-xs font-medium text-muted-foreground ring-1 ring-border transition-colors hover:bg-accent hover:text-foreground"
         >
           {section.label}
         </a>

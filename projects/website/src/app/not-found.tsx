@@ -24,7 +24,7 @@ export default function NotFoundPage() {
         actions={<NotFoundSearchButton />}
         footer={
           <div className="flex flex-col items-center gap-2">
-            <p className="text-muted-foreground text-sm">Need help? Join our Discord community!</p>
+            <p className="text-sm text-muted-foreground">Need help? Join our Discord community!</p>
             <DiscordButton />
           </div>
         }

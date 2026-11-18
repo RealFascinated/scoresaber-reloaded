@@ -1,7 +1,11 @@
 import { InvalidCookie, NotFound, ParseError, ValidationError } from "elysia";
 
 export type HttpErrorCode =
-  "VALIDATION" | "NOT_FOUND" | "PARSE" | "INVALID_COOKIE_SIGNATURE" | "INTERNAL_SERVER_ERROR";
+  | "VALIDATION"
+  | "NOT_FOUND"
+  | "PARSE"
+  | "INVALID_COOKIE_SIGNATURE"
+  | "INTERNAL_SERVER_ERROR";
 
 /**
  * Elysia 2 no longer passes an error `code` string to `onError` handlers, so derive the

@@ -200,7 +200,7 @@ function CanvasBounds() {
   const k = useStageScale();
   return (
     <div
-      className="border-foreground/50 pointer-events-none absolute inset-0 border-dotted"
+      className="pointer-events-none absolute inset-0 border-dotted border-foreground/50"
       style={{ borderWidth: 2 / k }}
       aria-hidden
     />
@@ -294,14 +294,14 @@ export default function EditorCanvas() {
 
   return (
     <div
-      className="bg-muted/30 relative h-full w-full p-8"
+      className="relative h-full w-full bg-muted/30 p-8"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endMarquee}
       onPointerCancel={endMarquee}
     >
       {layout.elements.length === 0 && (
-        <div className="text-muted-foreground pointer-events-none absolute inset-0 z-10 flex items-center justify-center text-sm">
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center text-sm text-muted-foreground">
           Add a widget from the panel on the left to get started.
         </div>
       )}
@@ -322,7 +322,7 @@ export default function EditorCanvas() {
       </OverlayStage>
       {showMarquee && (
         <div
-          className="border-primary bg-primary/10 pointer-events-none fixed z-50 border"
+          className="pointer-events-none fixed z-50 border border-primary bg-primary/10"
           style={{
             left: Math.min(marquee.startX, marquee.x),
             top: Math.min(marquee.startY, marquee.y),

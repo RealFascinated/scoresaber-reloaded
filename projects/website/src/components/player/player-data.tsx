@@ -108,7 +108,7 @@ export default function PlayerData({ player: playerProp, initialScores }: Player
           <PlayerHeader player={player} />
 
           {!player.inactive && (
-            <div className="ring-border bg-card rounded-xl p-4 ring-1">
+            <div className="rounded-xl bg-card p-4 ring-1 ring-border">
               <PlayerViews player={player} key={player.id} />
             </div>
           )}

@@ -27,7 +27,8 @@ const EMPTY_COPY = {
 type EmptyVariant = keyof typeof EMPTY_COPY;
 
 type FeedPhase =
-  { kind: "list"; scores: PlayerScore<ScoreSaberScore>[] } | { kind: "empty"; variant: EmptyVariant };
+  | { kind: "list"; scores: PlayerScore<ScoreSaberScore>[] }
+  | { kind: "empty"; variant: EmptyVariant };
 
 function sortByNewestFirst(a: PlayerScore<ScoreSaberScore>, b: PlayerScore<ScoreSaberScore>) {
   return (
@@ -83,15 +84,15 @@ function FeedConnectionStatus({ readyState }: { readyState: ReadyState }) {
 function FeedEmptyState({ variant }: { variant: EmptyVariant }) {
   if (variant === "connecting") {
     return (
-      <div className="ring-border bg-card flex flex-col items-center justify-center gap-3 rounded-xl py-12 ring-1">
+      <div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-card py-12 ring-1 ring-border">
         <Spinner />
-        <p className="text-muted-foreground text-sm">{EMPTY_COPY[variant]}</p>
+        <p className="text-sm text-muted-foreground">{EMPTY_COPY[variant]}</p>
       </div>
     );
   }
 
   return (
-    <p className="ring-border bg-card text-muted-foreground rounded-xl py-12 text-center text-sm ring-1">
+    <p className="rounded-xl bg-card py-12 text-center text-sm text-muted-foreground ring-1 ring-border">
       {EMPTY_COPY[variant]}
     </p>
   );
@@ -99,7 +100,7 @@ function FeedEmptyState({ variant }: { variant: EmptyVariant }) {
 
 function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
   return (
-    <div className="ring-border bg-card divide-border divide-y overflow-hidden rounded-xl ring-1">
+    <div className="divide-y divide-border overflow-hidden rounded-xl bg-card ring-1 ring-border">
       {scores.map(scoreToken => {
         if (!scoreToken.leaderboard || !scoreToken.score) {
           return null;
@@ -120,7 +121,7 @@ function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
               />
               <SimpleLink
                 href={`/player/${player?.id}`}
-                className="hover:text-primary text-sm font-medium transition-colors"
+                className="text-sm font-medium transition-colors hover:text-primary"
               >
                 {player?.name ?? "Unknown"}
               </SimpleLink>
@@ -128,7 +129,7 @@ function FeedScoreList({ scores }: { scores: PlayerScore<ScoreSaberScore>[] }) {
                 <span className="flex items-center">
                   <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(score.hmd)} />
                 </span>
-                <span className="text-muted-foreground text-xs">{score.hmd ?? "Unknown device"}</span>
+                <span className="text-xs text-muted-foreground">{score.hmd ?? "Unknown device"}</span>
               </div>
             </div>
             <ScoreSaberScoreDisplay

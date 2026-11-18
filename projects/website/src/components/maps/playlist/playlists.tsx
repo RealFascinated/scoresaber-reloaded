@@ -47,7 +47,7 @@ export default function Playlists() {
         <Button variant="outline" size="sm" className="gap-2">
           <SharedIcons.OneClickInstallIcon className="size-4" />
           Download playlist
-          <SharedIcons.ExpandLeaderboardRowIcon className="text-muted-foreground size-4" />
+          <SharedIcons.ExpandLeaderboardRowIcon className="size-4 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="flex w-56 flex-col gap-0.5 p-1">
@@ -67,7 +67,7 @@ export default function Playlists() {
             </a>
           );
         })}
-        <div className="bg-border my-1 h-px" />
+        <div className="my-1 h-px bg-border" />
         <CustomPlaylistCreator
           trigger={
             <button type="button" className={MENU_ITEM_CLASS}>

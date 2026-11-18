@@ -4,10 +4,10 @@ import Avatar from "../avatar";
 
 export default function PlayerScoreHeader({ player }: { player: ScoreSaberLeaderboardPlayerInfo }) {
   return (
-    <div className="bg-primary/20 flex w-fit items-center gap-2 rounded-md rounded-b-none p-2">
+    <div className="flex w-fit items-center gap-2 rounded-md rounded-b-none bg-primary/20 p-2">
       <Avatar src={player.avatar} alt={`${player.name}'s Profile Picture`} size={20} />
       <SimpleLink href={`/player/${player.id}`}>
-        <p className="hover:text-primary text-sm transition-all">{player.name}</p>
+        <p className="text-sm transition-all hover:text-primary">{player.name}</p>
       </SimpleLink>
     </div>
   );

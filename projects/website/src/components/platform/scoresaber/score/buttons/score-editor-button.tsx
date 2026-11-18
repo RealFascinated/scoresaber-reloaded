@@ -168,8 +168,8 @@ export default function ScoreSaberScoreEditorButton({
               <div className="flex w-full flex-col gap-(--spacing-md)">
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">Base</span>
-                    <span className="text-muted-foreground text-sm">{baseValue}</span>
+                    <span className="text-sm text-muted-foreground">Base</span>
+                    <span className="text-sm text-muted-foreground">{baseValue}</span>
                   </div>
                   <Slider
                     aria-label="Base accuracy"
@@ -184,8 +184,8 @@ export default function ScoreSaberScoreEditorButton({
 
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-sm">Decimal</span>
-                    <span className="text-muted-foreground text-sm">{decimalValue.toFixed(2)}</span>
+                    <span className="text-sm text-muted-foreground">Decimal</span>
+                    <span className="text-sm text-muted-foreground">{decimalValue.toFixed(2)}</span>
                   </div>
                   <Slider
                     aria-label="Decimal accuracy"
@@ -201,7 +201,7 @@ export default function ScoreSaberScoreEditorButton({
             </div>
 
             {rankedPps && leaderboard.ranked && (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 Weighted PP Gain: <b className="text-pp">{ppGain > 0.1 ? ppGain.toFixed(2) : 0}pp</b>
               </p>
             )}

@@ -48,10 +48,10 @@ export function FollowingScores() {
   }
 
   return (
-    <div className="ring-border bg-card rounded-xl p-5 ring-1">
+    <div className="rounded-xl bg-card p-5 ring-1 ring-border">
       <div className="mb-4">
         <h2 className="text-lg font-semibold">Following Scores</h2>
-        <p className="text-muted-foreground mt-1 text-sm">See the recent scores of the players you follow.</p>
+        <p className="mt-1 text-sm text-muted-foreground">See the recent scores of the players you follow.</p>
       </div>
 
       {isLoading && !scoreData && (
@@ -72,8 +72,8 @@ export function FollowingScores() {
             }
 
             return (
-              <div key={score.scoreId} className="ring-border bg-card overflow-hidden rounded-xl ring-1">
-                <div className="border-border/50 flex items-center gap-2 border-b px-4 py-2">
+              <div key={score.scoreId} className="overflow-hidden rounded-xl bg-card ring-1 ring-border">
+                <div className="flex items-center gap-2 border-b border-border/50 px-4 py-2">
                   <Avatar
                     src={player.avatar}
                     alt={`${player.name}'s Profile Picture`}
@@ -82,7 +82,7 @@ export function FollowingScores() {
                   />
                   <SimpleLink
                     href={`/player/${player.id}`}
-                    className="hover:text-primary text-sm font-medium transition-colors"
+                    className="text-sm font-medium transition-colors hover:text-primary"
                   >
                     {player.name}
                   </SimpleLink>

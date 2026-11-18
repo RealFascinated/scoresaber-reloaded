@@ -18,7 +18,7 @@ export default function EmbedLinks({ text }: EmbedLinksProps) {
           key={key}
           href={part}
           target="_blank"
-          className="text-primary hover:text-primary/80 transition-all"
+          className="text-primary transition-all hover:text-primary/80"
         >
           {part}
         </SimpleLink>

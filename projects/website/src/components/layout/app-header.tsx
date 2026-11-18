@@ -60,8 +60,8 @@ function Breadcrumbs() {
             href="/"
             className={
               crumbs.length > 0
-                ? "text-muted-foreground hover:text-foreground transition-colors"
-                : "text-foreground font-medium"
+                ? "text-muted-foreground transition-colors hover:text-foreground"
+                : "font-medium text-foreground"
             }
           >
             Home
@@ -71,14 +71,14 @@ function Breadcrumbs() {
           const isLast = index === crumbs.length - 1;
           return (
             <Fragment key={`${crumb.label}-${index}`}>
-              <li aria-hidden className="text-muted-foreground/60 shrink-0">
+              <li aria-hidden className="shrink-0 text-muted-foreground/60">
                 <SharedIcons.OpenScorePageIcon className="size-3.5" />
               </li>
               <li className={isLast ? "min-w-0" : "shrink-0"}>
                 {crumb.href ? (
                   <SimpleLink
                     href={crumb.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-muted-foreground transition-colors hover:text-foreground"
                   >
                     {crumb.label}
                   </SimpleLink>
@@ -86,7 +86,7 @@ function Breadcrumbs() {
                   <span
                     aria-current={isLast ? "page" : undefined}
                     className={
-                      isLast ? "text-foreground block truncate font-medium" : "text-muted-foreground"
+                      isLast ? "block truncate font-medium text-foreground" : "text-muted-foreground"
                     }
                   >
                     {crumb.label}
@@ -114,7 +114,7 @@ function MyProfileButton() {
       <Avatar
         size={28}
         src={mainPlayer?.avatar ?? ""}
-        className="border-border box-border size-7 shrink-0 rounded-full border"
+        className="box-border size-7 shrink-0 rounded-full border border-border"
         alt="My Profile"
       />
     </SimpleLink>
@@ -127,9 +127,9 @@ function MyProfileButton() {
  */
 export function AppHeader() {
   return (
-    <header className="bg-background/80 border-border/50 sticky top-0 z-20 mb-4 flex h-12 shrink-0 items-center gap-3 border-b px-3 backdrop-blur sm:px-4">
+    <header className="sticky top-0 z-20 mb-4 flex h-12 shrink-0 items-center gap-3 border-b border-border/50 bg-background/80 px-3 backdrop-blur sm:px-4">
       <SidebarTrigger className="-ml-1" />
-      <span className="bg-border hidden h-4 w-px md:block" />
+      <span className="hidden h-4 w-px bg-border md:block" />
       <div className="hidden min-w-0 md:block">
         <Breadcrumbs />
       </div>

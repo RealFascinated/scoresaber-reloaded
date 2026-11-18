@@ -17,7 +17,7 @@ export default function OverlayPlayerRank({ player }: OverlayPlayerRankProps) {
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-3">
         <div className="flex w-6 justify-center">
-          <SharedIcons.GlobalRankIcon className="text-foreground/80 h-6 w-6" />
+          <SharedIcons.GlobalRankIcon className="h-6 w-6 text-foreground/80" />
         </div>
         <p className={cn(getRankColor(rank), "text-2xl font-bold")}>#{formatNumberWithCommas(rank)}</p>
       </div>

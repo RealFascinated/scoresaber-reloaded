@@ -8,7 +8,7 @@ export default function OverlayEditorLoader({ overlayId }: { overlayId: string }
   const { data: overlay, isLoading, error } = useUserOverlay(overlayId);
 
   if (isLoading) {
-    return <div className="text-muted-foreground flex h-screen items-center justify-center">Loading…</div>;
+    return <div className="flex h-screen items-center justify-center text-muted-foreground">Loading…</div>;
   }
   if (error || !overlay) {
     return (

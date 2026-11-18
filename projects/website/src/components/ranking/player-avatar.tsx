@@ -34,7 +34,7 @@ export function PlayerAvatar({
           className={cn("border-border size-7 min-w-7 rounded-full border object-cover", className)}
         />
       ) : (
-        <div className="border-border bg-muted size-7 min-w-7 rounded-full border" />
+        <div className="size-7 min-w-7 rounded-full border border-border bg-muted" />
       )}
     </div>
   );

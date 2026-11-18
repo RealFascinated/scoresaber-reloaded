@@ -27,14 +27,14 @@ export default function SteamSignInRedirect({ redirectPath, failed }: SteamSignI
   if (failed) {
     return (
       <div className="flex h-[60vh] flex-col items-center justify-center gap-4">
-        <p className="text-destructive text-sm">Sign in failed, please try again.</p>
+        <p className="text-sm text-destructive">Sign in failed, please try again.</p>
         <Button onClick={() => signInWithSteam(redirectPath)}>Sign in with Steam</Button>
       </div>
     );
   }
 
   return (
-    <div className="text-muted-foreground flex h-[60vh] items-center justify-center">
+    <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
       Redirecting to Steam…
     </div>
   );

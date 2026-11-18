@@ -71,7 +71,7 @@ export default function CreateOverlayDialog({ open, onOpenChange }: CreateOverla
               <OverlayPreview layout={preset.layout} />
               <div className="px-1 pb-1">
                 <div className="text-sm font-medium">{preset.name}</div>
-                <div className="text-muted-foreground text-xs">{preset.description}</div>
+                <div className="text-xs text-muted-foreground">{preset.description}</div>
               </div>
             </button>
           ))}

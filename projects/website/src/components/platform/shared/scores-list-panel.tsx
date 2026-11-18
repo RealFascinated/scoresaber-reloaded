@@ -84,7 +84,7 @@ export default function ScoresListPanel<T>({
       <div className={cn("text-center", (isError || data.items.length === 0) && "pt-2")}>
         {isError || data.items.length === 0 ? (
           <EmptyState
-            className="ring-border rounded-xl ring-1"
+            className="rounded-xl ring-1 ring-border"
             title={isError ? "Failed to Load Scores" : "No Results"}
             description={
               isError ? "There was an error loading these scores" : "No scores were found on this page"

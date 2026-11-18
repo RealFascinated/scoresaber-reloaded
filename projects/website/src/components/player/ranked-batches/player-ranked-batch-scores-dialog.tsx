@@ -42,7 +42,7 @@ function PlayerRankedBatchScores({ playerId, rankedBatchId }: { playerId: string
     );
   }
   if (scores.isError || !scores.data) {
-    return <p className="text-muted-foreground py-4 text-sm">Failed to load the score changes.</p>;
+    return <p className="py-4 text-sm text-muted-foreground">Failed to load the score changes.</p>;
   }
 
   const starChanges = new Map(
@@ -51,7 +51,7 @@ function PlayerRankedBatchScores({ playerId, rankedBatchId }: { playerId: string
 
   return (
     <div className="flex min-h-0 flex-col">
-      <div className="text-muted-foreground border-border/50 flex items-center gap-3 border-b pb-1.5 text-xs">
+      <div className="flex items-center gap-3 border-b border-border/50 pb-1.5 text-xs text-muted-foreground">
         <span className="flex-1">Score</span>
         <span className="shrink-0 max-sm:hidden">Stars</span>
         <span className="w-28 shrink-0 text-right">Raw pp</span>
@@ -62,7 +62,7 @@ function PlayerRankedBatchScores({ playerId, rankedBatchId }: { playerId: string
           return (
             <div
               key={score.scoreId}
-              className="border-border/50 flex items-center gap-3 border-b py-2 last:border-b-0"
+              className="flex items-center gap-3 border-b border-border/50 py-2 last:border-b-0"
             >
               <div className="min-w-0 flex-1">
                 <ScoreSongInfo
@@ -79,7 +79,7 @@ function PlayerRankedBatchScores({ playerId, rankedBatchId }: { playerId: string
                 />
               </div>
               {starChange && (
-                <div className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs tabular-nums max-sm:hidden">
+                <div className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground tabular-nums max-sm:hidden">
                   <SharedIcons.QualifiedLeaderboardStarIcon className="size-3.5" />
                   <span>{starChange.previousStars.toFixed(2)}</span>
                   <SharedIcons.OpenSourceArrowIcon className="size-3" />
@@ -90,7 +90,7 @@ function PlayerRankedBatchScores({ playerId, rankedBatchId }: { playerId: string
                 <span className={cn("text-sm font-semibold", getDeltaClass(score.ppDelta))}>
                   {formatPpDelta(score.ppDelta)}
                 </span>
-                <span className="text-muted-foreground text-xs">
+                <span className="text-xs text-muted-foreground">
                   {formatPp(score.ppBefore)} {"->"} {formatPp(score.ppAfter)}
                 </span>
               </div>

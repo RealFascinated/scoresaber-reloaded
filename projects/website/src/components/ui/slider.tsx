@@ -30,11 +30,11 @@ function Slider({ className, label, labelPosition = "top", showLabelOnHover = tr
       onPointerUp={() => setIsDragging(false)}
       {...props}
     >
-      <SliderPrimitive.Track className="bg-primary/10 relative h-2 w-full grow overflow-hidden rounded-full select-none">
-        <SliderPrimitive.Range className="bg-primary absolute h-full transition-colors duration-200" />
+      <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-primary/10 select-none">
+        <SliderPrimitive.Range className="absolute h-full bg-primary transition-colors duration-200" />
       </SliderPrimitive.Track>
       <SliderPrimitive.Thumb
-        className="border-primary bg-background ring-offset-background hover:border-primary/80 block h-5 w-5 rounded-full border-2 shadow-md transition-all duration-200 select-none focus:ring-0 focus:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+        className="block h-5 w-5 rounded-full border-2 border-primary bg-background shadow-md ring-offset-background transition-all duration-200 select-none hover:border-primary/80 focus:ring-0 focus:outline-hidden disabled:pointer-events-none disabled:opacity-50"
         onKeyDown={handleKeyDown}
       >
         {label && showLabel && (

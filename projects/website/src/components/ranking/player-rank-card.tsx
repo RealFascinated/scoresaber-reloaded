@@ -76,7 +76,7 @@ export function PlayerRankCard({
           <span className={cn("truncate text-sm font-medium", inactive && "text-muted-foreground")}>
             {player.name}
           </span>
-          <span className="text-muted-foreground flex items-center gap-1.5 text-xs tabular-nums">
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums">
             <CountryFlag code={player.country ?? ""} size={12} />#{countryRank}
           </span>
         </div>

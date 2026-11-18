@@ -164,7 +164,7 @@ function ViewSelector({
 }) {
   return (
     <div className="-mx-1 min-w-0 [scrollbar-width:none] overflow-x-auto px-1">
-      <div className="bg-muted/50 flex h-8 w-max gap-1 rounded-lg p-0.5">
+      <div className="flex h-8 w-max gap-1 rounded-lg bg-muted/50 p-0.5">
         {views.map(view => {
           const isActive = view.index === selectedView.index;
           return (
@@ -257,8 +257,8 @@ export default function PlayerViews({ player }: { player: ScoreSaberPlayer }) {
         <Card className="bg-chart-card p-2.5">
           <div className="flex h-[400px] items-center justify-center">
             <div className="flex flex-col items-center gap-3">
-              <SharedIcons.WarningAlertIcon className="text-destructive size-8" />
-              <p className="text-muted-foreground text-sm">Failed to load player statistics</p>
+              <SharedIcons.WarningAlertIcon className="size-8 text-destructive" />
+              <p className="text-sm text-muted-foreground">Failed to load player statistics</p>
             </div>
           </div>
         </Card>

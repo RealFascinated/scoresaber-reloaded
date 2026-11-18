@@ -9,7 +9,7 @@ import type { OverlayLayout } from "@ssr/common/schemas/overlay/overlay-layout";
  */
 export default function OverlayPreview({ layout }: { layout: OverlayLayout }) {
   return (
-    <div className="bg-muted/60 pointer-events-none aspect-video w-full overflow-hidden rounded-lg">
+    <div className="pointer-events-none aspect-video w-full overflow-hidden rounded-lg bg-muted/60">
       <MockOverlayRuntime scenario="inSong" playerId="">
         <OverlayStage layout={layout} />
       </MockOverlayRuntime>

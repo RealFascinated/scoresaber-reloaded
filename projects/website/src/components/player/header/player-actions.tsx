@@ -99,7 +99,7 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
       {mainPlayerId && player.id !== mainPlayerId && (
         <>
           <div className="flex items-center">
-            <div className="bg-border h-7 w-px" />
+            <div className="h-7 w-px bg-border" />
           </div>
 
           <SnipePlaylistCreator toSnipe={player} />
@@ -109,7 +109,7 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
       {mainPlayerId && player.id === mainPlayerId && (
         <>
           <div className="flex items-center">
-            <div className="bg-border h-7 w-px" />
+            <div className="h-7 w-px bg-border" />
           </div>
 
           <SelfPlaylistCreator />

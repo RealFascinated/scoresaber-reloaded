@@ -347,8 +347,8 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
     return (
       <div className="flex h-[400px] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <SharedIcons.WarningAlertIcon className="text-destructive size-8" />
-          <p className="text-muted-foreground text-sm">Failed to load chart data</p>
+          <SharedIcons.WarningAlertIcon className="size-8 text-destructive" />
+          <p className="text-sm text-muted-foreground">Failed to load chart data</p>
         </div>
       </div>
     );
@@ -359,7 +359,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
       <div className="flex h-[400px] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Spinner />
-          <p className="text-muted-foreground text-sm">Loading chart data...</p>
+          <p className="text-sm text-muted-foreground">Loading chart data...</p>
         </div>
       </div>
     );
@@ -368,7 +368,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
   if (!hasData) {
     return (
       <div className="flex h-[400px] items-center justify-center">
-        <p className="text-muted-foreground text-sm">No scores found for this player</p>
+        <p className="text-sm text-muted-foreground">No scores found for this player</p>
       </div>
     );
   }
@@ -392,7 +392,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
               <SharedIcons.ScoresGraphFollowingIcon className="size-4" />
               Add Player to Compare
               {comparisonPlayers.length > 0 && (
-                <span className="bg-primary/10 ml-2 rounded-full px-2 py-0.5 text-xs">
+                <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs">
                   {comparisonPlayers.length}/{MAX_COMPARISON_PLAYERS}
                 </span>
               )}
@@ -403,15 +403,15 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
                 {comparisonPlayers.map(comparisonPlayer => (
                   <div
                     key={comparisonPlayer.id}
-                    className="bg-primary/10 border-primary/20 ring-border flex w-full items-center gap-2 rounded-lg px-2.5 py-1 text-xs font-medium ring-1 md:w-auto"
+                    className="flex w-full items-center gap-2 rounded-lg border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium ring-1 ring-border md:w-auto"
                   >
-                    <span className="text-primary-foreground flex-1 md:flex-initial">
+                    <span className="flex-1 text-primary-foreground md:flex-initial">
                       {comparisonPlayer.name}
                     </span>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="hover:bg-primary/20 h-5 w-5 shrink-0"
+                      className="h-5 w-5 shrink-0 hover:bg-primary/20"
                       onClick={() =>
                         setComparisonPlayers(players => players.filter(p => p.id !== comparisonPlayer.id))
                       }
@@ -426,7 +426,7 @@ export default function ScoresGraphChart({ player }: { player: ScoreSaberPlayer 
 
           <div className="flex items-center justify-end gap-2">
             <Switch checked={showTop} onCheckedChange={setShowTop} id="top-mode" />
-            <label htmlFor="top-mode" className="text-muted-foreground text-xs font-medium">
+            <label htmlFor="top-mode" className="text-xs font-medium text-muted-foreground">
               Only Top {TOP_SCORE_COUNT} Scores
             </label>
           </div>

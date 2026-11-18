@@ -57,7 +57,7 @@ export default function EditorToolbar({
   };
 
   return (
-    <header className="border-border bg-card grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b px-3">
+    <header className="grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-border bg-card px-3">
       <div className="flex min-w-0 items-center gap-1">
         <Button
           asChild
@@ -71,14 +71,14 @@ export default function EditorToolbar({
           </Link>
         </Button>
         <input
-          className="hover:bg-hover focus:bg-muted focus:ring-primary/50 max-w-64 min-w-0 rounded-md px-2 py-1 font-semibold outline-hidden focus:ring-2"
+          className="max-w-64 min-w-0 rounded-md px-2 py-1 font-semibold outline-hidden hover:bg-hover focus:bg-muted focus:ring-2 focus:ring-primary/50"
           value={name}
           maxLength={64}
           aria-label="Overlay name"
           onChange={event => rename(event.target.value)}
         />
         <output
-          className="text-muted-foreground ml-2 flex shrink-0 items-center gap-1.5 text-xs"
+          className="ml-2 flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground"
           title="Changes are saved automatically and show up in OBS right away"
         >
           <span className={cn("size-2 rounded-full", STATUS[status].dot)} />

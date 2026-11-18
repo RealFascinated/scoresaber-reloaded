@@ -74,7 +74,7 @@ export default function Settings() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[16rem_1fr] lg:gap-6">
         <nav
-          className="ring-border bg-card h-fit rounded-xl p-3 ring-1 lg:sticky lg:top-16"
+          className="h-fit rounded-xl bg-card p-3 ring-1 ring-border lg:sticky lg:top-16"
           aria-label="Settings categories"
         >
           <div className="flex flex-col gap-1">
@@ -102,15 +102,15 @@ export default function Settings() {
         </nav>
 
         <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <div className="ring-border bg-card rounded-xl p-4 ring-1">
+          <div className="rounded-xl bg-card p-4 ring-1 ring-border">
             <h2 className="mb-4 text-lg font-semibold">{selectedCategory.name}</h2>
             {selectedCategory.component}
           </div>
 
-          <div className="ring-border bg-card flex items-center justify-between rounded-xl p-4 ring-1">
+          <div className="flex items-center justify-between rounded-xl bg-card p-4 ring-1 ring-border">
             <div>
               <p className="text-sm font-semibold">Reset Settings</p>
-              <p className="text-muted-foreground mt-0.5 text-sm">
+              <p className="mt-0.5 text-sm text-muted-foreground">
                 Restore all settings to their default values
               </p>
             </div>

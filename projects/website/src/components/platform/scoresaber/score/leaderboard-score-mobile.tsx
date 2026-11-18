@@ -72,12 +72,12 @@ export default function ScoreSaberLeaderboardScoreMobile({
             {scorePlayer ? (
               <SimpleLink
                 href={`/player/${score.playerId}`}
-                className="hover:text-primary truncate text-sm font-medium transition-colors"
+                className="truncate text-sm font-medium transition-colors hover:text-primary"
               >
                 {scorePlayer.name}
               </SimpleLink>
             ) : (
-              <p className="text-muted-foreground text-sm">Unknown Player</p>
+              <p className="text-sm text-muted-foreground">Unknown Player</p>
             )}
             {hmd.logo && (
               <ScoreSaberScoreHMD score={score}>
@@ -87,7 +87,7 @@ export default function ScoreSaberLeaderboardScoreMobile({
               </ScoreSaberScoreHMD>
             )}
           </div>
-          <div className="text-muted-foreground flex items-center gap-2 text-xs">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <ScoreTimeSet timestamp={score.timestamp} />
             {score.modifiers.length > 0 && <ScoreSaberScoreModifiers type="simple" score={score} />}
           </div>
@@ -95,13 +95,13 @@ export default function ScoreSaberLeaderboardScoreMobile({
 
         <div className="flex shrink-0 flex-col items-end text-sm tabular-nums">
           {isRanked ? (
-            <span className="text-pp font-medium">
+            <span className="font-medium text-pp">
               <ScorePpBadge score={score} leaderboard={leaderboard} />
             </span>
           ) : (
             <span className="font-medium">{formatNumberWithCommas(score.score)}</span>
           )}
-          <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span>{formatScoreAccuracy(score.accuracy)}</span>
             <span className="text-border">•</span>
             <span className={score.misses > 0 ? "text-danger" : "text-success"}>

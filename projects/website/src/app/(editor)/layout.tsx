@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       themes={ssrConfig.themes.map((theme: SiteTheme) => theme.id)}
     >
       <SessionHydration>
-        <main className="bg-background text-foreground min-h-screen w-full">{children}</main>
+        <main className="min-h-screen w-full bg-background text-foreground">{children}</main>
       </SessionHydration>
     </ThemeProvider>
   );

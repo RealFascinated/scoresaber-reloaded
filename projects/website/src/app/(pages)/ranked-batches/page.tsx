@@ -63,7 +63,7 @@ export default async function RankedBatchesPage({ searchParams }: Props) {
 
       {!rankedBatches || rankedBatches.items.length === 0 ? (
         <EmptyState
-          className="ring-border rounded-xl ring-1"
+          className="rounded-xl ring-1 ring-border"
           title="No ranked batches found"
           description="There are no ranked batches on this page."
         />

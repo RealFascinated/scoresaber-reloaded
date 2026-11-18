@@ -20,7 +20,7 @@ function AddWidgetMenu({ onAdded }: { onAdded: () => void }) {
     <div className="flex flex-col gap-5">
       {GROUPS.map(group => (
         <section key={group} className="flex flex-col gap-2">
-          <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">{group}</h3>
+          <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{group}</h3>
           <div className="grid grid-cols-2 gap-2">
             {OVERLAY_WIDGET_TYPES.filter(type => OVERLAY_WIDGETS[type].group === group).map(type => {
               const Icon = OVERLAY_WIDGETS[type].icon;
@@ -33,9 +33,9 @@ function AddWidgetMenu({ onAdded }: { onAdded: () => void }) {
                     addElement(createOverlayElement(type, { z: count }));
                     onAdded();
                   }}
-                  className="ring-border hover:bg-hover hover:ring-primary/50 flex cursor-pointer flex-col items-center gap-1.5 rounded-lg px-2 py-3 text-xs ring-1 transition-colors disabled:cursor-default disabled:opacity-40"
+                  className="flex cursor-pointer flex-col items-center gap-1.5 rounded-lg px-2 py-3 text-xs ring-1 ring-border transition-colors hover:bg-hover hover:ring-primary/50 disabled:cursor-default disabled:opacity-40"
                 >
-                  <Icon className="text-muted-foreground size-5" />
+                  <Icon className="size-5 text-muted-foreground" />
                   {OVERLAY_WIDGETS[type].label}
                 </button>
               );
@@ -44,7 +44,7 @@ function AddWidgetMenu({ onAdded }: { onAdded: () => void }) {
         </section>
       ))}
       {full && (
-        <p className="text-destructive text-xs">
+        <p className="text-xs text-destructive">
           An overlay can have {MAX_OVERLAY_ELEMENTS} widgets at most.
         </p>
       )}
@@ -99,9 +99,9 @@ function LayerList({ onAdd }: { onAdd: () => void }) {
 
   if (layers.length === 0) {
     return (
-      <div className="text-muted-foreground flex flex-col items-center gap-3 py-10 text-center text-sm">
+      <div className="flex flex-col items-center gap-3 py-10 text-center text-sm text-muted-foreground">
         <p>Nothing on this overlay yet.</p>
-        <button type="button" onClick={onAdd} className="text-primary cursor-pointer hover:underline">
+        <button type="button" onClick={onAdd} className="cursor-pointer text-primary hover:underline">
           Add a widget
         </button>
       </div>
@@ -131,7 +131,7 @@ function LayerList({ onAdd }: { onAdd: () => void }) {
               }
               className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
             >
-              <Icon className="text-muted-foreground size-4 shrink-0" />
+              <Icon className="size-4 shrink-0 text-muted-foreground" />
               <span className="min-w-0 flex-1 truncate">{OVERLAY_WIDGETS[element.type].label}</span>
             </button>
             <div className={cn("hidden items-center group-hover:flex", selected && "flex")}>
@@ -182,7 +182,7 @@ export default function LayersPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-border border-b p-3">
+      <div className="border-b border-border p-3">
         <SegmentedControl>
           <SegmentedOption isActive={tab === "layers"} onClick={() => setTab("layers")}>
             Layers ({count})

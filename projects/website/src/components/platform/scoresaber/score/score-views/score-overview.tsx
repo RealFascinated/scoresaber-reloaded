@@ -47,7 +47,7 @@ export function ScoreOverview({ score, scoreStats, leaderboard }: ScoreOverviewP
           )}
         </div>
 
-        <div className="bg-card border-border flex w-full flex-col items-center justify-center gap-3 rounded-lg border p-3">
+        <div className="flex w-full flex-col items-center justify-center gap-3 rounded-lg border border-border bg-card p-3">
           <ScoreAccuracyStats scoreStats={scoreStats} />
         </div>
       </Card>

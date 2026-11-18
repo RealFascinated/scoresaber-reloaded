@@ -149,7 +149,7 @@ export default function ScoreSaberLeaderboardScore({
       </TableRow>
 
       {detailsExpanded && (
-        <TableRow className="border-border/50 border-b">
+        <TableRow className="border-b border-border/50">
           <TableCell colSpan={10} className="p-(--spacing-md)">
             <ScoreDetailsDropdown
               score={score}

@@ -78,9 +78,9 @@ export default function CustomPlaylistCreator({ trigger }: CustomPlaylistCreator
         </DialogDescription>
 
         <Card className="relative m-0 flex h-full max-h-[85vh] flex-col rounded-lg">
-          <div className="border-border border-b px-4 py-3">
+          <div className="border-b border-border px-4 py-3">
             <h1 className="text-xl font-semibold md:text-2xl">Create Custom Playlist</h1>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="mt-1 text-sm text-muted-foreground">
               Build a ranked maps playlist with your own star range and sort order.
             </p>
           </div>
@@ -134,7 +134,7 @@ export default function CustomPlaylistCreator({ trigger }: CustomPlaylistCreator
             </div>
           </div>
 
-          <div className="border-border flex flex-wrap items-center justify-end gap-2 border-t px-4 py-3">
+          <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border px-4 py-3">
             <Button type="submit" form="custom-playlist-form" className="gap-2" disabled={downloading}>
               {downloading ? (
                 <Spinner className="size-4" />

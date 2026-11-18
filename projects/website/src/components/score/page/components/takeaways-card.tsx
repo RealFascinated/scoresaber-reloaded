@@ -13,12 +13,12 @@ function TakeawayList({ items, tone }: { items: Takeaway[]; tone: Takeaway["tone
         {tone === "good" ? "What went well" : "What to work on"}
       </h3>
       {items.length === 0 ? (
-        <p className="text-muted-foreground text-sm">Nothing stood out here.</p>
+        <p className="text-sm text-muted-foreground">Nothing stood out here.</p>
       ) : (
         items.map(item => (
           <div key={item.title} className="flex flex-col gap-0.5">
             <span className="text-sm font-semibold">{item.title}</span>
-            <span className="text-muted-foreground text-sm leading-snug">{item.detail}</span>
+            <span className="text-sm leading-snug text-muted-foreground">{item.detail}</span>
           </div>
         ))
       )}
@@ -35,7 +35,7 @@ export default function TakeawaysCard({ takeaways }: { takeaways: Takeaway[] }) 
     <Card className="gap-5 rounded-xl p-5">
       <div>
         <h2 className="text-lg font-semibold">The Short Version</h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           What this replay says about your play, in plain terms.
         </p>
       </div>

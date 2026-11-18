@@ -271,8 +271,8 @@ function TimelineSlider({
                 onClick={() => onSelect(idx)}
                 className={`cursor-pointer touch-manipulation rounded-md px-3 py-2.5 text-left text-sm transition-colors md:px-2 md:py-0.5 md:text-xs ${
                   isSelected
-                    ? "bg-primary/20 text-primary font-semibold"
-                    : "text-muted-foreground active:bg-muted/70 hover:text-foreground hover:bg-hover"
+                    ? "bg-primary/20 font-semibold text-primary"
+                    : "text-muted-foreground hover:bg-hover hover:text-foreground active:bg-muted/70"
                 }`}
               >
                 {idx === timeline.length - 1 ? "Today" : entry.label}
@@ -330,8 +330,8 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
     return (
       <div className="flex min-h-[min(70vh,400px)] items-center justify-center px-4 py-8">
         <div className="flex flex-col items-center gap-3">
-          <SharedIcons.WarningAlertIcon className="text-destructive size-8" />
-          <p className="text-muted-foreground text-sm">Failed to load skill triangle data</p>
+          <SharedIcons.WarningAlertIcon className="size-8 text-destructive" />
+          <p className="text-sm text-muted-foreground">Failed to load skill triangle data</p>
         </div>
       </div>
     );
@@ -342,7 +342,7 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
       <div className="flex min-h-[min(70vh,400px)] items-center justify-center px-4 py-8">
         <div className="flex flex-col items-center gap-3">
           <Spinner />
-          <p className="text-muted-foreground text-sm">Computing skill triangle...</p>
+          <p className="text-sm text-muted-foreground">Computing skill triangle...</p>
         </div>
       </div>
     );
@@ -351,7 +351,7 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
   if (!metrics) {
     return (
       <div className="flex min-h-[min(50vh,400px)] items-center justify-center px-4 py-8">
-        <p className="text-muted-foreground text-center text-sm">
+        <p className="text-center text-sm text-muted-foreground">
           Not enough ranked score data for skill triangle
         </p>
       </div>
@@ -379,10 +379,10 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
                 showOnMobile
               >
                 <div className="flex flex-col items-start gap-0.5 md:items-center">
-                  <span className="text-danger text-xs font-semibold sm:text-sm">
+                  <span className="text-xs font-semibold text-danger sm:text-sm">
                     Tech: {metrics.tech.toFixed(4)}
                   </span>
-                  <span className="text-muted-foreground text-[10px] sm:text-xs">
+                  <span className="text-[10px] text-muted-foreground sm:text-xs">
                     ({techPart.toFixed(1)}%)
                   </span>
                 </div>
@@ -396,10 +396,10 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
                 showOnMobile
               >
                 <div className="flex flex-col items-end gap-0.5 md:items-center">
-                  <span className="text-info text-xs font-semibold sm:text-sm">
+                  <span className="text-xs font-semibold text-info sm:text-sm">
                     Acc: {metrics.acc.toFixed(2)}%
                   </span>
-                  <span className="text-muted-foreground text-[10px] sm:text-xs">
+                  <span className="text-[10px] text-muted-foreground sm:text-xs">
                     ({accPart.toFixed(1)}%)
                   </span>
                 </div>
@@ -413,11 +413,11 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
                 showOnMobile
               >
                 <div className="flex flex-col items-center gap-0.5">
-                  <span className="text-success text-xs font-semibold sm:text-sm">
+                  <span className="text-xs font-semibold text-success sm:text-sm">
                     Pass: {metrics.pass.toFixed(1)}
                     {"\u2009"}★
                   </span>
-                  <span className="text-muted-foreground text-[10px] sm:text-xs">
+                  <span className="text-[10px] text-muted-foreground sm:text-xs">
                     ({passPart.toFixed(1)}%)
                   </span>
                 </div>
@@ -435,7 +435,7 @@ export default function SkillTriangleChart({ player }: { player: ScoreSaberPlaye
         </div>
       </div>
 
-      <div className="text-muted-foreground mt-5 w-full text-center text-xs md:mt-8">
+      <div className="mt-5 w-full text-center text-xs text-muted-foreground md:mt-8">
         Based on top {Math.min(100, activeEntry?.scoreCount ?? 0)} ranked scores
         {activeIndex !== timeline.length - 1 && activeEntry ? ` as of ${activeEntry.label}` : ""}
       </div>

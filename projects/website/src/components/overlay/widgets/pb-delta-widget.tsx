@@ -39,7 +39,7 @@ export function PbDeltaWidget({ options }: { options: PbDeltaOptions }) {
           ? formatAccuracyDelta(delta, options.precision)
           : `${value.pbAccuracy.toFixed(options.precision)}%`}
       </p>
-      {options.showLabel && <p className="text-muted-foreground text-xl">{caption}</p>}
+      {options.showLabel && <p className="text-xl text-muted-foreground">{caption}</p>}
     </div>
   );
 }

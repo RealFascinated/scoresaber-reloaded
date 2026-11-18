@@ -260,13 +260,13 @@ export default function SimplePagination({
         </NavigationButton>
         {isMobile ? (
           <div
-            className="text-muted-foreground flex min-w-0 flex-1 items-center justify-center gap-x-1 px-0.5 text-sm leading-none tabular-nums"
+            className="flex min-w-0 flex-1 items-center justify-center gap-x-1 px-0.5 text-sm leading-none text-muted-foreground tabular-nums"
             aria-live="polite"
             aria-atomic="true"
           >
-            <span className="text-foreground font-medium">{formatPageLabel(page, false)}</span>
+            <span className="font-medium text-foreground">{formatPageLabel(page, false)}</span>
             <span className="text-muted-foreground">of</span>
-            <span className="text-foreground font-medium">{formatPageLabel(totalPages, false)}</span>
+            <span className="font-medium text-foreground">{formatPageLabel(totalPages, false)}</span>
           </div>
         ) : (
           pageNumbers

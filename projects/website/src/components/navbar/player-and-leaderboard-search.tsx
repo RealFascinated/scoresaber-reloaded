@@ -41,12 +41,12 @@ export default function PlayerAndLeaderboardSearch({
     return (
       <button
         type="button"
-        className="group bg-sidebar-accent/50 text-muted-foreground hover:bg-sidebar-accent hover:text-foreground flex h-8 w-full cursor-pointer items-center gap-2 rounded-md px-2.5 text-sm transition-colors select-none"
+        className="group flex h-8 w-full cursor-pointer items-center gap-2 rounded-md bg-sidebar-accent/50 px-2.5 text-sm text-muted-foreground transition-colors select-none hover:bg-sidebar-accent hover:text-foreground"
         onClick={openSearch}
       >
         <SharedIcons.SearchLeaderboardsPlayersIcon className="size-4 shrink-0" />
         <span className="flex-1 text-left">Search</span>
-        <kbd className="text-muted-foreground/60 text-xs font-medium">⌘K</kbd>
+        <kbd className="text-xs font-medium text-muted-foreground/60">⌘K</kbd>
       </button>
     );
   }
@@ -54,16 +54,16 @@ export default function PlayerAndLeaderboardSearch({
   return (
     <button
       type="button"
-      className="group bg-card border-border hover:border-primary/50 relative flex h-9 w-full cursor-pointer items-center justify-start gap-2 rounded-xl border px-2 transition-all duration-200 select-none"
+      className="group relative flex h-9 w-full cursor-pointer items-center justify-start gap-2 rounded-xl border border-border bg-card px-2 transition-all duration-200 select-none hover:border-primary/50"
       onClick={openSearch}
     >
-      <SharedIcons.SearchLeaderboardsPlayersIcon className="text-muted-foreground size-5" />
+      <SharedIcons.SearchLeaderboardsPlayersIcon className="size-5 text-muted-foreground" />
 
-      <span className="text-muted-foreground group-hover:text-foreground flex-1 text-left text-sm transition-colors duration-200">
+      <span className="flex-1 text-left text-sm text-muted-foreground transition-colors duration-200 group-hover:text-foreground">
         Search players & maps
       </span>
 
-      <kbd className="bg-muted/80 text-muted-foreground pointer-events-none inline-flex h-6 shrink-0 items-center gap-1 rounded-md px-2 text-xs font-medium shadow-xs select-none">
+      <kbd className="pointer-events-none inline-flex h-6 shrink-0 items-center gap-1 rounded-md bg-muted/80 px-2 text-xs font-medium text-muted-foreground shadow-xs select-none">
         <span className="text-xs">⌘</span>K
       </kbd>
     </button>
@@ -154,26 +154,26 @@ export function PlayerAndLeaderboardSearchDialog() {
       >
         {isQueryTooShort ? (
           <div className="flex flex-col items-center justify-center px-4 py-12">
-            <p className="text-muted-foreground text-center text-sm">{PLAYER_SEARCH_TOO_SHORT_MESSAGE}</p>
+            <p className="text-center text-sm text-muted-foreground">{PLAYER_SEARCH_TOO_SHORT_MESSAGE}</p>
           </div>
         ) : isLoading ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <SharedIcons.SearchLoadingIcon className="text-muted-foreground mb-3 size-6 animate-spin" />
-            <p className="text-muted-foreground text-sm">Searching...</p>
+            <SharedIcons.SearchLoadingIcon className="mb-3 size-6 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Searching...</p>
           </div>
         ) : isError && isBackendUnavailableError(error) ? (
           <div className="flex flex-col items-center justify-center px-4 py-12">
-            <SharedIcons.WarningAlertIcon className="text-danger mb-3 size-10" />
-            <p className="text-muted-foreground mb-1 text-sm font-medium">Backend unavailable</p>
-            <p className="text-muted-foreground/70 text-center text-xs">
+            <SharedIcons.WarningAlertIcon className="mb-3 size-10 text-danger" />
+            <p className="mb-1 text-sm font-medium text-muted-foreground">Backend unavailable</p>
+            <p className="text-center text-xs text-muted-foreground/70">
               The backend is currently offline or unreachable. Please try again later.
             </p>
           </div>
         ) : !results?.players.length && !results?.leaderboards.length ? (
           <div className="flex flex-col items-center justify-center px-4 py-12">
-            <SharedIcons.SearchNoResultsIcon className="text-muted-foreground/50 mb-3 size-10" />
-            <p className="text-muted-foreground mb-1 text-sm font-medium">No results found</p>
-            <p className="text-muted-foreground/70 text-center text-xs">
+            <SharedIcons.SearchNoResultsIcon className="mb-3 size-10 text-muted-foreground/50" />
+            <p className="mb-1 text-sm font-medium text-muted-foreground">No results found</p>
+            <p className="text-center text-xs text-muted-foreground/70">
               {query.trim().length > 0
                 ? "Try adjusting your search query"
                 : "Start typing to search for players or leaderboards"}
@@ -183,7 +183,7 @@ export function PlayerAndLeaderboardSearchDialog() {
           <>
             {results.players.length > 0 && (
               <div className="p-2">
-                <div className="text-muted-foreground mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider uppercase">
+                <div className="mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                   <SharedIcons.SearchPlayersIcon className="size-3.5" />
                   <span>Players</span>
                   <span className="text-muted-foreground/50">({results.players.length})</span>
@@ -206,7 +206,7 @@ export function PlayerAndLeaderboardSearchDialog() {
 
             {results.leaderboards.length > 0 && (
               <div className="p-2">
-                <div className="text-muted-foreground mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider uppercase">
+                <div className="mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                   <SharedIcons.SearchLeaderboardsMusicIcon className="size-3.5" />
                   <span>Leaderboards</span>
                   <span className="text-muted-foreground/50">({results.leaderboards.length})</span>
@@ -216,7 +216,7 @@ export function PlayerAndLeaderboardSearchDialog() {
                     <button
                       key={leaderboard.id}
                       type="button"
-                      className="group hover:bg-accent flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-200 hover:shadow-xs active:scale-[0.98]"
+                      className="group flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-200 hover:bg-accent hover:shadow-xs active:scale-[0.98]"
                       onClick={() => {
                         closeSearch();
                         router.push(`/leaderboard/${leaderboard.id}`);
@@ -224,14 +224,14 @@ export function PlayerAndLeaderboardSearchDialog() {
                     >
                       <Avatar
                         src={leaderboard.songArt}
-                        className="ring-border group-hover:ring-primary/20 size-9 shrink-0 ring-2 transition-all duration-200"
+                        className="size-9 shrink-0 ring-2 ring-border transition-all duration-200 group-hover:ring-primary/20"
                         alt={leaderboard.songName}
                       />
                       <div className="min-w-0 flex-1 flex-col">
-                        <p className="group-hover:text-foreground leading-tight font-medium transition-colors duration-200">
+                        <p className="leading-tight font-medium transition-colors duration-200 group-hover:text-foreground">
                           {truncateText(leaderboard.fullName, 48)}
                         </p>
-                        <div className="text-muted-foreground mt-0.5 text-xs leading-tight">
+                        <div className="mt-0.5 text-xs leading-tight text-muted-foreground">
                           <div className="flex flex-wrap items-center gap-1.5">
                             <span
                               className="font-medium"
@@ -244,7 +244,7 @@ export function PlayerAndLeaderboardSearchDialog() {
                             {leaderboard.ranked && (
                               <>
                                 <span className="text-muted-foreground/60">·</span>
-                                <div className="text-pp flex items-center gap-1">
+                                <div className="flex items-center gap-1 text-pp">
                                   <span className="font-medium">{leaderboard.stars.toFixed(2)}</span>
                                   <SharedIcons.ScoreStarBadgeIcon className="w-3.5" />
                                 </div>
@@ -257,7 +257,7 @@ export function PlayerAndLeaderboardSearchDialog() {
                               </>
                             )}
                           </div>
-                          <div className="text-muted-foreground/70 mt-0.5">
+                          <div className="mt-0.5 text-muted-foreground/70">
                             Mapper: {leaderboard.levelAuthorName}
                           </div>
                         </div>

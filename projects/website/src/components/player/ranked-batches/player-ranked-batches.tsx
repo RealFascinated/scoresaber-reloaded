@@ -39,11 +39,11 @@ export default function PlayerRankedBatches({ playerId }: { playerId: string }) 
             key={entry.rankedBatch.id}
             type="button"
             onClick={() => setSelected(entry)}
-            className="hover:bg-accent/40 flex cursor-pointer items-center justify-between gap-3 rounded-md px-1 py-1.5 text-left transition-colors"
+            className="flex cursor-pointer items-center justify-between gap-3 rounded-md px-1 py-1.5 text-left transition-colors hover:bg-accent/40"
           >
             <div className="flex min-w-0 flex-col">
               <span className="truncate text-sm font-medium">{entry.rankedBatch.name}</span>
-              <span className="text-muted-foreground text-xs">
+              <span className="text-xs text-muted-foreground">
                 {formatRankedBatchDate(entry.rankedBatch)} · {formatNumberWithCommas(entry.scoresChanged)}{" "}
                 {entry.scoresChanged === 1 ? "score" : "scores"} changed
               </span>

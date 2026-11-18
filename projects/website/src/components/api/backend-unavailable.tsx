@@ -19,10 +19,10 @@ export default function BackendUnavailable({ onRetry }: BackendUnavailableProps)
   return (
     <div className="flex w-full justify-center">
       <Card className="flex w-full flex-col items-center gap-6 md:w-4xl">
-        <SharedIcons.BackendOfflineIcon className="text-danger size-16" />
+        <SharedIcons.BackendOfflineIcon className="size-16 text-danger" />
 
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-danger text-3xl font-bold">Backend Unavailable</h1>
+          <h1 className="text-3xl font-bold text-danger">Backend Unavailable</h1>
           <p className="text-lg">The backend is currently offline or unreachable. Please try again later.</p>
         </div>
 

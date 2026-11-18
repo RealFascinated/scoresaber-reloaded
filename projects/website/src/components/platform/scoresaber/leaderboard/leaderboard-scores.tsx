@@ -75,7 +75,7 @@ function LeaderboardDifficultySelect({
                 : `${current.characteristic} ${getDifficultyName(current.difficulty)}`}
             </span>
             {current.stars > 0 && (
-              <span className="text-muted-foreground text-xs tabular-nums">{current.stars.toFixed(2)}★</span>
+              <span className="text-xs text-muted-foreground tabular-nums">{current.stars.toFixed(2)}★</span>
             )}
           </div>
         </SelectValue>
@@ -83,7 +83,7 @@ function LeaderboardDifficultySelect({
       <SelectContent>
         {sortedGroups.map(([characteristic, diffs]) => (
           <div key={characteristic}>
-            <div className="text-muted-foreground px-2 py-1.5 text-xs font-semibold tracking-wider uppercase">
+            <div className="px-2 py-1.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
               {characteristic}
             </div>
             {diffs.map(d => {
@@ -97,7 +97,7 @@ function LeaderboardDifficultySelect({
                     />
                     <span>{getDifficultyName(d.difficulty)}</span>
                     {d.stars > 0 && (
-                      <span className="text-muted-foreground text-xs tabular-nums">
+                      <span className="text-xs text-muted-foreground tabular-nums">
                         {d.stars.toFixed(2)}★
                       </span>
                     )}
@@ -218,7 +218,7 @@ export default function LeaderboardScores({ leaderboard, initialScores }: Leader
       </div>
 
       {isMobile ? (
-        <div className="ring-border bg-card flex flex-col gap-2 overflow-hidden rounded-xl px-2 pb-2 ring-1">
+        <div className="flex flex-col gap-2 overflow-hidden rounded-xl bg-card px-2 pb-2 ring-1 ring-border">
           <ScoresListPanel
             page={page}
             data={scores}
@@ -243,7 +243,7 @@ export default function LeaderboardScores({ leaderboard, initialScores }: Leader
         </div>
       ) : (
         <>
-          <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
+          <div className="overflow-hidden rounded-xl bg-card ring-1 ring-border">
             <Table className="min-w-[800px]">
               <TableHeader>
                 <TableRow>

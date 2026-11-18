@@ -5,20 +5,20 @@ export default function MedalsInfo() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h3 className="text-foreground text-lg font-semibold">Medal System</h3>
-        <p className="text-muted-foreground text-sm">Medals awarded for ranked leaderboard positions</p>
+        <h3 className="text-lg font-semibold text-foreground">Medal System</h3>
+        <p className="text-sm text-muted-foreground">Medals awarded for ranked leaderboard positions</p>
       </div>
       <div className="grid grid-cols-2 gap-2">
         {Object.entries(MEDAL_COUNTS).map(([rank, count]) => (
           <div
             key={rank}
-            className="bg-control flex items-center justify-between gap-2 rounded-md px-2.5 py-2"
+            className="flex items-center justify-between gap-2 rounded-md bg-control px-2.5 py-2"
           >
             <div className="flex items-center gap-1">
-              <SharedIcons.MedalsInfoIcon className="text-medals size-3" />
-              <span className="text-foreground text-xs font-medium tabular-nums">#{rank}</span>
+              <SharedIcons.MedalsInfoIcon className="size-3 text-medals" />
+              <span className="text-xs font-medium text-foreground tabular-nums">#{rank}</span>
             </div>
-            <span className="text-muted-foreground text-xs tabular-nums">
+            <span className="text-xs text-muted-foreground tabular-nums">
               {count} medal{count !== 1 ? "s" : ""}
             </span>
           </div>

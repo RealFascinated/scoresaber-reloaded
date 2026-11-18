@@ -68,9 +68,9 @@ export default function PlayerSuggestedMapsDialog({ player }: { player: ScoreSab
         <DialogTitle className="sr-only">Suggested Maps</DialogTitle>
         <DialogDescription className="sr-only">Maps that pay more pp for {player.name}.</DialogDescription>
         <Card className="relative m-0 flex h-full max-h-[85vh] flex-col rounded-lg">
-          <div className="border-border border-b px-4 py-3">
+          <div className="border-b border-border px-4 py-3">
             <h1 className="text-lg font-semibold">Suggested Maps</h1>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <p className="mt-1 text-sm text-muted-foreground">
               Suggested maps based on {isSelf ? "your" : `${player.name}'s`} recent plays.
               {data?.playerRanges &&
                 ` Suggesting ${data.playerRanges.minStars.toFixed(1)}-${data.playerRanges.maxStars.toFixed(1)}★ maps.`}
@@ -84,18 +84,18 @@ export default function PlayerSuggestedMapsDialog({ player }: { player: ScoreSab
               </div>
             )}
             {isError && (
-              <p className="text-muted-foreground p-10 text-center text-sm">
+              <p className="p-10 text-center text-sm text-muted-foreground">
                 Couldn&apos;t load suggested maps.
               </p>
             )}
             {data && data.maps.length === 0 && (
-              <p className="text-muted-foreground p-10 text-center text-sm">
+              <p className="p-10 text-center text-sm text-muted-foreground">
                 Suggestions aren&apos;t ready yet. Please check back in a few minutes.
               </p>
             )}
             {data && data.maps.length > 0 && (
               <table className="w-full text-sm">
-                <thead className="text-muted-foreground border-border border-b text-left text-xs">
+                <thead className="border-b border-border text-left text-xs text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2">Map</th>
                     <th className="px-3 py-2 text-right">Stars</th>
@@ -106,22 +106,22 @@ export default function PlayerSuggestedMapsDialog({ player }: { player: ScoreSab
                 </thead>
                 <tbody>
                   {data.maps.map(map => (
-                    <tr key={map.leaderboardId} className="border-border hover:bg-muted/40 border-b">
+                    <tr key={map.leaderboardId} className="border-b border-border hover:bg-muted/40">
                       <td className="max-w-[260px] px-3 py-2">
                         <SimpleLink
                           href={`/leaderboard/${map.leaderboardId}`}
-                          className="hover:text-primary block truncate font-medium"
+                          className="block truncate font-medium hover:text-primary"
                         >
                           {map.songName} {map.songSubName}
                         </SimpleLink>
-                        <span className="text-muted-foreground block truncate text-xs">
+                        <span className="block truncate text-xs text-muted-foreground">
                           {map.difficulty} · {map.songAuthorName} · {map.levelAuthorName}
                         </span>
                       </td>
                       <td className="px-3 py-2 text-right whitespace-nowrap">{map.stars.toFixed(2)}★</td>
                       <td className="px-3 py-2 text-right whitespace-nowrap">
                         {map.predictedAccuracy.toFixed(2)}%
-                        <span className="text-muted-foreground block text-xs">
+                        <span className="block text-xs text-muted-foreground">
                           {map.predictedPp.toFixed(0)}pp
                         </span>
                       </td>
@@ -129,7 +129,7 @@ export default function PlayerSuggestedMapsDialog({ player }: { player: ScoreSab
                         {map.currentAccuracy !== null ? (
                           <>
                             {map.currentAccuracy.toFixed(2)}%
-                            <span className="text-muted-foreground block text-xs">
+                            <span className="block text-xs text-muted-foreground">
                               {map.currentPp?.toFixed(0)}pp
                             </span>
                           </>
@@ -139,7 +139,7 @@ export default function PlayerSuggestedMapsDialog({ player }: { player: ScoreSab
                       </td>
                       <td className="px-3 py-2 text-right whitespace-nowrap">
                         {map.weightedGain !== null ? `+${map.weightedGain.toFixed(1)}pp` : "-"}
-                        <span className="text-muted-foreground block text-xs">
+                        <span className="block text-xs text-muted-foreground">
                           {map.bonusPp >= 0 ? "+" : ""}
                           {map.bonusPp.toFixed(0)}pp vs. avg
                         </span>
@@ -151,7 +151,7 @@ export default function PlayerSuggestedMapsDialog({ player }: { player: ScoreSab
             )}
           </div>
 
-          <div className="border-border flex items-center justify-end border-t px-4 py-3">
+          <div className="flex items-center justify-end border-t border-border px-4 py-3">
             <Button className="gap-2" disabled={downloading} onClick={handleDownload}>
               {downloading ? (
                 <Spinner className="size-4" />

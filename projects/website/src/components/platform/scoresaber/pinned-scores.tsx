@@ -115,7 +115,7 @@ function PinnedScoreMessage({
         <SimpleTooltip display="Edit comment">
           <button
             aria-label="Edit comment"
-            className="text-muted-foreground hover:text-foreground hover:bg-accent flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors"
+            className="flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             onClick={startEditing}
           >
             <SharedIcons.EditPinnedScoreMessageIcon className="size-3.5" />
@@ -138,7 +138,7 @@ function PinnedScoreCard({
   return (
     <div
       data-ss-score-row
-      className="ring-border bg-background/40 @container flex min-w-0 flex-col gap-2 rounded-lg p-2.5 ring-1"
+      className="@container flex min-w-0 flex-col gap-2 rounded-lg bg-background/40 p-2.5 ring-1 ring-border"
     >
       <div className="flex min-w-0 items-start gap-2">
         <div className="min-w-0 flex-1">
@@ -161,7 +161,7 @@ function PinnedScoreCard({
         </div>
       </div>
 
-      <div className="border-border/60 mt-auto flex min-w-0 items-center gap-2 border-t pt-2 text-xs">
+      <div className="mt-auto flex min-w-0 items-center gap-2 border-t border-border/60 pt-2 text-xs">
         {score.rank === -1 ? null : (
           <SimpleLink
             href={`/leaderboard/${leaderboard.id}?page=${getPageFromRank(score.rank, 12)}&highlight=${score.playerId}`}
@@ -171,7 +171,7 @@ function PinnedScoreCard({
             </span>
           </SimpleLink>
         )}
-        <div className="text-muted-foreground shrink-0">
+        <div className="shrink-0 text-muted-foreground">
           <ScoreTimeSet timestamp={score.timestamp} />
         </div>
         <PinnedScoreMessage
@@ -201,8 +201,8 @@ export default function PinnedScores({ playerId }: { playerId: string }) {
   const isOwnProfile = me?.playerId === playerId;
 
   return (
-    <section className="ring-border bg-card @container flex flex-col gap-2 rounded-xl p-3 ring-1">
-      <h3 className="text-muted-foreground flex items-center justify-center gap-2 text-sm font-semibold">
+    <section className="@container flex flex-col gap-2 rounded-xl bg-card p-3 ring-1 ring-border">
+      <h3 className="flex items-center justify-center gap-2 text-sm font-semibold text-muted-foreground">
         <SharedIcons.PinScoreIcon className="size-4" />
         Pinned Scores
       </h3>

@@ -14,8 +14,8 @@ type KpiTileProps = {
 
 function KpiTile({ label, value, icon, delta, valueClassName }: KpiTileProps) {
   return (
-    <div className="bg-card ring-border flex flex-col gap-1.5 rounded-xl p-3 ring-1">
-      <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+    <div className="flex flex-col gap-1.5 rounded-xl bg-card p-3 ring-1 ring-border">
+      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
         <span aria-hidden className="shrink-0">
           {icon}
         </span>

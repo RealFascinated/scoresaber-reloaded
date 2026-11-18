@@ -24,7 +24,7 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
       <div className="flex flex-col gap-2">
         <div>
           <p className="text-4xl font-bold">{player.name}</p>
-          <p className="text-pp flex items-center gap-2">
+          <p className="flex items-center gap-2 text-pp">
             <span className="text-2xl font-bold">{formatPp(player.pp)}pp</span>
             <DailyChange
               type={PlayerStatChange.PerformancePoints}
@@ -33,7 +33,7 @@ export default function OverlayPlayerInfoView({ player }: OverlayPlayerInfoProps
               useTooltip={false}
             />
             {!!player.plusOnePp && (
-              <span className="text-muted-foreground text-xl">(+1 = {formatPp(player.plusOnePp)}pp)</span>
+              <span className="text-xl text-muted-foreground">(+1 = {formatPp(player.plusOnePp)}pp)</span>
             )}
           </p>
         </div>

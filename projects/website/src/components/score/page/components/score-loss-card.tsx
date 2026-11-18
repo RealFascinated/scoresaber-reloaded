@@ -21,7 +21,7 @@ export default function ScoreLossCard({ insights }: { insights: ReplayInsights }
     <Card className="flex-1 gap-4 rounded-xl">
       <div>
         <h3 className="font-semibold">Where You Lost Points</h3>
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {formatNumberWithCommas(Math.round(loss.total))} points were left on the table compared to a perfect
           play of this map.
         </p>
@@ -60,17 +60,17 @@ export default function ScoreLossCard({ insights }: { insights: ReplayInsights }
       )}
 
       {weakMoments.length > 0 && (
-        <div className="border-border/50 flex flex-col gap-1.5 border-t pt-3">
-          <h4 className="text-muted-foreground text-xs font-semibold">Roughest moments</h4>
+        <div className="flex flex-col gap-1.5 border-t border-border/50 pt-3">
+          <h4 className="text-xs font-semibold text-muted-foreground">Roughest moments</h4>
           {weakMoments.map(moment => (
             <div
               key={moment.start}
-              className="bg-control ring-border flex items-center justify-between rounded-lg px-3 py-1.5 text-sm ring-1"
+              className="flex items-center justify-between rounded-lg bg-control px-3 py-1.5 text-sm ring-1 ring-border"
             >
               <span className="tabular-nums">
                 {formatTime(Math.floor(moment.start))} – {formatTime(Math.ceil(moment.end))}
               </span>
-              <span className="text-muted-foreground text-xs tabular-nums">
+              <span className="text-xs text-muted-foreground tabular-nums">
                 {Math.round(moment.pointsLost)} points lost
                 {moment.misses > 0 ? ` · ${moment.misses} miss${moment.misses === 1 ? "" : "es"}` : ""}
               </span>

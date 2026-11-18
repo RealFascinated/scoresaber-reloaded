@@ -34,7 +34,9 @@ type Props = {
 };
 
 type PlayerFetchResult =
-  { status: "found"; player: ScoreSaberPlayer } | { status: "not-found" } | { status: "unavailable" };
+  | { status: "found"; player: ScoreSaberPlayer }
+  | { status: "not-found" }
+  | { status: "unavailable" };
 
 const getPlayer = cache(async (id: string) => {
   try {

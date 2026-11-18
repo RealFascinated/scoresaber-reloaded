@@ -25,12 +25,12 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
   const showStarHistory = leaderboardData.ranked;
 
   return (
-    <section className="bg-card ring-border flex w-full flex-col gap-5 rounded-xl p-4 ring-1 sm:p-5">
+    <section className="flex w-full flex-col gap-5 rounded-xl bg-card p-4 ring-1 ring-border sm:p-5">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
         <NextImage
           src={leaderboardData.songArt}
           alt={`${leaderboardData.songName} cover`}
-          className="border-border/80 mx-auto shrink-0 rounded-xl border object-cover shadow-md sm:mx-0"
+          className="mx-auto shrink-0 rounded-xl border border-border/80 object-cover shadow-md sm:mx-0"
           width={160}
           height={160}
           priority
@@ -43,7 +43,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
               <Dialog>
                 <DialogTrigger asChild>
                   <button
-                    className="border-primary/50 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary focus-visible:ring-primary/50 flex cursor-pointer items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-bold uppercase transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-hidden"
+                    className="flex cursor-pointer items-center gap-1.5 rounded-md border border-primary/50 bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary uppercase transition-colors duration-200 hover:border-primary hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-hidden"
                     title="View star history and ranked batches"
                   >
                     <SharedIcons.LeaderboardStarHistoryIcon className="h-3.5 w-3.5" />
@@ -60,18 +60,18 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
 
           <FallbackLink
             href={beatsaver ? `https://beatsaver.com/maps/${beatsaver.bsr}` : undefined}
-            className="hover:text-primary/80 transition-all sm:w-fit"
+            className="transition-all hover:text-primary/80 sm:w-fit"
           >
             <h1 className="text-2xl leading-tight font-bold sm:text-3xl">{leaderboardData.fullName}</h1>
           </FallbackLink>
 
-          <p className="text-muted-foreground text-sm">
-            by <span className="text-foreground font-medium">{leaderboardData.songAuthorName}</span>
+          <p className="text-sm text-muted-foreground">
+            by <span className="font-medium text-foreground">{leaderboardData.songAuthorName}</span>
             {" · "}
             mapped by{" "}
             <FallbackLink
               href={getBeatSaverMapperProfileUrl(beatsaver)}
-              className="text-foreground hover:text-primary/80 font-medium transition-all"
+              className="font-medium text-foreground transition-all hover:text-primary/80"
             >
               {leaderboardData.levelAuthorName}
             </FallbackLink>
@@ -93,45 +93,45 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
       </div>
 
       {beatsaver && (
-        <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-xs sm:justify-start">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 text-xs text-muted-foreground sm:justify-start">
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapNjsStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">
+            <span className="font-semibold text-foreground tabular-nums">
               {formatNumber(beatsaver.difficulty.njs, "number")}
             </span>
             <span>NJS</span>
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapBpmStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">
+            <span className="font-semibold text-foreground tabular-nums">
               {formatNumber(beatsaver.metadata.bpm, "number")}
             </span>
             <span>BPM</span>
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapNpsStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">
+            <span className="font-semibold text-foreground tabular-nums">
               {beatsaver.difficulty.nps.toFixed(2)}
             </span>
             <span>NPS</span>
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapNotesStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">
+            <span className="font-semibold text-foreground tabular-nums">
               {formatNumberWithCommas(beatsaver.difficulty.notes)}
             </span>
             <span>Notes</span>
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapBombsStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">
+            <span className="font-semibold text-foreground tabular-nums">
               {formatNumberWithCommas(beatsaver.difficulty.bombs)}
             </span>
             <span>Bombs</span>
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.MapObstaclesStatIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">
+            <span className="font-semibold text-foreground tabular-nums">
               {formatNumberWithCommas(beatsaver.difficulty.obstacles)}
             </span>
             <span>Obstacles</span>
@@ -142,7 +142,7 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
           </span>
           <span className="flex items-center gap-1.5">
             <SharedIcons.StatTotalPlayCountIcon className="size-3.5" />
-            <span className="text-foreground font-semibold tabular-nums">
+            <span className="font-semibold text-foreground tabular-nums">
               {formatNumberWithCommas(leaderboardData.plays)}
             </span>
             <span>plays</span>

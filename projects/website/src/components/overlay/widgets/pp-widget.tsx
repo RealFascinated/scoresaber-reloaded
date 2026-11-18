@@ -16,7 +16,7 @@ export function PpValue({ pp, source, showPlatform = true, dimmed = false }: PpV
   return (
     <p className={cn("text-4xl font-bold whitespace-nowrap tabular-nums", dimmed && "opacity-60")}>
       {pp.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-      <span className="text-muted-foreground ml-1 text-2xl font-medium">
+      <span className="ml-1 text-2xl font-medium text-muted-foreground">
         PP{showPlatform && <span className="ml-1 text-xl">{source}</span>}
       </span>
     </p>

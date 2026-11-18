@@ -12,7 +12,7 @@ import CountryFlag from "../../ui/country-flag";
 
 function PlayerOverviewItem({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-control ring-border flex items-center gap-2 rounded-lg px-3 py-1.5 ring-1 lg:px-4 lg:py-2">
+    <div className="flex items-center gap-2 rounded-lg bg-control px-3 py-1.5 ring-1 ring-border lg:px-4 lg:py-2">
       {children}
     </div>
   );
@@ -29,7 +29,7 @@ const playerData = [
         <PlayerOverviewItem>
           <div className="flex items-center gap-2">
             <SimpleTooltip display={<span>Global Rank</span>} side="bottom">
-              <SharedIcons.GlobalRankIcon className="text-muted-foreground h-5 w-5 shrink-0" />
+              <SharedIcons.GlobalRankIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
             </SimpleTooltip>
             <ChangeOverTime
               player={player}
@@ -45,7 +45,7 @@ const playerData = [
               }
             >
               <SimpleLink href={`/ranking?page=${player.rankPages.global}`}>
-                <span className="text-foreground hover:text-primary focus-visible:outline-primary/50 m-0 text-base font-semibold transition-colors focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
+                <span className="m-0 text-base font-semibold text-foreground transition-colors hover:text-primary focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/50">
                   #{formatNumberWithCommas(player.rank)}
                 </span>
               </SimpleLink>
@@ -74,7 +74,7 @@ const playerData = [
             />
             <ChangeOverTime player={player} type={PlayerStatChange.CountryRank}>
               <SimpleLink href={`/ranking?country=${player.country}&page=${player.rankPages.country}`}>
-                <span className="text-foreground hover:text-primary focus-visible:outline-primary/50 m-0 text-base font-semibold transition-colors focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2">
+                <span className="m-0 text-base font-semibold text-foreground transition-colors hover:text-primary focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/50">
                   #{formatNumberWithCommas(player.countryRank)}
                 </span>
               </SimpleLink>
@@ -95,7 +95,7 @@ const playerData = [
         <PlayerOverviewItem>
           <div className="flex items-center gap-2">
             <SimpleTooltip display={<span>Medals</span>} side="bottom">
-              <SharedIcons.MedalsIcon className="text-muted-foreground h-5 w-5 shrink-0" />
+              <SharedIcons.MedalsIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
             </SimpleTooltip>
             <ChangeOverTime player={player} type={PlayerStatChange.Medals}>
               <FallbackLink
@@ -127,10 +127,10 @@ const playerData = [
         <PlayerOverviewItem>
           <div className="flex items-center gap-2">
             <SimpleTooltip display={<span>Performance Points</span>} side="bottom">
-              <SharedIcons.PerformancePointsIcon className="text-muted-foreground h-5 w-5 shrink-0" />
+              <SharedIcons.PerformancePointsIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
             </SimpleTooltip>
             <ChangeOverTime player={player} type={PlayerStatChange.PerformancePoints}>
-              <span className="text-pp hover:text-primary m-0 truncate text-base font-semibold transition-colors">
+              <span className="m-0 truncate text-base font-semibold text-pp transition-colors hover:text-primary">
                 {formatPp(player.pp)}pp
               </span>
             </ChangeOverTime>

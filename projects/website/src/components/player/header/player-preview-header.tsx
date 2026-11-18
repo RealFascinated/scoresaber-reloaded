@@ -18,7 +18,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
   return (
     <div className="flex flex-col items-center gap-6 text-center select-none lg:flex-row lg:text-start">
       <div className="relative shrink-0">
-        <div className="bg-primary/10 absolute inset-0 scale-110 rounded-full blur-3xl" />
+        <div className="absolute inset-0 scale-110 rounded-full bg-primary/10 blur-3xl" />
         <Avatar
           src={player.avatar}
           size={128}
@@ -30,7 +30,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
       <div className="flex flex-col items-center gap-2 lg:items-start">
         <SimpleLink
           href={`/player/${player.id}`}
-          className="hover:text-primary/80 text-3xl leading-tight font-bold tracking-tight transition-all"
+          className="text-3xl leading-tight font-bold tracking-tight transition-all hover:text-primary/80"
           style={{
             color: getScoreSaberRoles(player)[0]?.color,
           }}
@@ -62,7 +62,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
           )}
 
           <SimpleTooltip display={<span>Performance Points</span>} side="bottom">
-            <span className="text-pp flex items-center gap-1.5 font-semibold">
+            <span className="flex items-center gap-1.5 font-semibold text-pp">
               <SharedIcons.PerformancePointsIcon className="size-3.5" />
               {formatPp(player.pp)}pp
             </span>
@@ -94,7 +94,7 @@ export default function PlayerPreviewHeader({ player }: PlayerPreviewHeaderProps
             showOnMobile
           >
             <span className="flex items-center gap-1.5 font-medium text-white/85">
-              <SharedIcons.PlayerStreakIcon className="text-streak size-3.5" />
+              <SharedIcons.PlayerStreakIcon className="size-3.5 text-streak" />
               {formatNumberWithCommas(currentStreak)}
             </span>
           </SimpleTooltip>

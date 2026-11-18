@@ -9,7 +9,7 @@ function PpCount({ rankedBatch, value }: { rankedBatch: RankedBatch; value: numb
     return <span className="tabular-nums">{formatNumberWithCommas(value)}</span>;
   }
   return (
-    <span className="text-muted-foreground text-xs">
+    <span className="text-xs text-muted-foreground">
       {isPpPending(rankedBatch) ? "Calculating" : "Not tracked"}
     </span>
   );
@@ -17,7 +17,7 @@ function PpCount({ rankedBatch, value }: { rankedBatch: RankedBatch; value: numb
 
 export function RankedBatchList({ rankedBatches }: { rankedBatches: RankedBatch[] }) {
   return (
-    <div className="ring-border bg-card overflow-x-auto rounded-xl ring-1">
+    <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -35,11 +35,11 @@ export function RankedBatchList({ rankedBatches }: { rankedBatches: RankedBatch[
                 <div className="flex flex-col">
                   <SimpleLink
                     href={`/ranked-batches/${rankedBatch.id}`}
-                    className="hover:text-primary text-sm font-medium transition-colors after:absolute after:inset-0"
+                    className="text-sm font-medium transition-colors after:absolute after:inset-0 hover:text-primary"
                   >
                     {rankedBatch.name}
                   </SimpleLink>
-                  <span className="text-muted-foreground text-xs">{formatRankedBatchDate(rankedBatch)}</span>
+                  <span className="text-xs text-muted-foreground">{formatRankedBatchDate(rankedBatch)}</span>
                 </div>
               </TableCell>
               <TableCell className="py-2.5 text-right text-sm tabular-nums">

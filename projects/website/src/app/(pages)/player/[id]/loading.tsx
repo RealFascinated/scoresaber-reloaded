@@ -42,7 +42,7 @@ export default function Loading() {
               </div>
             </div>
 
-            <div className="border-border/50 flex flex-col-reverse items-center gap-4 border-t pt-6 md:flex-row md:justify-between md:pt-4">
+            <div className="flex flex-col-reverse items-center gap-4 border-t border-border/50 pt-6 md:flex-row md:justify-between md:pt-4">
               <div className="flex gap-2">
                 {Array.from({ length: 3 }).map((_, index) => (
                   <Skeleton key={index} className="size-9 rounded-md" />
@@ -56,7 +56,7 @@ export default function Loading() {
             </div>
           </Card>
 
-          <div className="ring-border bg-card rounded-xl p-4 ring-1">
+          <div className="rounded-xl bg-card p-4 ring-1 ring-border">
             <div className="flex w-full flex-wrap items-center justify-center gap-2">
               {Array.from({ length: 4 }).map((_, index) => (
                 <Skeleton key={index} className="h-[30px] w-20" />
@@ -64,7 +64,7 @@ export default function Loading() {
             </div>
           </div>
 
-          <div className="ring-border bg-card rounded-xl p-4 ring-1">
+          <div className="rounded-xl bg-card p-4 ring-1 ring-border">
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap items-center justify-center gap-1">
                 {Array.from({ length: 6 }).map((_, index) => (
@@ -72,7 +72,7 @@ export default function Loading() {
                 ))}
               </div>
 
-              <div className="bg-chart-card ring-border flex flex-col rounded-xl p-2.5 ring-1">
+              <div className="flex flex-col rounded-xl bg-chart-card p-2.5 ring-1 ring-border">
                 <div className="flex h-[400px] items-center justify-center" />
               </div>
 
@@ -82,9 +82,9 @@ export default function Loading() {
             </div>
           </div>
 
-          <div className="ring-border bg-card flex flex-col gap-1 rounded-xl p-4 ring-1">
+          <div className="flex flex-col gap-1 rounded-xl bg-card p-4 ring-1 ring-border">
             <div className="flex w-full flex-col gap-3">
-              <div className="border-border/50 flex flex-wrap items-center gap-2 border-b pb-3">
+              <div className="flex flex-wrap items-center gap-2 border-b border-border/50 pb-3">
                 <Skeleton className="h-9 w-72 rounded-lg" />
                 {Array.from({ length: 2 }).map((_, index) => (
                   <Skeleton key={index} className="h-8 w-16 rounded-md" />
@@ -114,13 +114,13 @@ export default function Loading() {
             {Array.from({ length: 2 }).map((_, cardIndex) => (
               <div
                 key={cardIndex}
-                className="bg-card ring-border flex w-full flex-col gap-2 rounded-xl p-3 text-xs ring-1 select-none"
+                className="flex w-full flex-col gap-2 rounded-xl bg-card p-3 text-xs ring-1 ring-border select-none"
               >
                 <div className="flex items-center gap-2">
                   <Skeleton className="size-6 rounded-full" />
                   <Skeleton className="h-4 w-24" />
                 </div>
-                <div className="divide-border bg-accent/50 divide-y rounded-md">
+                <div className="divide-y divide-border rounded-md bg-accent/50">
                   {Array.from({ length: 5 }).map((_, rowIndex) => (
                     <div key={rowIndex} className="flex items-center gap-2 px-2 py-1.5">
                       <Skeleton className="h-4 w-8" />

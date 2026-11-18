@@ -63,7 +63,7 @@ function CustomPreview({ value }: { value: string }) {
   const background = parseCustomBackground(value);
   if (!background) {
     return (
-      <div className="text-muted-foreground flex h-full items-center justify-center text-xs">Custom</div>
+      <div className="flex h-full items-center justify-center text-xs text-muted-foreground">Custom</div>
     );
   }
   if (background.type === "color") {
@@ -100,8 +100,8 @@ export function BackgroundCoverControl({ field }: BackgroundCoverControlProps) {
   return (
     <div className="flex flex-col gap-3">
       <div className="w-full min-w-0">
-        <FormLabel className="text-foreground text-[15px] leading-snug font-medium">Background</FormLabel>
-        <FormDescription className="text-muted-foreground mt-1 text-[13px] leading-snug">
+        <FormLabel className="text-[15px] leading-snug font-medium text-foreground">Background</FormLabel>
+        <FormDescription className="mt-1 text-[13px] leading-snug text-muted-foreground">
           Pick a preset image, or use your own hex color or image URL
         </FormDescription>
       </div>
@@ -112,7 +112,7 @@ export function BackgroundCoverControl({ field }: BackgroundCoverControlProps) {
           selected={selected === BACKGROUND_COVER_NONE}
           onSelect={() => field.onChange(BACKGROUND_COVER_NONE)}
         >
-          <div className="bg-background h-full w-full" />
+          <div className="h-full w-full bg-background" />
         </CoverOption>
         {BACKGROUND_COVER_PRESETS.map(preset => (
           <CoverOption
@@ -143,7 +143,7 @@ export function BackgroundCoverControl({ field }: BackgroundCoverControlProps) {
             className={cn("w-full max-w-xl", isCustomInvalid && "border-destructive")}
           />
           {isCustomInvalid && (
-            <p className="text-destructive text-[13px]">
+            <p className="text-[13px] text-destructive">
               Enter a hex color (e.g. #1a1a2e) or an http(s) image URL
             </p>
           )}

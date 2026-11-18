@@ -35,7 +35,7 @@ export default function ScorePad({ title, description, columns, cells, footnote 
     <Card className="gap-3 rounded-xl">
       <div>
         <h3 className="font-semibold">{title}</h3>
-        <p className="text-muted-foreground text-xs">{description}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
       </div>
 
       <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
@@ -57,13 +57,13 @@ export default function ScorePad({ title, description, columns, cells, footnote 
             >
               {cell.icon}
               {empty ? (
-                <span className="text-muted-foreground text-xs">–</span>
+                <span className="text-xs text-muted-foreground">–</span>
               ) : (
                 <>
                   <span className="text-sm leading-none font-bold tabular-nums">
                     {(cell.score ?? 0).toFixed(1)}
                   </span>
-                  <span className="text-muted-foreground text-[10px] leading-none tabular-nums">
+                  <span className="text-[10px] leading-none text-muted-foreground tabular-nums">
                     {cell.cuts} hit{cell.cuts === 1 ? "" : "s"}
                   </span>
                 </>
@@ -73,7 +73,7 @@ export default function ScorePad({ title, description, columns, cells, footnote 
         })}
       </div>
 
-      <p className="text-muted-foreground text-xs">The red outline marks your weakest tile. {footnote}</p>
+      <p className="text-xs text-muted-foreground">The red outline marks your weakest tile. {footnote}</p>
     </Card>
   );
 }

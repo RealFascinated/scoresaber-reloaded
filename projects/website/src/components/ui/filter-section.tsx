@@ -27,13 +27,13 @@ export function FilterSection({
     <Card className={`h-fit w-full gap-4 ${className ?? ""}`}>
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <h3 className="text-foreground text-lg font-semibold">{title}</h3>
+          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
           {hasActiveFilters && onClear && (
             <SimpleTooltip display={clearLabel}>
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-muted-foreground hover:text-destructive size-7"
+                className="size-7 text-muted-foreground hover:text-destructive"
                 onClick={onClear}
               >
                 <SharedIcons.FilterClearIcon className="size-4" />
@@ -41,7 +41,7 @@ export function FilterSection({
             </SimpleTooltip>
           )}
         </div>
-        {description && <p className="text-muted-foreground text-sm">{description}</p>}
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>
       <div className="flex flex-col gap-4">{children}</div>
     </Card>
@@ -57,7 +57,7 @@ interface FilterFieldProps {
 export function FilterField({ label, children, className }: FilterFieldProps) {
   return (
     <div className={`flex flex-col gap-2 ${className ?? ""}`}>
-      {label && <label className="text-foreground text-sm font-medium">{label}</label>}
+      {label && <label className="text-sm font-medium text-foreground">{label}</label>}
       {children}
     </div>
   );

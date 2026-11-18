@@ -4,7 +4,7 @@ Working agreement for humans + AI agents contributing to this repo.
 
 ## Layout
 
-- **Root**: Bun workspaces; formatting via `.prettierrc.json`.
+- **Root**: Bun workspaces; formatting via oxfmt (`.oxfmtrc.json`).
 - **`projects/backend/`**: Bun backend (TS, ESM, decorators). PostgreSQL via Drizzle ORM (`src/db/`, `drizzle/`).
 - **`projects/common/`**: Shared package `@ssr/common` (builds to `dist/`).
 - **`projects/website/`**: Next.js app (React 19, Next 16, Tailwind). `@/*` maps to `src/*`.
@@ -13,7 +13,7 @@ Working agreement for humans + AI agents contributing to this repo.
 
 - Match existing patterns in the file you're touching; no new abstractions without need.
 - Keep changes scoped to one problem; no drive-by refactors.
-- Prettier owns formatting (`bun run prettier` from root); oxlint (`.oxlintrc.json` per project) owns correctness.
+- oxfmt owns formatting, including import and Tailwind class sorting (`bun run format` from root); oxlint (`.oxlintrc.json` per project) owns correctness.
 - Never commit secrets (`.env*`, tokens, credentials, private URLs).
 
 ## TypeScript
@@ -62,8 +62,8 @@ Types come from the schema (`InferSelectModel` / `InferInsertModel`); there is n
 
 - Lint: `bun run lint` (in `projects/website`).
 - Prefer Server Components; use client components only when necessary. Avoid expensive work in render.
-- Reuse existing UI primitives (Radix, existing component styles); Tailwind ordering is handled by Prettier.
+- Reuse existing UI primitives (Radix, existing component styles); Tailwind ordering is handled by oxfmt.
 
 ## Before a PR
 
-`bun run prettier` (root); `bun run lint` in backend and website; `bun run build` in common and website when relevant.
+`bun run format` (root); `bun run lint` in backend and website; `bun run build` in common and website when relevant.

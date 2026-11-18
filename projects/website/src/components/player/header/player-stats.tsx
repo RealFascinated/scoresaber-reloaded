@@ -163,7 +163,7 @@ const playerStats: Stat[] = [
               <div key={hmdKey} className="flex items-center gap-2">
                 <SharedIcons.HeadMountedDisplayIcon hmd={getHMDInfo(hmdKey as HMD)} />
                 <span>{hmdKey}</span>
-                <span className="text-muted-foreground text-sm">{percentage.toFixed(2)}%</span>
+                <span className="text-sm text-muted-foreground">{percentage.toFixed(2)}%</span>
               </div>
             ))}
           </div>
@@ -215,7 +215,7 @@ function PlayerStat({
   editing?: boolean;
 }) {
   return (
-    <div className="bg-control ring-border flex min-w-0 flex-col gap-0.5 rounded-lg px-2.5 py-1.5 ring-1 lg:gap-1 lg:px-3 lg:py-2">
+    <div className="flex min-w-0 flex-col gap-0.5 rounded-lg bg-control px-2.5 py-1.5 ring-1 ring-border lg:gap-1 lg:px-3 lg:py-2">
       <dt
         className={cn(
           "text-muted-foreground truncate text-[11px] font-medium tracking-wide uppercase",
@@ -401,7 +401,7 @@ export default function PlayerStats({ player, editing }: Props) {
     <div className="flex w-full flex-col items-center gap-2 lg:items-start">
       {editing ? (
         <>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             Drag to reorder. Tick the stats to show before &quot;Show more&quot;.
           </p>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -434,7 +434,7 @@ export default function PlayerStats({ player, editing }: Props) {
           aria-expanded={showMore}
           aria-controls="player-stats"
           onClick={() => setShowMore(current => !current)}
-          className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-1 text-xs font-medium transition-colors"
+          className="flex cursor-pointer items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           {showMore ? "Show less" : `Show ${hiddenStatCount} more`}
           {showMore ? (

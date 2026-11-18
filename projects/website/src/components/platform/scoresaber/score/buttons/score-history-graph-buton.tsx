@@ -94,7 +94,7 @@ export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberSc
             </div>
           </div>
 
-          <div className="ring-border bg-card hidden w-full shrink-0 flex-col overflow-hidden rounded-xl ring-1 md:flex md:w-96">
+          <div className="hidden w-full shrink-0 flex-col overflow-hidden rounded-xl bg-card ring-1 ring-border md:flex md:w-96">
             <div className="max-h-[400px] overflow-y-auto">
               <Table className="text-xs">
                 <TableHeader>
@@ -105,11 +105,11 @@ export default function ScoreHistoryGraphButton({ score }: { score: ScoreSaberSc
                 </TableHeader>
                 <TableBody>
                   {newestFirstPoints.map(point => (
-                    <TableRow key={point.timestamp.getTime()} className="hover:bg-accent/40 tabular-nums">
-                      <TableCell className="text-muted-foreground px-3 py-1.5 whitespace-nowrap">
+                    <TableRow key={point.timestamp.getTime()} className="tabular-nums hover:bg-accent/40">
+                      <TableCell className="px-3 py-1.5 whitespace-nowrap text-muted-foreground">
                         {formatRelativeDate(point.timestamp.getTime(), true)}
                       </TableCell>
-                      <TableCell className="text-success px-3 py-1.5 text-right">
+                      <TableCell className="px-3 py-1.5 text-right text-success">
                         {point.accuracy.toFixed(2)}%
                       </TableCell>
                     </TableRow>

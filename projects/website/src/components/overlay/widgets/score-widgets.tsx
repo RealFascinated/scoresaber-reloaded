@@ -29,7 +29,7 @@ export function ScoreComboWidget() {
   return (
     <p className="text-4xl font-bold whitespace-nowrap tabular-nums">
       {formatNumberWithCommas(data.score.combo)}
-      <span className="text-muted-foreground ml-1 text-2xl font-medium">combo</span>
+      <span className="ml-1 text-2xl font-medium text-muted-foreground">combo</span>
     </p>
   );
 }

@@ -66,26 +66,26 @@ const PlayerSearch = ({
     >
       {isQueryTooShort ? (
         <div className="flex flex-col items-center justify-center px-4 py-12">
-          <p className="text-muted-foreground text-center text-sm">{PLAYER_SEARCH_TOO_SHORT_MESSAGE}</p>
+          <p className="text-center text-sm text-muted-foreground">{PLAYER_SEARCH_TOO_SHORT_MESSAGE}</p>
         </div>
       ) : isLoading ? (
         <div className="flex flex-col items-center justify-center py-12">
-          <SharedIcons.SearchLoadingIcon className="text-muted-foreground mb-3 size-6 animate-spin" />
-          <p className="text-muted-foreground text-sm">Searching players...</p>
+          <SharedIcons.SearchLoadingIcon className="mb-3 size-6 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Searching players...</p>
         </div>
       ) : isError && isBackendUnavailableError(error) ? (
         <div className="flex flex-col items-center justify-center px-4 py-12">
-          <SharedIcons.WarningAlertIcon className="text-danger mb-3 size-10" />
-          <p className="text-muted-foreground mb-1 text-sm font-medium">Backend unavailable</p>
-          <p className="text-muted-foreground/70 text-center text-xs">
+          <SharedIcons.WarningAlertIcon className="mb-3 size-10 text-danger" />
+          <p className="mb-1 text-sm font-medium text-muted-foreground">Backend unavailable</p>
+          <p className="text-center text-xs text-muted-foreground/70">
             The backend is currently offline or unreachable. Please try again later.
           </p>
         </div>
       ) : !results?.players.length ? (
         <div className="flex flex-col items-center justify-center px-4 py-12">
-          <SharedIcons.SearchNoResultsIcon className="text-muted-foreground/50 mb-3 size-10" />
-          <p className="text-muted-foreground mb-1 text-sm font-medium">No players found</p>
-          <p className="text-muted-foreground/70 text-center text-xs">
+          <SharedIcons.SearchNoResultsIcon className="mb-3 size-10 text-muted-foreground/50" />
+          <p className="mb-1 text-sm font-medium text-muted-foreground">No players found</p>
+          <p className="text-center text-xs text-muted-foreground/70">
             {query.trim().length > 0
               ? "Try adjusting your search query"
               : "Start typing to search for players"}
@@ -93,7 +93,7 @@ const PlayerSearch = ({
         </div>
       ) : (
         <div className="p-2">
-          <div className="text-muted-foreground mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider uppercase">
+          <div className="mb-1.5 flex items-center gap-2 px-2 py-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
             <SharedIcons.SearchPlayersIcon className="size-3.5" />
             <span>Players</span>
             <span className="text-muted-foreground/50">

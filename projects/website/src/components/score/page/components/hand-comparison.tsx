@@ -36,7 +36,7 @@ export default function HandComparison({ insights }: { insights: ReplayInsights 
     <Card className="gap-3 rounded-xl">
       <div>
         <h3 className="font-semibold">Left Hand vs Right Hand</h3>
-        <p className="text-muted-foreground text-xs">The better hand for each row is in bold.</p>
+        <p className="text-xs text-muted-foreground">The better hand for each row is in bold.</p>
       </div>
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 text-xs font-semibold">
@@ -47,7 +47,7 @@ export default function HandComparison({ insights }: { insights: ReplayInsights 
         <span style={{ color: Colors.hands.right }}>Right</span>
       </div>
 
-      <div className="divide-border/50 divide-y">
+      <div className="divide-y divide-border/50">
         {ROWS.map(row => {
           const leftValue = row.value(left);
           const rightValue = row.value(right);
@@ -60,7 +60,7 @@ export default function HandComparison({ insights }: { insights: ReplayInsights 
               >
                 {row.format(leftValue)}
               </span>
-              <span className="text-muted-foreground w-32 text-center text-xs sm:w-40">{row.label}</span>
+              <span className="w-32 text-center text-xs text-muted-foreground sm:w-40">{row.label}</span>
               <span className={`tabular-nums ${!tied && !leftWins ? "font-bold" : "text-muted-foreground"}`}>
                 {row.format(rightValue)}
               </span>

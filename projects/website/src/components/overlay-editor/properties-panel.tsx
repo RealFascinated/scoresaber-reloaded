@@ -27,10 +27,10 @@ const SCALE_PRESETS = [50, 75, 100, 150, 200];
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: ReactNode }) {
   return (
-    <section className="border-border flex flex-col gap-3 border-b px-4 py-4 last:border-b-0">
+    <section className="flex flex-col gap-3 border-b border-border px-4 py-4 last:border-b-0">
       <div>
-        <h3 className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">{title}</h3>
-        {hint && <p className="text-muted-foreground/80 mt-0.5 text-xs">{hint}</p>}
+        <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{title}</h3>
+        {hint && <p className="mt-0.5 text-xs text-muted-foreground/80">{hint}</p>}
       </div>
       {children}
     </section>
@@ -61,7 +61,7 @@ function NumberField({
         disabled && "opacity-50"
       )}
     >
-      <span className="text-muted-foreground w-3 shrink-0 text-xs font-medium">{label}</span>
+      <span className="w-3 shrink-0 text-xs font-medium text-muted-foreground">{label}</span>
       <input
         type="number"
         className="min-w-0 flex-1 [appearance:textfield] bg-transparent text-right outline-hidden [&::-webkit-inner-spin-button]:appearance-none"
@@ -77,7 +77,7 @@ function NumberField({
           }
         }}
       />
-      {suffix && <span className="text-muted-foreground text-xs">{suffix}</span>}
+      {suffix && <span className="text-xs text-muted-foreground">{suffix}</span>}
     </label>
   );
 }
@@ -104,7 +104,7 @@ function SizeField({
         disabled={value === "auto"}
         onChange={onChange}
       />
-      <label htmlFor={fitContentId} className="text-muted-foreground flex items-center gap-2 text-xs">
+      <label htmlFor={fitContentId} className="flex items-center gap-2 text-xs text-muted-foreground">
         <Switch
           id={fitContentId}
           checked={value === "auto"}
@@ -139,8 +139,8 @@ function ElementProperties({ element }: { element: OverlayElement }) {
 
   return (
     <>
-      <div className="border-border flex items-center gap-2 border-b px-4 py-3">
-        <Icon className="text-muted-foreground size-4" />
+      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
+        <Icon className="size-4 text-muted-foreground" />
         <h2 className="font-semibold">{OVERLAY_WIDGETS[element.type].label}</h2>
       </div>
 
@@ -301,7 +301,7 @@ function ElementProperties({ element }: { element: OverlayElement }) {
       </Section>
 
       {element.locked && (
-        <p className="text-muted-foreground px-4 py-3 text-xs">
+        <p className="px-4 py-3 text-xs text-muted-foreground">
           This widget is locked, unlock it in Layers to drag it.
         </p>
       )}
@@ -316,9 +316,9 @@ function ConnectionProperties() {
 
   return (
     <>
-      <div className="border-border border-b px-4 py-3">
+      <div className="border-b border-border px-4 py-3">
         <h2 className="font-semibold">Overlay settings</h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">Select a widget on the canvas to edit it.</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">Select a widget on the canvas to edit it.</p>
       </div>
       <Section title="Player" hint="Whose profile the player widgets show.">
         <Input
@@ -356,7 +356,7 @@ function ConnectionProperties() {
         </Select>
       </Section>
       <Section title="Shortcuts">
-        <dl className="text-muted-foreground grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
+        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs text-muted-foreground">
           <dt className="text-foreground">Arrows</dt>
           <dd>Nudge (Shift for 10px)</dd>
           <dt className="text-foreground">Alt + drag</dt>
@@ -391,9 +391,9 @@ function MultiProperties({ ids }: { ids: string[] }) {
 
   return (
     <>
-      <div className="border-border border-b px-4 py-3">
+      <div className="border-b border-border px-4 py-3">
         <h2 className="font-semibold">{ids.length} widgets selected</h2>
-        <p className="text-muted-foreground mt-0.5 text-xs">Drag to move them together.</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">Drag to move them together.</p>
       </div>
       <Section title="Actions">
         <div className="grid grid-cols-2 gap-2">

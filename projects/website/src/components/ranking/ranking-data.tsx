@@ -107,7 +107,7 @@ export default function RankingData({ initial }: RankingDataProps) {
             placeholder="All countries"
           />
           <div className="relative w-full sm:w-64">
-            <SharedIcons.SearchFieldIcon className="text-muted-foreground absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
+            <SharedIcons.SearchFieldIcon className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search players..."
@@ -136,7 +136,7 @@ export default function RankingData({ initial }: RankingDataProps) {
           <div className="flex items-center gap-4 sm:ml-auto">
             <label
               htmlFor={`${filtersId}-inactive`}
-              className="text-muted-foreground flex cursor-pointer items-center gap-2 text-sm"
+              className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground"
             >
               <Switch
                 id={`${filtersId}-inactive`}
@@ -190,7 +190,7 @@ export default function RankingData({ initial }: RankingDataProps) {
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2 sm:hidden">
                 {rankingData.items.length === 0 && (
-                  <p className="text-muted-foreground py-10 text-center">No players found</p>
+                  <p className="py-10 text-center text-muted-foreground">No players found</p>
                 )}
                 {rankingData.items.map((player, index) => (
                   <PlayerRankCard
@@ -216,7 +216,7 @@ export default function RankingData({ initial }: RankingDataProps) {
                 ))}
               </div>
 
-              <div className="ring-border bg-card overflow-x-auto rounded-xl ring-1 max-sm:hidden">
+              <div className="overflow-x-auto rounded-xl bg-card ring-1 ring-border max-sm:hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -232,7 +232,7 @@ export default function RankingData({ initial }: RankingDataProps) {
                   <TableBody>
                     {rankingData.items.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={me ? 5 : 4} className="text-muted-foreground py-10 text-center">
+                        <TableCell colSpan={me ? 5 : 4} className="py-10 text-center text-muted-foreground">
                           No players found
                         </TableCell>
                       </TableRow>
@@ -252,7 +252,7 @@ export default function RankingData({ initial }: RankingDataProps) {
                         <TableCell className="py-2">
                           <div className="flex items-center gap-2">
                             <CountryFlag code={player.country} size={14} />
-                            <span className="text-foreground text-sm tabular-nums">
+                            <span className="text-sm text-foreground tabular-nums">
                               #{player.countryRank}
                             </span>
                           </div>
@@ -265,7 +265,7 @@ export default function RankingData({ initial }: RankingDataProps) {
                           />
                         </TableCell>
                         <TableCell className="py-2 text-right whitespace-nowrap">
-                          <span className="text-pp font-semibold tabular-nums">{formatPp(player.pp)}pp</span>
+                          <span className="font-semibold text-pp tabular-nums">{formatPp(player.pp)}pp</span>
                           {showRelativePp && mainPlayer && (
                             <PlayerPpDifference pp={player.pp} mainPp={mainPlayer.pp} />
                           )}

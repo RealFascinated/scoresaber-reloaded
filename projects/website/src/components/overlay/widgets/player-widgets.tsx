@@ -63,7 +63,7 @@ export function PlayerRankWidget() {
   }
   return (
     <StatRow
-      icon={<SharedIcons.GlobalRankIcon className="text-foreground/80 size-7" />}
+      icon={<SharedIcons.GlobalRankIcon className="size-7 text-foreground/80" />}
       change={player.daily.rank}
       type={PlayerStatChange.Rank}
     >
@@ -99,7 +99,7 @@ export function PlayerMedalsWidget() {
   }
   return (
     <StatRow
-      icon={<SharedIcons.OverlayPlayerMedalsIcon className="text-foreground/80 size-7" />}
+      icon={<SharedIcons.OverlayPlayerMedalsIcon className="size-7 text-foreground/80" />}
       change={player.daily.medals}
       type={PlayerStatChange.Medals}
     >

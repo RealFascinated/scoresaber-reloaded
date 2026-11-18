@@ -159,7 +159,7 @@ function renderSliderField<TFormValues extends FieldValues, TName extends Path<T
         className="flex-1"
       />
       {field.labelDisplay !== "thumb" && (
-        <span className="text-muted-foreground min-w-12 text-right text-sm font-medium">
+        <span className="min-w-12 text-right text-sm font-medium text-muted-foreground">
           {labelFormatter(value as number)}
         </span>
       )}
@@ -267,9 +267,9 @@ function FormFieldComponent<TFormValues extends FieldValues, TName extends Path<
       }
     >
       <div className={isToggleRow ? "min-w-0 flex-1" : "w-full min-w-0"}>
-        <FormLabel className="text-foreground text-[15px] leading-snug font-medium">{field.label}</FormLabel>
+        <FormLabel className="text-[15px] leading-snug font-medium text-foreground">{field.label}</FormLabel>
         {field.description && (
-          <FormDescription className="text-muted-foreground mt-1 text-[13px] leading-snug">
+          <FormDescription className="mt-1 text-[13px] leading-snug text-muted-foreground">
             {field.description}
           </FormDescription>
         )}
@@ -290,11 +290,11 @@ export function SettingSection<TFormValues extends FieldValues>({
 }: SettingSectionProps<TFormValues>) {
   return (
     <section className="flex flex-col">
-      <h3 className="text-foreground flex items-center gap-2 pb-2 text-sm font-semibold">
-        <Icon className="text-muted-foreground size-4 shrink-0" aria-hidden />
+      <h3 className="flex items-center gap-2 pb-2 text-sm font-semibold text-foreground">
+        <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         {title}
       </h3>
-      <div className="divide-border/80 border-border/80 divide-y border-t">
+      <div className="divide-y divide-border/80 border-t border-border/80">
         {fields.map(field => (
           <FormField
             key={String(field.name)}

@@ -36,9 +36,9 @@ export default function OverlaySongInfoView({ overlayData }: OverlaySongInfoProp
         <div>
           <p className="font-bold">{beatSaverMap.metadata.songName}</p>
           {beatSaverMap.metadata.songAuthorName && (
-            <p className="text-muted-foreground text-sm">by {beatSaverMap.metadata.songAuthorName}</p>
+            <p className="text-sm text-muted-foreground">by {beatSaverMap.metadata.songAuthorName}</p>
           )}
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Mapped by {truncateText(beatSaverMap.metadata.levelAuthorName, 48)}
           </p>
         </div>
@@ -52,7 +52,7 @@ export default function OverlaySongInfoView({ overlayData }: OverlaySongInfoProp
           >
             {getDifficultyName(difficulty)}
           </div>
-          <div className="[&>*:not(:last-child)]:after:text-muted-foreground flex items-center [&>*:not(:last-child)]:after:mx-2 [&>*:not(:last-child)]:after:content-['|']">
+          <div className="flex items-center [&>*:not(:last-child)]:after:mx-2 [&>*:not(:last-child)]:after:text-muted-foreground [&>*:not(:last-child)]:after:content-['|']">
             <span>!bsr {beatSaverMap.bsr}</span>
             <span>{formatNumberWithCommas(beatSaverMap.metadata.bpm)} BPM</span>
             {leaderboard && leaderboard.stars > 0 && (

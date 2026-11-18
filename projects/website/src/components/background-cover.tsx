@@ -113,7 +113,7 @@ export default function BackgroundCover() {
           )}
         </div>
       ))}
-      <div className="from-background/50 to-background/20 absolute inset-0 bg-linear-to-b" />
+      <div className="absolute inset-0 bg-linear-to-b from-background/50 to-background/20" />
     </div>
   );
 }

@@ -191,7 +191,7 @@ function FollowingPopover() {
           <SharedIcons.FollowingNavIcon className="size-[18px]" />
           <span>Following</span>
           {followingCount > 0 && (
-            <span className="bg-muted text-muted-foreground ml-auto rounded-md px-1.5 py-0.5 text-xs font-medium tabular-nums">
+            <span className="ml-auto rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
               {followingCount}
             </span>
           )}
@@ -205,13 +205,13 @@ function FollowingPopover() {
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="border-border/50 flex items-center justify-between border-b px-3 py-2.5">
+        <div className="flex items-center justify-between border-b border-border/50 px-3 py-2.5">
           <div className="flex items-center gap-2">
-            <SharedIcons.FollowingNavIcon className="text-muted-foreground size-4" />
+            <SharedIcons.FollowingNavIcon className="size-4 text-muted-foreground" />
             <span className="font-semibold">Following</span>
           </div>
           {followingCount > 0 && (
-            <span className="bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-xs font-medium tabular-nums">
+            <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
               {followingCount}
             </span>
           )}
@@ -220,7 +220,7 @@ function FollowingPopover() {
         <div className="flex-1 overflow-y-auto p-2">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <SharedIcons.PageLoadingIcon className="text-muted-foreground size-5 animate-spin" />
+              <SharedIcons.PageLoadingIcon className="size-5 animate-spin text-muted-foreground" />
             </div>
           ) : followingCount > 0 ? (
             <div className="flex flex-col gap-px">
@@ -240,10 +240,10 @@ function FollowingPopover() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center gap-3 py-8">
-              <SharedIcons.FollowingNavIcon className="text-muted-foreground/30 size-10" />
+              <SharedIcons.FollowingNavIcon className="size-10 text-muted-foreground/30" />
               <div className="flex flex-col items-center gap-1">
-                <p className="text-muted-foreground font-medium">Not following anyone yet</p>
-                <p className="text-muted-foreground/60 max-w-[220px] text-center text-xs">
+                <p className="font-medium text-muted-foreground">Not following anyone yet</p>
+                <p className="max-w-[220px] text-center text-xs text-muted-foreground/60">
                   Search for players and follow them to see them here
                 </p>
               </div>
@@ -289,9 +289,9 @@ function ProfileSection() {
       <button
         type="button"
         onClick={() => signInWithSteam(pathname ?? "/").catch(error => toast.error(error.message))}
-        className="text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors"
+        className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-foreground"
       >
-        <SharedIcons.SignInIcon className="text-success size-5 shrink-0" />
+        <SharedIcons.SignInIcon className="size-5 shrink-0 text-success" />
         <span className="font-medium">Sign in</span>
       </button>
     );
@@ -313,13 +313,13 @@ function ProfileSection() {
         <Avatar
           size={32}
           src={mainPlayer?.avatar ?? ""}
-          className="border-border box-border size-8 shrink-0 rounded-full border"
+          className="box-border size-8 shrink-0 rounded-full border border-border"
           alt="Your Profile Picture"
         />
         <div className="grid min-w-0 flex-1 leading-tight">
           <span className="truncate text-sm font-medium">{mainPlayer?.name ?? "My Profile"}</span>
           {mainPlayer != undefined && (
-            <span className="text-muted-foreground text-xs tabular-nums">
+            <span className="text-xs text-muted-foreground tabular-nums">
               #{formatNumberWithCommas(mainPlayer.rank)} · {formatPp(mainPlayer.pp)}pp
             </span>
           )}
@@ -330,7 +330,7 @@ function ProfileSection() {
           type="button"
           onClick={handleSignOut}
           aria-label="Sign out"
-          className="text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors"
+          className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-foreground"
         >
           <SharedIcons.SignOutIcon className="size-4" />
         </button>
@@ -393,7 +393,7 @@ export function AppSidebar() {
 
         {navGroups.map(group => (
           <SidebarGroup key={group.label} className="py-1.5">
-            <SidebarGroupLabel className="text-muted-foreground/70 h-6 px-2.5 text-xs font-normal">
+            <SidebarGroupLabel className="h-6 px-2.5 text-xs font-normal text-muted-foreground/70">
               {group.label}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -411,7 +411,7 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="border-sidebar-border gap-2 border-t p-3">
+      <SidebarFooter className="gap-2 border-t border-sidebar-border p-3">
         <div className="flex flex-wrap gap-x-3 gap-y-1">
           {[...resourceLinks, ...appLinks].map(link => (
             <SimpleLink
@@ -419,7 +419,7 @@ export function AppSidebar() {
               href={link.href}
               target="_blank"
               draggable={false}
-              className="text-muted-foreground hover:text-foreground text-xs transition-colors"
+              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               {link.shortName ?? link.name}
             </SimpleLink>
@@ -430,7 +430,7 @@ export function AppSidebar() {
             <SimpleLink
               key={link.name}
               aria-label={link.name}
-              className="text-muted-foreground hover:text-foreground hover:bg-sidebar-accent flex size-8 items-center justify-center rounded-md transition-colors"
+              className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
               href={link.href}
               target="_blank"
               draggable={false}

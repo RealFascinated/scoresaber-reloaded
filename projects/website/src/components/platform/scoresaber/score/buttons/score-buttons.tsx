@@ -135,7 +135,7 @@ export default function ScoreSaberScoreButtons({
       <Popover>
         <PopoverTrigger
           aria-label="Score actions"
-          className="text-muted-foreground hover:text-foreground hover:bg-accent flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors @3xl:hidden"
+          className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground @3xl:hidden"
         >
           <SharedIcons.ScoreActionsMenuIcon className="size-4" />
         </PopoverTrigger>

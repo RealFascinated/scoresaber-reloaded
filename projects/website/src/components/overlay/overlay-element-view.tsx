@@ -50,7 +50,7 @@ export default function OverlayElementView({
       {available ? (
         <OverlayWidget element={element} />
       ) : (
-        <div className="border-muted-foreground/60 text-muted-foreground flex size-full min-h-10 min-w-40 items-center justify-center rounded-md border border-dashed px-3 py-2 text-lg whitespace-nowrap">
+        <div className="flex size-full min-h-10 min-w-40 items-center justify-center rounded-md border border-dashed border-muted-foreground/60 px-3 py-2 text-lg whitespace-nowrap text-muted-foreground">
           {definition.label}
           {definition.requiresRealTimeData ? " (live only)" : ""}
         </div>

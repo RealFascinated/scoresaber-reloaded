@@ -22,10 +22,10 @@ export function EmptyState({ icon, title, description, className }: EmptyStatePr
       className={cn("bg-secondary/90 flex min-h-[200px] flex-col items-center justify-center p-8", className)}
     >
       <div className="mb-6">
-        {icon || <SharedIcons.LeaderboardEmptyStateIcon className="text-muted-foreground h-10 w-10" />}
+        {icon || <SharedIcons.LeaderboardEmptyStateIcon className="h-10 w-10 text-muted-foreground" />}
       </div>
-      <h3 className="text-foreground mb-2 text-lg font-semibold">{title}</h3>
-      <p className="text-muted-foreground max-w-[500px] text-center text-sm leading-relaxed">{description}</p>
+      <h3 className="mb-2 text-lg font-semibold text-foreground">{title}</h3>
+      <p className="max-w-[500px] text-center text-sm leading-relaxed text-muted-foreground">{description}</p>
     </div>
   );
 }

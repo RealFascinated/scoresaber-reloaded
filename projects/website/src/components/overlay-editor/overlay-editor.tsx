@@ -45,7 +45,7 @@ export default function OverlayEditor({ overlay }: { overlay: UserOverlay }) {
         onScenarioChange={setScenario}
       />
       <div className="grid min-h-0 flex-1 grid-cols-[17rem_1fr_19rem]">
-        <aside className="border-border bg-card min-h-0 border-r">
+        <aside className="min-h-0 border-r border-border bg-card">
           <LayersPanel />
         </aside>
         <main className="min-h-0 min-w-0">
@@ -59,7 +59,7 @@ export default function OverlayEditor({ overlay }: { overlay: UserOverlay }) {
             </LiveOverlayRuntime>
           )}
         </main>
-        <aside className="border-border bg-card min-h-0 border-l">
+        <aside className="min-h-0 border-l border-border bg-card">
           <PropertiesPanel />
         </aside>
       </div>

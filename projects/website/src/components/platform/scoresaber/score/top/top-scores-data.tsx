@@ -61,7 +61,7 @@ export function TopScoresData({ initial }: TopScoresDataProps) {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="ring-border bg-card divide-border divide-y overflow-hidden rounded-xl ring-1">
+          <div className="divide-y divide-border overflow-hidden rounded-xl bg-card ring-1 ring-border">
             {scores.items.map(({ score, leaderboard, beatSaver }) => {
               const player = score.playerInfo;
               if (!player) {
@@ -79,7 +79,7 @@ export function TopScoresData({ initial }: TopScoresDataProps) {
                     />
                     <SimpleLink
                       href={`/player/${player.id}`}
-                      className="hover:text-primary text-sm font-medium transition-colors"
+                      className="text-sm font-medium transition-colors hover:text-primary"
                     >
                       {player.name}
                     </SimpleLink>

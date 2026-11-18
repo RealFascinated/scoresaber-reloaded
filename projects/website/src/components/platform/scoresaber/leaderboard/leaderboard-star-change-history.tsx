@@ -45,15 +45,15 @@ export function LeaderboardStarChangeHistory({ leaderboardId }: { leaderboardId:
   );
 
   if (isPending) {
-    return <p className="text-muted-foreground py-6 text-center text-sm">Loading star history…</p>;
+    return <p className="py-6 text-center text-sm text-muted-foreground">Loading star history…</p>;
   }
 
   if (isError) {
-    return <p className="text-muted-foreground py-6 text-center text-sm">Could not load star history.</p>;
+    return <p className="py-6 text-center text-sm text-muted-foreground">Could not load star history.</p>;
   }
 
   return (
-    <div className="ring-border bg-card max-h-[70vh] overflow-auto rounded-xl ring-1">
+    <div className="max-h-[70vh] overflow-auto rounded-xl bg-card ring-1 ring-border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -75,7 +75,7 @@ export function LeaderboardStarChangeHistory({ leaderboardId }: { leaderboardId:
                 <TableCell className="py-2.5 text-sm">
                   {formatDate(change.timestamp, "DD MMMM YYYY")}
                 </TableCell>
-                <TableCell className="text-muted-foreground py-2.5 text-right text-sm tabular-nums">
+                <TableCell className="py-2.5 text-right text-sm text-muted-foreground tabular-nums">
                   {formatStars(change.previousStars)}
                 </TableCell>
                 <TableCell className="py-2.5 text-right text-sm font-medium tabular-nums">
@@ -88,7 +88,7 @@ export function LeaderboardStarChangeHistory({ leaderboardId }: { leaderboardId:
                   {change.rankedBatchId !== undefined ? (
                     <SimpleLink
                       href={`/ranked-batches/${change.rankedBatchId}`}
-                      className="text-primary hover:text-primary/80 transition-colors after:absolute after:inset-0"
+                      className="text-primary transition-colors after:absolute after:inset-0 hover:text-primary/80"
                     >
                       View
                     </SimpleLink>

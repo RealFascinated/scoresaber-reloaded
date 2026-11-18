@@ -16,22 +16,22 @@ type LandingTopPlayersProps = {
  */
 export function LandingTopPlayers({ players }: LandingTopPlayersProps) {
   return (
-    <div className="ring-border bg-card/80 w-full overflow-hidden rounded-2xl ring-1 backdrop-blur-sm">
-      <div className="border-border flex items-center justify-between border-b px-5 py-3.5">
+    <div className="w-full overflow-hidden rounded-2xl bg-card/80 ring-1 ring-border backdrop-blur-sm">
+      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
         <div className="flex items-center gap-2">
-          <SharedIcons.GlobalPlayersRankingIcon className="text-brand size-4" />
-          <h2 className="text-foreground text-sm font-semibold">Top Players</h2>
+          <SharedIcons.GlobalPlayersRankingIcon className="size-4 text-brand" />
+          <h2 className="text-sm font-semibold text-foreground">Top Players</h2>
         </div>
         <SimpleLink
           href="/ranking"
-          className="text-muted-foreground hover:text-foreground text-xs font-medium transition-colors"
+          className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           View all
         </SimpleLink>
       </div>
-      <ol className="divide-border divide-y">
+      <ol className="divide-y divide-border">
         {players.map((player, index) => (
-          <li key={player.id} className="hover:bg-hover relative transition-colors">
+          <li key={player.id} className="relative transition-colors hover:bg-hover">
             <SimpleLink
               href={`/player/${player.id}`}
               className="flex items-center gap-3 px-5 py-3 after:absolute after:inset-0"
@@ -42,11 +42,11 @@ export function LandingTopPlayers({ players }: LandingTopPlayersProps) {
                 #{player.rank}
               </span>
               <PlayerAvatar profilePicture={player.avatar} name={player.name} />
-              <span className="text-foreground min-w-0 flex-1 truncate text-sm font-medium">
+              <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
                 {player.name}
               </span>
               <CountryFlag code={player.country} size={10} />
-              <span className="text-pp w-24 shrink-0 text-right text-sm font-bold tabular-nums">
+              <span className="w-24 shrink-0 text-right text-sm font-bold text-pp tabular-nums">
                 {formatPp(player.pp)}pp
               </span>
             </SimpleLink>

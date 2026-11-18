@@ -12,7 +12,7 @@ export function RankedBatchLeaderboardsTable({
   leaderboards: RankedBatchLeaderboardChange[];
 }) {
   return (
-    <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
+    <div className="overflow-hidden rounded-xl bg-card ring-1 ring-border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -46,7 +46,7 @@ export function RankedBatchLeaderboardsTable({
                   <div className="flex items-center justify-center gap-1 font-medium">
                     <SharedIcons.QualifiedLeaderboardStarIcon className="size-3.5" />
                     <span>{leaderboard.previousStars.toFixed(2)}</span>
-                    <SharedIcons.OpenSourceArrowIcon className="text-muted-foreground size-3" />
+                    <SharedIcons.OpenSourceArrowIcon className="size-3 text-muted-foreground" />
                     <span>{isUnranked ? "Unranked" : leaderboard.newStars.toFixed(2)}</span>
                   </div>
                 </TableCell>

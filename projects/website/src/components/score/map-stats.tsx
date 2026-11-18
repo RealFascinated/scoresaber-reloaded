@@ -15,50 +15,50 @@ export function MapStats({ beatSaver }: MapAndScoreData) {
   }
 
   return (
-    <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs">
+    <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
       <span className="flex items-center gap-1.5">
         <SharedIcons.MapLengthStatIcon className="size-3.5" />
-        <span className="text-foreground font-semibold tabular-nums">{formatTime(metadata.duration)}</span>
+        <span className="font-semibold text-foreground tabular-nums">{formatTime(metadata.duration)}</span>
         <span>Length</span>
       </span>
       <span className="flex items-center gap-1.5">
         <SharedIcons.MapBpmStatIcon className="size-3.5" />
-        <span className="text-foreground font-semibold tabular-nums">
+        <span className="font-semibold text-foreground tabular-nums">
           {formatNumberWithCommas(metadata.bpm)}
         </span>
         <span>BPM</span>
       </span>
       <span className="flex items-center gap-1.5">
         <SharedIcons.MapNpsStatIcon className="size-3.5" />
-        <span className="text-foreground font-semibold tabular-nums">
+        <span className="font-semibold text-foreground tabular-nums">
           {beatSaver.difficulty.nps.toFixed(2)}
         </span>
         <span>NPS</span>
       </span>
       <span className="flex items-center gap-1.5">
         <SharedIcons.MapNjsStatIcon className="size-3.5" />
-        <span className="text-foreground font-semibold tabular-nums">
+        <span className="font-semibold text-foreground tabular-nums">
           {beatSaver.difficulty.njs.toFixed(2)}
         </span>
         <span>NJS</span>
       </span>
       <span className="flex items-center gap-1.5">
         <SharedIcons.MapNotesStatIcon className="size-3.5" />
-        <span className="text-foreground font-semibold tabular-nums">
+        <span className="font-semibold text-foreground tabular-nums">
           {formatNumberWithCommas(beatSaver.difficulty.notes)}
         </span>
         <span>Notes</span>
       </span>
       <span className="flex items-center gap-1.5">
         <SharedIcons.MapBombsStatIcon className="size-3.5" />
-        <span className="text-foreground font-semibold tabular-nums">
+        <span className="font-semibold text-foreground tabular-nums">
           {formatNumberWithCommas(beatSaver.difficulty.bombs)}
         </span>
         <span>Bombs</span>
       </span>
       <span className="flex items-center gap-1.5">
         <SharedIcons.MapObstaclesStatIcon className="size-3.5" />
-        <span className="text-foreground font-semibold tabular-nums">
+        <span className="font-semibold text-foreground tabular-nums">
           {formatNumberWithCommas(beatSaver.difficulty.obstacles)}
         </span>
         <span>Obstacles</span>

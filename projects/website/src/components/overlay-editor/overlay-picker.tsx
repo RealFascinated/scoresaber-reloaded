@@ -24,16 +24,16 @@ function OverlayCard({ overlay, atLimit }: { overlay: UserOverlaySummary; atLimi
   };
 
   return (
-    <div className="ring-border bg-card flex flex-col gap-4 rounded-xl p-4 ring-1">
+    <div className="flex flex-col gap-4 rounded-xl bg-card p-4 ring-1 ring-border">
       <Link href={`/overlay/editor/${overlay.id}`} className="group flex items-center gap-3">
-        <div className="bg-muted text-muted-foreground group-hover:text-foreground flex size-12 shrink-0 items-center justify-center rounded-lg transition-colors">
+        <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:text-foreground">
           <Monitor className="size-6" />
         </div>
         <div className="min-w-0">
-          <div className="group-hover:text-primary truncate font-semibold transition-colors">
+          <div className="truncate font-semibold transition-colors group-hover:text-primary">
             {overlay.name}
           </div>
-          <div className="text-muted-foreground text-xs">
+          <div className="text-xs text-muted-foreground">
             Edited {timeAgo(new Date(overlay.updatedAt), 1)}
           </div>
         </div>
@@ -95,12 +95,12 @@ export default function OverlayPicker() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Overlay editor</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="mt-1 text-sm text-muted-foreground">
             Build stream overlays and add them to OBS as a browser source.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-muted-foreground text-sm">
+          <span className="text-sm text-muted-foreground">
             {count} / {MAX_USER_OVERLAYS}
           </span>
           <Button variant="primary" disabled={atLimit} onClick={() => setCreating(true)}>
@@ -110,20 +110,20 @@ export default function OverlayPicker() {
         </div>
       </header>
 
-      {error && <p className="text-destructive text-sm">Could not load your overlays: {error.message}</p>}
+      {error && <p className="text-sm text-destructive">Could not load your overlays: {error.message}</p>}
       {isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2].map(index => (
-            <div key={index} className="bg-card ring-border h-32 animate-pulse rounded-xl ring-1" />
+            <div key={index} className="h-32 animate-pulse rounded-xl bg-card ring-1 ring-border" />
           ))}
         </div>
       )}
 
       {overlays && overlays.length === 0 && (
-        <div className="ring-border bg-card flex flex-col items-center gap-3 rounded-xl p-12 text-center ring-1">
-          <Monitor className="text-muted-foreground size-10" />
+        <div className="flex flex-col items-center gap-3 rounded-xl bg-card p-12 text-center ring-1 ring-border">
+          <Monitor className="size-10 text-muted-foreground" />
           <h2 className="text-lg font-semibold">You have no overlays yet</h2>
-          <p className="text-muted-foreground max-w-md text-sm">
+          <p className="max-w-md text-sm text-muted-foreground">
             Start from a preset and drag things around until it looks right.
           </p>
           <Button variant="primary" onClick={() => setCreating(true)}>

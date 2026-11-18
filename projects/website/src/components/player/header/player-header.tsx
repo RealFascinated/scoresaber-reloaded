@@ -36,7 +36,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
           <div className="flex w-full flex-col gap-2 lg:gap-3">
             {player.inactive && (
               <div className="flex justify-center lg:hidden">
-                <span className="text-inactive-account rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium">
+                <span className="rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium text-inactive-account">
                   Inactive Account
                 </span>
               </div>
@@ -47,7 +47,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                   <SimpleLink
                     href={`https://steamcommunity.com/profiles/${player.id}`}
                     target="_blank"
-                    className="hover:text-primary/80 max-w-[300px] truncate text-2xl font-semibold transition-colors duration-200"
+                    className="max-w-[300px] truncate text-2xl font-semibold transition-colors duration-200 hover:text-primary/80"
                     style={{
                       color: getScoreSaberRoles(player)[0]?.color,
                     }}
@@ -57,12 +57,12 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
                 </h1>
                 <PlayerNameHistory previousNames={player.previousNames ?? []} />
                 {player.inactive && (
-                  <span className="text-inactive-account hidden rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium lg:inline-flex">
+                  <span className="hidden rounded-md border border-(--inactive-account)/30 bg-(--inactive-account)/20 px-2 py-0.5 text-xs font-medium text-inactive-account lg:inline-flex">
                     Inactive Account
                   </span>
                 )}
                 {player.banned && (
-                  <span className="bg-destructive/20 text-destructive-foreground border-destructive/30 rounded-md border px-2 py-0.5 text-xs font-medium">
+                  <span className="text-destructive-foreground rounded-md border border-destructive/30 bg-destructive/20 px-2 py-0.5 text-xs font-medium">
                     Banned Account
                   </span>
                 )}
@@ -88,7 +88,7 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
         </div>
       </div>
 
-      <div className="border-border/50 flex flex-col-reverse items-center gap-4 border-t pt-4 md:flex-row md:justify-between">
+      <div className="flex flex-col-reverse items-center gap-4 border-t border-border/50 pt-4 md:flex-row md:justify-between">
         <PlayerActions player={player} />
         <PlayerAccBadges statistics={player.statistics} />
       </div>

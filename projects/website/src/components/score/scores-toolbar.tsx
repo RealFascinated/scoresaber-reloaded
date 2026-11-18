@@ -30,7 +30,7 @@ export function ScoresToolbar({ actions, children }: { actions?: ReactNode; chil
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="border-border -mx-4 -mt-4 flex flex-wrap items-center justify-between gap-x-4 border-b px-4">
+      <div className="-mx-4 -mt-4 flex flex-wrap items-center justify-between gap-x-4 border-b border-border px-4">
         <div className="flex h-12 min-w-0 items-center">
           {leading ?? <h2 className="text-base font-semibold">Scores</h2>}
         </div>

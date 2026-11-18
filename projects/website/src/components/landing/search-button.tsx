@@ -10,13 +10,13 @@ export function SearchButton() {
   return (
     <Button
       onClick={openSearch}
-      className="ring-border bg-card hover:bg-accent flex h-12 w-full max-w-sm items-center justify-between gap-3 rounded-xl px-4 text-left ring-1 transition-colors"
+      className="flex h-12 w-full max-w-sm items-center justify-between gap-3 rounded-xl bg-card px-4 text-left ring-1 ring-border transition-colors hover:bg-accent"
     >
       <div className="flex items-center gap-3">
-        <SharedIcons.SearchIcon className="text-muted-foreground h-4 w-4" />
-        <span className="text-muted-foreground text-sm">Search players...</span>
+        <SharedIcons.SearchIcon className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">Search players...</span>
       </div>
-      <kbd className="bg-muted text-muted-foreground hidden rounded-md border px-1.5 py-0.5 text-xs font-medium sm:inline-block">
+      <kbd className="hidden rounded-md border bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground sm:inline-block">
         Ctrl+K
       </kbd>
     </Button>

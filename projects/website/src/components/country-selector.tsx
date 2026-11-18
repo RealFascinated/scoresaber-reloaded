@@ -133,7 +133,7 @@ function CountryList({
               </span>
               <span className="flex shrink-0 items-center gap-2">
                 {hasCounts && item.count != undefined && (
-                  <span className="text-muted-foreground text-sm whitespace-nowrap tabular-nums">
+                  <span className="text-sm whitespace-nowrap text-muted-foreground tabular-nums">
                     {item.count.toLocaleString()} {pluralize(item.count, countNoun)}
                   </span>
                 )}

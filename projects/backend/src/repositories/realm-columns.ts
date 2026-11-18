@@ -12,7 +12,8 @@ type LeaderboardTable = typeof scoreSaberLeaderboardsTable;
 type LeaderboardRealmTable = typeof scoreSaberLeaderboardRealmsTable;
 type LeaderboardTableOrAlias = LeaderboardTable | ReturnType<typeof alias<LeaderboardTable, string>>;
 type LeaderboardRealmTableOrAlias =
-  LeaderboardRealmTable | ReturnType<typeof alias<LeaderboardRealmTable, string>>;
+  | LeaderboardRealmTable
+  | ReturnType<typeof alias<LeaderboardRealmTable, string>>;
 
 /**
  * The pp of a score in the realm joined through {@link scoreRealmJoinOn} (0 when the

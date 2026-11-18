@@ -33,7 +33,9 @@ type Props = {
 };
 
 type LeaderboardFetchResult =
-  { status: "found"; response: LeaderboardResponse } | { status: "not-found" } | { status: "unavailable" };
+  | { status: "found"; response: LeaderboardResponse }
+  | { status: "not-found" }
+  | { status: "unavailable" };
 
 const getLeaderboard = cache(async (id: number) => {
   try {

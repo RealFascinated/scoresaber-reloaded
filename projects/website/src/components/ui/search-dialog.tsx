@@ -27,15 +27,15 @@ const SearchDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[600px]">
         <DialogTitle className="sr-only">Search</DialogTitle>
-        <div className="border-border/50 bg-muted/30 relative border-b">
+        <div className="relative border-b border-border/50 bg-muted/30">
           <div className="flex h-14 items-center gap-3 px-4">
             {isLoading ? (
-              <SharedIcons.SearchLoadingIcon className="text-muted-foreground size-4 shrink-0 animate-spin" />
+              <SharedIcons.SearchLoadingIcon className="size-4 shrink-0 animate-spin text-muted-foreground" />
             ) : (
-              <SharedIcons.SearchIcon className="text-muted-foreground size-4 shrink-0" />
+              <SharedIcons.SearchIcon className="size-4 shrink-0 text-muted-foreground" />
             )}
             <input
-              className="placeholder:text-muted-foreground focus:text-foreground flex h-full w-full rounded-md bg-transparent py-3 text-sm outline-hidden transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-full w-full rounded-md bg-transparent py-3 text-sm outline-hidden transition-colors placeholder:text-muted-foreground focus:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
               placeholder={placeholder}
               maxLength={maxLength}
               value={query}
@@ -44,7 +44,7 @@ const SearchDialog = ({
           </div>
         </div>
 
-        <div className="[&::-webkit-scrollbar-thumb]:bg-muted/50 max-h-[500px] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+        <div className="max-h-[500px] overflow-x-hidden overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted/50 [&::-webkit-scrollbar-track]:bg-transparent">
           {children}
         </div>
       </DialogContent>

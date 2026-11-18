@@ -74,7 +74,7 @@ export default function ScoreSongInfo({
           />
         </div>
         <div
-          className="bg-background/90 text-foreground absolute -right-2 bottom-1 inline-flex h-5.5 w-fit cursor-default items-center gap-1 rounded-md px-1.5 text-xs leading-none font-bold tabular-nums shadow-md ring-[1.5px] ring-(--diff-color) backdrop-blur-sm"
+          className="absolute -right-2 bottom-1 inline-flex h-5.5 w-fit cursor-default items-center gap-1 rounded-md bg-background/90 px-1.5 text-xs leading-none font-bold text-foreground tabular-nums shadow-md ring-[1.5px] ring-(--diff-color) backdrop-blur-sm"
           style={{ "--diff-color": diff.color } as CSSProperties}
         >
           {metric != undefined && metric.value > 0 ? (
@@ -102,7 +102,7 @@ export default function ScoreSongInfo({
           <div className="flex flex-row items-end gap-1.5 text-[12.5px] leading-none">
             <p className={cn("text-muted-foreground line-clamp-2", className)}>
               {song.authorName}
-              <span className="text-muted-foreground px-1">|</span>
+              <span className="px-1 text-muted-foreground">|</span>
               <span className="text-song-mapper">
                 <FallbackLink
                   href={mappersProfile}

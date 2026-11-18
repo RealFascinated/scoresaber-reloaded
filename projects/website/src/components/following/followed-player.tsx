@@ -39,7 +39,7 @@ export default function FollowedPlayer({ player, onClick }: FollowedPlayerProps)
   }
 
   return (
-    <div className="hover:bg-accent group flex items-center justify-between gap-2 rounded-lg p-2 transition-all select-none">
+    <div className="group flex items-center justify-between gap-2 rounded-lg p-2 transition-all select-none hover:bg-accent">
       <SimpleLink
         href={`/player/${player.id}`}
         onClick={() => onClick?.()}
@@ -49,9 +49,9 @@ export default function FollowedPlayer({ player, onClick }: FollowedPlayerProps)
         <div className="flex min-w-0 flex-1 flex-col">
           <p className="truncate text-sm font-medium">{player.name}</p>
           {player.inactive ? (
-            <span className="text-inactive-account text-xs">Inactive Account</span>
+            <span className="text-xs text-inactive-account">Inactive Account</span>
           ) : (
-            <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <CountryFlag code={player.country} size={5} />#{formatNumberWithCommas(player.rank)}
             </span>
           )}
@@ -64,7 +64,7 @@ export default function FollowedPlayer({ player, onClick }: FollowedPlayerProps)
       >
         <ConfirmationDialog
           trigger={
-            <div className="text-muted-foreground hover:text-foreground cursor-pointer rounded-md p-1 opacity-0 transition-all group-hover:opacity-100">
+            <div className="cursor-pointer rounded-md p-1 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:text-foreground">
               <SharedIcons.RemoveFollowingFromListIcon className="size-4" />
             </div>
           }

@@ -396,8 +396,8 @@ const GenericChart = ({ config, labels, markers }: Props) => {
   if (showNoData) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-center">
-        <SharedIcons.NoChartDataIcon className="text-muted-foreground/60 size-8" />
-        <p className="text-muted-foreground text-sm">No data for this period yet</p>
+        <SharedIcons.NoChartDataIcon className="size-8 text-muted-foreground/60" />
+        <p className="text-sm text-muted-foreground">No data for this period yet</p>
       </div>
     );
   }

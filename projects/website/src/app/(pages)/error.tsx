@@ -24,25 +24,25 @@ export default function Error(props: ErrorProps) {
     <div className="flex w-full justify-center">
       <Card className="mt-2 flex w-full max-w-2xl flex-col items-center gap-4">
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-danger flex items-center gap-2 text-2xl font-bold">
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-danger">
             Something went wrong <SharedIcons.PageErrorIcon className="size-6" />
           </h1>
-          <p className="text-muted-foreground text-lg">{errorMessage}</p>
+          <p className="text-lg text-muted-foreground">{errorMessage}</p>
         </div>
 
         <div className="w-full">
-          <div className="border-border bg-muted/50 ring-border mt-2 rounded-xl p-4 text-left ring-1">
+          <div className="mt-2 rounded-xl border-border bg-muted/50 p-4 text-left ring-1 ring-border">
             <div className="flex flex-col gap-2">
               {error.message && (
                 <div>
-                  <span className="text-muted-foreground text-sm font-semibold">Message:</span>
+                  <span className="text-sm font-semibold text-muted-foreground">Message:</span>
                   <p className="font-mono text-sm wrap-break-word">{error.message}</p>
                 </div>
               )}
               {error.stack && (
                 <div>
-                  <span className="text-muted-foreground text-sm font-semibold">Stack Trace:</span>
-                  <pre className="text-muted-foreground bg-background/50 mt-2 max-h-64 overflow-auto rounded-md p-2 text-xs">
+                  <span className="text-sm font-semibold text-muted-foreground">Stack Trace:</span>
+                  <pre className="mt-2 max-h-64 overflow-auto rounded-md bg-background/50 p-2 text-xs text-muted-foreground">
                     {error.stack}
                   </pre>
                 </div>
@@ -60,8 +60,8 @@ export default function Error(props: ErrorProps) {
           </SimpleLink>
         </div>
 
-        <div className="border-border flex flex-col items-center gap-2 border-t pt-3">
-          <p className="text-muted-foreground text-sm">Need help? Join our Discord community!</p>
+        <div className="flex flex-col items-center gap-2 border-t border-border pt-3">
+          <p className="text-sm text-muted-foreground">Need help? Join our Discord community!</p>
           <DiscordButton />
         </div>
       </Card>

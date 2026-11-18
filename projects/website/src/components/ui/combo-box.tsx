@@ -93,13 +93,13 @@ const Combobox = <T,>({
             >
               <span className="flex min-w-0 flex-1 items-center gap-2 truncate text-left">
                 {selectedItem?.icon ? (
-                  <span className="text-muted-foreground flex shrink-0 items-center">
+                  <span className="flex shrink-0 items-center text-muted-foreground">
                     {selectedItem.icon}
                   </span>
                 ) : null}
                 <span className="truncate">{triggerLabel}</span>
               </span>
-              <SharedIcons.ComboBoxToggleIcon className="text-muted-foreground size-4 shrink-0 opacity-70" />
+              <SharedIcons.ComboBoxToggleIcon className="size-4 shrink-0 text-muted-foreground opacity-70" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-fit p-0">
@@ -145,7 +145,7 @@ const Combobox = <T,>({
           type="button"
           variant="outline"
           size="icon"
-          className="border-border bg-muted size-10 shrink-0 shadow-none"
+          className="size-10 shrink-0 border-border bg-muted shadow-none"
           aria-label="Clear selection"
           onClick={() => handleValueChange(undefined)}
         >

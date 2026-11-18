@@ -41,17 +41,17 @@ function FollowListDialog({
       <DialogTrigger asChild>
         <button
           type="button"
-          className="hover:text-primary flex cursor-pointer items-baseline gap-1 transition-colors"
+          className="flex cursor-pointer items-baseline gap-1 transition-colors hover:text-primary"
         >
           <span className="font-semibold tabular-nums">{formatNumberWithCommas(count)}</span>
           <span className="text-muted-foreground">{LIST_TITLES[list]}</span>
         </button>
       </DialogTrigger>
       <DialogContent className="flex max-h-[80vh] max-w-lg flex-col gap-0 p-0">
-        <DialogHeader className="border-border border-b px-4 py-3 text-left">
+        <DialogHeader className="border-b border-border px-4 py-3 text-left">
           <DialogTitle className="flex items-center gap-2">
             {LIST_TITLES[list]}
-            <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs font-medium tabular-nums">
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground tabular-nums">
               {formatNumberWithCommas(count)}
             </span>
           </DialogTitle>
@@ -69,12 +69,12 @@ function FollowListDialog({
             </div>
           )}
           {!isLoading && players.length === 0 && (
-            <p className="text-muted-foreground py-8 text-center text-sm">Nobody yet</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">Nobody yet</p>
           )}
           {players.map(listed => (
             <div
               key={listed.id}
-              className="hover:bg-accent flex items-center gap-3 rounded-lg p-2 transition-colors"
+              className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
             >
               <SimpleLink
                 href={`/player/${listed.id}`}
@@ -89,7 +89,7 @@ function FollowListDialog({
                 />
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <p className="truncate text-sm font-semibold">{listed.name}</p>
-                  <span className="text-muted-foreground flex items-center gap-2 text-xs tabular-nums">
+                  <span className="flex items-center gap-2 text-xs text-muted-foreground tabular-nums">
                     <span>#{formatNumberWithCommas(listed.rank)}</span>
                     <span className="flex items-center gap-1">
                       <CountryFlag code={listed.country} size={5} />#
@@ -97,7 +97,7 @@ function FollowListDialog({
                     </span>
                   </span>
                 </div>
-                <span className="text-pp shrink-0 text-sm font-semibold tabular-nums">
+                <span className="shrink-0 text-sm font-semibold text-pp tabular-nums">
                   {formatPp(listed.pp)}pp
                 </span>
               </SimpleLink>

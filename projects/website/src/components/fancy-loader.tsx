@@ -11,8 +11,8 @@ export function FancyLoader({ title, description }: { title: string; description
     >
       <Spinner size="lg" />
       <div className="flex flex-col items-center gap-2">
-        <p className="text-foreground text-lg font-medium">{title}</p>
-        <p className="text-muted-foreground text-sm">{description}</p>
+        <p className="text-lg font-medium text-foreground">{title}</p>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
     </div>
   );

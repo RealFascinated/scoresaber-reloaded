@@ -46,7 +46,7 @@ export default function RankingQueue({ initial }: RankingQueueProps) {
       <div className="flex flex-col gap-4">
         <h3 className="text-lg font-semibold">{name}</h3>
 
-        <div className="ring-border bg-card overflow-hidden rounded-xl ring-1">
+        <div className="overflow-hidden rounded-xl bg-card ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -80,7 +80,7 @@ export default function RankingQueue({ initial }: RankingQueueProps) {
                   <TableCell className="text-center text-xs tabular-nums">
                     {leaderboard.difficultyCount}
                   </TableCell>
-                  <TableCell className="text-foreground relative z-10 text-center text-xs tabular-nums">
+                  <TableCell className="relative z-10 text-center text-xs text-foreground tabular-nums">
                     <SimpleTooltip display="Plays on this leaderboard in the last 24 hours">
                       <p className="inline-flex items-center justify-center gap-1">
                         <SharedIcons.PlayMapIcon className="h-3 w-3" />
@@ -88,7 +88,7 @@ export default function RankingQueue({ initial }: RankingQueueProps) {
                       </p>
                     </SimpleTooltip>
                   </TableCell>
-                  <TableCell className="text-foreground relative z-10 text-center text-xs tabular-nums">
+                  <TableCell className="relative z-10 text-center text-xs text-foreground tabular-nums">
                     <SimpleTooltip display="Total plays on this leaderboard">
                       <p className="inline-flex items-center justify-center gap-1">
                         <SharedIcons.PlayMapIcon className="h-3 w-3" />
