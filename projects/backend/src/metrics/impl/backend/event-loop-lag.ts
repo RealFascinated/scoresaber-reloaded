@@ -2,9 +2,12 @@ import { Gauge } from "@prometheus-io/client";
 import Metric from "../../metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";
 
+const SAMPLE_INTERVAL_MS = 100;
+
 export default class EventLoopLagMetric extends Metric<number> {
   private lastCheck: number;
   private lag: number;
+  private maxLagSinceCollect = 0;
   private measureInterval: NodeJS.Timeout | null = null;
 
   constructor() {
@@ -15,10 +18,11 @@ export default class EventLoopLagMetric extends Metric<number> {
 
     const gauge = new Gauge({
       name: "event_loop_lag_ms",
-      help: "Event loop lag in milliseconds",
+      help: "Max event loop lag in milliseconds since the previous scrape",
       registers: [prometheusRegistry],
       collect: () => {
-        gauge.set(this.lag);
+        gauge.set(this.maxLagSinceCollect);
+        this.maxLagSinceCollect = 0;
       },
     });
 
@@ -28,11 +32,12 @@ export default class EventLoopLagMetric extends Metric<number> {
   private startMeasuring() {
     this.measureInterval = setInterval(() => {
       const now = performance.now();
-      const expected = this.lastCheck + 1000;
+      const expected = this.lastCheck + SAMPLE_INTERVAL_MS;
       this.lag = Math.max(0, now - expected);
+      this.maxLagSinceCollect = Math.max(this.maxLagSinceCollect, this.lag);
       this.lastCheck = now;
       this.value = this.lag;
-    }, 1000);
+    }, SAMPLE_INTERVAL_MS);
   }
 
   public cleanup() {
