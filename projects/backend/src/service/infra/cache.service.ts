@@ -20,7 +20,6 @@ export enum CacheId {
   SCORESABER_RANKING_QUEUE_LEADERBOARDS = "scoresaber_ranking_queue_leaderboards",
   SCORESABER_REALMS = "scoresaber_realms",
   SCORESABER_REALM_PP_CURVE = "scoresaber_realm_pp_curve",
-  BEATLEADER_SCORE = "beatleader_score",
   SCORESABER_SCORE_HISTORY_GRAPH = "scoresaber_score_history_graph",
 }
 
@@ -33,71 +32,64 @@ export default class CacheService {
   private static readonly memoryCaches = new Map<CacheId, SSRCache>();
   private static readonly inFlightRequests = new Map<string, Promise<unknown>>();
 
-  public static readonly CACHE_INFO: Record<
-    CacheId,
-    { ttl: number; mode: CacheMode; negativeTtl?: number; maxObjects?: number }
-  > = {
-    [CacheId.PLAYER_PPS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.PLAYER_SCORE_STATISTICS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_MINI_RANKING]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_MINI_RANKING_RESPONSE]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_API_RESPONSE]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
-      mode: "MEMORY",
-      maxObjects: 2_000,
-    },
-    [CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_RANKED_BATCH_MARKERS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
-      mode: "MEMORY",
-    },
+  public static readonly CACHE_INFO: Record<CacheId, { ttl: number; mode: CacheMode; maxObjects?: number }> =
+    {
+      [CacheId.PLAYER_PPS]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.PLAYER_SCORE_STATISTICS]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_MINI_RANKING]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_MINI_RANKING_RESPONSE]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Minute, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_API_RESPONSE]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
+        mode: "MEMORY",
+        maxObjects: 2_000,
+      },
+      [CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_RANKED_BATCH_MARKERS]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
+        mode: "MEMORY",
+      },
 
-    [CacheId.SCORESABER_REALMS]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
-    [CacheId.SCORESABER_REALM_PP_CURVE]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "MEMORY",
-    },
+      [CacheId.SCORESABER_REALMS]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
+      [CacheId.SCORESABER_REALM_PP_CURVE]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "MEMORY",
+      },
 
-    [CacheId.SCORESABER_PLAYER]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
-      mode: "REDIS",
-    },
-    [CacheId.BEATSAVER_MAP]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
-      mode: "REDIS",
-    },
-    [CacheId.BEATLEADER_SCORE]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      negativeTtl: TimeUnit.toSeconds(TimeUnit.Minute, 1),
-      mode: "REDIS",
-    },
-    [CacheId.SCORESABER_SCORE_HISTORY_GRAPH]: {
-      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-      mode: "REDIS",
-    },
-  };
+      [CacheId.SCORESABER_PLAYER]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
+        mode: "REDIS",
+      },
+      [CacheId.BEATSAVER_MAP]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
+        mode: "REDIS",
+      },
+      [CacheId.SCORESABER_SCORE_HISTORY_GRAPH]: {
+        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+        mode: "REDIS",
+      },
+    };
 
   public static async get<T>(cache: CacheId, cacheKey: string) {
     if (!isProduction()) {
@@ -219,14 +211,6 @@ export default class CacheService {
       CachePerformanceMetric.recordMiss(cache, mode);
       const data = await fetchFn();
 
-      const negativeTtl = this.CACHE_INFO[cache].negativeTtl;
-      if (data === undefined && mode === "REDIS" && negativeTtl !== undefined) {
-        try {
-          await redisClient.set(cacheKey, stringify(undefined), "EX", negativeTtl);
-        } catch (error) {
-          CacheService.logger.warn(`Failed to write negative ${cacheKey} to Redis:`, error);
-        }
-      }
       if (data !== undefined) {
         if (mode === "REDIS") {
           try {

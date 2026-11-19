@@ -23,7 +23,6 @@ import MetricsService, { MetricType } from "../infra/metrics.service";
 import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { PlayerCoreService } from "./player-core.service";
 import { PlayerHistoryService } from "./player-history.service";
-import { PlayerHmdService } from "./player-hmd.service";
 
 function computeHmdUsagePercentages(hmdUsage: Record<HMD, number>) {
   const totalKnownHmdScores = Object.values(hmdUsage).reduce((sum, c) => sum + c, 0);
@@ -100,21 +99,25 @@ export default class ScoreSaberPlayerService {
       throw new NotFoundError(`Player account "${id}" not found`);
     }
 
-    const basePlayer: ScoreSaberPlayer = {
-      ...ScoreSaberPlayerService.buildBasePlayer(player, account),
-      previousNames: await ScoreSaberAccountNamesRepository.findNamesByPlayerId(id),
-    };
-
     if (type === "basic") {
-      return basePlayer;
+      return {
+        ...ScoreSaberPlayerService.buildBasePlayer(player, account),
+        previousNames: await ScoreSaberAccountNamesRepository.findNamesByPlayerId(id),
+      } satisfies ScoreSaberPlayer;
     }
 
-    const statistics = await PlayerStatisticsService.getStatistics(player, realmId);
-    const [hmdBreakdown, history, topPp] = await Promise.all([
-      PlayerHmdService.getPlayerHmdBreakdown(id, realmId).then(computeHmdUsagePercentages),
-      PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30, realmId),
+    const [previousNames, scoreStats, topPp] = await Promise.all([
+      ScoreSaberAccountNamesRepository.findNamesByPlayerId(id),
+      PlayerStatisticsService.getScoreStats(id, realmId),
       ScoreSaberScoresRepository.getTopPpByPlayer(id, realmId),
     ]);
+    const basePlayer: ScoreSaberPlayer = {
+      ...ScoreSaberPlayerService.buildBasePlayer(player, account),
+      previousNames,
+    };
+    const statistics = PlayerStatisticsService.buildStatistics(player, account.medals, scoreStats.statistics);
+    const hmdBreakdown = computeHmdUsagePercentages(scoreStats.hmdBreakdown);
+    const history = await PlayerHistoryService.getPlayerStatisticHistories(player, statistics, 30, realmId);
 
     let rankPercentile =
       (rank / (MetricsService.getMetric<ActiveAccountsMetric>(MetricType.ACTIVE_ACCOUNTS)?.value || 1)) * 100;

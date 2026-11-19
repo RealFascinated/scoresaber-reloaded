@@ -2,8 +2,6 @@ import { DetailType } from "@ssr/common/detail-type";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { describe, expect, test } from "bun:test";
 import {
-  beatLeaderScoreByIdCacheKey,
-  beatLeaderScoreBySongCacheKey,
   beatSaverMapCacheKey,
   miniRankingCacheKey,
   normalizeSongHash,
@@ -150,47 +148,6 @@ describe("beatSaverMapCacheKey", () => {
   for (const { name, hash, difficulty, characteristic, expected } of cases) {
     test(name, () => {
       expect(beatSaverMapCacheKey(hash, difficulty, characteristic)).toBe(expected);
-    });
-  }
-});
-
-describe("beatLeaderScoreByIdCacheKey", () => {
-  const cases = [
-    { name: "positive id", scoreId: 42, expected: "beatleader-score:42" },
-    { name: "zero id", scoreId: 0, expected: "beatleader-score:0" },
-    { name: "negative id", scoreId: -1, expected: "beatleader-score:-1" },
-  ] as const;
-
-  for (const { name, scoreId, expected } of cases) {
-    test(name, () => {
-      expect(beatLeaderScoreByIdCacheKey(scoreId)).toBe(expected);
-    });
-  }
-});
-
-describe("beatLeaderScoreBySongCacheKey", () => {
-  const cases = [
-    {
-      name: "normalizes song hash",
-      playerId: "pl1",
-      songHash: " HASH01 ",
-      songDifficulty: "Expert",
-      songScore: 950000,
-      expected: "beatleader-score:pl1-hash01-Expert-950000",
-    },
-    {
-      name: "empty song hash",
-      playerId: "pl2",
-      songHash: "",
-      songDifficulty: "Hard",
-      songScore: 0,
-      expected: "beatleader-score:pl2--Hard-0",
-    },
-  ] as const;
-
-  for (const { name, playerId, songHash, songDifficulty, songScore, expected } of cases) {
-    test(name, () => {
-      expect(beatLeaderScoreBySongCacheKey(playerId, songHash, songDifficulty, songScore)).toBe(expected);
     });
   }
 });

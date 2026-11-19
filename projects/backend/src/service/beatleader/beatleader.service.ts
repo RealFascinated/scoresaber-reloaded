@@ -15,7 +15,6 @@ import { formatDuration, TimeUnit } from "@ssr/common/utils/time-utils";
 import { isProduction } from "@ssr/common/utils/utils";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { BatchLoader } from "../../common/batch-loader";
-import { beatLeaderScoreByIdCacheKey, beatLeaderScoreBySongCacheKey } from "../../common/cache-keys";
 import { createGenericEmbed } from "../../common/discord/embed";
 import { beatLeaderScoreRowToType } from "../../db/converter/beatleader-score";
 import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
@@ -28,7 +27,6 @@ import {
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
 import { BeatLeaderApiService } from "../external/beatleader-api.service";
-import CacheService, { CacheId } from "../infra/cache.service";
 import StorageService from "../infra/storage.service";
 import { PlayerCoreService } from "../player/player-core.service";
 
@@ -222,23 +220,14 @@ export default class BeatLeaderService {
     songCharacteristic: string,
     songScore: number
   ) {
-    return CacheService.fetch(
-      CacheId.BEATLEADER_SCORE,
-      beatLeaderScoreBySongCacheKey(playerId, songHash, songDifficulty, songScore),
-      async () => {
-        const beatLeaderScore = await BeatLeaderService.latestBySongLoader.load({
-          playerId,
-          songHashUpper: songHash.toUpperCase(),
-          songDifficulty: songDifficulty as MapDifficulty,
-          songCharacteristic: songCharacteristic as MapCharacteristic,
-          songScore,
-        });
-        if (!beatLeaderScore) {
-          return undefined;
-        }
-        return beatLeaderScoreRowToType(beatLeaderScore);
-      }
-    );
+    const beatLeaderScore = await BeatLeaderService.latestBySongLoader.load({
+      playerId,
+      songHashUpper: songHash.toUpperCase(),
+      songDifficulty: songDifficulty as MapDifficulty,
+      songCharacteristic: songCharacteristic as MapCharacteristic,
+      songScore,
+    });
+    return beatLeaderScore ? beatLeaderScoreRowToType(beatLeaderScore) : undefined;
   }
 
   /**
@@ -248,13 +237,8 @@ export default class BeatLeaderService {
    * @returns the BeatLeader score, or undefined if none
    */
   public static async getBeatLeaderScore(scoreId: number) {
-    return CacheService.fetch(CacheId.BEATLEADER_SCORE, beatLeaderScoreByIdCacheKey(scoreId), async () => {
-      const beatLeaderScore = await BeatLeaderScoresRepository.findRowById(scoreId);
-      if (!beatLeaderScore) {
-        return undefined;
-      }
-      return beatLeaderScoreRowToType(beatLeaderScore);
-    });
+    const beatLeaderScore = await BeatLeaderScoresRepository.findRowById(scoreId);
+    return beatLeaderScore ? beatLeaderScoreRowToType(beatLeaderScore) : undefined;
   }
 
   /**

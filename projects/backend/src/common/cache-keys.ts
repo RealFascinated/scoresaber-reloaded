@@ -64,19 +64,6 @@ export function beatSaverMapCacheKey(
   return `beatsaver:${normalizeSongHash(hash)}-${difficulty.toLowerCase()}-${characteristic.toLowerCase()}`;
 }
 
-export function beatLeaderScoreByIdCacheKey(scoreId: number) {
-  return `beatleader-score:${scoreId}`;
-}
-
-export function beatLeaderScoreBySongCacheKey(
-  playerId: string,
-  songHash: string,
-  songDifficulty: string,
-  songScore: number
-) {
-  return `beatleader-score:${playerId}-${normalizeSongHash(songHash)}-${songDifficulty}-${songScore}`;
-}
-
 export function scoreHistoryGraphCacheKey(playerId: string, leaderboardId: number) {
   return `score-history-graph:${playerId}-${leaderboardId}`;
 }
