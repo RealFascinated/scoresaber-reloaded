@@ -20,7 +20,6 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useMainPlayer, useMainPlayerId } from "@/hooks/use-main-player";
@@ -92,7 +91,7 @@ function ConversationItem({ conversation, isActive, onRename, onDelete }: Conver
       <SidebarMenuButton
         asChild
         isActive={isActive}
-        className="h-9 pr-12 group-hover/menu-item:bg-sidebar-accent group-hover/menu-item:text-sidebar-accent-foreground data-[active=true]:bg-primary/15 data-[active=true]:group-hover/menu-item:bg-primary/15"
+        className="h-9 pr-14 group-hover/menu-item:bg-sidebar-accent group-hover/menu-item:text-sidebar-accent-foreground group-has-[[data-sidebar=menu-action]]/menu-item:pr-14 data-[active=true]:bg-primary/15 data-[active=true]:group-hover/menu-item:bg-primary/15"
       >
         <SimpleLink
           href={`${CHAT_ROUTE}/${conversation.id}`}
@@ -172,7 +171,12 @@ function ChatUser() {
 /**
  * The chat app's sidebar: branding, new chat, the user's chats with rename, delete and paging, and the user.
  */
-export default function ChatSidebar({ activeConversationId }: { activeConversationId: string | null }) {
+type ChatSidebarProps = {
+  activeConversationId: string | null;
+  onResize: (width: number) => void;
+};
+
+export default function ChatSidebar({ activeConversationId, onResize }: ChatSidebarProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { isMobile, setOpenMobile } = useSidebar();
@@ -318,7 +322,24 @@ export default function ChatSidebar({ activeConversationId }: { activeConversati
       <SidebarFooter className="border-t border-sidebar-border p-2">
         <ChatUser />
       </SidebarFooter>
-      <SidebarRail />
+      <div
+        aria-hidden
+        className="absolute inset-y-0 -right-1 z-30 hidden w-2 cursor-col-resize touch-none transition-colors hover:bg-primary/40 active:bg-primary/60 md:block"
+        onPointerDown={event => {
+          event.preventDefault();
+          const handle = event.currentTarget;
+          handle.setPointerCapture(event.pointerId);
+          const move = (moveEvent: PointerEvent) => onResize(moveEvent.clientX);
+          const stop = () => {
+            handle.removeEventListener("pointermove", move);
+            handle.removeEventListener("pointerup", stop);
+            handle.removeEventListener("pointercancel", stop);
+          };
+          handle.addEventListener("pointermove", move);
+          handle.addEventListener("pointerup", stop);
+          handle.addEventListener("pointercancel", stop);
+        }}
+      />
     </Sidebar>
   );
 }

@@ -326,7 +326,7 @@ const Sidebar = React.forwardRef<
       <div
         className={cn(
           "hidden shrink-0 md:block",
-          "w-72",
+          "w-[var(--sidebar-width)]",
           state === "collapsed" && "w-0",
           "transition-[width] duration-200 ease-linear"
         )}
@@ -342,7 +342,7 @@ const Sidebar = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "bg-sidebar text-sidebar-foreground fixed inset-y-0 z-10 flex h-svh w-72 flex-col",
+          "bg-sidebar text-sidebar-foreground fixed inset-y-0 z-10 flex h-svh w-[var(--sidebar-width)] flex-col",
           side === "left" ? "left-0" : "right-0",
           state === "collapsed" && side === "left" && "-translate-x-full",
           state === "collapsed" && side === "right" && "translate-x-full",

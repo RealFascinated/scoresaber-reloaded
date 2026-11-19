@@ -14,7 +14,7 @@ import type { ChatMessage } from "@ssr/common/schemas/chat/chat-message";
 import { useQueryClient } from "@tanstack/react-query";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 
 const TITLE_REFRESH_DELAYS_MS = [2000, 5000];
@@ -23,6 +23,31 @@ type ChatShellProps = {
   conversationId: string | null;
   initialMessages?: ChatMessage[];
 };
+
+const SIDEBAR_WIDTH_STORAGE_KEY = "chat-sidebar-width";
+const SIDEBAR_MIN_WIDTH = 220;
+const SIDEBAR_MAX_WIDTH = 560;
+const SIDEBAR_DEFAULT_WIDTH = 288;
+
+function clampSidebarWidth(width: number) {
+  return Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, Math.round(width)));
+}
+
+const SIDEBAR_WIDTH_EVENT = "chat-sidebar-width-change";
+
+function subscribeSidebarWidth(onChange: () => void) {
+  window.addEventListener(SIDEBAR_WIDTH_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(SIDEBAR_WIDTH_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+function getSidebarWidth() {
+  const stored = Number(window.localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY));
+  return Number.isFinite(stored) && stored > 0 ? clampSidebarWidth(stored) : SIDEBAR_DEFAULT_WIDTH;
+}
 
 const displayStreamCache = new WeakMap<UIMessage, ReturnType<typeof toDisplayStreamMessage>>();
 
@@ -68,6 +93,18 @@ export default function ChatShell(props: ChatShellProps) {
 function ChatShellContent({ conversationId: serverConversationId, initialMessages }: ChatShellProps) {
   const queryClient = useQueryClient();
   const [conversationId, setConversationId] = useState(serverConversationId);
+  const sidebarWidth = useSyncExternalStore(
+    subscribeSidebarWidth,
+    getSidebarWidth,
+    () => SIDEBAR_DEFAULT_WIDTH
+  );
+  const [conversationId, setConversationId] = useState(serverConversationId);
+
+  const resizeSidebar = useCallback((width: number) => {
+    const clamped = clampSidebarWidth(width);
+    window.localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(clamped));
+    window.dispatchEvent(new Event(SIDEBAR_WIDTH_EVENT));
+  }, []);
   const [idStore] = useState(() => createIdStore(serverConversationId));
   const [history, setHistory] = useState<ChatMessage[]>(initialMessages ?? []);
   const [historyFailed, setHistoryFailed] = useState(
@@ -207,8 +244,12 @@ function ChatShellContent({ conversationId: serverConversationId, initialMessage
   }, [conversationId]);
 
   return (
-    <SidebarProvider defaultOpen className="h-dvh min-h-0">
-      <ChatSidebar activeConversationId={conversationId} />
+    <SidebarProvider
+      defaultOpen
+      className="h-dvh min-h-0"
+      style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}
+    >
+      <ChatSidebar activeConversationId={conversationId} onResize={resizeSidebar} />
       <SidebarInset className="h-dvh min-h-0 min-w-0 overflow-hidden bg-background">
         <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border/40 px-3">
           <SidebarTrigger className="md:hidden md:group-has-data-[state=collapsed]/sidebar-wrapper:inline-flex" />
