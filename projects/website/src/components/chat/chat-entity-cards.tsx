@@ -147,7 +147,7 @@ function MapRow({ id }: { id: string }) {
       </SimpleLink>
     );
   }
-  const hasStars = (data.ranked || data.qualified) && data.stars > 0;
+  const hasStars = data.stars > 0;
   return (
     <div className={cn(ROW_CLASS, "relative")}>
       <div className="flex min-w-0 flex-1 items-center">
