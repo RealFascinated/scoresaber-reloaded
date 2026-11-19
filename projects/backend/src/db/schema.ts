@@ -1,4 +1,5 @@
 import { AuthConnectionProvider } from "@ssr/common/schemas/auth/connection-provider";
+import type { ChatMessagePart } from "@ssr/common/schemas/chat/chat-message";
 import type { HMD } from "@ssr/common/schemas/hmd";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
 import { MapDifficulty } from "@ssr/common/schemas/map/map-difficulty";
@@ -907,3 +908,43 @@ export type BeatSaverMapVersionRow = typeof beatSaverMapVersionsTable.$inferSele
 export type BeatSaverMapDifficultyRow = typeof beatSaverMapDifficultiesTable.$inferSelect;
 export type MetricRow = typeof metricsTable.$inferSelect;
 export type AuthUserRow = typeof authUsersTable.$inferSelect;
+
+/**
+ * A chat between a user and the assistant. `summary` is the rolling compaction of every message up
+ * to and including the one at `summarizedUpTo`, which the model sees instead of those messages.
+ */
+export const chatConversationsTable = pgTable(
+  "chat-conversations",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: text()
+      .notNull()
+      .references(() => authUsersTable.id, { onDelete: "cascade" }),
+    title: text(),
+    summary: text(),
+    summarizedUpTo: integer(),
+    createdAt: timestamp().notNull().defaultNow(),
+    updatedAt: timestamp().notNull().defaultNow(),
+  },
+  table => [index("chat_conversations_user_updated_idx").on(table.userId, table.updatedAt.desc())]
+);
+
+/**
+ * The messages of a chat. `parts` is the AI SDK UI message parts (text, tool calls and results),
+ * so tool results render again when a chat is reopened.
+ */
+export const chatMessagesTable = pgTable(
+  "chat-messages",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    conversationId: uuid()
+      .notNull()
+      .references(() => chatConversationsTable.id, { onDelete: "cascade" }),
+    ordinal: integer().notNull(),
+    role: varchar({ length: 16 }).$type<"user" | "assistant">().notNull(),
+    parts: jsonb().$type<ChatMessagePart[]>().notNull(),
+    tokenEstimate: integer().notNull().default(0),
+    createdAt: timestamp().notNull().defaultNow(),
+  },
+  table => [uniqueIndex("chat_messages_conversation_ordinal_idx").on(table.conversationId, table.ordinal)]
+);

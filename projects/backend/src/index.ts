@@ -24,6 +24,7 @@ import AppController from "./controller/app/app.controller";
 import AuthController from "./controller/auth/auth.controller";
 import BeatLeaderController from "./controller/beatleader/beatleader.controller";
 import BeatSaverController from "./controller/beatsaver/beatsaver.controller";
+import ChatController from "./controller/chat/chat.controller";
 import LeaderboardController from "./controller/leaderboard/leaderboard.controller";
 import MetricsController from "./controller/metrics/metrics.controller";
 import PlayerRankingController from "./controller/player/player-ranking.controller";
@@ -91,6 +92,7 @@ function registerControllers<TApp extends AnyElysia>(instance: TApp) {
     .use(AuthController)
     .use(UserPreferencesController)
     .use(UserController)
+    .use(ChatController)
     .use(UserFollowingController)
     .use(UserPinnedScoresController)
     .use(UserOverlaysController)

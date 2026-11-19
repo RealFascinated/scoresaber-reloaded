@@ -3,6 +3,7 @@
 import { signInWithSteam, signOut } from "@/common/auth/auth-api";
 import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
+import { useChatStatus } from "@/components/chat/chat-queries";
 import FollowedPlayer from "@/components/following/followed-player";
 import GithubLogo from "@/components/logos/logos/github-logo";
 import TwitterLogo from "@/components/logos/logos/twitter-logo";
@@ -27,10 +28,11 @@ import {
 } from "@/components/ui/sidebar";
 import { FOLLOWING_QUERY_KEY, useFollowing } from "@/hooks/use-following";
 import { useMainPlayer, useMainPlayerId } from "@/hooks/use-main-player";
-import { ME_QUERY_KEY } from "@/hooks/use-me";
+import useMe, { ME_QUERY_KEY } from "@/hooks/use-me";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { USER_PREFERENCES_QUERY_KEY } from "@/hooks/use-user-preferences";
 import { SharedIcons } from "@/shared-icons";
+import { CHAT_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
 import { DEFAULT_USER_PREFERENCES } from "@ssr/common/schemas/user/default-preferences";
 import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
@@ -340,6 +342,21 @@ function ProfileSection() {
 }
 
 export function AppSidebar() {
+  const { data: me } = useMe();
+  const { data: chatEnabled } = useChatStatus(me != null);
+  const chatItem: NavItem = {
+    id: "chat",
+    name: "Chat",
+    icon: SharedIcons.ChatNavIcon,
+    href: CHAT_ROUTE,
+  };
+  const groups =
+    me != null && chatEnabled
+      ? navGroups.map(group =>
+          group.label === "Tools" ? { ...group, items: [chatItem, ...group.items] } : group
+        )
+      : navGroups;
+
   return (
     <Sidebar collapsible="offcanvas">
       <SidebarHeader>
@@ -391,7 +408,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {navGroups.map(group => (
+        {groups.map(group => (
           <SidebarGroup key={group.label} className="py-1.5">
             <SidebarGroupLabel className="h-6 px-2.5 text-xs font-normal text-muted-foreground/70">
               {group.label}

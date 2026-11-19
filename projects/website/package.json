@@ -12,6 +12,7 @@
     "lint": "oxlint src"
   },
   "dependencies": {
+    "@ai-sdk/react": "^4.0.181",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -37,6 +38,7 @@
     "@tanstack/react-query": "^5.108.0",
     "@types/websocket": "^1.0.10",
     "@uidotdev/usehooks": "^2.4.1",
+    "ai": "^7.0.177",
     "babel-plugin-react-compiler": "^1.0.0",
     "chart.js": "^4.6.1",
     "class-variance-authority": "^0.7.1",
@@ -56,6 +58,7 @@
     "react-countup": "^6.5.3",
     "react-dom": "^19.3.1",
     "react-hook-form": "^7.92.0",
+    "react-markdown": "^10.1.0",
     "react-moveable": "0.56.0",
     "react-snowfall": "^2.4.0",
     "react-use-websocket": "^4.13.0",

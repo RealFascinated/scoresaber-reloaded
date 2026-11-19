@@ -24,6 +24,7 @@ const STATIC_CRUMBS: Record<string, Crumb[]> = {
   "/ranked-batches": [{ label: "Ranked Batches" }],
   "/scores/top": [{ label: "Scores" }, { label: "Top Scores" }],
   "/scores/live": [{ label: "Scores" }, { label: "Live Scores" }],
+  "/chat": [{ label: "Chat" }],
   "/settings": [{ label: "Settings" }],
 };
 
@@ -32,6 +33,7 @@ const DYNAMIC_ROUTES: Record<string, { parent: Crumb; fallback: string }> = {
   leaderboard: { parent: { label: "Leaderboards", href: "/maps/leaderboards" }, fallback: "Leaderboard" },
   rankedBatches: { parent: { label: "Ranked Batches", href: "/ranked-batches" }, fallback: "Ranked Batch" },
   score: { parent: { label: "Scores", href: "/scores/top" }, fallback: "Score" },
+  chat: { parent: { label: "Chat", href: "/chat" }, fallback: "Chat" },
 };
 
 function getCrumbs(pathname: string, pageTitle: string | undefined) {

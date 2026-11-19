@@ -8,3 +8,4 @@ export const USER_FOLLOWING_ROUTE = "/user/following";
 export const USER_PINNED_SCORES_ROUTE = "/user/pinned-scores";
 export const USER_OVERLAYS_ROUTE = "/user/overlays";
 export const OVERLAY_ROUTE = "/overlay";
+export const CHAT_ROUTE = "/chat";

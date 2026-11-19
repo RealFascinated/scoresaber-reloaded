@@ -1,6 +1,7 @@
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { ApiServicesMetric } from "../../metrics/impl/backend/api-services";
 import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance";
+import ChatMetric from "../../metrics/impl/backend/chat";
 import EventLoopLagMetric from "../../metrics/impl/backend/event-loop-lag";
 import HttpResponseStatusMetric from "../../metrics/impl/backend/http-response-status";
 import MemoryUsageMetric from "../../metrics/impl/backend/memory-usage";
@@ -67,6 +68,7 @@ export default class MetricsService {
     this.registerMetric(new ProcessUptimeMetric());
     this.registerMetric(new ProcessCpuMetric());
     this.registerMetric(new RedisHealthMetric());
+    this.registerMetric(new ChatMetric());
 
     this.registerMetric(new QueueSizesMetric());
     this.registerMetric(new QueueProcessingDurationMetric());

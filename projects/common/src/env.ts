@@ -67,4 +67,13 @@ export const env = {
   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
   STEAM_API_KEY: process.env.STEAM_API_KEY,
   AUTH_COOKIE_DOMAIN: process.env.AUTH_COOKIE_DOMAIN,
+
+  // Chat
+  CHAT_ENABLED: process.env.CHAT_ENABLED === "true",
+  CHAT_API_URL: process.env.CHAT_API_URL,
+  CHAT_API_KEY: process.env.CHAT_API_KEY,
+  CHAT_MODEL: process.env.CHAT_MODEL,
+  CHAT_TITLE_MODEL: process.env.CHAT_TITLE_MODEL,
+  CHAT_MAX_CONTEXT_TOKENS: Number(process.env.CHAT_MAX_CONTEXT_TOKENS ?? 32_000),
+  CHAT_MAX_STEPS: Number(process.env.CHAT_MAX_STEPS ?? 8),
 } as unknown as StaticDecode<typeof envSchema>;

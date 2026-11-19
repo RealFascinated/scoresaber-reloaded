@@ -50,6 +50,18 @@ const serverSchema = Type.Object({
   BETTER_AUTH_SECRET: Type.String(),
   STEAM_API_KEY: Type.Optional(Type.String()),
   AUTH_COOKIE_DOMAIN: Type.Optional(Type.String()),
+
+  // Chat (any OpenAI compatible endpoint)
+  CHAT_ENABLED: Type.Optional(Type.Boolean()),
+  CHAT_API_URL: Type.Optional(Type.String()),
+  CHAT_API_KEY: Type.Optional(Type.String()),
+  CHAT_MODEL: Type.Optional(Type.String()),
+  /** Cheaper model used for titles and compaction summaries, defaults to `CHAT_MODEL` */
+  CHAT_TITLE_MODEL: Type.Optional(Type.String()),
+  /** Context window budget in tokens, compaction triggers when a chat nears it */
+  CHAT_MAX_CONTEXT_TOKENS: Type.Integer({ minimum: 1000, default: 32_000 }),
+  /** Max tool loop steps per request */
+  CHAT_MAX_STEPS: Type.Integer({ minimum: 1, default: 8 }),
 });
 
 const clientSchema = Type.Object({

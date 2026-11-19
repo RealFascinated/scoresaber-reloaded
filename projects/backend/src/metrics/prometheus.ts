@@ -30,6 +30,8 @@ export enum MetricType {
   PROCESS_CPU = "process_cpu",
   REDIS_HEALTH = "redis_health",
 
+  CHAT = "chat",
+
   QUEUE_SIZES = "queue_sizes",
   QUEUE_PROCESSING_DURATION = "queue_processing_duration",
 
