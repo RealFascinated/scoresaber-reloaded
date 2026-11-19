@@ -36,8 +36,13 @@ RUN cd projects/website && bun run lint
 RUN cd projects/website && bun run build
 
 # Run the app
-FROM base AS runner
+FROM node:22-bookworm-slim AS runner
 WORKDIR /app
+
+ENV NEXT_PUBLIC_APP_ENV=production
+
+ARG SOURCE_COMMIT
+ENV SOURCE_COMMIT=${SOURCE_COMMIT}
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
@@ -59,4 +64,4 @@ ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
 
 # Use the correct path to server.js
-CMD ["bun", "server.js"]
+CMD ["node", "server.js"]
