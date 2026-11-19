@@ -1,7 +1,7 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import type { ChatConversation } from "@ssr/common/schemas/chat/chat-conversation";
 import type { ChatMessage, ChatMessagePart } from "@ssr/common/schemas/chat/chat-message";
-import { and, asc, count, desc, eq, gt, isNull, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { chatConversationsTable, chatMessagesTable } from "../../db/schema";
 
@@ -109,35 +109,60 @@ export class ChatConversationService {
 
   /**
    * Appends a message to a conversation with the next ordinal and bumps the conversation's updated date.
+   * The conversation row is locked for the duration, so concurrent appends get distinct ordinals.
    */
-  public static async addMessage(
+  public static addMessage(
     conversationId: string,
     role: ChatMessageRow["role"],
     parts: ChatMessagePart[],
     tokenEstimate: number
   ) {
-    const [row] = await db
-      .insert(chatMessagesTable)
-      .values({
-        conversationId,
-        role,
-        parts,
-        tokenEstimate,
-        ordinal: sql`(select coalesce(max(m."ordinal"), 0) + 1 from "chat-messages" m where m."conversationId" = ${conversationId})`,
-      })
-      .returning();
-    await db
-      .update(chatConversationsTable)
-      .set({ updatedAt: new Date() })
-      .where(eq(chatConversationsTable.id, conversationId));
-    return row;
+    return db.transaction(async tx => {
+      const [conversation] = await tx
+        .select({ id: chatConversationsTable.id })
+        .from(chatConversationsTable)
+        .where(eq(chatConversationsTable.id, conversationId))
+        .for("update");
+      if (!conversation) {
+        throw new NotFoundError("Conversation not found");
+      }
+
+      const [{ lastOrdinal }] = await tx
+        .select({ lastOrdinal: sql<number>`coalesce(max(${chatMessagesTable.ordinal}), 0)` })
+        .from(chatMessagesTable)
+        .where(eq(chatMessagesTable.conversationId, conversationId));
+      const [row] = await tx
+        .insert(chatMessagesTable)
+        .values({ conversationId, role, parts, tokenEstimate, ordinal: Number(lastOrdinal) + 1 })
+        .returning();
+      await tx
+        .update(chatConversationsTable)
+        .set({ updatedAt: new Date() })
+        .where(eq(chatConversationsTable.id, conversationId));
+      return row;
+    });
   }
 
+  public static async deleteMessage(messageId: string) {
+    await db.delete(chatMessagesTable).where(eq(chatMessagesTable.id, messageId));
+  }
+
+  /**
+   * Stores a compaction summary, never moving `summarizedUpTo` backwards.
+   */
   public static async setSummary(conversationId: string, summary: string, summarizedUpTo: number) {
     await db
       .update(chatConversationsTable)
       .set({ summary, summarizedUpTo })
-      .where(eq(chatConversationsTable.id, conversationId));
+      .where(
+        and(
+          eq(chatConversationsTable.id, conversationId),
+          or(
+            isNull(chatConversationsTable.summarizedUpTo),
+            lt(chatConversationsTable.summarizedUpTo, summarizedUpTo)
+          )
+        )
+      );
   }
 
   /**

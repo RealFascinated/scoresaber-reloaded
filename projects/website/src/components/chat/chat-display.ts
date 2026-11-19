@@ -110,12 +110,12 @@ function readToolPart(
     const part: ChatDisplayPart = { kind: "tool", toolName, state: "available", output };
     return part;
   }
-  if (state === "output-error") {
+  if (state === "output-error" || state === "output-denied") {
     const part: ChatDisplayPart = {
       kind: "tool",
       toolName,
       state: "error",
-      errorText: errorText ?? "The lookup failed",
+      errorText: errorText ?? (state === "output-denied" ? "The lookup was denied" : "The lookup failed"),
     };
     return part;
   }

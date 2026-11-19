@@ -1,5 +1,5 @@
 import type { ChatMessagePart } from "@ssr/common/schemas/chat/chat-message";
-import { generateText } from "ai";
+import { asSchema, generateText, type ToolSet } from "ai";
 import { ChatModelService } from "./chat-model.service";
 
 export interface ChatContextMessage {
@@ -29,6 +29,8 @@ const KEEP_RATIO = 0.4;
 const TRANSCRIPT_TEXT_LIMIT = 2000;
 const TRANSCRIPT_ARGS_LIMIT = 200;
 const TRANSCRIPT_STUB = "result omitted";
+const SUMMARY_TIMEOUT_MS = 30_000;
+const SUMMARY_MAX_OUTPUT_TOKENS = 1024;
 
 const SUMMARY_SYSTEM_PROMPT = [
   "You maintain the running summary of a chat between a user and a Beat Saber assistant.",
@@ -43,6 +45,33 @@ export class ChatContextService {
    */
   public static estimateTokens(text: string) {
     return Math.ceil(text.length / CHARS_PER_TOKEN);
+  }
+
+  /**
+   * Estimates the tokens the serialized tool definitions add to every request.
+   */
+  public static estimateToolTokens(tools: ToolSet) {
+    const definitions = Object.entries(tools).map(([name, definition]) => ({
+      name,
+      description: definition.description,
+      inputSchema: asSchema(definition.inputSchema).jsonSchema,
+    }));
+    return ChatContextService.estimateTokens(JSON.stringify(definitions));
+  }
+
+  /**
+   * Drops the oldest history messages until the summary, history and new message fit in the budget.
+   * The history always starts with a user message afterwards. Stored messages are not touched.
+   */
+  public static trimToBudget({ history, newMessageTokens, summaryTokens, budget }: ChatCompactionPlanInput) {
+    let start = 0;
+    let total =
+      summaryTokens + newMessageTokens + history.reduce((sum, message) => sum + message.tokenEstimate, 0);
+    while (start < history.length && (total > budget || history[start].role === "assistant")) {
+      total -= history[start].tokenEstimate;
+      start++;
+    }
+    return history.slice(start);
   }
 
   /**
@@ -112,7 +141,8 @@ export class ChatContextService {
   public static async summarize(
     existingSummary: string | null,
     folded: ChatContextMessage[],
-    maxTranscriptChars: number
+    maxTranscriptChars: number,
+    abortSignal?: AbortSignal
   ) {
     const transcript = ChatContextService.buildTranscript(folded, maxTranscriptChars);
     const prompt = [
@@ -124,6 +154,11 @@ export class ChatContextService {
       model: ChatModelService.getTitleModel(),
       system: SUMMARY_SYSTEM_PROMPT,
       prompt,
+      maxOutputTokens: SUMMARY_MAX_OUTPUT_TOKENS,
+      abortSignal: AbortSignal.any([
+        AbortSignal.timeout(SUMMARY_TIMEOUT_MS),
+        ...(abortSignal ? [abortSignal] : []),
+      ]),
     });
     const summary = text.trim();
     if (summary.length === 0) {

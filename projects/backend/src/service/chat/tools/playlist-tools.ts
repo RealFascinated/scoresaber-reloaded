@@ -8,12 +8,12 @@ import {
   GetSuggestedMapsPlaylistInputSchema,
 } from "@ssr/common/schemas/chat/tools/map-tools";
 import type { Playlist } from "@ssr/common/schemas/ssr/playlist/playlist";
-import { jsonSchema, tool, type ToolSet } from "ai";
+import { tool, type ToolSet } from "ai";
 import type { Static } from "typebox";
 import { ScoreSaberLeaderboardsService } from "../../leaderboard/scoresaber-leaderboards.service";
 import PlaylistService from "../../playlist/playlist.service";
 import type { ChatToolContext } from "../chat-tool-context";
-import { requirePlayerId } from "./map-tool-utils";
+import { resolvePlayerId } from "./player-tool-results";
 import {
   MAX_CREATE_PLAYLIST_SONGS,
   buildPlaylistOutput,
@@ -29,6 +29,7 @@ import {
   type ResolvedPlaylistMap,
   type SkippedMapEntry,
 } from "./playlist-tool-utils";
+import { runTool, toolSchema } from "./tool-runtime";
 
 const RESOLVE_CONCURRENCY = 10;
 
@@ -43,10 +44,6 @@ function getRankedMapsPlaylistByKind(kind: "ranked" | "qualified" | "ranking-que
     case "trending":
       return PlaylistService.getTopTrendingMapsPlaylist();
   }
-}
-
-function describeError(error: Error) {
-  return error.message.length > 0 ? error.message : "Map not found";
 }
 
 async function resolvePlaylistMap(
@@ -90,10 +87,10 @@ async function resolvePlaylistMaps(maps: Static<typeof CreatePlaylistInputSchema
       chunk.map(async map => {
         try {
           return await resolvePlaylistMap(map, realmId);
-        } catch (error) {
+        } catch {
           skipped.push({
             input: describePlaylistMap(map),
-            reason: error instanceof Error ? describeError(error) : "Map not found",
+            reason: "This map could not be resolved.",
           });
           return undefined;
         }
@@ -115,113 +112,113 @@ export function createPlaylistTools(context: ChatToolContext) {
     getSelfPlaylist: tool({
       description:
         "Builds a downloadable .bplist of a player's own scores, with the sort, star range, accuracy range and limit settings. Use when the user asks for a playlist of their own maps.",
-      inputSchema: jsonSchema<Static<typeof GetSelfPlaylistInputSchema>>(GetSelfPlaylistInputSchema),
-      execute: async ({ playerId, settings }) => {
-        const player = requirePlayerId(context, playerId);
-        if ("error" in player) {
-          return player;
-        }
-        const playlist = await PlaylistService.getSelfPlaylist(
-          player.playerId,
-          encodePlaylistSettings(settings)
-        );
-        return buildPlaylistOutput(playlist);
-      },
+      inputSchema: toolSchema(GetSelfPlaylistInputSchema),
+      execute: ({ playerId, settings }) =>
+        runTool(async () => {
+          const player = resolvePlayerId(context, playerId);
+          if (!player.ok) {
+            return { error: player.error };
+          }
+          const playlist = await PlaylistService.getSelfPlaylist(
+            player.playerId,
+            encodePlaylistSettings(settings)
+          );
+          return buildPlaylistOutput(playlist);
+        }, "The playlist could not be built."),
       toModelOutput: ({ output }) => playlistModelOutput(output),
     }),
 
     getSnipePlaylist: tool({
       description:
         "Builds a downloadable .bplist of the maps another player has scores on that the sniper can beat. Use when the user asks what to snipe.",
-      inputSchema: jsonSchema<Static<typeof GetSnipePlaylistInputSchema>>(GetSnipePlaylistInputSchema),
-      execute: async ({ playerId, targetId, settings }) => {
-        const player = requirePlayerId(context, playerId);
-        if ("error" in player) {
-          return player;
-        }
-        const playlist = await PlaylistService.getSnipePlaylist(
-          player.playerId,
-          targetId,
-          encodePlaylistSettings(settings)
-        );
-        return buildPlaylistOutput(playlist);
-      },
+      inputSchema: toolSchema(GetSnipePlaylistInputSchema),
+      execute: ({ playerId, targetId, settings }) =>
+        runTool(async () => {
+          const player = resolvePlayerId(context, playerId);
+          if (!player.ok) {
+            return { error: player.error };
+          }
+          const playlist = await PlaylistService.getSnipePlaylist(
+            player.playerId,
+            targetId,
+            encodePlaylistSettings(settings)
+          );
+          return buildPlaylistOutput(playlist);
+        }, "The snipe playlist could not be built."),
       toModelOutput: ({ output }) => playlistModelOutput(output),
     }),
 
     getSuggestedMapsPlaylist: tool({
       description:
         "Builds a downloadable .bplist of the maps the suggested maps model recommends for a player, best first. Use when the user wants their suggestions as a playlist.",
-      inputSchema: jsonSchema<Static<typeof GetSuggestedMapsPlaylistInputSchema>>(
-        GetSuggestedMapsPlaylistInputSchema
-      ),
-      execute: async ({ playerId, filters }) => {
-        const player = requirePlayerId(context, playerId);
-        if ("error" in player) {
-          return player;
-        }
-        const playlist = await PlaylistService.getSuggestedMapsPlaylist(player.playerId, filters ?? {});
-        return buildPlaylistOutput(playlist);
-      },
+      inputSchema: toolSchema(GetSuggestedMapsPlaylistInputSchema),
+      execute: ({ playerId, filters }) =>
+        runTool(async () => {
+          const player = resolvePlayerId(context, playerId);
+          if (!player.ok) {
+            return { error: player.error };
+          }
+          const playlist = await PlaylistService.getSuggestedMapsPlaylist(player.playerId, filters ?? {});
+          return buildPlaylistOutput(playlist);
+        }, "The suggested maps playlist could not be built."),
       toModelOutput: ({ output }) => playlistModelOutput(output),
     }),
 
     getRankedBatchPlaylist: tool({
       description:
         "Builds a downloadable .bplist of the maps a ranked batch re-rated or newly ranked. Use after getRankedBatches or getRankedBatch when the user wants that batch as a playlist.",
-      inputSchema: jsonSchema<Static<typeof GetRankedBatchPlaylistInputSchema>>(
-        GetRankedBatchPlaylistInputSchema
-      ),
-      execute: async ({ rankedBatchId }) => {
-        const playlist = await PlaylistService.getRankedBatchPlaylist(rankedBatchId);
-        return buildPlaylistOutput(playlist);
-      },
+      inputSchema: toolSchema(GetRankedBatchPlaylistInputSchema),
+      execute: ({ rankedBatchId }) =>
+        runTool(async () => {
+          const playlist = await PlaylistService.getRankedBatchPlaylist(rankedBatchId);
+          return buildPlaylistOutput(playlist);
+        }, "The ranked batch playlist could not be built."),
       toModelOutput: ({ output }) => playlistModelOutput(output),
     }),
 
     getRankedMapsPlaylist: tool({
       description:
         "Builds a downloadable .bplist of the site's ranked, qualified, ranking queue or trending maps. Use when the user wants a bulk map playlist rather than individual maps.",
-      inputSchema: jsonSchema<Static<typeof GetRankedMapsPlaylistInputSchema>>(
-        GetRankedMapsPlaylistInputSchema
-      ),
-      execute: async ({ kind }) => {
-        const playlist = await getRankedMapsPlaylistByKind(kind);
-        return buildPlaylistOutput(playlist);
-      },
+      inputSchema: toolSchema(GetRankedMapsPlaylistInputSchema),
+      execute: ({ kind }) =>
+        runTool(async () => {
+          const playlist = await getRankedMapsPlaylistByKind(kind);
+          return buildPlaylistOutput(playlist);
+        }, "The ranked maps playlist could not be built."),
       toModelOutput: ({ output }) => playlistModelOutput(output),
     }),
 
     createPlaylist: tool({
       description:
         "Builds a custom downloadable .bplist from up to 100 maps the user picked. Each map must be a leaderboardId from resolveMap/searchMaps, or a songHash plus difficulty. Use searchMaps then resolveMap first; unresolved maps are dropped and reported in skipped.",
-      inputSchema: jsonSchema<Static<typeof CreatePlaylistInputSchema>>(CreatePlaylistInputSchema),
-      execute: async ({ title, description, maps }) => {
-        const uniqueMaps = uniquePlaylistMaps(maps, MAX_CREATE_PLAYLIST_SONGS);
-        const result = await resolvePlaylistMaps(uniqueMaps, context.realmId);
-        const resolved = dedupeResolvedMaps(result.resolved);
-        const skipped = result.skipped;
+      inputSchema: toolSchema(CreatePlaylistInputSchema),
+      execute: ({ title, description, maps }) =>
+        runTool(async () => {
+          const uniqueMaps = uniquePlaylistMaps(maps, MAX_CREATE_PLAYLIST_SONGS);
+          const result = await resolvePlaylistMaps(uniqueMaps, context.realmId);
+          const resolved = dedupeResolvedMaps(result.resolved);
+          const skipped = result.skipped;
 
-        if (resolved.length === 0) {
-          return {
-            error:
-              "None of the maps could be resolved. Use searchMaps or resolveMap to find valid maps first.",
-            ...(skipped.length > 0 ? { skipped } : {}),
-          } satisfies PlaylistToolError;
-        }
+          if (resolved.length === 0) {
+            return {
+              error:
+                "None of the maps could be resolved. Use searchMaps or resolveMap to find valid maps first.",
+              ...(skipped.length > 0 ? { skipped } : {}),
+            } satisfies PlaylistToolError;
+          }
 
-        const playlist = {
-          playlistTitle: capPlaylistTitle(title),
-          playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
-          songs: resolvedMapsToSongs(resolved),
-        } satisfies Playlist;
+          const playlist = {
+            playlistTitle: capPlaylistTitle(title),
+            playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
+            songs: resolvedMapsToSongs(resolved),
+          } satisfies Playlist;
 
-        return buildPlaylistOutput(playlist, {
-          description,
-          maxSongs: MAX_CREATE_PLAYLIST_SONGS,
-          skipped,
-        });
-      },
+          return buildPlaylistOutput(playlist, {
+            description,
+            maxSongs: MAX_CREATE_PLAYLIST_SONGS,
+            skipped,
+          });
+        }, "The playlist could not be built."),
       toModelOutput: ({ output }) => playlistModelOutput(output),
     }),
   } satisfies ToolSet;

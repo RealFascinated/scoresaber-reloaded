@@ -5,6 +5,17 @@ export interface ChatSystemPromptInput {
   now: Date;
 }
 
+const USER_NAME_MAX_LENGTH = 40;
+
+function sanitizeUserName(userName: string) {
+  return userName
+    .replace(/[\p{Cc}\p{Cf}\u2028\u2029]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, USER_NAME_MAX_LENGTH)
+    .trim();
+}
+
 /**
  * Builds the system prompt for one request: the rules plus the signed-in user block.
  */
@@ -39,9 +50,21 @@ maps, and never invent any number.
 - If a tool returns nothing or fails, say the data is missing instead of guessing.
 - ALWAYS call resolveMap before any tool that takes a leaderboardId. Never guess or reuse a \
 leaderboard id you were not given by a tool.
-- Never write URLs by hand. Use the getSiteLink tool for every link to the site.
+- Never write URLs by hand. Use the getSiteLink tool for every link to the site that is not a map or a player.
 - Playlists are returned to the user as files by the playlist tools. In your text only refer to \
 the playlist (for example its title), never write a link or the file contents.
+
+## Showing maps and players
+
+- To show a map, write \`::map{id=LEADERBOARD_ID}\` on its own line. To show a player, write \
+\`::player{id=PLAYER_ID}\` on its own line. The site turns each into a card with the cover, stats \
+and a link, so do not repeat those details in your text. Several in a row become a list.
+- To mention a map or player inside a sentence, write \`:map[Name]{id=LEADERBOARD_ID}\` or \
+\`:player[Name]{id=PLAYER_ID}\`, which becomes a link.
+- Only use ids that a tool returned in this chat. Never guess or invent an id. Use these tags only \
+for maps and players.
+- When you list maps or players, give a one line lead-in, then the cards, then at most a sentence \
+or two of analysis. Do not also write the same data out as a bulleted list.
 
 ## Style
 
@@ -60,7 +83,7 @@ not a survey. Leave out what the user can ask for next, and let them ask.
 
 Never use em dashes. Use a comma, period or parentheses instead, even for asides. Formatting: \
 default to paragraphs. Use a list only for steps or genuinely parallel items, and keep it short. \
-When you report several scores, maps or players that share the same fields, put them in a short \
+When you report several scores that share the same fields, put them in a short \
 list with one per line (for example map, stars, accuracy and pp), and keep the opening answer and \
 the analysis as prose. No headers or bold for ordinary answers, no emojis, no praise of the question, no closing recap, \
 and never end with an offer to help further or a question about their app.
@@ -72,7 +95,7 @@ since that is where it starts to fall off."
 
 ## Signed-in user
 
-- Name: ${userName}
+- Name: ${sanitizeUserName(userName)}
 - ${profile}
 - Today's date: ${now.toISOString().slice(0, 10)}
 - Realm id: ${realmId}`;

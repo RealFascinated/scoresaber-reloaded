@@ -12,7 +12,7 @@ export const ChatConversationSchema = Type.Object({
 export type ChatConversation = StaticDecode<typeof ChatConversationSchema>;
 
 export const ChatConversationRenameBodySchema = Type.Object({
-  title: Type.String({ minLength: 1, maxLength: 100 }),
+  title: Type.String({ minLength: 1, maxLength: 100, pattern: "\\S" }),
 });
 export type ChatConversationRenameBody = StaticDecode<typeof ChatConversationRenameBodySchema>;
 
@@ -24,6 +24,6 @@ export const ChatConversationParamsSchema = Type.Object({
 export type ChatConversationParams = StaticDecode<typeof ChatConversationParamsSchema>;
 
 export const ChatConversationsQuerySchema = Type.Object({
-  page: Type.Optional(Type.Integer({ minimum: 1 })),
+  page: Type.Optional(Type.Integer({ minimum: 1, maximum: 1000 })),
 });
 export type ChatConversationsQuery = StaticDecode<typeof ChatConversationsQuerySchema>;

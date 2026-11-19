@@ -1,10 +1,13 @@
 import Logger from "@ssr/common/logger";
 import { generateText } from "ai";
 import { ChatConversationService } from "./chat-conversation.service";
+import { describeChatError } from "./chat-error";
 import { ChatModelService } from "./chat-model.service";
 
 const TITLE_MAX_LENGTH = 60;
 const TITLE_INPUT_LIMIT = 1000;
+const TITLE_TIMEOUT_MS = 30_000;
+const TITLE_MAX_OUTPUT_TOKENS = 32;
 const TITLE_SYSTEM_PROMPT = [
   "Write a title for this chat from the user's first message in 3 to 6 words. No quotes, no trailing punctuation. Reply with the title only.",
   "The chat is on ScoreSaber Reloaded, a Beat Saber score tracking site (ScoreSaber, BeatLeader, AccSaber), so rank, PP and accuracy mean Beat Saber stats. Never mention osu or any other game.",
@@ -46,10 +49,15 @@ export class ChatTitleService {
           model: ChatModelService.getTitleModel(),
           system: TITLE_SYSTEM_PROMPT,
           prompt: `User: ${userText.slice(0, TITLE_INPUT_LIMIT)}`,
+          maxOutputTokens: TITLE_MAX_OUTPUT_TOKENS,
+          abortSignal: AbortSignal.timeout(TITLE_TIMEOUT_MS),
         });
         title = ChatTitleService.cleanTitle(text, userText);
       } catch (error) {
-        logger.warn(`Title generation failed for conversation ${conversationId}, using the fallback`, error);
+        logger.warn(
+          `Title generation failed for conversation ${conversationId}, using the fallback`,
+          error instanceof Error ? describeChatError(error) : "unknown error"
+        );
       }
 
       await ChatConversationService.setTitleIfEmpty(conversationId, title);

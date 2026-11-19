@@ -11,11 +11,12 @@ import {
   ResolveMapInputSchema,
   SearchMapsInputSchema,
 } from "@ssr/common/schemas/chat/tools/map-tools";
-import { jsonSchema, tool, type ToolSet } from "ai";
-import { desc, eq } from "drizzle-orm";
-import type { Static } from "typebox";
+import { tool, type ToolSet } from "ai";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "../../../db";
-import { beatSaverMapVersionsTable } from "../../../db/schema";
+import { leaderboardRowToType } from "../../../db/converter/scoresaber-leaderboard";
+import { beatSaverMapVersionsTable, scoreSaberLeaderboardsTable } from "../../../db/schema";
+import { ScoreSaberLeaderboardsRepository } from "../../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberLeaderboardScoresService } from "../../leaderboard/scoresaber-leaderboard-scores.service";
 import { ScoreSaberLeaderboardsService } from "../../leaderboard/scoresaber-leaderboards.service";
 import { RankedBatchService } from "../../ranked-batch/ranked-batch.service";
@@ -25,7 +26,6 @@ import type { ChatToolContext } from "../chat-tool-context";
 import {
   MAX_TOOL_ROWS,
   getSiteLinkUrl,
-  requirePlayerId,
   trimLeaderboard,
   trimLeaderboards,
   trimLeaderboardScore,
@@ -33,7 +33,9 @@ import {
   trimRealm,
   trimSuggestedMap,
 } from "./map-tool-utils";
+import { resolvePlayerId } from "./player-tool-results";
 import { createPlaylistTools } from "./playlist-tools";
+import { runTool, toolSchema } from "./tool-runtime";
 
 const MAX_SUGGESTED_MAPS = 25;
 const SONG_HASH_PATTERN = /^(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{40})$/;
@@ -56,7 +58,7 @@ async function findVersionHashForKey(key: string) {
   const [row] = await db
     .select({ hash: beatSaverMapVersionsTable.hash })
     .from(beatSaverMapVersionsTable)
-    .where(eq(beatSaverMapVersionsTable.mapId, key))
+    .where(eq(beatSaverMapVersionsTable.mapId, key.toLowerCase()))
     .orderBy(desc(beatSaverMapVersionsTable.createdAt))
     .limit(1);
   return row?.hash;
@@ -64,26 +66,37 @@ async function findVersionHashForKey(key: string) {
 
 async function resolveQueryHash(value: string) {
   if (isSongHash(value)) {
-    return value;
+    return { hash: value, matchedBy: "hash" as const };
   }
   if (isBeatSaverKey(value)) {
-    return await findVersionHashForKey(value);
+    const hash = await findVersionHashForKey(value);
+    return hash ? { hash, matchedBy: "beatsaverKey" as const } : undefined;
   }
   return undefined;
 }
 
 async function findLeaderboardsByHash(hash: string, realmId: number) {
-  const token = await lookupBeatSaverToken(hash);
-  const page = await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(
-    1,
-    { query: token?.name ?? hash },
-    realmId
-  );
   const normalizedHash = hash.toLowerCase();
-  return {
-    items: page.items.filter(leaderboard => leaderboard.songHash.toLowerCase() === normalizedHash),
-    metadata: page.metadata,
-  };
+  const rows = await ScoreSaberLeaderboardsRepository.selectResolved(realmId)
+    .where(eq(sql`lower(${scoreSaberLeaderboardsTable.songHash})`, normalizedHash))
+    .orderBy(asc(scoreSaberLeaderboardsTable.difficulty));
+  return rows.map(row => leaderboardRowToType(row));
+}
+
+function mergeLeaderboards(
+  primary: ReturnType<typeof leaderboardRowToType>[],
+  secondary: ReturnType<typeof leaderboardRowToType>[]
+) {
+  const seen = new Set<number>();
+  const merged: ReturnType<typeof leaderboardRowToType>[] = [];
+  for (const leaderboard of primary.concat(secondary)) {
+    if (seen.has(leaderboard.id)) {
+      continue;
+    }
+    seen.add(leaderboard.id);
+    merged.push(leaderboard);
+  }
+  return merged;
 }
 
 export function createMapTools(context: ChatToolContext) {
@@ -93,234 +106,257 @@ export function createMapTools(context: ChatToolContext) {
     getLeaderboard: tool({
       description:
         "Gets one ScoreSaber leaderboard by id: song, mapper, difficulty, stars, ranked state and play count. Get the id from resolveMap or searchMaps first.",
-      inputSchema: jsonSchema<Static<typeof GetLeaderboardInputSchema>>(GetLeaderboardInputSchema),
-      execute: async ({ leaderboardId }) => {
-        const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(
-          leaderboardId,
-          context.realmId
-        );
-        return { leaderboard: trimLeaderboard(leaderboard) };
-      },
+      inputSchema: toolSchema(GetLeaderboardInputSchema),
+      execute: ({ leaderboardId }) =>
+        runTool(async () => {
+          const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(
+            leaderboardId,
+            context.realmId
+          );
+          return { leaderboard: trimLeaderboard(leaderboard) };
+        }, "The leaderboard could not be loaded."),
     }),
 
     getLeaderboardScores: tool({
       description:
         "Gets a page of the top scores on a ScoreSaber leaderboard: rank, player, accuracy, pp, misses and full combo. Get the leaderboard id from resolveMap or searchMaps first.",
-      inputSchema: jsonSchema<Static<typeof GetLeaderboardScoresInputSchema>>(
-        GetLeaderboardScoresInputSchema
-      ),
-      execute: async ({ leaderboardId, page }) => {
-        const response = await ScoreSaberLeaderboardScoresService.getLeaderboardScores(
-          leaderboardId,
-          page ?? 1,
-          undefined,
-          context.realmId
-        );
-        return {
-          leaderboard: trimLeaderboard(response.leaderboard),
-          scores: response.scores.slice(0, MAX_TOOL_ROWS).map(trimLeaderboardScore),
-          beatSaver: response.beatSaver
-            ? {
-                key: response.beatSaver.id,
-                name: response.beatSaver.name,
-                mapper: response.beatSaver.author.name,
-                bpm: response.beatSaver.metadata.bpm,
-                duration: response.beatSaver.metadata.duration,
-                nps: response.beatSaver.difficulty.nps,
-                seconds: response.beatSaver.difficulty.seconds,
-              }
-            : undefined,
-          metadata: response.metadata,
-        };
-      },
+      inputSchema: toolSchema(GetLeaderboardScoresInputSchema),
+      execute: ({ leaderboardId, page }) =>
+        runTool(async () => {
+          const response = await ScoreSaberLeaderboardScoresService.getLeaderboardScores(
+            leaderboardId,
+            page ?? 1,
+            undefined,
+            context.realmId
+          );
+          return {
+            leaderboard: trimLeaderboard(response.leaderboard),
+            scores: response.scores.slice(0, MAX_TOOL_ROWS).map(trimLeaderboardScore),
+            beatSaver: response.beatSaver
+              ? {
+                  key: response.beatSaver.id,
+                  name: response.beatSaver.name,
+                  mapper: response.beatSaver.author.name,
+                  bpm: response.beatSaver.metadata.bpm,
+                  duration: response.beatSaver.metadata.duration,
+                  nps: response.beatSaver.difficulty.nps,
+                  seconds: response.beatSaver.difficulty.seconds,
+                }
+              : undefined,
+            metadata: response.metadata,
+          };
+        }, "The leaderboard scores could not be loaded."),
     }),
 
     searchMaps: tool({
       description:
         "Searches ScoreSaber leaderboards by song or mapper name, star range and ranked/qualified state. Returns leaderboard ids and stars; use it to find maps, then pass selected ids to other tools.",
-      inputSchema: jsonSchema<Static<typeof SearchMapsInputSchema>>(SearchMapsInputSchema),
-      execute: async ({ query, minStars, maxStars, ranked, qualified, category, sort, page }) => {
-        const result = await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(
-          page ?? 1,
-          {
-            query,
-            minStars,
-            maxStars,
-            ranked,
-            qualified,
-            category,
-            sort,
-          },
-          context.realmId
-        );
-        return {
-          maps: trimLeaderboards(result.items),
-          metadata: result.metadata,
-        };
-      },
+      inputSchema: toolSchema(SearchMapsInputSchema),
+      execute: ({ query, minStars, maxStars, ranked, qualified, category, sort, page }) =>
+        runTool(async () => {
+          const result = await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(
+            page ?? 1,
+            {
+              query,
+              minStars,
+              maxStars,
+              ranked,
+              qualified,
+              category,
+              sort,
+            },
+            context.realmId
+          );
+          return {
+            maps: trimLeaderboards(result.items),
+            metadata: result.metadata,
+          };
+        }, "The map search failed."),
     }),
 
     resolveMap: tool({
       description:
         "Resolves a map name, song hash or BeatSaver key to ScoreSaber leaderboard ids with difficulty and stars. ALWAYS use this before any tool that takes a leaderboardId; never guess ids.",
-      inputSchema: jsonSchema<Static<typeof ResolveMapInputSchema>>(ResolveMapInputSchema),
-      execute: async ({ query }) => {
-        const trimmed = query.trim();
-        const hash = await resolveQueryHash(trimmed);
-        if (hash) {
-          const result = await findLeaderboardsByHash(hash, context.realmId);
+      inputSchema: toolSchema(ResolveMapInputSchema),
+      execute: ({ query }) =>
+        runTool(async () => {
+          const trimmed = query.trim();
+          const resolvedHash = await resolveQueryHash(trimmed);
+          const hashResults = resolvedHash
+            ? await findLeaderboardsByHash(resolvedHash.hash, context.realmId)
+            : [];
+          const nameResults = isSongHash(trimmed)
+            ? []
+            : (
+                await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(
+                  1,
+                  { query: trimmed },
+                  context.realmId
+                )
+              ).items;
+          const merged = mergeLeaderboards(hashResults, nameResults);
           return {
             query: trimmed,
-            matchedBy: isSongHash(trimmed) ? "hash" : "beatsaverKey",
-            results: trimLeaderboards(result.items),
-            metadata: result.metadata,
+            matchedBy: resolvedHash?.matchedBy ?? "name",
+            results: trimLeaderboards(merged),
+            metadata: {
+              page: 1,
+              totalPages: 1,
+              totalItems: merged.length,
+              itemsPerPage: merged.length,
+            },
           };
-        }
-
-        const result = await ScoreSaberLeaderboardsService.getLeaderboardsPaginated(
-          1,
-          { query: trimmed },
-          context.realmId
-        );
-        return {
-          query: trimmed,
-          matchedBy: "name",
-          results: trimLeaderboards(result.items),
-          metadata: result.metadata,
-        };
-      },
+        }, "The map could not be resolved."),
     }),
 
     getBeatSaverMap: tool({
       description:
         "Gets BeatSaver map details by song hash or BeatSaver key: mapper, tags, BPM, duration and every difficulty. Use it when the user asks about the map itself, not its leaderboard.",
-      inputSchema: jsonSchema<Static<typeof GetBeatSaverMapInputSchema>>(GetBeatSaverMapInputSchema),
-      execute: async ({ hashOrKey }) => {
-        const value = hashOrKey.trim();
-        const hash = await resolveQueryHash(value);
-        if (!hash) {
-          return {
-            error: `BeatSaver map "${value}" could not be resolved. Use the 32 or 40 character song hash instead.`,
+      inputSchema: toolSchema(GetBeatSaverMapInputSchema),
+      execute: ({ hashOrKey }) =>
+        runTool(async () => {
+          const value = hashOrKey.trim();
+          const resolvedHash = await resolveQueryHash(value);
+          if (!resolvedHash) {
+            return {
+              error: `BeatSaver map "${value}" could not be resolved. Use the 32 or 40 character song hash instead.`,
+            };
+          }
+
+          const hash = resolvedHash.hash;
+          const token = await lookupBeatSaverToken(hash);
+          if (!token) {
+            return { error: `BeatSaver map "${value}" was not found.` };
+          }
+
+          const normalizedHash = hash.toLowerCase();
+          const version = token.versions.find(candidate => {
+            const candidateHash = candidate.hash.toLowerCase();
+            return candidateHash === normalizedHash || candidateHash.startsWith(normalizedHash);
+          });
+          const base = {
+            beatSaverKey: token.id,
+            name: token.name,
+            mapper: token.uploader.name,
+            songName: token.metadata.songName,
+            songSubName: token.metadata.songSubName,
+            songAuthorName: token.metadata.songAuthorName,
+            levelAuthorName: token.metadata.levelAuthorName,
+            tags: token.tags.slice(0, MAX_TOOL_ROWS),
+            bpm: token.metadata.bpm,
+            duration: token.metadata.duration,
+            ranked: token.ranked,
+            qualified: token.qualified,
           };
-        }
-
-        const token = await lookupBeatSaverToken(hash);
-        if (!token) {
-          return { error: `BeatSaver map "${value}" was not found.` };
-        }
-
-        const normalizedHash = hash.toLowerCase();
-        const version =
-          token.versions.find(candidate => candidate.hash.toLowerCase() === normalizedHash) ??
-          token.versions[token.versions.length - 1];
-
-        return {
-          beatSaverKey: token.id,
-          name: token.name,
-          mapper: token.uploader.name,
-          songName: token.metadata.songName,
-          songSubName: token.metadata.songSubName,
-          songAuthorName: token.metadata.songAuthorName,
-          levelAuthorName: token.metadata.levelAuthorName,
-          tags: token.tags.slice(0, MAX_TOOL_ROWS),
-          bpm: token.metadata.bpm,
-          duration: token.metadata.duration,
-          ranked: token.ranked,
-          qualified: token.qualified,
-          difficulties: (version?.diffs ?? []).slice(0, MAX_TOOL_ROWS).map(difficulty => ({
-            difficulty: difficulty.difficulty,
-            characteristic: difficulty.characteristic,
-            nps: difficulty.nps,
-            seconds: difficulty.seconds,
-            notes: difficulty.notes,
-          })),
-        };
-      },
+          if (!version) {
+            return {
+              ...base,
+              difficulties: [],
+              note: `No BeatSaver version matches the requested hash "${hash}", so difficulty details are unavailable.`,
+            };
+          }
+          return {
+            ...base,
+            versionHash: version.hash,
+            difficulties: version.diffs.slice(0, MAX_TOOL_ROWS).map(difficulty => ({
+              difficulty: difficulty.difficulty,
+              characteristic: difficulty.characteristic,
+              nps: difficulty.nps,
+              seconds: difficulty.seconds,
+              notes: difficulty.notes,
+            })),
+          };
+        }, "The BeatSaver map could not be loaded."),
     }),
 
     getSuggestedMaps: tool({
       description:
         "Gets the maps the suggested maps model recommends for a player, best first, with predicted accuracy and pp gain. Defaults to the signed-in user's linked player.",
-      inputSchema: jsonSchema<Static<typeof GetSuggestedMapsInputSchema>>(GetSuggestedMapsInputSchema),
-      execute: async ({ playerId, limit, ...filters }) => {
-        const player = requirePlayerId(context, playerId);
-        if ("error" in player) {
-          return player;
-        }
-        const response = await SuggestedMapsService.getSuggestedMaps({
-          ...filters,
-          playerId: player.playerId,
-          limit: Math.min(limit ?? MAX_SUGGESTED_MAPS, MAX_SUGGESTED_MAPS),
-        });
-        return {
-          playerSkill: response.playerSkill,
-          playerRanges: response.playerRanges,
-          updatedAt: response.updatedAt,
-          maps: response.maps.slice(0, MAX_SUGGESTED_MAPS).map(trimSuggestedMap),
-        };
-      },
+      inputSchema: toolSchema(GetSuggestedMapsInputSchema),
+      execute: ({ playerId, limit, ...filters }) =>
+        runTool(async () => {
+          const player = resolvePlayerId(context, playerId);
+          if (!player.ok) {
+            return { error: player.error };
+          }
+          const response = await SuggestedMapsService.getSuggestedMaps({
+            ...filters,
+            playerId: player.playerId,
+            limit: Math.min(limit ?? MAX_SUGGESTED_MAPS, MAX_SUGGESTED_MAPS),
+          });
+          return {
+            playerSkill: response.playerSkill,
+            playerRanges: response.playerRanges,
+            updatedAt: response.updatedAt,
+            maps: response.maps.slice(0, MAX_SUGGESTED_MAPS).map(trimSuggestedMap),
+          };
+        }, "The suggested maps could not be loaded."),
     }),
 
     getRankedBatches: tool({
       description:
         "Lists recent ranked batches (groups of maps whose star ratings changed together), newest first. Use it to find a batch id for getRankedBatch or getRankedBatchPlaylist.",
-      inputSchema: jsonSchema<Static<typeof GetRankedBatchesInputSchema>>(GetRankedBatchesInputSchema),
-      execute: async ({ page }) => {
-        const result = await RankedBatchService.getRankedBatches(page ?? 1);
-        return {
-          batches: result.items.slice(0, MAX_TOOL_ROWS).map(trimRankedBatch),
-          metadata: result.metadata,
-        };
-      },
+      inputSchema: toolSchema(GetRankedBatchesInputSchema),
+      execute: ({ page }) =>
+        runTool(async () => {
+          const result = await RankedBatchService.getRankedBatches(page ?? 1);
+          return {
+            batches: result.items.slice(0, MAX_TOOL_ROWS).map(trimRankedBatch),
+            metadata: result.metadata,
+          };
+        }, "The ranked batches could not be loaded."),
     }),
 
     getRankedBatch: tool({
       description:
         "Gets one ranked batch by id with the maps it re-rated and the maps that became ranked, including star changes. Get the id from getRankedBatches.",
-      inputSchema: jsonSchema<Static<typeof GetRankedBatchInputSchema>>(GetRankedBatchInputSchema),
-      execute: async ({ rankedBatchId }) => {
-        const result = await RankedBatchService.getRankedBatch(rankedBatchId);
-        return {
-          rankedBatch: trimRankedBatch(result.rankedBatch),
-          leaderboards: result.leaderboards.slice(0, MAX_TOOL_ROWS).map(leaderboard => ({
-            leaderboardId: leaderboard.leaderboardId,
-            songName: leaderboard.songName,
-            songHash: leaderboard.songHash,
-            difficulty: leaderboard.difficulty,
-            characteristic: leaderboard.characteristic,
-            previousStars: leaderboard.previousStars,
-            newStars: leaderboard.newStars,
-          })),
-          newLeaderboards: result.newLeaderboards.slice(0, MAX_TOOL_ROWS).map(leaderboard => ({
-            leaderboardId: leaderboard.leaderboardId,
-            songName: leaderboard.songName,
-            songHash: leaderboard.songHash,
-            difficulty: leaderboard.difficulty,
-            characteristic: leaderboard.characteristic,
-            stars: leaderboard.stars,
-          })),
-        };
-      },
+      inputSchema: toolSchema(GetRankedBatchInputSchema),
+      execute: ({ rankedBatchId }) =>
+        runTool(async () => {
+          const result = await RankedBatchService.getRankedBatch(rankedBatchId);
+          return {
+            rankedBatch: trimRankedBatch(result.rankedBatch),
+            leaderboards: result.leaderboards.slice(0, MAX_TOOL_ROWS).map(leaderboard => ({
+              leaderboardId: leaderboard.leaderboardId,
+              songName: leaderboard.songName,
+              songHash: leaderboard.songHash,
+              difficulty: leaderboard.difficulty,
+              characteristic: leaderboard.characteristic,
+              previousStars: leaderboard.previousStars,
+              newStars: leaderboard.newStars,
+            })),
+            newLeaderboards: result.newLeaderboards.slice(0, MAX_TOOL_ROWS).map(leaderboard => ({
+              leaderboardId: leaderboard.leaderboardId,
+              songName: leaderboard.songName,
+              songHash: leaderboard.songHash,
+              difficulty: leaderboard.difficulty,
+              characteristic: leaderboard.characteristic,
+              stars: leaderboard.stars,
+            })),
+          };
+        }, "The ranked batch could not be loaded."),
     }),
 
     getSiteLink: tool({
       description:
         "Builds the site URL for a player, leaderboard or score page. Use it for every link, never write a site URL by hand.",
-      inputSchema: jsonSchema<Static<typeof GetSiteLinkInputSchema>>(GetSiteLinkInputSchema),
-      execute: async ({ kind, id }) => ({ url: getSiteLinkUrl(kind, id) }),
+      inputSchema: toolSchema(GetSiteLinkInputSchema),
+      execute: ({ kind, id }) =>
+        runTool(async () => ({ url: getSiteLinkUrl(kind, id) }), "The link could not be built."),
     }),
 
     getRealms: tool({
       description:
         "Lists the ScoreSaber realms (seasons) with their ids, dates and whether they accept scores. Use it to pick a valid realm instead of guessing.",
-      inputSchema: jsonSchema<Static<typeof GetRealmsInputSchema>>(GetRealmsInputSchema),
-      execute: async () => {
-        const realms = await RealmService.getRealms();
-        return {
-          currentRealmId: context.realmId,
-          realms: realms.slice(0, MAX_TOOL_ROWS).map(trimRealm),
-        };
-      },
+      inputSchema: toolSchema(GetRealmsInputSchema),
+      execute: () =>
+        runTool(async () => {
+          const realms = await RealmService.getRealms();
+          return {
+            currentRealmId: context.realmId,
+            realms: realms.slice(0, MAX_TOOL_ROWS).map(trimRealm),
+          };
+        }, "The realms could not be loaded."),
     }),
   } satisfies ToolSet;
 }

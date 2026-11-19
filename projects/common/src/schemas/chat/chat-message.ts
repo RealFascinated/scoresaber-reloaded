@@ -25,5 +25,6 @@ export const CHAT_MESSAGE_MAX_LENGTH = 4000;
 export const SendChatMessageBodySchema = Type.Object({
   id: Type.String({ minLength: 1, maxLength: 64 }),
   text: Type.String({ minLength: 1, maxLength: CHAT_MESSAGE_MAX_LENGTH }),
+  regenerate: Type.Optional(Type.Boolean()),
 });
 export type SendChatMessageBody = StaticDecode<typeof SendChatMessageBodySchema>;

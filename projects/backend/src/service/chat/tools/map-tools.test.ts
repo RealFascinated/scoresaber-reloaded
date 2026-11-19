@@ -11,12 +11,12 @@ import type { ChatToolContext } from "../chat-tool-context";
 import {
   MAX_TOOL_ROWS,
   getSiteLinkUrl,
-  requirePlayerId,
   trimLeaderboards,
   trimLeaderboardScore,
   trimRankedBatch,
   trimRealm,
 } from "./map-tool-utils";
+import { resolvePlayerId } from "./player-tool-results";
 
 const linkedContext: ChatToolContext = {
   userId: "user-1",
@@ -141,21 +141,22 @@ describe("getSiteLinkUrl", () => {
   });
 });
 
-describe("requirePlayerId", () => {
+describe("resolvePlayerId", () => {
   it("defaults to the signed-in user's linked player", () => {
-    expect(requirePlayerId(linkedContext, undefined)).toEqual({
+    expect(resolvePlayerId(linkedContext, undefined)).toEqual({
+      ok: true,
       playerId: "76561198000000000",
     });
   });
 
   it("prefers an explicitly requested player", () => {
-    expect(requirePlayerId(linkedContext, "123")).toEqual({ playerId: "123" });
+    expect(resolvePlayerId(linkedContext, "123")).toEqual({ ok: true, playerId: "123" });
   });
 
   it("tells the model to ask for a player when nothing is linked", () => {
-    const result = requirePlayerId(unlinkedContext, undefined);
-    expect("error" in result).toBe(true);
-    if ("error" in result) {
+    const result = resolvePlayerId(unlinkedContext, undefined);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
       expect(result.error).toContain("Ask the user");
     }
   });

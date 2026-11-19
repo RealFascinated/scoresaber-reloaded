@@ -41,6 +41,8 @@ export type SkippedMapEntry = {
 export type PlaylistToolSummary = {
   title: string;
   songCount: number;
+  totalCount: number;
+  truncated: boolean;
   fileName: string;
   skipped?: SkippedMapEntry[];
 };
@@ -222,6 +224,7 @@ export function buildPlaylistOutput(
   }
 ) {
   const maxSongs = options?.maxSongs ?? MAX_GENERATED_PLAYLIST_SONGS;
+  const totalCount = playlist.songs.length;
   const bplist = toBplistFile(
     {
       ...playlist,
@@ -235,6 +238,8 @@ export function buildPlaylistOutput(
   return {
     title: playlist.playlistTitle,
     songCount: bplist.songs.length,
+    totalCount,
+    truncated: totalCount > bplist.songs.length,
     fileName: `${slugifyPlaylistTitle(playlist.playlistTitle)}.bplist`,
     bplist,
     ...(options?.skipped && options.skipped.length > 0 ? { skipped: options.skipped } : {}),
@@ -248,6 +253,8 @@ export function playlistSummary(output: PlaylistToolOutput) {
   return {
     title: output.title,
     songCount: output.songCount,
+    totalCount: output.totalCount,
+    truncated: output.truncated,
     fileName: output.fileName,
     ...(output.skipped ? { skipped: output.skipped } : {}),
   } satisfies PlaylistToolSummary;

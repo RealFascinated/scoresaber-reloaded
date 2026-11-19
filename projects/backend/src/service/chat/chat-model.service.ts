@@ -5,6 +5,23 @@ export class ChatModelService {
   private static provider: ReturnType<typeof createOpenAICompatible> | undefined;
 
   /**
+   * Throws an actionable error naming every chat variable that is missing, to fail fast at boot.
+   */
+  public static assertConfigured() {
+    const required = {
+      CHAT_API_URL: env.CHAT_API_URL,
+      CHAT_API_KEY: env.CHAT_API_KEY,
+      CHAT_MODEL: env.CHAT_MODEL,
+    } satisfies Record<string, string | undefined>;
+    const missing = Object.entries(required)
+      .filter(([, value]) => !value)
+      .map(([name]) => name);
+    if (missing.length > 0) {
+      throw new Error(`CHAT_ENABLED is true but these variables are not set: ${missing.join(", ")}`);
+    }
+  }
+
+  /**
    * Gets the model the assistant answers with.
    */
   public static getChatModel() {

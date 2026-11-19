@@ -12,8 +12,9 @@ import { useChat } from "@ai-sdk/react";
 import { CHAT_ROUTE } from "@ssr/common/api-routes";
 import type { ChatMessage } from "@ssr/common/schemas/chat/chat-message";
 import { useQueryClient } from "@tanstack/react-query";
-import { DefaultChatTransport } from "ai";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { DefaultChatTransport, type UIMessage } from "ai";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 const TITLE_REFRESH_DELAYS_MS = [2000, 5000];
@@ -23,15 +24,51 @@ type ChatShellProps = {
   initialMessages?: ChatMessage[];
 };
 
+const displayStreamCache = new WeakMap<UIMessage, ReturnType<typeof toDisplayStreamMessage>>();
+
+function createIdStore(initial: string | null) {
+  let current = initial;
+  return {
+    get: () => current,
+    set: (id: string) => {
+      current = id;
+    },
+  };
+}
+
+function toCachedDisplayStreamMessage(message: UIMessage) {
+  const cached = displayStreamCache.get(message);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const display = toDisplayStreamMessage(message);
+  displayStreamCache.set(message, display);
+  return display;
+}
+
 /**
  * The whole chat app: the sidebar of conversations, the message column and the input.
  *
  * A new chat has no conversation until the first message is sent; the conversation is created then and the
  * address is updated without a navigation, so the reply keeps streaming.
  */
-export default function ChatShell({ conversationId: serverConversationId, initialMessages }: ChatShellProps) {
+export default function ChatShell(props: ChatShellProps) {
+  const pathname = usePathname();
+  const [lastPathname, setLastPathname] = useState(pathname);
+  const [session, setSession] = useState(0);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    if (pathname === CHAT_ROUTE) {
+      setSession(previous => previous + 1);
+    }
+  }
+  return <ChatShellContent key={session} {...props} />;
+}
+
+function ChatShellContent({ conversationId: serverConversationId, initialMessages }: ChatShellProps) {
   const queryClient = useQueryClient();
   const [conversationId, setConversationId] = useState(serverConversationId);
+  const [idStore] = useState(() => createIdStore(serverConversationId));
   const [history, setHistory] = useState<ChatMessage[]>(initialMessages ?? []);
   const [historyFailed, setHistoryFailed] = useState(
     serverConversationId !== null && initialMessages === undefined
@@ -39,17 +76,23 @@ export default function ChatShell({ conversationId: serverConversationId, initia
 
   const startConversation = useCallback(async () => {
     const conversation = await createChatConversation();
+    idStore.set(conversation.id);
     setConversationId(conversation.id);
     window.history.replaceState(null, "", `${CHAT_ROUTE}/${conversation.id}`);
     await queryClient.invalidateQueries({ queryKey: CHAT_CONVERSATIONS_QUERY_KEY });
     return conversation.id;
   }, [queryClient]);
 
+  const resolveConversationId = useCallback(
+    async () => idStore.get() ?? (await startConversation()),
+    [idStore, startConversation]
+  );
+
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         credentials: "include",
-        prepareSendMessagesRequest: async ({ messages }) => {
+        prepareSendMessagesRequest: async ({ messages, trigger }) => {
           const lastUserMessage = messages.findLast(message => message.role === "user");
           if (lastUserMessage === undefined) {
             throw new Error("There is no message to send");
@@ -58,20 +101,31 @@ export default function ChatShell({ conversationId: serverConversationId, initia
           if (text === "") {
             throw new Error("The message is empty");
           }
-          const id = conversationId ?? (await startConversation());
+          const id = await resolveConversationId();
           return {
             api: chatMessagesUrl(id),
             credentials: "include",
-            body: { id: lastUserMessage.id, text },
+            body: { id: lastUserMessage.id, text, regenerate: trigger === "regenerate-message" },
           };
         },
       }),
-    [conversationId, startConversation]
+    [resolveConversationId]
   );
 
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [durations, setDurations] = useState<Record<string, number>>({});
   const startedAtRef = useRef<number | null>(null);
+  const titleTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const isSendingRef = useRef(false);
+
+  useEffect(() => {
+    const timeouts = titleTimeoutsRef.current;
+    return () => {
+      for (const timeout of timeouts) {
+        clearTimeout(timeout);
+      }
+    };
+  }, []);
 
   const markStarted = useCallback(() => {
     const now = Date.now();
@@ -91,9 +145,11 @@ export default function ChatShell({ conversationId: serverConversationId, initia
       }
       void queryClient.invalidateQueries({ queryKey: CHAT_CONVERSATIONS_QUERY_KEY });
       for (const delay of TITLE_REFRESH_DELAYS_MS) {
-        setTimeout(() => {
-          void queryClient.invalidateQueries({ queryKey: CHAT_CONVERSATIONS_QUERY_KEY });
-        }, delay);
+        titleTimeoutsRef.current.push(
+          setTimeout(() => {
+            void queryClient.invalidateQueries({ queryKey: CHAT_CONVERSATIONS_QUERY_KEY });
+          }, delay)
+        );
       }
     },
   });
@@ -106,23 +162,27 @@ export default function ChatShell({ conversationId: serverConversationId, initia
 
   const isBusy = status === "submitted" || status === "streaming";
 
+  const historyDisplayMessages = useMemo(() => history.map(toDisplayMessage), [history]);
   const displayMessages = useMemo(
-    () => [...history.map(toDisplayMessage), ...messages.map(toDisplayStreamMessage)],
-    [history, messages]
+    () => [...historyDisplayMessages, ...messages.map(toCachedDisplayStreamMessage)],
+    [historyDisplayMessages, messages]
   );
 
   const isEmptyChat = displayMessages.length === 0 && !isBusy && error === undefined && !historyFailed;
 
   const handleSend = useCallback(
     (text: string) => {
-      if (text.trim() === "") {
+      if (text.trim() === "" || isBusy || isSendingRef.current) {
         return;
       }
+      isSendingRef.current = true;
       clearError();
       markStarted();
-      void sendMessage({ text });
+      void sendMessage({ text }).finally(() => {
+        isSendingRef.current = false;
+      });
     },
-    [clearError, markStarted, sendMessage]
+    [clearError, isBusy, markStarted, sendMessage]
   );
 
   const handleRetry = useCallback(() => {
@@ -130,6 +190,8 @@ export default function ChatShell({ conversationId: serverConversationId, initia
     markStarted();
     void regenerate();
   }, [clearError, markStarted, regenerate]);
+
+  const canRegenerate = messages.length > 0 && messages[messages.length - 1].role === "assistant";
 
   const handleReloadHistory = useCallback(() => {
     if (conversationId === null) {
@@ -164,6 +226,7 @@ export default function ChatShell({ conversationId: serverConversationId, initia
               error={error}
               historyFailed={historyFailed}
               onRetry={handleRetry}
+              onRegenerate={canRegenerate ? handleRetry : undefined}
               onReloadHistory={handleReloadHistory}
             />
             {!historyFailed && <ChatInput isBusy={isBusy} onSend={handleSend} onStop={stop} />}

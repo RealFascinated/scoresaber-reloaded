@@ -1,3 +1,4 @@
+import { jsonSchema } from "ai";
 import { describe, expect, it } from "bun:test";
 import { ChatContextService, type ChatContextMessage } from "./chat-context.service";
 
@@ -128,5 +129,50 @@ describe("ChatContextService.buildTranscript", () => {
 
     expect(transcript.length).toBe(30);
     expect(transcript.endsWith("message 2")).toBe(true);
+  });
+});
+
+describe("ChatContextService.trimToBudget", () => {
+  it("keeps everything that fits", () => {
+    const history = [message(1, "user", 10), message(2, "assistant", 10)];
+    expect(
+      ChatContextService.trimToBudget({ history, newMessageTokens: 10, summaryTokens: 0, budget: 100 })
+    ).toEqual(history);
+  });
+
+  it("drops the oldest messages and starts on a user message", () => {
+    const history = [
+      message(1, "user", 40),
+      message(2, "assistant", 40),
+      message(3, "user", 40),
+      message(4, "assistant", 40),
+    ];
+    const trimmed = ChatContextService.trimToBudget({
+      history,
+      newMessageTokens: 10,
+      summaryTokens: 10,
+      budget: 100,
+    });
+    expect(trimmed.map(item => item.ordinal)).toEqual([3, 4]);
+  });
+
+  it("drops the whole history when nothing fits", () => {
+    const history = [message(1, "user", 90)];
+    expect(
+      ChatContextService.trimToBudget({ history, newMessageTokens: 50, summaryTokens: 0, budget: 100 })
+    ).toEqual([]);
+  });
+});
+
+describe("ChatContextService.estimateToolTokens", () => {
+  it("grows with the tool definitions", () => {
+    const small = ChatContextService.estimateToolTokens({});
+    const large = ChatContextService.estimateToolTokens({
+      lookup: {
+        description: "Looks something up ".repeat(20),
+        inputSchema: jsonSchema({ type: "object", properties: { id: { type: "string" } } }),
+      },
+    });
+    expect(large).toBeGreaterThan(small + 50);
   });
 });

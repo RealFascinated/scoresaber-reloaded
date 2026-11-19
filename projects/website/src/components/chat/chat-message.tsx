@@ -2,22 +2,21 @@
 
 import { type ChatDisplayMessage, type ChatDisplayPart, getToolLabel } from "@/components/chat/chat-display";
 import ChatMarkdown from "@/components/chat/chat-markdown";
+import ChatMessageActions from "@/components/chat/chat-message-actions";
 import PlaylistFileCard, { type PlaylistFile, readPlaylistFile } from "@/components/chat/playlist-file-card";
 import { SharedIcons } from "@/shared-icons";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 
 type ToolPart = Extract<ChatDisplayPart, { kind: "tool" }>;
 
 type WorkStep = { kind: "text"; text: string } | { kind: "reasoning"; text: string } | ToolPart;
 
-export type MessageTiming = {
+type MessageTiming = {
   isActive: boolean;
   startedAt: number | null;
   durationMs: number | undefined;
 };
-
-const ENTER_ANIMATION = "animate-in fade-in slide-in-from-bottom-1 duration-300 motion-reduce:animate-none";
 
 function splitParts(parts: ChatDisplayPart[], isStreaming: boolean) {
   let lastWorkIndex = -1;
@@ -53,14 +52,18 @@ function splitParts(parts: ChatDisplayPart[], isStreaming: boolean) {
 }
 
 function formatDuration(ms: number) {
-  if (ms < 10_000) {
-    return `${(ms / 1000).toFixed(1)}s`;
+  const totalSeconds = Math.max(1, Math.round(ms / 1000));
+  if (totalSeconds < 60) {
+    return `${totalSeconds}s`;
   }
-  const seconds = Math.round(ms / 1000);
-  if (seconds < 60) {
-    return `${seconds}s`;
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (totalMinutes < 60) {
+    return seconds === 0 ? `${totalMinutes}m` : `${totalMinutes}m ${seconds}s`;
   }
-  return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
 }
 
 function useNow(running: boolean) {
@@ -184,7 +187,7 @@ function WorkRow({ steps, timing }: { steps: WorkStep[]; timing: MessageTiming }
               <ThoughtStep key={`${step.kind}-${index}`} text={step.text} />
             ) : (
               <li key={`${step.kind}-${index}`}>
-                <ChatMarkdown text={step.text} />
+                <ChatMarkdown text={step.text} isStreaming={timing.isActive} />
               </li>
             )
           )}
@@ -200,9 +203,62 @@ function UserText({ message }: { message: ChatDisplayMessage }) {
     .map(part => part.text)
     .join("\n");
   return (
-    <div className={`flex justify-end ${ENTER_ANIMATION}`}>
+    <div className="flex justify-end">
       <div className="max-w-[85%] rounded-3xl rounded-br-lg border border-primary/20 bg-primary/15 px-4 py-2.5 text-sm leading-relaxed break-words whitespace-pre-wrap shadow-xs">
         {text}
+      </div>
+    </div>
+  );
+}
+
+function ChatMessageItem({
+  message,
+  isActive,
+  startedAt,
+  durationMs,
+  onRegenerate,
+}: {
+  message: ChatDisplayMessage;
+  isActive: boolean;
+  startedAt: number | null;
+  durationMs: number | undefined;
+  onRegenerate?: () => void;
+}) {
+  const timing = useMemo(
+    () => ({ isActive, startedAt, durationMs }) satisfies MessageTiming,
+    [isActive, startedAt, durationMs]
+  );
+  const { steps, playlists, answerText } = useMemo(
+    () => splitParts(message.parts, isActive),
+    [message.parts, isActive]
+  );
+  if (message.role === "user") {
+    return <UserText message={message} />;
+  }
+
+  const hasAnswer = answerText.trim() !== "";
+  if (steps.length === 0 && playlists.length === 0 && !hasAnswer) {
+    return null;
+  }
+
+  return (
+    <div className="group/message flex items-start gap-3">
+      <Image
+        width={28}
+        height={28}
+        className="mt-0.5 size-7 shrink-0 rounded-full border border-border/60 bg-secondary p-1"
+        src="/assets/logos/scoresaber.png"
+        alt="ScoreSaber Logo"
+      />
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        {steps.length > 0 && <WorkRow steps={steps} timing={timing} />}
+        {playlists.map(file => (
+          <PlaylistFileCard key={`${message.id}-${file.fileName}`} file={file} />
+        ))}
+        {hasAnswer && <ChatMarkdown text={answerText} isStreaming={timing.isActive} />}
+        {hasAnswer && !timing.isActive && (
+          <ChatMessageActions text={answerText} onRegenerate={onRegenerate} />
+        )}
       </div>
     </div>
   );
@@ -211,39 +267,4 @@ function UserText({ message }: { message: ChatDisplayMessage }) {
 /**
  * One message in the pane: user text in a bubble, assistant work collapsed into one row above the Markdown answer and file cards.
  */
-export default function ChatMessageItem({
-  message,
-  timing,
-}: {
-  message: ChatDisplayMessage;
-  timing: MessageTiming;
-}) {
-  if (message.role === "user") {
-    return <UserText message={message} />;
-  }
-
-  const { steps, playlists, answerText } = splitParts(message.parts, timing.isActive);
-  const hasAnswer = answerText.trim() !== "";
-  if (steps.length === 0 && playlists.length === 0 && !hasAnswer) {
-    return null;
-  }
-
-  return (
-    <div className={`flex items-start gap-3 ${ENTER_ANIMATION}`}>
-      <Image
-        width={28}
-        height={28}
-        className="mt-0.5 size-7 shrink-0 rounded-full border border-border/60 bg-secondary p-1"
-        src="/assets/logos/scoresaber.png"
-        alt="ScoreSaber Logo"
-      />
-      <div className="flex min-w-0 flex-1 flex-col gap-3">
-        {steps.length > 0 && <WorkRow steps={steps} timing={timing} />}
-        {playlists.map(file => (
-          <PlaylistFileCard key={`${message.id}-${file.fileName}`} file={file} />
-        ))}
-        {hasAnswer && <ChatMarkdown text={answerText} />}
-      </div>
-    </div>
-  );
-}
+export default memo(ChatMessageItem);

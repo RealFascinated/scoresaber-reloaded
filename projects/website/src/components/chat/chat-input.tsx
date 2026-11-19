@@ -26,29 +26,36 @@ export default function ChatInput({ isBusy, onSend, onStop, variant = "dock" }: 
     }
     textarea.focus();
 
-    const isTypingElsewhere = () => {
+    const INTERACTIVE_SELECTOR = "button, a, input, textarea, select, [contenteditable], [role]";
+
+    const isTypingElsewhere = (target: EventTarget | null) => {
       const active = document.activeElement;
-      if (active instanceof HTMLElement) {
-        if (
-          active.isContentEditable ||
-          active instanceof HTMLInputElement ||
-          active instanceof HTMLTextAreaElement
-        ) {
-          return true;
-        }
+      if (active instanceof Element && active.closest(INTERACTIVE_SELECTOR) !== null) {
+        return true;
+      }
+      if (target instanceof Element && target.closest(INTERACTIVE_SELECTOR) !== null) {
+        return true;
       }
       return document.querySelector('[role="dialog"], [role="alertdialog"]') !== null;
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey || event.metaKey || event.altKey || event.key.length !== 1 || isTypingElsewhere()) {
+      if (
+        event.isComposing ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.key.length !== 1 ||
+        (window.getSelection()?.toString() ?? "") !== "" ||
+        isTypingElsewhere(event.target)
+      ) {
         return;
       }
       textarea.focus();
     };
 
-    const handlePaste = () => {
-      if (!isTypingElsewhere()) {
+    const handlePaste = (event: ClipboardEvent) => {
+      if (!isTypingElsewhere(event.target)) {
         textarea.focus();
       }
     };
@@ -122,7 +129,7 @@ export default function ChatInput({ isBusy, onSend, onStop, variant = "dock" }: 
               variant="primary"
               aria-label="Send the message"
               disabled={isEmpty}
-              className="size-10 shrink-0 rounded-full disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
+              className="size-10 shrink-0 rounded-full disabled:bg-primary/15 disabled:text-primary/70 disabled:opacity-100"
               onClick={handleSubmit}
             >
               <SharedIcons.SendChatMessageIcon className="size-5" strokeWidth={2.5} />

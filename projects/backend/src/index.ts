@@ -48,6 +48,7 @@ import { privateNetworkCors } from "./plugins/private-network-cors";
 import { rateLimit } from "./plugins/rate-limit";
 import { QueueManager } from "./queue/queue-manager";
 import { AppService } from "./service/app/app.service";
+import { ChatModelService } from "./service/chat/chat-model.service";
 import CacheService from "./service/infra/cache.service";
 import MetricsService from "./service/infra/metrics.service";
 import StorageService from "./service/infra/storage.service";
@@ -72,6 +73,15 @@ try {
   log.error("Database migration failed:", error);
   reportErrorToDiscord("Database migration failed", error);
   process.exit(1);
+}
+
+if (env.CHAT_ENABLED) {
+  try {
+    ChatModelService.assertConfigured();
+  } catch (error) {
+    log.error("Invalid chat configuration:", error);
+    process.exit(1);
+  }
 }
 
 new EventsManager();

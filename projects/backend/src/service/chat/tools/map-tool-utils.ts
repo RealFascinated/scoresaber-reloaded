@@ -4,7 +4,6 @@ import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leade
 import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import type { ScoreSaberV2RealmToken } from "@ssr/common/schemas/scoresaber/tokens/v2/realm/realm";
 import type { SuggestedMap } from "@ssr/common/schemas/suggested-maps/suggested-maps";
-import type { ChatToolContext } from "../chat-tool-context";
 
 export const MAX_TOOL_ROWS = 25;
 
@@ -27,22 +26,6 @@ export function getSiteLinkUrl(
     case "score":
       return `${base}/score/${encodeURIComponent(id)}`;
   }
-}
-
-/**
- * Resolves the player a tool works on: the requested id, or the signed-in user's linked player.
- */
-export function requirePlayerId(context: ChatToolContext, requestedPlayerId: string | undefined) {
-  const playerId = requestedPlayerId ?? context.playerId;
-  if (!playerId) {
-    const failure: { error: string } = {
-      error:
-        "No player id was given and the signed-in user has no linked ScoreSaber profile. Ask the user for their player id or name instead of guessing.",
-    };
-    return failure;
-  }
-  const resolved: { playerId: string } = { playerId };
-  return resolved;
 }
 
 /**

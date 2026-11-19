@@ -71,6 +71,7 @@ export const ChatGetScoreHistoryToolInputSchema = Type.Object({
   playerId: Type.Optional(PlayerIdSchema),
   leaderboardId: Type.Integer({
     minimum: 1,
+    maximum: 2147483647,
     description: "Leaderboard id from resolveMap. Never guess it from a map name or difficulty.",
   }),
 });

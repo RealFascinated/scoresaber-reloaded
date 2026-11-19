@@ -36,15 +36,15 @@ website /chat (useChat) -> POST /chat/:id/messages (Elysia, auth: true)
 
 Add to `projects/common/src/env-schema.ts`, `.env-example`, and the backend only.
 
-| Var | Purpose |
-| --- | --- |
-| `CHAT_ENABLED` | Feature flag. When false, routes return 404 and the nav link is hidden. |
-| `CHAT_API_URL` | OpenAI-compatible base URL. |
-| `CHAT_API_KEY` | API key. |
-| `CHAT_MODEL` | Model id for chat. |
-| `CHAT_TITLE_MODEL` | Optional cheaper model for titles and compaction. Defaults to `CHAT_MODEL`. |
-| `CHAT_MAX_CONTEXT_TOKENS` | Context window budget. Compaction triggers near this. |
-| `CHAT_MAX_STEPS` | Max tool-loop steps per request (default 8). A quality guard, not a spend cap. |
+| Var                       | Purpose                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `CHAT_ENABLED`            | Feature flag. When false, routes return 404 and the nav link is hidden.        |
+| `CHAT_API_URL`            | OpenAI-compatible base URL.                                                    |
+| `CHAT_API_KEY`            | API key.                                                                       |
+| `CHAT_MODEL`              | Model id for chat.                                                             |
+| `CHAT_TITLE_MODEL`        | Optional cheaper model for titles and compaction. Defaults to `CHAT_MODEL`.    |
+| `CHAT_MAX_CONTEXT_TOKENS` | Context window budget. Compaction triggers near this.                          |
+| `CHAT_MAX_STEPS`          | Max tool-loop steps per request (default 8). A quality guard, not a spend cap. |
 
 ## Database
 
@@ -52,7 +52,6 @@ Schema in `projects/backend/src/db/schema.ts`, then `bunx drizzle-kit generate` 
 
 - `chat-conversations`: `id` (uuid pk), `userId` (fk `auth-users`, cascade), `title` (nullable), `summary` (nullable text, rolling compaction summary), `summarizedUpTo` (nullable, id/ordinal of last message folded into the summary), `createdAt`, `updatedAt`. Index on `(userId, updatedAt desc)`.
 - `chat-messages`: `id` (uuid pk), `conversationId` (fk, cascade), `ordinal` (int), `role`, `parts` (jsonb, AI SDK UI message parts incl. tool calls and results), `tokenEstimate` (int), `createdAt`. Unique `(conversationId, ordinal)`.
-
 
 Storing UI message parts keeps tool-result rendering working when a chat is reopened.
 
@@ -106,32 +105,32 @@ Built per request, not stored.
 
 Each is a thin wrapper over an existing service, returns trimmed fields, and caps list sizes (for example 10 to 25 rows).
 
-| Tool | Backed by |
-| --- | --- |
-| `searchPlayers(query)` | `PlayerSearchService.searchPlayers` |
-| `getPlayer(playerId?)` | `PlayerCoreService` / profile service |
-| `getPlayerScores(playerId?, sort, page, filters)` | `PlayerScoresService.getScoreSaberPlayerScores` |
-| `getPlayerHistory(playerId?, days)` | `PlayerHistoryService` |
-| `getPlayerRanking(country?, page)` | `PlayerSearchService.getPlayerRanking` |
-| `getLeaderboard(leaderboardId)` | leaderboard services |
-| `getLeaderboardScores(leaderboardId, page)` | `getLeaderboardScores` |
-| `searchMaps(stars range, query, ranked, ...)` | leaderboard / BeatSaver services |
-| `getSuggestedMaps(playerId?)` | `SuggestedMapsService.getSuggestedMaps` |
-| `comparePlayers(a, b)` | composed from player services |
-| `getFollowing()` | `UserFollowsService` |
-| `getMedals(playerId?)` | medals services |
-| `resolveMap(query)` | leaderboard and BeatSaver search, returns leaderboard ids for a name or hash |
-| `getScoreHistory(playerId?, leaderboardId)` | `PlayerScoreHistoryService` |
-| `getRankedBatches(page)` / `getRankedBatch(id)` | ranked batch services |
-| `getBeatSaverMap(hashOrKey)` | BeatSaver services (mapper, tags, BPM, duration, difficulties) |
-| `getSiteLink(kind, id)` | pure function, builds a site URL for a player, leaderboard or score |
-| `getRealms()` | realm config |
-| `createPlaylist(title, maps[], description?)` | new, see Playlist tools |
-| `getSelfPlaylist(playerId?, settings?)` | `PlaylistService.getSelfPlaylist` |
-| `getSnipePlaylist(playerId?, targetId, settings?)` | `PlaylistService.getSnipePlaylist` |
-| `getSuggestedMapsPlaylist(playerId?, filters?)` | `PlaylistService.getSuggestedMapsPlaylist` |
-| `getRankedBatchPlaylist(rankedBatchId)` | `PlaylistService.getRankedBatchPlaylist` |
-| `getRankedMapsPlaylist(kind)` | `PlaylistService` ranked, qualified, ranking queue, trending |
+| Tool                                               | Backed by                                                                    |
+| -------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `searchPlayers(query)`                             | `PlayerSearchService.searchPlayers`                                          |
+| `getPlayer(playerId?)`                             | `PlayerCoreService` / profile service                                        |
+| `getPlayerScores(playerId?, sort, page, filters)`  | `PlayerScoresService.getScoreSaberPlayerScores`                              |
+| `getPlayerHistory(playerId?, days)`                | `PlayerHistoryService`                                                       |
+| `getPlayerRanking(country?, page)`                 | `PlayerSearchService.getPlayerRanking`                                       |
+| `getLeaderboard(leaderboardId)`                    | leaderboard services                                                         |
+| `getLeaderboardScores(leaderboardId, page)`        | `getLeaderboardScores`                                                       |
+| `searchMaps(stars range, query, ranked, ...)`      | leaderboard / BeatSaver services                                             |
+| `getSuggestedMaps(playerId?)`                      | `SuggestedMapsService.getSuggestedMaps`                                      |
+| `comparePlayers(a, b)`                             | composed from player services                                                |
+| `getFollowing()`                                   | `UserFollowsService`                                                         |
+| `getMedals(playerId?)`                             | medals services                                                              |
+| `resolveMap(query)`                                | leaderboard and BeatSaver search, returns leaderboard ids for a name or hash |
+| `getScoreHistory(playerId?, leaderboardId)`        | `PlayerScoreHistoryService`                                                  |
+| `getRankedBatches(page)` / `getRankedBatch(id)`    | ranked batch services                                                        |
+| `getBeatSaverMap(hashOrKey)`                       | BeatSaver services (mapper, tags, BPM, duration, difficulties)               |
+| `getSiteLink(kind, id)`                            | pure function, builds a site URL for a player, leaderboard or score          |
+| `getRealms()`                                      | realm config                                                                 |
+| `createPlaylist(title, maps[], description?)`      | new, see Playlist tools                                                      |
+| `getSelfPlaylist(playerId?, settings?)`            | `PlaylistService.getSelfPlaylist`                                            |
+| `getSnipePlaylist(playerId?, targetId, settings?)` | `PlaylistService.getSnipePlaylist`                                           |
+| `getSuggestedMapsPlaylist(playerId?, filters?)`    | `PlaylistService.getSuggestedMapsPlaylist`                                   |
+| `getRankedBatchPlaylist(rankedBatchId)`            | `PlaylistService.getRankedBatchPlaylist`                                     |
+| `getRankedMapsPlaylist(kind)`                      | `PlaylistService` ranked, qualified, ranking queue, trending                 |
 
 Exact signatures to be confirmed while implementing.
 

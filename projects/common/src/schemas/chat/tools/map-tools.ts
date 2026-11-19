@@ -28,9 +28,29 @@ const rankedStatusSchema = Type.Union([
   Type.Literal("unranked"),
 ]);
 
+const PlayerIdSchema = Type.String({
+  minLength: 1,
+  maxLength: 32,
+  description: "ScoreSaber player id. Omit it to use the signed-in user's linked player.",
+});
+
+const PageSchema = Type.Integer({
+  minimum: 1,
+  maximum: 1000,
+  description: "1-based page number.",
+});
+
+const SongHashSchema = Type.String({
+  minLength: 32,
+  maxLength: 40,
+  pattern: "^(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{40})$",
+  description: "BeatSaver song hash (32 or 40 hex characters).",
+});
+
 export const GetLeaderboardInputSchema = Type.Object({
   leaderboardId: Type.Integer({
     minimum: 1,
+    maximum: 2147483647,
     description: "ScoreSaber leaderboard id. Get it from resolveMap or searchMaps first; never guess an id.",
   }),
 });
@@ -38,9 +58,10 @@ export const GetLeaderboardInputSchema = Type.Object({
 export const GetLeaderboardScoresInputSchema = Type.Object({
   leaderboardId: Type.Integer({
     minimum: 1,
+    maximum: 2147483647,
     description: "ScoreSaber leaderboard id from resolveMap or searchMaps.",
   }),
-  page: Type.Optional(Type.Integer({ minimum: 1, description: "Page of scores, 1-based. Defaults to 1." })),
+  page: Type.Optional(PageSchema),
 });
 
 export const SearchMapsInputSchema = Type.Object({
@@ -53,7 +74,7 @@ export const SearchMapsInputSchema = Type.Object({
   qualified: Type.Optional(Type.Boolean({ description: "Only qualified maps when true." })),
   category: Type.Optional(ScoreSaberLeaderboardQueryCategorySchema),
   sort: Type.Optional(ScoreSaberLeaderboardQuerySortSchema),
-  page: Type.Optional(Type.Integer({ minimum: 1, description: "Page of results, 1-based. Defaults to 1." })),
+  page: Type.Optional(PageSchema),
 });
 
 export const ResolveMapInputSchema = Type.Object({
@@ -69,33 +90,34 @@ export const GetBeatSaverMapInputSchema = Type.Object({
   hashOrKey: Type.String({
     minLength: 1,
     maxLength: 40,
+    pattern: "^(?:[0-9a-fA-F]{1,8}|[0-9a-fA-F]{32}|[0-9a-fA-F]{40})$",
     description: "BeatSaver song hash (32 or 40 hex characters) or BeatSaver map key.",
   }),
 });
 
 export const GetSuggestedMapsInputSchema = Type.Object({
-  playerId: Type.Optional(
-    Type.String({ description: "ScoreSaber player id. Defaults to the signed-in user's linked player." })
-  ),
+  playerId: Type.Optional(PlayerIdSchema),
   minStars: Type.Optional(Type.Number({ minimum: 0, maximum: 20 })),
   maxStars: Type.Optional(Type.Number({ minimum: 0, maximum: 20 })),
-  minSeconds: Type.Optional(Type.Number({ minimum: 0 })),
-  maxSeconds: Type.Optional(Type.Number({ minimum: 0 })),
-  maxNps: Type.Optional(Type.Number({ minimum: 0 })),
-  minScores: Type.Optional(Type.Integer({ minimum: 0 })),
+  minSeconds: Type.Optional(Type.Number({ minimum: 0, maximum: 36000 })),
+  maxSeconds: Type.Optional(Type.Number({ minimum: 0, maximum: 36000 })),
+  maxNps: Type.Optional(Type.Number({ minimum: 0, maximum: 100 })),
+  minScores: Type.Optional(Type.Integer({ minimum: 0, maximum: 1000000 })),
   hidePlayed: Type.Optional(Type.Boolean()),
   sort: Type.Optional(Type.Union([Type.Literal("gain"), Type.Literal("bonus")])),
   limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 25 })),
 });
 
 export const GetRankedBatchesInputSchema = Type.Object({
-  page: Type.Optional(
-    Type.Integer({ minimum: 1, description: "Page of ranked batches, 1-based. Defaults to 1." })
-  ),
+  page: Type.Optional(PageSchema),
 });
 
 export const GetRankedBatchInputSchema = Type.Object({
-  rankedBatchId: Type.Integer({ minimum: 1, description: "Ranked batch id from getRankedBatches." }),
+  rankedBatchId: Type.Integer({
+    minimum: 1,
+    maximum: 2147483647,
+    description: "Ranked batch id from getRankedBatches.",
+  }),
 });
 
 export const GetSiteLinkInputSchema = Type.Object({
@@ -133,16 +155,12 @@ export const SnipePlaylistToolSettingsSchema = Type.Object({
 });
 
 export const GetSelfPlaylistInputSchema = Type.Object({
-  playerId: Type.Optional(
-    Type.String({ description: "ScoreSaber player id. Defaults to the signed-in user's linked player." })
-  ),
+  playerId: Type.Optional(PlayerIdSchema),
   settings: Type.Optional(SelfPlaylistToolSettingsSchema),
 });
 
 export const GetSnipePlaylistInputSchema = Type.Object({
-  playerId: Type.Optional(
-    Type.String({ description: "Player id of the sniper. Defaults to the signed-in user's linked player." })
-  ),
+  playerId: Type.Optional(PlayerIdSchema),
   targetId: Type.String({
     minLength: 1,
     maxLength: 32,
@@ -152,17 +170,15 @@ export const GetSnipePlaylistInputSchema = Type.Object({
 });
 
 export const GetSuggestedMapsPlaylistInputSchema = Type.Object({
-  playerId: Type.Optional(
-    Type.String({ description: "ScoreSaber player id. Defaults to the signed-in user's linked player." })
-  ),
+  playerId: Type.Optional(PlayerIdSchema),
   filters: Type.Optional(
     Type.Object({
       minStars: Type.Optional(Type.Number({ minimum: 0, maximum: 20 })),
       maxStars: Type.Optional(Type.Number({ minimum: 0, maximum: 20 })),
-      minSeconds: Type.Optional(Type.Number({ minimum: 0 })),
-      maxSeconds: Type.Optional(Type.Number({ minimum: 0 })),
-      maxNps: Type.Optional(Type.Number({ minimum: 0 })),
-      minScores: Type.Optional(Type.Integer({ minimum: 0 })),
+      minSeconds: Type.Optional(Type.Number({ minimum: 0, maximum: 36000 })),
+      maxSeconds: Type.Optional(Type.Number({ minimum: 0, maximum: 36000 })),
+      maxNps: Type.Optional(Type.Number({ minimum: 0, maximum: 100 })),
+      minScores: Type.Optional(Type.Integer({ minimum: 0, maximum: 1000000 })),
       referenceAccuracy: Type.Optional(Type.Number({ minimum: 80, maximum: 99.9 })),
       hidePlayed: Type.Optional(Type.Boolean()),
       sort: Type.Optional(Type.Union([Type.Literal("gain"), Type.Literal("bonus")])),
@@ -172,7 +188,11 @@ export const GetSuggestedMapsPlaylistInputSchema = Type.Object({
 });
 
 export const GetRankedBatchPlaylistInputSchema = Type.Object({
-  rankedBatchId: Type.Integer({ minimum: 1, description: "Ranked batch id from getRankedBatches." }),
+  rankedBatchId: Type.Integer({
+    minimum: 1,
+    maximum: 2147483647,
+    description: "Ranked batch id from getRankedBatches.",
+  }),
 });
 
 export const GetRankedMapsPlaylistInputSchema = Type.Object({
@@ -192,12 +212,7 @@ export const CreatePlaylistMapSchema = Type.Union([
     }),
   }),
   Type.Object({
-    songHash: Type.String({
-      minLength: 32,
-      maxLength: 40,
-      pattern: "^[0-9a-fA-F]+$",
-      description: "Map song hash.",
-    }),
+    songHash: SongHashSchema,
     difficulty: MapDifficultySchema,
     characteristic: Type.Optional(MapCharacteristicSchema),
   }),

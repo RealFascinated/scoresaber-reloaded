@@ -1,4 +1,5 @@
 import { CHAT_ROUTE } from "@ssr/common/api-routes";
+import { BadRequestError } from "@ssr/common/error/bad-request-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import {
   CHAT_CONVERSATIONS_PER_PAGE,
@@ -121,8 +122,12 @@ export default function chatController(app: Elysia) {
         async ({ user, params: { id }, body, set }) => {
           ensureEnabled();
           set.headers["cache-control"] = PRIVATE_NO_STORE;
+          const title = body.title.trim();
+          if (title.length === 0) {
+            throw new BadRequestError("The title must not be blank");
+          }
           return ChatConversationService.toConversation(
-            await ChatConversationService.rename(user.id, id, body.title.trim())
+            await ChatConversationService.rename(user.id, id, title)
           );
         }
       )
@@ -159,6 +164,7 @@ export default function chatController(app: Elysia) {
             user,
             conversationId: id,
             text: body.text,
+            regenerate: body.regenerate,
             abortSignal: request.signal,
           });
           response.headers.set("cache-control", PRIVATE_NO_STORE);

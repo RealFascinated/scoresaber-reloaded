@@ -114,6 +114,8 @@ describe("buildPlaylistOutput", () => {
     const output = buildPlaylistOutput(makePlaylist(MAX_GENERATED_PLAYLIST_SONGS + 20));
     expect(output.songCount).toBe(MAX_GENERATED_PLAYLIST_SONGS);
     expect(output.bplist.songs).toHaveLength(MAX_GENERATED_PLAYLIST_SONGS);
+    expect(output.totalCount).toBe(MAX_GENERATED_PLAYLIST_SONGS + 20);
+    expect(output.truncated).toBe(true);
   });
 
   it("strips a huge cover image and the sync route", () => {
@@ -143,6 +145,8 @@ describe("playlistModelOutput", () => {
     expect(modelOutput.value).toEqual({
       title: "My Maps",
       songCount: 3,
+      totalCount: 3,
+      truncated: false,
       fileName: "my-maps.bplist",
     });
     expect("bplist" in modelOutput.value).toBe(false);
@@ -155,6 +159,8 @@ describe("playlistModelOutput", () => {
     expect(playlistModelOutput(output).value).toEqual({
       title: "My Maps",
       songCount: 1,
+      totalCount: 1,
+      truncated: false,
       fileName: "my-maps.bplist",
       skipped: [{ input: "leaderboard 9", reason: "Map not found" }],
     });
