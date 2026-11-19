@@ -50,6 +50,7 @@ export class ChatTitleService {
           system: TITLE_SYSTEM_PROMPT,
           prompt: `User: ${userText.slice(0, TITLE_INPUT_LIMIT)}`,
           maxOutputTokens: TITLE_MAX_OUTPUT_TOKENS,
+          reasoning: "none",
           abortSignal: AbortSignal.timeout(TITLE_TIMEOUT_MS),
         });
         title = ChatTitleService.cleanTitle(text, userText);
