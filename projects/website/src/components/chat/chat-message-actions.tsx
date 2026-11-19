@@ -40,7 +40,7 @@ export default function ChatMessageActions({
       <button
         type="button"
         aria-label={isCopied ? "Copied" : "Copy the answer"}
-        className={ICON_BUTTON_CLASS}
+        className={`${ICON_BUTTON_CLASS} hidden sm:block`}
         onClick={handleCopy}
       >
         {isCopied ? (
