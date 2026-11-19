@@ -1,7 +1,5 @@
-import { env } from "@ssr/common/env";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
-import { ScoreSaberAccount } from "@ssr/common/schemas/scoresaber/account";
 import { ScoreSaberPlayerHistoryEntries } from "@ssr/common/schemas/scoresaber/player/history";
 import { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
@@ -16,14 +14,18 @@ import {
 import { EmbedBuilder } from "discord.js";
 import { DiscordChannels, sendEmbedToChannel } from "../../bot/bot";
 import { playerHistoryRowToType } from "../../db/converter/player-history";
-import { type PlayerHistoryRow } from "../../db/schema";
+import { scoreSaberAccountRowToType } from "../../db/converter/scoresaber-account";
+import { type PlayerHistoryRow, type ScoreSaberAccountRow } from "../../db/schema";
 import {
   PlayerHistoryRepository,
   type DailyScoreCounterKey,
 } from "../../repositories/player-history.repository";
 import { ScoreSaberAccountsRepository } from "../../repositories/scoresaber-accounts.repository";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
-import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import {
+  ScoreSaberScoresRepository,
+  emptyScoreSaberPlayerScoreStatistics,
+} from "../../repositories/scoresaber-scores.repository";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import { PlayerStatisticsService } from "../player-statistics/player-statistics.service";
 import { RealmService } from "../realm/realm.service";
@@ -31,108 +33,57 @@ import { PlayerCoreService } from "./player-core.service";
 import { PlayerScoresService } from "./player-scores.service";
 import ScoreSaberPlayerService from "./scoresaber-player.service";
 
+const CHUNK_SIZE = 250;
+const CHUNKS_IN_FLIGHT = 2;
+const ACCOUNT_WRITE_CONCURRENCY = 10;
+
 export class PlayerHistoryService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player History");
 
   /**
-   * Updates the player statistics for all players.
-   *
-   * @param callback the callback that gets called when a page is fetched
+   * Tracks the daily statistics of every ranked player in every realm, a chunk of players at a time.
    */
   public static async updatePlayerStatistics() {
     const now = new Date();
     PlayerHistoryService.logger.info("Starting player statistics update...");
 
-    let successCount = 0;
-    let errorCount = 0;
-
-    const fetched = await PlayerHistoryService.fetchAllPlayers(DEFAULT_REALM_ID);
-    if (fetched === undefined) {
+    const result = await PlayerHistoryService.trackRealmPlayers(DEFAULT_REALM_ID, now);
+    if (result === undefined) {
       PlayerHistoryService.logger.error(
         "Failed to fetch players on page 1, skipping player statistics update..."
       );
       return;
     }
-    const { players } = fetched;
-    errorCount += fetched.failedPages;
-    PlayerHistoryService.logger.info(`Found ${players.length} active players from ScoreSaber API`);
-
-    const batchSize = Math.max(1, env.DATABASE_POOL_MAX - 10);
-    const refreshedPlayerIds: string[] = [];
-
-    await processInBatches(players, batchSize, async player => {
-      const playerId = String(player.id);
-
-      try {
-        const account = await PlayerCoreService.getOrCreateAccount(playerId, player);
-        const statistics = await PlayerHistoryService.trackPlayerHistory(
-          account,
-          now,
-          player,
-          DEFAULT_REALM_ID
-        );
-
-        if (account.inactive !== player.inactive) {
-          await PlayerCoreService.updatePlayer(account.id, { inactive: player.inactive });
-          account.inactive = player.inactive;
-        }
-
-        await ScoreSaberPlayerService.cacheBasicPlayer(player, account, DEFAULT_REALM_ID);
-        refreshedPlayerIds.push(playerId);
-
-        if (statistics && !player.banned) {
-          const [recordedScores, archivedScores] = await Promise.all([
-            ScoreSaberScoresRepository.countByPlayerId(playerId),
-            ScoreSaberScoreHistoryRepository.countByPlayerId(playerId),
-          ]);
-          const recordedPlays = recordedScores + archivedScores;
-          if (recordedPlays < player.stats.totalSubmittedPlays) {
-            await PlayerScoresService.checkScoreCountFromApi(playerId);
-          }
-        }
-
-        successCount++;
-
-        if (successCount % 1000 === 0) {
-          PlayerHistoryService.logger.info(`Tracked ${successCount}/${players.length} players...`);
-        }
-      } catch (err) {
-        errorCount++;
-        PlayerHistoryService.logger.error(`Failed to track player "${playerId}"`, err);
-      }
-    });
-
-    await PlayerCoreService.invalidatePlayersCaches(refreshedPlayerIds, {
-      detailTypes: ["full"],
-      realmIds: [DEFAULT_REALM_ID],
-    });
 
     for (const realmId of (await RealmService.getRealmIds()).filter(id => id !== DEFAULT_REALM_ID)) {
       try {
-        await PlayerHistoryService.updateRealmPlayerStatistics(realmId, now);
+        const realmResult = await PlayerHistoryService.trackRealmPlayers(realmId, now);
+        if (realmResult === undefined) {
+          PlayerHistoryService.logger.error(`Failed to fetch players for realm "${realmId}", skipping...`);
+          continue;
+        }
+        PlayerHistoryService.logger.info(
+          `Tracked ${realmResult.tracked}/${realmResult.playerIds.length} players in realm "${realmId}"`
+        );
       } catch (err) {
         PlayerHistoryService.logger.error(`Failed to track realm "${realmId}" player statistics`, err);
       }
     }
 
-    const playerIds = new Set(players.map(player => String(player.id)));
-    const activePlayerIdsArray = Array.from(playerIds);
-    PlayerHistoryService.logger.info(`Found ${playerIds.size} active players from ScoreSaber API`);
-
-    const inactiveUpdate = await ScoreSaberAccountsRepository.markInactiveWhereIdNotIn(activePlayerIdsArray);
+    const inactiveUpdate = await ScoreSaberAccountsRepository.markInactiveWhereIdNotIn(result.playerIds);
     const inactivePlayers = inactiveUpdate.rowCount ?? 0;
-
     if (inactivePlayers > 0) {
       PlayerHistoryService.logger.info(`Marked ${inactivePlayers} players as inactive`);
     }
 
+    const errorCount = result.failed + result.failedPages;
     sendEmbedToChannel(
       DiscordChannels.BACKEND_LOGS,
       new EmbedBuilder()
-        .setTitle(`Refreshed ${successCount} players.`)
+        .setTitle(`Refreshed ${result.tracked} players.`)
         .setDescription(
           [
-            `Successfully processed: ${successCount} players`,
+            `Successfully processed: ${result.tracked} players`,
             `Failed to process: ${errorCount} players`,
             `Inactive players: ${inactivePlayers}`,
           ].join("\n")
@@ -141,106 +92,198 @@ export class PlayerHistoryService {
     );
     PlayerHistoryService.logger.info(
       `Finished tracking player statistics in ${(Date.now() - now.getTime()).toFixed(0)}ms\n` +
-        `Successfully processed: ${successCount} players\n` +
+        `Successfully processed: ${result.tracked} players\n` +
         `Failed to process: ${errorCount} players\n` +
         `Total inactive players: ${inactivePlayers}`
     );
   }
 
-  private static async fetchAllPlayers(realmId: number) {
-    const firstPage = await ScoreSaberApiService.lookupPlayers(1, { realmId });
+  private static async trackRealmPlayers(realmId: number, trackTime: Date) {
+    const firstPage = await ScoreSaberApiService.lookupPlayers(1, { realmId, skipCache: true });
     if (firstPage == undefined) {
       return undefined;
     }
 
     const pages = Math.ceil(firstPage.metadata.totalItems / (firstPage.metadata.itemsPerPage ?? 100));
-    PlayerHistoryService.logger.info(`Fetching ${pages} pages of players from ScoreSaber...`);
-    PlayerHistoryService.logger.info(`Fetching page 1 of ${pages}...`);
+    PlayerHistoryService.logger.info(`Tracking ${pages} pages of players in realm "${realmId}"...`);
 
+    const playerIds: string[] = [];
+    const inFlight = new Set<Promise<void>>();
+    let pending: ScoreSaberV2PlayerPageToken[] = [];
+    let tracked = 0;
+    let failed = 0;
     let failedPages = 0;
-    const players: ScoreSaberV2PlayerPageToken[] = [...(firstPage.data ?? [])];
 
-    for (let page = 2; page <= pages; page++) {
-      if (page % 10 === 0 || page === pages) {
-        PlayerHistoryService.logger.info(`Fetching page ${page} of ${pages}...`);
+    const startChunk = async (players: ScoreSaberV2PlayerPageToken[]) => {
+      const chunk: Promise<void> = PlayerHistoryService.trackPlayersChunk(players, realmId, trackTime)
+        .then(
+          count => {
+            tracked += count;
+            failed += players.length - count;
+          },
+          err => {
+            failed += players.length;
+            PlayerHistoryService.logger.error(
+              `Failed to track a chunk of players in realm "${realmId}"`,
+              err
+            );
+          }
+        )
+        .finally(() => inFlight.delete(chunk));
+      inFlight.add(chunk);
+      if (inFlight.size >= CHUNKS_IN_FLIGHT) {
+        await Promise.race(inFlight);
       }
-      const response = await ScoreSaberApiService.lookupPlayers(page, { realmId });
+    };
+    const accept = async (players: ScoreSaberV2PlayerPageToken[]) => {
+      for (const player of players) {
+        playerIds.push(String(player.id));
+      }
+      pending = pending.concat(players);
+      while (pending.length >= CHUNK_SIZE) {
+        await startChunk(pending.slice(0, CHUNK_SIZE));
+        pending = pending.slice(CHUNK_SIZE);
+      }
+    };
+
+    await accept(firstPage.data ?? []);
+    for (let page = 2; page <= pages; page++) {
+      const response = await ScoreSaberApiService.lookupPlayers(page, { realmId, skipCache: true });
       if (response == undefined) {
         PlayerHistoryService.logger.error(`Failed to fetch players on page ${page}, skipping page...`);
         failedPages++;
         continue;
       }
-      players.push(...(response.data ?? []));
-    }
-    return { players, failedPages };
-  }
-
-  private static async updateRealmPlayerStatistics(realmId: number, trackTime: Date) {
-    PlayerHistoryService.logger.info(`Starting player statistics update for realm "${realmId}"...`);
-    const fetched = await PlayerHistoryService.fetchAllPlayers(realmId);
-    if (fetched === undefined) {
-      PlayerHistoryService.logger.error(`Failed to fetch players for realm "${realmId}", skipping...`);
-      return;
-    }
-
-    const batchSize = Math.max(1, env.DATABASE_POOL_MAX - 10);
-    let trackedCount = 0;
-    const refreshedPlayerIds: string[] = [];
-    await processInBatches(fetched.players, batchSize, async player => {
-      try {
-        const account = await PlayerCoreService.getOrCreateAccount(String(player.id), player);
-        await PlayerHistoryService.trackPlayerHistory(account, trackTime, player, realmId);
-        await ScoreSaberPlayerService.cacheBasicPlayer(player, account, realmId);
-        refreshedPlayerIds.push(String(player.id));
-        trackedCount++;
-      } catch (err) {
-        PlayerHistoryService.logger.error(`Failed to track player "${player.id}" in realm "${realmId}"`, err);
+      await accept(response.data ?? []);
+      if (page % 100 === 0) {
+        PlayerHistoryService.logger.info(`Tracked ${tracked} players, fetched page ${page} of ${pages}...`);
       }
-    });
-    await PlayerCoreService.invalidatePlayersCaches(refreshedPlayerIds, {
-      detailTypes: ["full"],
-      realmIds: [realmId],
-    });
-    PlayerHistoryService.logger.info(
-      `Tracked ${trackedCount}/${fetched.players.length} players in realm "${realmId}"`
-    );
+    }
+    if (pending.length > 0) {
+      await startChunk(pending);
+    }
+    await Promise.all(inFlight);
+
+    return { playerIds, tracked, failed, failedPages };
   }
 
-  /**
-   * Tracks and updates a player's statistics for a specific date.
-   * This method handles both new and existing players, updating their statistics
-   * and handling inactive status.
-   *
-   * @param player the player to track the history for
-   * @param trackTime the time to track the history for
-   * @param playerToken the player token to track the history for, resolved for the realm
-   * @param realmId the realm to track the history in
-   */
-  public static async trackPlayerHistory(
-    player: ScoreSaberAccount,
-    trackTime: Date,
-    playerToken: ScoreSaberPlayerLookupToken,
-    realmId: number
+  private static async trackPlayersChunk(
+    players: ScoreSaberV2PlayerPageToken[],
+    realmId: number,
+    trackTime: Date
   ) {
-    if (!playerToken || playerToken.inactive) {
-      return undefined;
+    const isDefaultRealm = realmId === DEFAULT_REALM_ID;
+    const ids = players.map(player => String(player.id));
+    const accounts = new Map(
+      (await ScoreSaberAccountsRepository.findManyByIds(ids)).map(account => [account.id, account])
+    );
+
+    const missing = players.filter(player => !accounts.has(String(player.id)));
+    if (missing.length > 0) {
+      await processInBatches(missing, ACCOUNT_WRITE_CONCURRENCY, async player => {
+        try {
+          await PlayerCoreService.getOrCreateAccount(String(player.id), player);
+        } catch (err) {
+          PlayerHistoryService.logger.error(`Failed to create player "${player.id}"`, err);
+        }
+      });
+      const created = await ScoreSaberAccountsRepository.findManyByIds(
+        missing.map(player => String(player.id))
+      );
+      for (const account of created) {
+        accounts.set(account.id, account);
+      }
     }
 
-    if (realmId === DEFAULT_REALM_ID) {
-      await PlayerCoreService.updatePeakRank(playerToken);
-    }
+    const tracked = players.flatMap(player => {
+      const account = accounts.get(String(player.id));
+      return account ? [{ player, account }] : [];
+    });
 
+    const changed = tracked.flatMap(({ player, account }) => {
+      const updates: Partial<Omit<ScoreSaberAccountRow, "id">> = PlayerCoreService.accountUpdatesFromToken(
+        account,
+        player
+      );
+      if (isDefaultRealm && account.inactive !== player.inactive) {
+        updates.inactive = player.inactive;
+      }
+      const rank = player.stats.rank;
+      if (
+        isDefaultRealm &&
+        !player.inactive &&
+        rank !== 0 &&
+        account.peakRank !== rank &&
+        (!account.peakRank || rank < account.peakRank)
+      ) {
+        updates.peakRank = rank;
+        updates.peakRankTimestamp = trackTime;
+      }
+      return Object.keys(updates).length > 0 ? [{ account, updates }] : [];
+    });
+    await processInBatches(changed, ACCOUNT_WRITE_CONCURRENCY, async ({ account, updates }) => {
+      await PlayerCoreService.updatePlayer(account.id, updates);
+      Object.assign(account, updates);
+    });
+
+    const active = tracked.filter(({ player }) => !player.inactive);
+    const scoreStatistics = await ScoreSaberScoresRepository.getPlayersScoreStatistics(
+      active.map(({ account }) => account.id),
+      realmId
+    );
     const date = getMidnightAlignedDate(trackTime);
-
-    const statistics = await PlayerStatisticsService.getStatistics(playerToken, realmId);
-    await PlayerHistoryRepository.upsertByPlayerAndDate(
-      player.id,
-      date,
-      PlayerHistoryService.createHistoryEntry(statistics, playerToken),
+    await PlayerHistoryRepository.upsertMany(
+      active.map(({ player, account }) => ({
+        playerId: account.id,
+        date,
+        data: PlayerHistoryService.createHistoryEntry(
+          PlayerStatisticsService.buildStatistics(
+            player,
+            account.medals,
+            scoreStatistics.get(account.id)?.statistics ?? emptyScoreSaberPlayerScoreStatistics()
+          ),
+          player
+        ),
+      })),
       realmId
     );
 
-    return statistics;
+    await Promise.all(
+      tracked.map(({ player, account }) =>
+        ScoreSaberPlayerService.cacheBasicPlayer(player, scoreSaberAccountRowToType(account), realmId)
+      )
+    );
+    await PlayerCoreService.invalidatePlayersCaches(
+      tracked.map(({ account }) => account.id),
+      { detailTypes: ["full"], realmIds: [realmId] }
+    );
+
+    if (isDefaultRealm) {
+      await PlayerHistoryService.checkScoreCounts(
+        active.filter(({ player }) => !player.banned).map(({ player }) => player)
+      );
+    }
+
+    return tracked.length;
+  }
+
+  private static async checkScoreCounts(players: ScoreSaberV2PlayerPageToken[]) {
+    const ids = players.map(player => String(player.id));
+    const [recordedScores, archivedScores] = await Promise.all([
+      ScoreSaberScoresRepository.countByPlayerIds(ids),
+      ScoreSaberScoreHistoryRepository.countByPlayerIds(ids),
+    ]);
+    const behind = players.filter(player => {
+      const id = String(player.id);
+      return (recordedScores.get(id) ?? 0) + (archivedScores.get(id) ?? 0) < player.stats.totalSubmittedPlays;
+    });
+    await processInBatches(behind, ACCOUNT_WRITE_CONCURRENCY, async player => {
+      try {
+        await PlayerScoresService.checkScoreCountFromApi(String(player.id));
+      } catch (err) {
+        PlayerHistoryService.logger.error(`Failed to check the score count of "${player.id}"`, err);
+      }
+    });
   }
 
   /**

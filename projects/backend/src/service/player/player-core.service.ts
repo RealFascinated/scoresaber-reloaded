@@ -30,6 +30,32 @@ export class PlayerCoreService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player Core");
 
   /**
+   * Gets the account fields that differ from a freshly looked up token.
+   *
+   * @param account the stored account
+   * @param playerToken the token to compare against
+   */
+  public static accountUpdatesFromToken(
+    account: ScoreSaberAccountRow,
+    playerToken: ScoreSaberPlayerLookupToken
+  ) {
+    const updates: Partial<Pick<ScoreSaberAccountRow, "name" | "country" | "banned" | "avatar">> = {};
+    if (playerToken.name && playerToken.name !== account.name) {
+      updates.name = playerToken.name;
+    }
+    if (playerToken.country !== account.country) {
+      updates.country = playerToken.country ?? null;
+    }
+    if (playerToken.banned !== account.banned) {
+      updates.banned = playerToken.banned ?? false;
+    }
+    if (account.avatar !== playerToken.avatar) {
+      updates.avatar = playerToken.avatar;
+    }
+    return updates;
+  }
+
+  /**
    * Gets a player by id.
    *
    * @param id the player's id
@@ -69,26 +95,8 @@ export class PlayerCoreService {
       }
     }
 
-    let shouldSave = false;
-    const updates: Partial<Pick<ScoreSaberAccountRow, "name" | "country" | "banned" | "avatar">> = {};
-    if (playerToken) {
-      if (playerToken.name && playerToken.name !== account.name) {
-        updates.name = playerToken.name;
-        shouldSave = true;
-      }
-      if (playerToken.country !== account.country) {
-        updates.country = playerToken.country ?? null;
-        shouldSave = true;
-      }
-      if (playerToken.banned !== account.banned) {
-        updates.banned = playerToken.banned ?? false;
-        shouldSave = true;
-      }
-      if (account.avatar !== playerToken.avatar) {
-        updates.avatar = playerToken.avatar;
-        shouldSave = true;
-      }
-    }
+    const updates = playerToken ? PlayerCoreService.accountUpdatesFromToken(account, playerToken) : {};
+    const shouldSave = Object.keys(updates).length > 0;
 
     if (shouldSave) {
       await PlayerCoreService.updatePlayer(id, updates);
@@ -314,33 +322,5 @@ export class PlayerCoreService {
     if (options?.invalidateCache !== false) {
       await PlayerCoreService.invalidatePlayerCaches(playerId);
     }
-  }
-
-  /**
-   * Updates the player's peak rank.
-   *
-   * @param playerToken the player's token
-   */
-  public static async updatePeakRank(playerToken: ScoreSaberPlayerLookupToken) {
-    const account = await ScoreSaberAccountsRepository.findRowById(playerToken.id);
-    if (!account) {
-      return;
-    }
-    const rank = playerToken.stats.rank;
-    if (account.peakRank === rank) {
-      return;
-    }
-    if (rank == 0) {
-      return;
-    }
-
-    if (!account.peakRank || (account.peakRank && rank < account.peakRank)) {
-      await ScoreSaberAccountsRepository.updateAccount(playerToken.id, {
-        peakRank: rank,
-        peakRankTimestamp: new Date(),
-      });
-    }
-
-    return scoreSaberAccountRowToType(account);
   }
 }

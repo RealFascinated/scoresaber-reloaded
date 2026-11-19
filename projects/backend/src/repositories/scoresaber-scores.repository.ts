@@ -427,6 +427,24 @@ export class ScoreSaberScoresRepository {
   }
 
   /**
+   * Counts the current scores of many players in one query.
+   *
+   * @param playerIds the players to count
+   * @returns the count per player id, players without scores are absent
+   */
+  public static async countByPlayerIds(playerIds: string[]) {
+    if (playerIds.length === 0) {
+      return new Map<string, number>();
+    }
+    const rows = await db
+      .select({ playerId: scoreSaberScoresTable.playerId, count: count() })
+      .from(scoreSaberScoresTable)
+      .where(inArray(scoreSaberScoresTable.playerId, playerIds))
+      .groupBy(scoreSaberScoresTable.playerId);
+    return new Map(rows.map(row => [row.playerId, row.count]));
+  }
+
+  /**
    * Gets the ids of every current score row for a player.
    *
    * @param playerId the player's id
@@ -637,6 +655,21 @@ export class ScoreSaberScoresRepository {
    * @param realmId the realm to resolve pp for
    */
   public static async getPlayerScoreStatistics(playerId: string, realmId: number) {
+    const statistics = await ScoreSaberScoresRepository.getPlayersScoreStatistics([playerId], realmId);
+    return statistics.get(playerId) ?? ScoreSaberScoresRepository.combineScoreStatistics([]);
+  }
+
+  /**
+   * Aggregates the score statistics and headset breakdown of many players in one query.
+   *
+   * @param playerIds the players to aggregate
+   * @param realmId the realm to resolve pp for
+   * @returns the statistics per player id, players without scores are absent
+   */
+  public static async getPlayersScoreStatistics(playerIds: string[], realmId: number) {
+    if (playerIds.length === 0) {
+      return new Map<string, ReturnType<typeof ScoreSaberScoresRepository.combineScoreStatistics>>();
+    }
     const accuracy = scoreSaberScoresTable.accuracy;
     const score = scoreSaberScoresTable.score;
     const valid = sql`filter (where ${accuracy} >= 0)`;
@@ -648,6 +681,7 @@ export class ScoreSaberScoresRepository {
 
     const rows = await db
       .select({
+        playerId: scoreSaberScoresTable.playerId,
         hmd: scoreSaberScoresTable.hmd,
         hmdCount: sql<number>`cast(count(*) as integer)`,
         totalScore: sql<number>`(coalesce(sum(${score}) ${valid}, 0))::double precision`,
@@ -665,9 +699,44 @@ export class ScoreSaberScoresRepository {
       })
       .from(scoreSaberScoresTable)
       .leftJoin(scoreSaberScoreRealmsTable, scoreRealmJoinOn(realmId))
-      .where(eq(scoreSaberScoresTable.playerId, playerId))
-      .groupBy(scoreSaberScoresTable.hmd);
+      .where(inArray(scoreSaberScoresTable.playerId, playerIds))
+      .groupBy(scoreSaberScoresTable.playerId, scoreSaberScoresTable.hmd);
 
+    const rowsByPlayer = new Map<string, typeof rows>();
+    for (const row of rows) {
+      const playerRows = rowsByPlayer.get(row.playerId);
+      if (playerRows) {
+        playerRows.push(row);
+      } else {
+        rowsByPlayer.set(row.playerId, [row]);
+      }
+    }
+    return new Map(
+      [...rowsByPlayer].map(([playerId, playerRows]) => [
+        playerId,
+        ScoreSaberScoresRepository.combineScoreStatistics(playerRows),
+      ])
+    );
+  }
+
+  private static combineScoreStatistics(
+    rows: {
+      hmd: HMD | null;
+      hmdCount: number;
+      totalScore: number;
+      totalRankedScore: number;
+      totalRankedScores: number;
+      totalScores: number;
+      rankedAccuracySum: number;
+      accuracySum: number;
+      aPlays: number;
+      sPlays: number;
+      spPlays: number;
+      ssPlays: number;
+      sspPlays: number;
+      godPlays: number;
+    }[]
+  ) {
     const hmdBreakdown = Object.fromEntries(
       rows
         .filter(row => row.hmd != null)

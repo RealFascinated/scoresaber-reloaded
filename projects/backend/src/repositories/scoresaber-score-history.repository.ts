@@ -97,6 +97,27 @@ export class ScoreSaberScoreHistoryRepository {
   }
 
   /**
+   * Counts the archived plays of many players in one query.
+   *
+   * @param playerIds the players to count
+   * @returns the count per player id, players without archived plays are absent
+   */
+  public static async countByPlayerIds(playerIds: string[]) {
+    if (playerIds.length === 0) {
+      return new Map<string, number>();
+    }
+    const rows = await db
+      .select({
+        playerId: scoreSaberScoreHistoryTable.playerId,
+        count: sql<number>`cast(count(*) as integer)`,
+      })
+      .from(scoreSaberScoreHistoryTable)
+      .where(inArray(scoreSaberScoreHistoryTable.playerId, playerIds))
+      .groupBy(scoreSaberScoreHistoryTable.playerId);
+    return new Map(rows.map(row => [row.playerId, Number(row.count)]));
+  }
+
+  /**
    * Returns the score ids already recorded in the history table.
    *
    * Used by the backfill to skip archived plays without per-score lookups.

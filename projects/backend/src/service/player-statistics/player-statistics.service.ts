@@ -3,7 +3,10 @@ import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber
 import { eq } from "drizzle-orm";
 import { db } from "../../db";
 import { scoreSaberAccountsTable } from "../../db/schema";
-import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import {
+  ScoreSaberScoresRepository,
+  type emptyScoreSaberPlayerScoreStatistics,
+} from "../../repositories/scoresaber-scores.repository";
 import CacheService, { CacheId } from "../infra/cache.service";
 
 export class PlayerStatisticsService {
@@ -27,12 +30,26 @@ export class PlayerStatisticsService {
     }
 
     const { statistics: scoreStats } = await PlayerStatisticsService.getScoreStats(playerId, realmId);
+    return PlayerStatisticsService.buildStatistics(playerToken, account.medals, scoreStats);
+  }
 
+  /**
+   * Builds a player's statistics from their token, medals and score statistics.
+   *
+   * @param playerToken the player token, resolved for the realm
+   * @param medals the player's medal count
+   * @param scoreStats the player's score statistics in the realm
+   */
+  public static buildStatistics(
+    playerToken: ScoreSaberPlayerLookupToken,
+    medals: number,
+    scoreStats: ReturnType<typeof emptyScoreSaberPlayerScoreStatistics>
+  ) {
     return {
       rank: playerToken.stats.rank,
       countryRank: playerToken.stats.countryRank,
 
-      medals: account.medals,
+      medals,
 
       pp: playerToken.stats.totalPP,
       plusOnePp: playerToken.stats.plusOnePP ?? 0,

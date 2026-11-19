@@ -30,9 +30,25 @@ export class PlayerHistoryRepository {
     data: ScoreSaberPlayerHistory,
     realmId: number
   ) {
+    await PlayerHistoryRepository.upsertMany([{ playerId, date, data }], realmId);
+  }
+
+  /**
+   * Upserts the history rows of many players in one statement.
+   *
+   * @param entries the player, date and history data of each row
+   * @param realmId the realm the rows belong to
+   */
+  public static async upsertMany(
+    entries: { playerId: string; date: Date; data: ScoreSaberPlayerHistory }[],
+    realmId: number
+  ) {
+    if (entries.length === 0) {
+      return;
+    }
     await db
       .insert(playerHistoryTable)
-      .values({ playerId, date, realmId, ...data })
+      .values(entries.map(({ playerId, date, data }) => ({ playerId, date, realmId, ...data })))
       .onConflictDoUpdate({
         target: [playerHistoryTable.playerId, playerHistoryTable.date, playerHistoryTable.realmId],
         set: {
