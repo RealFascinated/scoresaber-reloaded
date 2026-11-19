@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { SharedIcons } from "@/shared-icons";
 import { CHAT_MESSAGE_MAX_LENGTH } from "@ssr/common/schemas/chat/chat-message";
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +17,7 @@ type ChatInputProps = {
  * The message box. Enter sends, Shift+Enter adds a line, and while a reply streams the send button becomes stop.
  */
 export default function ChatInput({ isBusy, onSend, onStop, variant = "dock" }: ChatInputProps) {
+  const isMobile = useIsMobile();
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -107,7 +109,7 @@ export default function ChatInput({ isBusy, onSend, onStop, variant = "dock" }: 
             }}
             rows={1}
             maxLength={CHAT_MESSAGE_MAX_LENGTH}
-            placeholder="Ask about a player, a map or your scores…"
+            placeholder={isMobile ? "Ask anything" : "Ask about a player, a map or your scores…"}
             aria-label="Message"
             className="max-h-52 min-h-10 flex-1 resize-none bg-transparent px-3 py-2.5 text-sm outline-hidden placeholder:text-muted-foreground"
           />
