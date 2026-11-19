@@ -1,11 +1,17 @@
 "use client";
 
 import { chatMessagesUrl, createChatConversation, fetchChatConversation } from "@/common/chat/chat-api";
+import ChatContextUsage from "@/components/chat/chat-context-usage";
 import { getUserMessageText, toDisplayMessage, toDisplayStreamMessage } from "@/components/chat/chat-display";
 import ChatEmptyState from "@/components/chat/chat-empty-state";
 import ChatInput from "@/components/chat/chat-input";
 import ChatMessageList from "@/components/chat/chat-message-list";
-import { CHAT_CONVERSATIONS_QUERY_KEY, useChatConversations } from "@/components/chat/chat-queries";
+import {
+  CHAT_CONTEXT_QUERY_KEY,
+  CHAT_CONVERSATIONS_QUERY_KEY,
+  useChatContextUsage,
+  useChatConversations,
+} from "@/components/chat/chat-queries";
 import ChatSidebar from "@/components/chat/chat-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useChat } from "@ai-sdk/react";
@@ -14,7 +20,15 @@ import type { ChatMessage } from "@ssr/common/schemas/chat/chat-message";
 import { useQueryClient } from "@tanstack/react-query";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { usePathname } from "next/navigation";
-import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { toast } from "sonner";
 
 const TITLE_REFRESH_DELAYS_MS = [2000, 5000];
@@ -92,7 +106,6 @@ export default function ChatShell(props: ChatShellProps) {
 
 function ChatShellContent({ conversationId: serverConversationId, initialMessages }: ChatShellProps) {
   const queryClient = useQueryClient();
-  const [conversationId, setConversationId] = useState(serverConversationId);
   const sidebarWidth = useSyncExternalStore(
     subscribeSidebarWidth,
     getSidebarWidth,
@@ -181,6 +194,7 @@ function ChatShellContent({ conversationId: serverConversationId, initialMessage
         setDurations(previous => ({ ...previous, [message.id]: duration }));
       }
       void queryClient.invalidateQueries({ queryKey: CHAT_CONVERSATIONS_QUERY_KEY });
+      void queryClient.invalidateQueries({ queryKey: CHAT_CONTEXT_QUERY_KEY });
       for (const delay of TITLE_REFRESH_DELAYS_MS) {
         titleTimeoutsRef.current.push(
           setTimeout(() => {
@@ -195,6 +209,7 @@ function ChatShellContent({ conversationId: serverConversationId, initialMessage
   const activeConversation = conversations.data?.pages
     .flatMap(page => page.items)
     .find(conversation => conversation.id === conversationId);
+  const contextUsage = useChatContextUsage(conversationId);
   const title = activeConversation?.title ?? "New chat";
 
   const isBusy = status === "submitted" || status === "streaming";
@@ -254,6 +269,7 @@ function ChatShellContent({ conversationId: serverConversationId, initialMessage
         <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border/40 px-3">
           <SidebarTrigger className="md:hidden md:group-has-data-[state=collapsed]/sidebar-wrapper:inline-flex" />
           <h1 className="min-w-0 flex-1 truncate text-sm font-medium text-muted-foreground">{title}</h1>
+          {contextUsage.data && <ChatContextUsage usage={contextUsage.data} />}
         </div>
         {isEmptyChat ? (
           <ChatEmptyState isBusy={isBusy} onSend={handleSend} onStop={stop} />

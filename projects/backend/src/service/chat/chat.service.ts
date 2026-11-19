@@ -163,9 +163,13 @@ export class ChatService {
     const textPart = { type: "text", text };
     const newParts: ChatMessagePart[] = [textPart];
     const newMessageTokens = ChatContextService.estimateTokens(text);
+    const prompt = {
+      systemPromptTokens: ChatContextService.estimateTokens(system),
+      tools: ChatContextService.measureTools(tools),
+    };
     const budget = ChatContextService.getBudget(
       env.CHAT_MAX_CONTEXT_TOKENS,
-      ChatContextService.estimateTokens(system) + ChatContextService.estimateToolTokens(tools)
+      prompt.systemPromptTokens + prompt.tools.reduce((sum, tool) => sum + tool.tokens, 0)
     );
     const plan = ChatContextService.planCompaction({
       history,
@@ -206,6 +210,7 @@ export class ChatService {
       newParts,
       newMessageTokens
     );
+    await ChatService.refreshContextUsage(conversation.id, prompt);
 
     try {
       if (conversation.title === null) {
@@ -274,6 +279,7 @@ export class ChatService {
                 parts,
                 await ChatService.estimateTokens(parts, tools)
               );
+              await ChatService.refreshContextUsage(conversation.id, prompt);
             } catch (error) {
               getMetric()?.observeError("persist");
               logger.error(
@@ -294,6 +300,20 @@ export class ChatService {
         );
       });
       throw error;
+    }
+  }
+
+  private static async refreshContextUsage(
+    conversationId: string,
+    prompt: Parameters<typeof ChatConversationService.updateContextUsage>[1]
+  ) {
+    try {
+      await ChatConversationService.updateContextUsage(conversationId, prompt);
+    } catch (error) {
+      logger.warn(
+        `Failed to update the context usage of conversation ${conversationId}`,
+        error instanceof Error ? error.message : "unknown error"
+      );
     }
   }
 

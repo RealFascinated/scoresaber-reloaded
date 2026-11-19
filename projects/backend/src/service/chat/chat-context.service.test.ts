@@ -164,15 +164,34 @@ describe("ChatContextService.trimToBudget", () => {
   });
 });
 
-describe("ChatContextService.estimateToolTokens", () => {
-  it("grows with the tool definitions", () => {
-    const small = ChatContextService.estimateToolTokens({});
-    const large = ChatContextService.estimateToolTokens({
-      lookup: {
+describe("ChatContextService.measureTools", () => {
+  it("measures each tool and sorts the largest first", () => {
+    const tools = ChatContextService.measureTools({
+      small: {
+        description: "Small",
+        inputSchema: jsonSchema({ type: "object", properties: {} }),
+      },
+      large: {
         description: "Looks something up ".repeat(20),
         inputSchema: jsonSchema({ type: "object", properties: { id: { type: "string" } } }),
       },
     });
-    expect(large).toBeGreaterThan(small + 50);
+    expect(tools.map(tool => tool.name)).toEqual(["large", "small"]);
+    expect(tools[0].tokens).toBeGreaterThan(tools[1].tokens + 50);
+  });
+});
+
+describe("ChatContextService.buildUsage", () => {
+  it("holds back the reply reserve and the compaction buffer using the turn budget", () => {
+    const usage = ChatContextService.buildUsage({
+      maxTokens: 10_000,
+      systemPromptTokens: 1000,
+      tools: [{ name: "lookup", tokens: 1000 }],
+      summaryTokens: 100,
+      userMessageTokens: 200,
+      assistantMessageTokens: 300,
+    });
+    expect(usage.replyReserveTokens).toBe(1600);
+    expect(usage.compactionBufferTokens).toBe(1280);
   });
 });

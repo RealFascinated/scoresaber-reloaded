@@ -1,7 +1,8 @@
-import { fetchChatConversations, fetchChatStatus } from "@/common/chat/chat-api";
+import { fetchChatContextUsage, fetchChatConversations, fetchChatStatus } from "@/common/chat/chat-api";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 export const CHAT_CONVERSATIONS_QUERY_KEY = ["chat", "conversations"] as const;
+export const CHAT_CONTEXT_QUERY_KEY = ["chat", "context"] as const;
 export const CHAT_STATUS_QUERY_KEY = ["chat", "status"] as const;
 
 /**
@@ -27,5 +28,17 @@ export function useChatConversations() {
     initialPageParam: 1,
     getNextPageParam: lastPage =>
       lastPage.metadata.page < lastPage.metadata.totalPages ? lastPage.metadata.page + 1 : undefined,
+  });
+}
+
+/**
+ * Gets the estimated context window usage of a conversation, refetched after every reply.
+ */
+export function useChatContextUsage(conversationId: string | null) {
+  return useQuery({
+    queryKey: [...CHAT_CONTEXT_QUERY_KEY, conversationId],
+    queryFn: () => fetchChatContextUsage(conversationId as string),
+    enabled: conversationId !== null,
+    retry: false,
   });
 }

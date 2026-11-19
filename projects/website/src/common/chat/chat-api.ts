@@ -1,6 +1,6 @@
 import { CHAT_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
-import type { ChatConversation } from "@ssr/common/schemas/chat/chat-conversation";
+import type { ChatContextUsage, ChatConversation } from "@ssr/common/schemas/chat/chat-conversation";
 import type {
   ChatConversationResponse,
   ChatConversationsResponse,
@@ -103,4 +103,17 @@ export async function deleteChatConversation(conversationId: string) {
   if (!response.ok) {
     throw new Error(`Failed to delete the chat (${response.status})`);
   }
+}
+
+/**
+ * Fetches the estimated context window usage of a conversation, null before its first turn.
+ *
+ * @throws when the backend could not be reached or answered with an error
+ */
+export async function fetchChatContextUsage(conversationId: string) {
+  const response = await chatRequest(`/conversations/${encodeURIComponent(conversationId)}/context`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch the context usage (${response.status})`);
+  }
+  return (await response.json()) as ChatContextUsage | null;
 }

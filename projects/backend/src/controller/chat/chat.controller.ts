@@ -5,6 +5,7 @@ import {
   CHAT_CONVERSATIONS_PER_PAGE,
   ChatConversationParamsSchema,
   ChatConversationRenameBodySchema,
+  ChatContextUsageSchema,
   ChatConversationSchema,
   ChatConversationsQuerySchema,
 } from "@ssr/common/schemas/chat/chat-conversation";
@@ -15,6 +16,7 @@ import {
   ChatStatusResponseSchema,
 } from "@ssr/common/schemas/response/chat/chat";
 import { Elysia } from "elysia";
+import { Type } from "typebox";
 import { authPlugin } from "../../plugins/auth.plugin";
 import { ChatConversationService } from "../../service/chat/chat-conversation.service";
 import { ChatService } from "../../service/chat/chat.service";
@@ -107,6 +109,24 @@ export default function chatController(app: Elysia) {
             conversation: ChatConversationService.toConversation(conversation),
             messages: messages.map(ChatConversationService.toMessage),
           };
+        }
+      )
+      .get(
+        "/conversations/:id/context",
+        {
+          auth: true,
+          tags: ["Chat"],
+          params: ChatConversationParamsSchema,
+          response: Type.Union([ChatContextUsageSchema, Type.Null()]),
+          detail: {
+            description:
+              "Fetch the estimated context window usage after the last turn, null before the first one",
+          },
+        },
+        async ({ user, params: { id }, set }) => {
+          ensureEnabled();
+          set.headers["cache-control"] = PRIVATE_NO_STORE;
+          return (await ChatConversationService.getOwned(user.id, id)).contextUsage;
         }
       )
       .patch(

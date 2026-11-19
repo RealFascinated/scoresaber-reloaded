@@ -1,3 +1,4 @@
+import type { ChatContextTool, ChatContextUsage } from "@ssr/common/schemas/chat/chat-conversation";
 import type { ChatMessagePart } from "@ssr/common/schemas/chat/chat-message";
 import { asSchema, generateText, type ToolSet } from "ai";
 import { ChatModelService } from "./chat-model.service";
@@ -20,6 +21,15 @@ export interface ChatCompactionPlanInput {
   newMessageTokens: number;
   summaryTokens: number;
   budget: number;
+}
+
+export interface ChatContextUsageInput {
+  maxTokens: number;
+  systemPromptTokens: number;
+  tools: ChatContextTool[];
+  summaryTokens: number;
+  userMessageTokens: number;
+  assistantMessageTokens: number;
 }
 
 export const CHARS_PER_TOKEN = 4;
@@ -48,15 +58,50 @@ export class ChatContextService {
   }
 
   /**
-   * Estimates the tokens the serialized tool definitions add to every request.
+   * Estimates the tokens each serialized tool definition adds to every request, largest first.
    */
-  public static estimateToolTokens(tools: ToolSet) {
-    const definitions = Object.entries(tools).map(([name, definition]) => ({
-      name,
-      description: definition.description,
-      inputSchema: asSchema(definition.inputSchema).jsonSchema,
-    }));
-    return ChatContextService.estimateTokens(JSON.stringify(definitions));
+  public static measureTools(tools: ToolSet) {
+    return Object.entries(tools)
+      .map(
+        ([name, definition]) =>
+          ({
+            name,
+            tokens: ChatContextService.estimateTokens(
+              JSON.stringify({
+                name,
+                description: definition.description,
+                inputSchema: asSchema(definition.inputSchema).jsonSchema,
+              })
+            ),
+          }) satisfies ChatContextTool
+      )
+      .sort((a, b) => b.tokens - a.tokens);
+  }
+
+  /**
+   * Splits the context window into the parts the model sees plus the space held back for the reply
+   * and for compaction, using the same budget rules as the turn itself.
+   */
+  public static buildUsage({
+    maxTokens,
+    systemPromptTokens,
+    tools,
+    summaryTokens,
+    userMessageTokens,
+    assistantMessageTokens,
+  }: ChatContextUsageInput) {
+    const fixedTokens = systemPromptTokens + tools.reduce((sum, tool) => sum + tool.tokens, 0);
+    const budget = ChatContextService.getBudget(maxTokens, fixedTokens);
+    return {
+      maxTokens,
+      systemPromptTokens,
+      tools,
+      summaryTokens,
+      userMessageTokens,
+      assistantMessageTokens,
+      replyReserveTokens: Math.max(0, maxTokens - fixedTokens - budget),
+      compactionBufferTokens: budget - Math.floor(budget * COMPACT_THRESHOLD),
+    } satisfies ChatContextUsage;
   }
 
   /**

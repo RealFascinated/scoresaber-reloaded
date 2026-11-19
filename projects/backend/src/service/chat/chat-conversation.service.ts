@@ -1,9 +1,11 @@
+import { env } from "@ssr/common/env";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import type { ChatConversation } from "@ssr/common/schemas/chat/chat-conversation";
 import type { ChatMessage, ChatMessagePart } from "@ssr/common/schemas/chat/chat-message";
 import { and, asc, count, desc, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { chatConversationsTable, chatMessagesTable } from "../../db/schema";
+import { ChatContextService, type ChatContextUsageInput } from "./chat-context.service";
 
 export type ChatConversationRow = typeof chatConversationsTable.$inferSelect;
 export type ChatMessageRow = typeof chatMessagesTable.$inferSelect;
@@ -163,6 +165,52 @@ export class ChatConversationService {
           )
         )
       );
+  }
+
+  /**
+   * Re-estimates and stores where the context window goes: the given prompt sizes plus the summary and
+   * the messages the model still sees. Called whenever a message is added or the summary changes.
+   */
+  public static async updateContextUsage(
+    conversationId: string,
+    prompt: Pick<ChatContextUsageInput, "systemPromptTokens" | "tools">
+  ) {
+    const [conversation] = await db
+      .select()
+      .from(chatConversationsTable)
+      .where(eq(chatConversationsTable.id, conversationId))
+      .limit(1);
+    if (!conversation) {
+      throw new NotFoundError("Conversation not found");
+    }
+
+    const rows = await db
+      .select({
+        role: chatMessagesTable.role,
+        tokens: sql<number>`coalesce(sum(${chatMessagesTable.tokenEstimate}), 0)`,
+      })
+      .from(chatMessagesTable)
+      .where(
+        and(
+          eq(chatMessagesTable.conversationId, conversationId),
+          gt(chatMessagesTable.ordinal, conversation.summarizedUpTo ?? 0)
+        )
+      )
+      .groupBy(chatMessagesTable.role);
+    const tokensOf = (role: ChatMessageRow["role"]) =>
+      Number(rows.find(row => row.role === role)?.tokens ?? 0);
+
+    const contextUsage = ChatContextService.buildUsage({
+      maxTokens: env.CHAT_MAX_CONTEXT_TOKENS,
+      ...prompt,
+      summaryTokens: ChatContextService.estimateTokens(conversation.summary ?? ""),
+      userMessageTokens: tokensOf("user"),
+      assistantMessageTokens: tokensOf("assistant"),
+    });
+    await db
+      .update(chatConversationsTable)
+      .set({ contextUsage })
+      .where(eq(chatConversationsTable.id, conversationId));
   }
 
   /**

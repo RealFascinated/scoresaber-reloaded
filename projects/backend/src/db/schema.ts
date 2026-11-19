@@ -1,4 +1,5 @@
 import { AuthConnectionProvider } from "@ssr/common/schemas/auth/connection-provider";
+import type { ChatContextUsage } from "@ssr/common/schemas/chat/chat-conversation";
 import type { ChatMessagePart } from "@ssr/common/schemas/chat/chat-message";
 import type { HMD } from "@ssr/common/schemas/hmd";
 import { MapCharacteristic } from "@ssr/common/schemas/map/map-characteristic";
@@ -912,6 +913,7 @@ export type AuthUserRow = typeof authUsersTable.$inferSelect;
 /**
  * A chat between a user and the assistant. `summary` is the rolling compaction of every message up
  * to and including the one at `summarizedUpTo`, which the model sees instead of those messages.
+ * `contextUsage` is the context window breakdown estimated after the last turn.
  */
 export const chatConversationsTable = pgTable(
   "chat-conversations",
@@ -923,6 +925,7 @@ export const chatConversationsTable = pgTable(
     title: text(),
     summary: text(),
     summarizedUpTo: integer(),
+    contextUsage: jsonb().$type<ChatContextUsage>(),
     createdAt: timestamp().notNull().defaultNow(),
     updatedAt: timestamp().notNull().defaultNow(),
   },
