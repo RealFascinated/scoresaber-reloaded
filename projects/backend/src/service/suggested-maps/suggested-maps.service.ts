@@ -3,16 +3,16 @@ import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import {
   DEFAULT_SUGGESTED_MAPS_PARAMS,
   estimatePlayerSkill,
-  fitSuggestedMapsModel,
   predictAccuracy,
   scoreWeight,
 } from "@ssr/common/suggested-maps/suggested-maps-model";
 import { Cron } from "croner";
 import { eq } from "drizzle-orm";
+import { SHARE_ENV } from "node:worker_threads";
 import { db } from "../../db";
 import { scoreSaberLeaderboardSuggestedMapsTable } from "../../db/schema";
-import { ScoreSaberLeaderboardSuggestedMapsRepository } from "../../repositories/scoresaber-leaderboard-suggested-maps.repository";
-import { listPlayerScores, listRankedMaps, loadFitData } from "./suggested-maps-data";
+import { listPlayerScores, listRankedMaps } from "./suggested-maps-data";
+import type { SuggestedMapsFitResult } from "./suggested-maps-fit.worker";
 import {
   derivePlayerStyle,
   getReferenceSkill,
@@ -36,6 +36,11 @@ const DEFAULT_FILTERS: SuggestedMapsFilters = {
 };
 
 const MAP_CACHE_TTL_MS = 10 * 60 * 1000;
+
+// WARNING: compiled binaries embed the worker relative to src/ (it must be a build entrypoint), not to this file.
+const FIT_WORKER_PATH = Bun.main.startsWith("/$bunfs/")
+  ? "./service/suggested-maps/suggested-maps-fit.worker.ts"
+  : new URL("./suggested-maps-fit.worker.ts", import.meta.url).href;
 
 type MapCache = { maps: RankableMap[]; updatedAt: Date; weightScale: number; loadedAt: number };
 
@@ -70,32 +75,12 @@ export class SuggestedMapsService {
   }
 
   private static async runRefresh() {
-    const params = DEFAULT_SUGGESTED_MAPS_PARAMS;
-    const before = Date.now();
-    const maps = await listRankedMaps();
-    const data = await loadFitData(maps, params);
-    const loadedAt = Date.now();
-    const model = fitSuggestedMapsModel(data, params);
-    const updatedAt = new Date();
-
-    await ScoreSaberLeaderboardSuggestedMapsRepository.replaceRealm(
-      DEFAULT_REALM_ID,
-      maps.map((map, i) => ({
-        leaderboardId: map.leaderboardId,
-        realmId: DEFAULT_REALM_ID,
-        ease: model.ease[i],
-        prior: model.prior[i],
-        scoreCount: model.mapScores[i],
-        weightScale: model.weightScale,
-        updatedAt,
-      }))
-    );
+    const fit = await runFitWorker();
     this.cache = undefined;
     this.logger.info(
-      `Fitted ${data.y.length} scores of ${data.playerCount} players on ${maps.length} maps (load ${(
-        (loadedAt - before) /
-        1000
-      ).toFixed(1)}s, fit ${((Date.now() - loadedAt) / 1000).toFixed(1)}s)`
+      `Fitted ${fit.scoreCount} scores of ${fit.playerCount} players on ${fit.mapCount} maps (load ${(
+        fit.loadMs / 1000
+      ).toFixed(1)}s, fit ${(fit.fitMs / 1000).toFixed(1)}s)`
     );
   }
 
@@ -217,6 +202,20 @@ export class SuggestedMapsService {
       ),
     };
   }
+}
+
+function runFitWorker() {
+  return new Promise<SuggestedMapsFitResult>((resolve, reject) => {
+    const worker = new Worker(FIT_WORKER_PATH, { env: SHARE_ENV });
+    worker.onmessage = (event: MessageEvent<SuggestedMapsFitResult>) => {
+      resolve(event.data);
+      worker.terminate();
+    };
+    worker.onerror = event => {
+      reject(new Error(`The suggested maps fit worker failed: ${event.message}`));
+      worker.terminate();
+    };
+  });
 }
 
 function stripUndefined<T extends object>(value: T) {

@@ -309,6 +309,96 @@ function seededRandom(seed: number): () => number {
   };
 }
 
+function markActiveRows(data: SuggestedMapsFitData, minPlayerScores: number) {
+  const { playerIdx } = data;
+  const playerScores = new Int32Array(data.playerCount);
+  for (let i = 0; i < playerIdx.length; i++) {
+    playerScores[playerIdx[i]]++;
+  }
+  const active = new Uint8Array(playerIdx.length);
+  for (let i = 0; i < playerIdx.length; i++) {
+    active[i] = playerScores[playerIdx[i]] >= minPlayerScores ? 1 : 0;
+  }
+  return { playerScores, active };
+}
+
+function accumulateRowTotals(
+  data: SuggestedMapsFitData,
+  active: Uint8Array,
+  z: Float64Array,
+  totals: {
+    mapScores: Int32Array;
+    mapWeight: Float64Array;
+    sums: Float64Array;
+    pa: Float64Array;
+    pb: Float64Array;
+    pc: Float64Array;
+  }
+) {
+  const { playerIdx, mapIdx, y, weight } = data;
+  const { mapScores, mapWeight, sums, pa, pb, pc } = totals;
+  let weightSum = 0;
+  let weightRows = 0;
+  for (let i = 0; i < y.length; i++) {
+    if (!active[i]) {
+      continue;
+    }
+    const p = playerIdx[i];
+    const m = mapIdx[i];
+    const w = weight ? weight[i] : 1;
+    const zm = z[m];
+    weightSum += w;
+    weightRows++;
+    mapScores[m]++;
+    mapWeight[m] += w;
+    sums[m] += y[i] * w;
+    pa[p] += w;
+    pb[p] += w * zm;
+    pc[p] += w * zm * zm;
+  }
+  return { weightSum, weightRows };
+}
+
+function accumulatePlayerResiduals(
+  data: SuggestedMapsFitData,
+  active: Uint8Array,
+  ease: Float64Array,
+  z: Float64Array,
+  pu: Float64Array,
+  pv: Float64Array
+): void {
+  const { playerIdx, mapIdx, y, weight } = data;
+  for (let i = 0; i < y.length; i++) {
+    if (!active[i]) {
+      continue;
+    }
+    const m = mapIdx[i];
+    const w = weight ? weight[i] : 1;
+    const r = y[i] - ease[m];
+    pu[playerIdx[i]] += w * r;
+    pv[playerIdx[i]] += w * r * z[m];
+  }
+}
+
+function accumulateMapResiduals(
+  data: SuggestedMapsFitData,
+  active: Uint8Array,
+  skill: Float64Array,
+  slope: Float64Array,
+  z: Float64Array,
+  mapSum: Float64Array
+): void {
+  const { playerIdx, mapIdx, y, weight } = data;
+  for (let i = 0; i < y.length; i++) {
+    if (!active[i]) {
+      continue;
+    }
+    const p = playerIdx[i];
+    const m = mapIdx[i];
+    mapSum[m] += (weight ? weight[i] : 1) * (y[i] - skill[p] - slope[p] * z[m]);
+  }
+}
+
 /**
  * Fits the model. Rows whose player has fewer than `minPlayerScores` scores are skipped, players and
  * maps are indexed `0 until playerCount` / `0 until mapCount`.
@@ -322,54 +412,40 @@ export function fitSuggestedMapsModel(
   const k = params.factors;
   const weight = data.weight;
 
-  const playerScores = new Int32Array(playerCount);
-  for (let i = 0; i < rows; i++) {
-    playerScores[data.playerIdx[i]]++;
-  }
-  const active = new Uint8Array(rows);
-  for (let i = 0; i < rows; i++) {
-    active[i] = playerScores[data.playerIdx[i]] >= params.minPlayerScores ? 1 : 0;
-  }
-
-  // The priors count in "scores", so they are scaled by the mean weight to keep their meaning.
-  let weightSum = 0;
-  let weightRows = 0;
-  for (let i = 0; i < rows; i++) {
-    if (active[i]) {
-      weightSum += weight ? weight[i] : 1;
-      weightRows++;
-    }
-  }
-  const weightScale = weightRows > 0 ? weightSum / weightRows : 1;
-  const skillPrior = params.playerSkillPrior * weightScale;
-  const slopePrior = params.playerSlopePrior * weightScale;
-  const mapPrior = params.mapPriorStrength * weightScale;
-  const factorRidge = params.factorRidge * weightScale;
+  const { playerScores, active } = markActiveRows(data, params.minPlayerScores);
 
   const z = new Float64Array(mapCount);
   for (let m = 0; m < mapCount; m++) {
     z[m] = data.mapStars[m] - SUGGESTED_MAPS_STAR_PIVOT;
   }
 
+  const mapScores = new Int32Array(mapCount);
+  const mapWeight = new Float64Array(mapCount);
+  const sums = new Float64Array(mapCount);
+  const pa = new Float64Array(playerCount);
+  const pb = new Float64Array(playerCount);
+  const pc = new Float64Array(playerCount);
+  const { weightSum, weightRows } = accumulateRowTotals(data, active, z, {
+    mapScores,
+    mapWeight,
+    sums,
+    pa,
+    pb,
+    pc,
+  });
+
+  // The priors count in "scores", so they are scaled by the mean weight to keep their meaning.
+  const weightScale = weightRows > 0 ? weightSum / weightRows : 1;
+  const skillPrior = params.playerSkillPrior * weightScale;
+  const slopePrior = params.playerSlopePrior * weightScale;
+  const mapPrior = params.mapPriorStrength * weightScale;
+  const factorRidge = params.factorRidge * weightScale;
+
   const skill = new Float64Array(playerCount);
   const slope = new Float64Array(playerCount);
   const ease = new Float64Array(mapCount);
-  const mapScores = new Int32Array(mapCount);
-  const mapWeight = new Float64Array(mapCount);
-  for (let i = 0; i < rows; i++) {
-    if (active[i]) {
-      mapScores[data.mapIdx[i]]++;
-      mapWeight[data.mapIdx[i]] += weight ? weight[i] : 1;
-    }
-  }
 
   // Start from a feature prior fitted on plain per map means.
-  const sums = new Float64Array(mapCount);
-  for (let i = 0; i < rows; i++) {
-    if (active[i]) {
-      sums[data.mapIdx[i]] += data.y[i] * (weight ? weight[i] : 1);
-    }
-  }
   const rawEase = new Float64Array(mapCount);
   for (let m = 0; m < mapCount; m++) {
     rawEase[m] = mapWeight[m] > 0 ? sums[m] / mapWeight[m] : 0;
@@ -398,9 +474,6 @@ export function fitSuggestedMapsModel(
     return sum;
   };
 
-  const pa = new Float64Array(playerCount);
-  const pb = new Float64Array(playerCount);
-  const pc = new Float64Array(playerCount);
   const pu = new Float64Array(playerCount);
   const pv = new Float64Array(playerCount);
   const mapSum = new Float64Array(mapCount);
@@ -414,25 +487,22 @@ export function fitSuggestedMapsModel(
 
   for (let iteration = 0; iteration < params.iterations; iteration++) {
     // Players, part 1: skill and slope on the residual left by ease and style.
-    pa.fill(0);
-    pb.fill(0);
-    pc.fill(0);
     pu.fill(0);
     pv.fill(0);
-    for (let i = 0; i < rows; i++) {
-      if (!active[i]) {
-        continue;
+    if (k === 0) {
+      accumulatePlayerResiduals(data, active, ease, z, pu, pv);
+    } else {
+      for (let i = 0; i < rows; i++) {
+        if (!active[i]) {
+          continue;
+        }
+        const p = data.playerIdx[i];
+        const m = data.mapIdx[i];
+        const w = weight ? weight[i] : 1;
+        const r = data.y[i] - ease[m] - factorTerm(p, m);
+        pu[p] += w * r;
+        pv[p] += w * r * z[m];
       }
-      const p = data.playerIdx[i];
-      const m = data.mapIdx[i];
-      const w = weight ? weight[i] : 1;
-      const r = data.y[i] - ease[m] - (k > 0 ? factorTerm(p, m) : 0);
-      const zm = z[m];
-      pa[p] += w;
-      pb[p] += w * zm;
-      pc[p] += w * zm * zm;
-      pu[p] += w * r;
-      pv[p] += w * r * zm;
     }
     for (let p = 0; p < playerCount; p++) {
       if (pa[p] === 0) {
@@ -483,6 +553,20 @@ export function fitSuggestedMapsModel(
           playerFactors[p * k + f] = out[f];
         }
       }
+    }
+
+    if (k === 0) {
+      mapSum.fill(0);
+      accumulateMapResiduals(data, active, skill, slope, z, mapSum);
+      for (let m = 0; m < mapCount; m++) {
+        const shrunk = mapSum[m] + mapPrior * prior[m];
+        const total = mapWeight[m] + mapPrior;
+        ease[m] = Math.abs(total) < 1e-12 ? shrunk : shrunk / total;
+        rawEase[m] = mapWeight[m] > 0 ? mapSum[m] / mapWeight[m] : 0;
+      }
+      coefficients = fitPrior(data, rawEase, mapWeight, mapPrior, params);
+      prior = predictPrior(data, coefficients);
+      continue;
     }
 
     // Maps: ease (shrunk towards the feature prior) and style vector (shrunk towards 0), jointly.

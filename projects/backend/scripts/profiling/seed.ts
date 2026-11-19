@@ -83,7 +83,7 @@ const steps: [string, string][] = [
        accuracy, medals, "missedNotes", "badCuts", "maxCombo", "fullCombo", modifiers, hmd, "rightController",
        "leftController", timestamp)
      SELECT l.id * ${SCORE_ID_STRIDE} + r, ${playerIdSql(`((l.id::bigint * 7919 + r::bigint * 104729) % ${PLAYERS}) + 1`)},
-       l.id, l.difficulty, l.characteristic, floor(l."maxScore" * (0.99 - r * 0.00015))::int, 0.99 - r * 0.00015,
+       l.id, l.difficulty, l.characteristic, floor(l."maxScore" * (0.99 - r * 0.00015))::int, 99 - r * 0.015,
        CASE WHEN l.id % 3 <> 0 AND r <= 10 THEN 11 - r ELSE 0 END, r % 5, r % 3, 500 + l.id % 300, r % 7 = 0,
        CASE WHEN r % 11 = 0 THEN ARRAY['FS'] ELSE ARRAY[]::varchar[] END, 'Quest 3', 'Touch', 'Touch',
        now() - ((l.id * 13 + r * 17) % 8760) * interval '1 hour'
@@ -96,7 +96,7 @@ const steps: [string, string][] = [
        accuracy, medals, "missedNotes", "badCuts", "maxCombo", "fullCombo", modifiers, hmd, "rightController",
        "leftController", timestamp)
      SELECT l.id * ${SCORE_ID_STRIDE} + 5000 + g, ${playerIdSql("g")}, l.id, l.difficulty, l.characteristic,
-       floor(l."maxScore" * (0.97 - g * 0.0001))::int, 0.97 - g * 0.0001, 0, g % 5, g % 3, 500, false,
+       floor(l."maxScore" * (0.97 - g * 0.0001))::int, 97 - g * 0.01, 0, g % 5, g % 3, 500, false,
        ARRAY[]::varchar[], 'Valve Index', 'Knuckles', 'Knuckles',
        now() - ((l.id * 31 + g * 7) % 17520) * interval '1 hour'
      FROM generate_series(1, ${GRINDERS}) g
@@ -106,7 +106,7 @@ const steps: [string, string][] = [
   [
     "score realms",
     `INSERT INTO "scoresaber-score-realms" ("scoreId", "realmId", "playerId", "leaderboardId", pp)
-     SELECT s."scoreId", 1, s."playerId", s."leaderboardId", lr.stars * 42 * s.accuracy
+     SELECT s."scoreId", 1, s."playerId", s."leaderboardId", lr.stars * 0.42 * s.accuracy
      FROM "scoresaber-scores" s
      JOIN "scoresaber-leaderboard-realms" lr ON lr."leaderboardId" = s."leaderboardId" AND lr."realmId" = 1 AND lr.ranked`,
   ],
@@ -130,7 +130,7 @@ const steps: [string, string][] = [
        accuracy, pp, medals, "missedNotes", "badCuts", "maxCombo", "fullCombo", modifiers, hmd, "rightController",
        "leftController", timestamp)
      SELECT s."playerId", s."leaderboardId", s."scoreId", s.difficulty, s.characteristic, s.score - 5000 * k,
-       s.accuracy - 0.005 * k, coalesce(sr.pp, 0) * 0.98, 0, s."missedNotes" + k, s."badCuts", s."maxCombo", false,
+       s.accuracy - 0.5 * k, coalesce(sr.pp, 0) * 0.98, 0, s."missedNotes" + k, s."badCuts", s."maxCombo", false,
        s.modifiers, s.hmd, s."rightController", s."leftController", s.timestamp - k * interval '7 days'
      FROM "scoresaber-scores" s
      LEFT JOIN "scoresaber-score-realms" sr ON sr."scoreId" = s."scoreId" AND sr."realmId" = 1
@@ -164,7 +164,7 @@ const steps: [string, string][] = [
        "improvementWallsHit", "improvementBadCuts", "improvementLeftHandAccuracy", "improvementRightHandAccuracy",
        timestamp)
      SELECT s."scoreId", s."playerId", l."songHash", l.id || 'x' || (s."leaderboardId" % 4), s.difficulty,
-       s.characteristic, s.score, s."scoreId" % 3, least(1, s.accuracy + 0.01), s."fullCombo", s."scoreId" % 2 = 0,
+       s.characteristic, s.score, s."scoreId" % 3, least(1, s.accuracy / 100 + 0.01), s."fullCombo", s."scoreId" % 2 = 0,
        114.2, 114.6, s."missedNotes" + s."badCuts", s."missedNotes", 0, 0, s."badCuts", 1200, 0, -1, -1, 0, 0, 0,
        0.1, 0.12, s.timestamp
      FROM "scoresaber-scores" s JOIN "scoresaber-leaderboards" l ON l.id = s."leaderboardId"

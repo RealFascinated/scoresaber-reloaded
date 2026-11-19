@@ -11,7 +11,7 @@ import {
 import { sql } from "drizzle-orm";
 import { db } from "../../db";
 
-const FETCH_SIZE = 200_000;
+const FETCH_SIZE = 20_000;
 
 type RankedMapRow = {
   id: number;
