@@ -7,7 +7,6 @@ import ChatMessageItem from "@/components/chat/chat-message";
 import { Button } from "@/components/ui/button";
 import { SharedIcons } from "@/shared-icons";
 import type { ChatStatus } from "ai";
-import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const NEAR_BOTTOM_PX = 240;
@@ -130,13 +129,6 @@ export default function ChatMessageList({
               ))}
               {showThinking && (
                 <output className="flex items-center gap-3" aria-label="Thinking">
-                  <Image
-                    width={28}
-                    height={28}
-                    className="size-7 shrink-0 rounded-full border border-border/60 bg-secondary p-1"
-                    src="/assets/logos/scoresaber.png"
-                    alt="ScoreSaber Logo"
-                  />
                   <div className="flex items-center gap-1">
                     {[0, 150, 300].map(delay => (
                       <span
