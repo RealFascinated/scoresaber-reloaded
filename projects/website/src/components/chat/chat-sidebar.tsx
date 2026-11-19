@@ -108,7 +108,7 @@ function ConversationItem({ conversation, isActive, onRename, onDelete }: Conver
       <SidebarMenuAction
         showOnHover
         aria-label="Rename the chat"
-        className="top-2 right-7"
+        className="top-2 right-7 text-muted-foreground hover:bg-transparent hover:text-primary"
         onClick={() => {
           setTitle(conversation.title ?? "");
           setEditing(true);
@@ -126,7 +126,7 @@ function ConversationItem({ conversation, isActive, onRename, onDelete }: Conver
           <SidebarMenuAction
             showOnHover
             aria-label="Delete the chat"
-            className="top-2 hover:bg-destructive/20 hover:text-destructive"
+            className="top-2 text-muted-foreground hover:bg-transparent hover:text-destructive"
           >
             <SharedIcons.DeleteChatIcon />
           </SidebarMenuAction>
