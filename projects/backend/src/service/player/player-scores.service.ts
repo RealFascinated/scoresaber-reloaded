@@ -133,6 +133,7 @@ export class PlayerScoresService {
         page: page,
         limit: 100,
         sort: "recent",
+        skipCache: true,
       });
     }
 
@@ -270,6 +271,7 @@ export class PlayerScoresService {
       page: 1,
       limit: 1,
       sort: "recent",
+      skipCache: true,
     });
     if (!page) {
       return false;
@@ -340,6 +342,7 @@ export class PlayerScoresService {
       page: 1,
       limit,
       sort: "recent",
+      skipCache: true,
     });
     if (!firstPage) {
       return;
@@ -353,6 +356,7 @@ export class PlayerScoresService {
         page: totalPages,
         limit,
         sort: "recent",
+        skipCache: true,
       });
       if (!lastPage) {
         PlayerScoresService.logger.warn(
@@ -373,7 +377,9 @@ export class PlayerScoresService {
     const remainingPages = Array.from({ length: Math.max(totalPages - 2, 0) }, (_, index) => index + 2);
     for (const batch of chunkArray(remainingPages, PlayerScoresService.RECONCILE_PAGE_CONCURRENCY)) {
       const batchPages = await Promise.all(
-        batch.map(page => ScoreSaberApiService.lookupPlayerScores({ playerId, page, limit, sort: "recent" }))
+        batch.map(page =>
+          ScoreSaberApiService.lookupPlayerScores({ playerId, page, limit, sort: "recent", skipCache: true })
+        )
       );
       for (const page of batchPages) {
         if (!page) {

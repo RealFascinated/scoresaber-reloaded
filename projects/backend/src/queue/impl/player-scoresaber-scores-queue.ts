@@ -24,7 +24,7 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
   protected async processItem(item: QueueItem<string>) {
     const { id: playerId } = item;
 
-    const playerToken = await ScoreSaberApiService.lookupPlayer(playerId);
+    const playerToken = await ScoreSaberApiService.lookupPlayer(playerId, undefined, { fresh: true });
     if (!playerToken) {
       FetchMissingScoresQueue.logger.warn(`Player "${playerId}" not found on ScoreSaber`);
       return;

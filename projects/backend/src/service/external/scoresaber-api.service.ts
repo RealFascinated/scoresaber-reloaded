@@ -389,6 +389,7 @@ export class ScoreSaberApiService {
       country?: string;
       includeInactives?: boolean;
       realmId?: number;
+      skipCache?: boolean;
     }
   ) {
     const before = performance.now();
@@ -403,6 +404,7 @@ export class ScoreSaberApiService {
           ...(options?.includeInactives ? { includeInactive: options.includeInactives.toString() } : {}),
           ...realmSearchParam(options?.realmId),
         },
+        skipCache: options?.skipCache,
       }
     );
     if (response === undefined) {
@@ -446,6 +448,7 @@ export class ScoreSaberApiService {
     limit = 8,
     page,
     search,
+    skipCache,
   }: {
     playerId: string;
     sort: ScoreSaberScoreSort;
@@ -453,6 +456,7 @@ export class ScoreSaberApiService {
     page: number;
     search?: string;
     priority?: CooldownPriority;
+    skipCache?: boolean;
   }) {
     const before = performance.now();
     ScoreSaberApiService.log(
@@ -460,7 +464,8 @@ export class ScoreSaberApiService {
     );
     const response = await ScoreSaberApiService.fetch<ScoreSaberPlayerScoresPageToken>(
       fillEndpoint(LOOKUP_PLAYER_SCORES_ENDPOINT, { id: playerId, limit, sort, page }) +
-        (search ? `&search=${encodeURIComponent(search)}` : "")
+        (search ? `&search=${encodeURIComponent(search)}` : ""),
+      { skipCache }
     );
     if (response === undefined) {
       return undefined;
@@ -581,13 +586,15 @@ export class ScoreSaberApiService {
     page: number,
     options?: {
       country?: string;
+      skipCache?: boolean;
     }
   ) {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up scores for leaderboard "${leaderboardId}", page "${page}"...`);
     const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardScoresPageToken>(
       fillEndpoint(LOOKUP_LEADERBOARD_SCORES_ENDPOINT, { id: leaderboardId, page }) +
-        (options?.country ? `&countries=${encodeURIComponent(options.country)}` : "")
+        (options?.country ? `&countries=${encodeURIComponent(options.country)}` : ""),
+      { skipCache: options?.skipCache }
     );
 
     if (response === undefined) {
@@ -621,6 +628,7 @@ export class ScoreSaberApiService {
           limit: "100",
           ...realmSearchParam(realmId),
         },
+        skipCache: true,
       }
     );
     if (response === undefined) {

@@ -26,73 +26,78 @@ export enum CacheId {
 
 export type CacheMode = "REDIS" | "MEMORY";
 
+const MEMORY_CACHE_MAX_OBJECTS = 20_000;
+
 export default class CacheService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Cache");
   private static readonly memoryCaches = new Map<CacheId, SSRCache>();
   private static readonly inFlightRequests = new Map<string, Promise<unknown>>();
 
-  public static readonly CACHE_INFO: Record<CacheId, { ttl: number; mode: CacheMode; negativeTtl?: number }> =
-    {
-      [CacheId.PLAYER_PPS]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-        mode: "MEMORY",
-      },
-      [CacheId.PLAYER_SCORE_STATISTICS]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-        mode: "MEMORY",
-      },
-      [CacheId.SCORESABER_MINI_RANKING]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
-        mode: "MEMORY",
-      },
-      [CacheId.SCORESABER_MINI_RANKING_RESPONSE]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Minute, 1),
-        mode: "MEMORY",
-      },
-      [CacheId.SCORESABER_API_RESPONSE]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
-        mode: "MEMORY",
-      },
-      [CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-        mode: "MEMORY",
-      },
-      [CacheId.SCORESABER_RANKED_BATCH_MARKERS]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-        mode: "MEMORY",
-      },
-      [CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
-        mode: "MEMORY",
-      },
+  public static readonly CACHE_INFO: Record<
+    CacheId,
+    { ttl: number; mode: CacheMode; negativeTtl?: number; maxObjects?: number }
+  > = {
+    [CacheId.PLAYER_PPS]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      mode: "MEMORY",
+    },
+    [CacheId.PLAYER_SCORE_STATISTICS]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      mode: "MEMORY",
+    },
+    [CacheId.SCORESABER_MINI_RANKING]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
+      mode: "MEMORY",
+    },
+    [CacheId.SCORESABER_MINI_RANKING_RESPONSE]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 1),
+      mode: "MEMORY",
+    },
+    [CacheId.SCORESABER_API_RESPONSE]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Minute, 2),
+      mode: "MEMORY",
+      maxObjects: 2_000,
+    },
+    [CacheId.SCORESABER_LEADERBOARD_STAR_CHANGE]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      mode: "MEMORY",
+    },
+    [CacheId.SCORESABER_RANKED_BATCH_MARKERS]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      mode: "MEMORY",
+    },
+    [CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 2),
+      mode: "MEMORY",
+    },
 
-      [CacheId.SCORESABER_REALMS]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-        mode: "MEMORY",
-      },
-      [CacheId.SCORESABER_REALM_PP_CURVE]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-        mode: "MEMORY",
-      },
+    [CacheId.SCORESABER_REALMS]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      mode: "MEMORY",
+    },
+    [CacheId.SCORESABER_REALM_PP_CURVE]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      mode: "MEMORY",
+    },
 
-      [CacheId.SCORESABER_PLAYER]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
-        mode: "REDIS",
-      },
-      [CacheId.BEATSAVER_MAP]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
-        mode: "REDIS",
-      },
-      [CacheId.BEATLEADER_SCORE]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-        negativeTtl: TimeUnit.toSeconds(TimeUnit.Minute, 1),
-        mode: "REDIS",
-      },
-      [CacheId.SCORESABER_SCORE_HISTORY_GRAPH]: {
-        ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
-        mode: "REDIS",
-      },
-    };
+    [CacheId.SCORESABER_PLAYER]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
+      mode: "REDIS",
+    },
+    [CacheId.BEATSAVER_MAP]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Day, 7),
+      mode: "REDIS",
+    },
+    [CacheId.BEATLEADER_SCORE]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      negativeTtl: TimeUnit.toSeconds(TimeUnit.Minute, 1),
+      mode: "REDIS",
+    },
+    [CacheId.SCORESABER_SCORE_HISTORY_GRAPH]: {
+      ttl: TimeUnit.toSeconds(TimeUnit.Hour, 1),
+      mode: "REDIS",
+    },
+  };
 
   public static async get<T>(cache: CacheId, cacheKey: string) {
     if (!isProduction()) {
@@ -317,6 +322,7 @@ export default class CacheService {
     const ttlMs = Math.max(0, this.CACHE_INFO[cacheId].ttl) * 1000;
     const created = new SSRCache({
       ttl: ttlMs,
+      maxObjects: this.CACHE_INFO[cacheId].maxObjects ?? MEMORY_CACHE_MAX_OBJECTS,
     });
     this.memoryCaches.set(cacheId, created);
     return created;

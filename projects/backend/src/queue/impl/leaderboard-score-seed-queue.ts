@@ -41,7 +41,9 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     let fullySeeded = true;
 
     while (scrape) {
-      const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page);
+      const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page, {
+        skipCache: true,
+      });
       if (!response) {
         consecutiveFailures++;
         if (consecutiveFailures >= 2) {
