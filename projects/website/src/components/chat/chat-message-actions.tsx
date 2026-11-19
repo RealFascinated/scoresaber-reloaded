@@ -1,13 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { SharedIcons } from "@/shared-icons";
 import { useEffect, useState } from "react";
 
 const COPIED_RESET_MS = 1500;
 
+const ICON_BUTTON_CLASS =
+  "cursor-pointer text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:text-foreground";
+
 /**
- * Ghost copy and regenerate buttons under a finished answer, revealed on hover or focus and always visible on touch.
+ * Icon-only copy and regenerate buttons under a finished answer, revealed on hover or focus and always visible on touch.
  */
 export default function ChatMessageActions({
   text,
@@ -34,13 +36,11 @@ export default function ChatMessageActions({
   };
 
   return (
-    <div className="-ml-1.5 flex items-center gap-0.5 opacity-0 transition-opacity group-hover/message:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
-      <Button
+    <div className="flex items-center gap-3 opacity-0 transition-opacity group-hover/message:opacity-100 focus-within:opacity-100 pointer-coarse:opacity-100">
+      <button
         type="button"
-        size="icon"
-        variant="ghost"
         aria-label={isCopied ? "Copied" : "Copy the answer"}
-        className="size-7 text-muted-foreground hover:text-foreground"
+        className={ICON_BUTTON_CLASS}
         onClick={handleCopy}
       >
         {isCopied ? (
@@ -48,18 +48,16 @@ export default function ChatMessageActions({
         ) : (
           <SharedIcons.ChatCopyIcon className="size-3.5" />
         )}
-      </Button>
+      </button>
       {onRegenerate !== undefined && (
-        <Button
+        <button
           type="button"
-          size="icon"
-          variant="ghost"
           aria-label="Regenerate the answer"
-          className="size-7 text-muted-foreground hover:text-foreground"
+          className={ICON_BUTTON_CLASS}
           onClick={onRegenerate}
         >
           <SharedIcons.ChatRetryIcon className="size-3.5" />
-        </Button>
+        </button>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { type ChatDisplayMessage, type ChatDisplayPart, getToolLabel } from "@/c
 import ChatMarkdown from "@/components/chat/chat-markdown";
 import ChatMessageActions from "@/components/chat/chat-message-actions";
 import PlaylistFileCard, { type PlaylistFile, readPlaylistFile } from "@/components/chat/playlist-file-card";
+import { Separator } from "@/components/ui/separator";
 import { SharedIcons } from "@/shared-icons";
 import Image from "next/image";
 import { memo, useEffect, useMemo, useState } from "react";
@@ -246,12 +247,13 @@ function ChatMessageItem({
       <Image
         width={28}
         height={28}
-        className="mt-0.5 size-7 shrink-0 rounded-full border border-border/60 bg-secondary p-1"
+        className="mt-0.5 hidden size-7 shrink-0 rounded-full border border-border/60 bg-secondary p-1 sm:block"
         src="/assets/logos/scoresaber.png"
         alt="ScoreSaber Logo"
       />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         {steps.length > 0 && <WorkRow steps={steps} timing={timing} />}
+        {steps.length > 0 && hasAnswer && <Separator className="bg-border/60" />}
         {playlists.map(file => (
           <PlaylistFileCard key={`${message.id}-${file.fileName}`} file={file} />
         ))}
