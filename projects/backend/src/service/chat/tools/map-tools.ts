@@ -24,6 +24,7 @@ import { RealmService } from "../../realm/realm.service";
 import { SuggestedMapsService } from "../../suggested-maps/suggested-maps.service";
 import type { ChatToolContext } from "../chat-tool-context";
 import {
+  MAX_RANKED_BATCH_ROWS,
   MAX_TOOL_ROWS,
   getSiteLinkUrl,
   trimLeaderboard,
@@ -37,7 +38,7 @@ import { resolvePlayerId } from "./player-tool-results";
 import { createPlaylistTools } from "./playlist-tools";
 import { runTool, toolSchema } from "./tool-runtime";
 
-const MAX_SUGGESTED_MAPS = 25;
+const MAX_SUGGESTED_MAPS = 100;
 const SONG_HASH_PATTERN = /^(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{40})$/;
 const BEATSAVER_KEY_PATTERN = /^[0-9a-fA-F]{1,8}$/;
 
@@ -316,7 +317,7 @@ export function createMapTools(context: ChatToolContext) {
           const result = await RankedBatchService.getRankedBatch(rankedBatchId);
           return {
             rankedBatch: trimRankedBatch(result.rankedBatch),
-            leaderboards: result.leaderboards.slice(0, MAX_TOOL_ROWS).map(leaderboard => ({
+            leaderboards: result.leaderboards.slice(0, MAX_RANKED_BATCH_ROWS).map(leaderboard => ({
               leaderboardId: leaderboard.leaderboardId,
               songName: leaderboard.songName,
               songHash: leaderboard.songHash,
@@ -325,7 +326,7 @@ export function createMapTools(context: ChatToolContext) {
               previousStars: leaderboard.previousStars,
               newStars: leaderboard.newStars,
             })),
-            newLeaderboards: result.newLeaderboards.slice(0, MAX_TOOL_ROWS).map(leaderboard => ({
+            newLeaderboards: result.newLeaderboards.slice(0, MAX_RANKED_BATCH_ROWS).map(leaderboard => ({
               leaderboardId: leaderboard.leaderboardId,
               songName: leaderboard.songName,
               songHash: leaderboard.songHash,

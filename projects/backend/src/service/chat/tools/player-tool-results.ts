@@ -4,7 +4,9 @@ import type { ScoreSaberPlayerHistory } from "@ssr/common/schemas/scoresaber/pla
 import type { ScoreSaberPlayerStatistics } from "@ssr/common/schemas/scoresaber/player/statistics";
 import type { ChatToolContext } from "../chat-tool-context";
 
-export const MAX_TOOL_ROWS = 25;
+import { MAX_TOOL_ROWS } from "./map-tool-utils";
+
+export { MAX_TOOL_ROWS };
 
 type PlayerSummarySource = Pick<
   ScoreSaberPlayer,

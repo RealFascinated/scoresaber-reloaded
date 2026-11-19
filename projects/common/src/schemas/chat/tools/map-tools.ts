@@ -105,7 +105,7 @@ export const GetSuggestedMapsInputSchema = Type.Object({
   minScores: Type.Optional(Type.Integer({ minimum: 0, maximum: 1000000 })),
   hidePlayed: Type.Optional(Type.Boolean()),
   sort: Type.Optional(Type.Union([Type.Literal("gain"), Type.Literal("bonus")])),
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 25 })),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
 });
 
 export const GetRankedBatchesInputSchema = Type.Object({

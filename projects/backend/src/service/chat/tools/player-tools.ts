@@ -94,7 +94,7 @@ export function createPlayerTools(context: ChatToolContext) {
   return {
     searchPlayers: tool({
       description:
-        "Search ScoreSaber players by name. Returns up to 25 matches with id, name, country, global rank, country rank and pp. Use this first to turn a player name into a player id for the other player tools.",
+        "Search ScoreSaber players by name. Returns up to 100 matches with id, name, country, global rank, country rank and pp. Use this first to turn a player name into a player id for the other player tools.",
       inputSchema: toolSchema(ChatSearchPlayersToolInputSchema),
       execute: (input: ChatSearchPlayersToolInput) =>
         runTool(async () => {
@@ -129,7 +129,7 @@ export function createPlayerTools(context: ChatToolContext) {
 
     getPlayerScores: tool({
       description:
-        "List a player's ScoreSaber scores, highest pp first or newest first. Returns up to 25 trimmed rows with accuracy, pp, score, misses, combo, timestamp and map name, mapper, difficulty, characteristic and stars. Filter by map name or headset with search and hmd. Defaults to the signed-in user's linked player.",
+        "List a player's ScoreSaber scores, highest pp first or newest first. Returns up to 100 trimmed rows with accuracy, pp, score, misses, combo, timestamp and map name, mapper, difficulty, characteristic and stars. Filter by map name or headset with search and hmd. Defaults to the signed-in user's linked player.",
       inputSchema: toolSchema(ChatGetPlayerScoresToolInputSchema),
       execute: (input: ChatGetPlayerScoresToolInput) =>
         runTool(async () => {
@@ -214,7 +214,7 @@ export function createPlayerTools(context: ChatToolContext) {
 
     getPlayerHistory: tool({
       description:
-        "Get a player's daily stat history for the last N days, newest first, capped at 25 rows. Each row has date, global rank, country rank, pp, medals, average ranked accuracy and score counts. The days field reports how many rows were actually returned, and change gives the difference from the oldest to the newest row (from and to dates, pp, rank, country rank, medals, ranked scores; a negative rank change means the player moved up). Quote change instead of subtracting rows. Use it for progress questions like rank or pp gained this week.",
+        "Get a player's daily stat history for the last N days, newest first, capped at 100 rows. Each row has date, global rank, country rank, pp, medals, average ranked accuracy and score counts. The days field reports how many rows were actually returned, and change gives the difference from the oldest to the newest row (from and to dates, pp, rank, country rank, medals, ranked scores; a negative rank change means the player moved up). Quote change instead of subtracting rows. Use it for progress questions like rank or pp gained this week.",
       inputSchema: toolSchema(ChatGetPlayerHistoryToolInputSchema),
       execute: (input: ChatGetPlayerHistoryToolInput) =>
         runTool(async () => {
@@ -251,7 +251,7 @@ export function createPlayerTools(context: ChatToolContext) {
 
     getPlayerRanking: tool({
       description:
-        "List a page of the global ScoreSaber player ranking, optionally filtered by a two-letter country code. Returns up to 25 players with global rank, country rank, pp and medal totals. Use getPlayer for one player's full profile.",
+        "List a page of the global ScoreSaber player ranking, optionally filtered by a two-letter country code. Returns up to 100 players with global rank, country rank, pp and medal totals. Use getPlayer for one player's full profile.",
       inputSchema: toolSchema(ChatGetPlayerRankingToolInputSchema),
       execute: (input: ChatGetPlayerRankingToolInput) =>
         runTool(async () => {
@@ -271,7 +271,7 @@ export function createPlayerTools(context: ChatToolContext) {
 
     getScoreHistory: tool({
       description:
-        "Get a player's attempts on one leaderboard, newest first, up to 25 rows. Each row has accuracy, pp, score, misses, combo, timestamp and map details. Requires a leaderboardId from resolveMap; never guess it. Defaults to the signed-in user's linked player.",
+        "Get a player's attempts on one leaderboard, newest first, up to 100 rows. Each row has accuracy, pp, score, misses, combo, timestamp and map details. Requires a leaderboardId from resolveMap; never guess it. Defaults to the signed-in user's linked player.",
       inputSchema: toolSchema(ChatGetScoreHistoryToolInputSchema),
       execute: (input: ChatGetScoreHistoryToolInput) =>
         runTool(async () => {
@@ -331,7 +331,7 @@ export function createPlayerTools(context: ChatToolContext) {
 
     getFollowing: tool({
       description:
-        "List the players the signed-in user follows, up to 25 rows with id, name, country, rank and pp. count is the total number of followed players and skipped is how many could not be looked up. This always uses the signed-in user's follows and cannot read another user's list.",
+        "List the players the signed-in user follows, up to 100 rows with id, name, country, rank and pp. count is the total number of followed players and skipped is how many could not be looked up. This always uses the signed-in user's follows and cannot read another user's list.",
       inputSchema: toolSchema(ChatGetFollowingToolInputSchema),
       execute: () =>
         runTool(async () => {
@@ -355,7 +355,7 @@ export function createPlayerTools(context: ChatToolContext) {
 
     getMedals: tool({
       description:
-        "Get a player's medal summary and their best medal scores. Returns total medals, global and country medal ranks, plus up to 25 medal scores with medal count, accuracy, score, misses, timestamp and map details. Defaults to the signed-in user's linked player.",
+        "Get a player's medal summary and their best medal scores. Returns total medals, global and country medal ranks, plus up to 100 medal scores with medal count, accuracy, score, misses, timestamp and map details. Defaults to the signed-in user's linked player.",
       inputSchema: toolSchema(ChatGetMedalsToolInputSchema),
       execute: (input: ChatGetMedalsToolInput) =>
         runTool(async () => {

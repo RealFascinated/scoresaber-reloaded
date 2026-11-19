@@ -5,7 +5,8 @@ import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score
 import type { ScoreSaberV2RealmToken } from "@ssr/common/schemas/scoresaber/tokens/v2/realm/realm";
 import type { SuggestedMap } from "@ssr/common/schemas/suggested-maps/suggested-maps";
 
-export const MAX_TOOL_ROWS = 25;
+export const MAX_TOOL_ROWS = 100;
+export const MAX_RANKED_BATCH_ROWS = 500;
 
 export type SiteLinkKind = "player" | "leaderboard" | "score";
 
