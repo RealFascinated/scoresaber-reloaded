@@ -6,6 +6,7 @@ import {
   USER_PINNED_SCORES_ROUTE,
   USER_PREFERENCES_ROUTE,
 } from "@ssr/common/api-routes";
+import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import { isProduction } from "@ssr/common/utils/utils";
 import { logger } from "@tqman/nice-logger";
@@ -18,6 +19,7 @@ import { websocket as websocketPlugin } from "elysia/websocket";
 import { DiscordChannels, initDiscordBot, sendEmbedToChannel } from "./bot/bot";
 import { registerGlobalErrorHandlers, reportErrorToDiscord } from "./common/discord/error-reporting";
 import { getHttpErrorCode } from "./common/error-code";
+import { profileEventLoop } from "./common/event-loop-profiler";
 import AppController from "./controller/app/app.controller";
 import AuthController from "./controller/auth/auth.controller";
 import BeatLeaderController from "./controller/beatleader/beatleader.controller";
@@ -74,6 +76,12 @@ try {
 new EventsManager();
 new MetricsService();
 AppService.startSampling();
+
+if (env.PROFILE_EVENT_LOOP_SECONDS) {
+  profileEventLoop(Number(env.PROFILE_EVENT_LOOP_SECONDS)).catch(error =>
+    log.error("Failed to profile the event loop:", error)
+  );
+}
 
 const httpMetricsHooks = createHttpMetricsHooks();
 

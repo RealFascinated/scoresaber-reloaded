@@ -19,6 +19,8 @@ const serverSchema = Type.Object({
 
   ENABLE_QUEUES: Type.Boolean(),
   IGNORE_WEBSOCKET_SCORES: Type.Optional(Type.Boolean()),
+  /** Seconds to sample the backend's main thread with the JSC profiler a minute after startup, logging its longest stalls */
+  PROFILE_EVENT_LOOP_SECONDS: Type.Optional(Type.Integer({ minimum: 1 })),
 
   S3_ENDPOINT: Type.String(),
   S3_ACCESS_KEY: Type.String(),

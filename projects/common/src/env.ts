@@ -14,6 +14,7 @@ export const env = {
 
   ENABLE_QUEUES: process.env.ENABLE_QUEUES === "true",
   IGNORE_WEBSOCKET_SCORES: process.env.IGNORE_WEBSOCKET_SCORES === "true",
+  PROFILE_EVENT_LOOP_SECONDS: process.env.PROFILE_EVENT_LOOP_SECONDS,
 
   // PostgreSQL
   DATABASE_URL: process.env.DATABASE_URL,
