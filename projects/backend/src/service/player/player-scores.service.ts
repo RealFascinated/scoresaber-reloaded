@@ -25,6 +25,7 @@ import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { chunkArray } from "@ssr/common/utils/utils";
 import { SQL, asc, desc, eq, gt, gte, inArray, isNotNull, sql, type AnyColumn } from "drizzle-orm";
+import { redisClient } from "../../common/redis";
 import { scoreSaberMedalScoreRowToType } from "../../db/converter/medal-score";
 import { scoreSaberScoreRowToType } from "../../db/converter/scoresaber-score";
 import { scoreSaberScoresTable } from "../../db/schema";
@@ -69,10 +70,10 @@ export class PlayerScoresService {
   private static readonly logger: ScopedLogger = Logger.withTopic("ScoreSaber Player Scores");
   private static readonly COUNT_CHECK_COOLDOWN_MS = 60 * 1000;
   private static readonly RECONCILE_COOLDOWN_MS = 15 * 60 * 1000;
+  private static readonly BROKEN_SCORE_COUNT_COOLDOWN_SECONDS = 30 * 24 * 60 * 60;
   private static readonly COUNT_CHECK_PRUNE_SIZE = 5_000;
   private static readonly RECONCILE_PAGE_CONCURRENCY = 3;
   private static readonly scoreCountChecks = new Map<string, number>();
-  private static readonly unfetchableScoreGaps = new Map<string, { liveTotal: number; localTotal: number }>();
 
   /**
    * Fetches missing scores for a player.
@@ -278,7 +279,10 @@ export class PlayerScoresService {
 
   private static async canReconcile(playerId: string) {
     const account = await PlayerCoreService.getAccount(playerId);
-    return account?.seededScores === true && !account.banned;
+    if (account?.seededScores !== true || account.banned) {
+      return false;
+    }
+    return (await redisClient.exists(PlayerScoresService.brokenScoreCountKey(playerId))) === 0;
   }
 
   private static pruneScoreCountChecks(now: number) {
@@ -295,11 +299,6 @@ export class PlayerScoresService {
   private static async queueReconcileIfCountMismatch(playerId: string, liveTotal: number) {
     const localTotal = await ScoreSaberScoresRepository.countByPlayerId(playerId);
     if (localTotal === liveTotal) {
-      PlayerScoresService.unfetchableScoreGaps.delete(playerId);
-      return false;
-    }
-    const knownGap = PlayerScoresService.unfetchableScoreGaps.get(playerId);
-    if (knownGap?.liveTotal === liveTotal && knownGap.localTotal === localTotal) {
       return false;
     }
 
@@ -311,6 +310,19 @@ export class PlayerScoresService {
       data: playerId,
     });
     return true;
+  }
+
+  private static brokenScoreCountKey(playerId: string) {
+    return `ssr:score-count-broken:${playerId}`;
+  }
+
+  private static async markScoreCountBroken(playerId: string) {
+    await redisClient.set(
+      PlayerScoresService.brokenScoreCountKey(playerId),
+      Date.now().toString(),
+      "EX",
+      PlayerScoresService.BROKEN_SCORE_COUNT_COOLDOWN_SECONDS
+    );
   }
 
   /**
@@ -335,7 +347,30 @@ export class PlayerScoresService {
 
     const pages = [firstPage];
     const totalPages = Math.ceil(firstPage.metadata.total / firstPage.metadata.itemsPerPage);
-    const remainingPages = Array.from({ length: Math.max(totalPages - 1, 0) }, (_, index) => index + 2);
+    if (totalPages > 1) {
+      const lastPage = await ScoreSaberApiService.lookupPlayerScores({
+        playerId,
+        page: totalPages,
+        limit,
+        sort: "recent",
+      });
+      if (!lastPage) {
+        PlayerScoresService.logger.warn(
+          `Aborted score reconcile for "${playerId}": the last page failed to load, nothing was changed`
+        );
+        return;
+      }
+      const expectedTotal = (totalPages - 1) * firstPage.metadata.itemsPerPage + lastPage.playerScores.length;
+      if (expectedTotal !== firstPage.metadata.total) {
+        PlayerScoresService.logger.warn(
+          `Score reconcile for "${playerId}": ScoreSaber reported ${firstPage.metadata.total} scores but the first and last pages imply ${expectedTotal}, skipping for 30 days`
+        );
+        await PlayerScoresService.markScoreCountBroken(playerId);
+        return;
+      }
+      pages.push(lastPage);
+    }
+    const remainingPages = Array.from({ length: Math.max(totalPages - 2, 0) }, (_, index) => index + 2);
     for (const batch of chunkArray(remainingPages, PlayerScoresService.RECONCILE_PAGE_CONCURRENCY)) {
       const batchPages = await Promise.all(
         batch.map(page => ScoreSaberApiService.lookupPlayerScores({ playerId, page, limit, sort: "recent" }))
@@ -379,6 +414,7 @@ export class PlayerScoresService {
       PlayerScoresService.logger.warn(
         `Score reconcile for "${playerId}": ScoreSaber reported ${firstPage.metadata.total} scores but its pages returned ${remoteIds.size} unique ids (${remoteTokens.length} total), so nothing will be deleted`
       );
+      await PlayerScoresService.markScoreCountBroken(playerId);
     }
     const trackingResults = await ScoreCoreService.trackScoreSaberScoresBatch(missingEntries);
     const rankedLeaderboards = new Map<number, ScoreSaberLeaderboard>();
@@ -432,18 +468,6 @@ export class PlayerScoresService {
     }
     if (added > 0 || deleted > 0) {
       await PlayerCoreService.invalidatePlayerCaches(playerId);
-    } else if (
-      missingRemoteCount === 0 &&
-      remoteIds.size === localIds.size &&
-      remoteIds.size !== firstPage.metadata.total
-    ) {
-      if (PlayerScoresService.unfetchableScoreGaps.size >= PlayerScoresService.COUNT_CHECK_PRUNE_SIZE) {
-        PlayerScoresService.unfetchableScoreGaps.clear();
-      }
-      PlayerScoresService.unfetchableScoreGaps.set(playerId, {
-        liveTotal: firstPage.metadata.total,
-        localTotal: remoteIds.size,
-      });
     }
 
     PlayerScoresService.logger.info(
