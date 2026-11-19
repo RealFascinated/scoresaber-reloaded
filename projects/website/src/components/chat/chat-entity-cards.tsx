@@ -40,9 +40,10 @@ function getMapCover(map: ChatMapInfo) {
 function useChatMap(id: string) {
   const index = useContext(ChatEntityContext);
   const indexed = index.maps.get(id);
+  const isComplete = indexed?.mapper !== undefined && indexed.songAuthor !== undefined;
   const query = useQuery({
     queryKey: ["chat-entity", "map", id],
-    enabled: indexed === undefined,
+    enabled: !isComplete,
     retry: false,
     staleTime: 1000 * 60 * 10,
     queryFn: async () => {
@@ -66,7 +67,7 @@ function useChatMap(id: string) {
     },
   });
   return {
-    data: indexed ?? query.data ?? undefined,
+    data: isComplete ? indexed : (query.data ?? indexed),
     isLoading: indexed === undefined && query.isPending,
   };
 }

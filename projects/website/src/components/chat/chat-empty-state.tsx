@@ -6,7 +6,7 @@ import { useMemo, useSyncExternalStore } from "react";
 const SUGGESTED_PROMPTS = [
   "Show my highest pp plays",
   "How has my rank changed this month?",
-  "What got ranked this week?",
+  "What got ranked in the last batch?",
   "Suggest maps to help me gain pp",
   "Make a playlist of maps I should try next",
   "How do I compare to the number one player?",
