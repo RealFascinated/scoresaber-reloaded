@@ -4,16 +4,17 @@ import ChatInput from "@/components/chat/chat-input";
 import { useMemo, useSyncExternalStore } from "react";
 
 const SUGGESTED_PROMPTS = [
-  "Show my highest pp plays",
-  "How has my rank changed this month?",
-  "What got ranked in the last batch?",
-  "Suggest maps to help me gain pp",
-  "Make a playlist of maps I should try next",
-  "How do I compare to the number one player?",
-  "Find ranked maps around 7 stars",
-  "How are the players I follow doing?",
-  "How many medals do I have?",
-  "Who's top of the global ranking?",
+  "How much pp and rank have I gained this month?",
+  "What got ranked or reweighted in the latest batch?",
+  "Which maps would add the most to my total pp?",
+  "Make a playlist of my suggested maps",
+  "Which star range does most of my pp come from?",
+  "Which of my scores are worth improving for pp?",
+  "How far am I behind the player ranked just above me?",
+  "Find ranked maps around the star level I usually play",
+  "Where do the players I follow rank right now?",
+  "Which of my scores earned medals?",
+  "Who's top of my country's ranking?",
 ];
 
 const PROMPTS_SHOWN = 3;
