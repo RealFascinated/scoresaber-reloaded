@@ -1,5 +1,4 @@
 import { Gauge } from "@prometheus-io/client";
-import { heapStats } from "bun:jsc";
 import NumberMetric from "../../number-metric";
 import { MetricType, prometheusRegistry } from "../../prometheus";
 
@@ -12,8 +11,7 @@ export default class MemoryUsageMetric extends NumberMetric {
       help: "Heap size in bytes",
       registers: [prometheusRegistry],
       collect: () => {
-        const stats = heapStats();
-        heapSizeGauge.set(stats.heapSize);
+        heapSizeGauge.set(process.memoryUsage().heapUsed);
       },
     });
 
@@ -22,8 +20,7 @@ export default class MemoryUsageMetric extends NumberMetric {
       help: "Heap capacity in bytes",
       registers: [prometheusRegistry],
       collect: () => {
-        const stats = heapStats();
-        heapCapacityGauge.set(stats.heapCapacity);
+        heapCapacityGauge.set(process.memoryUsage().heapTotal);
       },
     });
 
