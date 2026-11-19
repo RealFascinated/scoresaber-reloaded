@@ -4,6 +4,7 @@ import {
   MAX_TOOL_ROWS,
   capRows,
   resolvePlayerId,
+  summarizeHistoryChange,
   trimPlayerHistoryEntry,
   trimPlayerProfile,
   trimPlayerScore,
@@ -201,5 +202,35 @@ describe("capRows", () => {
 
     expect(rows).toHaveLength(MAX_TOOL_ROWS);
     expect(rows[rows.length - 1]).toBe(MAX_TOOL_ROWS - 1);
+  });
+});
+
+describe("summarizeHistoryChange", () => {
+  const row = (date: string, pp: number, rank: number) => ({
+    date,
+    rank,
+    countryRank: undefined,
+    pp,
+    medals: undefined,
+    averageRankedAccuracy: undefined,
+    rankedScores: undefined,
+    totalScores: undefined,
+  });
+
+  it("diffs the newest row against the oldest", () => {
+    expect(summarizeHistoryChange([row("2026-03-04", 1010.5, 90), row("2026-03-01", 1000, 100)])).toEqual({
+      from: "2026-03-01",
+      to: "2026-03-04",
+      pp: 10.5,
+      rank: -10,
+      countryRank: null,
+      medals: null,
+      rankedScores: null,
+    });
+  });
+
+  it("returns null with fewer than two rows", () => {
+    expect(summarizeHistoryChange([row("2026-03-04", 1, 1)])).toBeNull();
+    expect(summarizeHistoryChange([])).toBeNull();
   });
 });

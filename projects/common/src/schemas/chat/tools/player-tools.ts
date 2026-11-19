@@ -34,6 +34,41 @@ export const ChatGetPlayerToolInputSchema = Type.Object({
 });
 export type ChatGetPlayerToolInput = StaticDecode<typeof ChatGetPlayerToolInputSchema>;
 
+export const ChatGetPlayerPerformanceToolInputSchema = Type.Object({
+  playerId: Type.Optional(PlayerIdSchema),
+});
+export type ChatGetPlayerPerformanceToolInput = StaticDecode<typeof ChatGetPlayerPerformanceToolInputSchema>;
+
+export const ChatCalculatePpToolInputSchema = Type.Object({
+  stars: Type.Number({
+    minimum: 0,
+    maximum: 20,
+    description: "Star rating of the map, for example 7.5.",
+  }),
+  accuracies: Type.Array(
+    Type.Number({
+      minimum: 0,
+      maximum: 100,
+      description: "Accuracy as a percent, for example 97.4.",
+    }),
+    {
+      minItems: 1,
+      maxItems: 10,
+      description: "Accuracies to calculate pp for, as percents.",
+    }
+  ),
+  playerId: Type.Optional(PlayerIdSchema),
+  leaderboardId: Type.Optional(
+    Type.Integer({
+      minimum: 1,
+      maximum: 2147483647,
+      description:
+        "Leaderboard id from resolveMap to treat the score as replacing the player's existing score on that map. Never guess it.",
+    })
+  ),
+});
+export type ChatCalculatePpToolInput = StaticDecode<typeof ChatCalculatePpToolInputSchema>;
+
 export const ChatGetPlayerScoresToolInputSchema = Type.Object({
   playerId: Type.Optional(PlayerIdSchema),
   sort: Type.Optional(

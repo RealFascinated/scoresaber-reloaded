@@ -155,3 +155,33 @@ export function trimPlayerHistoryEntry(entry: ScoreSaberPlayerHistory) {
     totalScores: entry.totalScores,
   };
 }
+
+type HistoryRow = ReturnType<typeof trimPlayerHistoryEntry> & { date: string };
+
+function difference(newest: number | null | undefined, oldest: number | null | undefined) {
+  if (newest === null || newest === undefined || oldest === null || oldest === undefined) {
+    return null;
+  }
+  return Math.round((newest - oldest) * 100) / 100;
+}
+
+/**
+ * Computes the change between the oldest and newest history rows (rows are newest first), so the
+ * model never has to subtract. Negative rank changes mean the player moved up.
+ */
+export function summarizeHistoryChange(rows: HistoryRow[]) {
+  const newest = rows[0];
+  const oldest = rows[rows.length - 1];
+  if (!newest || !oldest || newest === oldest) {
+    return null;
+  }
+  return {
+    from: oldest.date,
+    to: newest.date,
+    pp: difference(newest.pp, oldest.pp),
+    rank: difference(newest.rank, oldest.rank),
+    countryRank: difference(newest.countryRank, oldest.countryRank),
+    medals: difference(newest.medals, oldest.medals),
+    rankedScores: difference(newest.rankedScores, oldest.rankedScores),
+  };
+}

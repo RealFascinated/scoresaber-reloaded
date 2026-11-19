@@ -125,5 +125,6 @@ export function trimSuggestedMap(map: SuggestedMap) {
     weightedGain: map.weightedGain,
     currentAccuracy: map.currentAccuracy,
     currentPp: map.currentPp,
+    familiarity: map.familiarity,
   };
 }

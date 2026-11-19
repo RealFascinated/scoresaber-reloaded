@@ -1,8 +1,10 @@
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type {
+  ChatCalculatePpToolInput,
   ChatComparePlayersToolInput,
   ChatGetMedalsToolInput,
   ChatGetPlayerHistoryToolInput,
+  ChatGetPlayerPerformanceToolInput,
   ChatGetPlayerRankingToolInput,
   ChatGetPlayerScoresToolInput,
   ChatGetPlayerToolInput,
@@ -10,10 +12,12 @@ import type {
   ChatSearchPlayersToolInput,
 } from "@ssr/common/schemas/chat/tools/player-tools";
 import {
+  ChatCalculatePpToolInputSchema,
   ChatComparePlayersToolInputSchema,
   ChatGetFollowingToolInputSchema,
   ChatGetMedalsToolInputSchema,
   ChatGetPlayerHistoryToolInputSchema,
+  ChatGetPlayerPerformanceToolInputSchema,
   ChatGetPlayerRankingToolInputSchema,
   ChatGetPlayerScoresToolInputSchema,
   ChatGetPlayerToolInputSchema,
@@ -30,8 +34,10 @@ import { PlayerScoreHistoryService } from "../../player/player-score-history.ser
 import { PlayerScoresService } from "../../player/player-scores.service";
 import { PlayerSearchService } from "../../player/player-search.service";
 import ScoreSaberPlayerService from "../../player/scoresaber-player.service";
+import { listPlayerRankedScores } from "../../suggested-maps/suggested-maps-data";
 import { UserFollowsService } from "../../user/user-follows.service";
 import type { ChatToolContext } from "../chat-tool-context";
+import { buildPlayerPerformance, calculatePpRows } from "./player-performance";
 import {
   MAX_TOOL_ROWS,
   capRows,
@@ -39,6 +45,7 @@ import {
   trimPlayerHistoryEntry,
   trimPlayerProfile,
   trimPlayerScore,
+  summarizeHistoryChange,
   trimPlayerSummary,
 } from "./player-tool-results";
 import { runTool, toolSchema } from "./tool-runtime";
@@ -154,9 +161,60 @@ export function createPlayerTools(context: ChatToolContext) {
         }),
     }),
 
+    getPlayerPerformance: tool({
+      description:
+        "Get how a player performs by star rating, computed from all of their ranked scores: per whole-star bucket the score count, average, median and best accuracy, best pp, full combo rate, how many of their top 50 plays are in that bucket (inTop50), weightedPp (how much of their total pp that bucket contributes, the best measure of where their pp comes from), and the same accuracy for the last 60 days. Also returns their weighted pp total, the pp of their #1, #10, #25, #50 and #100 scores, and rawPpForOneWeightedPp (the raw pp a new score needs to add 1 weighted pp). Use it for any question about where a player is strong or weak, which star range to play, or how their accuracy changes with difficulty, instead of inferring it from a handful of scores. Defaults to the signed-in user's linked player.",
+      inputSchema: toolSchema(ChatGetPlayerPerformanceToolInputSchema),
+      execute: (input: ChatGetPlayerPerformanceToolInput) =>
+        runTool(async () => {
+          const resolved = resolvePlayerId(context, input.playerId);
+          if (!resolved.ok) {
+            return { error: resolved.error };
+          }
+          const scores = await listPlayerRankedScores(resolved.playerId, context.realmId);
+          if (scores.length === 0) {
+            return { error: "This player has no ranked scores in this realm." };
+          }
+          return {
+            playerId: resolved.playerId,
+            ...buildPlayerPerformance(scores, new Date()),
+          };
+        }, "The player performance could not be loaded."),
+    }),
+
+    calculatePp: tool({
+      description:
+        "Calculate the raw ScoreSaber pp a score at the given accuracies would earn on a map of the given star rating, and the weighted pp it would add to the player's total (weightedGain, null when no player is linked or given), accounting for the 0.965 weighting and, when leaderboardId is given, for replacing the player's existing score on that map. Use it for any what-if question such as what 98% would give or how much an improvement is worth. Never estimate pp yourself. Defaults to the signed-in user's linked player.",
+      inputSchema: toolSchema(ChatCalculatePpToolInputSchema),
+      execute: (input: ChatCalculatePpToolInput) =>
+        runTool(async () => {
+          const resolved = resolvePlayerId(context, input.playerId);
+          let pps: number[] | null = null;
+          let currentPp: number | null = null;
+          if (resolved.ok) {
+            const scores = await listPlayerRankedScores(resolved.playerId, context.realmId);
+            pps = scores.map(score => score.pp);
+            if (input.leaderboardId !== undefined) {
+              const existing = scores.find(score => score.leaderboardId === input.leaderboardId);
+              currentPp = existing?.pp ?? null;
+            }
+          }
+          return {
+            stars: input.stars,
+            currentPp,
+            rows: calculatePpRows({
+              stars: input.stars,
+              accuracies: input.accuracies,
+              pps,
+              currentPp,
+            }),
+          };
+        }, "The pp calculation failed."),
+    }),
+
     getPlayerHistory: tool({
       description:
-        "Get a player's daily stat history for the last N days, newest first, capped at 25 rows. Each row has date, global rank, country rank, pp, medals, average ranked accuracy and score counts. The days field reports how many rows were actually returned. Use it for progress questions like rank or pp gained this week.",
+        "Get a player's daily stat history for the last N days, newest first, capped at 25 rows. Each row has date, global rank, country rank, pp, medals, average ranked accuracy and score counts. The days field reports how many rows were actually returned, and change gives the difference from the oldest to the newest row (from and to dates, pp, rank, country rank, medals, ranked scores; a negative rank change means the player moved up). Quote change instead of subtracting rows. Use it for progress questions like rank or pp gained this week.",
       inputSchema: toolSchema(ChatGetPlayerHistoryToolInputSchema),
       execute: (input: ChatGetPlayerHistoryToolInput) =>
         runTool(async () => {
@@ -185,6 +243,7 @@ export function createPlayerTools(context: ChatToolContext) {
           return {
             playerId: resolved.playerId,
             days: rows.length,
+            change: summarizeHistoryChange(rows),
             history: rows,
           };
         }),

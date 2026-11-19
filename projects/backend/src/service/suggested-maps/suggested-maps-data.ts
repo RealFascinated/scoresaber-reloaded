@@ -200,3 +200,34 @@ export async function listPlayerScores(playerId: string) {
     fullCombo: row.fullCombo,
   }));
 }
+
+/**
+ * Lists the ranked scores of one player in a realm with their map stars, best pp first.
+ */
+export async function listPlayerRankedScores(playerId: string, realmId: number) {
+  const result = await db.execute<{
+    leaderboardId: number;
+    stars: number;
+    pp: number;
+    accuracy: number;
+    fullCombo: boolean;
+    timestampMs: number;
+  }>(sql`
+    SELECT sr."leaderboardId", lr.stars, sr.pp, s.accuracy, s."fullCombo",
+      extract(epoch FROM s.timestamp) * 1000 AS "timestampMs"
+    FROM "scoresaber-score-realms" sr
+    JOIN "scoresaber-scores" s ON s."scoreId" = sr."scoreId"
+    JOIN "scoresaber-leaderboard-realms" lr
+      ON lr."leaderboardId" = sr."leaderboardId" AND lr."realmId" = sr."realmId"
+    WHERE sr."realmId" = ${realmId} AND sr."playerId" = ${playerId} AND sr.pp > 0
+    ORDER BY sr.pp DESC
+  `);
+  return result.rows.map(row => ({
+    leaderboardId: row.leaderboardId,
+    stars: Number(row.stars),
+    pp: Number(row.pp),
+    accuracy: Number(row.accuracy),
+    fullCombo: row.fullCombo,
+    timestamp: new Date(Number(row.timestampMs)),
+  }));
+}
