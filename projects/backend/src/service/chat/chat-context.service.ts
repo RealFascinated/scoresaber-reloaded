@@ -80,8 +80,8 @@ export class ChatContextService {
   }
 
   /**
-   * Splits the context window into the parts the model sees plus the space held back for the reply
-   * and for compaction, using the same budget rules as the turn itself.
+   * Splits the context window into the parts the model sees plus the space held back for the reply,
+   * using the same reserve rule as the turn itself.
    */
   public static buildUsage({
     maxTokens,
@@ -92,7 +92,6 @@ export class ChatContextService {
     assistantMessageTokens,
   }: ChatContextUsageInput) {
     const fixedTokens = systemPromptTokens + tools.reduce((sum, tool) => sum + tool.tokens, 0);
-    const budget = ChatContextService.getBudget(maxTokens, fixedTokens);
     return {
       maxTokens,
       systemPromptTokens,
@@ -101,7 +100,6 @@ export class ChatContextService {
       userMessageTokens,
       assistantMessageTokens,
       replyReserveTokens: ChatContextService.getReplyReserve(maxTokens, fixedTokens),
-      compactionBufferTokens: budget - Math.floor(budget * COMPACT_THRESHOLD),
     } satisfies ChatContextUsage;
   }
 

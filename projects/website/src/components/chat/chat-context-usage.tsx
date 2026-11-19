@@ -50,12 +50,8 @@ export default function ChatContextUsage({ usage }: ChatContextUsageProps) {
   const usedTokens = usage.systemPromptTokens + toolTokens + usage.summaryTokens + messageTokens;
   const reservedSegments: Segment[] = [
     { label: "Reply reserve", tokens: usage.replyReserveTokens, color: "bg-zinc-500" },
-    { label: "Compaction buffer", tokens: usage.compactionBufferTokens, color: "bg-zinc-600" },
   ];
-  const freeTokens = Math.max(
-    0,
-    usage.maxTokens - usedTokens - usage.replyReserveTokens - usage.compactionBufferTokens
-  );
+  const freeTokens = Math.max(0, usage.maxTokens - usedTokens - usage.replyReserveTokens);
   const percent = Math.min(100, Math.round((usedTokens / usage.maxTokens) * 100));
 
   const renderRow = (segment: Segment) => (

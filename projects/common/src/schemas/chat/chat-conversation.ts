@@ -51,7 +51,5 @@ export const ChatContextUsageSchema = Type.Object({
   assistantMessageTokens: Type.Integer({ minimum: 0 }),
   /** Kept free for the next reply */
   replyReserveTokens: Type.Integer({ minimum: 0 }),
-  /** Headroom left before the history is compacted */
-  compactionBufferTokens: Type.Integer({ minimum: 0 }),
 });
 export type ChatContextUsage = StaticDecode<typeof ChatContextUsageSchema>;

@@ -182,7 +182,7 @@ describe("ChatContextService.measureTools", () => {
 });
 
 describe("ChatContextService.buildUsage", () => {
-  it("holds back the reply reserve and the compaction buffer using the turn budget", () => {
+  it("holds back the reply reserve the turn uses", () => {
     const usage = ChatContextService.buildUsage({
       maxTokens: 10_000,
       systemPromptTokens: 1000,
@@ -192,7 +192,6 @@ describe("ChatContextService.buildUsage", () => {
       assistantMessageTokens: 300,
     });
     expect(usage.replyReserveTokens).toBe(1600);
-    expect(usage.compactionBufferTokens).toBe(1280);
   });
 
   it("caps the reply reserve on large context windows", () => {
