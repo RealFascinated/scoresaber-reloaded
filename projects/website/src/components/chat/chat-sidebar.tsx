@@ -324,7 +324,7 @@ export default function ChatSidebar({ activeConversationId, onResize }: ChatSide
       </SidebarFooter>
       <div
         aria-hidden
-        className="absolute inset-y-0 -right-1 z-30 hidden w-2 cursor-col-resize touch-none transition-colors hover:bg-primary/40 active:bg-primary/60 md:block"
+        className="absolute inset-y-0 -right-1 z-30 hidden w-2 cursor-col-resize touch-none md:block"
         onPointerDown={event => {
           event.preventDefault();
           const handle = event.currentTarget;

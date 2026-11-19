@@ -45,9 +45,8 @@ export default function ChatContextUsage({ usage }: ChatContextUsageProps) {
     { label: "System prompt", tokens: usage.systemPromptTokens, color: "bg-emerald-500" },
     { label: "Tool definitions", tokens: toolTokens, color: "bg-violet-400" },
     { label: "Summary", tokens: usage.summaryTokens, color: "bg-amber-500" },
-    { label: "Your messages", tokens: usage.userMessageTokens, color: "bg-sky-400" },
-    { label: "Replies and tool results", tokens: usage.assistantMessageTokens, color: "bg-blue-600" },
-  ];
+    { label: "Messages", tokens: messageTokens, color: "bg-blue-500" },
+  ].filter(segment => segment.label !== "Summary" || segment.tokens > 0);
   const usedTokens = usage.systemPromptTokens + toolTokens + usage.summaryTokens + messageTokens;
   const reservedSegments: Segment[] = [
     { label: "Reply reserve", tokens: usage.replyReserveTokens, color: "bg-zinc-500" },
@@ -63,7 +62,7 @@ export default function ChatContextUsage({ usage }: ChatContextUsageProps) {
     <li key={segment.label} className="flex items-center gap-2 py-0.5">
       <span className={`size-2.5 shrink-0 rounded-xs ${segment.color}`} />
       <span className="flex-1 truncate">{segment.label}</span>
-      <span className="w-14 text-right text-muted-foreground tabular-nums">
+      <span className="w-12 text-right text-muted-foreground tabular-nums">
         {formatTokens(segment.tokens)}
       </span>
       <span className="w-12 text-right text-muted-foreground tabular-nums">
@@ -81,7 +80,14 @@ export default function ChatContextUsage({ usage }: ChatContextUsageProps) {
           className="flex shrink-0 items-center gap-2 rounded-full px-2 py-1 text-xs text-muted-foreground tabular-nums hover:bg-muted"
         >
           <svg viewBox="0 0 20 20" className="size-5 -rotate-90">
-            <circle cx="10" cy="10" r={RING_RADIUS} fill="none" strokeWidth="2.5" className="stroke-muted" />
+            <circle
+              cx="10"
+              cy="10"
+              r={RING_RADIUS}
+              fill="none"
+              strokeWidth="2.5"
+              className="stroke-foreground/15"
+            />
             <circle
               cx="10"
               cy="10"
@@ -133,7 +139,7 @@ export default function ChatContextUsage({ usage }: ChatContextUsageProps) {
             <span className="tabular-nums">{usage.tools.length}</span>
           </button>
           {toolsOpen && (
-            <ul className="mt-1 max-h-48 space-y-0.5 overflow-y-auto pl-5 text-xs text-muted-foreground">
+            <ul className="mt-1 max-h-48 space-y-0.5 overflow-y-auto pr-3 pl-5 text-xs text-muted-foreground">
               {usage.tools.map(tool => (
                 <li key={tool.name} className="flex justify-between gap-2">
                   <span className="truncate">{tool.name}</span>

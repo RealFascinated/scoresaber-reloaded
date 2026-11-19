@@ -194,4 +194,17 @@ describe("ChatContextService.buildUsage", () => {
     expect(usage.replyReserveTokens).toBe(1600);
     expect(usage.compactionBufferTokens).toBe(1280);
   });
+
+  it("caps the reply reserve on large context windows", () => {
+    const usage = ChatContextService.buildUsage({
+      maxTokens: 300_000,
+      systemPromptTokens: 1000,
+      tools: [],
+      summaryTokens: 0,
+      userMessageTokens: 0,
+      assistantMessageTokens: 0,
+    });
+    expect(usage.replyReserveTokens).toBe(16_000);
+    expect(ChatContextService.getBudget(300_000, 1000)).toBe(299_000 - 16_000);
+  });
 });

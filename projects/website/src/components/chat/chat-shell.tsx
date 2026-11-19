@@ -39,7 +39,7 @@ type ChatShellProps = {
 };
 
 const SIDEBAR_WIDTH_STORAGE_KEY = "chat-sidebar-width";
-const SIDEBAR_MIN_WIDTH = 220;
+const SIDEBAR_MIN_WIDTH = 288;
 const SIDEBAR_MAX_WIDTH = 560;
 const SIDEBAR_DEFAULT_WIDTH = 288;
 

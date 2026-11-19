@@ -34,6 +34,7 @@ export interface ChatContextUsageInput {
 
 export const CHARS_PER_TOKEN = 4;
 const REPLY_RESERVE = 0.2;
+const MAX_REPLY_RESERVE_TOKENS = 16_000;
 const COMPACT_THRESHOLD = 0.8;
 const KEEP_RATIO = 0.4;
 const TRANSCRIPT_TEXT_LIMIT = 2000;
@@ -99,7 +100,7 @@ export class ChatContextService {
       summaryTokens,
       userMessageTokens,
       assistantMessageTokens,
-      replyReserveTokens: Math.max(0, maxTokens - fixedTokens - budget),
+      replyReserveTokens: ChatContextService.getReplyReserve(maxTokens, fixedTokens),
       compactionBufferTokens: budget - Math.floor(budget * COMPACT_THRESHOLD),
     } satisfies ChatContextUsage;
   }
@@ -120,11 +121,21 @@ export class ChatContextService {
   }
 
   /**
+   * Gets the tokens held back for the reply: a fifth of what the system prompt and tools leave free,
+   * capped so huge context windows do not reserve more than a reply can use.
+   */
+  public static getReplyReserve(maxContextTokens: number, systemPromptTokens: number) {
+    const available = Math.max(0, maxContextTokens - systemPromptTokens);
+    return Math.min(Math.floor(available * REPLY_RESERVE), MAX_REPLY_RESERVE_TOKENS);
+  }
+
+  /**
    * Gets the token budget for the conversation messages: the context window minus the system prompt
    * minus the reply reserve.
    */
   public static getBudget(maxContextTokens: number, systemPromptTokens: number) {
-    return Math.max(0, Math.floor((maxContextTokens - systemPromptTokens) * (1 - REPLY_RESERVE)));
+    const available = Math.max(0, maxContextTokens - systemPromptTokens);
+    return available - ChatContextService.getReplyReserve(maxContextTokens, systemPromptTokens);
   }
 
   /**

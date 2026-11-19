@@ -143,7 +143,15 @@ function ThoughtStep({ text }: { text: string }) {
   );
 }
 
-function WorkRow({ steps, timing }: { steps: WorkStep[]; timing: MessageTiming }) {
+function WorkRow({
+  steps,
+  timing,
+  hasAnswer,
+}: {
+  steps: WorkStep[];
+  timing: MessageTiming;
+  hasAnswer: boolean;
+}) {
   const [manualOpen, setManualOpen] = useState<boolean | null>(null);
   const isWorking = timing.isActive;
   const now = useNow(isWorking && timing.startedAt !== null);
@@ -193,6 +201,7 @@ function WorkRow({ steps, timing }: { steps: WorkStep[]; timing: MessageTiming }
           )}
         </ul>
       )}
+      {!isOpen && hasAnswer && <Separator className="bg-border/60" />}
     </div>
   );
 }
@@ -244,8 +253,7 @@ function ChatMessageItem({
   return (
     <div className="group/message flex items-start gap-3">
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        {steps.length > 0 && <WorkRow steps={steps} timing={timing} />}
-        {steps.length > 0 && hasAnswer && <Separator className="bg-border/60" />}
+        {steps.length > 0 && <WorkRow steps={steps} timing={timing} hasAnswer={hasAnswer} />}
         {playlists.map(file => (
           <PlaylistFileCard key={`${message.id}-${file.fileName}`} file={file} />
         ))}
