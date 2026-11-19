@@ -10,6 +10,8 @@ const TITLE_TIMEOUT_MS = 30_000;
 const TITLE_MAX_OUTPUT_TOKENS = 32;
 const TITLE_SYSTEM_PROMPT = [
   "Write a title for this chat from the user's first message in 3 to 6 words. No quotes, no trailing punctuation. Reply with the title only.",
+  "The title should help the user find this chat later: summarise what they are actually asking for, keeping the specific subject and the intent (compare, find, explain, recommend), not just a loose topic label or a stat name from the message. It must read as natural, grammatical English, never word salad. Keep exact numbers, names and ranks. Never answer the question and do not invent terms that are not in the message.",
+  'Examples: "Which star range does most of my pp come from?" -> "Where most of my PP comes from"; "recommend me some 10 star maps I can pass" -> "Recommended 10 star maps"; "how is my acc compared to rank 100?" -> "My accuracy versus rank 100".',
   "The chat is on ScoreSaber Reloaded, a Beat Saber score tracking site (ScoreSaber, BeatLeader, AccSaber), so rank, PP and accuracy mean Beat Saber stats. Never mention osu or any other game.",
 ].join(" ");
 
