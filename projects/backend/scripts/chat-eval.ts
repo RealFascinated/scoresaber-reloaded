@@ -1,3 +1,4 @@
+import { env } from "@ssr/common/env";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { generateText, stepCountIs, type ModelMessage } from "ai";
 import { writeFile } from "node:fs/promises";
@@ -151,6 +152,7 @@ async function runCase(evalCase: EvalCase, player: EvalPlayer) {
       tools,
       stopWhen: stepCountIs(8),
       maxOutputTokens: 2048,
+      reasoning: env.CHAT_REASONING_EFFORT,
     });
     messages.push(...result.response.messages);
     const traces = result.steps.flatMap(step =>

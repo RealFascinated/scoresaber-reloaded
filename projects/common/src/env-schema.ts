@@ -62,6 +62,20 @@ const serverSchema = Type.Object({
   CHAT_MAX_CONTEXT_TOKENS: Type.Integer({ minimum: 1000, default: 32_000 }),
   /** Max tool loop steps per request */
   CHAT_MAX_STEPS: Type.Integer({ minimum: 1, default: 8 }),
+  /** Reasoning effort per chat turn, `provider-default` sends no effort */
+  CHAT_REASONING_EFFORT: Type.Union(
+    [
+      Type.Literal("provider-default"),
+      Type.Literal("none"),
+      Type.Literal("minimal"),
+      Type.Literal("low"),
+      Type.Literal("medium"),
+      Type.Literal("high"),
+      Type.Literal("xhigh"),
+      Type.Literal("max"),
+    ],
+    { default: "medium" }
+  ),
 });
 
 const clientSchema = Type.Object({

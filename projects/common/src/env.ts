@@ -76,4 +76,5 @@ export const env = {
   CHAT_TITLE_MODEL: process.env.CHAT_TITLE_MODEL,
   CHAT_MAX_CONTEXT_TOKENS: Number(process.env.CHAT_MAX_CONTEXT_TOKENS ?? 32_000),
   CHAT_MAX_STEPS: Number(process.env.CHAT_MAX_STEPS ?? 8),
+  CHAT_REASONING_EFFORT: process.env.CHAT_REASONING_EFFORT ?? "medium",
 } as unknown as StaticDecode<typeof envSchema>;

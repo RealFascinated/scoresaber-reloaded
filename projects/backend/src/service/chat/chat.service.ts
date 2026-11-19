@@ -223,6 +223,7 @@ export class ChatService {
         tools,
         stopWhen: stepCountIs(env.CHAT_MAX_STEPS),
         maxOutputTokens: STREAM_MAX_OUTPUT_TOKENS,
+        reasoning: env.CHAT_REASONING_EFFORT,
         abortSignal: turnSignal,
         onToolExecutionEnd: event => {
           const isError = event.toolOutput.type === "tool-error";
