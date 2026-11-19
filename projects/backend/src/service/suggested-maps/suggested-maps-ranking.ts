@@ -81,6 +81,18 @@ const STYLE_HALF_LIFE_DAYS = 45;
 const STYLE_RANK_DECAY = 0.985;
 const STYLE_TAIL = 0.04;
 
+function memoizeByStars<T>(compute: (stars: number) => T) {
+  const cache = new Map<number, T>();
+  return (stars: number) => {
+    if (cache.has(stars)) {
+      return cache.get(stars) as T;
+    }
+    const value = compute(stars);
+    cache.set(stars, value);
+    return value;
+  };
+}
+
 function weightedQuantile(items: { value: number; weight: number }[], q: number) {
   const sorted = [...items].sort((a, b) => a.value - b.value);
   const total = sorted.reduce((sum, item) => sum + item.weight, 0);
@@ -182,11 +194,26 @@ export function derivePlayerStyle(
     nps: map.nps,
     weight: Math.pow(0.5, Math.max(0, map.ageDays) / STYLE_HALF_LIFE_DAYS) * Math.pow(STYLE_RANK_DECAY, rank),
   }));
-  const density = (stars: number) =>
+  const density = memoizeByStars((stars: number) =>
     top.reduce(
       (sum, map) => sum + map.weight * Math.exp(-0.5 * ((stars - map.stars) / STYLE_BANDWIDTH) ** 2),
       0
-    );
+    )
+  );
+  const residuals = played
+    .map((map, rank) => ({
+      stars: map.stars,
+      residual: map.residual,
+      accuracy: map.accuracy,
+      current:
+        Math.pow(0.5, Math.max(0, map.ageDays) / STYLE_HALF_LIFE_DAYS) * Math.pow(STYLE_RANK_DECAY, rank),
+    }))
+    .filter(
+      (map): map is typeof map & { residual: number } =>
+        map.residual !== undefined && map.accuracy >= CORRECTION_MIN_ACCURACY
+    )
+    .sort((a, b) => a.residual - b.residual);
+  const residualWeights = new Float64Array(residuals.length);
   const peak = top.reduce((max, map) => Math.max(max, density(map.stars)), 0);
   const knownNps = top.filter(map => map.nps > 0).map(map => ({ value: map.nps, weight: map.weight }));
   const medianStars =
@@ -209,33 +236,52 @@ export function derivePlayerStyle(
       const extraNps = medianNps > 0 && nps > 0 ? Math.max(0, nps / medianNps - 1) : 0;
       return common / (1 + EFFORT_PER_STAR * extraStars + EFFORT_PER_NPS_SHARE * extraNps);
     },
-    correction: stars => {
+    correction: memoizeByStars(stars => {
       let kernelTotal = 0;
-      const near: { value: number; weight: number }[] = [];
-      played.forEach((map, rank) => {
-        if (map.residual === undefined || map.accuracy < CORRECTION_MIN_ACCURACY) {
-          return;
-        }
-        const kernel = Math.exp(-0.5 * ((stars - map.stars) / CORRECTION_BANDWIDTH) ** 2);
+      let weightTotal = 0;
+      let last = -1;
+      for (let i = 0; i < residuals.length; i++) {
+        const kernel = Math.exp(-0.5 * ((stars - residuals[i].stars) / CORRECTION_BANDWIDTH) ** 2);
         if (kernel < 0.01) {
-          return;
+          residualWeights[i] = -1;
+          continue;
         }
         kernelTotal += kernel;
-        const current =
-          Math.pow(0.5, Math.max(0, map.ageDays) / STYLE_HALF_LIFE_DAYS) * Math.pow(STYLE_RANK_DECAY, rank);
-        near.push({ value: map.residual, weight: kernel * current });
-      });
-      return kernelTotal >= MIN_CORRECTION_WEIGHT ? weightedQuantile(near, CORRECTION_QUANTILE) : 0;
-    },
-    ceiling: stars => {
+        residualWeights[i] = kernel * residuals[i].current;
+        weightTotal += residualWeights[i];
+        last = i;
+      }
+      if (kernelTotal < MIN_CORRECTION_WEIGHT) {
+        return 0;
+      }
+      let cumulative = 0;
+      for (let i = 0; i < residuals.length; i++) {
+        if (residualWeights[i] < 0) {
+          continue;
+        }
+        cumulative += residualWeights[i];
+        if (cumulative >= CORRECTION_QUANTILE * weightTotal) {
+          return residuals[i].residual;
+        }
+      }
+      return residuals[last].residual;
+    }),
+    ceiling: memoizeByStars(stars => {
       for (const radius of [CEILING_RADIUS, CEILING_RADIUS * 2]) {
-        const near = played.filter(map => Math.abs(map.stars - stars) <= radius);
-        if (near.length >= MIN_CEILING_SCORES) {
-          return Math.max(...near.map(map => map.accuracy)) + CEILING_MARGIN;
+        let count = 0;
+        let best = Number.NEGATIVE_INFINITY;
+        for (const map of played) {
+          if (Math.abs(map.stars - stars) <= radius) {
+            count++;
+            best = Math.max(best, map.accuracy);
+          }
+        }
+        if (count >= MIN_CEILING_SCORES) {
+          return best + CEILING_MARGIN;
         }
       }
       return null;
-    },
+    }),
   } satisfies PlayerStyle;
 }
 
@@ -354,6 +400,7 @@ export function rankSuggestedMaps(args: {
   const gain = playerPps ? new WeightedGain(playerPps) : null;
   const out: RankedSuggestedMap[] = [];
   const listFloorPp = playerPps ? (playerPps[Math.min(LIST_SIZE, playerPps.length) - 1] ?? 0) : 0;
+  const requiredAccuracy = memoizeByStars(stars => accuracyForPp(stars, listFloorPp));
 
   for (const map of maps) {
     if (
@@ -409,7 +456,7 @@ export function rankSuggestedMaps(args: {
       predictedPp,
       bonusPp,
       weightedGain,
-      requiredAccuracy: playerPps ? accuracyForPp(map.stars, listFloorPp) : null,
+      requiredAccuracy: playerPps ? requiredAccuracy(map.stars) : null,
       currentAccuracy: current?.accuracy ?? null,
       currentPp: current?.pp ?? null,
       familiarity,
