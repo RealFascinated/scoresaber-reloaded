@@ -13,6 +13,8 @@ const suggestedMapsFilterFields = {
   hidePlayed: Type.Optional(Type.Boolean()),
   sort: Type.Optional(Type.Union([Type.Literal("gain"), Type.Literal("bonus")])),
   limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200 })),
+  /** Pick a different set of maps every UTC day from a wider pool, instead of always the best. */
+  daily: Type.Optional(Type.Boolean()),
 };
 
 export const SuggestedMapsQuerySchema = Type.Object({

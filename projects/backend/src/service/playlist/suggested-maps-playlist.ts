@@ -45,7 +45,7 @@ export function buildSuggestedMapsPlaylist(
   }
 
   return {
-    playlistTitle: `Suggested maps (${formatDate(date, "MMM D, YYYY")})`,
+    playlistTitle: `${query.daily ? "Daily suggested maps" : "Suggested maps"} (${formatDate(date, "MMM D, YYYY")})`,
     playlistAuthor: env.NEXT_PUBLIC_WEBSITE_NAME,
     customData: {
       syncURL: `${env.NEXT_PUBLIC_API_URL}/playlist/suggested-maps/${playerId}.bplist${params.size > 0 ? `?${params.toString()}` : ""}`,

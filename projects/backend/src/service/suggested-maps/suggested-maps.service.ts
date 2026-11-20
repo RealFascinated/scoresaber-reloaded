@@ -124,11 +124,16 @@ export class SuggestedMapsService {
    * Ranks ranked maps by how much pp they offer a player (or a reference player) over maps of the same stars.
    */
   public static async getSuggestedMaps(
-    options: Partial<SuggestedMapsFilters> & { playerId?: string; referenceAccuracy?: number }
+    options: Partial<SuggestedMapsFilters> & {
+      playerId?: string;
+      referenceAccuracy?: number;
+      daily?: boolean;
+    }
   ) {
     const params = DEFAULT_SUGGESTED_MAPS_PARAMS;
     const { maps, updatedAt, weightScale } = await this.getMaps();
-    const explicit = stripUndefined(options);
+    const { daily, ...filterOptions } = options;
+    const explicit = stripUndefined(filterOptions);
 
     let skill: number;
     let slope = 0;
@@ -197,9 +202,17 @@ export class SuggestedMapsService {
           }
         : null,
       updatedAt: updatedAt.toISOString(),
-      maps: rankSuggestedMaps({ maps, skill, slope, params, filters, playerScores, playerPps, style }).map(
-        ({ bonusPp: _bonusPp, ...map }) => map
-      ),
+      maps: rankSuggestedMaps({
+        maps,
+        skill,
+        slope,
+        params,
+        filters,
+        playerScores,
+        playerPps,
+        style,
+        shuffleSeed: daily ? new Date().toISOString().slice(0, 10) : undefined,
+      }).map(({ bonusPp: _bonusPp, ...map }) => map),
     };
   }
 }

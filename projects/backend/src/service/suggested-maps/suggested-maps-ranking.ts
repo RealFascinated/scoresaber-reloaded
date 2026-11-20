@@ -395,8 +395,10 @@ export function rankSuggestedMaps(args: {
   playerPps: number[] | null;
   /** The player's style, null for the reference player. */
   style?: PlayerStyle | null;
+  /** Picks a different set of maps per seed (e.g. the UTC date) from a wider pool; omitted for the best maps. */
+  shuffleSeed?: string;
 }) {
-  const { maps, skill, slope, filters, playerScores, playerPps, style } = args;
+  const { maps, skill, slope, filters, playerScores, playerPps, style, shuffleSeed } = args;
   const gain = playerPps ? new WeightedGain(playerPps) : null;
   const out: RankedSuggestedMap[] = [];
   const listFloorPp = playerPps ? (playerPps[Math.min(LIST_SIZE, playerPps.length) - 1] ?? 0) : 0;
@@ -472,10 +474,44 @@ export function rankSuggestedMaps(args: {
     }
     return b.bonusPp - a.bonusPp;
   });
-  if (!playerScores || filters.hidePlayed) {
-    return out.slice(0, filters.limit);
+  const balanced = !playerScores || filters.hidePlayed;
+  if (shuffleSeed) {
+    const pool = balanced
+      ? out.slice(0, filters.limit * DAILY_POOL_FACTOR)
+      : balancePlayed(out, filters.limit * DAILY_POOL_FACTOR);
+    return pickDaily(pool, filters.limit, shuffleSeed);
   }
-  return balancePlayed(out, filters.limit);
+  return balanced ? out.slice(0, filters.limit) : balancePlayed(out, filters.limit);
+}
+
+const DAILY_POOL_FACTOR = 2;
+const DAILY_BOTTOM_WEIGHT = 0.5;
+
+function seededUnit(seed: string, leaderboardId: number) {
+  let hash = 2166136261;
+  for (const char of `${seed}:${leaderboardId}`) {
+    hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
+  }
+  hash ^= hash >>> 15;
+  hash = Math.imul(hash, 2246822507);
+  hash ^= hash >>> 13;
+  return ((hash >>> 0) + 0.5) / 4294967296;
+}
+
+/**
+ * Picks `limit` maps from a ranked pool by weighted sampling seeded per day (the best map is twice as likely
+ * as the last), and keeps the pool's order. The pick is stable within a seed and different between seeds.
+ */
+export function pickDaily<T extends { leaderboardId: number }>(pool: T[], limit: number, seed: string) {
+  const keyed = pool.map((map, index) => {
+    const weight = 1 - (1 - DAILY_BOTTOM_WEIGHT) * (index / Math.max(1, pool.length - 1));
+    return { map, index, key: Math.log(seededUnit(seed, map.leaderboardId)) / weight };
+  });
+  return keyed
+    .sort((a, b) => b.key - a.key)
+    .slice(0, limit)
+    .sort((a, b) => a.index - b.index)
+    .map(item => item.map);
 }
 
 const PLAYED_SHARE = 0.5;
