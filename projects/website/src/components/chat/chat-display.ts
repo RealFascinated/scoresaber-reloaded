@@ -44,6 +44,7 @@ const TOOL_LABELS: Record<string, string> = {
   comparePlayers: "Compared players",
   createPlaylist: "Created a playlist",
   getBeatSaverMap: "Fetched a BeatSaver map",
+  getImprovableScores: "Found scores worth improving",
   getFollowing: "Fetched followed players",
   getLeaderboardScores: "Fetched leaderboard scores",
   getLeaderboard: "Fetched a leaderboard",
