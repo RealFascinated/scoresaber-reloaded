@@ -10,7 +10,7 @@ describe("buildChatSystemPrompt", () => {
     expect(prompt).toContain("Name: Alice");
     expect(prompt).toContain("Linked player id: 123");
     expect(prompt).toContain("Today's date: 2026-03-04");
-    expect(prompt).toContain("Realm id: 1");
+    expect(prompt).toContain("Current realm (season) id: 1.");
     expect(prompt).not.toContain("No profile is linked");
   });
 
@@ -49,6 +49,26 @@ describe("buildChatSystemPrompt", () => {
     expect(prompt).toContain("Answer exactly what was asked and nothing more");
     expect(prompt).toContain("share the same fields, put them in a short list");
     expect(prompt).not.toContain("\u2014");
+  });
+
+  it("tells the model to explain stats in game terms and give advice", () => {
+    const prompt = buildChatSystemPrompt({ userName: "Alice", playerId: null, realmId: 1, now: NOW });
+
+    expect(prompt).toContain("## Explaining things to players");
+    expect(prompt).toContain("Never write a tool field name");
+    expect(prompt).toContain("**What went well**");
+    expect(prompt).toContain("**What held you back**");
+    expect(prompt).toContain("**What to work on**");
+    expect(prompt).toContain("Each cut is worth up to 115 points");
+    expect(prompt).toContain("**What improved**");
+    expect(prompt).toContain("**Why these**");
+  });
+
+  it("tells the model to ask only when a request is ambiguous", () => {
+    const prompt = buildChatSystemPrompt({ userName: "Alice", playerId: null, realmId: 1, now: NOW });
+
+    expect(prompt).toContain("call selectSong (different songs) or");
+    expect(prompt).toContain("Ask a question only when you need something");
   });
 
   it("teaches the map and player directives", () => {

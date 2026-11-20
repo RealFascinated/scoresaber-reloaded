@@ -163,7 +163,7 @@ export function createPlayerTools(context: ChatToolContext) {
 
     getPlayerPerformance: tool({
       description:
-        "Get how a player performs by star rating, computed from all of their ranked scores: per whole-star bucket the score count, average, median and best accuracy, best pp, full combo rate, how many of their top 50 plays are in that bucket (inTop50), weightedPp (how much of their total pp that bucket contributes, the best measure of where their pp comes from), and the same accuracy for the last 60 days. Also returns their weighted pp total, the pp of their #1, #10, #25, #50 and #100 scores, and rawPpForOneWeightedPp (the raw pp a new score needs to add 1 weighted pp). Use it for any question about where a player is strong or weak, which star range to play, or how their accuracy changes with difficulty, instead of inferring it from a handful of scores. Defaults to the signed-in user's linked player.",
+        "Get how a player performs by star rating, computed from all of their ranked scores: per whole-star bucket the score count, average, median and best accuracy, best pp, full combo rate, how many of their top 50 plays are in that bucket (inTop50), weightedPp (how much of their total pp that bucket contributes, the best measure of where their pp comes from), and the same accuracy for the last 60 days. Also returns their weighted pp total, the pp of their #1, #10, #25, #50 and #100 scores, and rawPpForOneWeightedPp (the raw pp a new score needs to add 1 weighted pp). Use it for any question about where a player is strong or weak, where to gain pp, which star range to play, what to improve, or how their accuracy changes with difficulty, instead of inferring it from a handful of scores. For where a player is strongest or where their pp comes from, use weightedPp and inTop50, not accuracy, since accuracy always falls as stars rise. Defaults to the signed-in user's linked player.",
       inputSchema: toolSchema(ChatGetPlayerPerformanceToolInputSchema),
       execute: (input: ChatGetPlayerPerformanceToolInput) =>
         runTool(async () => {
@@ -214,7 +214,7 @@ export function createPlayerTools(context: ChatToolContext) {
 
     getPlayerHistory: tool({
       description:
-        "Get a player's daily stat history for the last N days, newest first, capped at 100 rows. Each row has date, global rank, country rank, pp, medals, average ranked accuracy and score counts. The days field reports how many rows were actually returned, and change gives the difference from the oldest to the newest row (from and to dates, pp, rank, country rank, medals, ranked scores; a negative rank change means the player moved up). Quote change instead of subtracting rows. Use it for progress questions like rank or pp gained this week.",
+        "Get a player's daily stat history for the last N days, newest first, capped at 100 rows. Each row has date, global rank, country rank, pp, medals, average ranked accuracy and score counts. The days field reports how many rows were actually returned, and change gives the difference from the oldest to the newest row (from and to dates, pp, rank, country rank, medals, ranked scores; a negative rank change means the player moved up). Quote change instead of subtracting rows. Use it for progress questions like rank or pp gained this week, and give the exact dates the rows cover.",
       inputSchema: toolSchema(ChatGetPlayerHistoryToolInputSchema),
       execute: (input: ChatGetPlayerHistoryToolInput) =>
         runTool(async () => {

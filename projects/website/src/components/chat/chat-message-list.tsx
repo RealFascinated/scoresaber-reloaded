@@ -32,6 +32,7 @@ type ChatMessageListProps = {
   historyFailed: boolean;
   onRetry: () => void;
   onRegenerate?: () => void;
+  onSelect: (text: string) => void;
   onReloadHistory: () => void;
 };
 
@@ -47,6 +48,7 @@ export default function ChatMessageList({
   historyFailed,
   onRetry,
   onRegenerate,
+  onSelect,
   onReloadHistory,
 }: ChatMessageListProps) {
   const outputCount = countToolOutputs(messages);
@@ -125,6 +127,7 @@ export default function ChatMessageList({
                   startedAt={isBusy && message === lastMessage ? startedAt : null}
                   durationMs={durations[message.id] ?? message.workDurationMs}
                   onRegenerate={message === lastMessage && !isBusy ? onRegenerate : undefined}
+                  onSelect={message === lastMessage && !isBusy ? onSelect : undefined}
                 />
               ))}
               {showThinking && (

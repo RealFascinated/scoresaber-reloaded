@@ -1,11 +1,13 @@
 "use client";
 
+import ChatChoiceCard, { readChatChoice } from "@/components/chat/chat-choice-card";
 import { type ChatDisplayMessage, type ChatDisplayPart, getToolLabel } from "@/components/chat/chat-display";
 import ChatMarkdown from "@/components/chat/chat-markdown";
 import ChatMessageActions from "@/components/chat/chat-message-actions";
 import PlaylistFileCard, { type PlaylistFile, readPlaylistFile } from "@/components/chat/playlist-file-card";
 import { Separator } from "@/components/ui/separator";
 import { SharedIcons } from "@/shared-icons";
+import type { ChatChoice } from "@ssr/common/schemas/chat/tools/select-tools";
 import { memo, useEffect, useMemo, useState } from "react";
 
 type ToolPart = Extract<ChatDisplayPart, { kind: "tool" }>;
@@ -28,12 +30,16 @@ function splitParts(parts: ChatDisplayPart[], isStreaming: boolean) {
 
   const steps: WorkStep[] = [];
   const playlists: PlaylistFile[] = [];
+  const choices: ChatChoice[] = [];
   const answer: string[] = [];
   parts.forEach((part, index) => {
     if (part.kind === "tool") {
       const playlist = part.output === undefined ? undefined : readPlaylistFile(part.output);
+      const choice = part.output === undefined ? undefined : readChatChoice(part.output);
       if (playlist !== undefined) {
         playlists.push(playlist);
+      } else if (choice !== undefined) {
+        choices.push(choice);
       } else {
         steps.push(part);
       }
@@ -48,7 +54,7 @@ function splitParts(parts: ChatDisplayPart[], isStreaming: boolean) {
       answer.push(part.text);
     }
   });
-  return { steps, playlists, answerText: answer.join("\n\n") };
+  return { steps, playlists, choices, answerText: answer.join("\n\n") };
 }
 
 function formatDuration(ms: number) {
@@ -226,18 +232,20 @@ function ChatMessageItem({
   startedAt,
   durationMs,
   onRegenerate,
+  onSelect,
 }: {
   message: ChatDisplayMessage;
   isActive: boolean;
   startedAt: number | null;
   durationMs: number | undefined;
   onRegenerate?: () => void;
+  onSelect?: (text: string) => void;
 }) {
   const timing = useMemo(
     () => ({ isActive, startedAt, durationMs }) satisfies MessageTiming,
     [isActive, startedAt, durationMs]
   );
-  const { steps, playlists, answerText } = useMemo(
+  const { steps, playlists, choices, answerText } = useMemo(
     () => splitParts(message.parts, isActive),
     [message.parts, isActive]
   );
@@ -246,7 +254,7 @@ function ChatMessageItem({
   }
 
   const hasAnswer = answerText.trim() !== "";
-  if (steps.length === 0 && playlists.length === 0 && !hasAnswer) {
+  if (steps.length === 0 && playlists.length === 0 && choices.length === 0 && !hasAnswer) {
     return null;
   }
 
@@ -258,6 +266,9 @@ function ChatMessageItem({
           <PlaylistFileCard key={`${message.id}-${file.fileName}`} file={file} />
         ))}
         {hasAnswer && <ChatMarkdown text={answerText} isStreaming={timing.isActive} />}
+        {choices.map((choice, index) => (
+          <ChatChoiceCard key={`${message.id}-choice-${index}`} choice={choice} onSelect={onSelect} />
+        ))}
         {hasAnswer && !timing.isActive && (
           <ChatMessageActions text={answerText} onRegenerate={onRegenerate} />
         )}

@@ -5,6 +5,7 @@ import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { ChatMessagePart } from "@ssr/common/schemas/chat/chat-message";
 import {
   convertToModelMessages,
+  hasToolCall,
   stepCountIs,
   streamText,
   type ToolSet,
@@ -25,6 +26,7 @@ import { buildChatSystemPrompt } from "./chat-system-prompt";
 import { ChatTitleService } from "./chat-title.service";
 import type { ChatToolContext } from "./chat-tool-context";
 import { createChatTools } from "./tools/chat-tools";
+import { SELECT_TOOL_NAMES } from "./tools/select-tools";
 
 export interface ChatSessionUser {
   id: string;
@@ -226,7 +228,7 @@ export class ChatService {
         system: summary ? `${system}\n\nSummary of the earlier conversation:\n${summary}` : system,
         messages: modelMessages,
         tools,
-        stopWhen: stepCountIs(env.CHAT_MAX_STEPS),
+        stopWhen: [stepCountIs(env.CHAT_MAX_STEPS), hasToolCall(...SELECT_TOOL_NAMES)],
         maxOutputTokens: STREAM_MAX_OUTPUT_TOKENS,
         reasoning: env.CHAT_REASONING_EFFORT,
         abortSignal: turnSignal,

@@ -302,6 +302,7 @@ function ChatShellContent({
               historyFailed={historyFailed}
               onRetry={handleRetry}
               onRegenerate={canRegenerate ? handleRetry : undefined}
+              onSelect={handleSend}
               onReloadHistory={handleReloadHistory}
             />
             {!historyFailed && <ChatInput isBusy={isBusy} onSend={handleSend} onStop={stop} />}

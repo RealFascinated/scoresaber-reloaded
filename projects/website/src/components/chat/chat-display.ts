@@ -63,6 +63,8 @@ const TOOL_LABELS: Record<string, string> = {
   resolveMap: "Resolved a map",
   searchMaps: "Searched maps",
   searchPlayers: "Searched players",
+  selectLeaderboard: "Asked which difficulty",
+  selectSong: "Asked which song",
 };
 
 /**
