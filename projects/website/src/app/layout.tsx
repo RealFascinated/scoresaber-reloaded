@@ -1,4 +1,5 @@
 import { Colors } from "@/common/colors";
+import { OpenObserveProvider } from "@/components/providers/openobserve-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -107,6 +108,7 @@ export default function RootLayout({
             data-website-id={env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID}
           />
         )}
+        <OpenObserveProvider />
         <Toaster />
         <LazyMotion features={domAnimation} strict>
           <PageTransitionProvider>

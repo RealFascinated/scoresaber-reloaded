@@ -90,6 +90,10 @@ const clientSchema = Type.Object({
 
   NEXT_PUBLIC_ANALYTICS_WEBSITE_ID: Type.Optional(Type.String()),
   NEXT_PUBLIC_ANALYTICS_SCRIPT_URL: Type.Optional(Type.String()),
+  NEXT_PUBLIC_OPENOBSERVE_CLIENT_TOKEN: Type.Optional(Type.String()),
+  NEXT_PUBLIC_OPENOBSERVE_SITE: Type.Optional(Type.String()),
+  NEXT_PUBLIC_OPENOBSERVE_ORGANIZATION: Type.Optional(Type.String()),
+  NEXT_PUBLIC_OPENOBSERVE_SERVICE: Type.Optional(Type.String()),
 });
 
 export const envSchema = Type.Evaluate(Type.Intersect([serverSchema, clientSchema]));
