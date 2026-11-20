@@ -36,7 +36,7 @@ import {
 } from "./map-tool-utils";
 import { resolvePlayerId } from "./player-tool-results";
 import { createPlaylistTools } from "./playlist-tools";
-import { runTool, toolSchema } from "./tool-runtime";
+import { ChatToolError, runTool, toolSchema } from "./tool-runtime";
 
 const MAX_SUGGESTED_MAPS = 100;
 const SONG_HASH_PATTERN = /^(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{40})$/;
@@ -219,15 +219,17 @@ export function createMapTools(context: ChatToolContext) {
           const value = hashOrKey.trim();
           const resolvedHash = await resolveQueryHash(value);
           if (!resolvedHash) {
-            return {
-              error: `BeatSaver map "${value}" could not be resolved. Use the 32 or 40 character song hash instead.`,
-            };
+            throw new ChatToolError(
+              "not_found",
+              `BeatSaver map "${value}" could not be resolved.`,
+              "Use the 32 or 40 character song hash instead."
+            );
           }
 
           const hash = resolvedHash.hash;
           const token = await lookupBeatSaverToken(hash);
           if (!token) {
-            return { error: `BeatSaver map "${value}" was not found.` };
+            throw new ChatToolError("not_found", `BeatSaver map "${value}" was not found.`);
           }
 
           const normalizedHash = hash.toLowerCase();
@@ -278,7 +280,7 @@ export function createMapTools(context: ChatToolContext) {
         runTool(async () => {
           const player = resolvePlayerId(context, playerId);
           if (!player.ok) {
-            return { error: player.error };
+            throw new ChatToolError(player.code, player.error);
           }
           const response = await SuggestedMapsService.getSuggestedMaps({
             ...filters,

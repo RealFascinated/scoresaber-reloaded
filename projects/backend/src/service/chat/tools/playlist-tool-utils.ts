@@ -51,12 +51,7 @@ export type PlaylistToolOutput = PlaylistToolSummary & {
   bplist: BplistFile;
 };
 
-export type PlaylistToolError = {
-  error: string;
-  skipped?: SkippedMapEntry[];
-};
-
-export type PlaylistToolResult = PlaylistToolOutput | PlaylistToolError;
+export type PlaylistToolResult = PlaylistToolOutput;
 
 export type ChatPlaylistSettings = {
   sort?: string;
@@ -264,15 +259,6 @@ export function playlistSummary(output: PlaylistToolOutput) {
  * Builds the model-facing tool output, keeping the bplist (and any cover) out of the model context.
  */
 export function playlistModelOutput(output: PlaylistToolResult) {
-  if ("error" in output) {
-    return {
-      type: "json" as const,
-      value: {
-        error: output.error,
-        ...(output.skipped ? { skipped: output.skipped } : {}),
-      },
-    };
-  }
   return {
     type: "json" as const,
     value: playlistSummary(output),

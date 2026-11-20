@@ -64,6 +64,7 @@ export function resolvePlayerId(context: ChatToolContext, playerId?: string) {
   if (!resolved) {
     return {
       ok: false as const,
+      code: "invalid_input" as const,
       error:
         "No player id was provided and this account has no linked player. Ask the user for a player id or name, then use searchPlayers to find the id.",
     };

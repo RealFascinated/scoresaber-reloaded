@@ -51,10 +51,10 @@ describe("buildLeaderboardChoice", () => {
     });
   });
 
-  it("returns an error when fewer than two ids exist", () => {
-    const choice = buildLeaderboardChoice("Which?", [1, 99], [makeLeaderboard(1, HASH_A, "Expert", 7)]);
-
-    expect(choice).toEqual({ error: expect.stringContaining("Only 1 of the leaderboard ids exist") });
+  it("throws when fewer than two ids exist", () => {
+    expect(() =>
+      buildLeaderboardChoice("Which?", [1, 99], [makeLeaderboard(1, HASH_A, "Expert", 7)])
+    ).toThrow("Only 1 of the leaderboard ids exist");
   });
 });
 
@@ -77,14 +77,10 @@ describe("buildSongChoice", () => {
     });
   });
 
-  it("returns an error when fewer than two songs have a leaderboard", () => {
-    const choice = buildSongChoice(
-      "Which song?",
-      [HASH_A, HASH_B],
-      [makeLeaderboard(1, HASH_A, "Expert", 7)]
-    );
-
-    expect(choice).toEqual({ error: expect.stringContaining("Only 1 of the song hashes") });
+  it("throws when fewer than two songs have a leaderboard", () => {
+    expect(() =>
+      buildSongChoice("Which song?", [HASH_A, HASH_B], [makeLeaderboard(1, HASH_A, "Expert", 7)])
+    ).toThrow("Only 1 of the song hashes");
   });
 });
 

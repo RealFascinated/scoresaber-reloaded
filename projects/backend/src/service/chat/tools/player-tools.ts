@@ -48,7 +48,7 @@ import {
   summarizeHistoryChange,
   trimPlayerSummary,
 } from "./player-tool-results";
-import { runTool, toolSchema } from "./tool-runtime";
+import { ChatToolError, runTool, toolSchema } from "./tool-runtime";
 
 async function searchPlayerCandidates(query: string) {
   const normalizedQuery = query.trim();
@@ -83,7 +83,11 @@ async function searchPlayerCandidates(query: string) {
 }
 
 function playerNotFound(playerId: string) {
-  return { error: `Player "${playerId}" was not found. Use searchPlayers to find the right id.` };
+  return new ChatToolError(
+    "not_found",
+    `Player "${playerId}" was not found.`,
+    "Use searchPlayers to find the right id."
+  );
 }
 
 /**
@@ -115,7 +119,7 @@ export function createPlayerTools(context: ChatToolContext) {
         runTool(async () => {
           const resolved = resolvePlayerId(context, input.playerId);
           if (!resolved.ok) {
-            return { error: resolved.error };
+            throw new ChatToolError(resolved.code, resolved.error);
           }
           const player = await ScoreSaberPlayerService.getPlayer(
             resolved.playerId,
@@ -135,7 +139,7 @@ export function createPlayerTools(context: ChatToolContext) {
         runTool(async () => {
           const resolved = resolvePlayerId(context, input.playerId);
           if (!resolved.ok) {
-            return { error: resolved.error };
+            throw new ChatToolError(resolved.code, resolved.error);
           }
           const sort = input.sort ?? "recent";
           const sortField = sort === "top" ? "pp" : "date";
@@ -169,11 +173,11 @@ export function createPlayerTools(context: ChatToolContext) {
         runTool(async () => {
           const resolved = resolvePlayerId(context, input.playerId);
           if (!resolved.ok) {
-            return { error: resolved.error };
+            throw new ChatToolError(resolved.code, resolved.error);
           }
           const scores = await listPlayerRankedScores(resolved.playerId, context.realmId);
           if (scores.length === 0) {
-            return { error: "This player has no ranked scores in this realm." };
+            throw new ChatToolError("not_found", "This player has no ranked scores in this realm.");
           }
           return {
             playerId: resolved.playerId,
@@ -220,11 +224,11 @@ export function createPlayerTools(context: ChatToolContext) {
         runTool(async () => {
           const resolved = resolvePlayerId(context, input.playerId);
           if (!resolved.ok) {
-            return { error: resolved.error };
+            throw new ChatToolError(resolved.code, resolved.error);
           }
           const player = await ScoreSaberApiService.lookupPlayer(resolved.playerId, context.realmId);
           if (!player) {
-            return playerNotFound(resolved.playerId);
+            throw playerNotFound(resolved.playerId);
           }
           const days = input.days ?? 14;
           const statistics = await PlayerStatisticsService.getStatistics(player, context.realmId);
@@ -277,7 +281,7 @@ export function createPlayerTools(context: ChatToolContext) {
         runTool(async () => {
           const resolved = resolvePlayerId(context, input.playerId);
           if (!resolved.ok) {
-            return { error: resolved.error };
+            throw new ChatToolError(resolved.code, resolved.error);
           }
           const [leaderboard, page] = await Promise.all([
             ScoreSaberLeaderboardsService.getLeaderboard(input.leaderboardId, context.realmId),
@@ -308,18 +312,22 @@ export function createPlayerTools(context: ChatToolContext) {
           const aId = input.a.trim();
           const bId = input.b.trim();
           if (aId === bId) {
-            return {
-              error: "Both player ids refer to the same player. Pass two different players to compare.",
-            };
+            throw new ChatToolError(
+              "invalid_input",
+              "Both player ids refer to the same player.",
+              "Pass two different players to compare."
+            );
           }
           const [a, b] = await Promise.all([
             ScoreSaberPlayerService.getPlayer(aId, "full", undefined, context.realmId),
             ScoreSaberPlayerService.getPlayer(bId, "full", undefined, context.realmId),
           ]);
           if (a.id === b.id) {
-            return {
-              error: "Both player ids refer to the same player. Pass two different players to compare.",
-            };
+            throw new ChatToolError(
+              "invalid_input",
+              "Both player ids refer to the same player.",
+              "Pass two different players to compare."
+            );
           }
           return {
             a: trimPlayerProfile(a),
@@ -361,7 +369,7 @@ export function createPlayerTools(context: ChatToolContext) {
         runTool(async () => {
           const resolved = resolvePlayerId(context, input.playerId);
           if (!resolved.ok) {
-            return { error: resolved.error };
+            throw new ChatToolError(resolved.code, resolved.error);
           }
           const [player, scores] = await Promise.all([
             ScoreSaberPlayerService.getPlayer(resolved.playerId, "basic", undefined, context.realmId),

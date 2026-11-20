@@ -25,11 +25,10 @@ import {
   playlistModelOutput,
   resolvedMapsToSongs,
   uniquePlaylistMaps,
-  type PlaylistToolError,
   type ResolvedPlaylistMap,
   type SkippedMapEntry,
 } from "./playlist-tool-utils";
-import { runTool, toolSchema } from "./tool-runtime";
+import { ChatToolError, runTool, toolSchema } from "./tool-runtime";
 
 const RESOLVE_CONCURRENCY = 10;
 
@@ -117,7 +116,7 @@ export function createPlaylistTools(context: ChatToolContext) {
         runTool(async () => {
           const player = resolvePlayerId(context, playerId);
           if (!player.ok) {
-            return { error: player.error };
+            throw new ChatToolError(player.code, player.error);
           }
           const playlist = await PlaylistService.getSelfPlaylist(
             player.playerId,
@@ -136,7 +135,7 @@ export function createPlaylistTools(context: ChatToolContext) {
         runTool(async () => {
           const player = resolvePlayerId(context, playerId);
           if (!player.ok) {
-            return { error: player.error };
+            throw new ChatToolError(player.code, player.error);
           }
           const playlist = await PlaylistService.getSnipePlaylist(
             player.playerId,
@@ -156,7 +155,7 @@ export function createPlaylistTools(context: ChatToolContext) {
         runTool(async () => {
           const player = resolvePlayerId(context, playerId);
           if (!player.ok) {
-            return { error: player.error };
+            throw new ChatToolError(player.code, player.error);
           }
           const playlist = await PlaylistService.getSuggestedMapsPlaylist(player.playerId, filters ?? {});
           return buildPlaylistOutput(playlist);
@@ -200,11 +199,13 @@ export function createPlaylistTools(context: ChatToolContext) {
           const skipped = result.skipped;
 
           if (resolved.length === 0) {
-            return {
-              error:
-                "None of the maps could be resolved. Use searchMaps or resolveMap to find valid maps first.",
-              ...(skipped.length > 0 ? { skipped } : {}),
-            } satisfies PlaylistToolError;
+            throw new ChatToolError(
+              "not_found",
+              "None of the maps could be resolved.",
+              `Use searchMaps or resolveMap to find valid maps first.${
+                skipped.length > 0 ? ` Skipped: ${JSON.stringify(skipped.slice(0, 10))}` : ""
+              }`
+            );
           }
 
           const playlist = {

@@ -1,6 +1,6 @@
 import { GetSuggestedMapsInputSchema } from "@ssr/common/schemas/chat/tools/map-tools";
 import { describe, expect, it } from "bun:test";
-import { toolSchema } from "./tool-runtime";
+import { ChatToolError, runTool, toolSchema } from "./tool-runtime";
 
 function getValidate() {
   const validate = toolSchema(GetSuggestedMapsInputSchema).validate;
@@ -36,5 +36,39 @@ describe("toolSchema", () => {
     if (!result.success) {
       expect(result.error.message).toContain("playerId");
     }
+  });
+});
+
+describe("runTool", () => {
+  it("returns the action result", async () => {
+    expect(await runTool(async () => ({ ok: true }))).toEqual({ ok: true });
+  });
+
+  it("rethrows a ChatToolError untouched", async () => {
+    const error = new ChatToolError("not_found", "Missing", "Search first");
+
+    await expect(runTool(async () => Promise.reject(error))).rejects.toBe(error);
+    expect(JSON.parse(error.message)).toEqual({
+      code: "not_found",
+      message: "Missing",
+      retryable: false,
+      hint: "Search first",
+    });
+  });
+
+  it("wraps unexpected errors as retryable without leaking the cause message", async () => {
+    const cause = new Error("connection to 10.0.0.1 refused");
+    const thrown = await runTool(async () => Promise.reject(cause), "Could not load.").catch(
+      (error: Error) => error
+    );
+
+    expect(thrown).toBeInstanceOf(ChatToolError);
+    expect(thrown.message).not.toContain("10.0.0.1");
+    expect(JSON.parse(thrown.message)).toMatchObject({
+      code: "unavailable",
+      message: "Could not load.",
+      retryable: true,
+    });
+    expect(thrown.cause).toBe(cause);
   });
 });

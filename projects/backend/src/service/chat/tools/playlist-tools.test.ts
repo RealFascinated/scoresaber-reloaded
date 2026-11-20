@@ -165,12 +165,6 @@ describe("playlistModelOutput", () => {
       skipped: [{ input: "leaderboard 9", reason: "Map not found" }],
     });
   });
-
-  it("passes errors and skipped entries through", () => {
-    expect(
-      playlistModelOutput({ error: "No maps resolved", skipped: [{ input: "x", reason: "missing" }] }).value
-    ).toEqual({ error: "No maps resolved", skipped: [{ input: "x", reason: "missing" }] });
-  });
 });
 
 describe("encodePlaylistSettings", () => {

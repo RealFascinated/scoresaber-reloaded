@@ -12,7 +12,7 @@ import { PlayerScoresService } from "../../player/player-scores.service";
 import type { ChatToolContext } from "../chat-tool-context";
 import { resolvePlayerId } from "./player-tool-results";
 import { buildScoreSummary } from "./score-summary";
-import { runTool, toolSchema } from "./tool-runtime";
+import { ChatToolError, runTool, toolSchema } from "./tool-runtime";
 
 const logger = Logger.withTopic("Chat Score Tools");
 
@@ -48,6 +48,7 @@ async function resolveScoreId(context: ChatToolContext, input: ChatGetScoreSumma
   if (input.leaderboardId === undefined) {
     return {
       ok: false as const,
+      code: "invalid_input" as const,
       error:
         "Pass a scoreId from another tool result, or a leaderboardId from resolveMap to use the player's current score on that map.",
     };
@@ -64,6 +65,7 @@ async function resolveScoreId(context: ChatToolContext, input: ChatGetScoreSumma
   if (!row) {
     return {
       ok: false as const,
+      code: "not_found" as const,
       error: `Player "${resolved.playerId}" has no score on leaderboard ${input.leaderboardId}.`,
     };
   }
@@ -83,7 +85,7 @@ export function createScoreTools(context: ChatToolContext) {
         runTool(async () => {
           const resolved = await resolveScoreId(context, input);
           if (!resolved.ok) {
-            return { error: resolved.error };
+            throw new ChatToolError(resolved.code, resolved.error);
           }
           const playerScore = await PlayerScoresService.getScore(resolved.scoreId, context.realmId);
           const { beatLeaderScore, playerId, leaderboardId } = playerScore.score;

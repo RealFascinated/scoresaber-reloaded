@@ -6,7 +6,6 @@ import type { ChatMessagePart } from "@ssr/common/schemas/chat/chat-message";
 import {
   convertToModelMessages,
   hasToolCall,
-  stepCountIs,
   streamText,
   type ToolSet,
   type UIDataTypes,
@@ -22,6 +21,7 @@ import { ChatConversationService, type ChatConversationRow } from "./chat-conver
 import { describeChatError } from "./chat-error";
 import { ChatModelService } from "./chat-model.service";
 import { deleteLastTurn } from "./chat-regenerate";
+import { chatStepLimit } from "./chat-step-limit";
 import { buildChatSystemPrompt } from "./chat-system-prompt";
 import { ChatTitleService } from "./chat-title.service";
 import type { ChatToolContext } from "./chat-tool-context";
@@ -228,15 +228,21 @@ export class ChatService {
         system: summary ? `${system}\n\nSummary of the earlier conversation:\n${summary}` : system,
         messages: modelMessages,
         tools,
-        stopWhen: [stepCountIs(env.CHAT_MAX_STEPS), hasToolCall(...SELECT_TOOL_NAMES)],
+        stopWhen: [chatStepLimit(env.CHAT_MAX_STEPS), hasToolCall(...SELECT_TOOL_NAMES)],
         maxOutputTokens: STREAM_MAX_OUTPUT_TOKENS,
         reasoning: env.CHAT_REASONING_EFFORT,
         abortSignal: turnSignal,
         onToolExecutionEnd: event => {
           const isError = event.toolOutput.type === "tool-error";
           getMetric()?.observeToolCall(event.toolCall.toolName, isError ? "error" : "ok");
-          if (isError) {
-            logger.error(`Tool ${event.toolCall.toolName} failed in conversation ${conversation.id}`);
+          if (event.toolOutput.type === "tool-error") {
+            const { error } = event.toolOutput;
+            const cause = error instanceof Error && error.cause instanceof Error ? error.cause : undefined;
+            logger.error(
+              `Tool ${event.toolCall.toolName} failed in conversation ${conversation.id}`,
+              error instanceof Error ? describeChatError(error) : "unknown error",
+              cause === undefined ? "" : `cause: ${describeChatError(cause)}`
+            );
           }
         },
         onEnd: event => {
@@ -255,6 +261,7 @@ export class ChatService {
 
       return result.toUIMessageStreamResponse<UIMessage>({
         originalMessages: [],
+        redactToolErrors: false,
         onError: () => "The assistant failed to answer, please try again.",
         onEnd: async ({ messages, isAborted, isCancelled }) => {
           try {

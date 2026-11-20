@@ -15,7 +15,7 @@ import { leaderboardRowToType } from "../../../db/converter/scoresaber-leaderboa
 import { scoreSaberLeaderboardsTable } from "../../../db/schema";
 import { ScoreSaberLeaderboardsRepository } from "../../../repositories/scoresaber-leaderboards.repository";
 import type { ChatToolContext } from "../chat-tool-context";
-import { runTool, toolSchema } from "./tool-runtime";
+import { ChatToolError, runTool, toolSchema } from "./tool-runtime";
 
 export const SELECT_TOOL_NAMES = ["selectLeaderboard", "selectSong"] as const;
 
@@ -51,9 +51,11 @@ export function buildLeaderboardChoice(
     });
   }
   if (options.length < MIN_CHAT_CHOICE_OPTIONS) {
-    return {
-      error: `Only ${options.length} of the leaderboard ids exist. Use ids from resolveMap, and when only one fits, use it without asking.`,
-    };
+    throw new ChatToolError(
+      "invalid_input",
+      `Only ${options.length} of the leaderboard ids exist.`,
+      "Use ids from resolveMap, and when only one fits, use it without asking."
+    );
   }
   const choice: ChatChoice = { kind: "leaderboard-choice", question, options, note: CHOICE_NOTE };
   return choice;
@@ -85,9 +87,11 @@ export function buildSongChoice(question: string, hashes: string[], leaderboards
     });
   }
   if (options.length < MIN_CHAT_CHOICE_OPTIONS) {
-    return {
-      error: `Only ${options.length} of the song hashes have a leaderboard. Use songHash values from resolveMap, and when only one fits, use it without asking.`,
-    };
+    throw new ChatToolError(
+      "invalid_input",
+      `Only ${options.length} of the song hashes have a leaderboard.`,
+      "Use songHash values from resolveMap, and when only one fits, use it without asking."
+    );
   }
   const choice: ChatChoice = { kind: "song-choice", question, options, note: CHOICE_NOTE };
   return choice;
