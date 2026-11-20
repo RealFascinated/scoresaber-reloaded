@@ -1,5 +1,13 @@
 import { OpenTelemetry } from "@ai-sdk/otel";
-import { context, SpanKind, SpanStatusCode, trace, type Attributes, type Span } from "@opentelemetry/api";
+import {
+  context,
+  ROOT_CONTEXT,
+  SpanKind,
+  SpanStatusCode,
+  trace,
+  type Attributes,
+  type Span,
+} from "@opentelemetry/api";
 import { logs, SeverityNumber, type AnyValueMap } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
@@ -95,6 +103,20 @@ export async function withSpan<T>(name: string, fn: (span: Span) => Promise<T>, 
   const span = trace.getTracer(TRACER_NAME).startSpan(name, { kind: SpanKind.CLIENT, attributes });
   try {
     return await context.with(trace.setSpan(context.active(), span), () => fn(span));
+  } catch (error) {
+    span.recordException(error instanceof Error ? error : new Error(String(error)));
+    span.setStatus({ code: SpanStatusCode.ERROR });
+    throw error;
+  } finally {
+    span.end();
+  }
+}
+
+/** Runs `fn` in its own root trace so work started by a request does not extend that request's trace. */
+export async function withBackgroundSpan<T>(name: string, fn: () => Promise<T>) {
+  const span = trace.getTracer(TRACER_NAME).startSpan(name, { kind: SpanKind.INTERNAL }, ROOT_CONTEXT);
+  try {
+    return await context.with(trace.setSpan(ROOT_CONTEXT, span), fn);
   } catch (error) {
     span.recordException(error instanceof Error ? error : new Error(String(error)));
     span.setStatus({ code: SpanStatusCode.ERROR });

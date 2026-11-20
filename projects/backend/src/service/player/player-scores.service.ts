@@ -36,6 +36,7 @@ import { ScoreSaberLeaderboardsRepository } from "../../repositories/scoresaber-
 import { ScoreSaberMedalsRepository } from "../../repositories/scoresaber-medals.repository";
 import { ScoreSaberScoreHistoryRepository } from "../../repositories/scoresaber-score-history.repository";
 import { ScoreSaberScoresRepository } from "../../repositories/scoresaber-scores.repository";
+import { withBackgroundSpan } from "../../telemetry/telemetry";
 import BeatLeaderService from "../beatleader/beatleader.service";
 import BeatSaverService from "../external/beatsaver.service";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
@@ -558,10 +559,14 @@ export class PlayerScoresService {
       return { score, leaderboard };
     });
 
-    void ScoreCoreService.upsertScoresFromApi(parsedPlayerScores.map(({ score }) => score));
+    void withBackgroundSpan("background upsertScoresFromApi", () =>
+      ScoreCoreService.upsertScoresFromApi(parsedPlayerScores.map(({ score }) => score))
+    );
 
     if (!search?.trim()) {
-      void PlayerScoresService.checkScoreCount(playerId, requestedPage.metadata.total);
+      void withBackgroundSpan("background checkScoreCount", () =>
+        PlayerScoresService.checkScoreCount(playerId, requestedPage.metadata.total)
+      );
     }
 
     const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
