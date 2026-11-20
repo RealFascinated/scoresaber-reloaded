@@ -72,6 +72,19 @@ function buildRecord(level: LogLevel, topic: string | undefined, message: string
   return { timestamp: new Date(), level, topic, message, attributes, error } satisfies LogRecord;
 }
 
+function applyFormat(message: string, args: unknown[]) {
+  const placeholders = message.match(/%s/g)?.length ?? 0;
+  if (placeholders === 0) {
+    return { message, args };
+  }
+  const consumed = args.slice(0, placeholders);
+  if (consumed.some(arg => typeof arg === "object" && arg !== null)) {
+    return { message, args };
+  }
+  let index = 0;
+  return { message: message.replace(/%s/g, () => String(consumed[index++])), args: args.slice(placeholders) };
+}
+
 function stringifyRecord(record: LogRecord) {
   const seen = new WeakSet<object>();
   return JSON.stringify(
@@ -136,10 +149,12 @@ export default class Logger {
     Logger.emit("error", undefined, message, args);
   }
 
-  private static emit(level: LogLevel, topic: string | undefined, message: string, args: unknown[]) {
+  private static emit(level: LogLevel, topic: string | undefined, rawMessage: string, rawArgs: unknown[]) {
     if (LEVEL_RANK[level] < LEVEL_RANK[CONFIGURED_LEVEL]) {
       return;
     }
+
+    const { message, args } = applyFormat(rawMessage, rawArgs);
 
     if (JSON_OUTPUT || sinks.length > 0) {
       const record = buildRecord(level, topic, message, args);
