@@ -14,6 +14,7 @@ const SUGGESTED_PROMPTS = [
   "Find ranked maps around the star level I usually play",
   "Where do the players I follow rank right now?",
   "Which of my scores earned medals?",
+  "Break down my latest replay",
   "Who's top of my country's ranking?",
 ];
 

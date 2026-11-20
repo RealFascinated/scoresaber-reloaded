@@ -54,6 +54,7 @@ const TOOL_LABELS: Record<string, string> = {
   getRankedMapsPlaylist: "Built a ranked maps playlist",
   getRealms: "Fetched realms",
   getScoreHistory: "Fetched score history",
+  getScoreSummary: "Summarized a score",
   getSelfPlaylist: "Built a playlist",
   getSiteLink: "Created a site link",
   getSnipePlaylist: "Built a snipe playlist",
