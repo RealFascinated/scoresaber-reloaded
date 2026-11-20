@@ -164,11 +164,13 @@ export default function ScoreSaberScoreButtons({
         </PopoverContent>
       </Popover>
 
-      <div
-        className="hidden min-w-0 flex-wrap justify-end gap-1 @3xl:flex"
-        style={{ width: (visibleButtons.length / 2) * 40 }}
-      >
-        {renderedButtons}
+      <div className="hidden min-w-0 flex-col items-end gap-1 @3xl:flex">
+        <div className="flex justify-end gap-1">
+          {renderedButtons.slice(0, Math.ceil(renderedButtons.length / 2))}
+        </div>
+        <div className="flex justify-end gap-1">
+          {renderedButtons.slice(Math.ceil(renderedButtons.length / 2))}
+        </div>
       </div>
     </>
   );
