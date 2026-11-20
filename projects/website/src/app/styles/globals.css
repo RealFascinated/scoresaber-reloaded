@@ -82,3 +82,48 @@ body {
     contain-intrinsic-size: auto 8rem;
   }
 }
+
+@keyframes title-shimmer {
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes title-reveal {
+  from {
+    mask-position: 100% 0;
+  }
+  to {
+    mask-position: 0 0;
+  }
+}
+
+@layer utilities {
+  .title-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--muted-foreground) 40%,
+        var(--foreground) 50%,
+        var(--muted-foreground) 60%
+      )
+      100% 0 / 250% 100% no-repeat;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: title-shimmer 1.6s linear infinite;
+  }
+
+  .title-reveal {
+    mask-image: linear-gradient(to right, black 40%, transparent 60%);
+    mask-size: 250% 100%;
+    mask-repeat: no-repeat;
+    animation: title-reveal 900ms ease-out both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title-shimmer,
+  .title-reveal {
+    animation: none;
+  }
+}

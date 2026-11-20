@@ -13,6 +13,7 @@ import {
   useChatConversations,
 } from "@/components/chat/chat-queries";
 import ChatSidebar from "@/components/chat/chat-sidebar";
+import { ChatTitle } from "@/components/chat/chat-title";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useChat } from "@ai-sdk/react";
 import { CHAT_ROUTE } from "@ssr/common/api-routes";
@@ -32,6 +33,7 @@ import {
 import { toast } from "sonner";
 
 const TITLE_REFRESH_DELAYS_MS = [2000, 5000];
+const TITLE_PENDING_TIMEOUT_MS = 30_000;
 
 type ChatShellProps = {
   conversationId: string | null;
@@ -168,6 +170,7 @@ function ChatShellContent({
   );
 
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [titlePending, setTitlePending] = useState(false);
   const [durations, setDurations] = useState<Record<string, number>>({});
   const startedAtRef = useRef<number | null>(null);
   const titleTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -183,6 +186,7 @@ function ChatShellContent({
   }, []);
 
   const markStarted = useCallback(() => {
+    setTitlePending(true);
     const now = Date.now();
     startedAtRef.current = now;
     setStartedAt(now);
@@ -215,9 +219,16 @@ function ChatShellContent({
     .flatMap(page => page.items)
     .find(conversation => conversation.id === conversationId);
   const contextUsage = useChatContextUsage(conversationId);
-  const title = activeConversation?.title ?? "New chat";
 
   const isBusy = status === "submitted" || status === "streaming";
+
+  useEffect(() => {
+    if (!titlePending || isBusy) {
+      return;
+    }
+    const timeout = setTimeout(() => setTitlePending(false), TITLE_PENDING_TIMEOUT_MS);
+    return () => clearTimeout(timeout);
+  }, [isBusy, titlePending]);
 
   const historyDisplayMessages = useMemo(() => history.map(toDisplayMessage), [history]);
   const displayMessages = useMemo(
@@ -282,11 +293,17 @@ function ChatShellContent({
       className="h-dvh min-h-0"
       style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}
     >
-      <ChatSidebar activeConversationId={conversationId} onResize={resizeSidebar} />
+      <ChatSidebar
+        activeConversationId={conversationId}
+        titlePending={titlePending}
+        onResize={resizeSidebar}
+      />
       <SidebarInset className="h-dvh min-h-0 min-w-0 overflow-hidden bg-background">
         <div className="flex h-12 shrink-0 items-center gap-2 border-b border-border/40 px-3">
           <SidebarTrigger className="md:hidden md:group-has-data-[state=collapsed]/sidebar-wrapper:inline-flex" />
-          <h1 className="min-w-0 flex-1 truncate text-sm font-medium text-muted-foreground">{title}</h1>
+          <h1 className="min-w-0 flex-1 truncate text-sm font-medium text-muted-foreground">
+            <ChatTitle title={activeConversation?.title ?? null} pending={titlePending} />
+          </h1>
           {contextUsage.data && <ChatContextUsage usage={contextUsage.data} />}
         </div>
         {isEmptyChat ? (

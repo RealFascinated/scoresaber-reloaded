@@ -5,6 +5,7 @@ import { deleteChatConversation, renameChatConversation } from "@/common/chat/ch
 import Avatar from "@/components/avatar";
 import { getConversationGroupLabel, type ConversationGroupLabel } from "@/components/chat/chat-display";
 import { CHAT_CONVERSATIONS_QUERY_KEY, useChatConversations } from "@/components/chat/chat-queries";
+import { ChatTitle } from "@/components/chat/chat-title";
 import SimpleLink from "@/components/simple-link";
 import { Button } from "@/components/ui/button";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
@@ -35,15 +36,21 @@ import { toast } from "sonner";
 type ConversationItemProps = {
   conversation: ChatConversation;
   isActive: boolean;
+  titlePending: boolean;
   onRename: (conversationId: string, title: string) => void;
   onDelete: (conversationId: string) => void;
 };
 
-function ConversationItem({ conversation, isActive, onRename, onDelete }: ConversationItemProps) {
+function ConversationItem({
+  conversation,
+  isActive,
+  titlePending,
+  onRename,
+  onDelete,
+}: ConversationItemProps) {
   const { isMobile, setOpenMobile } = useSidebar();
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(conversation.title ?? "");
-  const label = conversation.title ?? "New chat";
 
   const commitRename = () => {
     const trimmed = title.trim();
@@ -102,7 +109,7 @@ function ConversationItem({ conversation, isActive, onRename, onDelete }: Conver
             }
           }}
         >
-          <span className="truncate">{label}</span>
+          <ChatTitle title={conversation.title} pending={isActive && titlePending} />
         </SimpleLink>
       </SidebarMenuButton>
       <SidebarMenuAction
@@ -173,10 +180,11 @@ function ChatUser() {
  */
 type ChatSidebarProps = {
   activeConversationId: string | null;
+  titlePending: boolean;
   onResize: (width: number) => void;
 };
 
-export default function ChatSidebar({ activeConversationId, onResize }: ChatSidebarProps) {
+export default function ChatSidebar({ activeConversationId, titlePending, onResize }: ChatSidebarProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { isMobile, setOpenMobile } = useSidebar();
@@ -292,6 +300,7 @@ export default function ChatSidebar({ activeConversationId, onResize }: ChatSide
                           key={conversation.id}
                           conversation={conversation}
                           isActive={conversation.id === activeConversationId}
+                          titlePending={titlePending}
                           onRename={(conversationId, title) =>
                             renameMutation.mutate({ conversationId, title })
                           }
