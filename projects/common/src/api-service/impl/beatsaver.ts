@@ -43,7 +43,11 @@ export class BeatSaverService extends ApiService {
     if (!response?.ok) {
       return { status: "error" } as const;
     }
-    return { status: "found", map: (await response.json()) as BeatSaverMapToken } as const;
+    const map = (await response.json().catch(() => undefined)) as BeatSaverMapToken | undefined;
+    if (!map || !Array.isArray(map.versions)) {
+      return { status: "missing" } as const;
+    }
+    return { status: "found", map } as const;
   }
 
   /**
