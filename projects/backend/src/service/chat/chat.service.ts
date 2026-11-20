@@ -215,13 +215,6 @@ export class ChatService {
     await ChatService.refreshContextUsage(conversation.id, prompt);
 
     try {
-      if (conversation.title === null) {
-        void ChatTitleService.generate(conversation.id, text).catch(error => {
-          getMetric()?.observeError("title");
-          logger.error(`Title generation crashed for conversation ${conversation.id}`, error);
-        });
-      }
-
       let failed = false;
       const result = streamText({
         model,
@@ -270,6 +263,15 @@ export class ChatService {
 
             const reply = messages[messages.length - 1];
             const replyParts = reply?.role === "assistant" ? reply.parts : [];
+            if (conversation.title === null) {
+              const replyText = replyParts
+                .flatMap(part => (part.type === "text" ? [part.text] : []))
+                .join("\n");
+              void ChatTitleService.generate(conversation.id, text, replyText).catch(error => {
+                getMetric()?.observeError("title");
+                logger.error(`Title generation crashed for conversation ${conversation.id}`, error);
+              });
+            }
             if (replyParts.length === 0) {
               return;
             }
