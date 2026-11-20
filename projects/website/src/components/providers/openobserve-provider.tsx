@@ -29,17 +29,18 @@ export function OpenObserveProvider() {
     openobserveRum.init({
       ...options,
       applicationId: options.service,
-      trackResources: true,
-      trackLongTasks: true,
-      trackUserInteractions: true,
+      trackResources: false,
+      trackLongTasks: false,
+      trackUserInteractions: false,
       defaultPrivacyLevel: "mask-user-input",
-      sessionSampleRate: 100,
+      sessionSampleRate: 5,
       sessionReplaySampleRate: 0,
     });
 
     openobserveLogs.init({
       ...options,
       forwardErrorsToLogs: true,
+      sessionSampleRate: 5,
     });
   }, []);
 
