@@ -15,6 +15,7 @@ import {
 } from "ai";
 import type ChatMetric from "../../metrics/impl/backend/chat";
 import { MetricType } from "../../metrics/prometheus";
+import { withChatSession } from "../../telemetry/telemetry";
 import MetricsService from "../infra/metrics.service";
 import { CHARS_PER_TOKEN, ChatContextService, type ChatContextMessage } from "./chat-context.service";
 import { ChatConversationService, type ChatConversationRow } from "./chat-conversation.service";
@@ -216,42 +217,44 @@ export class ChatService {
 
     try {
       let failed = false;
-      const result = streamText({
-        model,
-        telemetry: { functionId: "chat.turn" },
-        system: summary ? `${system}\n\nSummary of the earlier conversation:\n${summary}` : system,
-        messages: modelMessages,
-        tools,
-        stopWhen: [chatStepLimit(env.CHAT_MAX_STEPS), hasToolCall(...SELECT_TOOL_NAMES)],
-        maxOutputTokens: STREAM_MAX_OUTPUT_TOKENS,
-        reasoning: env.CHAT_REASONING_EFFORT,
-        abortSignal: turnSignal,
-        onToolExecutionEnd: event => {
-          const isError = event.toolOutput.type === "tool-error";
-          getMetric()?.observeToolCall(event.toolCall.toolName, isError ? "error" : "ok");
-          if (event.toolOutput.type === "tool-error") {
-            const { error } = event.toolOutput;
-            const cause = error instanceof Error && error.cause instanceof Error ? error.cause : undefined;
+      const result = withChatSession({ conversationId: conversation.id, userId: user.id }, () =>
+        streamText({
+          model,
+          telemetry: { functionId: "chat.turn" },
+          system: summary ? `${system}\n\nSummary of the earlier conversation:\n${summary}` : system,
+          messages: modelMessages,
+          tools,
+          stopWhen: [chatStepLimit(env.CHAT_MAX_STEPS), hasToolCall(...SELECT_TOOL_NAMES)],
+          maxOutputTokens: STREAM_MAX_OUTPUT_TOKENS,
+          reasoning: env.CHAT_REASONING_EFFORT,
+          abortSignal: turnSignal,
+          onToolExecutionEnd: event => {
+            const isError = event.toolOutput.type === "tool-error";
+            getMetric()?.observeToolCall(event.toolCall.toolName, isError ? "error" : "ok");
+            if (event.toolOutput.type === "tool-error") {
+              const { error } = event.toolOutput;
+              const cause = error instanceof Error && error.cause instanceof Error ? error.cause : undefined;
+              logger.error(
+                `Tool ${event.toolCall.toolName} failed in conversation ${conversation.id}`,
+                error instanceof Error ? describeChatError(error) : "unknown error",
+                cause === undefined ? "" : `cause: ${describeChatError(cause)}`
+              );
+            }
+          },
+          onEnd: event => {
+            getMetric()?.observeTokens("input", event.totalUsage.inputTokens ?? 0);
+            getMetric()?.observeTokens("output", event.totalUsage.outputTokens ?? 0);
+          },
+          onError: ({ error }) => {
+            failed = true;
+            getMetric()?.observeError("turn");
             logger.error(
-              `Tool ${event.toolCall.toolName} failed in conversation ${conversation.id}`,
-              error instanceof Error ? describeChatError(error) : "unknown error",
-              cause === undefined ? "" : `cause: ${describeChatError(cause)}`
+              `Chat turn failed in conversation ${conversation.id}`,
+              error instanceof Error ? describeChatError(error) : "unknown error"
             );
-          }
-        },
-        onEnd: event => {
-          getMetric()?.observeTokens("input", event.totalUsage.inputTokens ?? 0);
-          getMetric()?.observeTokens("output", event.totalUsage.outputTokens ?? 0);
-        },
-        onError: ({ error }) => {
-          failed = true;
-          getMetric()?.observeError("turn");
-          logger.error(
-            `Chat turn failed in conversation ${conversation.id}`,
-            error instanceof Error ? describeChatError(error) : "unknown error"
-          );
-        },
-      });
+          },
+        })
+      );
 
       return result.toUIMessageStreamResponse<UIMessage>({
         originalMessages: [],
@@ -352,11 +355,13 @@ export class ChatService {
     abortSignal: AbortSignal
   ) {
     try {
-      const summary = await ChatContextService.summarize(
-        conversation.summary,
-        folded,
-        Math.floor(budget * CHARS_PER_TOKEN * SUMMARY_TRANSCRIPT_CHAR_RATIO),
-        abortSignal
+      const summary = await withChatSession({ conversationId: conversation.id }, () =>
+        ChatContextService.summarize(
+          conversation.summary,
+          folded,
+          Math.floor(budget * CHARS_PER_TOKEN * SUMMARY_TRANSCRIPT_CHAR_RATIO),
+          abortSignal
+        )
       );
       const lastFolded = folded[folded.length - 1];
       await ChatConversationService.setSummary(conversation.id, summary, lastFolded.ordinal);

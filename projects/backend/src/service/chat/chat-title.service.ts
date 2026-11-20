@@ -1,5 +1,6 @@
 import Logger from "@ssr/common/logger";
 import { generateText } from "ai";
+import { withChatSession } from "../../telemetry/telemetry";
 import { ChatConversationService } from "./chat-conversation.service";
 import { describeChatError } from "./chat-error";
 import { ChatModelService } from "./chat-model.service";
@@ -49,17 +50,19 @@ export class ChatTitleService {
     try {
       let title = ChatTitleService.fallbackTitle(userText);
       try {
-        const { text } = await generateText({
-          model: ChatModelService.getTitleModel(),
-          telemetry: { functionId: "chat.title" },
-          system: TITLE_SYSTEM_PROMPT,
-          prompt: `User: ${userText.slice(0, TITLE_INPUT_LIMIT)}${
-            replyText.length > 0 ? `\n\nAssistant: ${replyText.slice(0, TITLE_REPLY_LIMIT)}` : ""
-          }`,
-          maxOutputTokens: TITLE_MAX_OUTPUT_TOKENS,
-          reasoning: "none",
-          abortSignal: AbortSignal.timeout(TITLE_TIMEOUT_MS),
-        });
+        const { text } = await withChatSession({ conversationId }, () =>
+          generateText({
+            model: ChatModelService.getTitleModel(),
+            telemetry: { functionId: "chat.title" },
+            system: TITLE_SYSTEM_PROMPT,
+            prompt: `User: ${userText.slice(0, TITLE_INPUT_LIMIT)}${
+              replyText.length > 0 ? `\n\nAssistant: ${replyText.slice(0, TITLE_REPLY_LIMIT)}` : ""
+            }`,
+            maxOutputTokens: TITLE_MAX_OUTPUT_TOKENS,
+            reasoning: "none",
+            abortSignal: AbortSignal.timeout(TITLE_TIMEOUT_MS),
+          })
+        );
         title = ChatTitleService.cleanTitle(text, userText);
       } catch (error) {
         logger.warn(

@@ -1,6 +1,7 @@
 import { OpenTelemetry } from "@ai-sdk/otel";
 import {
   context,
+  createContextKey,
   ROOT_CONTEXT,
   SpanKind,
   SpanStatusCode,
@@ -13,7 +14,7 @@ import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { BatchLogRecordProcessor, LoggerProvider } from "@opentelemetry/sdk-logs";
-import { BatchSpanProcessor, BasicTracerProvider } from "@opentelemetry/sdk-trace-base";
+import { BatchSpanProcessor, BasicTracerProvider, type SpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { env } from "@ssr/common/env";
 import Logger, { type LogLevel } from "@ssr/common/logger";
@@ -28,6 +29,32 @@ const SEVERITY: Record<LogLevel, SeverityNumber> = {
 };
 
 const TRACER_NAME = "ssr-backend";
+
+const CHAT_SESSION_KEY = createContextKey("ssr-chat-session");
+
+type ChatSession = { conversationId: string; userId?: string };
+
+const chatSessionProcessor = {
+  onStart(span, parentContext) {
+    const session = parentContext.getValue(CHAT_SESSION_KEY) as ChatSession | undefined;
+    if (!session) {
+      return;
+    }
+    span.setAttribute("gen_ai.conversation.id", session.conversationId);
+    if (session.userId) {
+      span.setAttribute("user.id", session.userId);
+    }
+  },
+  onEnd() {},
+  forceFlush: () => Promise.resolve(),
+  shutdown: () => Promise.resolve(),
+} satisfies SpanProcessor;
+
+/** Tags every span started inside `fn` with the chat conversation and user so LLM traces group into sessions. */
+export function withChatSession<T>(session: ChatSession, fn: () => T) {
+  const current = context.active().getValue(CHAT_SESSION_KEY) as ChatSession | undefined;
+  return context.with(context.active().setValue(CHAT_SESSION_KEY, { ...current, ...session }), fn);
+}
 
 let loggerProvider: LoggerProvider | undefined;
 let tracerProvider: BasicTracerProvider | undefined;
@@ -54,7 +81,7 @@ export function initTelemetry() {
 
   tracerProvider = new BasicTracerProvider({
     resource,
-    spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
+    spanProcessors: [chatSessionProcessor, new BatchSpanProcessor(new OTLPTraceExporter())],
   });
   trace.setGlobalTracerProvider(tracerProvider);
   registerTelemetry(new OpenTelemetry());
