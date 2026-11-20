@@ -218,6 +218,7 @@ export class ChatService {
       let failed = false;
       const result = streamText({
         model,
+        telemetry: { functionId: "chat.turn" },
         system: summary ? `${system}\n\nSummary of the earlier conversation:\n${summary}` : system,
         messages: modelMessages,
         tools,

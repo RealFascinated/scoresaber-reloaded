@@ -206,6 +206,7 @@ export class ChatContextService {
 
     const { text } = await generateText({
       model: ChatModelService.getTitleModel(),
+      telemetry: { functionId: "chat.summary" },
       system: SUMMARY_SYSTEM_PROMPT,
       prompt,
       maxOutputTokens: SUMMARY_MAX_OUTPUT_TOKENS,

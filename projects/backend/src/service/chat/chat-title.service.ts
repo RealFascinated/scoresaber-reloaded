@@ -51,6 +51,7 @@ export class ChatTitleService {
       try {
         const { text } = await generateText({
           model: ChatModelService.getTitleModel(),
+          telemetry: { functionId: "chat.title" },
           system: TITLE_SYSTEM_PROMPT,
           prompt: `User: ${userText.slice(0, TITLE_INPUT_LIMIT)}${
             replyText.length > 0 ? `\n\nAssistant: ${replyText.slice(0, TITLE_REPLY_LIMIT)}` : ""

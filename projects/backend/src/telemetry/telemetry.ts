@@ -1,3 +1,4 @@
+import { OpenTelemetry } from "@ai-sdk/otel";
 import { context, SpanKind, SpanStatusCode, trace, type Attributes, type Span } from "@opentelemetry/api";
 import { logs, SeverityNumber, type AnyValueMap } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
@@ -8,6 +9,7 @@ import { BatchSpanProcessor, BasicTracerProvider } from "@opentelemetry/sdk-trac
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { env } from "@ssr/common/env";
 import Logger, { type LogLevel } from "@ssr/common/logger";
+import { registerTelemetry } from "ai";
 import { EnterableContextManager } from "./context-manager";
 
 const SEVERITY: Record<LogLevel, SeverityNumber> = {
@@ -47,6 +49,7 @@ export function initTelemetry() {
     spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
   });
   trace.setGlobalTracerProvider(tracerProvider);
+  registerTelemetry(new OpenTelemetry());
 
   loggerProvider = new LoggerProvider({
     resource,
