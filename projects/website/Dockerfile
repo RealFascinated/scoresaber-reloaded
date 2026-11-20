@@ -35,6 +35,14 @@ RUN cd projects/website && bun run lint
 # Build the website
 RUN cd projects/website && bun run build
 
+# Upload source maps to OpenObserve, then strip them from the served output
+ARG NEXT_PUBLIC_OPENOBSERVE_ORGANIZATION
+ARG NEXT_PUBLIC_OPENOBSERVE_SERVICE
+ARG OPENOBSERVE_SOURCEMAP_URL
+ARG OPENOBSERVE_SOURCEMAP_TOKEN
+RUN apt-get update && apt-get install -y --no-install-recommends curl zip && rm -rf /var/lib/apt/lists/*
+RUN cd projects/website && sh scripts/upload-sourcemaps.sh
+
 # Run the app
 FROM node:26-bookworm-slim AS runner
 WORKDIR /app

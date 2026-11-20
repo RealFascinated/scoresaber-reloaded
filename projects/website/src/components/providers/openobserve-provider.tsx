@@ -22,6 +22,7 @@ export function OpenObserveProvider() {
       organizationIdentifier: env.NEXT_PUBLIC_OPENOBSERVE_ORGANIZATION ?? "default",
       service: env.NEXT_PUBLIC_OPENOBSERVE_SERVICE ?? "website",
       env: env.NEXT_PUBLIC_APP_ENV,
+      version: process.env.NEXT_PUBLIC_BUILD_ID,
       insecureHTTP: false,
       apiVersion: "v1",
     };
