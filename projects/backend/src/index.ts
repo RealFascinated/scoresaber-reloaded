@@ -54,12 +54,14 @@ import StorageService from "./service/infra/storage.service";
 import { PlayerCacheLivenessService } from "./service/player/player-cache-liveness.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { SuggestedMapsService } from "./service/suggested-maps/suggested-maps.service";
+import { instrumentFetch } from "./telemetry/instrumentation";
 import { initTelemetry, shutdownTelemetry } from "./telemetry/telemetry";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
 
 initTelemetry();
+instrumentFetch();
 
 const log = Logger.withTopic("SSR Backend");
 

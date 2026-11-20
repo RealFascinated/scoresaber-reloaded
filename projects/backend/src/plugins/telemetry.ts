@@ -1,6 +1,7 @@
 import { context, SpanKind, SpanStatusCode, trace, type Span } from "@opentelemetry/api";
 import Logger from "@ssr/common/logger";
 import { Elysia } from "elysia";
+import { enterContext } from "../telemetry/context-manager";
 import { TRACER_NAME } from "../telemetry/telemetry";
 
 const log = Logger.withTopic("HTTP");
@@ -27,15 +28,16 @@ export const telemetry = () => {
         context.active()
       );
       states.set(request, { span, start: performance.now() });
+      enterContext(trace.setSpan(context.active(), span));
     })
-    .onError({ as: "global" }, ({ request, error }) => {
+    .onError("global", ({ request, error }) => {
       const state = states.get(request);
       if (state) {
         state.span.recordException(error instanceof Error ? error : new Error(String(error)));
         state.span.setStatus({ code: SpanStatusCode.ERROR });
       }
     })
-    .onAfterResponse({ as: "global" }, ({ request, route, set, responseValue }) => {
+    .onAfterResponse("global", ({ request, route, set, responseValue }) => {
       const state = states.get(request);
       if (!state) {
         return;

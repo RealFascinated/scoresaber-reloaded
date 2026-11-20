@@ -1,6 +1,5 @@
-import { context, SpanStatusCode, trace, type Span } from "@opentelemetry/api";
+import { context, SpanKind, SpanStatusCode, trace, type Attributes, type Span } from "@opentelemetry/api";
 import { logs, SeverityNumber, type AnyValueMap } from "@opentelemetry/api-logs";
-import { AsyncLocalStorageContextManager } from "@opentelemetry/context-async-hooks";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
@@ -9,6 +8,7 @@ import { BatchSpanProcessor, BasicTracerProvider } from "@opentelemetry/sdk-trac
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { env } from "@ssr/common/env";
 import Logger, { type LogLevel } from "@ssr/common/logger";
+import { EnterableContextManager } from "./context-manager";
 
 const SEVERITY: Record<LogLevel, SeverityNumber> = {
   debug: SeverityNumber.DEBUG,
@@ -35,7 +35,7 @@ export function initTelemetry() {
     return;
   }
 
-  context.setGlobalContextManager(new AsyncLocalStorageContextManager().enable());
+  context.setGlobalContextManager(new EnterableContextManager().enable());
 
   const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: env.OTEL_SERVICE_NAME ?? "ssr-backend",
@@ -88,8 +88,8 @@ export async function shutdownTelemetry() {
 }
 
 /** Runs `fn` inside a span that is ended, and marked failed on throw, automatically. */
-export async function withSpan<T>(name: string, fn: (span: Span) => Promise<T>) {
-  const span = trace.getTracer(TRACER_NAME).startSpan(name);
+export async function withSpan<T>(name: string, fn: (span: Span) => Promise<T>, attributes?: Attributes) {
+  const span = trace.getTracer(TRACER_NAME).startSpan(name, { kind: SpanKind.CLIENT, attributes });
   try {
     return await context.with(trace.setSpan(context.active(), span), () => fn(span));
   } catch (error) {

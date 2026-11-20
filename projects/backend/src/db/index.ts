@@ -2,6 +2,7 @@ import { env } from "@ssr/common/env";
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { instrumentPool } from "../telemetry/instrumentation";
 import * as schema from "./schema";
 
 const pool = new Pool({
@@ -11,5 +12,7 @@ const pool = new Pool({
   idleTimeoutMillis: env.DATABASE_POOL_IDLE_TIMEOUT_MS,
   connectionTimeoutMillis: env.DATABASE_POOL_CONNECTION_TIMEOUT_MS,
 });
+
+instrumentPool(pool);
 
 export const db = drizzle(pool, { schema: { ...schema } });
