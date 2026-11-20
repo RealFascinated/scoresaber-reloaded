@@ -1,5 +1,6 @@
 "use client";
 
+import AskChatButton from "@/components/chat/ask-chat-button";
 import FallbackLink from "@/components/fallback-link";
 import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-button";
 import { OneClickInstallButton } from "@/components/leaderboard/button/one-click-install-button";
@@ -77,18 +78,20 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             </FallbackLink>
           </p>
 
-          {(beatsaver || showStarHistory) && (
-            <div className="flex items-center justify-center gap-1 sm:justify-start">
-              {beatsaver && (
-                <>
-                  <ScoreCopyBsrButton beatSaverMap={beatsaver} />
-                  <BeatSaverMapButton beatSaverMap={beatsaver} />
-                  <MapPreviewButton leaderboard={leaderboardData} beatSaverMap={beatsaver} />
-                  <OneClickInstallButton beatSaverMap={beatsaver} />
-                </>
-              )}
-            </div>
-          )}
+          <div className="flex items-center justify-center gap-1 sm:justify-start">
+            {beatsaver && (
+              <>
+                <ScoreCopyBsrButton beatSaverMap={beatsaver} />
+                <BeatSaverMapButton beatSaverMap={beatsaver} />
+                <MapPreviewButton leaderboard={leaderboardData} beatSaverMap={beatsaver} />
+                <OneClickInstallButton beatSaverMap={beatsaver} />
+              </>
+            )}
+            <AskChatButton
+              prompt={`Tell me about the map ${leaderboardData.fullName} (leaderboard ${leaderboardData.id}): how hard is it and how do I improve on it?`}
+              tooltip="Ask the chat about this map"
+            />
+          </div>
         </div>
       </div>
 

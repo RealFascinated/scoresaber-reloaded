@@ -66,7 +66,7 @@ export default function MedalsData({ initial }: MedalsDataProps) {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <PageTitle title="Medals" description="Track medal rankings and compare players by medal count" />
+      <PageTitle title="Medals" />
 
       <div className="flex flex-wrap items-center gap-2">
         <CountrySelector

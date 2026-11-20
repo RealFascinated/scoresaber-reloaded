@@ -3,7 +3,7 @@
 import { BACKGROUND_COVER_PRESETS, parseCustomBackground } from "@/common/background-covers";
 import { DEBOUNCE_MS_FORM } from "@/common/debounce";
 import { cn } from "@/common/utils";
-import { FormDescription, FormLabel } from "@/components/ui/form";
+import { FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useUpdateUserPreferences, useUserPreference } from "@/hooks/use-user-preferences";
 import { BACKGROUND_COVER_CUSTOM, BACKGROUND_COVER_NONE } from "@ssr/common/schemas/user/default-preferences";
@@ -101,9 +101,6 @@ export function BackgroundCoverControl({ field }: BackgroundCoverControlProps) {
     <div className="flex flex-col gap-3">
       <div className="w-full min-w-0">
         <FormLabel className="text-[15px] leading-snug font-medium text-foreground">Background</FormLabel>
-        <FormDescription className="mt-1 text-[13px] leading-snug text-muted-foreground">
-          Pick a preset image, or use your own hex color or image URL
-        </FormDescription>
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">

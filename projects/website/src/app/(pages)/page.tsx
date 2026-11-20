@@ -122,12 +122,12 @@ export default async function LandingPage() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <SectionHeading title="Statistics" desc="See the current website statistics." />
+        <SectionHeading title="Statistics" />
         <LandingStats initial={initialStatistics} />
       </section>
 
       <section className="flex flex-col gap-4">
-        <SectionHeading title="Explore" desc="Jump straight to one of our pages." />
+        <SectionHeading title="Explore" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {EXPLORE_LINKS.map(({ icon: Icon, label, href, desc }) => (
             <SimpleLink
@@ -144,7 +144,7 @@ export default async function LandingPage() {
       </section>
 
       <section className="flex flex-col gap-4">
-        <SectionHeading title="Why Reloaded" desc="See some reasons why people choose us." />
+        <SectionHeading title="Why Reloaded" />
         <div className="grid gap-3 sm:grid-cols-2">
           {FEATURES.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="flex items-start gap-4 rounded-xl bg-card p-5 ring-1 ring-border">
@@ -182,11 +182,10 @@ export default async function LandingPage() {
   );
 }
 
-function SectionHeading({ title, desc }: { title: string; desc: string }) {
+function SectionHeading({ title }: { title: string }) {
   return (
     <div className="flex flex-col gap-1">
       <h2 className="text-xl font-bold tracking-tight text-foreground">{title}</h2>
-      <p className="text-sm text-muted-foreground">{desc}</p>
     </div>
   );
 }

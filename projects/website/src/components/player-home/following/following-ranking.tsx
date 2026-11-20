@@ -33,9 +33,6 @@ export function FollowingRanking() {
     <Card className="flex flex-col">
       <div className="mb-4">
         <h2 className="text-lg font-semibold">Following Ranking</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          See how the players you follow rank compared to each other.
-        </p>
       </div>
 
       {isLoading && sortedFollowing.length === 0 ? (

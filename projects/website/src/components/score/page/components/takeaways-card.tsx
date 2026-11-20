@@ -1,4 +1,5 @@
 import Card from "@/components/card";
+import AskChatButton from "@/components/chat/ask-chat-button";
 import { Takeaway } from "@ssr/common/replay/replay-takeaways";
 import { CircleCheck, Target } from "lucide-react";
 
@@ -26,18 +27,24 @@ function TakeawayList({ items, tone }: { items: Takeaway[]; tone: Takeaway["tone
   );
 }
 
-export default function TakeawaysCard({ takeaways }: { takeaways: Takeaway[] }) {
+export default function TakeawaysCard({
+  takeaways,
+  askPrompt,
+}: {
+  takeaways: Takeaway[];
+  askPrompt?: string;
+}) {
   if (takeaways.length === 0) {
     return null;
   }
 
   return (
     <Card className="gap-5 rounded-xl p-5">
-      <div>
-        <h2 className="text-lg font-semibold">The Short Version</h2>
-        <p className="text-sm text-muted-foreground">
-          What this replay says about your play, in plain terms.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">The Short Version</h2>
+        </div>
+        {askPrompt && <AskChatButton prompt={askPrompt} label="Dig deeper" />}
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <TakeawayList items={takeaways.filter(item => item.tone === "good")} tone="good" />

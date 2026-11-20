@@ -22,12 +22,5 @@ export default function BlockPositionCard({ insights }: { insights: ReplayInsigh
       }))
   );
 
-  return (
-    <ScorePad
-      title="By Position"
-      description="Average points per hit for each spot on the 4×3 block grid, as you see it in game."
-      columns={4}
-      cells={cells}
-    />
-  );
+  return <ScorePad title="By Position" columns={4} cells={cells} />;
 }

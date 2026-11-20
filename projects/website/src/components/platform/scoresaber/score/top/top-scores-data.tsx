@@ -53,7 +53,7 @@ export function TopScoresData({ initial }: TopScoresDataProps) {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <PageTitle title="Top Scores" description="Discover the highest scores tracked across ScoreSaber" />
+      <PageTitle title="Top Scores" />
 
       {isLoading || !scores ? (
         <div className="flex items-center justify-center py-12">

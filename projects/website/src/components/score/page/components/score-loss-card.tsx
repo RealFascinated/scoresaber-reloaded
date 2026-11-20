@@ -1,6 +1,5 @@
 import Card from "@/components/card";
 import { ReplayInsights } from "@ssr/common/replay/replay-insights";
-import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatTime } from "@ssr/common/utils/time-utils";
 
 const SEGMENTS = [
@@ -21,10 +20,6 @@ export default function ScoreLossCard({ insights }: { insights: ReplayInsights }
     <Card className="flex-1 gap-4 rounded-xl">
       <div>
         <h3 className="font-semibold">Where You Lost Points</h3>
-        <p className="text-xs text-muted-foreground">
-          {formatNumberWithCommas(Math.round(loss.total))} points were left on the table compared to a perfect
-          play of this map.
-        </p>
       </div>
 
       {loss.total > 0 && (

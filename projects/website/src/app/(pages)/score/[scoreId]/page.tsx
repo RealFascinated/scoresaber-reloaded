@@ -164,6 +164,7 @@ export default async function ScorePage({ params }: ScorePageProps) {
   const insights = replay ? computeReplayInsights(replay.rawReplay) : undefined;
   const takeaways = insights ? buildTakeaways(insights, score) : [];
 
+  const scoreLabel = `score ${score.scoreId} on ${leaderboard.fullName}`;
   const sections = [
     { id: "performance", label: "Performance", show: true },
     { id: "analysis", label: "Where You Lose Points", show: !!insights },
@@ -175,7 +176,12 @@ export default async function ScorePage({ params }: ScorePageProps) {
       <ScoreHero score={playerScore} />
       <ScoreKpiStrip score={score} />
       {hasMap && beatSaver && <ScoreMapSection beatSaver={beatSaver} />}
-      {takeaways.length > 0 && <TakeawaysCard takeaways={takeaways} />}
+      {takeaways.length > 0 && (
+        <TakeawaysCard
+          takeaways={takeaways}
+          askPrompt={`Break down my replay for ${scoreLabel} and tell me what to work on`}
+        />
+      )}
       <ScoreSectionNav sections={sections} />
 
       <ScoreSection id="performance" title="Performance">

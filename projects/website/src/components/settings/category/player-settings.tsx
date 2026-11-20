@@ -27,7 +27,6 @@ const settings = [
         name: "historyMode" as Path<FormValues>,
         label: "History Mode",
         type: "select" as const,
-        description: "Choose which history mode to use",
         options: [
           { value: HistoryMode.ADVANCED, label: "Advanced" },
           { value: HistoryMode.SIMPLE, label: "Simple" },

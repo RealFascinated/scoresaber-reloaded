@@ -22,7 +22,6 @@ type MapsInitialDataProps = {
 
 type Category = {
   name: string;
-  description: string;
   icon: ElementType;
   id: string;
   showFilter: boolean;
@@ -33,7 +32,6 @@ type Category = {
 const categories: Category[] = [
   {
     name: "Leaderboards",
-    description: "Browse and filter ScoreSaber leaderboards",
     icon: SharedIcons.MapsLeaderboardsTabIcon,
     id: "leaderboards",
     showFilter: true,
@@ -42,7 +40,6 @@ const categories: Category[] = [
   },
   {
     name: "Ranking Queue",
-    description: "Maps currently up for rank or unrank on ScoreSaber",
     icon: SharedIcons.MapsRankingQueueTabIcon,
     id: "ranking-queue",
     showFilter: false,
@@ -62,7 +59,6 @@ export function MapsData({ type, initialMaps, initialRankingQueue }: MapsDataPro
       <div className="flex w-full flex-col gap-4">
         <PageTitle
           title={selectedCategory.name}
-          description={selectedCategory.description}
           actions={
             <>
               {selectedCategory.id === "ranking-queue" && (

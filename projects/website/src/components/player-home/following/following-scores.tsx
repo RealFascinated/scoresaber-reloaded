@@ -51,7 +51,6 @@ export function FollowingScores() {
     <div className="rounded-xl bg-card p-5 ring-1 ring-border">
       <div className="mb-4">
         <h2 className="text-lg font-semibold">Following Scores</h2>
-        <p className="mt-1 text-sm text-muted-foreground">See the recent scores of the players you follow.</p>
       </div>
 
       {isLoading && !scoreData && (

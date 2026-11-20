@@ -6,7 +6,6 @@ import { Button } from "./button";
 
 interface FilterSectionProps {
   title: string;
-  description?: string;
   children: ReactNode;
   className?: string;
   onClear?: () => void;
@@ -16,7 +15,6 @@ interface FilterSectionProps {
 
 export function FilterSection({
   title,
-  description,
   children,
   className,
   onClear,
@@ -41,7 +39,6 @@ export function FilterSection({
             </SimpleTooltip>
           )}
         </div>
-        {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>
       <div className="flex flex-col gap-4">{children}</div>
     </Card>

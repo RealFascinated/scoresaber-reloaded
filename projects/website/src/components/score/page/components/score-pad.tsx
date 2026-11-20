@@ -14,7 +14,6 @@ export type PadCell = {
 
 type ScorePadProps = {
   title: string;
-  description: string;
   columns: number;
   cells: PadCell[];
   footnote?: ReactNode;
@@ -23,7 +22,7 @@ type ScorePadProps = {
 /**
  * A grid of tiles colored by average score, used for both cut directions and grid positions.
  */
-export default function ScorePad({ title, description, columns, cells, footnote }: ScorePadProps) {
+export default function ScorePad({ title, columns, cells, footnote }: ScorePadProps) {
   const scored = cells.filter(cell => cell.score !== undefined && cell.cuts > 0);
   const scores = scored.map(cell => cell.score ?? 0);
   const min = scores.length > 0 ? Math.min(...scores) : 0;
@@ -35,7 +34,6 @@ export default function ScorePad({ title, description, columns, cells, footnote 
     <Card className="gap-3 rounded-xl">
       <div>
         <h3 className="font-semibold">{title}</h3>
-        <p className="text-xs text-muted-foreground">{description}</p>
       </div>
 
       <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>

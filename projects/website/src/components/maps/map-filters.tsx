@@ -40,7 +40,6 @@ export default function MapFilters() {
   return (
     <FilterSection
       title="Search Filters"
-      description="Filter maps by various criteria"
       hasActiveFilters={hasActiveFilters}
       onClear={() => filter.clearFilters()}
     >

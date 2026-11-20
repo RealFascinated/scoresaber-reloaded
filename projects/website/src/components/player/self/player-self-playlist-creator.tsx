@@ -135,9 +135,6 @@ export default function SelfPlaylistCreator() {
         <Card className="relative m-0 flex h-full max-h-[85vh] flex-col rounded-lg">
           <div className="border-b border-border px-4 py-3">
             <h1 className="text-xl font-semibold md:text-2xl">Create Self Playlist</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Generate a new playlist from your own scores.
-            </p>
           </div>
 
           <div className="flex-1 overflow-x-hidden overflow-y-auto">

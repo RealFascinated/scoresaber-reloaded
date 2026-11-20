@@ -75,16 +75,13 @@ function summarizeMap({ leaderboard, beatSaver }: PlayerScore<ScoreSaberScore>) 
   };
 }
 
-function summarizeResult({ score, leaderboard }: PlayerScore<ScoreSaberScore>, scoresSetOnMap?: number) {
+function summarizeResult({ score }: PlayerScore<ScoreSaberScore>, scoresSetOnMap?: number) {
   return {
     accuracy: round(score.accuracy, 4),
     score: score.score,
     pp: score.pp,
     weight: score.weight,
     weightedPp: round(score.pp * score.weight),
-    rank: score.rank,
-    topPercentOfPlays:
-      leaderboard.plays > 0 && score.rank > 0 ? round((score.rank / leaderboard.plays) * 100) : null,
     misses: score.misses,
     missedNotes: score.missedNotes,
     badCuts: score.badCuts,
@@ -110,7 +107,6 @@ function summarizePrevious(score: ScoreSaberScore) {
     accuracy: round(previous.accuracy, 4),
     pp: previous.pp,
     score: previous.score,
-    rank: previous.rank,
     misses: previous.misses,
     badCuts: previous.badCuts,
     maxCombo: previous.maxCombo,

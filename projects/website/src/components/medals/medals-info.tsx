@@ -6,7 +6,6 @@ export default function MedalsInfo() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h3 className="text-lg font-semibold text-foreground">Medal System</h3>
-        <p className="text-sm text-muted-foreground">Medals awarded for ranked leaderboard positions</p>
       </div>
       <div className="grid grid-cols-2 gap-2">
         {Object.entries(MEDAL_COUNTS).map(([rank, count]) => (

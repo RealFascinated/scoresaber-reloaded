@@ -7,7 +7,6 @@ import SimpleTooltip from "@/components/simple-tooltip";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useMainPlayerId } from "@/hooks/use-main-player";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
 import type ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
@@ -19,7 +18,6 @@ import PlayerActionButtonWrapper from "../buttons/player-action-button-wrapper";
 const MAP_LIMIT = 25;
 
 export default function PlayerSuggestedMapsDialog({ player }: { player: ScoreSaberPlayer }) {
-  const isSelf = useMainPlayerId() === player.id;
   const [open, setOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
@@ -70,11 +68,6 @@ export default function PlayerSuggestedMapsDialog({ player }: { player: ScoreSab
         <Card className="relative m-0 flex h-full max-h-[85vh] flex-col rounded-lg">
           <div className="border-b border-border px-4 py-3">
             <h1 className="text-lg font-semibold">Suggested Maps</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Suggested maps based on {isSelf ? "your" : `${player.name}'s`} recent plays.
-              {data?.playerRanges &&
-                ` Suggesting ${data.playerRanges.minStars.toFixed(1)}-${data.playerRanges.maxStars.toFixed(1)}★ maps.`}
-            </p>
           </div>
 
           <div className="flex-1 overflow-x-auto overflow-y-auto">

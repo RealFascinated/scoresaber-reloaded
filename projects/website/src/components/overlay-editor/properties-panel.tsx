@@ -318,7 +318,6 @@ function ConnectionProperties() {
     <>
       <div className="border-b border-border px-4 py-3">
         <h2 className="font-semibold">Overlay settings</h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">Select a widget on the canvas to edit it.</p>
       </div>
       <Section title="Player" hint="Whose profile the player widgets show.">
         <Input
@@ -393,7 +392,6 @@ function MultiProperties({ ids }: { ids: string[] }) {
     <>
       <div className="border-b border-border px-4 py-3">
         <h2 className="font-semibold">{ids.length} widgets selected</h2>
-        <p className="mt-0.5 text-xs text-muted-foreground">Drag to move them together.</p>
       </div>
       <Section title="Actions">
         <div className="grid grid-cols-2 gap-2">

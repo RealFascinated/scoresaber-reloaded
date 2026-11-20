@@ -36,7 +36,6 @@ export default function HandComparison({ insights }: { insights: ReplayInsights 
     <Card className="gap-3 rounded-xl">
       <div>
         <h3 className="font-semibold">Left Hand vs Right Hand</h3>
-        <p className="text-xs text-muted-foreground">The better hand for each row is in bold.</p>
       </div>
 
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 text-xs font-semibold">

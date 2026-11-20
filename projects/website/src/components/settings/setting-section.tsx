@@ -8,12 +8,11 @@ import type { SharedDecorativeIcon } from "@/shared-icons";
 import { useDebounce } from "@uidotdev/usehooks";
 import { ReactElement, ReactNode, Ref, useEffect, useState } from "react";
 import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
-import { FormControl, FormDescription, FormField, FormItem, FormLabel } from "../ui/form";
+import { FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 
 interface BaseField<TFormValues extends FieldValues, TName extends Path<TFormValues>> {
   name: TName;
   label: string;
-  description?: string;
 }
 
 export interface CheckboxField<
@@ -268,11 +267,6 @@ function FormFieldComponent<TFormValues extends FieldValues, TName extends Path<
     >
       <div className={isToggleRow ? "min-w-0 flex-1" : "w-full min-w-0"}>
         <FormLabel className="text-[15px] leading-snug font-medium text-foreground">{field.label}</FormLabel>
-        {field.description && (
-          <FormDescription className="mt-1 text-[13px] leading-snug text-muted-foreground">
-            {field.description}
-          </FormDescription>
-        )}
       </div>
       <FormControl className={isToggleRow ? "ml-auto shrink-0 pt-0.5 sm:pt-0" : "w-full min-w-0"}>
         {control}

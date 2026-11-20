@@ -48,9 +48,9 @@ export default function AskChatButton({
 
   if (label) {
     return (
-      <SimpleLink href={href}>
+      <SimpleLink className="inline-flex" href={href}>
         <Button variant="outline" size="sm" className={cn("gap-1.5", className)}>
-          <Icon className="size-4" />
+          <Icon className="size-3.5 shrink-0 opacity-90" />
           {label}
         </Button>
       </SimpleLink>

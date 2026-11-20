@@ -247,8 +247,12 @@ function ChatShellContent({
     if (initialPrompt === undefined || initialPromptSentRef.current) {
       return;
     }
-    initialPromptSentRef.current = true;
-    handleSend(initialPrompt);
+    // WARNING: useChat stops its request on cleanup, so a send made synchronously is aborted by React Strict Mode's mount cycle in development
+    const timeout = setTimeout(() => {
+      initialPromptSentRef.current = true;
+      handleSend(initialPrompt);
+    }, 0);
+    return () => clearTimeout(timeout);
   }, [handleSend, initialPrompt]);
 
   const handleRetry = useCallback(() => {

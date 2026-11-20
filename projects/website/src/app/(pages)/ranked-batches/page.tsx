@@ -59,7 +59,7 @@ export default async function RankedBatchesPage({ searchParams }: Props) {
 
   return (
     <section className="flex w-full flex-col gap-4">
-      <PageTitle title={TITLE} description={DESCRIPTION} />
+      <PageTitle title={TITLE} />
 
       {!rankedBatches || rankedBatches.items.length === 0 ? (
         <EmptyState

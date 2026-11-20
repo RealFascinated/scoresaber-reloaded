@@ -1,3 +1,4 @@
+import AskChatButton from "@/components/chat/ask-chat-button";
 import FallbackLink from "@/components/fallback-link";
 import { ScoreSaberScoreModifiers } from "@/components/platform/scoresaber/score/score-modifiers";
 import { PlayerAvatar } from "@/components/ranking/player-avatar";
@@ -79,6 +80,11 @@ export default function ScoreHero({ score: playerScore }: ScoreHeroProps) {
             <ReplayButton score={score} />
             <PlayerButton playerId={playerInfo.id} />
             <LeaderboardButton leaderboardId={leaderboard.id} />
+            <AskChatButton
+              prompt={`Break down score ${score.scoreId} on ${leaderboard.fullName}`}
+              label="Ask Chat"
+              className="font-medium"
+            />
           </div>
         </div>
 

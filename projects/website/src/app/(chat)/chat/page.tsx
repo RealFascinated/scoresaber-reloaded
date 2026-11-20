@@ -22,11 +22,18 @@ const MAX_INITIAL_PROMPT_LENGTH = 1000;
 
 export default async function ChatPage({ searchParams }: ChatPageProps) {
   const { prompt } = await searchParams;
-  const initialPrompt = (Array.isArray(prompt) ? prompt[0] : prompt)?.trim().slice(0, MAX_INITIAL_PROMPT_LENGTH);
+  const initialPrompt = (Array.isArray(prompt) ? prompt[0] : prompt)
+    ?.trim()
+    .slice(0, MAX_INITIAL_PROMPT_LENGTH);
   const cookie = (await cookies()).toString();
   const session = await getServerSession(cookie);
   if (session.status === "anonymous") {
-    return <SteamSignInRedirect redirectPath={initialPrompt ? `/chat?prompt=${encodeURIComponent(initialPrompt)}` : "/chat"} failed={false} />;
+    return (
+      <SteamSignInRedirect
+        redirectPath={initialPrompt ? `/chat?prompt=${encodeURIComponent(initialPrompt)}` : "/chat"}
+        failed={false}
+      />
+    );
   }
   if (!(await isChatEnabled(cookie)) || (await isChatDisabledByUser(cookie))) {
     notFound();

@@ -30,7 +30,6 @@ const settings = [
           value: id,
           label: viewer.name,
         })),
-        description: "Choose which replay viewer to use when watching replays",
       },
     ],
   },

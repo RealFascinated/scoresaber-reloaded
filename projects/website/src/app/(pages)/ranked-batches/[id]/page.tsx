@@ -124,7 +124,10 @@ export default async function RankedBatchPage({ params }: Props) {
       <RankedBatchBreadcrumb name={rankedBatch.name} />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <PageTitle title={rankedBatch.name} description={formatRankedBatchDate(rankedBatch)} />
+        <PageTitle
+          title={rankedBatch.name}
+          askPrompt={`What got ranked or reweighted in ${rankedBatch.name} (ranked batch ${rankedBatch.id}), and who gained or lost pp?`}
+        />
         <RankedBatchDownloadPlaylist rankedBatchId={rankedBatch.id} />
       </div>
 

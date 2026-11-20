@@ -15,7 +15,6 @@ type SettingsCategorySlug = "website" | "scores" | "player";
 type Category = {
   slug: SettingsCategorySlug;
   name: string;
-  description: string;
   icon: SharedDecorativeIcon;
   component: ReactNode;
 };
@@ -24,21 +23,18 @@ const categories: Category[] = [
   {
     slug: "website",
     name: "Website",
-    description: "Customize your experience",
     icon: SharedIcons.WebsiteSettingsCategoryIcon,
     component: <WebsiteSettings />,
   },
   {
     slug: "scores",
     name: "Scores",
-    description: "Manage your scores",
     icon: SharedIcons.ScoreSettingsCategoryIcon,
     component: <ScoreSettings />,
   },
   {
     slug: "player",
     name: "Player",
-    description: "Manage your player",
     icon: SharedIcons.PlayerSettingsCategoryIcon,
     component: <PlayerSettings />,
   },
@@ -70,7 +66,7 @@ export default function Settings() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <PageTitle title="Settings" description="Manage your account and preferences" />
+      <PageTitle title="Settings" />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[16rem_1fr] lg:gap-6">
         <nav

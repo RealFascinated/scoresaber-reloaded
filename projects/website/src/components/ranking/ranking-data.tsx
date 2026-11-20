@@ -90,10 +90,7 @@ export default function RankingData({ initial }: RankingDataProps) {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <PageTitle
-        title="Ranking"
-        description="View players ranked by performance points globally or by country"
-      />
+      <PageTitle title="Ranking" />
 
       <div className="flex w-full flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">

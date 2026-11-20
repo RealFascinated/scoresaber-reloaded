@@ -173,7 +173,8 @@ describe("buildScoreSummary", () => {
       stars: 8.5,
       difficulty: "ExpertPlus",
     });
-    expect(summary.result).toMatchObject({ accuracy: 95.5, pp: 300, weightedPp: 150, rank: 4, misses: 1 });
+    expect(summary.result).toMatchObject({ accuracy: 95.5, pp: 300, weightedPp: 150, misses: 1 });
+    expect(summary.result).not.toHaveProperty("rank");
     expect(summary.previousScore).toBeNull();
     expect(summary.beatLeader).toBeNull();
     expect(summary.replay).toBeNull();

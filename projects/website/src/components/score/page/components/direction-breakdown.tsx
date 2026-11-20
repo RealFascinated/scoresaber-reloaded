@@ -33,12 +33,5 @@ export default function DirectionBreakdown({ insights }: { insights: ReplayInsig
     };
   });
 
-  return (
-    <ScorePad
-      title="By Cut Direction"
-      description="Average points per hit for blocks you had to cut in each direction."
-      columns={3}
-      cells={cells}
-    />
-  );
+  return <ScorePad title="By Cut Direction" columns={3} cells={cells} />;
 }

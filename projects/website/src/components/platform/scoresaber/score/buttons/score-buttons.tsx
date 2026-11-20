@@ -135,7 +135,8 @@ export default function ScoreSaberScoreButtons({
     [score, leaderboard, beatSaverMap, updateScore, isPreviousScore, isOwnScore]
   );
   const visibleButtons = useMemo(
-    () => buttons.filter(button => (button.id !== "ask-chat" || chatAvailable) && button.display(buttonProps)),
+    () =>
+      buttons.filter(button => (button.id !== "ask-chat" || chatAvailable) && button.display(buttonProps)),
     [buttonProps, chatAvailable]
   );
 

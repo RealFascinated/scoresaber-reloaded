@@ -193,11 +193,7 @@ export default function ScoreFeed() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <PageTitle
-        title="Live Scores"
-        description={<>New scores from ScoreSaber appear here as they are submitted.</>}
-        actions={<FeedConnectionStatus readyState={readyState} />}
-      />
+      <PageTitle title="Live Scores" actions={<FeedConnectionStatus readyState={readyState} />} />
       <FeedBody phase={phase} />
     </div>
   );
