@@ -234,3 +234,24 @@ describe("summarizeHistoryChange", () => {
     expect(summarizeHistoryChange([])).toBeNull();
   });
 });
+
+describe("resolvePlayerId precision loss", () => {
+  it("maps an id that lost digits as a JSON number back to the linked player", () => {
+    const lossy = String(Number("76561198000000074"));
+
+    expect(lossy).not.toBe("76561198000000074");
+    expect(resolvePlayerId({ ...linkedContext, playerId: "76561198000000074" }, lossy)).toEqual({
+      ok: true,
+      playerId: "76561198000000074",
+    });
+  });
+
+  it("keeps a different player id as requested", () => {
+    expect(resolvePlayerId({ ...linkedContext, playerId: "76561198000000074" }, "76561198111111111")).toEqual(
+      {
+        ok: true,
+        playerId: "76561198111111111",
+      }
+    );
+  });
+});

@@ -69,6 +69,25 @@ export const ChatCalculatePpToolInputSchema = Type.Object({
 });
 export type ChatCalculatePpToolInput = StaticDecode<typeof ChatCalculatePpToolInputSchema>;
 
+export const ChatGetImprovableScoresToolInputSchema = Type.Object({
+  playerId: Type.Optional(PlayerIdSchema),
+  limit: Type.Optional(
+    Type.Integer({
+      minimum: 1,
+      maximum: 30,
+      description: "How many of the player's best scores to evaluate. Defaults to 20.",
+    })
+  ),
+  increases: Type.Optional(
+    Type.Array(Type.Number({ minimum: 0.1, maximum: 5 }), {
+      minItems: 1,
+      maxItems: 3,
+      description: "Accuracy increases to evaluate, in percentage points. Defaults to 0.25, 0.5 and 1.",
+    })
+  ),
+});
+export type ChatGetImprovableScoresToolInput = StaticDecode<typeof ChatGetImprovableScoresToolInputSchema>;
+
 export const ChatGetPlayerScoresToolInputSchema = Type.Object({
   playerId: Type.Optional(PlayerIdSchema),
   sort: Type.Optional(

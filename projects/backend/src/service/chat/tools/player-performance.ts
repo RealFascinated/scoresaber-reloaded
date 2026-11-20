@@ -1,5 +1,6 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { WeightedGain } from "../../suggested-maps/suggested-maps-ranking";
+import { classifyAccuracy, describeAccuracyRarity, getAccuracyBenchmark } from "./accuracy-benchmarks";
 
 const RECENT_DAYS = 60;
 const TOP_PERCENTILE_SIZE = 50;
@@ -58,6 +59,15 @@ export function buildPlayerPerformance(scores: PerformanceScore[], now: Date) {
       score.pp * Math.pow(ScoreSaberCurve.WEIGHT_COEFFICIENT, rank),
     ])
   );
+  const allPlayersAccuracy = (stars: number) => {
+    const benchmark = getAccuracyBenchmark(stars);
+    return {
+      median: benchmark.p50,
+      top10Percent: benchmark.p90,
+      top1Percent: benchmark.p99,
+      top0_1Percent: benchmark.p999,
+    };
+  };
   const recentCutoff = now.getTime() - RECENT_DAYS * DAY_MS;
   const grouped = new Map<number, PerformanceScore[]>();
   for (const score of scores) {
@@ -84,6 +94,8 @@ export function buildPlayerPerformance(scores: PerformanceScore[], now: Date) {
         averageAccuracy: round(average(accuracies) ?? 0),
         medianAccuracy: round(median(accuracies)),
         bestAccuracy: round(Math.max(...accuracies)),
+        bestAccuracyRarity: describeAccuracyRarity(Math.max(...accuracies), minStars),
+        allPlayersAccuracy: allPlayersAccuracy(minStars),
         bestPp: round(Math.max(...bucket.map(score => score.pp))),
         fullComboRate: round(bucket.filter(score => score.fullCombo).length / bucket.length),
         inTop50: bucket.filter(score => topScores.has(score)).length,
@@ -142,6 +154,7 @@ export function calculatePpRows(input: {
     }
     return {
       accuracy,
+      ...classifyAccuracy(accuracy, input.stars, null),
       rawPp: round(rawPp),
       weightedGain: weightedGain === null ? null : round(weightedGain),
     };

@@ -55,12 +55,23 @@ type PlayerScoreSource<TScore extends TrimmableScore> = {
   leaderboard: LeaderboardSource;
 };
 
+function isPrecisionLossOf(requested: string, linkedPlayerId: string | null) {
+  return (
+    linkedPlayerId !== null &&
+    requested !== linkedPlayerId &&
+    requested.length > 15 &&
+    Number(requested) === Number(linkedPlayerId)
+  );
+}
+
 /**
  * Resolves the player a tool should read, falling back to the signed-in user's linked player.
  * Returns an error telling the model to ask for a player id or name when neither exists.
  */
 export function resolvePlayerId(context: ChatToolContext, playerId?: string) {
-  const resolved = playerId?.trim() || context.playerId;
+  const requested = playerId?.trim();
+  const resolved =
+    requested && !isPrecisionLossOf(requested, context.playerId) ? requested : context.playerId;
   if (!resolved) {
     return {
       ok: false as const,

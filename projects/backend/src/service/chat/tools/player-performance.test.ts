@@ -71,10 +71,17 @@ describe("buildPlayerPerformance", () => {
     expect(performance.starBuckets.map(bucket => bucket.scoreCount)).toEqual([2, 2]);
   });
 
+  it("compares each bucket's best accuracy with all ranked scores at those stars", () => {
+    const [lowBucket] = buildPlayerPerformance(scores, NOW).starBuckets;
+
+    expect(lowBucket.bestAccuracyRarity).toBe("top 10%");
+    expect(lowBucket.allPlayersAccuracy.top1Percent).toBeGreaterThan(lowBucket.allPlayersAccuracy.median);
+  });
+
   it("summarizes accuracy, pp and full combos per bucket", () => {
     const [lowBucket, highBucket] = buildPlayerPerformance(scores, NOW).starBuckets;
 
-    expect(lowBucket).toEqual({
+    expect(lowBucket).toMatchObject({
       stars: "5-6",
       minStars: 5,
       scoreCount: 2,
@@ -88,7 +95,7 @@ describe("buildPlayerPerformance", () => {
       recentScoreCount: 1,
       recentAverageAccuracy: 97,
     });
-    expect(highBucket).toEqual({
+    expect(highBucket).toMatchObject({
       stars: "6-7",
       minStars: 6,
       scoreCount: 2,

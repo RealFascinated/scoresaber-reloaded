@@ -3,21 +3,47 @@ import { jsonSchema } from "ai";
 import type { StaticDecode, TSchema } from "typebox";
 import { Value } from "typebox/value";
 
+function coerceNumericPlayerId(input: object) {
+  if (
+    typeof input === "object" &&
+    input !== null &&
+    "playerId" in input &&
+    typeof input.playerId === "number"
+  ) {
+    return { ...input, playerId: String(input.playerId) };
+  }
+  return input;
+}
+
+function describeReceived(root: object, instancePath: string) {
+  const segments = instancePath.split("/").filter(part => part.length > 0);
+  let current: object | string | number | boolean | undefined = root;
+  for (const segment of segments) {
+    if (typeof current !== "object" || current === null) {
+      return "";
+    }
+    current = Reflect.get(current, segment);
+  }
+  return current === undefined ? "" : `, got a ${typeof current}`;
+}
+
 /**
  * Wraps a TypeBox input schema in the AI SDK schema shape, validating every tool call at runtime.
  */
 export function toolSchema<const Schema extends TSchema>(schema: Schema) {
   return jsonSchema<StaticDecode<Schema>>(schema, {
-    validate: value => {
+    validate: input => {
+      const value = coerceNumericPlayerId(input as object);
       const [firstError] = Value.Errors(schema, value);
       if (firstError === undefined) {
         return { success: true, value: value as StaticDecode<Schema> };
       }
       const location = firstError.instancePath.length > 0 ? ` at ${firstError.instancePath}` : "";
+      const received = describeReceived(value, firstError.instancePath);
       return {
         success: false,
         error: new Error(
-          `Invalid tool input${location}: ${firstError.message}. Ids and hashes are strings, wrap them in quotes.`
+          `Invalid tool input${location}: ${firstError.message}${received}. Ids and hashes are strings, wrap them in quotes.`
         ),
       };
     },

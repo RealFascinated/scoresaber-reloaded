@@ -30,7 +30,7 @@ describe("toolSchema", () => {
   });
 
   it("rejects a non-string player id", async () => {
-    const result = await getValidate()({ playerId: 123 });
+    const result = await getValidate()({ playerId: true });
 
     expect(result.success).toBe(false);
     if (!result.success) {
@@ -70,5 +70,27 @@ describe("runTool", () => {
       retryable: true,
     });
     expect(thrown.cause).toBe(cause);
+  });
+});
+
+describe("toolSchema received type", () => {
+  it("names the type that was received", async () => {
+    const result = await getValidate()({ playerId: true });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.message).toContain("got a boolean");
+    }
+  });
+});
+
+describe("toolSchema numeric player ids", () => {
+  it("accepts a player id sent as a number by reading it as a string", async () => {
+    const result = await getValidate()({ playerId: 76561198449412080 });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.value.playerId).toBe("76561198449412080");
+    }
   });
 });

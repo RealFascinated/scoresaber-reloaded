@@ -6,6 +6,7 @@ import type {
   ChatGetPlayerHistoryToolInput,
   ChatGetPlayerPerformanceToolInput,
   ChatGetPlayerRankingToolInput,
+  ChatGetImprovableScoresToolInput,
   ChatGetPlayerScoresToolInput,
   ChatGetPlayerToolInput,
   ChatGetScoreHistoryToolInput,
@@ -15,6 +16,7 @@ import {
   ChatCalculatePpToolInputSchema,
   ChatComparePlayersToolInputSchema,
   ChatGetFollowingToolInputSchema,
+  ChatGetImprovableScoresToolInputSchema,
   ChatGetMedalsToolInputSchema,
   ChatGetPlayerHistoryToolInputSchema,
   ChatGetPlayerPerformanceToolInputSchema,
@@ -25,7 +27,11 @@ import {
   ChatSearchPlayersToolInputSchema,
 } from "@ssr/common/schemas/chat/tools/player-tools";
 import { tool } from "ai";
+import { inArray } from "drizzle-orm";
+import { leaderboardRowToType } from "../../../db/converter/scoresaber-leaderboard";
+import { scoreSaberLeaderboardsTable } from "../../../db/schema";
 import { ScoreSaberAccountsRepository } from "../../../repositories/scoresaber-accounts.repository";
+import { ScoreSaberLeaderboardsRepository } from "../../../repositories/scoresaber-leaderboards.repository";
 import { ScoreSaberApiService } from "../../external/scoresaber-api.service";
 import { ScoreSaberLeaderboardsService } from "../../leaderboard/scoresaber-leaderboards.service";
 import { PlayerStatisticsService } from "../../player-statistics/player-statistics.service";
@@ -37,6 +43,7 @@ import ScoreSaberPlayerService from "../../player/scoresaber-player.service";
 import { listPlayerRankedScores } from "../../suggested-maps/suggested-maps-data";
 import { UserFollowsService } from "../../user/user-follows.service";
 import type { ChatToolContext } from "../chat-tool-context";
+import { buildImprovableScores } from "./improvable-scores";
 import { buildPlayerPerformance, calculatePpRows } from "./player-performance";
 import {
   MAX_TOOL_ROWS,
@@ -71,15 +78,28 @@ async function searchPlayerCandidates(query: string) {
       ScoreSaberPlayerService.getPlayer(playerId, "basic", tokenById.get(playerId), DEFAULT_REALM_ID)
     )
   );
-  return players.sort((a, b) => {
-    if (a.inactive && !b.inactive) {
-      return 1;
-    }
-    if (!a.inactive && b.inactive) {
-      return -1;
-    }
-    return a.rank - b.rank;
-  });
+  return players
+    .filter(player => !player.banned)
+    .sort((a, b) => {
+      if (a.inactive && !b.inactive) {
+        return 1;
+      }
+      if (!a.inactive && b.inactive) {
+        return -1;
+      }
+      return a.rank - b.rank;
+    });
+}
+
+async function assertNotBanned(playerId: string) {
+  const account = await ScoreSaberAccountsRepository.findRowById(playerId);
+  if (account?.banned) {
+    throw new ChatToolError(
+      "not_found",
+      `${account.name} is banned, so they have no ranking or pp data.`,
+      "Tell the user the player is banned instead of analysing their scores."
+    );
+  }
 }
 
 function playerNotFound(playerId: string) {
@@ -133,7 +153,7 @@ export function createPlayerTools(context: ChatToolContext) {
 
     getPlayerScores: tool({
       description:
-        "List a player's ScoreSaber scores, highest pp first or newest first. Returns up to 100 trimmed rows with accuracy, pp, score, misses, combo, timestamp and map name, mapper, difficulty, characteristic and stars. Filter by map name or headset with search and hmd. Defaults to the signed-in user's linked player.",
+        "List a player's ScoreSaber scores, highest pp first or newest first. Returns 8 rows per page (use page for more) with accuracy, pp, score, misses, combo, timestamp and map name, mapper, difficulty, characteristic and stars. Filter by map name or headset with search and hmd. Defaults to the signed-in user's linked player.",
       inputSchema: toolSchema(ChatGetPlayerScoresToolInputSchema),
       execute: (input: ChatGetPlayerScoresToolInput) =>
         runTool(async () => {
@@ -175,6 +195,7 @@ export function createPlayerTools(context: ChatToolContext) {
           if (!resolved.ok) {
             throw new ChatToolError(resolved.code, resolved.error);
           }
+          await assertNotBanned(resolved.playerId);
           const scores = await listPlayerRankedScores(resolved.playerId, context.realmId);
           if (scores.length === 0) {
             throw new ChatToolError("not_found", "This player has no ranked scores in this realm.");
@@ -186,9 +207,54 @@ export function createPlayerTools(context: ChatToolContext) {
         }, "The player performance could not be loaded."),
     }),
 
+    getImprovableScores: tool({
+      description:
+        "Find which of a player's existing scores are worth improving for pp. Evaluates their best scores and returns, for each, the map, stars, current accuracy and pp, whether it was a full combo, the player's best accuracy on maps of similar stars (bestAccuracyAtSimilarStars, a realistic ceiling), and the raw pp and weightedGain (the real increase in total pp) at small accuracy increases and at that best similar accuracy (gainAtBestSimilarAccuracy, the realistic target, null when the score already beats it). Every target also has a tier (reachable, stretch, elite, unrealistic) and a rarity among all ranked scores. Sorted by the realistic gain. Use it for any question about which scores to improve or replay instead of calling calculatePp per map, and recommend the realistic target before any bigger jump. Defaults to the signed-in user's linked player.",
+      inputSchema: toolSchema(ChatGetImprovableScoresToolInputSchema),
+      execute: (input: ChatGetImprovableScoresToolInput) =>
+        runTool(async () => {
+          const resolved = resolvePlayerId(context, input.playerId);
+          if (!resolved.ok) {
+            throw new ChatToolError(resolved.code, resolved.error);
+          }
+          await assertNotBanned(resolved.playerId);
+          const scores = await listPlayerRankedScores(resolved.playerId, context.realmId);
+          if (scores.length === 0) {
+            throw new ChatToolError("not_found", "This player has no ranked scores in this realm.");
+          }
+          const improvable = buildImprovableScores(scores, {
+            limit: input.limit,
+            increases: input.increases,
+          });
+          const rows = await ScoreSaberLeaderboardsRepository.selectResolved(context.realmId).where(
+            inArray(
+              scoreSaberLeaderboardsTable.id,
+              improvable.map(score => score.leaderboardId)
+            )
+          );
+          const leaderboards = new Map(
+            rows.map(row => {
+              const leaderboard = leaderboardRowToType(row);
+              return [leaderboard.id, leaderboard] as const;
+            })
+          );
+          return {
+            playerId: resolved.playerId,
+            scores: improvable.map(score => {
+              const leaderboard = leaderboards.get(score.leaderboardId);
+              return {
+                ...score,
+                mapName: leaderboard?.songName,
+                difficulty: leaderboard?.difficulty.difficulty,
+              };
+            }),
+          };
+        }, "The improvable scores could not be loaded."),
+    }),
+
     calculatePp: tool({
       description:
-        "Calculate the raw ScoreSaber pp a score at the given accuracies would earn on a map of the given star rating, and the weighted pp it would add to the player's total (weightedGain, null when no player is linked or given), accounting for the 0.965 weighting and, when leaderboardId is given, for replacing the player's existing score on that map. Use it for any what-if question such as what 98% would give or how much an improvement is worth. Never estimate pp yourself. Defaults to the signed-in user's linked player.",
+        "Calculate the raw ScoreSaber pp a score at the given accuracies would earn on a map of the given star rating, and the weighted pp it would add to the player's total (weightedGain, null when no player is linked or given), accounting for the 0.965 weighting and, when leaderboardId is given, for replacing the player's existing score on that map. Use it for any what-if question such as what 98% would give or how much an improvement is worth. Every accuracy row has a tier and rarity, so also use it to judge whether the accuracy is realistic. Never estimate pp yourself. Defaults to the signed-in user's linked player.",
       inputSchema: toolSchema(ChatCalculatePpToolInputSchema),
       execute: (input: ChatCalculatePpToolInput) =>
         runTool(async () => {

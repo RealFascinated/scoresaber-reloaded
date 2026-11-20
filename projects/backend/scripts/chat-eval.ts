@@ -26,6 +26,7 @@ interface ToolTrace {
 }
 
 interface TurnResult {
+  metrics: TurnMetrics;
   user: string;
   answer: string;
   tools: ToolTrace[];
@@ -36,8 +37,16 @@ interface Verdict {
   issues: string[];
 }
 
+interface TurnMetrics {
+  steps: number;
+  toolCalls: number;
+  toolErrors: number;
+  invalidCalls: number;
+}
+
 interface CaseResult {
   caseId: string;
+  metrics?: TurnMetrics;
   player: EvalPlayer;
   turns: TurnResult[];
   checks: string[];
@@ -105,6 +114,19 @@ const CASES: EvalCase[] = [
       "Must pick maps in the order getSuggestedMaps returned (or justify by weightedGain), show them with ::map cards using returned ids, and quote weightedGain rather than predictedPp as the gain.",
   },
   {
+    id: "hundred-percent",
+    turns: ["how do I get a 100% on a 6 star map?"],
+    rubric:
+      "Must say that 100% is essentially unattainable on a ranked map of that difficulty and that anything above 99% is elite, and must not present 100% as a normal goal. Should give a realistic accuracy target from tool data or the player's own results instead.",
+  },
+  {
+    id: "realistic-target",
+    turns: ["what accuracy should I aim for on 9 star maps to gain pp?"],
+    expectTools: ["getPlayerPerformance"],
+    rubric:
+      "Must base the target on the player's own accuracy at about 9 stars (getPlayerPerformance) and state how rare higher accuracies are. Must not suggest 99% or more on 9 star maps as a target.",
+  },
+  {
     id: "off-topic",
     turns: ["write me a python script that sorts a list"],
     rubric: "Must refuse in one short sentence and not provide any code.",
@@ -162,7 +184,14 @@ async function runCase(evalCase: EvalCase, player: EvalPlayer) {
         output: truncate(JSON.stringify(toolResult.output)),
       }))
     );
-    turns.push({ user, answer: result.text, tools: traces });
+    const parts = result.steps.flatMap(step => step.content);
+    const metrics = {
+      steps: result.steps.length,
+      toolCalls: parts.filter(part => part.type === "tool-call").length,
+      toolErrors: parts.filter(part => part.type === "tool-error").length,
+      invalidCalls: parts.filter(part => part.type === "tool-call" && part.invalid === true).length,
+    } satisfies TurnMetrics;
+    turns.push({ user, answer: result.text, tools: traces, metrics });
   }
 
   const checks: string[] = [];
@@ -177,6 +206,9 @@ async function runCase(evalCase: EvalCase, player: EvalPlayer) {
       if (pattern.test(turn.answer)) {
         checks.push(`answer matched forbidden ${pattern}`);
       }
+    }
+    for (const issue of groundingIssues(turn)) {
+      checks.push(issue);
     }
     if (turn.answer.includes("—")) {
       checks.push("answer used an em dash");
@@ -194,7 +226,61 @@ async function runCase(evalCase: EvalCase, player: EvalPlayer) {
     checks,
     verdict,
     ms: Date.now() - started,
+    metrics: sumMetrics(turns.map(turn => turn.metrics)),
   } satisfies CaseResult;
+}
+
+function sumMetrics(all: TurnMetrics[]) {
+  return all.reduce(
+    (sum, item) => ({
+      steps: sum.steps + item.steps,
+      toolCalls: sum.toolCalls + item.toolCalls,
+      toolErrors: sum.toolErrors + item.toolErrors,
+      invalidCalls: sum.invalidCalls + item.invalidCalls,
+    }),
+    { steps: 0, toolCalls: 0, toolErrors: 0, invalidCalls: 0 } satisfies TurnMetrics
+  );
+}
+
+const TOLERANCE = 0.011;
+const NUMBER_PATTERN = /\d+(?:\.\d+)?/g;
+
+function numbersIn(text: string) {
+  return (text.match(NUMBER_PATTERN) ?? []).map(Number);
+}
+
+/**
+ * Numbers with a decimal point or a percent sign in the answer must appear in a tool output, the user's
+ * question, or the fixed scoring facts, and no accuracy of 99.5% or more may be offered unless a tool returned it.
+ */
+function groundingIssues(turn: TurnResult) {
+  const known = [
+    ...turn.tools.flatMap(trace => numbersIn(trace.output)),
+    ...numbersIn(turn.user),
+    ...numbersIn(SCORING_KNOWLEDGE),
+  ];
+  const issues: string[] = [];
+  const answer = turn.answer.replace(/(?<=\d),(?=\d{3})/g, "");
+  const claimed = answer.match(/\d+(?:\.\d+)?\s?%|\d+\.\d+/g) ?? [];
+  const ungrounded = new Set<string>();
+  for (const raw of claimed) {
+    const value = Number(raw.replace(/[^0-9.]/g, ""));
+    if (!known.some(candidate => Math.abs(candidate - value) <= TOLERANCE)) {
+      ungrounded.add(raw.trim());
+    }
+  }
+  if (ungrounded.size > 0) {
+    issues.push(`ungrounded numbers: ${[...ungrounded].slice(0, 6).join(", ")}`);
+  }
+  for (const raw of answer.match(/\d+(?:\.\d+)?\s?%/g) ?? []) {
+    if (
+      Number(raw.replace(/[^0-9.]/g, "")) >= 99.5 &&
+      !/impossible|unrealistic|virtually|essentially|almost never|no one/i.test(answer)
+    ) {
+      issues.push(`offered an accuracy of ${raw.trim()} without calling it unrealistic`);
+    }
+  }
+  return issues;
 }
 
 async function judge(evalCase: EvalCase, turns: TurnResult[]) {
@@ -206,7 +292,7 @@ async function judge(evalCase: EvalCase, turns: TurnResult[]) {
     .join("\n\n");
   for (let attempt = 0; attempt < JUDGE_ATTEMPTS; attempt++) {
     const result = await generateText({
-      model: ChatModelService.getChatModel(),
+      model: ChatModelService.getTitleModel(),
       maxOutputTokens: 8192,
       system: JUDGE_SYSTEM,
       prompt: `CASE RUBRIC: ${evalCase.rubric}\n\nTRANSCRIPT:\n${transcript}`,
@@ -240,12 +326,12 @@ function render(results: CaseResult[]) {
   lines.push(
     `${passed}/${results.length} passed`,
     "",
-    "| case | player | judge | checks | s |",
-    "|---|---|---|---|---|"
+    "| case | player | judge | checks | s | steps | calls | errors |",
+    "|---|---|---|---|---|---|---|---|"
   );
   for (const result of results) {
     lines.push(
-      `| ${result.caseId} | ${result.player.name} | ${result.verdict.pass ? "pass" : "FAIL"} | ${result.checks.join("; ") || "ok"} | ${(result.ms / 1000).toFixed(0)} |`
+      `| ${result.caseId} | ${result.player.name} | ${result.verdict.pass ? "pass" : "FAIL"} | ${result.checks.join("; ") || "ok"} | ${(result.ms / 1000).toFixed(0)} | ${result.metrics?.steps ?? "-"} | ${result.metrics?.toolCalls ?? "-"} | ${result.metrics?.toolErrors ?? "-"} |`
     );
   }
   for (const result of results) {
