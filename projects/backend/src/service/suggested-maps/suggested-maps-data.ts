@@ -114,6 +114,7 @@ export async function loadFitData(
       FROM "scoresaber-score-realms" sr
       JOIN "scoresaber-scores" s ON s."scoreId" = sr."scoreId"
       WHERE sr."realmId" = ${DEFAULT_REALM_ID} AND s.accuracy >= ${params.minAccuracy} AND sr.pp >= ${params.minPp}
+        AND sr."playerId" NOT IN (SELECT id FROM "scoresaber-accounts" WHERE banned = true)
     `);
     for (;;) {
       const batch = await tx.execute<ScoreRow>(sql.raw(`FETCH ${FETCH_SIZE} FROM suggested_maps_scores`));
