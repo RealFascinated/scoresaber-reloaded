@@ -36,44 +36,64 @@ function truncate(text: string, max: number) {
   return `${text.slice(0, max - 20)}\n\n… (truncated)`;
 }
 
-function formatPgCause(error: unknown) {
-  if (!(error instanceof Error) || !("cause" in error)) {
-    return undefined;
+const MAX_CAUSE_DEPTH = 5;
+
+const BASE_MAX = 2200;
+
+function formatCauseChain(error: unknown) {
+  const lines: string[] = [];
+  let current: unknown = error instanceof Error ? error.cause : undefined;
+
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH && current !== undefined && current !== null; depth++) {
+    if (typeof current !== "object") {
+      lines.push(String(current));
+      break;
+    }
+
+    const record = current as {
+      name?: unknown;
+      message?: unknown;
+      code?: unknown;
+      detail?: unknown;
+      hint?: unknown;
+      cause?: unknown;
+    };
+    const parts: string[] = [];
+    if (typeof record.name === "string" || typeof record.message === "string") {
+      parts.push(
+        `${typeof record.name === "string" ? record.name : "Error"}: ${String(record.message ?? "")}`
+      );
+    }
+    if (typeof record.code === "string") {
+      parts.push(`code: ${record.code}`);
+    }
+    if (typeof record.detail === "string") {
+      parts.push(`detail: ${record.detail}`);
+    }
+    if (typeof record.hint === "string") {
+      parts.push(`hint: ${record.hint}`);
+    }
+    if (parts.length > 0) {
+      lines.push(`${"  ".repeat(depth)}Caused by ${parts.join(" | ")}`);
+    }
+    current = record.cause;
   }
 
-  const cause = error.cause;
-  if (typeof cause !== "object" || cause === null) {
-    return undefined;
-  }
-
-  const record = cause as { code?: unknown; detail?: unknown; hint?: unknown };
-  const parts: string[] = [];
-  if (typeof record.code === "string") {
-    parts.push(`code: ${record.code}`);
-  }
-  if (typeof record.detail === "string") {
-    parts.push(`detail: ${record.detail}`);
-  }
-  if (typeof record.hint === "string") {
-    parts.push(`hint: ${record.hint}`);
-  }
-
-  return parts.length > 0 ? parts.join("\n") : undefined;
+  return lines.length > 0 ? lines.join("\n") : undefined;
 }
 
 export function formatErrorForDiscord(error: unknown) {
-  const pgCause = formatPgCause(error);
+  const causes = formatCauseChain(error);
+  const withCauses = (base: string) => (causes ? `${truncate(base, BASE_MAX)}\n\n${causes}` : base);
 
   if (error instanceof Error) {
-    const base = error.stack ?? `${error.name}: ${error.message}`;
-    return pgCause ? `${base}\n\nPostgreSQL:\n${pgCause}` : base;
+    return withCauses(error.stack ?? `${error.name}: ${error.message}`);
   }
 
   if (typeof error === "object" && error !== null) {
     const record = error as { message?: unknown; stack?: unknown };
     if (typeof record.message === "string") {
-      const base = typeof record.stack === "string" ? record.stack : record.message;
-      return pgCause ? `${base}\n\nPostgreSQL:\n${pgCause}` : base;
+      return withCauses(typeof record.stack === "string" ? record.stack : record.message);
     }
 
     try {
