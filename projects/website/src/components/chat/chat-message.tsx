@@ -1,7 +1,13 @@
 "use client";
 
 import ChatChoiceCard, { readChatChoice } from "@/components/chat/chat-choice-card";
-import { type ChatDisplayMessage, type ChatDisplayPart, getToolLabel } from "@/components/chat/chat-display";
+import {
+  type ChatDisplayMessage,
+  type ChatDisplayPart,
+  getToolLabel,
+  getToolSummary,
+  readToolError,
+} from "@/components/chat/chat-display";
 import ChatMarkdown from "@/components/chat/chat-markdown";
 import ChatMessageActions from "@/components/chat/chat-message-actions";
 import PlaylistFileCard, { type PlaylistFile, readPlaylistFile } from "@/components/chat/playlist-file-card";
@@ -88,6 +94,9 @@ function ToolStep({ tool }: { tool: ToolPart }) {
   const [isOpen, setIsOpen] = useState(false);
   const isError = tool.state === "error";
   const isRunning = tool.state === "running";
+  const summary = getToolSummary(tool);
+  const error = isError ? readToolError(tool.errorText) : undefined;
+  const hasInput = tool.input !== undefined && Object.keys(tool.input).length > 0;
 
   return (
     <li className="flex flex-col gap-1.5">
@@ -111,15 +120,40 @@ function ToolStep({ tool }: { tool: ToolPart }) {
           {isError ? `${getToolLabel(tool.toolName)} failed` : getToolLabel(tool.toolName)}
           {isRunning ? " …" : ""}
         </span>
+        {summary !== "" && (
+          <span className={`truncate ${isError ? "text-destructive/70" : "text-muted-foreground/60"}`}>
+            · {summary}
+          </span>
+        )}
       </button>
       {isOpen && (
-        <div className="rounded-md bg-secondary/40 p-2 text-xs">
-          {isError ? (
-            <p className="text-destructive">{tool.errorText ?? "The lookup failed"}</p>
+        <div className="flex flex-col gap-2 rounded-md bg-secondary/40 p-2 text-xs">
+          {hasInput && (
+            <div className="flex flex-col gap-1">
+              <span className="font-medium text-muted-foreground">Input</span>
+              <pre className="max-h-40 overflow-auto font-mono whitespace-pre-wrap text-muted-foreground">
+                {JSON.stringify(tool.input, null, 2)}
+              </pre>
+            </div>
+          )}
+          {error !== undefined ? (
+            <div className="flex flex-col gap-1 text-destructive">
+              <p>{error.message}</p>
+              {error.hint !== undefined && <p className="text-destructive/80">Hint: {error.hint}</p>}
+              {error.code !== undefined && (
+                <p className="text-destructive/60">
+                  {error.code}
+                  {error.retryable ? " · retryable" : ""}
+                </p>
+              )}
+            </div>
           ) : (
-            <pre className="max-h-56 overflow-auto font-mono whitespace-pre-wrap text-muted-foreground">
-              {JSON.stringify(tool.output, null, 2)}
-            </pre>
+            <div className="flex flex-col gap-1">
+              <span className="font-medium text-muted-foreground">Output</span>
+              <pre className="max-h-56 overflow-auto font-mono whitespace-pre-wrap text-muted-foreground">
+                {JSON.stringify(tool.output, null, 2)}
+              </pre>
+            </div>
           )}
         </div>
       )}

@@ -1,5 +1,7 @@
 import type { ChatMessage } from "@ssr/common/schemas/chat/chat-message";
+import { ChatToolErrorSchema, type ChatToolErrorPayload } from "@ssr/common/schemas/chat/tools/tool-error";
 import type { UIMessage } from "ai";
+import { Value } from "typebox/value";
 
 /**
  * A text, reasoning or tool part of a message, whichever shape it was stored or streamed in.
@@ -11,6 +13,7 @@ export type ChatDisplayPart =
       kind: "tool";
       toolName: string;
       state: "running" | "available" | "error";
+      input?: object;
       output?: object;
       errorText?: string;
     };
@@ -29,6 +32,7 @@ type StoredPart = {
   type: string;
   text?: string;
   state?: string;
+  input?: object;
   output?: object;
   errorText?: string;
   data?: { durationMs?: number };
@@ -83,6 +87,61 @@ export function getToolLabel(toolName: string) {
   return words === "" ? "Used a tool" : words.charAt(0).toUpperCase() + words.slice(1);
 }
 
+const MAX_SUMMARY_VALUE_LENGTH = 24;
+const MAX_SUMMARY_ARGS = 3;
+const MAX_ERROR_SUMMARY_LENGTH = 90;
+
+function truncate(text: string, max: number) {
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+}
+
+/**
+ * A short "key value" line of the scalar arguments a tool was called with, for example "playerId 7656119… · page 1".
+ */
+export function summarizeToolInput(input: object | undefined) {
+  if (input === undefined) {
+    return "";
+  }
+  const pairs: string[] = [];
+  for (const [key, value] of Object.entries(input)) {
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      pairs.push(`${key} ${truncate(String(value), MAX_SUMMARY_VALUE_LENGTH)}`);
+    } else if (Array.isArray(value)) {
+      pairs.push(`${key} ×${value.length}`);
+    }
+  }
+  return pairs.slice(0, MAX_SUMMARY_ARGS).join(" · ");
+}
+
+/**
+ * Reads a tool error shown to the user: the backend sends the code, message, retryable flag and hint as JSON,
+ * anything else, such as an invalid input error from the AI SDK, is shown as written.
+ */
+export function readToolError(errorText: string | undefined) {
+  const text = errorText ?? "The lookup failed";
+  if (text.startsWith('{"code"')) {
+    const payload = JSON.parse(text);
+    if (Value.Check(ChatToolErrorSchema, payload)) {
+      const parsed: ChatToolErrorPayload = payload;
+      return parsed;
+    }
+  }
+  const fallback: Pick<ChatToolErrorPayload, "message"> & Partial<ChatToolErrorPayload> = { message: text };
+  return fallback;
+}
+
+/**
+ * The collapsed one-line summary of a tool step: the arguments it ran with, or why it failed.
+ */
+export function getToolSummary(tool: Extract<ChatDisplayPart, { kind: "tool" }>) {
+  if (tool.state === "error") {
+    const error = readToolError(tool.errorText);
+    const firstLine = error.message.split("\n")[0] ?? error.message;
+    return truncate(firstLine, MAX_ERROR_SUMMARY_LENGTH);
+  }
+  return summarizeToolInput(tool.input);
+}
+
 export type ConversationGroupLabel = "Today" | "Yesterday" | "Previous 7 days" | "Older";
 
 /**
@@ -106,11 +165,12 @@ export function getConversationGroupLabel(isoDate: string, now: Date) {
 function readToolPart(
   toolName: string,
   state: string | undefined,
+  input: object | undefined,
   output: object | undefined,
   errorText: string | undefined
 ) {
   if (state === "output-available") {
-    const part: ChatDisplayPart = { kind: "tool", toolName, state: "available", output };
+    const part: ChatDisplayPart = { kind: "tool", toolName, state: "available", input, output };
     return part;
   }
   if (state === "output-error" || state === "output-denied") {
@@ -118,11 +178,12 @@ function readToolPart(
       kind: "tool",
       toolName,
       state: "error",
+      input,
       errorText: errorText ?? (state === "output-denied" ? "The lookup was denied" : "The lookup failed"),
     };
     return part;
   }
-  const part: ChatDisplayPart = { kind: "tool", toolName, state: "running" };
+  const part: ChatDisplayPart = { kind: "tool", toolName, state: "running", input };
   return part;
 }
 
@@ -142,7 +203,13 @@ function readStoredPart(part: StoredPart) {
     return reasoning;
   }
   if (part.type.startsWith(TOOL_PREFIX)) {
-    return readToolPart(part.type.slice(TOOL_PREFIX.length), part.state, part.output, part.errorText);
+    return readToolPart(
+      part.type.slice(TOOL_PREFIX.length),
+      part.state,
+      part.input,
+      part.output,
+      part.errorText
+    );
   }
   return undefined;
 }
@@ -185,14 +252,17 @@ function readUiPart(part: UIMessage["parts"][number]) {
         ? part.output
         : undefined;
     const errorText = part.state === "output-error" ? part.errorText : undefined;
-    return readToolPart(part.toolName, part.state, output, errorText);
+    const input = typeof part.input === "object" && part.input !== null ? part.input : undefined;
+    return readToolPart(part.toolName, part.state, input, output, errorText);
   }
   if (part.type.startsWith(TOOL_PREFIX) && "state" in part) {
     const state = typeof part.state === "string" ? part.state : undefined;
     const output =
       "output" in part && typeof part.output === "object" && part.output !== null ? part.output : undefined;
     const errorText = "errorText" in part && typeof part.errorText === "string" ? part.errorText : undefined;
-    return readToolPart(part.type.slice(TOOL_PREFIX.length), state, output, errorText);
+    const input =
+      "input" in part && typeof part.input === "object" && part.input !== null ? part.input : undefined;
+    return readToolPart(part.type.slice(TOOL_PREFIX.length), state, input, output, errorText);
   }
   return undefined;
 }
