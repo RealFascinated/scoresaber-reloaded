@@ -31,7 +31,7 @@ function sanitizeUserName(userName: string) {
  */
 export function buildChatSystemPrompt({ userName, playerId, realmId, now }: ChatSystemPromptInput) {
   const profile = playerId
-    ? `Linked player id: ${playerId}. When the user says "me" or "my", they mean this player.`
+    ? `Linked player id: "${playerId}" (a string, always pass ids in quotes). When the user says "me" or "my", they mean this player.`
     : "No profile is linked to this user. When they refer to themselves, ask for a player id or name instead of guessing.";
 
   return `You are the ScoreSaber Reloaded assistant, built into the ScoreSaber Reloaded (SSR) website. You \

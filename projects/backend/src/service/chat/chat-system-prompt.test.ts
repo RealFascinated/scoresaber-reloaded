@@ -8,7 +8,7 @@ describe("buildChatSystemPrompt", () => {
     const prompt = buildChatSystemPrompt({ userName: "Alice", playerId: "123", realmId: 1, now: NOW });
 
     expect(prompt).toContain("Name: Alice");
-    expect(prompt).toContain("Linked player id: 123");
+    expect(prompt).toContain("Linked player id: \"123\"");
     expect(prompt).toContain("Today's date: 2026-03-04");
     expect(prompt).toContain("Current realm (season) id: 1.");
     expect(prompt).not.toContain("No profile is linked");

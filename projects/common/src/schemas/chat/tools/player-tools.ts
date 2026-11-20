@@ -5,7 +5,7 @@ const PlayerIdSchema = Type.String({
   minLength: 1,
   maxLength: 32,
   description:
-    "ScoreSaber player id. Omit it to use the signed-in user's linked player. Use searchPlayers first if you only have a name.",
+    "ScoreSaber player id, always a JSON string in quotes (never a number, long ids lose digits as numbers). Omit it to use the signed-in user's linked player. Use searchPlayers first if you only have a name.",
 });
 
 const PageSchema = Type.Integer({

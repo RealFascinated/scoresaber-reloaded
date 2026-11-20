@@ -16,7 +16,9 @@ export function toolSchema<const Schema extends TSchema>(schema: Schema) {
       const location = firstError.instancePath.length > 0 ? ` at ${firstError.instancePath}` : "";
       return {
         success: false,
-        error: new Error(`Invalid tool input${location}: ${firstError.message}`),
+        error: new Error(
+          `Invalid tool input${location}: ${firstError.message}. Ids and hashes are strings, wrap them in quotes.`
+        ),
       };
     },
   });
