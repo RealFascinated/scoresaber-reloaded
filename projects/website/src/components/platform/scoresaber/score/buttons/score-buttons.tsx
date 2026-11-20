@@ -44,12 +44,44 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
+    id: "install-map",
+    display: ({ beatSaverMap, isPreviousScore }: Props) => {
+      return beatSaverMap != undefined && !isPreviousScore;
+    },
+    render: ({ beatSaverMap }: Props) => {
+      return <ScoreInstallMapButton beatSaverMap={beatSaverMap!} />;
+    },
+  },
+  {
     id: "beat-saver-map",
     display: ({ beatSaverMap, isPreviousScore }: Props) => {
       return beatSaverMap != undefined && !isPreviousScore;
     },
     render: ({ beatSaverMap }: Props) => {
       return <BeatSaverMapButton beatSaverMap={beatSaverMap!} />;
+    },
+  },
+  {
+    id: "ask-chat",
+    display: ({ isPreviousScore }: Props) => {
+      return !isPreviousScore;
+    },
+    render: ({ score, leaderboard }: Props) => {
+      return (
+        <AskChatButton
+          prompt={`Break down my score ${score.scoreId} on ${leaderboard.songName}`}
+          tooltip="Ask the chat about this score"
+        />
+      );
+    },
+  },
+  {
+    id: "replay",
+    display: ({ score }: Props) => {
+      return score?.beatLeaderScore != undefined;
+    },
+    render: ({ score }: Props) => {
+      return <ScoreReplayButton score={score.beatLeaderScore} scoreSaberScoreId={score.scoreId} />;
     },
   },
   {
@@ -71,44 +103,12 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
-    id: "replay",
-    display: ({ score }: Props) => {
-      return score?.beatLeaderScore != undefined;
-    },
-    render: ({ score }: Props) => {
-      return <ScoreReplayButton score={score.beatLeaderScore} scoreSaberScoreId={score.scoreId} />;
-    },
-  },
-  {
     id: "pin-score",
     display: ({ isOwnScore }: Props) => {
       return !!isOwnScore;
     },
     render: ({ score }: Props) => {
       return <ScorePinButton scoreId={score.scoreId} />;
-    },
-  },
-  {
-    id: "ask-chat",
-    display: ({ isPreviousScore }: Props) => {
-      return !isPreviousScore;
-    },
-    render: ({ score, leaderboard }: Props) => {
-      return (
-        <AskChatButton
-          prompt={`Break down my score ${score.scoreId} on ${leaderboard.songName}`}
-          tooltip="Ask the chat about this score"
-        />
-      );
-    },
-  },
-  {
-    id: "install-map",
-    display: ({ beatSaverMap, isPreviousScore }: Props) => {
-      return beatSaverMap != undefined && !isPreviousScore;
-    },
-    render: ({ beatSaverMap }: Props) => {
-      return <ScoreInstallMapButton beatSaverMap={beatSaverMap!} />;
     },
   },
 ];
@@ -164,13 +164,8 @@ export default function ScoreSaberScoreButtons({
         </PopoverContent>
       </Popover>
 
-      <div className="hidden min-w-0 flex-col items-end gap-1 @3xl:flex">
-        <div className="flex justify-end gap-1">
-          {renderedButtons.slice(0, Math.ceil(renderedButtons.length / 2))}
-        </div>
-        <div className="flex justify-end gap-1">
-          {renderedButtons.slice(Math.ceil(renderedButtons.length / 2))}
-        </div>
+      <div dir="rtl" className="hidden grid-flow-col grid-rows-2 gap-1 @3xl:grid">
+        {renderedButtons}
       </div>
     </>
   );
