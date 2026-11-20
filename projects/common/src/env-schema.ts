@@ -16,6 +16,14 @@ const serverSchema = Type.Object({
   LOG_LEVEL: Type.Optional(
     Type.Union([Type.Literal("debug"), Type.Literal("info"), Type.Literal("warn"), Type.Literal("error")])
   ),
+  /** `json` emits one structured JSON object per line; defaults to `json` in production and pretty output otherwise */
+  LOG_FORMAT: Type.Optional(Type.Union([Type.Literal("json"), Type.Literal("pretty")])),
+
+  /** OTLP/HTTP base endpoint, e.g. https://openobserve.example.com/api/default. Telemetry is disabled when unset */
+  OTEL_EXPORTER_OTLP_ENDPOINT: Type.Optional(Type.String()),
+  /** Comma separated `key=value` headers, e.g. `Authorization=Basic xxx` */
+  OTEL_EXPORTER_OTLP_HEADERS: Type.Optional(Type.String()),
+  OTEL_SERVICE_NAME: Type.Optional(Type.String()),
 
   ENABLE_QUEUES: Type.Boolean(),
   IGNORE_WEBSOCKET_SCORES: Type.Optional(Type.Boolean()),

@@ -8,8 +8,6 @@ import {
 } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
-import { isProduction } from "@ssr/common/utils/utils";
-import { logger } from "@tqman/nice-logger";
 import { stringify } from "devalue";
 import { EmbedBuilder } from "discord.js";
 import { Elysia, ValidationError, type AnyElysia } from "elysia";
@@ -46,6 +44,7 @@ import { crons } from "./plugins/crons";
 import { createHttpMetricsHooks } from "./plugins/http-metrics.hooks";
 import { privateNetworkCors } from "./plugins/private-network-cors";
 import { rateLimit } from "./plugins/rate-limit";
+import { telemetry } from "./plugins/telemetry";
 import { QueueManager } from "./queue/queue-manager";
 import { AppService } from "./service/app/app.service";
 import { ChatModelService } from "./service/chat/chat-model.service";
@@ -55,9 +54,12 @@ import StorageService from "./service/infra/storage.service";
 import { PlayerCacheLivenessService } from "./service/player/player-cache-liveness.service";
 import PlaylistService from "./service/playlist/playlist.service";
 import { SuggestedMapsService } from "./service/suggested-maps/suggested-maps.service";
+import { initTelemetry, shutdownTelemetry } from "./telemetry/telemetry";
 import { BeatSaverWebsocket } from "./websocket/listeners/beatsaver-websocket";
 import { ScoreWebsockets } from "./websocket/listeners/platform-score-handlers";
 import { WebsocketManager } from "./websocket/websocket-manager";
+
+initTelemetry();
 
 const log = Logger.withTopic("SSR Backend");
 
@@ -121,12 +123,7 @@ function registerControllers<TApp extends AnyElysia>(instance: TApp) {
 }
 
 const baseApp = new Elysia()
-  .use(
-    logger({
-      enabled: !isProduction(),
-      mode: "combined",
-    })
-  )
+  .use(telemetry())
   .use(trace())
   .use(serverTiming())
   .use(crons)
@@ -303,6 +300,7 @@ const gracefulShutdown = async (signal: string) => {
 
     clearTimeout(forceExit);
     log.info("Shutdown complete");
+    await shutdownTelemetry();
     process.exit(0);
   } catch (error) {
     log.error("Error during shutdown:", error);

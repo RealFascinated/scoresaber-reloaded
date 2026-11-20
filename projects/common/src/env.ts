@@ -8,6 +8,11 @@ import type { envSchema } from "./env-schema";
  */
 export const env = {
   LOG_LEVEL: process.env.LOG_LEVEL ?? "info",
+  LOG_FORMAT: process.env.LOG_FORMAT,
+
+  OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
+  OTEL_SERVICE_NAME: process.env.OTEL_SERVICE_NAME,
 
   NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV ?? "development",
   NEXT_PUBLIC_APPLICATION_NAME: process.env.NEXT_PUBLIC_APPLICATION_NAME,
