@@ -24,6 +24,7 @@ const formSchema = Type.Object({
     "backgroundCoverBlur",
     "snowParticles",
     "showKitty",
+    "chatDisabled",
     "websiteLanding",
   ]).properties,
   theme: Type.String(),
@@ -89,6 +90,19 @@ const settings: {
     ],
   },
   {
+    id: "features",
+    title: "Features",
+    icon: SharedIcons.WebsiteFeaturesSettingsIcon,
+    fields: [
+      {
+        name: "chatDisabled" as Path<FormValues>,
+        label: "Disable Chat",
+        type: "checkbox" as const,
+        description: "Hides the chat assistant and its sidebar link",
+      },
+    ],
+  },
+  {
     id: "navigation",
     title: "Navigation",
     icon: SharedIcons.WebsiteGlobalSettingsIcon,
@@ -134,6 +148,7 @@ const WebsiteSettings = () => {
       backgroundCoverBlur: 6,
       snowParticles: false,
       showKitty: false,
+      chatDisabled: false,
       websiteLanding: WebsiteLanding.PLAYER_HOME,
       theme: ssrConfig.themes[0].id,
     },
@@ -145,6 +160,7 @@ const WebsiteSettings = () => {
     backgroundCoverBlur: preferences.backgroundCoverBlur,
     snowParticles: preferences.snowParticles,
     showKitty: preferences.showKitty,
+    chatDisabled: preferences.chatDisabled,
     websiteLanding: preferences.websiteLanding,
     theme,
   }));
@@ -157,6 +173,7 @@ const WebsiteSettings = () => {
       backgroundCoverBlur: values.backgroundCoverBlur,
       snowParticles: values.snowParticles,
       showKitty: values.showKitty,
+      chatDisabled: values.chatDisabled,
       websiteLanding: values.websiteLanding,
     });
     setTheme(values.theme);

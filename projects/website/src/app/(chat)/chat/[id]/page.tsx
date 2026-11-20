@@ -1,5 +1,5 @@
 import { getServerSession } from "@/common/auth/session-server";
-import { getServerChatConversation, isChatEnabled } from "@/common/chat/chat-server";
+import { getServerChatConversation, isChatEnabled, isChatDisabledByUser } from "@/common/chat/chat-server";
 import SteamSignInRedirect from "@/components/auth/steam-sign-in-redirect";
 import ChatShell from "@/components/chat/chat-shell";
 import { Metadata } from "next";
@@ -25,7 +25,7 @@ export default async function ChatConversationPage({ params }: ChatConversationP
   if (session.status === "anonymous") {
     return <SteamSignInRedirect redirectPath={`/chat/${id}`} failed={false} />;
   }
-  if (!(await isChatEnabled(cookie))) {
+  if (!(await isChatEnabled(cookie)) || (await isChatDisabledByUser(cookie))) {
     notFound();
   }
 

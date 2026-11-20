@@ -36,6 +36,7 @@ const TITLE_REFRESH_DELAYS_MS = [2000, 5000];
 type ChatShellProps = {
   conversationId: string | null;
   initialMessages?: ChatMessage[];
+  initialPrompt?: string;
 };
 
 const SIDEBAR_WIDTH_STORAGE_KEY = "chat-sidebar-width";
@@ -104,7 +105,11 @@ export default function ChatShell(props: ChatShellProps) {
   return <ChatShellContent key={session} {...props} />;
 }
 
-function ChatShellContent({ conversationId: serverConversationId, initialMessages }: ChatShellProps) {
+function ChatShellContent({
+  conversationId: serverConversationId,
+  initialMessages,
+  initialPrompt,
+}: ChatShellProps) {
   const queryClient = useQueryClient();
   const sidebarWidth = useSyncExternalStore(
     subscribeSidebarWidth,
@@ -236,6 +241,15 @@ function ChatShellContent({ conversationId: serverConversationId, initialMessage
     },
     [clearError, isBusy, markStarted, sendMessage]
   );
+
+  const initialPromptSentRef = useRef(false);
+  useEffect(() => {
+    if (initialPrompt === undefined || initialPromptSentRef.current) {
+      return;
+    }
+    initialPromptSentRef.current = true;
+    handleSend(initialPrompt);
+  }, [handleSend, initialPrompt]);
 
   const handleRetry = useCallback(() => {
     clearError();

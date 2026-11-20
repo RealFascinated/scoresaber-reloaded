@@ -13,6 +13,7 @@ export const BACKGROUND_COVER_CUSTOM = "custom";
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   showKitty: false,
   snowParticles: false,
+  chatDisabled: false,
   whatIfRange: [90, 98.5],
   plusPpDefaultAccuracy: 95,
   historyMode: HistoryMode.ADVANCED,

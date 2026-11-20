@@ -1,5 +1,6 @@
 "use client";
 
+import AskChatButton, { useChatAvailable } from "@/components/chat/ask-chat-button";
 import { BeatSaverMapButton } from "@/components/score/button/beat-saver-map-button";
 import { ScoreCopyBsrButton } from "@/components/score/button/score-copy-bsr-button";
 import { ScoreReplayButton } from "@/components/score/button/score-replay-button";
@@ -88,6 +89,20 @@ const buttons: ButtonConfig[] = [
     },
   },
   {
+    id: "ask-chat",
+    display: ({ isPreviousScore }: Props) => {
+      return !isPreviousScore;
+    },
+    render: ({ score, leaderboard }: Props) => {
+      return (
+        <AskChatButton
+          prompt={`Break down my score ${score.scoreId} on ${leaderboard.songName}`}
+          tooltip="Ask the chat about this score"
+        />
+      );
+    },
+  },
+  {
     id: "install-map",
     display: ({ beatSaverMap, isPreviousScore }: Props) => {
       return beatSaverMap != undefined && !isPreviousScore;
@@ -106,6 +121,7 @@ export default function ScoreSaberScoreButtons({
   isPreviousScore,
 }: Props) {
   const mainPlayerId = useMainPlayerId();
+  const chatAvailable = useChatAvailable();
   const isOwnScore = mainPlayerId !== undefined && score.playerId === mainPlayerId;
   const buttonProps = useMemo(
     () => ({
@@ -118,7 +134,10 @@ export default function ScoreSaberScoreButtons({
     }),
     [score, leaderboard, beatSaverMap, updateScore, isPreviousScore, isOwnScore]
   );
-  const visibleButtons = useMemo(() => buttons.filter(button => button.display(buttonProps)), [buttonProps]);
+  const visibleButtons = useMemo(
+    () => buttons.filter(button => (button.id !== "ask-chat" || chatAvailable) && button.display(buttonProps)),
+    [buttonProps, chatAvailable]
+  );
 
   const renderedButtons = visibleButtons.map(button => (
     <div key={button.id} className="shrink-0">

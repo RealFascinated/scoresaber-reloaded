@@ -293,6 +293,7 @@ export const SharedIcons = {
   WebsiteCoverImageSettingsIcon: ImageIcon,
   WebsiteSnowfallSettingsIcon: Snowflake,
   WebsiteGlobalSettingsIcon: Globe,
+  WebsiteFeaturesSettingsIcon: SparklesIcon,
   WebsiteThemeSettingsIcon: Palette,
 
   OverlayPlayerLayerIcon: User,
@@ -304,6 +305,7 @@ export const SharedIcons = {
 
   ChatNavIcon: MessageSquare,
   ChatEmptyStateIcon: MessageSquare,
+  ChatAskIcon: SparklesIcon,
   ChatToolIcon: Wrench,
   NewChatIcon: Plus,
   SendChatMessageIcon: ArrowUp,

@@ -30,6 +30,7 @@ import { FOLLOWING_QUERY_KEY, useFollowing } from "@/hooks/use-following";
 import { useMainPlayer, useMainPlayerId } from "@/hooks/use-main-player";
 import useMe, { ME_QUERY_KEY } from "@/hooks/use-me";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserPreference } from "@/hooks/use-user-preferences";
 import { USER_PREFERENCES_QUERY_KEY } from "@/hooks/use-user-preferences";
 import { SharedIcons } from "@/shared-icons";
 import { CHAT_ROUTE } from "@ssr/common/api-routes";
@@ -343,7 +344,8 @@ function ProfileSection() {
 
 export function AppSidebar() {
   const { data: me } = useMe();
-  const { data: chatEnabled } = useChatStatus(me != null);
+  const chatDisabled = useUserPreference("chatDisabled");
+  const { data: chatAvailable } = useChatStatus(me != null && !chatDisabled);
   const chatItem: NavItem = {
     id: "chat",
     name: "Chat",
@@ -351,7 +353,7 @@ export function AppSidebar() {
     href: CHAT_ROUTE,
   };
   const groups =
-    me != null && chatEnabled
+    me != null && !chatDisabled && chatAvailable
       ? navGroups.map(group =>
           group.label === "Tools" ? { ...group, items: [chatItem, ...group.items] } : group
         )

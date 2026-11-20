@@ -15,6 +15,8 @@ export const UserPreferencesSchema = Type.Object(
   {
     showKitty: Type.Boolean(),
     snowParticles: Type.Boolean(),
+    /** Whether the chat feature is turned off. */
+    chatDisabled: Type.Boolean(),
     /** The accuracy range shown in the "what if" pp calculator. */
     whatIfRange: Type.Tuple([AccuracySchema, AccuracySchema]),
     plusPpDefaultAccuracy: AccuracySchema,

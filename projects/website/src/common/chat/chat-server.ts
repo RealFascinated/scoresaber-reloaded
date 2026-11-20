@@ -1,4 +1,4 @@
-import { CHAT_ROUTE } from "@ssr/common/api-routes";
+import { CHAT_ROUTE, USER_PREFERENCES_ROUTE } from "@ssr/common/api-routes";
 import { env } from "@ssr/common/env";
 import { parseSchema } from "@ssr/common/schemas/parse";
 import {
@@ -29,6 +29,22 @@ export const isChatEnabled = cache(async (cookie: string) => {
       return false;
     }
     return parseSchema(ChatStatusResponseSchema, await response.json()).enabled;
+  } catch {
+    return false;
+  }
+});
+
+/**
+ * Whether the signed-in user turned the chat feature off in their settings.
+ */
+export const isChatDisabledByUser = cache(async (cookie: string) => {
+  try {
+    const response = await backendGet(USER_PREFERENCES_ROUTE, cookie);
+    if (!response.ok) {
+      return false;
+    }
+    const preferences = (await response.json()) as { chatDisabled?: boolean };
+    return preferences.chatDisabled ?? false;
   } catch {
     return false;
   }
