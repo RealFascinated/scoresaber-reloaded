@@ -1,7 +1,7 @@
 import { Colors } from "@/common/colors";
 import Card from "@/components/card";
+import { HandSummary, ReplayInsights } from "@ssr/common/replay/replay-insights";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
-import { HandSummary, ReplayInsights } from "../replay-insights";
 
 type Row = {
   label: string;

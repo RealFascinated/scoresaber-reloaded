@@ -1,5 +1,5 @@
-import { getMaxNoteScore, getNoteScore } from "@ssr/common/replay/replay-accuracy";
-import { NoteEventType, Replay } from "@ssr/common/replay/replay-decoder";
+import { getMaxNoteScore, getNoteScore } from "./replay-accuracy";
+import { NoteEventType, Replay } from "./replay-decoder";
 
 export type Hand = "left" | "right";
 
@@ -159,7 +159,10 @@ function clamp(value: number, min: number, max: number) {
 
 type DecodedNoteId = { lane: number; layer: number; colorType: number; cutDirection: number };
 
-function decodeNoteId(noteId: number) {
+/**
+ * Decodes a BeatLeader note id into its grid lane and layer, color and cut direction.
+ */
+export function decodeNoteId(noteId: number) {
   const large = noteId >= 100000;
   const digit = (power: number) => Math.floor(noteId / 10 ** power) % 10;
   const offset = large ? 1 : 0;
@@ -209,7 +212,15 @@ function outOf115(cut: CutRecord) {
   return (cut.score / cut.max) * MAX_CUT;
 }
 
-export function computeReplayInsights(replay: Replay) {
+export type ReplayInsightsOptions = {
+  /** How many non-overlapping weak moments to return, worst first. Defaults to 3. */
+  weakMomentCount?: number;
+};
+
+/**
+ * Analyses a decoded replay: where points were lost, per hand, direction, grid cell and section, streaks and weak moments.
+ */
+export function computeReplayInsights(replay: Replay, options: ReplayInsightsOptions = {}) {
   const notes: TimelineNote[] = [];
   const cuts: CutRecord[] = [];
   const mistakes: MistakeRecord[] = [];
@@ -379,7 +390,7 @@ export function computeReplayInsights(replay: Replay) {
         postSwing: cut.post,
         center: cut.center,
       })),
-    weakMoments: findWeakMoments(lostEvents),
+    weakMoments: findWeakMoments(lostEvents, options.weakMomentCount ?? WEAK_MOMENT_COUNT),
     greatShare: cuts.length > 0 ? greatCuts / cuts.length : 0,
     perfectCuts,
     totalCuts: cuts.length,
@@ -544,7 +555,7 @@ function summarizeStreaks(notes: TimelineNote[]) {
   return { great, perfect, comboBreaks };
 }
 
-function findWeakMoments(events: { time: number; lost: number; miss: boolean }[]) {
+function findWeakMoments(events: { time: number; lost: number; miss: boolean }[], count: number) {
   if (events.length === 0) {
     return [];
   }
@@ -569,7 +580,7 @@ function findWeakMoments(events: { time: number; lost: number; miss: boolean }[]
   windows.sort((a, b) => b.pointsLost - a.pointsLost);
   const picked: WeakMoment[] = [];
   for (const window of windows) {
-    if (picked.length >= WEAK_MOMENT_COUNT) {
+    if (picked.length >= count) {
       break;
     }
     if (picked.every(other => window.start > other.end || window.end < other.start)) {

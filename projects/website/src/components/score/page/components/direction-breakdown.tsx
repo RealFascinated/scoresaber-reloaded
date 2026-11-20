@@ -1,5 +1,5 @@
-import { CutDirection, ReplayInsights } from "../replay-insights";
-import { DIRECTION_NAMES } from "../replay-takeaways";
+import { CutDirection, ReplayInsights } from "@ssr/common/replay/replay-insights";
+import { DIRECTION_NAMES } from "@ssr/common/replay/replay-takeaways";
 import SaberCut from "./saber-cut";
 import ScorePad, { PadCell } from "./score-pad";
 

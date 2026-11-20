@@ -1,6 +1,6 @@
-import { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
-import { formatNumberWithCommas, formatPp } from "@ssr/common/utils/number-utils";
-import { formatTime } from "@ssr/common/utils/time-utils";
+import { ScoreSaberScore } from "../schemas/scoresaber/score/score";
+import { formatNumberWithCommas, formatPp } from "../utils/number-utils";
+import { formatTime } from "../utils/time-utils";
 import { CutDetail, CutDirection, GridCellSummary, ReplayInsights } from "./replay-insights";
 
 export type Takeaway = {
@@ -43,10 +43,23 @@ function clock(seconds: number) {
   return formatTime(Math.floor(seconds));
 }
 
+export type TakeawayLimits = {
+  /** Most good takeaways to return. Defaults to 4. */
+  good?: number;
+  /** Most improvement takeaways to return. Defaults to 6. */
+  improve?: number;
+  /** Most weak-spot takeaways among the improvements. Defaults to 3. */
+  weakSpots?: number;
+};
+
 /**
  * Turns the replay numbers into a short list of plain-language conclusions.
  */
-export function buildTakeaways(insights: ReplayInsights, score: ScoreSaberScore) {
+export function buildTakeaways(
+  insights: ReplayInsights,
+  score: ScoreSaberScore,
+  limits: TakeawayLimits = {}
+) {
   const good: Takeaway[] = [];
   const improve: Takeaway[] = [];
   const { loss, totalNotes, avgScore } = insights;
@@ -131,7 +144,7 @@ export function buildTakeaways(insights: ReplayInsights, score: ScoreSaberScore)
     improve.push(concentrated);
   }
 
-  improve.push(...findWeakSpots(insights, accuracyOf).slice(0, MAX_WEAK_SPOTS));
+  improve.push(...findWeakSpots(insights, accuracyOf).slice(0, limits.weakSpots ?? MAX_WEAK_SPOTS));
 
   const quiet = insights.density[0];
   const busy = insights.density[insights.density.length - 1];
@@ -170,7 +183,7 @@ export function buildTakeaways(insights: ReplayInsights, score: ScoreSaberScore)
     });
   }
 
-  return [...good.slice(0, MAX_GOOD), ...improve.slice(0, MAX_IMPROVE)];
+  return [...good.slice(0, limits.good ?? MAX_GOOD), ...improve.slice(0, limits.improve ?? MAX_IMPROVE)];
 }
 
 type Part = "preSwing" | "postSwing" | "center";

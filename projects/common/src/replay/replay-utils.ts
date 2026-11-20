@@ -11,7 +11,7 @@ type IntervalSwingAgg = {
 /**
  * Computes cut distribution, swing speed, and max event time in one pass over notes.
  */
-function computeReplayDerivedData(replay: Replay): {
+export function computeReplayDerivedData(replay: Replay): {
   cutDistribution: CutDistribution[];
   swingSpeed: SwingSpeed;
   replayLengthSeconds: number;

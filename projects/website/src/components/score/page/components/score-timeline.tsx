@@ -1,5 +1,5 @@
+import { Hand, ReplayInsights } from "@ssr/common/replay/replay-insights";
 import { formatTime } from "@ssr/common/utils/time-utils";
-import { Hand, ReplayInsights } from "../replay-insights";
 import ScoreTimelineChart from "./score-timeline-chart";
 
 const MAX_SCORE = 115;

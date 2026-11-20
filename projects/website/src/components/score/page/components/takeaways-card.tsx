@@ -1,6 +1,6 @@
 import Card from "@/components/card";
+import { Takeaway } from "@ssr/common/replay/replay-takeaways";
 import { CircleCheck, Target } from "lucide-react";
-import { Takeaway } from "../replay-takeaways";
 
 function TakeawayList({ items, tone }: { items: Takeaway[]; tone: Takeaway["tone"] }) {
   const Icon = tone === "good" ? CircleCheck : Target;

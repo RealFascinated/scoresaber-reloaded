@@ -1,7 +1,7 @@
 import Card from "@/components/card";
+import { ReplayInsights } from "@ssr/common/replay/replay-insights";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatTime } from "@ssr/common/utils/time-utils";
-import { ReplayInsights } from "../replay-insights";
 
 const SEGMENTS = [
   {

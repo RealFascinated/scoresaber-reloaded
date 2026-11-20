@@ -1,4 +1,4 @@
-import { CutDirection } from "../replay-insights";
+import { CutDirection } from "@ssr/common/replay/replay-insights";
 
 const TRAVEL_ROTATION: Record<Exclude<CutDirection, "dot">, number> = {
   up: 180,

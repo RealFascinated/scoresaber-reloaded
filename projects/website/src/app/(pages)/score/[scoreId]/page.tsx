@@ -11,10 +11,10 @@ import ScoreMapSection from "@/components/score/page/components/score-map-sectio
 import { ScoreSection, ScoreSectionNav } from "@/components/score/page/components/score-section";
 import ScoreTimeline from "@/components/score/page/components/score-timeline";
 import TakeawaysCard from "@/components/score/page/components/takeaways-card";
-import { computeReplayInsights } from "@/components/score/page/replay-insights";
-import { buildTakeaways } from "@/components/score/page/replay-takeaways";
 import { SharedIcons } from "@/shared-icons";
 import { env } from "@ssr/common/env";
+import { computeReplayInsights } from "@ssr/common/replay/replay-insights";
+import { buildTakeaways } from "@ssr/common/replay/replay-takeaways";
 import { getDecodedReplay } from "@ssr/common/replay/replay-utils";
 import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import type { PlayerScore } from "@ssr/common/score/player-score";

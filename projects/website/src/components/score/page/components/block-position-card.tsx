@@ -1,5 +1,5 @@
-import { ReplayInsights } from "../replay-insights";
-import { describeGridCell } from "../replay-takeaways";
+import { ReplayInsights } from "@ssr/common/replay/replay-insights";
+import { describeGridCell } from "@ssr/common/replay/replay-takeaways";
 import ScorePad, { PadCell } from "./score-pad";
 
 const LAYERS_TOP_FIRST = [2, 1, 0];
