@@ -36,7 +36,7 @@ RUN cd projects/website && bun run lint
 RUN cd projects/website && bun run build
 
 # Run the app
-FROM node:22-bookworm-slim AS runner
+FROM node:26-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NEXT_PUBLIC_APP_ENV=production
