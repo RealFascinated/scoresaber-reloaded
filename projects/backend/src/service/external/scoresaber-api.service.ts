@@ -26,6 +26,7 @@ import ScoreSaberApiCallMetric, {
   type ScoreSaberApiOutcome,
 } from "../../metrics/impl/backend/scoresaber-api-call";
 import { MetricType } from "../../metrics/prometheus";
+import { SUPERSEDED_REASON } from "../../telemetry/instrumentation";
 import CacheService, { CacheId } from "../infra/cache.service";
 import MetricsService from "../infra/metrics.service";
 import { backoff, parseRetryAfterMs } from "./http-retry";
@@ -82,7 +83,6 @@ type UpstreamResult = {
 };
 
 const TIMEOUT_REASON = "scoresaber-request-timeout";
-const SUPERSEDED_REASON = "scoresaber-request-superseded";
 
 const ENDPOINT_LABELS: [RegExp, string][] = [
   [/^v2\/players\/count$/, "v2/players/count"],

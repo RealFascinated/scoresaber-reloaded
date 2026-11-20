@@ -3,6 +3,8 @@ import Redis from "ioredis";
 import type { Pool } from "pg";
 import { TRACER_NAME, withSpan } from "./telemetry";
 
+export const SUPERSEDED_REASON = "scoresaber-request-superseded";
+
 function endSpan(span: Span, error?: Error) {
   if (error) {
     span.recordException(error);
@@ -35,7 +37,13 @@ export function instrumentFetch() {
         return response;
       },
       (error: unknown) => {
-        endSpan(span, toError(error));
+        const signal = init?.signal ?? request?.signal;
+        if (signal?.aborted && signal.reason === SUPERSEDED_REASON) {
+          span.setAttribute("http.request.superseded", true);
+          endSpan(span);
+        } else {
+          endSpan(span, toError(error));
+        }
         throw error;
       }
     );
