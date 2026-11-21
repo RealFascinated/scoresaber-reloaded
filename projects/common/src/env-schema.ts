@@ -24,6 +24,8 @@ const serverSchema = Type.Object({
   /** Comma separated `key=value` headers, e.g. `Authorization=Basic xxx` */
   OTEL_EXPORTER_OTLP_HEADERS: Type.Optional(Type.String()),
   OTEL_SERVICE_NAME: Type.Optional(Type.String()),
+  /** OpenObserve stream for LLM chat traces. Chat spans share the default stream when unset */
+  OTEL_CHAT_STREAM: Type.Optional(Type.String()),
 
   ENABLE_QUEUES: Type.Boolean(),
   IGNORE_WEBSOCKET_SCORES: Type.Optional(Type.Boolean()),

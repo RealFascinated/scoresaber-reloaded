@@ -14,7 +14,12 @@ import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import { BatchLogRecordProcessor, LoggerProvider } from "@opentelemetry/sdk-logs";
-import { BatchSpanProcessor, BasicTracerProvider, type SpanProcessor } from "@opentelemetry/sdk-trace-base";
+import {
+  BatchSpanProcessor,
+  BasicTracerProvider,
+  type ReadableSpan,
+  type SpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { env } from "@ssr/common/env";
 import Logger, { type LogLevel } from "@ssr/common/logger";
@@ -30,6 +35,8 @@ const SEVERITY: Record<LogLevel, SeverityNumber> = {
 
 const TRACER_NAME = "ssr-backend";
 
+const CHAT_SPAN_ATTRIBUTE = "gen_ai.conversation.id";
+
 const CHAT_SESSION_KEY = createContextKey("ssr-chat-session");
 
 type ChatSession = { conversationId: string; userId?: string };
@@ -40,7 +47,7 @@ const chatSessionProcessor = {
     if (!session) {
       return;
     }
-    span.setAttribute("gen_ai.conversation.id", session.conversationId);
+    span.setAttribute(CHAT_SPAN_ATTRIBUTE, session.conversationId);
     if (session.userId) {
       span.setAttribute("user.id", session.userId);
     }
@@ -54,6 +61,35 @@ const chatSessionProcessor = {
 export function withChatSession<T>(session: ChatSession, fn: () => T) {
   const current = context.active().getValue(CHAT_SESSION_KEY) as ChatSession | undefined;
   return context.with(context.active().setValue(CHAT_SESSION_KEY, { ...current, ...session }), fn);
+}
+
+function isChatSpan(span: ReadableSpan) {
+  return span.attributes[CHAT_SPAN_ATTRIBUTE] !== undefined;
+}
+
+class FilteredSpanProcessor implements SpanProcessor {
+  constructor(
+    private readonly inner: SpanProcessor,
+    private readonly accepts: (span: ReadableSpan) => boolean
+  ) {}
+
+  onStart(...args: Parameters<SpanProcessor["onStart"]>) {
+    this.inner.onStart(...args);
+  }
+
+  onEnd(span: ReadableSpan) {
+    if (this.accepts(span)) {
+      this.inner.onEnd(span);
+    }
+  }
+
+  forceFlush() {
+    return this.inner.forceFlush();
+  }
+
+  shutdown() {
+    return this.inner.shutdown();
+  }
 }
 
 let loggerProvider: LoggerProvider | undefined;
@@ -81,7 +117,23 @@ export function initTelemetry() {
 
   tracerProvider = new BasicTracerProvider({
     resource,
-    spanProcessors: [chatSessionProcessor, new BatchSpanProcessor(new OTLPTraceExporter())],
+    spanProcessors: [
+      chatSessionProcessor,
+      ...(env.OTEL_CHAT_STREAM
+        ? [
+            new FilteredSpanProcessor(
+              new BatchSpanProcessor(new OTLPTraceExporter()),
+              span => !isChatSpan(span)
+            ),
+            new FilteredSpanProcessor(
+              new BatchSpanProcessor(
+                new OTLPTraceExporter({ headers: { "stream-name": env.OTEL_CHAT_STREAM } })
+              ),
+              isChatSpan
+            ),
+          ]
+        : [new BatchSpanProcessor(new OTLPTraceExporter())]),
+    ],
   });
   trace.setGlobalTracerProvider(tracerProvider);
   registerTelemetry(new OpenTelemetry());
