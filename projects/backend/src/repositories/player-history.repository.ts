@@ -34,7 +34,7 @@ export class PlayerHistoryRepository {
   }
 
   /**
-   * Upserts the history rows of many players in one statement.
+   * Upserts the history rows of many players in one statement. Duplicate player and date entries keep the last one.
    *
    * @param entries the player, date and history data of each row
    * @param realmId the realm the rows belong to
@@ -46,9 +46,12 @@ export class PlayerHistoryRepository {
     if (entries.length === 0) {
       return;
     }
+    const latestEntries = new Map(entries.map(entry => [`${entry.playerId}:${entry.date.getTime()}`, entry]));
     await db
       .insert(playerHistoryTable)
-      .values(entries.map(({ playerId, date, data }) => ({ playerId, date, realmId, ...data })))
+      .values(
+        [...latestEntries.values()].map(({ playerId, date, data }) => ({ playerId, date, realmId, ...data }))
+      )
       .onConflictDoUpdate({
         target: [playerHistoryTable.playerId, playerHistoryTable.date, playerHistoryTable.realmId],
         set: {
