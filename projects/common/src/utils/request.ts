@@ -1,5 +1,5 @@
 import { CooldownPriority } from "../cooldown";
-import { RateLimitError } from "../error/rate-limit-error";
+import { type RequestResult, requestFailure, requestFailureFromStatus } from "./request-result";
 
 type RequestReturns = "text" | "json" | "arraybuffer";
 
@@ -8,8 +8,6 @@ type BaseRequestOptions = {
     revalidate?: number;
   };
   searchParams?: Record<string, unknown>;
-  throwOnError?: boolean;
-  returnErrorResponses?: boolean;
   returns?: RequestReturns;
   priority?: CooldownPriority;
 };
@@ -36,79 +34,53 @@ class Request {
     return `${baseUrl}${separator}${params.toString()}`;
   }
 
-  private static async handleRateLimit(url: string, response: Response): Promise<void> {
+  private static recordRateLimit(url: string, response: Response) {
     const rateLimit = response.headers.get("x-ratelimit-remaining");
     const resetTime = response.headers.get("x-ratelimit-reset");
 
     if (rateLimit) {
-      const remaining = Number(rateLimit);
-
       this.rateLimitInfo.set(url, {
-        remaining,
+        remaining: Number(rateLimit),
         resetTime: resetTime ? Number(resetTime) : Date.now() + 60_000,
       });
-
-      // // Log warning if below threshold
-      // if (remaining <= 50) {
-      //   Logger.warn(
-      //     `The rate limit for ${url} is low (${remaining} remaining). ${
-      //       resetTime
-      //         ? `Reset date: ${formatDate(new Date(Number(resetTime) * 1000), "DD/MM/YYYY, HH:mm:ss")}.`
-      //         : ""
-      //     }`
-      //   );
-      // }
-
-      if (remaining === 0) {
-        throw new RateLimitError("Rate limit exceeded");
-      }
     }
   }
 
-  public static async executeRequest<T>(
+  public static async executeRequest(
     url: string,
     method: string,
     options?: RequestOptions
-  ): Promise<Response | undefined> {
-    const {
-      searchParams,
-      returns = "json",
-      throwOnError = false,
-      returnErrorResponses = false,
-      priority = CooldownPriority.NORMAL,
-      ...fetchOptions
-    } = options || {};
+  ): Promise<RequestResult<Response>> {
+    const { searchParams, returns: _returns, priority: _priority, ...fetchOptions } = options || {};
     const fullUrl = this.buildUrl(url, searchParams);
     const cacheKey = this.getCacheKey(fullUrl, method, options);
 
     const pendingRequest = this.pendingRequests.get(cacheKey);
     if (pendingRequest) {
-      const cachedResponse = (await pendingRequest) as Response | undefined;
-      // Clone the response for each consumer to avoid body consumption issues
-      return cachedResponse ? cachedResponse.clone() : undefined;
+      const shared = (await pendingRequest) as RequestResult<Response>;
+      return shared.ok ? { ...shared, response: shared.response.clone() } : shared;
     }
 
-    const requestPromise = (async () => {
+    const requestPromise = (async (): Promise<RequestResult<Response>> => {
       try {
-        const response = await fetch(fullUrl, {
-          method,
-          ...fetchOptions,
-        });
-
-        await this.handleRateLimit(url, response);
-
-        if (!response.ok) {
-          if (throwOnError) {
-            throw new Error(
-              `Request ${fullUrl} failed with status ${response.status}: ${response.statusText}`
-            );
-          }
-          if (!returnErrorResponses) {
-            return undefined;
-          }
+        let response: Response;
+        try {
+          response = await fetch(fullUrl, { method, ...fetchOptions });
+        } catch (error) {
+          return requestFailure(
+            "unreachable",
+            undefined,
+            `Request ${fullUrl} failed: ${error instanceof Error ? error.message : "network error"}`
+          );
         }
 
-        return response;
+        this.recordRateLimit(url, response);
+
+        if (!response.ok) {
+          return requestFailureFromStatus(response.status, fullUrl);
+        }
+
+        return { ok: true, status: response.status, response } satisfies RequestResult<Response>;
       } finally {
         this.pendingRequests.delete(cacheKey);
       }
@@ -118,43 +90,48 @@ class Request {
     return requestPromise;
   }
 
-  private static handleResponse<T>(
-    response: Response | undefined,
+  private static async handleResponse<T>(
+    result: RequestResult<Response>,
     returns: RequestReturns
-  ): Promise<T | undefined> {
-    if (!response) {
-      return Promise.resolve(undefined);
+  ): Promise<RequestResult<T>> {
+    if (!result.ok) {
+      return result;
     }
-    switch (returns) {
-      case "text":
-        return response.text() as Promise<T>;
-      case "json":
-        return response.json() as Promise<T>;
-      case "arraybuffer":
-        return response.arrayBuffer() as Promise<T>;
-      default:
-        return response.json() as Promise<T>;
+    try {
+      const body =
+        returns === "text"
+          ? await result.response.text()
+          : returns === "arraybuffer"
+            ? await result.response.arrayBuffer()
+            : await result.response.json();
+      return { ok: true, status: result.status, response: body as T } satisfies RequestResult<T>;
+    } catch (error) {
+      return requestFailure(
+        "invalid_response",
+        result.status,
+        `Response body could not be read as ${returns}: ${error instanceof Error ? error.message : "unknown error"}`
+      );
     }
   }
 
-  public static async get<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    const response = await this.executeRequest<T>(url, "GET", options);
-    return this.handleResponse<T>(response, options?.returns || "json");
+  public static async get<T>(url: string, options?: RequestOptions) {
+    const result = await this.executeRequest(url, "GET", options);
+    return this.handleResponse<T>(result, options?.returns || "json");
   }
 
-  public static async post<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    const response = await this.executeRequest<T>(url, "POST", options);
-    return this.handleResponse<T>(response, options?.returns || "json");
+  public static async post<T>(url: string, options?: RequestOptions) {
+    const result = await this.executeRequest(url, "POST", options);
+    return this.handleResponse<T>(result, options?.returns || "json");
   }
 
-  public static async put<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    const response = await this.executeRequest<T>(url, "PUT", options);
-    return this.handleResponse<T>(response, options?.returns || "json");
+  public static async put<T>(url: string, options?: RequestOptions) {
+    const result = await this.executeRequest(url, "PUT", options);
+    return this.handleResponse<T>(result, options?.returns || "json");
   }
 
-  public static async delete<T>(url: string, options?: RequestOptions): Promise<T | undefined> {
-    const response = await this.executeRequest<T>(url, "DELETE", options);
-    return this.handleResponse<T>(response, options?.returns || "json");
+  public static async delete<T>(url: string, options?: RequestOptions) {
+    const result = await this.executeRequest(url, "DELETE", options);
+    return this.handleResponse<T>(result, options?.returns || "json");
   }
 }
 

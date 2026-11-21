@@ -99,10 +99,14 @@ export class PlayerHistoryService {
   }
 
   private static async trackRealmPlayers(realmId: number, trackTime: Date) {
-    const firstPage = await ScoreSaberApiService.lookupPlayers(1, { realmId, skipCache: true });
-    if (firstPage == undefined) {
+    const firstPageResult = await ScoreSaberApiService.lookupPlayers(1, { realmId, skipCache: true });
+    if (!firstPageResult.ok) {
+      PlayerHistoryService.logger.error(
+        `Failed to fetch players on page 1, skipping player statistics update: ${firstPageResult.message}`
+      );
       return undefined;
     }
+    const firstPage = firstPageResult.response;
 
     const pages = Math.ceil(firstPage.metadata.totalItems / (firstPage.metadata.itemsPerPage ?? 100));
     PlayerHistoryService.logger.info(`Tracking ${pages} pages of players in realm "${realmId}"...`);
@@ -149,12 +153,14 @@ export class PlayerHistoryService {
     await accept(firstPage.data ?? []);
     for (let page = 2; page <= pages; page++) {
       const response = await ScoreSaberApiService.lookupPlayers(page, { realmId, skipCache: true });
-      if (response == undefined) {
-        PlayerHistoryService.logger.error(`Failed to fetch players on page ${page}, skipping page...`);
+      if (!response.ok) {
+        PlayerHistoryService.logger.error(
+          `Failed to fetch players on page ${page}, skipping page: ${response.message}`
+        );
         failedPages++;
         continue;
       }
-      await accept(response.data ?? []);
+      await accept(response.response.data ?? []);
       if (page % 100 === 0) {
         PlayerHistoryService.logger.info(`Tracked ${tracked} players, fetched page ${page} of ${pages}...`);
       }

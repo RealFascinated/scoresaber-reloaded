@@ -49,7 +49,7 @@ export class AccSaberService extends ApiService {
   public async checkPlayerExists(playerId: string): Promise<boolean> {
     try {
       const user = await this.fetch(USER_ENDPOINT.replace(":playerId", playerId));
-      return user !== undefined;
+      return user.ok;
     } catch (error) {
       Logger.error("Failed to check AccSaber player existence: ", error);
       return false;
@@ -92,21 +92,20 @@ export class AccSaberService extends ApiService {
 
     try {
       const result = await this.fetch<ScorePageResponse>(url);
-      if (result === undefined || result.content.length === 0) {
+      if (!result.ok || result.response.content.length === 0) {
         return Pagination.empty<ScoreResponse>();
       }
+      const page = result.response;
 
-      this.log(
-        `Found ${result.totalElements} AccSaber scores in ${(performance.now() - before).toFixed(0)}ms`
-      );
+      this.log(`Found ${page.totalElements} AccSaber scores in ${(performance.now() - before).toFixed(0)}ms`);
 
       return {
-        items: result.content,
+        items: page.content,
         metadata: {
-          totalItems: result.totalElements,
-          totalPages: result.totalPages,
-          page: result.number + 1,
-          itemsPerPage: result.size,
+          totalItems: page.totalElements,
+          totalPages: page.totalPages,
+          page: page.number + 1,
+          itemsPerPage: page.size,
         },
       };
     } catch (error) {

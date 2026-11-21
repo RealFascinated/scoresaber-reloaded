@@ -194,16 +194,16 @@ export class PlayerScoresService {
     let fetchFailed = false;
     while (hasMoreScores) {
       const scoresPage = await getScoresPage(currentPage);
-      if (!scoresPage) {
+      if (!scoresPage.ok) {
         fetchFailed = true;
         PlayerScoresService.logger.warn(
-          `Failed to fetch page ${currentPage} of scores for "${playerId}"; leaving the player unseeded so the next cycle retries the backfill`
+          `Failed to fetch page ${currentPage} of scores for "${playerId}"; leaving the player unseeded so the next cycle retries the backfill: ${scoresPage.message}`
         );
         break;
       }
 
       pagesFetched++;
-      hasMoreScores = await processPage(currentPage, scoresPage);
+      hasMoreScores = await processPage(currentPage, scoresPage.response);
       if (!hasMoreScores) {
         break;
       }
@@ -274,10 +274,10 @@ export class PlayerScoresService {
       sort: "recent",
       skipCache: true,
     });
-    if (!page) {
+    if (!page.ok) {
       return false;
     }
-    return PlayerScoresService.queueReconcileIfCountMismatch(playerId, page.metadata.total);
+    return PlayerScoresService.queueReconcileIfCountMismatch(playerId, page.response.metadata.total);
   }
 
   private static async canReconcile(playerId: string) {
@@ -338,33 +338,38 @@ export class PlayerScoresService {
    */
   public static async reconcilePlayerScores(playerId: string) {
     const limit = 100;
-    const firstPage = await ScoreSaberApiService.lookupPlayerScores({
+    const firstPageResult = await ScoreSaberApiService.lookupPlayerScores({
       playerId,
       page: 1,
       limit,
       sort: "recent",
       skipCache: true,
     });
-    if (!firstPage) {
+    if (!firstPageResult.ok) {
+      PlayerScoresService.logger.warn(
+        `Aborted score reconcile for "${playerId}": the first page failed to load, nothing was changed: ${firstPageResult.message}`
+      );
       return;
     }
+    const firstPage = firstPageResult.response;
 
     const pages = [firstPage];
     const totalPages = Math.ceil(firstPage.metadata.total / firstPage.metadata.itemsPerPage);
     if (totalPages > 1) {
-      const lastPage = await ScoreSaberApiService.lookupPlayerScores({
+      const lastPageResult = await ScoreSaberApiService.lookupPlayerScores({
         playerId,
         page: totalPages,
         limit,
         sort: "recent",
         skipCache: true,
       });
-      if (!lastPage) {
+      if (!lastPageResult.ok) {
         PlayerScoresService.logger.warn(
-          `Aborted score reconcile for "${playerId}": the last page failed to load, nothing was changed`
+          `Aborted score reconcile for "${playerId}": the last page failed to load, nothing was changed: ${lastPageResult.message}`
         );
         return;
       }
+      const lastPage = lastPageResult.response;
       const expectedTotal = (totalPages - 1) * firstPage.metadata.itemsPerPage + lastPage.playerScores.length;
       if (expectedTotal !== firstPage.metadata.total) {
         PlayerScoresService.logger.warn(
@@ -383,13 +388,13 @@ export class PlayerScoresService {
         )
       );
       for (const page of batchPages) {
-        if (!page) {
+        if (!page.ok) {
           PlayerScoresService.logger.warn(
-            `Aborted score reconcile for "${playerId}": a page failed to load, nothing was changed`
+            `Aborted score reconcile for "${playerId}": a page failed to load, nothing was changed: ${page.message}`
           );
           return;
         }
-        pages.push(page);
+        pages.push(page.response);
       }
     }
 
@@ -549,11 +554,12 @@ export class PlayerScoresService {
       search,
     });
 
-    if (!requestedPage) {
+    if (!requestedPage.ok) {
       return Pagination.empty<PlayerScore<ScoreSaberScore>>();
     }
+    const scoresPage = requestedPage.response;
 
-    const parsedPlayerScores = requestedPage.playerScores.map(playerScore => {
+    const parsedPlayerScores = scoresPage.playerScores.map(playerScore => {
       const leaderboard = getScoreSaberLeaderboardFromToken(playerScore.leaderboard);
       const score = getScoreSaberScoreFromToken(playerScore.score, leaderboard, playerId);
       return { score, leaderboard };
@@ -565,13 +571,13 @@ export class PlayerScoresService {
 
     if (!search?.trim()) {
       void withBackgroundSpan("background checkScoreCount", () =>
-        PlayerScoresService.checkScoreCount(playerId, requestedPage.metadata.total)
+        PlayerScoresService.checkScoreCount(playerId, scoresPage.metadata.total)
       );
     }
 
     const pagination = new Pagination<PlayerScore<ScoreSaberScore>>()
-      .setItemsPerPage(requestedPage.metadata.itemsPerPage)
-      .setTotalItems(requestedPage.metadata.total);
+      .setItemsPerPage(scoresPage.metadata.itemsPerPage)
+      .setTotalItems(scoresPage.metadata.total);
 
     return await pagination.getPage(pageNumber, async () => {
       const scores = await Promise.all(

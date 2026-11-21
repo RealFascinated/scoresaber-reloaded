@@ -1,4 +1,5 @@
 import { NotFoundError } from "@ssr/common/error/not-found-error";
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { miniRankingCacheKey, miniRankingResponseCacheKey } from "../../common/cache-keys";
 import { ScoreSaberApiService } from "../external/scoresaber-api.service";
@@ -8,6 +9,8 @@ import ScoreSaberPlayerService from "./scoresaber-player.service";
 type MiniRankingType = "global" | "country";
 
 export default class MiniRankingService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Mini Ranking");
+
   /**
    * Gets the players around a player for both global and country rankings.
    *
@@ -82,9 +85,15 @@ export default class MiniRankingService {
       )
     );
 
-    const allPlayers = pageResponses
-      .filter((response): response is NonNullable<typeof response> => response !== undefined)
-      .flatMap(response => response.data);
+    const allPlayers = pageResponses.flatMap(response => {
+      if (!response.ok) {
+        MiniRankingService.logger.warn(
+          `Failed to fetch ${type} rankings page for player "${player.id}": ${response.message}`
+        );
+        return [];
+      }
+      return response.response.data;
+    });
     const tokenRank = (token: (typeof allPlayers)[number]) =>
       type === "global" ? token.stats.rank : token.stats.countryRank;
     const windowTokens = allPlayers.filter(token => {

@@ -74,11 +74,17 @@ async function main(): Promise<void> {
   let seen = 0;
 
   do {
-    const response = await ScoreSaberApiService.lookupLeaderboards(page, {
+    const result = await ScoreSaberApiService.lookupLeaderboards(page, {
       search,
     });
 
-    if (response == null || response.data.length === 0) {
+    if (!result.ok) {
+      scriptLog.error(`Failed to fetch leaderboards page ${page}: ${result.message}`);
+      break;
+    }
+
+    const response = result.response;
+    if (response.data.length === 0) {
       if (page === 1) {
         scriptLog.warn(`No leaderboards on page 1 (search=${search ?? "(none)"})`);
       }

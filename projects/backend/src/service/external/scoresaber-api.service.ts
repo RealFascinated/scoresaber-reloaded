@@ -19,6 +19,12 @@ import { ScoreSaberV2RealmPpCurveToken } from "@ssr/common/schemas/scoresaber/to
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromV2PageToken } from "@ssr/common/token-creators";
 import { CoalescingLoader } from "@ssr/common/utils/coalescing-loader";
+import {
+  type RequestFailure,
+  type RequestResult,
+  requestFailure,
+  requestFailureFromStatus,
+} from "@ssr/common/utils/request-result";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import { scoreSaberApiResponseCacheKey } from "../../common/cache-keys";
@@ -30,7 +36,6 @@ import { SUPERSEDED_REASON } from "../../telemetry/instrumentation";
 import CacheService, { CacheId } from "../infra/cache.service";
 import MetricsService from "../infra/metrics.service";
 import { backoff, parseRetryAfterMs } from "./http-retry";
-
 const scoreSaberApiLog = Logger.withTopic("ScoreSaber API");
 
 const API_BASE = "https://scoresaber.com/api";
@@ -119,7 +124,7 @@ export class ScoreSaberApiService {
   public static totalRequests: number = 0;
   public static failedRequests: number = 0;
   private static totalRequestLatencyMs: number = 0;
-  private static coalescingLoader = new CoalescingLoader<string, SerializableValue | undefined>();
+  private static coalescingLoader = new CoalescingLoader<string, RequestResult<SerializableValue>>();
 
   private static readonly MAX_ATTEMPTS = 5;
   private static readonly REQUEST_TIMEOUT_MS = 5_000;
@@ -138,25 +143,38 @@ export class ScoreSaberApiService {
     options = Object.keys(requestOptions).length > 0 ? requestOptions : undefined;
     const cacheHash = Bun.hash(JSON.stringify({ url, options })).toString();
 
+    const load = () =>
+      ScoreSaberApiService.coalescingLoader.get(cacheHash, () => ScoreSaberApiService.request(url, options));
+
+    let result: RequestResult<SerializableValue>;
     if (skipCache) {
-      const fresh = (await ScoreSaberApiService.coalescingLoader.get(cacheHash, async () => {
-        return await ScoreSaberApiService.request(url, options);
-      })) as SerializableValue | undefined;
-      ScoreSaberApiService.totalRequestLatencyMs += Math.max(0, performance.now() - startedAt);
-      return fresh as T;
+      result = await load();
+    } else {
+      let uncached: RequestFailure | undefined;
+      const cached = await CacheService.fetch<RequestResult<SerializableValue> | undefined>(
+        CacheId.SCORESABER_API_RESPONSE,
+        scoreSaberApiResponseCacheKey(cacheHash),
+        async () => {
+          const loaded = await load();
+          if (loaded.ok || loaded.error === "not_found") {
+            return loaded;
+          }
+          uncached = loaded;
+          return undefined;
+        }
+      );
+      result =
+        cached ??
+        uncached ??
+        requestFailure(
+          "unreachable",
+          undefined,
+          "ScoreSaber request failed while another caller was loading it"
+        );
     }
 
-    const data = await CacheService.fetch<SerializableValue | undefined>(
-      CacheId.SCORESABER_API_RESPONSE,
-      scoreSaberApiResponseCacheKey(cacheHash),
-      async () =>
-        (await ScoreSaberApiService.coalescingLoader.get(cacheHash, async () => {
-          return await ScoreSaberApiService.request(url, options);
-        })) as SerializableValue | undefined
-    );
-
     ScoreSaberApiService.totalRequestLatencyMs += Math.max(0, performance.now() - startedAt);
-    return data as T;
+    return result as RequestResult<T>;
   }
 
   private static async request(
@@ -169,6 +187,11 @@ export class ScoreSaberApiService {
 
     const startedAt = performance.now();
     const endpoint = scoreSaberEndpointLabel(url);
+    let failure: RequestFailure = requestFailure(
+      "unreachable",
+      undefined,
+      "ScoreSaber request exceeded its deadline"
+    );
 
     for (let attempt = 1; attempt <= ScoreSaberApiService.MAX_ATTEMPTS; attempt++) {
       const remainingMs = ScoreSaberApiService.TOTAL_DEADLINE_MS - (performance.now() - startedAt);
@@ -185,6 +208,7 @@ export class ScoreSaberApiService {
       const canRetry = attempt < ScoreSaberApiService.MAX_ATTEMPTS;
 
       if (result == undefined) {
+        failure = requestFailure("unreachable", undefined, "ScoreSaber request timed out or failed");
         if (canRetry) {
           await backoff(attempt);
           continue;
@@ -193,6 +217,7 @@ export class ScoreSaberApiService {
       }
 
       if (result.status === 429 || result.status >= 500) {
+        failure = requestFailureFromStatus(result.status, "ScoreSaber");
         const waitMs = result.retryAfterMs ?? 0;
         const deadlineLeftMs = ScoreSaberApiService.TOTAL_DEADLINE_MS - (performance.now() - startedAt);
         if (canRetry && waitMs < deadlineLeftMs) {
@@ -203,14 +228,26 @@ export class ScoreSaberApiService {
       }
 
       if (result.status !== 200) {
+        failure = requestFailureFromStatus(result.status, "ScoreSaber");
         break;
       }
 
-      return result.data;
+      if (result.data === undefined) {
+        failure = requestFailure("invalid_response", result.status, "ScoreSaber returned a non-JSON body");
+        break;
+      }
+
+      return {
+        ok: true,
+        status: result.status,
+        response: result.data,
+      } satisfies RequestResult<SerializableValue>;
     }
 
-    ScoreSaberApiService.failedRequests++;
-    return undefined;
+    if (failure.error !== "not_found") {
+      ScoreSaberApiService.failedRequests++;
+    }
+    return failure;
   }
 
   private static async requestHedged(
@@ -331,7 +368,7 @@ export class ScoreSaberApiService {
     const before = performance.now();
     const trimmedQuery = query.trim();
     ScoreSaberApiService.log(`Searching for players matching "${trimmedQuery}"...`);
-    const results = await ScoreSaberApiService.fetch<ScoreSaberV2PlayersPageToken>(
+    const result = await ScoreSaberApiService.fetch<ScoreSaberV2PlayersPageToken>(
       LOOKUP_PLAYERS_V2_ENDPOINT,
       {
         searchParams: {
@@ -340,14 +377,14 @@ export class ScoreSaberApiService {
         },
       }
     );
-    if (results === undefined || results.data.length === 0) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
-    results.data.sort((a, b) => a.stats.rank - b.stats.rank);
+    result.response.data.sort((a, b) => a.stats.rank - b.stats.rank);
     ScoreSaberApiService.log(
-      `Found ${results.data.length} players in ${formatDuration(performance.now() - before)}`
+      `Found ${result.response.data.length} players in ${formatDuration(performance.now() - before)}`
     );
-    return results;
+    return result;
   }
 
   /**
@@ -361,18 +398,18 @@ export class ScoreSaberApiService {
   public static async lookupPlayer(playerId: string, realmId?: number, options?: { fresh?: boolean }) {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up player "${playerId}"...`);
-    const token = await ScoreSaberApiService.fetch<ScoreSaberV2PlayerToken>(
+    const result = await ScoreSaberApiService.fetch<ScoreSaberV2PlayerToken>(
       fillEndpoint(LOOKUP_PLAYER_V2_ENDPOINT, { id: playerId }),
       {
         skipCache: options?.fresh,
         ...(realmId != null ? { searchParams: { realmId: realmId.toString() } } : {}),
       }
     );
-    if (token === undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
     ScoreSaberApiService.log(`Found player "${playerId}" in ${formatDuration(performance.now() - before)}`);
-    return token;
+    return result;
   }
 
   /**
@@ -394,7 +431,7 @@ export class ScoreSaberApiService {
   ) {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up players on page "${page}"...`);
-    const response = await ScoreSaberApiService.fetch<ScoreSaberV2PlayersPageToken>(
+    const result = await ScoreSaberApiService.fetch<ScoreSaberV2PlayersPageToken>(
       LOOKUP_PLAYERS_V2_ENDPOINT,
       {
         searchParams: {
@@ -407,13 +444,14 @@ export class ScoreSaberApiService {
         skipCache: options?.skipCache,
       }
     );
-    if (response === undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
+    const response = result.response;
     ScoreSaberApiService.log(
       `Found ${response.data.length} players in ${formatDuration(performance.now() - before)}`
     );
-    return response;
+    return result;
   }
 
   /**
@@ -424,12 +462,13 @@ export class ScoreSaberApiService {
   public static async lookupActivePlayerCount() {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up active player count...`);
-    const response = await ScoreSaberApiService.fetch<{ count: number }>(LOOKUP_ACTIVE_PLAYER_COUNT);
-    if (response === undefined) {
-      return undefined;
+    const result = await ScoreSaberApiService.fetch<{ count: number }>(LOOKUP_ACTIVE_PLAYER_COUNT);
+    if (!result.ok) {
+      return result;
     }
+    const response = result.response;
     ScoreSaberApiService.log(`Found active player count in ${formatDuration(performance.now() - before)}`);
-    return response.count;
+    return { ok: true, status: result.status, response: response.count } satisfies RequestResult<number>;
   }
 
   /**
@@ -462,18 +501,19 @@ export class ScoreSaberApiService {
     ScoreSaberApiService.log(
       `Looking up scores for player "${playerId}", sort "${sort}", page "${page}"${search ? `, search "${search}"` : ""}...`
     );
-    const response = await ScoreSaberApiService.fetch<ScoreSaberPlayerScoresPageToken>(
+    const result = await ScoreSaberApiService.fetch<ScoreSaberPlayerScoresPageToken>(
       fillEndpoint(LOOKUP_PLAYER_SCORES_ENDPOINT, { id: playerId, limit, sort, page }) +
         (search ? `&search=${encodeURIComponent(search)}` : ""),
       { skipCache }
     );
-    if (response === undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
+    const response = result.response;
     ScoreSaberApiService.log(
       `Found ${response.playerScores.length} scores for player "${playerId}" in ${formatDuration(performance.now() - before)}`
     );
-    return response;
+    return result;
   }
 
   /**
@@ -484,16 +524,16 @@ export class ScoreSaberApiService {
   public static async lookupLeaderboard(leaderboardId: string | number) {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up leaderboard "${leaderboardId}"...`);
-    const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardToken>(
+    const result = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardToken>(
       fillEndpoint(LOOKUP_LEADERBOARD_ENDPOINT, { id: leaderboardId })
     );
-    if (response === undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
     ScoreSaberApiService.log(
       `Found leaderboard "${leaderboardId}" in ${formatDuration(performance.now() - before)}`
     );
-    return response;
+    return result;
   }
 
   /**
@@ -508,16 +548,16 @@ export class ScoreSaberApiService {
     ScoreSaberApiService.log(
       `Looking up leaderboard by hash for "${hash}", difficulty "${difficulty}", gamemode "${gameMode}"...`
     );
-    const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardToken>(
+    const result = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardToken>(
       fillEndpoint(LOOKUP_LEADERBOARD_BY_HASH_ENDPOINT, { query: hash, difficulty, gameMode })
     );
-    if (response === undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
     ScoreSaberApiService.log(
       `Found leaderboard by hash for "${hash}", difficulty "${difficulty}", gamemode "${gameMode}" in ${formatDuration(performance.now() - before)}`
     );
-    return response;
+    return result;
   }
 
   /**
@@ -543,7 +583,7 @@ export class ScoreSaberApiService {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up leaderboard page "${page}"...`);
 
-    const response = await ScoreSaberApiService.fetch<ScoreSaberV2LeaderboardsPageToken>(
+    const result = await ScoreSaberApiService.fetch<ScoreSaberV2LeaderboardsPageToken>(
       LOOKUP_LEADERBOARDS_V2_ENDPOINT,
       {
         searchParams: {
@@ -564,13 +604,14 @@ export class ScoreSaberApiService {
         },
       }
     );
-    if (response === undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
+    const response = result.response;
     ScoreSaberApiService.log(
       `Found ${response.data.length} leaderboards in ${formatDuration(performance.now() - before)}`
     );
-    return response;
+    return result;
   }
 
   /**
@@ -591,20 +632,21 @@ export class ScoreSaberApiService {
   ) {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up scores for leaderboard "${leaderboardId}", page "${page}"...`);
-    const response = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardScoresPageToken>(
+    const result = await ScoreSaberApiService.fetch<ScoreSaberLeaderboardScoresPageToken>(
       fillEndpoint(LOOKUP_LEADERBOARD_SCORES_ENDPOINT, { id: leaderboardId, page }) +
         (options?.country ? `&countries=${encodeURIComponent(options.country)}` : ""),
       { skipCache: options?.skipCache }
     );
 
-    if (response === undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
+    const response = result.response;
 
     ScoreSaberApiService.log(
       `Found ${response.scores.length} scores for leaderboard "${leaderboardId}", page "${page}" in ${formatDuration(performance.now() - before)}`
     );
-    return response;
+    return result;
   }
 
   /**
@@ -620,7 +662,7 @@ export class ScoreSaberApiService {
     ScoreSaberApiService.log(
       `Looking up realm "${realmId}" scores for leaderboard "${leaderboardId}", page "${page}"...`
     );
-    const response = await ScoreSaberApiService.fetch<ScoreSaberV2LeaderboardScoresPageToken>(
+    const result = await ScoreSaberApiService.fetch<ScoreSaberV2LeaderboardScoresPageToken>(
       LOOKUP_LEADERBOARD_SCORES_V2_ENDPOINT.replace(":id", leaderboardId.toString()),
       {
         searchParams: {
@@ -631,13 +673,14 @@ export class ScoreSaberApiService {
         skipCache: true,
       }
     );
-    if (response === undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
+    const response = result.response;
     ScoreSaberApiService.log(
       `Found ${response.data.length} realm "${realmId}" scores for leaderboard "${leaderboardId}" in ${formatDuration(performance.now() - before)}`
     );
-    return response;
+    return result;
   }
 
   /**
@@ -648,14 +691,15 @@ export class ScoreSaberApiService {
   public static async lookupRealms() {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up realms...`);
-    const response = await ScoreSaberApiService.fetch<ScoreSaberV2RealmToken[]>(LOOKUP_REALMS_V2_ENDPOINT);
-    if (response === undefined) {
-      return undefined;
+    const result = await ScoreSaberApiService.fetch<ScoreSaberV2RealmToken[]>(LOOKUP_REALMS_V2_ENDPOINT);
+    if (!result.ok) {
+      return result;
     }
+    const response = result.response;
     ScoreSaberApiService.log(
       `Found ${response.length} realms in ${formatDuration(performance.now() - before)}`
     );
-    return response;
+    return result;
   }
 
   /**
@@ -667,16 +711,16 @@ export class ScoreSaberApiService {
   public static async lookupRealmPpCurve(realmId: number) {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up pp curve for realm "${realmId}"...`);
-    const response = await ScoreSaberApiService.fetch<ScoreSaberV2RealmPpCurveToken>(
+    const result = await ScoreSaberApiService.fetch<ScoreSaberV2RealmPpCurveToken>(
       LOOKUP_REALM_PP_CURVE_V2_ENDPOINT.replace(":id", realmId.toString())
     );
-    if (response === undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
     ScoreSaberApiService.log(
       `Found pp curve for realm "${realmId}" in ${formatDuration(performance.now() - before)}`
     );
-    return response;
+    return result;
   }
 
   /**
@@ -688,26 +732,33 @@ export class ScoreSaberApiService {
     const before = performance.now();
     ScoreSaberApiService.log(`Looking up ranking requests...`);
 
-    const [nextInQueueResponse, openRankUnrankResponse] = await Promise.all([
+    const [nextInQueue, openRankUnrank] = await Promise.all([
       ScoreSaberApiService.fetch<RankingRequestToken[]>(RANKING_REQUESTS_ENDPOINT.replace(":query", "top")),
       ScoreSaberApiService.fetch<RankingRequestToken[]>(
         RANKING_REQUESTS_ENDPOINT.replace(":query", "belowTop")
       ),
     ]);
 
-    const response = nextInQueueResponse?.concat(openRankUnrankResponse || []);
-    if (response === undefined) {
-      return undefined;
+    if (!nextInQueue.ok) {
+      return nextInQueue;
+    }
+    if (!openRankUnrank.ok) {
+      return openRankUnrank;
     }
 
+    const all = nextInQueue.response.concat(openRankUnrank.response);
     ScoreSaberApiService.log(
-      `Found ${response.length} ranking requests in ${formatDuration(performance.now() - before)}`
+      `Found ${all.length} ranking requests in ${formatDuration(performance.now() - before)}`
     );
     return {
-      nextInQueue: nextInQueueResponse || [],
-      openRankUnrank: openRankUnrankResponse || [],
-      all: response || [],
-    };
+      ok: true,
+      status: nextInQueue.status,
+      response: { nextInQueue: nextInQueue.response, openRankUnrank: openRankUnrank.response, all },
+    } satisfies RequestResult<{
+      nextInQueue: RankingRequestToken[];
+      openRankUnrank: RankingRequestToken[];
+      all: RankingRequestToken[];
+    }>;
   }
 
   /**
@@ -717,10 +768,7 @@ export class ScoreSaberApiService {
    * @returns the result of the refresh
    */
   public static async refreshPlayer(id: string) {
-    const result = await ScoreSaberApiService.fetch<PlayerRefreshResponse>(
-      fillEndpoint(REFRESH_PLAYER_ENDPOINT, { id })
-    );
-    return result;
+    return ScoreSaberApiService.fetch<PlayerRefreshResponse>(fillEndpoint(REFRESH_PLAYER_ENDPOINT, { id }));
   }
 
   /**
@@ -746,16 +794,17 @@ export class ScoreSaberApiService {
     let page = 1;
 
     while (hasMorePages) {
-      const response = await ScoreSaberApiService.lookupLeaderboards(page, {
+      const result = await ScoreSaberApiService.lookupLeaderboards(page, {
         status: status === "ranked" ? "RANKED" : "QUALIFIED",
         limit: 100,
         realmId,
       });
-      if (!response) {
+      if (!result.ok) {
         complete = false;
         hasMorePages = false;
         continue;
       }
+      const response = result.response;
 
       expectedTotal ??= response.metadata.totalItems;
       const totalPages = Math.ceil(response.metadata.totalItems / response.metadata.itemsPerPage);

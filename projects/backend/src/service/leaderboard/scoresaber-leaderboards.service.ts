@@ -87,12 +87,17 @@ export class ScoreSaberLeaderboardsService {
       getScoreSaberDifficultyFromDifficulty(difficulty),
       characteristic
     );
-    if (leaderboardToken == undefined) {
-      throw new NotFoundError(
-        `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
+    if (!leaderboardToken.ok) {
+      if (leaderboardToken.error === "not_found") {
+        throw new NotFoundError(
+          `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
+        );
+      }
+      throw new Error(
+        `Unable to fetch leaderboard for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}": ${leaderboardToken.message}`
       );
     }
-    const foundLeaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+    const foundLeaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken.response);
 
     await ScoreSaberLeaderboardsService.saveLeaderboard(foundLeaderboard.id, foundLeaderboard);
     (QueueManager.getQueue(QueueId.LeaderboardScoreSeedQueue) as LeaderboardScoreSeedQueue).add({
@@ -167,10 +172,13 @@ export class ScoreSaberLeaderboardsService {
       leaderboard = getScoreSaberLeaderboardFromV2PageToken(token);
     } else {
       const leaderboardToken = await ScoreSaberApiService.lookupLeaderboard(id);
-      if (leaderboardToken == undefined) {
-        throw new NotFoundError(`Leaderboard not found for "${id}"`);
+      if (!leaderboardToken.ok) {
+        if (leaderboardToken.error === "not_found") {
+          throw new NotFoundError(`Leaderboard not found for "${id}"`);
+        }
+        throw new Error(`Unable to fetch leaderboard "${id}": ${leaderboardToken.message}`);
       }
-      leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken);
+      leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken.response);
     }
 
     await ScoreSaberLeaderboardsService.saveLeaderboard(id, leaderboard);
@@ -234,14 +242,20 @@ export class ScoreSaberLeaderboardsService {
       CacheId.SCORESABER_RANKING_QUEUE_LEADERBOARDS,
       rankingQueueLeaderboardsCacheKey,
       async () => {
-        const rankingQueueTokens = await ScoreSaberApiService.lookupRankingRequests();
-        if (!rankingQueueTokens) {
+        const rankingQueueResult = await ScoreSaberApiService.lookupRankingRequests();
+        if (!rankingQueueResult.ok) {
+          if (rankingQueueResult.error !== "not_found") {
+            ScoreSaberLeaderboardsService.logger.warn(
+              `Unable to fetch the ranking queue: ${rankingQueueResult.message}`
+            );
+          }
           return {
             nextInQueue: [],
             openRankUnrank: [],
             all: [],
           };
         }
+        const rankingQueueTokens = rankingQueueResult.response;
 
         function parseLeaderboard(token: RankingRequestToken) {
           const leaderboard = getScoreSaberLeaderboardFromToken(token.leaderboardInfo);

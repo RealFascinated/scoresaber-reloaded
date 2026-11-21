@@ -68,7 +68,14 @@ async function searchPlayerCandidates(query: string) {
     ScoreSaberApiService.searchPlayers(normalizedQuery),
     ScoreSaberAccountsRepository.searchIdsByNameIlike(pattern, MAX_TOOL_ROWS),
   ]);
-  const tokens = scoreSaberResponse?.data ?? [];
+  if (!scoreSaberResponse.ok) {
+    throw new ChatToolError(
+      "unavailable",
+      scoreSaberResponse.message,
+      "This may be temporary: retry once, and if it fails again tell the user instead of retrying further."
+    );
+  }
+  const tokens = scoreSaberResponse.response.data;
   const tokenById = new Map(tokens.map(token => [token.id, token]));
   const candidateIds = [
     ...new Set(localMatches.map(match => match.id).concat(tokens.map(token => token.id))),
@@ -292,10 +299,18 @@ export function createPlayerTools(context: ChatToolContext) {
           if (!resolved.ok) {
             throw new ChatToolError(resolved.code, resolved.error);
           }
-          const player = await ScoreSaberApiService.lookupPlayer(resolved.playerId, context.realmId);
-          if (!player) {
-            throw playerNotFound(resolved.playerId);
+          const playerResult = await ScoreSaberApiService.lookupPlayer(resolved.playerId, context.realmId);
+          if (!playerResult.ok) {
+            if (playerResult.error === "not_found") {
+              throw playerNotFound(resolved.playerId);
+            }
+            throw new ChatToolError(
+              "unavailable",
+              playerResult.message,
+              "This may be temporary: retry once, and if it fails again tell the user instead of retrying further."
+            );
           }
+          const player = playerResult.response;
           const days = input.days ?? 14;
           const statistics = await PlayerStatisticsService.getStatistics(player, context.realmId);
           const history = await PlayerHistoryService.getPlayerStatisticHistories(

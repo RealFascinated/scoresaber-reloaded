@@ -19,41 +19,35 @@ export class BeatSaverService extends ApiService {
     });
   }
 
-  async lookupMap(hash: string): Promise<BeatSaverMapToken | undefined> {
+  async lookupMap(hash: string) {
     const before = performance.now();
     this.log(`Looking up map "${hash}"...`);
 
-    const response = await this.fetch<BeatSaverMapToken>(LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", hash));
-    if (response == undefined) {
-      return undefined;
+    const result = await this.fetch<BeatSaverMapToken>(LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", hash));
+    if (result.ok) {
+      this.log(`Found map "${result.response.id}" in ${(performance.now() - before).toFixed(0)}ms`);
     }
-
-    this.log(`Found map "${response.id}" in ${(performance.now() - before).toFixed(0)}ms`);
-    return response;
+    return result;
   }
 
   /**
    * Looks up a map by hash, telling a map BeatSaver does not have (404) apart from a failed request.
    */
   async lookupMapResult(hash: string) {
-    const response = await this.fetchResponse(LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", hash));
-    if (response?.status === 404) {
+    const result = await this.fetch<BeatSaverMapToken>(LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", hash));
+    if (!result.ok) {
+      return result.error === "not_found" ? ({ status: "missing" } as const) : ({ status: "error" } as const);
+    }
+    if (!Array.isArray(result.response?.versions)) {
       return { status: "missing" } as const;
     }
-    if (!response?.ok) {
-      return { status: "error" } as const;
-    }
-    const map = (await response.json().catch(() => undefined)) as BeatSaverMapToken | undefined;
-    if (!map || !Array.isArray(map.versions)) {
-      return { status: "missing" } as const;
-    }
-    return { status: "found", map } as const;
+    return { status: "found", map: result.response } as const;
   }
 
   /**
    * Gets the map that match the query.
    */
-  async lookupMaps(hashes: string[]): Promise<BeatSaverMultiMapLookup | undefined> {
+  async lookupMaps(hashes: string[]) {
     if (hashes.length > 50) {
       throw new Error(`Cannot lookup more than 50 maps at once`);
     }
@@ -61,15 +55,15 @@ export class BeatSaverService extends ApiService {
     const before = performance.now();
     this.log(`Looking up maps "${hashes}"...`);
 
-    const response = await this.fetch<BeatSaverMultiMapLookup>(
+    const result = await this.fetch<BeatSaverMultiMapLookup>(
       LOOKUP_MAP_BY_HASH_ENDPOINT.replace(":query", hashes.join(","))
     );
-    if (response == undefined) {
-      return undefined;
+    if (result.ok) {
+      this.log(
+        `Found ${Object.entries(result.response).length} maps in ${(performance.now() - before).toFixed(0)}ms`
+      );
     }
-
-    this.log(`Found ${Object.entries(response).length} maps in ${(performance.now() - before).toFixed(0)}ms`);
-    return response;
+    return result;
   }
 
   /**
@@ -83,7 +77,7 @@ export class BeatSaverService extends ApiService {
       before?: Date;
       after?: Date;
     }
-  ): Promise<BeatSaverLatestMapsToken | undefined> {
+  ) {
     const before = performance.now();
     this.log(`Looking up latest maps...`);
 
@@ -93,7 +87,7 @@ export class BeatSaverService extends ApiService {
       return isoString.replace(/\.\d{3}Z$/, "+00:00");
     };
 
-    const response = await this.fetch<BeatSaverLatestMapsToken>(LOOKUP_LATEST_MAPS_ENDPOINT, {
+    const result = await this.fetch<BeatSaverLatestMapsToken>(LOOKUP_LATEST_MAPS_ENDPOINT, {
       searchParams: {
         ...(pageSize ? { pageSize: pageSize } : {}),
         ...(automapper ? { automapper: automapper } : {}),
@@ -102,11 +96,9 @@ export class BeatSaverService extends ApiService {
         ...(options?.after ? { after: formatDateForAPI(options.after) } : {}),
       },
     });
-    if (response == undefined) {
-      return undefined;
+    if (result.ok) {
+      this.log(`Found ${result.response.docs.length} maps in ${(performance.now() - before).toFixed(0)}ms`);
     }
-
-    this.log(`Found ${response.docs.length} maps in ${(performance.now() - before).toFixed(0)}ms`);
-    return response;
+    return result;
   }
 }

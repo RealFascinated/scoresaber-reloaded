@@ -62,8 +62,14 @@ export class BeatLeaderOverlayLiveService {
   public static getRatings(hash: string, difficulty: string, characteristic: string) {
     const key = `${hash.toLowerCase()}:${difficulty}:${characteristic}`;
     return this.ratings.get(key, async () => {
-      const response = await BeatLeaderApiService.lookupLeaderboardsByHash(hash);
-      const found = response?.leaderboards.find(
+      const result = await BeatLeaderApiService.lookupLeaderboardsByHash(hash);
+      if (!result.ok) {
+        if (result.error === "not_found") {
+          throw new NotFoundError(`BeatLeader leaderboards for "${hash}" not found: ${result.message}`);
+        }
+        throw new Error(`Failed to look up BeatLeader leaderboards for "${hash}": ${result.message}`);
+      }
+      const found = result.response.leaderboards.find(
         ({ difficulty: entry }) => entry.difficultyName === difficulty && entry.modeName === characteristic
       )?.difficulty;
       if (!found) {
@@ -92,8 +98,15 @@ export class BeatLeaderOverlayLiveService {
    */
   public static getPlayer(playerId: string) {
     return this.players.get(playerId, async () => {
-      const player = await BeatLeaderApiService.lookupPlayer(playerId);
-      if (!player || player.pp === undefined) {
+      const result = await BeatLeaderApiService.lookupPlayer(playerId);
+      if (!result.ok) {
+        if (result.error === "not_found") {
+          throw new NotFoundError(`BeatLeader player "${playerId}" not found: ${result.message}`);
+        }
+        throw new Error(`Failed to look up BeatLeader player "${playerId}": ${result.message}`);
+      }
+      const player = result.response;
+      if (player.pp === undefined) {
         throw new NotFoundError(`BeatLeader player "${playerId}" not found`);
       }
       return { pp: player.pp, rank: player.rank ?? 0, countryRank: player.countryRank ?? 0 };

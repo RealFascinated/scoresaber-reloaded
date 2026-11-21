@@ -1,3 +1,4 @@
+import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination } from "@ssr/common/pagination";
 import ScoreSaberPlayer from "@ssr/common/player/impl/scoresaber-player";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
@@ -6,6 +7,8 @@ import { ScoreSaberApiService } from "../external/scoresaber-api.service";
 import ScoreSaberPlayerService from "./scoresaber-player.service";
 
 export class PlayerSearchService {
+  private static readonly logger: ScopedLogger = Logger.withTopic("Player Search");
+
   /**
    * Searches for players by name.
    *
@@ -26,10 +29,15 @@ export class PlayerSearchService {
       normalizedQuery.length > 0 ? ScoreSaberAccountsRepository.searchIdsByNameIlike(pattern, 20) : [],
     ]);
 
-    const scoreSaberPlayerTokens = scoreSaberResponse?.data;
-    const scoreSaberPlayerTokenMap = new Map((scoreSaberPlayerTokens ?? []).map(token => [token.id, token]));
+    if (!scoreSaberResponse.ok) {
+      PlayerSearchService.logger.warn(
+        `Failed to search ScoreSaber players for "${normalizedQuery}": ${scoreSaberResponse.message}`
+      );
+    }
+    const scoreSaberPlayerTokens = scoreSaberResponse.ok ? scoreSaberResponse.response.data : [];
+    const scoreSaberPlayerTokenMap = new Map(scoreSaberPlayerTokens.map(token => [token.id, token]));
     const uniquePlayerIds = [
-      ...new Set(localMatches.map(p => p.id).concat(scoreSaberPlayerTokens?.map(token => token.id) ?? [])),
+      ...new Set(localMatches.map(p => p.id).concat(scoreSaberPlayerTokens.map(token => token.id))),
     ];
     return (
       await Promise.all(
@@ -69,17 +77,19 @@ export class PlayerSearchService {
       return Pagination.empty<ScoreSaberPlayer>();
     }
 
-    const foundPlayers = await ScoreSaberApiService.lookupPlayers(page, {
+    const result = await ScoreSaberApiService.lookupPlayers(page, {
       country,
       search,
       includeInactives,
       realmId,
     });
 
-    if (!foundPlayers) {
+    if (!result.ok) {
+      PlayerSearchService.logger.warn(`Failed to fetch player rankings page "${page}": ${result.message}`);
       return Pagination.empty<ScoreSaberPlayer>();
     }
 
+    const foundPlayers = result.response;
     const tokens = foundPlayers.data;
     const players = await ScoreSaberPlayerService.getPlayersFromTokens(tokens, realmId);
     const items = players.map((player, index) => ({

@@ -14,6 +14,7 @@ import type { ScoreSaberLeaderboardScoresPageToken } from "@ssr/common/schemas/s
 import type { ScoreSaberPlayerScoresPageToken } from "@ssr/common/schemas/scoresaber/tokens/v1/player-scores-page";
 import type { ScoreSaberScoreToken } from "@ssr/common/schemas/scoresaber/tokens/v1/score";
 import type { ScoreSaberV2PlayerToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
+import { type RequestResult, requestFailure } from "@ssr/common/utils/request-result";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { Pool } from "pg";
 import BeatSaverService from "../../src/service/external/beatsaver.service";
@@ -275,15 +276,25 @@ async function prepareStubs(): Promise<void> {
   };
 }
 
+function okResult<T>(response: T): RequestResult<T> {
+  return { ok: true, status: 200, response };
+}
+
 function installStubs(): void {
-  ScoreSaberApiService.lookupPlayer = async playerId => playerTokens.get(playerId);
+  ScoreSaberApiService.lookupPlayer = async playerId => {
+    const token = playerTokens.get(playerId);
+    if (token === undefined) {
+      return requestFailure("not_found", 404, `Player "${playerId}" was not found`);
+    }
+    return okResult(token);
+  };
   ScoreSaberApiService.lookupPlayers = async (page, options) => {
     const all = playerPages.get("all") ?? [];
     const filtered = options?.country ? all.filter(p => p.country === options.country) : all;
     const search = options?.search?.toLowerCase();
     const matched = search ? filtered.filter(p => p.name.toLowerCase().includes(search)) : filtered;
     const slice = matched.slice((page - 1) * 50, page * 50);
-    return {
+    return okResult({
       data: slice.map(token => ({
         id: token.id,
         name: token.name,
@@ -304,11 +315,23 @@ function installStubs(): void {
         totalItems: matched.length,
         totalPages: Math.ceil(matched.length / 50),
       },
-    } as never;
+    } as never);
   };
-  ScoreSaberApiService.lookupPlayerScores = async ({ playerId }) => playerScorePages.get(playerId);
-  ScoreSaberApiService.lookupLeaderboardScores = async () => leaderboardScoresPage;
-  ScoreSaberApiService.lookupRankingRequests = async () => undefined;
+  ScoreSaberApiService.lookupPlayerScores = async ({ playerId }) => {
+    const page = playerScorePages.get(playerId);
+    if (page === undefined) {
+      return requestFailure("not_found", 404, `No scores found for player "${playerId}"`);
+    }
+    return okResult(page);
+  };
+  ScoreSaberApiService.lookupLeaderboardScores = async () => {
+    if (leaderboardScoresPage === undefined) {
+      return requestFailure("not_found", 404, "No leaderboard scores found");
+    }
+    return okResult(leaderboardScoresPage);
+  };
+  ScoreSaberApiService.lookupRankingRequests = async () =>
+    okResult({ nextInQueue: [], openRankUnrank: [], all: [] });
   BeatSaverService.getMap = async () => undefined;
 }
 

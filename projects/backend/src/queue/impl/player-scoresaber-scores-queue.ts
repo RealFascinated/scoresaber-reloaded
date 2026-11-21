@@ -24,11 +24,17 @@ export class FetchMissingScoresQueue extends Queue<QueueItem<string>> {
   protected async processItem(item: QueueItem<string>) {
     const { id: playerId } = item;
 
-    const playerToken = await ScoreSaberApiService.lookupPlayer(playerId, undefined, { fresh: true });
-    if (!playerToken) {
-      FetchMissingScoresQueue.logger.warn(`Player "${playerId}" not found on ScoreSaber`);
+    const lookup = await ScoreSaberApiService.lookupPlayer(playerId, undefined, { fresh: true });
+    if (!lookup.ok) {
+      if (lookup.error === "not_found") {
+        FetchMissingScoresQueue.logger.warn(`Player "${playerId}" not found on ScoreSaber, marking inactive`);
+        await ScoreSaberAccountsRepository.updateAccount(playerId, { inactive: true, seededScores: true });
+        return;
+      }
+      FetchMissingScoresQueue.logger.warn(`Failed to look up player "${playerId}": ${lookup.message}`);
       return;
     }
+    const playerToken = lookup.response;
 
     const account = await PlayerCoreService.getOrCreateAccount(playerId, playerToken);
     const { totalScores, missingScores, totalPagesFetched, timeTaken } =

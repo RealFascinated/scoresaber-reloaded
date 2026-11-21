@@ -257,7 +257,14 @@ export default class BeatLeaderService {
     if (await BeatLeaderScoresRepository.findRowById(scoreId)) {
       return this.saveScoreStats(scoreId);
     }
-    return BeatLeaderApiService.lookupScoreStats(scoreId);
+    const result = await BeatLeaderApiService.lookupScoreStats(scoreId);
+    if (result.ok) {
+      return result.response;
+    }
+    if (result.error === "not_found") {
+      return undefined;
+    }
+    throw new Error(`Failed to fetch BeatLeader score stats for score ${scoreId}: ${result.message}`);
   }
 
   /**
@@ -267,16 +274,19 @@ export default class BeatLeaderService {
    * @returns the score stats, or undefined if nothing was found
    */
   public static async saveScoreStats(scoreId: number) {
-    const scoreStats = await BeatLeaderApiService.lookupScoreStats(scoreId);
-    if (scoreStats == undefined) {
-      return undefined;
+    const result = await BeatLeaderApiService.lookupScoreStats(scoreId);
+    if (!result.ok) {
+      if (result.error === "not_found") {
+        return undefined;
+      }
+      throw new Error(`Failed to fetch BeatLeader score stats for score ${scoreId}: ${result.message}`);
     }
     await StorageService.saveFile(
       StorageBucket.BeatLeaderScoreStats,
       `${scoreId}.json`,
-      Buffer.from(JSON.stringify(scoreStats))
+      Buffer.from(JSON.stringify(result.response))
     );
-    return scoreStats;
+    return result.response;
   }
 
   /**
@@ -340,12 +350,15 @@ export default class BeatLeaderService {
           returns: "arraybuffer",
         });
 
-        if (replay !== undefined) {
+        if (replay.ok) {
           return await StorageService.saveFile(
             StorageBucket.BeatLeaderReplays,
             `${replayId}`,
-            Buffer.from(replay)
+            Buffer.from(replay.response)
           );
+        }
+        if (replay.error !== "not_found") {
+          throw new Error(`Unable to fetch replay for ${beatLeaderScore.scoreId}: ${replay.message}`);
         }
       } catch (error) {
         sendEmbedToChannel(
@@ -376,9 +389,14 @@ export default class BeatLeaderService {
       return cached;
     }
 
-    const token = await BeatLeaderApiService.lookupPlayer(blPlayerId);
-    if (token) {
-      return BeatLeaderPlayersRepository.upsert(BeatLeaderService.playerRowFromToken(token));
+    const result = await BeatLeaderApiService.lookupPlayer(blPlayerId);
+    if (result.ok) {
+      return BeatLeaderPlayersRepository.upsert(BeatLeaderService.playerRowFromToken(result.response));
+    }
+    if (result.error !== "not_found") {
+      BeatLeaderService.logger.warn(
+        `Failed to refresh BeatLeader player "${blPlayerId}", using the cached mapping: ${result.message}`
+      );
     }
     return cached;
   }
@@ -392,11 +410,14 @@ export default class BeatLeaderService {
    * @returns the cached player mapping, or undefined if the player is not on BeatLeader
    */
   public static async upsertBeatLeaderPlayer(playerId: string) {
-    const token = await BeatLeaderApiService.lookupPlayer(playerId);
-    if (!token) {
-      return undefined;
+    const result = await BeatLeaderApiService.lookupPlayer(playerId);
+    if (!result.ok) {
+      if (result.error === "not_found") {
+        return undefined;
+      }
+      throw new Error(`Failed to look up BeatLeader player "${playerId}": ${result.message}`);
     }
-    return BeatLeaderPlayersRepository.upsert(BeatLeaderService.playerRowFromToken(token));
+    return BeatLeaderPlayersRepository.upsert(BeatLeaderService.playerRowFromToken(result.response));
   }
 
   /**
@@ -412,10 +433,14 @@ export default class BeatLeaderService {
    * @returns the persisted mapping when the player is tracked, or undefined
    */
   public static async fetchMappingIfTracked(blPlayerId: string) {
-    const token = await BeatLeaderApiService.lookupPlayer(blPlayerId);
-    if (!token) {
-      return undefined;
+    const result = await BeatLeaderApiService.lookupPlayer(blPlayerId);
+    if (!result.ok) {
+      if (result.error === "not_found") {
+        return undefined;
+      }
+      throw new Error(`Failed to look up BeatLeader player "${blPlayerId}": ${result.message}`);
     }
+    const token = result.response;
     const linkedIds = [
       token.id,
       ...(token.linkedIds

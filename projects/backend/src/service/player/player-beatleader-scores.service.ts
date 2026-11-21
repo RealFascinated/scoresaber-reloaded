@@ -52,7 +52,7 @@ export class PlayerBeatLeaderScoresService {
     const result = PlayerBeatLeaderScoresService.emptyResult();
 
     async function getScoresPage(page: number) {
-      return BeatLeaderApiService.requestPlayerScoresPage(playerId, page, {
+      return BeatLeaderApiService.lookupPlayerScoresPage(playerId, page, {
         count: 100,
         sortBy: "date",
         order: "desc",
@@ -102,15 +102,22 @@ export class PlayerBeatLeaderScoresService {
 
     while (true) {
       const pageResult = await getScoresPage(currentPage);
-      if (pageResult == undefined || pageResult.page == undefined) {
-        if (pageResult?.status === 404) {
+      if (!pageResult.ok) {
+        if (pageResult.error === "not_found") {
           completed = true;
+        } else {
+          PlayerBeatLeaderScoresService.logger.warn(
+            `Failed to fetch BeatLeader scores page %s for "%s": %s`,
+            currentPage,
+            playerId,
+            pageResult.message
+          );
         }
         break;
       }
 
       pagesFetched++;
-      const scoresPage = pageResult.page;
+      const scoresPage = pageResult.response;
       const scores = scoresPage.data ?? [];
       if (scores.length === 0) {
         completed = true;

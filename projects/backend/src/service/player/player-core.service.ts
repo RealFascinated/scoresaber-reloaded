@@ -78,12 +78,18 @@ export class PlayerCoreService {
     let account = await ScoreSaberAccountsRepository.findRowById(id);
 
     if (!account) {
-      const fullToken =
-        playerToken && isScoreSaberV2PlayerToken(playerToken)
-          ? playerToken
-          : await ScoreSaberApiService.lookupPlayer(id);
-      if (!fullToken) {
-        throw new NotFoundError(`Player "${id}" not found`);
+      let fullToken: ScoreSaberV2PlayerToken;
+      if (playerToken && isScoreSaberV2PlayerToken(playerToken)) {
+        fullToken = playerToken;
+      } else {
+        const result = await ScoreSaberApiService.lookupPlayer(id);
+        if (!result.ok) {
+          if (result.error === "not_found") {
+            throw new NotFoundError(`Player "${id}" not found`);
+          }
+          throw new InternalServerError(`Failed to look up player "${id}": ${result.message}`);
+        }
+        fullToken = result.response;
       }
       const created = await PlayerCoreService.createPlayer(id, fullToken);
       if (!created) {
@@ -136,9 +142,16 @@ export class PlayerCoreService {
             return scoreSaberAccountRowToType(existingRow);
           }
 
-          const token = playerToken || (await ScoreSaberApiService.lookupPlayer(id));
+          let token = playerToken;
           if (!token) {
-            return undefined;
+            const result = await ScoreSaberApiService.lookupPlayer(id);
+            if (!result.ok) {
+              PlayerCoreService.logger.warn(
+                `Failed to look up player "${id}" for creation: ${result.message}`
+              );
+              return undefined;
+            }
+            token = result.response;
           }
 
           try {
@@ -282,12 +295,13 @@ export class PlayerCoreService {
    * @returns the player document if found
    */
   public static async refreshPlayer(id: string) {
-    const response = await ScoreSaberApiService.refreshPlayer(id);
-    if (response !== undefined) {
-      await PlayerCoreService.invalidatePlayerCaches(id);
-      return response;
+    const result = await ScoreSaberApiService.refreshPlayer(id);
+    if (!result.ok) {
+      PlayerCoreService.logger.warn(`Failed to refresh player "${id}": ${result.message}`);
+      return { result: false };
     }
-    return { result: false };
+    await PlayerCoreService.invalidatePlayerCaches(id);
+    return result.response;
   }
 
   /**

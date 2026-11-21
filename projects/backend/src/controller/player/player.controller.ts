@@ -1,3 +1,4 @@
+import { InternalServerError } from "@ssr/common/error/internal-server-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import {
@@ -127,10 +128,14 @@ export default function playerController(app: Elysia) {
           },
         },
         async ({ params: { playerId }, query: { count, realmId = DEFAULT_REALM_ID } }) => {
-          const player = await ScoreSaberApiService.lookupPlayer(playerId, realmId);
-          if (!player) {
-            throw new NotFoundError(`Player "${playerId}" not found`);
+          const result = await ScoreSaberApiService.lookupPlayer(playerId, realmId);
+          if (!result.ok) {
+            if (result.error === "not_found") {
+              throw new NotFoundError(`Player "${playerId}" not found`);
+            }
+            throw new InternalServerError(`Failed to look up player "${playerId}": ${result.message}`);
           }
+          const player = result.response;
           const statistics = await PlayerStatisticsService.getStatistics(player, realmId);
           return await PlayerHistoryService.getPlayerStatisticHistories(
             player,

@@ -41,15 +41,15 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
     let fullySeeded = true;
 
     while (scrape) {
-      const response = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page, {
+      const result = await ScoreSaberApiService.lookupLeaderboardScores(leaderboardId, page, {
         skipCache: true,
       });
-      if (!response) {
+      if (!result.ok) {
         consecutiveFailures++;
         if (consecutiveFailures >= 2) {
           if (lastSeenTotalPages !== undefined && page < lastSeenTotalPages) {
             LeaderboardScoreSeedQueue.logger.warn(
-              `Failed to fetch page ${page} for leaderboard "${leaderboardId}" after 2 attempts; skipping this page and continuing (leaderboard may be incompletely seeded)`
+              `Failed to fetch page ${page} for leaderboard "${leaderboardId}" after 2 attempts; skipping this page and continuing (leaderboard may be incompletely seeded): ${result.message}`
             );
             consecutiveFailures = 0;
             fullySeeded = false;
@@ -57,16 +57,17 @@ export class LeaderboardScoreSeedQueue extends Queue<QueueItem<number>> {
             continue;
           }
           LeaderboardScoreSeedQueue.logger.warn(
-            `Aborting leaderboard "${leaderboardId}" after 2 consecutive page failures (page ${page}${lastSeenTotalPages !== undefined ? ` of ${lastSeenTotalPages}` : ""})`
+            `Aborting leaderboard "${leaderboardId}" after 2 consecutive page failures (page ${page}${lastSeenTotalPages !== undefined ? ` of ${lastSeenTotalPages}` : ""}): ${result.message}`
           );
           fullySeeded = false;
           break;
         }
         LeaderboardScoreSeedQueue.logger.warn(
-          `Tried to get page ${page} for leaderboard "${leaderboardId}" and failed`
+          `Tried to get page ${page} for leaderboard "${leaderboardId}" and failed: ${result.message}`
         );
         continue;
       }
+      const response = result.response;
 
       const totalPages = Math.ceil(response.metadata.total / Math.max(1, response.metadata.itemsPerPage));
       lastSeenTotalPages = totalPages;

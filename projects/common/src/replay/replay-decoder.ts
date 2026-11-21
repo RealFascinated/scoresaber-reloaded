@@ -199,12 +199,15 @@ export class ReplayDecoder {
       const scoreId = Number(url);
       const beatleaderScore = await request.get<BeatLeaderScoreToken>(
         `https://api.beatleader.com/score/${scoreId}`,
-        { returns: "json", throwOnError: true }
+        { returns: "json" }
       );
-      if (!beatleaderScore?.replay) {
+      if (!beatleaderScore.ok) {
+        throw new InternalServerError(`Failed to load score ${scoreId}: ${beatleaderScore.message}`);
+      }
+      if (!beatleaderScore.response.replay) {
         throw new InternalServerError("No replay found for score");
       }
-      targetUrl = beatleaderScore.replay;
+      targetUrl = beatleaderScore.response.replay;
     }
 
     const filename = targetUrl.split("?")[0];
@@ -218,15 +221,14 @@ export class ReplayDecoder {
     );
 
     try {
-      const data = await request.get(processedUrl, {
+      const data = await request.get<ArrayBuffer>(processedUrl, {
         returns: "arraybuffer",
-        throwOnError: true,
       });
 
-      if (!data) {
-        throw new InternalServerError("No data received");
+      if (!data.ok) {
+        throw new InternalServerError(data.message);
       }
-      return this.decode(data as ArrayBuffer);
+      return this.decode(data.response);
     } catch (error) {
       throw new InternalServerError(
         `Failed to download: ${error instanceof Error ? error.message : "Network error"}`

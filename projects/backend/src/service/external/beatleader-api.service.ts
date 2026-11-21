@@ -9,6 +9,12 @@ import {
   type BeatLeaderPlayerScoresPageToken,
 } from "@ssr/common/schemas/beatleader/tokens/score/page";
 import { checkSchema, parseCheckedSchema, parseSchema } from "@ssr/common/schemas/parse";
+import {
+  type RequestFailure,
+  type RequestResult,
+  requestFailure,
+  requestFailureFromStatus,
+} from "@ssr/common/utils/request-result";
 import { formatDuration } from "@ssr/common/utils/time-utils";
 import { getQueryParamsFromObject } from "@ssr/common/utils/utils";
 import { Value } from "typebox/value";
@@ -21,15 +27,6 @@ const LOOKUP_PLAYER_ENDPOINT = "https://api.beatleader.com/player/:playerId";
 const LOOKUP_LEADERBOARDS_BY_HASH_ENDPOINT = "https://api.beatleader.com/leaderboards/hash/:hash";
 const LOOKUP_PLAYER_SCORES_ENDPOINT = "https://api.beatleader.com/player/:playerId/scores";
 const beatLeaderApiLog = Logger.withTopic("BeatLeader API");
-
-/**
- * A player scores page request: the HTTP status BeatLeader answered with, plus the
- * parsed page when the response was a 200 this app could validate.
- */
-export type BeatLeaderPlayerScoresPageResult = {
-  status: number;
-  page: BeatLeaderPlayerScoresPageToken | undefined;
-};
 
 export class BeatLeaderApiService {
   public static totalRequests: number = 0;
@@ -71,26 +68,46 @@ export class BeatLeaderApiService {
     try {
       BeatLeaderApiService.totalRequests++;
 
+      let failure: RequestFailure = requestFailure(
+        "unreachable",
+        undefined,
+        "BeatLeader request was never attempted"
+      );
       for (let attempt = 1; attempt <= BeatLeaderApiService.MAX_ATTEMPTS; attempt++) {
         const result = await BeatLeaderApiService.requestOnce(url, options);
+        const canRetry = attempt < BeatLeaderApiService.MAX_ATTEMPTS;
 
         if (result == undefined) {
-          if (attempt < BeatLeaderApiService.MAX_ATTEMPTS) {
+          failure = requestFailure("unreachable", undefined, "BeatLeader request timed out or failed");
+          if (canRetry) {
             await backoff(attempt);
             continue;
           }
-          BeatLeaderApiService.failedRequests++;
-          return undefined;
+          break;
         }
 
-        if ((result.status === 429 || result.status >= 500) && attempt < BeatLeaderApiService.MAX_ATTEMPTS) {
+        if (result.status === 200) {
+          if (result.data === undefined) {
+            failure = requestFailure(
+              "invalid_response",
+              result.status,
+              "BeatLeader returned a non-JSON body"
+            );
+            break;
+          }
+          return { ok: true, status: result.status, response: result.data } satisfies RequestResult<unknown>;
+        }
+
+        failure = requestFailureFromStatus(result.status, "BeatLeader");
+        if ((result.status === 429 || result.status >= 500) && canRetry) {
           await backoff(attempt, result.retryAfterMs);
           continue;
         }
-        return result;
+        break;
       }
 
-      return undefined;
+      BeatLeaderApiService.failedRequests++;
+      return failure;
     } finally {
       BeatLeaderApiService.releaseRequestSlot();
     }
@@ -148,129 +165,126 @@ export class BeatLeaderApiService {
       useProxy?: boolean;
     }
   ) {
-    const result = await BeatLeaderApiService.request(url, options);
-    if (result == undefined) {
-      return undefined;
-    }
-    if (result.status !== 200) {
-      BeatLeaderApiService.failedRequests++;
-      return undefined;
-    }
-    return result.data as T;
+    return (await BeatLeaderApiService.request(url, options)) as RequestResult<T>;
   }
 
   public static async lookupScoreStats(scoreId: number) {
     const before = performance.now();
     BeatLeaderApiService.log(`Looking up scorestats for "${scoreId}"...`);
 
-    const response = await BeatLeaderApiService.fetch<ScoreStatsToken>(
+    const result = await BeatLeaderApiService.fetch<ScoreStatsToken>(
       LOOKUP_MAP_STATS_BY_SCORE_ID_ENDPOINT.replace(":scoreId", scoreId.toString()),
       {
         useProxy: false,
       }
     );
-    if (response == undefined) {
-      return undefined;
+    if (result.ok) {
+      BeatLeaderApiService.log(
+        `Found scorestats for score "${scoreId}" in ${formatDuration(performance.now() - before)}`
+      );
     }
-
-    BeatLeaderApiService.log(
-      `Found scorestats for score "${scoreId}" in ${formatDuration(performance.now() - before)}`
-    );
-    return response;
+    return result;
   }
 
   public static async lookupPlayersTotal() {
     const before = performance.now();
     BeatLeaderApiService.log("Looking up BeatLeader players total...");
 
-    const response = await BeatLeaderApiService.fetch<unknown>(LOOKUP_PLAYERS_ENDPOINT);
-    if (response == undefined) {
-      return undefined;
+    const result = await BeatLeaderApiService.fetch<unknown>(LOOKUP_PLAYERS_ENDPOINT);
+    if (!result.ok) {
+      return result;
     }
 
-    if (!checkSchema(BeatLeaderPlayersTotalSchema, response)) {
-      return undefined;
+    if (!checkSchema(BeatLeaderPlayersTotalSchema, result.response)) {
+      return requestFailure(
+        "invalid_response",
+        result.status,
+        `BeatLeader players total did not match the expected schema: ${Value.Errors(BeatLeaderPlayersTotalSchema, result.response)[0]?.message}`
+      );
     }
 
     BeatLeaderApiService.log(
       `Found BeatLeader players total in ${formatDuration(performance.now() - before)}`
     );
-    return parseSchema(BeatLeaderPlayersTotalSchema, response).metadata.total;
+    return {
+      ok: true,
+      status: result.status,
+      response: parseSchema(BeatLeaderPlayersTotalSchema, result.response).metadata.total,
+    } satisfies RequestResult<number>;
   }
 
   /**
    * Looks up a BeatLeader player by any of their known IDs (canonical BeatLeader ID,
-   * Steam ID, Oculus PC ID, Quest ID, ...). Returns `undefined` when the player does
-   * not exist on BeatLeader or the request fails.
+   * Steam ID, Oculus PC ID, Quest ID, ...).
    *
    * @param playerId the player ID to look up
-   * @returns the player with their linked account IDs, or undefined
+   * @returns the player with their linked account IDs, or the failure (`not_found` when the
+   *   player does not exist on BeatLeader)
    */
   public static async lookupPlayer(playerId: string) {
     const before = performance.now();
     BeatLeaderApiService.log(`Looking up BeatLeader player "${playerId}"...`);
 
-    const response = await BeatLeaderApiService.fetch<unknown>(
+    const result = await BeatLeaderApiService.fetch<unknown>(
       LOOKUP_PLAYER_ENDPOINT.replace(":playerId", playerId)
     );
-    if (response == undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
 
-    if (!checkSchema(BeatLeaderPlayerLookupSchema, response)) {
-      BeatLeaderApiService.log(
-        `Failed to parse BeatLeader player "${playerId}": ${Value.Errors(BeatLeaderPlayerLookupSchema, response)[0]?.message}`
+    if (!checkSchema(BeatLeaderPlayerLookupSchema, result.response)) {
+      return requestFailure(
+        "invalid_response",
+        result.status,
+        `Failed to parse BeatLeader player "${playerId}": ${Value.Errors(BeatLeaderPlayerLookupSchema, result.response)[0]?.message}`
       );
-      return undefined;
     }
 
-    const parsed = parseSchema(BeatLeaderPlayerLookupSchema, response);
+    const parsed = parseSchema(BeatLeaderPlayerLookupSchema, result.response);
     BeatLeaderApiService.log(
       `Found BeatLeader player "${parsed.name}" in ${formatDuration(performance.now() - before)}`
     );
-    return parsed;
+    return { ok: true, status: result.status, response: parsed } satisfies RequestResult<typeof parsed>;
   }
 
   /**
    * Looks up the leaderboards (one per difficulty) of a map by its hash.
    *
    * @param hash the hash of the map
-   * @returns the leaderboards, or undefined when the map is unknown to BeatLeader or the request fails
+   * @returns the leaderboards, or the failure (`not_found` when the map is unknown to BeatLeader)
    */
   public static async lookupLeaderboardsByHash(hash: string) {
     BeatLeaderApiService.log(`Looking up BeatLeader leaderboards for "${hash}"...`);
 
-    const response = await BeatLeaderApiService.fetch<unknown>(
+    const result = await BeatLeaderApiService.fetch<unknown>(
       LOOKUP_LEADERBOARDS_BY_HASH_ENDPOINT.replace(":hash", encodeURIComponent(hash))
     );
-    if (response == undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
 
-    if (!checkSchema(BeatLeaderLeaderboardsByHashSchema, response)) {
-      BeatLeaderApiService.log(
-        `Failed to parse BeatLeader leaderboards for "${hash}": ${Value.Errors(BeatLeaderLeaderboardsByHashSchema, response)[0]?.message}`
+    if (!checkSchema(BeatLeaderLeaderboardsByHashSchema, result.response)) {
+      return requestFailure(
+        "invalid_response",
+        result.status,
+        `Failed to parse BeatLeader leaderboards for "${hash}": ${Value.Errors(BeatLeaderLeaderboardsByHashSchema, result.response)[0]?.message}`
       );
-      return undefined;
     }
-    return parseSchema(BeatLeaderLeaderboardsByHashSchema, response);
+    const parsed = parseSchema(BeatLeaderLeaderboardsByHashSchema, result.response);
+    return { ok: true, status: result.status, response: parsed } satisfies RequestResult<typeof parsed>;
   }
 
   /**
-   * Fetches one page of a player's BeatLeader scores, keeping the HTTP status so the
-   * caller can tell a page that does not exist (404: the player has no scores, or the
-   * history ends here) from a failure worth retrying (429, 5xx, or a body this app
-   * cannot validate). Collapsing both into `undefined` left players without BeatLeader
-   * scores permanently unseeded, because "not found" could not be told apart from
-   * "try again later".
+   * Fetches one page of a player's BeatLeader scores. A page that does not exist (`not_found`: the
+   * player has no scores, or the history ends here) is told apart from a failure worth retrying
+   * (`rate_limited`, `server_error`, `unreachable`, or an `invalid_response` this app cannot validate).
    *
    * @param playerId the player ID to look up
    * @param page the page to fetch
    * @param options the query options
-   * @returns the status with the parsed page when it parsed, or `undefined` when no
-   *   HTTP response was received at all
+   * @returns the parsed page, or the failure
    */
-  public static async requestPlayerScoresPage(
+  public static async lookupPlayerScoresPage(
     playerId: string,
     page: number,
     options?: {
@@ -324,27 +338,28 @@ export class BeatLeaderApiService {
         },
       }
     );
-    if (result == undefined) {
-      return undefined;
+    if (!result.ok) {
+      return result;
     }
 
-    if (result.status !== 200) {
+    if (!checkSchema(BeatLeaderPlayerScoresPageSchema, result.response)) {
       BeatLeaderApiService.failedRequests++;
-      return { status: result.status, page: undefined };
-    }
-
-    if (!checkSchema(BeatLeaderPlayerScoresPageSchema, result.data)) {
-      BeatLeaderApiService.log(
-        `Failed to parse BeatLeader scores page ${page} for "${playerId}": ${Value.Errors(BeatLeaderPlayerScoresPageSchema, result.data)[0]?.message}`
+      return requestFailure(
+        "invalid_response",
+        result.status,
+        `Failed to parse BeatLeader scores page ${page} for "${playerId}": ${Value.Errors(BeatLeaderPlayerScoresPageSchema, result.response)[0]?.message}`
       );
-      return { status: result.status, page: undefined };
     }
 
-    const parsed = parseCheckedSchema(BeatLeaderPlayerScoresPageSchema, result.data);
+    const parsed = parseCheckedSchema(BeatLeaderPlayerScoresPageSchema, result.response);
     BeatLeaderApiService.log(
       `Found BeatLeader scores page ${page} for "${playerId}" in ${formatDuration(performance.now() - before)}`
     );
-    return { status: result.status, page: parsed };
+    return {
+      ok: true,
+      status: result.status,
+      response: parsed,
+    } satisfies RequestResult<BeatLeaderPlayerScoresPageToken>;
   }
 
   private static log(message: string) {

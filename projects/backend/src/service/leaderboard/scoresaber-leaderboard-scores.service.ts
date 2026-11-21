@@ -32,11 +32,17 @@ export class ScoreSaberLeaderboardScoresService {
     if (leaderboard == undefined) {
       throw new NotFoundError(`Leaderboard "${leaderboardId}" not found`);
     }
-    if (!leaderboardScores) {
-      throw new NotFoundError(`Leaderboard scores for leaderboard "${leaderboardId}" not found`);
+    if (!leaderboardScores.ok) {
+      if (leaderboardScores.error === "not_found") {
+        throw new NotFoundError(`Leaderboard scores for leaderboard "${leaderboardId}" not found`);
+      }
+      throw new Error(
+        `Failed to fetch scores for leaderboard "${leaderboardId}": ${leaderboardScores.message}`
+      );
     }
+    const scoresPage = leaderboardScores.response;
 
-    const defaultRealmScores = leaderboardScores.scores.map(token =>
+    const defaultRealmScores = scoresPage.scores.map(token =>
       getScoreSaberScoreFromToken(token, leaderboard, token.leaderboardPlayerInfo.id)
     );
 
@@ -76,7 +82,7 @@ export class ScoreSaberLeaderboardScoresService {
       )
     ).filter(score => score !== undefined) as ScoreSaberScore[];
 
-    const totalPages = Math.ceil(leaderboardScores.metadata.total / leaderboardScores.metadata.itemsPerPage);
+    const totalPages = Math.ceil(scoresPage.metadata.total / scoresPage.metadata.itemsPerPage);
 
     return {
       scores,
@@ -84,9 +90,9 @@ export class ScoreSaberLeaderboardScoresService {
       beatSaver: await beatSaverPromise,
       metadata: {
         totalPages,
-        totalItems: leaderboardScores.metadata.total,
-        page: leaderboardScores.metadata.page,
-        itemsPerPage: leaderboardScores.metadata.itemsPerPage,
+        totalItems: scoresPage.metadata.total,
+        page: scoresPage.metadata.page,
+        itemsPerPage: scoresPage.metadata.itemsPerPage,
       },
     };
   }

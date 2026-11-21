@@ -16,11 +16,14 @@ export class RealmService {
    */
   public static async getRealms() {
     return CacheService.fetch(CacheId.SCORESABER_REALMS, "realms", async () => {
-      const realms = await ScoreSaberApiService.lookupRealms();
-      if (realms === undefined) {
-        throw new NotFoundError("Unable to fetch realms from ScoreSaber");
+      const result = await ScoreSaberApiService.lookupRealms();
+      if (!result.ok) {
+        if (result.error === "not_found") {
+          throw new NotFoundError("Realms not found on ScoreSaber");
+        }
+        throw new Error(`Unable to fetch realms from ScoreSaber: ${result.message}`);
       }
-      return realms.sort((a, b) => a.id - b.id);
+      return result.response.sort((a, b) => a.id - b.id);
     });
   }
 
@@ -47,13 +50,16 @@ export class RealmService {
    */
   public static async getRealmPpCurve(realmId: number) {
     return CacheService.fetch(CacheId.SCORESABER_REALM_PP_CURVE, `realm:${realmId}:pp-curve`, async () => {
-      const curve = await ScoreSaberApiService.lookupRealmPpCurve(realmId);
-      if (curve === undefined) {
-        throw new NotFoundError(`Pp curve for realm "${realmId}" not found`);
+      const result = await ScoreSaberApiService.lookupRealmPpCurve(realmId);
+      if (!result.ok) {
+        if (result.error === "not_found") {
+          throw new NotFoundError(`Pp curve for realm "${realmId}" not found`);
+        }
+        throw new Error(`Unable to fetch pp curve for realm "${realmId}": ${result.message}`);
       }
       return {
-        curve: sortPpCurve(curve.curve),
-        positiveModifierCurve: sortPpCurve(curve.positiveModifierCurve),
+        curve: sortPpCurve(result.response.curve),
+        positiveModifierCurve: sortPpCurve(result.response.positiveModifierCurve),
       };
     });
   }

@@ -237,14 +237,17 @@ export class RankedBatchService {
     let totalPages = 1;
 
     do {
-      const response = await ScoreSaberApiService.lookupLeaderboardRealmScores(
+      const result = await ScoreSaberApiService.lookupLeaderboardRealmScores(
         leaderboardId,
         page,
         DEFAULT_REALM_ID
       );
-      if (response === undefined) {
-        throw new Error(`Unable to fetch scores of leaderboard "${leaderboardId}" (page ${page})`);
+      if (!result.ok) {
+        throw new Error(
+          `Unable to fetch scores of leaderboard "${leaderboardId}" (page ${page}): ${result.message}`
+        );
       }
+      const response = result.response;
       totalPages = response.metadata.totalPages;
 
       const ppAfterByScoreId = new Map(response.data.map(score => [score.id, score.pp]));

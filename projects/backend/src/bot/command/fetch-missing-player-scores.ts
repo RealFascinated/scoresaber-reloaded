@@ -51,10 +51,14 @@ export class FetchMissingPlayerScores {
         return;
       }
 
-      const playerToken = await ScoreSaberApiService.lookupPlayer(playerId);
-      if (!playerToken) {
-        throw new Error("Player not found");
+      const playerResult = await ScoreSaberApiService.lookupPlayer(playerId);
+      if (!playerResult.ok) {
+        if (playerResult.error === "not_found") {
+          throw new Error("Player not found");
+        }
+        throw new Error(`Failed to look up player: ${playerResult.message}`);
       }
+      const playerToken = playerResult.response;
 
       const account = await PlayerCoreService.getOrCreateAccount(playerId, playerToken);
       PlayerScoresService.fetchMissingPlayerScores(account, playerToken);

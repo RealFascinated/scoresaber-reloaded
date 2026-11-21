@@ -2,6 +2,7 @@ import { Cooldown, CooldownPriority } from "../cooldown";
 import Logger from "../logger";
 import { CLIENT_PROXY, SERVER_PROXIES } from "../shared-consts";
 import Request, { RequestOptions } from "../utils/request";
+import { type RequestResult, requestFailure } from "../utils/request-result";
 import { isServer } from "../utils/utils";
 import { ApiServiceName } from "./api-service-registry";
 
@@ -84,12 +85,12 @@ export default class ApiService {
       this.callCount++;
     }
 
-    const response = await Request.executeRequest(this.buildRequestUrl(url), "GET", {
+    const result = await Request.executeRequest(this.buildRequestUrl(url), "GET", {
       ...options,
     });
     this.totalLatencyMs += Math.max(0, performance.now() - startedAt);
 
-    const remaining = response?.headers.get("x-ratelimit-remaining");
+    const remaining = result.ok ? result.response.headers.get("x-ratelimit-remaining") : null;
     if (isServer() && this.config.useProxy) {
       if (remaining && Number(remaining) <= this.config.proxySwitchThreshold) {
         const currentIndex = SERVER_PROXIES.indexOf(this.currentProxy);
@@ -104,30 +105,30 @@ export default class ApiService {
       this.lastRateLimitSeen = Number(remaining);
     }
 
-    if (!response || !response.ok) {
+    if (!result.ok) {
       this.failedCallCount++;
     }
-    return response;
+    return result;
   }
 
   public async fetch<T>(
     url: string,
     options?: RequestOptions & { priority?: CooldownPriority }
-  ): Promise<T | undefined> {
-    const response = await this.executeTracked(url, options);
-    if (!response) {
-      return undefined;
+  ): Promise<RequestResult<T>> {
+    const result = await this.executeTracked(url, options);
+    if (!result.ok) {
+      return result;
     }
-    return response.json() as Promise<T>;
-  }
-
-  /**
-   * Like {@link ApiService.fetch}, but also resolves non-2xx responses so callers can act on the status.
-   *
-   * @returns the response, or undefined when no response was received
-   */
-  public async fetchResponse(url: string, options?: RequestOptions & { priority?: CooldownPriority }) {
-    return this.executeTracked(url, { ...options, returnErrorResponses: true });
+    try {
+      return { ok: true, status: result.status, response: (await result.response.json()) as T };
+    } catch (error) {
+      this.failedCallCount++;
+      return requestFailure(
+        "invalid_response",
+        result.status,
+        `${this.name} returned a body that is not valid JSON: ${error instanceof Error ? error.message : "unknown error"}`
+      );
+    }
   }
 
   public static getTotalServerProxies(): number {

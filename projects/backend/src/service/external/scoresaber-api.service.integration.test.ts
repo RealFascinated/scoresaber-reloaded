@@ -38,7 +38,7 @@ describe("ScoreSaberApiService requests", () => {
     const player = await ScoreSaberApiService.lookupPlayer(playerId, undefined, { fresh: true });
     const elapsedMs = performance.now() - startedAt;
 
-    expect(player?.id).toBe(playerId);
+    expect(player.ok ? player.response.id : undefined).toBe(playerId);
     expect(requests).toBe(2);
     expect(elapsedMs).toBeGreaterThanOrEqual(700);
     expect(elapsedMs).toBeLessThan(2000);
@@ -57,7 +57,7 @@ describe("ScoreSaberApiService requests", () => {
     const startedAt = performance.now();
     const player = await ScoreSaberApiService.lookupPlayer(playerId, undefined, { fresh: true });
 
-    expect(player?.id).toBe(playerId);
+    expect(player.ok ? player.response.id : undefined).toBe(playerId);
     expect(requests).toBe(1);
     expect(performance.now() - startedAt).toBeLessThan(700);
   });
@@ -75,9 +75,18 @@ describe("ScoreSaberApiService requests", () => {
     const startedAt = performance.now();
     const player = await ScoreSaberApiService.lookupPlayer(playerId, undefined, { fresh: true });
 
-    expect(player).toBeUndefined();
+    expect(player).toMatchObject({ ok: false, error: "not_found", status: 404 });
     expect(requests).toBe(1);
     expect(performance.now() - startedAt).toBeLessThan(2000);
+  });
+
+  test("a not found player resolves to a not_found failure", async () => {
+    const playerId = "76561198000000108";
+    server.use(scoreSaberApi("/v2/players/:id", () => new HttpResponse(null, { status: 404 })));
+
+    const result = await ScoreSaberApiService.lookupPlayer(playerId, undefined, { fresh: true });
+
+    expect(result).toMatchObject({ ok: false, error: "not_found", status: 404 });
   });
 
   test("retrying stops when the next backoff would exceed the total deadline", async () => {
@@ -93,7 +102,7 @@ describe("ScoreSaberApiService requests", () => {
     const startedAt = performance.now();
     const player = await ScoreSaberApiService.lookupPlayer(playerId, undefined, { fresh: true });
 
-    expect(player).toBeUndefined();
+    expect(player).toMatchObject({ ok: false, error: "rate_limited", status: 429 });
     expect(requests).toBe(1);
     expect(performance.now() - startedAt).toBeLessThan(2000);
   });
@@ -113,7 +122,7 @@ describe("ScoreSaberApiService requests", () => {
 
     const player = await ScoreSaberApiService.lookupPlayer(playerId, undefined, { fresh: true });
 
-    expect(player?.id).toBe(playerId);
+    expect(player.ok ? player.response.id : undefined).toBe(playerId);
     expect(requests).toBe(2);
   });
 

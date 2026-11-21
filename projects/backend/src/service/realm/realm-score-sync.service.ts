@@ -23,13 +23,14 @@ export class RealmScoreSyncService {
     let written = 0;
 
     do {
-      const response = await ScoreSaberApiService.lookupLeaderboardRealmScores(leaderboardId, page, realmId);
-      if (response === undefined) {
+      const result = await ScoreSaberApiService.lookupLeaderboardRealmScores(leaderboardId, page, realmId);
+      if (!result.ok) {
         RealmScoreSyncService.logger.warn(
-          `Unable to fetch realm "${realmId}" scores for leaderboard "${leaderboardId}" (page ${page})`
+          `Unable to fetch realm "${realmId}" scores for leaderboard "${leaderboardId}" (page ${page}): ${result.message}`
         );
         break;
       }
+      const response = result.response;
       totalPages = response.metadata.totalPages;
       written += await ScoreSaberScoresRepository.setRealmPpForExistingScores(
         realmId,
