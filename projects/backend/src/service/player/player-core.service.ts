@@ -30,6 +30,26 @@ export class PlayerCoreService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Player Core");
 
   /**
+   * Gets the peak rank fields to store when a token holds a better rank than the stored peak.
+   *
+   * @param currentPeak the stored peak rank
+   * @param playerToken a token freshly looked up from the default realm
+   * @param timestamp when the rank was observed
+   * @returns the peak rank updates, or undefined if the peak is unchanged
+   */
+  public static peakRankUpdates(
+    currentPeak: number | null | undefined,
+    playerToken: ScoreSaberPlayerLookupToken,
+    timestamp: Date
+  ) {
+    const rank = playerToken.stats?.rank;
+    if (!rank || playerToken.inactive || (currentPeak && rank >= currentPeak)) {
+      return undefined;
+    }
+    return { peakRank: rank, peakRankTimestamp: timestamp } satisfies Partial<ScoreSaberAccountRow>;
+  }
+
+  /**
    * Gets the account fields that differ from a freshly looked up token.
    *
    * @param account the stored account

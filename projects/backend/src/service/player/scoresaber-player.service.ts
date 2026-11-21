@@ -109,6 +109,14 @@ export default class ScoreSaberPlayerService {
       throw new NotFoundError(`Player account "${id}" not found`);
     }
 
+    if (realmId === DEFAULT_REALM_ID) {
+      const peakUpdates = PlayerCoreService.peakRankUpdates(account.peakRank?.rank, player, new Date());
+      if (peakUpdates) {
+        await PlayerCoreService.updatePlayer(id, peakUpdates);
+        account.peakRank = { rank: peakUpdates.peakRank, timestamp: peakUpdates.peakRankTimestamp };
+      }
+    }
+
     if (type === "basic") {
       return {
         ...ScoreSaberPlayerService.buildBasePlayer(player, account),

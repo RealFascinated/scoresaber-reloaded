@@ -214,16 +214,8 @@ export class PlayerHistoryService {
       if (isDefaultRealm && account.inactive !== player.inactive) {
         updates.inactive = player.inactive;
       }
-      const rank = player.stats.rank;
-      if (
-        isDefaultRealm &&
-        !player.inactive &&
-        rank !== 0 &&
-        account.peakRank !== rank &&
-        (!account.peakRank || rank < account.peakRank)
-      ) {
-        updates.peakRank = rank;
-        updates.peakRankTimestamp = trackTime;
+      if (isDefaultRealm) {
+        Object.assign(updates, PlayerCoreService.peakRankUpdates(account.peakRank, player, trackTime));
       }
       return Object.keys(updates).length > 0 ? [{ account, updates }] : [];
     });
