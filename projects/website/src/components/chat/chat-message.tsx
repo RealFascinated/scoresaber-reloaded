@@ -117,8 +117,8 @@ function ToolStep({ tool }: { tool: ToolPart }) {
           <SharedIcons.ChatToolDoneIcon className="size-3 shrink-0 text-success" />
         )}
         <span className="truncate">
-          {isError ? `${getToolLabel(tool.toolName)} failed` : getToolLabel(tool.toolName)}
-          {isRunning ? " …" : ""}
+          {isError ? `${getToolLabel(tool.toolName, false)} failed` : getToolLabel(tool.toolName, isRunning)}
+          {isRunning ? "…" : ""}
         </span>
         {summary !== "" && (
           <span className={`truncate ${isError ? "text-destructive/70" : "text-muted-foreground/60"}`}>
@@ -161,7 +161,7 @@ function ToolStep({ tool }: { tool: ToolPart }) {
   );
 }
 
-function ThoughtStep({ text }: { text: string }) {
+function ThoughtStep({ text, isThinking }: { text: string; isThinking: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -173,7 +173,7 @@ function ThoughtStep({ text }: { text: string }) {
         className="inline-flex cursor-pointer items-center gap-1.5 self-start text-xs text-muted-foreground transition-colors hover:text-foreground"
       >
         <SharedIcons.ChatThoughtIcon className="size-3 shrink-0" />
-        <span>Thought</span>
+        <span>{isThinking ? "Thinking…" : "Thought"}</span>
         <SharedIcons.ChatWorkChevronIcon
           className={`size-3 shrink-0 transition-transform ${isOpen ? "rotate-90" : ""}`}
         />
@@ -232,7 +232,11 @@ function WorkRow({
             step.kind === "tool" ? (
               <ToolStep key={`${step.toolName}-${index}`} tool={step} />
             ) : step.kind === "reasoning" ? (
-              <ThoughtStep key={`${step.kind}-${index}`} text={step.text} />
+              <ThoughtStep
+                key={`${step.kind}-${index}`}
+                text={step.text}
+                isThinking={timing.isActive && index === steps.length - 1}
+              />
             ) : (
               <li key={`${step.kind}-${index}`}>
                 <ChatMarkdown text={step.text} isStreaming={timing.isActive} />

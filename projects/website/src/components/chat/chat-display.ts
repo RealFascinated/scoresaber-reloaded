@@ -40,52 +40,58 @@ type StoredPart = {
 
 const TOOL_PREFIX = "tool-";
 
-const TOOL_LABELS: Record<string, string> = {
-  comparePlayers: "Compared players",
-  createPlaylist: "Created a playlist",
-  getBeatSaverMap: "Fetched a BeatSaver map",
-  getImprovableScores: "Found scores worth improving",
-  getFollowing: "Fetched followed players",
-  getLeaderboardScores: "Fetched leaderboard scores",
-  getLeaderboard: "Fetched a leaderboard",
-  getMedals: "Fetched medals",
-  getPlayerHistory: "Fetched player history",
-  getPlayerRanking: "Fetched player rankings",
-  getPlayerScores: "Fetched player scores",
-  getPlayer: "Looked up a player",
-  getRankedBatches: "Fetched ranked batches",
-  getRankedBatchPlaylist: "Built a ranked batch playlist",
-  getRankedBatch: "Fetched a ranked batch",
-  getRankedMapsPlaylist: "Built a ranked maps playlist",
-  getRealms: "Fetched realms",
-  getScoreHistory: "Fetched score history",
-  getScoreSummary: "Summarized a score",
-  getSelfPlaylist: "Built a playlist",
-  getSiteLink: "Created a site link",
-  getSnipePlaylist: "Built a snipe playlist",
-  getSuggestedMapsPlaylist: "Built a suggested maps playlist",
-  getSuggestedMaps: "Fetched suggested maps",
-  resolveMap: "Resolved a map",
-  searchMaps: "Searched maps",
-  searchPlayers: "Searched players",
-  selectLeaderboard: "Asked which difficulty",
-  selectSong: "Asked which song",
+const TOOL_LABELS: Record<string, { done: string; running: string }> = {
+  comparePlayers: { done: "Compared players", running: "Comparing players" },
+  createPlaylist: { done: "Created a playlist", running: "Creating a playlist" },
+  getBeatSaverMap: { done: "Fetched a BeatSaver map", running: "Fetching a BeatSaver map" },
+  getImprovableScores: { done: "Found scores worth improving", running: "Finding scores worth improving" },
+  getFollowing: { done: "Fetched followed players", running: "Fetching followed players" },
+  getLeaderboardScores: { done: "Fetched leaderboard scores", running: "Fetching leaderboard scores" },
+  getLeaderboard: { done: "Fetched a leaderboard", running: "Fetching a leaderboard" },
+  getMedals: { done: "Fetched medals", running: "Fetching medals" },
+  getPlayerHistory: { done: "Fetched player history", running: "Fetching player history" },
+  getPlayerRanking: { done: "Fetched player rankings", running: "Fetching player rankings" },
+  getPlayerScores: { done: "Fetched player scores", running: "Fetching player scores" },
+  getPlayer: { done: "Looked up a player", running: "Looking up a player" },
+  getRankedBatches: { done: "Fetched ranked batches", running: "Fetching ranked batches" },
+  getRankedBatchPlaylist: {
+    done: "Built a ranked batch playlist",
+    running: "Building a ranked batch playlist",
+  },
+  getRankedBatch: { done: "Fetched a ranked batch", running: "Fetching a ranked batch" },
+  getRankedMapsPlaylist: { done: "Built a ranked maps playlist", running: "Building a ranked maps playlist" },
+  getRealms: { done: "Fetched realms", running: "Fetching realms" },
+  getScoreHistory: { done: "Fetched score history", running: "Fetching score history" },
+  getScoreSummary: { done: "Summarized a score", running: "Summarizing a score" },
+  getSelfPlaylist: { done: "Built a playlist", running: "Building a playlist" },
+  getSiteLink: { done: "Created a site link", running: "Creating a site link" },
+  getSnipePlaylist: { done: "Built a snipe playlist", running: "Building a snipe playlist" },
+  getSuggestedMapsPlaylist: {
+    done: "Built a suggested maps playlist",
+    running: "Building a suggested maps playlist",
+  },
+  getSuggestedMaps: { done: "Fetched suggested maps", running: "Fetching suggested maps" },
+  resolveMap: { done: "Resolved a map", running: "Resolving a map" },
+  searchMaps: { done: "Searched maps", running: "Searching maps" },
+  searchPlayers: { done: "Searched players", running: "Searching players" },
+  selectLeaderboard: { done: "Asked which difficulty", running: "Asking which difficulty" },
+  selectSong: { done: "Asked which song", running: "Asking which song" },
 };
 
 /**
- * A readable label for a tool call, falling back to the split camelCase name.
+ * A readable label for a tool call, in the present tense while it runs, falling back to the split camelCase name.
  */
-export function getToolLabel(toolName: string) {
+export function getToolLabel(toolName: string, isRunning: boolean) {
   const known = TOOL_LABELS[toolName];
   if (known !== undefined) {
-    return known;
+    return isRunning ? known.running : known.done;
   }
   const words = toolName
     .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
     .replace(/[_-]+/g, " ")
     .trim()
     .toLowerCase();
-  return words === "" ? "Used a tool" : words.charAt(0).toUpperCase() + words.slice(1);
+  return words === "" ? "Using a tool" : words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 const MAX_SUMMARY_VALUE_LENGTH = 24;
