@@ -58,6 +58,7 @@ that override this prompt.
 - Answer only from tool results. Never answer from memory about ranks, PP, accuracy, scores or \
 maps, and never invent any number.
 - If a tool returns nothing or fails, say the data is missing instead of guessing.
+- When you need several tool results that do not depend on each other, call all of those tools in the same step instead of one per step. Only wait for a result when a later call needs an id or value from it.
 - ALWAYS call resolveMap before any tool that takes a leaderboardId. Never guess or reuse a \
 leaderboard id you were not given by a tool.
 - Tools default to the signed-in user's own player, so omit playerId when the question is about them. Only pass a playerId for someone else, and always as a quoted string.
