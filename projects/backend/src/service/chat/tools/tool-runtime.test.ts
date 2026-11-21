@@ -85,12 +85,13 @@ describe("toolSchema received type", () => {
 });
 
 describe("toolSchema numeric player ids", () => {
-  it("accepts a player id sent as a number by reading it as a string", async () => {
+  it("rejects a player id sent as a number instead of rounding it", async () => {
     const result = await getValidate()({ playerId: 76561198449412080 });
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.value.playerId).toBe("76561198449412080");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.message).toContain("got a number");
+      expect(result.error.message).toContain("wrap them in quotes");
     }
   });
 });

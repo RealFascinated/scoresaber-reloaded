@@ -3,18 +3,6 @@ import { jsonSchema } from "ai";
 import type { StaticDecode, TSchema } from "typebox";
 import { Value } from "typebox/value";
 
-function coerceNumericPlayerId(input: object) {
-  if (
-    typeof input === "object" &&
-    input !== null &&
-    "playerId" in input &&
-    typeof input.playerId === "number"
-  ) {
-    return { ...input, playerId: String(input.playerId) };
-  }
-  return input;
-}
-
 function describeReceived(root: object, instancePath: string) {
   const segments = instancePath.split("/").filter(part => part.length > 0);
   let current: object | string | number | boolean | undefined = root;
@@ -33,7 +21,7 @@ function describeReceived(root: object, instancePath: string) {
 export function toolSchema<const Schema extends TSchema>(schema: Schema) {
   return jsonSchema<StaticDecode<Schema>>(schema, {
     validate: input => {
-      const value = coerceNumericPlayerId(input as object);
+      const value = input as object;
       const [firstError] = Value.Errors(schema, value);
       if (firstError === undefined) {
         return { success: true, value: value as StaticDecode<Schema> };

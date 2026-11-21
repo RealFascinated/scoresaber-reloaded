@@ -9,6 +9,8 @@ export default class ChatMetric extends Metric<number> {
   private readonly turns: Counter<"outcome">;
   private readonly turnDuration: Histogram<"outcome">;
   private readonly toolCalls: Counter<"tool" | "outcome">;
+  private readonly toolRepairs: Counter<"tool" | "kind">;
+  private readonly toolBlocks: Counter<"tool" | "field">;
   private readonly compactions: Counter<"outcome">;
   private readonly errors: Counter<"stage">;
   private readonly tokens: Counter<"kind">;
@@ -33,6 +35,18 @@ export default class ChatMetric extends Metric<number> {
       name: "chat_tool_calls_total",
       help: "Chat tool calls by tool name and outcome",
       labelNames: ["tool", "outcome"],
+      registers: [prometheusRegistry],
+    });
+    this.toolRepairs = new Counter<"tool" | "kind">({
+      name: "chat_tool_repairs_total",
+      help: "Chat tool calls the model got wrong, by tool and repair kind (unrepaired when no repair applied)",
+      labelNames: ["tool", "kind"],
+      registers: [prometheusRegistry],
+    });
+    this.toolBlocks = new Counter<"tool" | "field">({
+      name: "chat_tool_blocks_total",
+      help: "Chat tool calls blocked for carrying an id the conversation never produced, by tool and field",
+      labelNames: ["tool", "field"],
       registers: [prometheusRegistry],
     });
     this.compactions = new Counter<"outcome">({
@@ -63,6 +77,16 @@ export default class ChatMetric extends Metric<number> {
 
   public observeToolCall(tool: string, outcome: "ok" | "error") {
     this.toolCalls.inc({ tool, outcome });
+  }
+
+  public observeToolRepair(tool: string, kinds: string[]) {
+    for (const kind of kinds.length === 0 ? ["unrepaired"] : kinds) {
+      this.toolRepairs.inc({ tool, kind });
+    }
+  }
+
+  public observeToolBlock(tool: string, field: string) {
+    this.toolBlocks.inc({ tool, field });
   }
 
   public observeCompaction(outcome: "ok" | "error") {

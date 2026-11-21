@@ -5,8 +5,10 @@ import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import type { ChatMessagePart } from "@ssr/common/schemas/chat/chat-message";
 import {
   convertToModelMessages,
+  createUIMessageStreamResponse,
   hasToolCall,
   streamText,
+  toUIMessageStream,
   type ToolSet,
   type UIDataTypes,
   type UIMessage,
@@ -28,6 +30,7 @@ import { ChatTitleService } from "./chat-title.service";
 import type { ChatToolContext } from "./chat-tool-context";
 import { createChatTools } from "./tools/chat-tools";
 import { SELECT_TOOL_NAMES } from "./tools/select-tools";
+import { createToolInputRepair } from "./tools/tool-input-repair";
 
 export interface ChatSessionUser {
   id: string;
@@ -143,7 +146,9 @@ export class ChatService {
       playerId: user.playerId ?? null,
       realmId: DEFAULT_REALM_ID,
     } satisfies ChatToolContext;
-    const tools = createChatTools(context);
+    const tools = createChatTools(context, (toolName, field) =>
+      getMetric()?.observeToolBlock(toolName, field)
+    );
     const system = buildChatSystemPrompt({
       userName: context.userName,
       playerId: context.playerId,
@@ -224,6 +229,9 @@ export class ChatService {
           system: summary ? `${system}\n\nSummary of the earlier conversation:\n${summary}` : system,
           messages: modelMessages,
           tools,
+          repairToolCall: createToolInputRepair((toolName, kinds) =>
+            getMetric()?.observeToolRepair(toolName, kinds)
+          ),
           stopWhen: [chatStepLimit(env.CHAT_MAX_STEPS), hasToolCall(...SELECT_TOOL_NAMES)],
           maxOutputTokens: STREAM_MAX_OUTPUT_TOKENS,
           reasoning: env.CHAT_REASONING_EFFORT,
@@ -256,7 +264,9 @@ export class ChatService {
         })
       );
 
-      return result.toUIMessageStreamResponse<UIMessage>({
+      const stream = toUIMessageStream<typeof tools, UIMessage>({
+        stream: result.stream,
+        tools,
         originalMessages: [],
         redactToolErrors: false,
         onError: () => "The assistant failed to answer, please try again.",
@@ -307,6 +317,7 @@ export class ChatService {
           }
         },
       });
+      return createUIMessageStreamResponse({ stream });
     } catch (error) {
       await ChatConversationService.deleteMessage(userRow.id).catch(cleanupError => {
         logger.error(
