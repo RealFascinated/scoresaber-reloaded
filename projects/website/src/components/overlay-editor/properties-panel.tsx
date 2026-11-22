@@ -37,6 +37,24 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
   );
 }
 
+function Toggle({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  const id = useId();
+  return (
+    <label htmlFor={id} className="flex items-center justify-between text-sm">
+      {label}
+      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+    </label>
+  );
+}
+
 function NumberField({
   label,
   value,
@@ -216,6 +234,54 @@ function ElementProperties({ element }: { element: OverlayElement }) {
               }
             />
           </label>
+        </Section>
+      )}
+
+      {element.type === OverlayWidgetTypes.SongInfo && (
+        <Section title="Display" hint="Turn off the parts you don't need.">
+          <Toggle
+            label="Song title"
+            checked={element.options.showSongName ?? true}
+            onChange={showSongName =>
+              updateElement(element.id, { options: { ...element.options, showSongName } })
+            }
+          />
+          <Toggle
+            label="Artist"
+            checked={element.options.showSongAuthor ?? true}
+            onChange={showSongAuthor =>
+              updateElement(element.id, { options: { ...element.options, showSongAuthor } })
+            }
+          />
+          <Toggle
+            label="Mapper"
+            checked={element.options.showMapper ?? false}
+            onChange={showMapper =>
+              updateElement(element.id, { options: { ...element.options, showMapper } })
+            }
+          />
+          <Toggle
+            label="Difficulty"
+            checked={element.options.showDifficulty ?? true}
+            onChange={showDifficulty =>
+              updateElement(element.id, { options: { ...element.options, showDifficulty } })
+            }
+          />
+          <Toggle
+            label="Star rating"
+            checked={element.options.showStars ?? true}
+            onChange={showStars => updateElement(element.id, { options: { ...element.options, showStars } })}
+          />
+          <Toggle
+            label="BPM"
+            checked={element.options.showBpm ?? true}
+            onChange={showBpm => updateElement(element.id, { options: { ...element.options, showBpm } })}
+          />
+          <Toggle
+            label="BSR"
+            checked={element.options.showBsr ?? true}
+            onChange={showBsr => updateElement(element.id, { options: { ...element.options, showBsr } })}
+          />
         </Section>
       )}
 

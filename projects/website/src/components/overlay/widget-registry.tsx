@@ -191,7 +191,7 @@ export function OverlayWidget({ element }: { element: OverlayElement }) {
     case OverlayWidgetTypes.SongCover:
       return <SongCoverWidget />;
     case OverlayWidgetTypes.SongInfo:
-      return <SongInfoWidget />;
+      return <SongInfoWidget options={element.options} />;
     case OverlayWidgetTypes.ScoreAccuracy:
       return <ScoreAccuracyWidget />;
     case OverlayWidgetTypes.ScoreCombo:

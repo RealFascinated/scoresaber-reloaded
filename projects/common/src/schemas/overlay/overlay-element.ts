@@ -48,6 +48,20 @@ export const PpOptionsSchema = Type.Object(
 );
 export type PpOptions = StaticDecode<typeof PpOptionsSchema>;
 
+export const SongInfoOptionsSchema = Type.Object(
+  {
+    showSongName: Type.Optional(Type.Boolean()),
+    showSongAuthor: Type.Optional(Type.Boolean()),
+    showMapper: Type.Optional(Type.Boolean()),
+    showDifficulty: Type.Optional(Type.Boolean()),
+    showStars: Type.Optional(Type.Boolean()),
+    showBpm: Type.Optional(Type.Boolean()),
+    showBsr: Type.Optional(Type.Boolean()),
+  },
+  { additionalProperties: false }
+);
+export type SongInfoOptions = StaticDecode<typeof SongInfoOptionsSchema>;
+
 export const TextOptionsSchema = Type.Object(
   { text: Type.String({ maxLength: MAX_OVERLAY_TEXT_LENGTH }) },
   { additionalProperties: false }
@@ -83,7 +97,7 @@ const OverlayElementBaseFields = {
 
 function elementSchema<
   T extends OverlayWidgetType,
-  O extends typeof NoOptionsSchema | typeof PpOptionsSchema,
+  O extends typeof NoOptionsSchema | typeof PpOptionsSchema | typeof SongInfoOptionsSchema,
 >(type: T, options: O) {
   return Type.Object(
     { ...OverlayElementBaseFields, type: Type.Literal(type), options },
@@ -100,7 +114,7 @@ export const OverlayElementSchema = Type.Union([
   elementSchema(OverlayWidgetTypes.PlayerPp, PpOptionsSchema),
   elementSchema(OverlayWidgetTypes.PlayerBlPp, PpOptionsSchema),
   elementSchema(OverlayWidgetTypes.SongCover, NoOptionsSchema),
-  elementSchema(OverlayWidgetTypes.SongInfo, NoOptionsSchema),
+  elementSchema(OverlayWidgetTypes.SongInfo, SongInfoOptionsSchema),
   elementSchema(OverlayWidgetTypes.ScoreAccuracy, NoOptionsSchema),
   elementSchema(OverlayWidgetTypes.ScoreCombo, NoOptionsSchema),
   elementSchema(OverlayWidgetTypes.ScoreScore, NoOptionsSchema),
