@@ -137,17 +137,30 @@ export const DEFAULT_SNAP_THRESHOLD = 8;
 export const EDGE_MARGINS = [0, 24];
 /** How far outside another element's edges they can snap, for laying out a small gap. */
 export const ELEMENT_SNAP_MARGIN = 5;
+/** How far apart two elements can be on the other axis and still snap to each other. */
+export const ELEMENT_SNAP_PROXIMITY = 48;
+
+function nearOnAxis(start: number, end: number, otherStart: number, otherEnd: number) {
+  return start <= otherEnd + ELEMENT_SNAP_PROXIMITY && end >= otherStart - ELEMENT_SNAP_PROXIMITY;
+}
 
 /**
- * Snaps bounds to the canvas edges (and their margins), the canvas centre lines and the edges of other elements.
+ * Snaps bounds to the canvas edges (and their margins), the canvas centre lines and the edges of
+ * nearby elements. Element guides only apply when the elements are close on the other axis.
  *
  * @returns the bounds moved onto the closest guides (per axis) and the guides that were hit
  */
 export function snapBounds(bounds: Bounds, others: Bounds[], threshold: number = DEFAULT_SNAP_THRESHOLD) {
+  const nearVertically = others.filter(other =>
+    nearOnAxis(bounds.top, bounds.top + bounds.height, other.top, other.top + other.height)
+  );
+  const nearHorizontally = others.filter(other =>
+    nearOnAxis(bounds.left, bounds.left + bounds.width, other.left, other.left + other.width)
+  );
   const verticalLines = [
     ...EDGE_MARGINS.flatMap(margin => [margin, OVERLAY_CANVAS_WIDTH - margin]),
     OVERLAY_CANVAS_WIDTH / 2,
-    ...others.flatMap(other => [
+    ...nearVertically.flatMap(other => [
       other.left - ELEMENT_SNAP_MARGIN,
       other.left,
       other.left + other.width,
@@ -158,7 +171,7 @@ export function snapBounds(bounds: Bounds, others: Bounds[], threshold: number =
   const horizontalLines = [
     ...EDGE_MARGINS.flatMap(margin => [margin, OVERLAY_CANVAS_HEIGHT - margin]),
     OVERLAY_CANVAS_HEIGHT / 2,
-    ...others.flatMap(other => [
+    ...nearHorizontally.flatMap(other => [
       other.top - ELEMENT_SNAP_MARGIN,
       other.top,
       other.top + other.height,
