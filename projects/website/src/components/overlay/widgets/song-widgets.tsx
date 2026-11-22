@@ -1,5 +1,6 @@
 import { useOverlayRuntime } from "@/common/overlay/overlay-runtime";
 import { cn } from "@/common/utils";
+import { SharedIcons } from "@/shared-icons";
 import { truncateText } from "@ssr/common/string-utils";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { getDifficulty, getDifficultyName } from "@ssr/common/utils/song-utils";
@@ -26,7 +27,7 @@ function Chip({ children, className }: { children: ReactNode; className?: string
   return (
     <span
       className={cn(
-        "rounded-full bg-white/10 px-3 py-1 text-lg leading-none font-medium whitespace-nowrap tabular-nums",
+        "inline-flex h-8 items-center rounded-full bg-white/[0.07] px-3.5 text-lg leading-none font-medium whitespace-nowrap ring-1 ring-white/10 ring-inset tabular-nums",
         className
       )}
     >
@@ -46,28 +47,41 @@ export function SongInfoWidget() {
   const leaderboard = data.map?.leaderboard;
 
   return (
-    <div className={cn("flex flex-col gap-3 transition-all", data.paused && "grayscale")}>
-      <div className="flex flex-col gap-0.5">
-        <p className="text-4xl leading-tight font-extrabold whitespace-nowrap">{map.metadata.songName}</p>
+    <div className={cn("flex flex-col gap-4 transition-all", data.paused && "grayscale")}>
+      <div className="flex flex-col">
+        <p className="text-4xl leading-tight font-extrabold tracking-tight whitespace-nowrap">
+          {map.metadata.songName}
+        </p>
         {map.metadata.songAuthorName && (
-          <p className="text-xl whitespace-nowrap text-muted-foreground">{map.metadata.songAuthorName}</p>
+          <p className="mt-1 text-xl leading-tight font-medium whitespace-nowrap text-foreground/70">
+            {map.metadata.songAuthorName}
+          </p>
         )}
-        <p className="text-base whitespace-nowrap text-muted-foreground/70">
+        <p className="mt-2 text-sm font-medium whitespace-nowrap text-foreground/45">
           Mapped by {truncateText(map.metadata.levelAuthorName, 48)}
         </p>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         <span
-          className="rounded-full px-3.5 py-1 text-lg leading-none font-semibold whitespace-nowrap"
+          className="inline-flex h-8 items-center rounded-full px-4 text-lg leading-none font-semibold whitespace-nowrap"
           style={{ backgroundColor: difficulty.color, color: "var(--difficulty-foreground)" }}
         >
           {getDifficultyName(difficulty)}
         </span>
         {leaderboard && leaderboard.stars > 0 && (
-          <Chip className="text-yellow-300">{leaderboard.stars} ★</Chip>
+          <Chip className="gap-1.5 bg-yellow-400/10 text-yellow-300 ring-yellow-300/20">
+            {leaderboard.stars}
+            <SharedIcons.DifficultyStarIcon className="size-4" />
+          </Chip>
         )}
-        <Chip>{formatNumberWithCommas(map.metadata.bpm)} BPM</Chip>
-        <Chip className="font-mono text-base">!bsr {map.bsr}</Chip>
+        <Chip>
+          {formatNumberWithCommas(map.metadata.bpm)}
+          <span className="ml-1 text-sm text-foreground/50">BPM</span>
+        </Chip>
+        <Chip className="gap-1.5">
+          <span className="text-foreground/45">!bsr</span>
+          <span className="font-mono text-base">{map.bsr}</span>
+        </Chip>
       </div>
     </div>
   );
