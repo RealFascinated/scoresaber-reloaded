@@ -294,7 +294,7 @@ export default function EditorCanvas() {
 
   return (
     <div
-      className="relative h-full w-full bg-muted/30 p-8"
+      className="relative h-full w-full bg-muted/30 p-8 select-none"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endMarquee}
