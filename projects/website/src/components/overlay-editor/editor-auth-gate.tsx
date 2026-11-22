@@ -17,7 +17,7 @@ export default function EditorAuthGate({ children }: { children: ReactNode }) {
   if (!me) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4">
-        <h1 className="text-xl font-semibold">Overlay editor</h1>
+        <h1 className="text-xl font-semibold">Overlay Editor</h1>
         <p className="text-sm text-muted-foreground">Sign in to create and save your overlays.</p>
         <Button onClick={() => signInWithSteam("/overlay/editor")}>Sign in with Steam</Button>
       </div>

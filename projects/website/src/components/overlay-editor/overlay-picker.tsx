@@ -1,6 +1,7 @@
 "use client";
 
 import CreateOverlayDialog from "@/components/overlay-editor/create-overlay-dialog";
+import { PageTitle } from "@/components/page-title";
 import { Button } from "@/components/ui/button";
 import { useUserOverlayMutations, useUserOverlays } from "@/hooks/use-user-overlays";
 import { MAX_USER_OVERLAYS, type UserOverlaySummary } from "@ssr/common/schemas/response/user/overlay";
@@ -91,21 +92,21 @@ export default function OverlayPicker() {
   const atLimit = count >= MAX_USER_OVERLAYS;
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Overlay editor</h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">
-            {count} / {MAX_USER_OVERLAYS}
-          </span>
-          <Button variant="primary" disabled={atLimit} onClick={() => setCreating(true)}>
-            <Plus className="mr-1.5 size-4" />
-            New overlay
-          </Button>
-        </div>
-      </header>
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4">
+      <PageTitle
+        title="Overlay Editor"
+        actions={
+          <>
+            <span className="text-sm text-muted-foreground">
+              {count} / {MAX_USER_OVERLAYS}
+            </span>
+            <Button variant="primary" disabled={atLimit} onClick={() => setCreating(true)}>
+              <Plus className="mr-1.5 size-4" />
+              New overlay
+            </Button>
+          </>
+        }
+      />
 
       {error && <p className="text-sm text-destructive">Could not load your overlays: {error.message}</p>}
       {isLoading && (
