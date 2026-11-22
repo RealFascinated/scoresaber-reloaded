@@ -140,4 +140,11 @@ describe("snapBounds", () => {
     expect(snapped.bounds.left).toBe(400);
     expect(snapped.bounds.top).toBe(700);
   });
+
+  test("snaps to the gap outside another element", () => {
+    const other = { left: 300, top: 300, width: 100, height: 100 };
+    const snapped = snapBounds({ left: 197, top: 700, width: 100, height: 50 }, [other]);
+    expect(snapped.bounds.left).toBe(195);
+    expect(snapped.guides).toContainEqual({ axis: "x", position: 295 });
+  });
 });

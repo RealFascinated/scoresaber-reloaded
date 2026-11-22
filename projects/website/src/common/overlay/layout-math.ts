@@ -134,7 +134,9 @@ export type SnapGuide = { axis: "x" | "y"; position: number };
 
 export const DEFAULT_SNAP_THRESHOLD = 8;
 /** Distances from the canvas edge elements snap to. */
-export const EDGE_MARGINS = [0, 24, 48];
+export const EDGE_MARGINS = [0, 24];
+/** How far outside another element's edges they can snap, for laying out a small gap. */
+export const ELEMENT_SNAP_MARGIN = 5;
 
 /**
  * Snaps bounds to the canvas edges (and their margins), the canvas centre lines and the edges of other elements.
@@ -145,12 +147,24 @@ export function snapBounds(bounds: Bounds, others: Bounds[], threshold: number =
   const verticalLines = [
     ...EDGE_MARGINS.flatMap(margin => [margin, OVERLAY_CANVAS_WIDTH - margin]),
     OVERLAY_CANVAS_WIDTH / 2,
-    ...others.flatMap(other => [other.left, other.left + other.width, other.left + other.width / 2]),
+    ...others.flatMap(other => [
+      other.left - ELEMENT_SNAP_MARGIN,
+      other.left,
+      other.left + other.width,
+      other.left + other.width + ELEMENT_SNAP_MARGIN,
+      other.left + other.width / 2,
+    ]),
   ];
   const horizontalLines = [
     ...EDGE_MARGINS.flatMap(margin => [margin, OVERLAY_CANVAS_HEIGHT - margin]),
     OVERLAY_CANVAS_HEIGHT / 2,
-    ...others.flatMap(other => [other.top, other.top + other.height, other.top + other.height / 2]),
+    ...others.flatMap(other => [
+      other.top - ELEMENT_SNAP_MARGIN,
+      other.top,
+      other.top + other.height,
+      other.top + other.height + ELEMENT_SNAP_MARGIN,
+      other.top + other.height / 2,
+    ]),
   ];
 
   const snapAxis = (start: number, size: number, lines: number[]) => {
