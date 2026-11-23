@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/common/utils";
-import AskChatButton from "@/components/chat/ask-chat-button";
 import { ScoreOverview } from "@/components/platform/scoresaber/score/score-views/score-overview";
 import { MapStats } from "@/components/score/map-stats";
 import { useLeaderboardDropdownData } from "@/hooks/use-leaderboard-dropdown-data";
@@ -93,13 +92,6 @@ function ScoreDetailsDropdownContent({
             !isLeaderboardScore ? "mt-(--spacing-md)" : ""
           )}
         >
-          <div className="flex justify-end">
-            <AskChatButton
-              prompt={`Break down score ${score.scoreId} on ${leaderboard.fullName}`}
-              label="Ask Chat about this score"
-            />
-          </div>
-
           {beatSaverMap && <MapStats beatSaver={beatSaverMap} />}
 
           <ScoreOverview score={score} leaderboard={leaderboard} scoreStats={dropdownData.scoreStats} />
