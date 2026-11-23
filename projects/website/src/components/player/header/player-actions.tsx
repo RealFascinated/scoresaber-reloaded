@@ -123,7 +123,7 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
         prompt={`Summarize ${player.name}'s play style and recent progress (player ${player.id})`}
         tooltip={`Ask the chat about ${player.name}`}
         size={36}
-        className="border-0 bg-muted hover:bg-accent"
+        className="border-0 bg-muted p-2 hover:bg-accent"
       />
     </div>
   );
