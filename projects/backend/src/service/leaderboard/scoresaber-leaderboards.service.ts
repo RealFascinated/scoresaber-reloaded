@@ -1,3 +1,4 @@
+import { BadGatewayError } from "@ssr/common/error/bad-gateway-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination } from "@ssr/common/pagination";
@@ -93,7 +94,7 @@ export class ScoreSaberLeaderboardsService {
           `Leaderboard not found for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}"`
         );
       }
-      throw new Error(
+      throw new BadGatewayError(
         `Unable to fetch leaderboard for hash "${hash}", difficulty "${difficulty}", characteristic "${characteristic}": ${leaderboardToken.message}`
       );
     }
@@ -176,7 +177,7 @@ export class ScoreSaberLeaderboardsService {
         if (leaderboardToken.error === "not_found") {
           throw new NotFoundError(`Leaderboard not found for "${id}"`);
         }
-        throw new Error(`Unable to fetch leaderboard "${id}": ${leaderboardToken.message}`);
+        throw new BadGatewayError(`Unable to fetch leaderboard "${id}": ${leaderboardToken.message}`);
       }
       leaderboard = getScoreSaberLeaderboardFromToken(leaderboardToken.response);
     }

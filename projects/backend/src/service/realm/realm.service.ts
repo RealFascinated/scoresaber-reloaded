@@ -1,3 +1,4 @@
+import { BadGatewayError } from "@ssr/common/error/bad-gateway-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { sortPpCurve } from "@ssr/common/leaderboard-curve/pp-curve";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
@@ -21,7 +22,7 @@ export class RealmService {
         if (result.error === "not_found") {
           throw new NotFoundError("Realms not found on ScoreSaber");
         }
-        throw new Error(`Unable to fetch realms from ScoreSaber: ${result.message}`);
+        throw new BadGatewayError(`Unable to fetch realms from ScoreSaber: ${result.message}`);
       }
       return result.response.sort((a, b) => a.id - b.id);
     });
@@ -55,7 +56,7 @@ export class RealmService {
         if (result.error === "not_found") {
           throw new NotFoundError(`Pp curve for realm "${realmId}" not found`);
         }
-        throw new Error(`Unable to fetch pp curve for realm "${realmId}": ${result.message}`);
+        throw new BadGatewayError(`Unable to fetch pp curve for realm "${realmId}": ${result.message}`);
       }
       return {
         curve: sortPpCurve(result.response.curve),

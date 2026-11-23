@@ -1,3 +1,4 @@
+import { BadGatewayError } from "@ssr/common/error/bad-gateway-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { DEFAULT_REALM_ID } from "@ssr/common/realm";
@@ -36,7 +37,7 @@ export class ScoreSaberLeaderboardScoresService {
       if (leaderboardScores.error === "not_found") {
         throw new NotFoundError(`Leaderboard scores for leaderboard "${leaderboardId}" not found`);
       }
-      throw new Error(
+      throw new BadGatewayError(
         `Failed to fetch scores for leaderboard "${leaderboardId}": ${leaderboardScores.message}`
       );
     }

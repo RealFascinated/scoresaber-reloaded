@@ -1,3 +1,4 @@
+import { BadGatewayError } from "@ssr/common/error/bad-gateway-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import type {
   BeatLeaderOverlayPlayerResponse,
@@ -67,7 +68,9 @@ export class BeatLeaderOverlayLiveService {
         if (result.error === "not_found") {
           throw new NotFoundError(`BeatLeader leaderboards for "${hash}" not found: ${result.message}`);
         }
-        throw new Error(`Failed to look up BeatLeader leaderboards for "${hash}": ${result.message}`);
+        throw new BadGatewayError(
+          `Failed to look up BeatLeader leaderboards for "${hash}": ${result.message}`
+        );
       }
       const found = result.response.leaderboards.find(
         ({ difficulty: entry }) => entry.difficultyName === difficulty && entry.modeName === characteristic
@@ -103,7 +106,7 @@ export class BeatLeaderOverlayLiveService {
         if (result.error === "not_found") {
           throw new NotFoundError(`BeatLeader player "${playerId}" not found: ${result.message}`);
         }
-        throw new Error(`Failed to look up BeatLeader player "${playerId}": ${result.message}`);
+        throw new BadGatewayError(`Failed to look up BeatLeader player "${playerId}": ${result.message}`);
       }
       const player = result.response;
       if (player.pp === undefined) {

@@ -1,3 +1,4 @@
+import { BadGatewayError } from "@ssr/common/error/bad-gateway-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { StorageBucket } from "@ssr/common/minio-buckets";
@@ -264,7 +265,9 @@ export default class BeatLeaderService {
     if (result.error === "not_found") {
       return undefined;
     }
-    throw new Error(`Failed to fetch BeatLeader score stats for score ${scoreId}: ${result.message}`);
+    throw new BadGatewayError(
+      `Failed to fetch BeatLeader score stats for score ${scoreId}: ${result.message}`
+    );
   }
 
   /**
@@ -279,7 +282,9 @@ export default class BeatLeaderService {
       if (result.error === "not_found") {
         return undefined;
       }
-      throw new Error(`Failed to fetch BeatLeader score stats for score ${scoreId}: ${result.message}`);
+      throw new BadGatewayError(
+        `Failed to fetch BeatLeader score stats for score ${scoreId}: ${result.message}`
+      );
     }
     await StorageService.saveFile(
       StorageBucket.BeatLeaderScoreStats,
@@ -415,7 +420,7 @@ export default class BeatLeaderService {
       if (result.error === "not_found") {
         return undefined;
       }
-      throw new Error(`Failed to look up BeatLeader player "${playerId}": ${result.message}`);
+      throw new BadGatewayError(`Failed to look up BeatLeader player "${playerId}": ${result.message}`);
     }
     return BeatLeaderPlayersRepository.upsert(BeatLeaderService.playerRowFromToken(result.response));
   }
@@ -438,7 +443,7 @@ export default class BeatLeaderService {
       if (result.error === "not_found") {
         return undefined;
       }
-      throw new Error(`Failed to look up BeatLeader player "${blPlayerId}": ${result.message}`);
+      throw new BadGatewayError(`Failed to look up BeatLeader player "${blPlayerId}": ${result.message}`);
     }
     const token = result.response;
     const linkedIds = [
