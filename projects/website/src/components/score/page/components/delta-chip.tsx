@@ -1,3 +1,4 @@
+import SimpleTooltip from "@/components/simple-tooltip";
 import { cn } from "@/common/utils";
 
 type DeltaChipProps = {
@@ -27,16 +28,17 @@ export function DeltaChip({ value, format, lowerIsBetter = false, className }: D
   const improved = lowerIsBetter ? value < 0 : value > 0;
 
   return (
+    <SimpleTooltip display="Compared to previous score">
     <span
       className={cn(
         "inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-semibold tabular-nums",
         improved ? "bg-success/15 text-success" : "bg-danger/15 text-danger",
         className
       )}
-      title="Compared to previous score"
     >
       {value > 0 ? "+" : "-"}
       {format(Math.abs(value))}
     </span>
+    </SimpleTooltip>
   );
 }

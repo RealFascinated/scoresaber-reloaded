@@ -1,5 +1,6 @@
 "use client";
 
+import SimpleTooltip from "@/components/simple-tooltip";
 import { cn } from "@/common/utils";
 import Avatar from "@/components/avatar";
 import { PageTitle } from "@/components/page-title";
@@ -58,6 +59,7 @@ function FeedConnectionStatus({ readyState }: { readyState: ReadyState }) {
   const label = { open: "Connected", connecting: "Connecting", closed: "Disconnected" }[state];
 
   return (
+    <SimpleTooltip display="WebSocket status for the live score feed" className="shrink-0">
     <span
       className={cn(
         "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium",
@@ -65,7 +67,6 @@ function FeedConnectionStatus({ readyState }: { readyState: ReadyState }) {
         state === "connecting" && "border-warning/35 bg-warning/10 text-warning",
         state === "closed" && "border-destructive/35 bg-destructive/10 text-destructive"
       )}
-      title="WebSocket status for the live score feed"
     >
       <span
         className={cn(
@@ -78,6 +79,7 @@ function FeedConnectionStatus({ readyState }: { readyState: ReadyState }) {
       />
       {label}
     </span>
+    </SimpleTooltip>
   );
 }
 

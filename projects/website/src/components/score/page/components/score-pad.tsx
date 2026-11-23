@@ -1,3 +1,4 @@
+import SimpleTooltip from "@/components/simple-tooltip";
 import Card from "@/components/card";
 import { ReactNode } from "react";
 
@@ -41,9 +42,8 @@ export default function ScorePad({ title, columns, cells, footnote }: ScorePadPr
           const empty = cell.score === undefined || cell.cuts === 0;
           const intensity = empty ? 0 : 15 + (((cell.score ?? 0) - min) / range) * 60;
           return (
+            <SimpleTooltip key={cell.key} display={cell.tooltip}>
             <div
-              key={cell.key}
-              title={cell.tooltip}
               className={`flex aspect-square flex-col items-center justify-center gap-0.5 rounded-lg p-1 text-center ring-1 ${
                 weakest?.key === cell.key ? "ring-danger" : "ring-border"
               }`}
@@ -67,6 +67,7 @@ export default function ScorePad({ title, columns, cells, footnote }: ScorePadPr
                 </>
               )}
             </div>
+            </SimpleTooltip>
           );
         })}
       </div>

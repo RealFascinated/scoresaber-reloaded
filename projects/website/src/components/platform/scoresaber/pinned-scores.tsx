@@ -102,15 +102,16 @@ function PinnedScoreMessage({
 
   return (
     <>
+      <SimpleTooltip display={message ?? ""} className="min-w-0 flex-1">
       <p
         className={cn(
-          "min-w-0 flex-1 truncate text-sm",
+          "truncate text-sm",
           message ? "text-muted-foreground" : "text-muted-foreground/50 italic"
         )}
-        title={message}
       >
         {message ?? (editable ? "No comment" : "")}
       </p>
+      </SimpleTooltip>
       {editable && (
         <SimpleTooltip display="Edit comment">
           <button

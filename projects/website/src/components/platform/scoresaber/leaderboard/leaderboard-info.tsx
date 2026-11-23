@@ -1,5 +1,6 @@
 "use client";
 
+import SimpleTooltip from "@/components/simple-tooltip";
 import AskChatButton from "@/components/chat/ask-chat-button";
 import FallbackLink from "@/components/fallback-link";
 import { MapPreviewButton } from "@/components/leaderboard/button/map-preview-button";
@@ -43,13 +44,14 @@ export function LeaderboardInfo({ leaderboard }: LeaderboardInfoProps) {
             {showStarHistory && (
               <Dialog>
                 <DialogTrigger asChild>
+                  <SimpleTooltip display="View star history and ranked batches">
                   <button
                     className="flex cursor-pointer items-center gap-1.5 rounded-md border border-primary/50 bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary uppercase transition-colors duration-200 hover:border-primary hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:outline-hidden"
-                    title="View star history and ranked batches"
                   >
                     <SharedIcons.LeaderboardStarHistoryIcon className="h-3.5 w-3.5" />
                     Star History
                   </button>
+                  </SimpleTooltip>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-xl">
                   <DialogTitle>Star History</DialogTitle>
