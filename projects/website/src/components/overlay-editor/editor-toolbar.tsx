@@ -4,6 +4,7 @@ import { useOverlayEditorStore } from "@/common/overlay/editor/overlay-editor-st
 import type { SaveStatus } from "@/common/overlay/editor/use-overlay-autosave";
 import { MOCK_SCENARIOS, type MockScenario } from "@/common/overlay/mock/mock-overlay-data";
 import { cn } from "@/common/utils";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { SegmentedControl, SegmentedOption } from "@/components/ui/segmented-control";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -59,17 +60,13 @@ export default function EditorToolbar({
   return (
     <header className="grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-border bg-card px-3">
       <div className="flex min-w-0 items-center gap-1">
-        <Button
-          asChild
-          size="icon"
-          variant="ghost"
-          title="All overlays"
-          className="border-transparent bg-transparent"
-        >
-          <Link href="/overlay/editor">
-            <ArrowLeft className="size-4" />
-          </Link>
-        </Button>
+        <SimpleTooltip display="All overlays">
+          <Button asChild size="icon" variant="ghost" className="border-transparent bg-transparent">
+            <Link href="/overlay/editor">
+              <ArrowLeft className="size-4" />
+            </Link>
+          </Button>
+        </SimpleTooltip>
         <input
           className="max-w-64 min-w-0 rounded-md px-2 py-1 font-semibold outline-hidden hover:bg-hover focus:bg-muted focus:ring-2 focus:ring-primary/50"
           value={name}
@@ -77,22 +74,28 @@ export default function EditorToolbar({
           aria-label="Overlay name"
           onChange={event => rename(event.target.value)}
         />
-        <output
-          className="ml-2 flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground"
-          title="Changes are saved automatically and show up in OBS right away"
+        <SimpleTooltip
+          display="Changes are saved automatically and show up in OBS right away"
+          className="ml-2 shrink-0"
         >
-          <span className={cn("size-2 rounded-full", STATUS[status].dot)} />
-          {STATUS[status].label}
-        </output>
+          <output className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className={cn("size-2 rounded-full", STATUS[status].dot)} />
+            {STATUS[status].label}
+          </output>
+        </SimpleTooltip>
       </div>
 
       <div className="flex items-center gap-2">
-        <Button size="icon" variant="outline" title="Undo (Ctrl+Z)" disabled={!canUndo} onClick={undo}>
-          <Undo2 className="size-4" />
-        </Button>
-        <Button size="icon" variant="outline" title="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={redo}>
-          <Redo2 className="size-4" />
-        </Button>
+        <SimpleTooltip display="Undo (Ctrl+Z)">
+          <Button size="icon" variant="outline" disabled={!canUndo} onClick={undo}>
+            <Undo2 className="size-4" />
+          </Button>
+        </SimpleTooltip>
+        <SimpleTooltip display="Redo (Ctrl+Shift+Z)">
+          <Button size="icon" variant="outline" disabled={!canRedo} onClick={redo}>
+            <Redo2 className="size-4" />
+          </Button>
+        </SimpleTooltip>
         <Select
           value=""
           onValueChange={presetId => {

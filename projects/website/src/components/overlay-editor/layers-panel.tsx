@@ -3,6 +3,7 @@
 import { useOverlayEditorStore } from "@/common/overlay/editor/overlay-editor-store";
 import { cn } from "@/common/utils";
 import { OVERLAY_WIDGET_TYPES, OVERLAY_WIDGETS } from "@/components/overlay/widget-registry";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { SegmentedControl, SegmentedOption } from "@/components/ui/segmented-control";
 import { createOverlayElement } from "@ssr/common/overlay/overlay-presets";
 import { MAX_OVERLAY_ELEMENTS } from "@ssr/common/schemas/overlay/overlay-layout";
@@ -66,22 +67,23 @@ function LayerButton({
   children: ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      disabled={disabled}
-      className={cn(
-        "hover:bg-hover cursor-pointer rounded p-1 transition-colors disabled:cursor-default disabled:opacity-30",
-        active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-      )}
-      onClick={event => {
-        event.stopPropagation();
-        onClick();
-      }}
-    >
-      {children}
-    </button>
+    <SimpleTooltip display={label}>
+      <button
+        type="button"
+        aria-label={label}
+        disabled={disabled}
+        className={cn(
+          "hover:bg-hover cursor-pointer rounded p-1 transition-colors disabled:cursor-default disabled:opacity-30",
+          active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+        )}
+        onClick={event => {
+          event.stopPropagation();
+          onClick();
+        }}
+      >
+        {children}
+      </button>
+    </SimpleTooltip>
   );
 }
 

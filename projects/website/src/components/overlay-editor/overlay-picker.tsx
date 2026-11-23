@@ -2,6 +2,7 @@
 
 import CreateOverlayDialog from "@/components/overlay-editor/create-overlay-dialog";
 import { PageTitle } from "@/components/page-title";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { useUserOverlayMutations, useUserOverlays } from "@/hooks/use-user-overlays";
 import { MAX_USER_OVERLAYS, type UserOverlaySummary } from "@ssr/common/schemas/response/user/overlay";
@@ -46,37 +47,41 @@ function OverlayCard({ overlay, atLimit }: { overlay: UserOverlaySummary; atLimi
             Edit
           </Link>
         </Button>
-        <Button size="sm" variant="outline" title="Copy OBS URL" onClick={copyUrl}>
-          <Link2 className="size-3.5" />
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          title="Duplicate"
-          disabled={atLimit || duplicate.isPending}
-          onClick={() =>
-            duplicate.mutate(overlay.id, {
-              onError: error => toast.error(`Could not duplicate it: ${error.message}`),
-            })
-          }
-        >
-          <Copy className="size-3.5" />
-        </Button>
-        <Button
-          size="sm"
-          variant="destructive"
-          title="Delete"
-          disabled={remove.isPending}
-          onClick={() => {
-            if (window.confirm(`Delete "${overlay.name}"? Its OBS URL will stop working.`)) {
-              remove.mutate(overlay.id, {
-                onError: error => toast.error(`Could not delete it: ${error.message}`),
-              });
+        <SimpleTooltip display="Copy OBS URL">
+          <Button size="sm" variant="outline" onClick={copyUrl}>
+            <Link2 className="size-3.5" />
+          </Button>
+        </SimpleTooltip>
+        <SimpleTooltip display="Duplicate">
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={atLimit || duplicate.isPending}
+            onClick={() =>
+              duplicate.mutate(overlay.id, {
+                onError: error => toast.error(`Could not duplicate it: ${error.message}`),
+              })
             }
-          }}
-        >
-          <Trash2 className="size-3.5" />
-        </Button>
+          >
+            <Copy className="size-3.5" />
+          </Button>
+        </SimpleTooltip>
+        <SimpleTooltip display="Delete">
+          <Button
+            size="sm"
+            variant="destructive"
+            disabled={remove.isPending}
+            onClick={() => {
+              if (window.confirm(`Delete "${overlay.name}"? Its OBS URL will stop working.`)) {
+                remove.mutate(overlay.id, {
+                  onError: error => toast.error(`Could not delete it: ${error.message}`),
+                });
+              }
+            }}
+          >
+            <Trash2 className="size-3.5" />
+          </Button>
+        </SimpleTooltip>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { useOverlayEditorStore } from "@/common/overlay/editor/overlay-editor-st
 import { changeAnchor, clampScale } from "@/common/overlay/layout-math";
 import { cn } from "@/common/utils";
 import { OVERLAY_WIDGETS } from "@/components/overlay/widget-registry";
+import SimpleTooltip from "@/components/simple-tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -289,20 +290,20 @@ function ElementProperties({ element }: { element: OverlayElement }) {
         <div className="flex items-start gap-4">
           <div className="grid w-20 shrink-0 grid-cols-3 gap-1 rounded-md">
             {ANCHOR_GRID.flat().map(anchor => (
-              <button
-                key={anchor}
-                type="button"
-                title={anchor}
-                aria-label={`Anchor ${anchor}`}
-                aria-pressed={element.anchor === anchor}
-                onClick={() => setAnchor(anchor)}
-                className={cn(
-                  "aspect-square cursor-pointer rounded-sm border transition-colors",
-                  element.anchor === anchor
-                    ? "border-primary bg-primary"
-                    : "border-border bg-muted hover:bg-hover"
-                )}
-              />
+              <SimpleTooltip key={anchor} display={anchor} className="aspect-square">
+                <button
+                  type="button"
+                  aria-label={`Anchor ${anchor}`}
+                  aria-pressed={element.anchor === anchor}
+                  onClick={() => setAnchor(anchor)}
+                  className={cn(
+                    "size-full cursor-pointer rounded-sm border transition-colors",
+                    element.anchor === anchor
+                      ? "border-primary bg-primary"
+                      : "border-border bg-muted hover:bg-hover"
+                  )}
+                />
+              </SimpleTooltip>
             ))}
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-2">
