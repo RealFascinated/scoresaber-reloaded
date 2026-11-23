@@ -22,9 +22,11 @@ describe("ChatTitleService.cleanTitleInput", () => {
     expect(ChatTitleService.cleanTitleInput("Summarize Bob's play style (player 76561198866778629)")).toBe(
       "Summarize Bob's play style"
     );
-    expect(ChatTitleService.cleanTitleInput("::player{id=7656119901849}\n\n**Bob** is a grinder\\nsecond line")).toBe(
-      "Bob is a grinder second line"
+    expect(
+      ChatTitleService.cleanTitleInput("::player{id=7656119901849}\n\n**Bob** is a grinder\\nsecond line")
+    ).toBe("Bob is a grinder second line");
+    expect(ChatTitleService.cleanTitleInput("Clean FC :map[Eviternity]{id=632465} at 95%")).toBe(
+      "Clean FC at 95%"
     );
-    expect(ChatTitleService.cleanTitleInput("Clean FC :map[Eviternity]{id=632465} at 95%")).toBe("Clean FC at 95%");
   });
 });

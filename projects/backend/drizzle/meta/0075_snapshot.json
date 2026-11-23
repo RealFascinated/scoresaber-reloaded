@@ -132,12 +132,8 @@
           "name": "auth-accounts_userId_auth-users_id_fk",
           "tableFrom": "auth-accounts",
           "tableTo": "auth-users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -250,12 +246,8 @@
           "name": "auth-connections_userId_auth-users_id_fk",
           "tableFrom": "auth-connections",
           "tableTo": "auth-users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -343,12 +335,8 @@
           "name": "auth-sessions_userId_auth-users_id_fk",
           "tableFrom": "auth-sessions",
           "tableTo": "auth-users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -358,9 +346,7 @@
         "auth-sessions_token_unique": {
           "name": "auth-sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -446,9 +432,7 @@
         "auth-users_email_unique": {
           "name": "auth-users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -1000,12 +984,8 @@
           "name": "beatsaver-map-difficulties_versionId_beatsaver-map-versions_id_fk",
           "tableFrom": "beatsaver-map-difficulties",
           "tableTo": "beatsaver-map-versions",
-          "columnsFrom": [
-            "versionId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["versionId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1112,12 +1092,8 @@
           "name": "beatsaver-map-versions_mapId_beatsaver-maps_id_fk",
           "tableFrom": "beatsaver-map-versions",
           "tableTo": "beatsaver-maps",
-          "columnsFrom": [
-            "mapId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["mapId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1257,12 +1233,8 @@
           "name": "beatsaver-maps_uploaderId_beatsaver-uploaders_id_fk",
           "tableFrom": "beatsaver-maps",
           "tableTo": "beatsaver-uploaders",
-          "columnsFrom": [
-            "uploaderId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["uploaderId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1637,12 +1609,8 @@
           "name": "scoresaber-account-names_playerId_scoresaber-accounts_id_fk",
           "tableFrom": "scoresaber-account-names",
           "tableTo": "scoresaber-accounts",
-          "columnsFrom": [
-            "playerId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["playerId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1650,10 +1618,7 @@
       "compositePrimaryKeys": {
         "scoresaber-account-names_playerId_name_pk": {
           "name": "scoresaber-account-names_playerId_name_pk",
-          "columns": [
-            "playerId",
-            "name"
-          ]
+          "columns": ["playerId", "name"]
         }
       },
       "uniqueConstraints": {},
@@ -2208,10 +2173,7 @@
       "compositePrimaryKeys": {
         "scoresaber-leaderboard-realms_leaderboardId_realmId_pk": {
           "name": "scoresaber-leaderboard-realms_leaderboardId_realmId_pk",
-          "columns": [
-            "leaderboardId",
-            "realmId"
-          ]
+          "columns": ["leaderboardId", "realmId"]
         }
       },
       "uniqueConstraints": {},
@@ -2371,10 +2333,7 @@
       "compositePrimaryKeys": {
         "scoresaber-leaderboard-suggested-maps_leaderboardId_realmId_pk": {
           "name": "scoresaber-leaderboard-suggested-maps_leaderboardId_realmId_pk",
-          "columns": [
-            "leaderboardId",
-            "realmId"
-          ]
+          "columns": ["leaderboardId", "realmId"]
         }
       },
       "uniqueConstraints": {},
@@ -2690,10 +2649,7 @@
       "compositePrimaryKeys": {
         "scoresaber-ranked-batch-new-leaderboards_rankedBatchId_leaderboardId_pk": {
           "name": "scoresaber-ranked-batch-new-leaderboards_rankedBatchId_leaderboardId_pk",
-          "columns": [
-            "rankedBatchId",
-            "leaderboardId"
-          ]
+          "columns": ["rankedBatchId", "leaderboardId"]
         }
       },
       "uniqueConstraints": {},
@@ -2790,10 +2746,7 @@
       "compositePrimaryKeys": {
         "scoresaber-ranked-batch-players_rankedBatchId_playerId_pk": {
           "name": "scoresaber-ranked-batch-players_rankedBatchId_playerId_pk",
-          "columns": [
-            "rankedBatchId",
-            "playerId"
-          ]
+          "columns": ["rankedBatchId", "playerId"]
         }
       },
       "uniqueConstraints": {},
@@ -2890,10 +2843,7 @@
       "compositePrimaryKeys": {
         "scoresaber-ranked-batch-scores_rankedBatchId_scoreId_pk": {
           "name": "scoresaber-ranked-batch-scores_rankedBatchId_scoreId_pk",
-          "columns": [
-            "rankedBatchId",
-            "scoreId"
-          ]
+          "columns": ["rankedBatchId", "scoreId"]
         }
       },
       "uniqueConstraints": {},
@@ -3073,12 +3023,8 @@
           "name": "scoresaber-score-events_playerId_scoresaber-accounts_id_fk",
           "tableFrom": "scoresaber-score-events",
           "tableTo": "scoresaber-accounts",
-          "columnsFrom": [
-            "playerId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["playerId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3086,12 +3032,8 @@
           "name": "scoresaber-score-events_leaderboardId_scoresaber-leaderboards_id_fk",
           "tableFrom": "scoresaber-score-events",
           "tableTo": "scoresaber-leaderboards",
-          "columnsFrom": [
-            "leaderboardId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["leaderboardId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3418,10 +3360,7 @@
       "compositePrimaryKeys": {
         "scoresaber-score-realms_scoreId_realmId_pk": {
           "name": "scoresaber-score-realms_scoreId_realmId_pk",
-          "columns": [
-            "scoreId",
-            "realmId"
-          ]
+          "columns": ["scoreId", "realmId"]
         }
       },
       "uniqueConstraints": {},
@@ -3749,12 +3688,8 @@
           "name": "user-follows_userId_auth-users_id_fk",
           "tableFrom": "user-follows",
           "tableTo": "auth-users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3762,10 +3697,7 @@
       "compositePrimaryKeys": {
         "user-follows_userId_followingPlayerId_pk": {
           "name": "user-follows_userId_followingPlayerId_pk",
-          "columns": [
-            "userId",
-            "followingPlayerId"
-          ]
+          "columns": ["userId", "followingPlayerId"]
         }
       },
       "uniqueConstraints": {},
@@ -3845,12 +3777,8 @@
           "name": "user-overlays_userId_auth-users_id_fk",
           "tableFrom": "user-overlays",
           "tableTo": "auth-users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3897,12 +3825,8 @@
           "name": "user-pinned-scores_userId_auth-users_id_fk",
           "tableFrom": "user-pinned-scores",
           "tableTo": "auth-users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3910,10 +3834,7 @@
       "compositePrimaryKeys": {
         "user-pinned-scores_userId_scoreId_pk": {
           "name": "user-pinned-scores_userId_scoreId_pk",
-          "columns": [
-            "userId",
-            "scoreId"
-          ]
+          "columns": ["userId", "scoreId"]
         }
       },
       "uniqueConstraints": {},
@@ -3952,12 +3873,8 @@
           "name": "user-preferences_userId_auth-users_id_fk",
           "tableFrom": "user-preferences",
           "tableTo": "auth-users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
