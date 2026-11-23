@@ -1,6 +1,5 @@
 "use client";
 
-import AskChatButton from "@/components/chat/ask-chat-button";
 import AccSaberLogo from "@/components/logos/logos/accsaber-logo";
 import BeatLeaderLogo from "@/components/logos/logos/beatleader-logo";
 import ScoresaberLogo from "@/components/logos/logos/scoresaber-logo";
@@ -118,13 +117,6 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
       )}
 
       <SuggestedMapsDialog player={player} />
-
-      <AskChatButton
-        prompt={`Summarize ${player.name}'s play style and recent progress (player ${player.id})`}
-        tooltip={`Ask the chat about ${player.name}`}
-        size={36}
-        className="border-0 bg-muted p-2 hover:bg-accent"
-      />
     </div>
   );
 }
