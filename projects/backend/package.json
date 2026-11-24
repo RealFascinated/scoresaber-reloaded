@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^3.0.94",
-    "@ai-sdk/otel": "^1.0.179",
+    "@ai-sdk/otel": "^1.0.181",
     "@discordx/importer": "^1.3.3",
     "@discordx/utilities": "^8.0.0",
     "@dotenvx/dotenvx": "^2.38.2",
@@ -38,16 +38,16 @@
     "ai": "7.0.178",
     "better-auth": "file:../../vendor/better-auth/better-auth-1.7.7.tgz",
     "croner": "^11.0.1",
-    "devalue": "^6.0.3",
+    "devalue": "^6.0.4",
     "discord.js": "^14.28.1",
     "discordx": "^11.13.3",
     "dotenv": "^18.0.10",
     "drizzle-orm": "^0.45.4",
     "elysia": "2.0.0-rc.4",
     "elysia-helmet": "^3.1.0",
-    "ioredis": "^6.0.0",
+    "ioredis": "^6.1.0",
     "pg": "^8.23.1",
-    "systeminformation": "^5.33.23",
+    "systeminformation": "^5.33.24",
     "typebox": "^1.4.7"
   },
   "devDependencies": {
@@ -57,7 +57,7 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "drizzle-kit": "^0.31.11",
     "msw": "^2.15.0",
-    "oxlint": "^1.94.0",
+    "oxlint": "^1.95.0",
     "tsx": "^4.23.15",
     "typescript": "npm:@typescript/typescript6@^6.0.2"
   }
