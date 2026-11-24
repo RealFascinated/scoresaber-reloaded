@@ -77,7 +77,7 @@ export default function PlayerActions({ player }: { player: ScoreSaberPlayer }) 
       <PlayerLink
         playerName={player.name}
         name="BeatLeader"
-        url={`https://beatleader.xyz/u/${player.id}`}
+        url={`https://beatleader.com/u/${player.id}`}
         icon={<BeatLeaderLogo size={20} className="select-none" />}
       />
       <PlayerLink

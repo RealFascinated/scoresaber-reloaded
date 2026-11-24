@@ -9,7 +9,7 @@ import { TEST_PLAYER_ID } from "../helpers/constants";
 import { server } from "../helpers/msw-server";
 
 const FIRST_ID = 930_000;
-const SCORE_STATS_CDN = "https://cdn.scorestats.beatleader.xyz";
+const SCORE_STATS_CDN = "https://cdn.scorestats.beatleader.com";
 
 afterEach(async () => {
   await db.delete(beatLeaderScoresTable).where(inArray(beatLeaderScoresTable.id, ids()));

@@ -8,7 +8,7 @@ type BeatLeaderWebsocket = {
 export function connectBeatLeaderWebsocket({ onMessage, onScore, onDisconnect }: BeatLeaderWebsocket) {
   return connectWebSocket({
     name: "BeatLeader",
-    url: "wss://sockets.api.beatleader.xyz/scores",
+    url: "wss://sockets.api.beatleader.com/scores",
     onMessage: (message: unknown) => {
       onScore && onScore(message as BeatLeaderScoreToken);
       onMessage && onMessage(message);

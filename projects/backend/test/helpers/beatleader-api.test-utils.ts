@@ -2,7 +2,7 @@ import { env } from "@ssr/common/env";
 import { HttpResponse, http, type JsonBodyType } from "msw";
 
 export const BEATLEADER_API_HOST = "api.beatleader.com";
-export const BEATLEADER_SCORE_STATS_CDN = "https://cdn.scorestats.beatleader.xyz";
+export const BEATLEADER_SCORE_STATS_CDN = "https://cdn.scorestats.beatleader.com";
 
 /**
  * Answers a BeatLeader API GET the way the real API would. The backend reaches BeatLeader through

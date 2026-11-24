@@ -351,7 +351,7 @@ export default class BeatLeaderService {
     if (isProduction() && account && (account.trackReplays || isTop50GlobalScore)) {
       try {
         const replayId = getBeatLeaderReplayId(beatLeaderScore);
-        const replay = await Request.get<ArrayBuffer>(`https://cdn.replays.beatleader.xyz/${replayId}`, {
+        const replay = await Request.get<ArrayBuffer>(`https://cdn.replays.beatleader.com/${replayId}`, {
           returns: "arraybuffer",
         });
 

@@ -37,5 +37,5 @@ export function getBeatLeaderReplayCdnUrl(beatLeaderScore: BeatLeaderScore): str
   if (beatLeaderScore.savedReplay) {
     return `${env.NEXT_PUBLIC_CDN_URL}/${getS3BucketName(StorageBucket.BeatLeaderReplays)}/${replayId}`;
   }
-  return `https://cdn.replays.beatleader.xyz/${replayId}`;
+  return `https://cdn.replays.beatleader.com/${replayId}`;
 }
