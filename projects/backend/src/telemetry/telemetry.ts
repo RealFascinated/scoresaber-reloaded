@@ -67,6 +67,21 @@ function isChatSpan(span: ReadableSpan) {
   return span.attributes[CHAT_SPAN_ATTRIBUTE] !== undefined;
 }
 
+const TRACE_SAMPLE_RATIO = 0.1;
+const SLOW_SPAN_THRESHOLD_MS = 100;
+
+function isSampledTrace(traceId: string) {
+  return Number.parseInt(traceId.slice(-8), 16) / 0x100000000 < TRACE_SAMPLE_RATIO;
+}
+
+function shouldExportSpan(span: ReadableSpan) {
+  if (isChatSpan(span) || span.status.code === SpanStatusCode.ERROR) {
+    return true;
+  }
+  const [seconds, nanos] = span.duration;
+  return seconds * 1000 + nanos / 1e6 >= SLOW_SPAN_THRESHOLD_MS || isSampledTrace(span.spanContext().traceId);
+}
+
 class FilteredSpanProcessor implements SpanProcessor {
   constructor(
     private readonly inner: SpanProcessor,
@@ -123,7 +138,7 @@ export function initTelemetry() {
         ? [
             new FilteredSpanProcessor(
               new BatchSpanProcessor(new OTLPTraceExporter()),
-              span => !isChatSpan(span)
+              span => !isChatSpan(span) && shouldExportSpan(span)
             ),
             new FilteredSpanProcessor(
               new BatchSpanProcessor(
@@ -132,7 +147,7 @@ export function initTelemetry() {
               isChatSpan
             ),
           ]
-        : [new BatchSpanProcessor(new OTLPTraceExporter())]),
+        : [new FilteredSpanProcessor(new BatchSpanProcessor(new OTLPTraceExporter()), shouldExportSpan)]),
     ],
   });
   trace.setGlobalTracerProvider(tracerProvider);

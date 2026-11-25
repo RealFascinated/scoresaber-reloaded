@@ -1,9 +1,6 @@
 import { env } from "@ssr/common/env";
 import Logger from "@ssr/common/logger";
 import Redis from "ioredis";
-import { instrumentRedis } from "../telemetry/instrumentation";
-
-instrumentRedis();
 
 const logger = Logger.withTopic("Redis");
 logger.info("Connecting to Redis...");

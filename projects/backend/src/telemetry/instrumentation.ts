@@ -1,9 +1,10 @@
 import { SpanKind, SpanStatusCode, trace, type Span, type Attributes } from "@opentelemetry/api";
-import Redis from "ioredis";
 import type { Pool } from "pg";
 import { TRACER_NAME, withSpan } from "./telemetry";
 
 export const SUPERSEDED_REASON = "scoresaber-request-superseded";
+
+const MAX_QUERY_TEXT_LENGTH = 256;
 
 function endSpan(span: Span, error?: Error) {
   if (error) {
@@ -63,32 +64,13 @@ export function instrumentPool(pool: Pool) {
 
     const config = args[0];
     const statement = typeof config === "string" ? config : (config as { text?: string }).text;
-    const attributes: Attributes = { "db.system.name": "postgresql", "db.query.text": statement };
+    const attributes: Attributes = {
+      "db.system.name": "postgresql",
+      "db.query.text": statement?.slice(0, MAX_QUERY_TEXT_LENGTH),
+    };
 
     return withSpan("pg.query", () => originalQuery(...args) as Promise<unknown>, attributes);
   };
 
   pool.query = tracedQuery as unknown as typeof pool.query;
-}
-
-/** Wraps `Redis.prototype.sendCommand` so every Redis command gets a client span. */
-export function instrumentRedis() {
-  const originalSendCommand = Redis.prototype.sendCommand;
-
-  Redis.prototype.sendCommand = function (
-    this: Redis,
-    command: Parameters<typeof originalSendCommand>[0],
-    stream?: Parameters<typeof originalSendCommand>[1]
-  ) {
-    const span = trace.getTracer(TRACER_NAME).startSpan(`redis ${command.name}`, {
-      kind: SpanKind.CLIENT,
-      attributes: { "db.system.name": "redis", "db.operation.name": command.name },
-    });
-    const result = originalSendCommand.call(this, command, stream);
-    command.promise.then(
-      () => endSpan(span),
-      (error: unknown) => endSpan(span, toError(error))
-    );
-    return result;
-  } as typeof originalSendCommand;
 }

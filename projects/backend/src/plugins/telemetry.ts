@@ -6,6 +6,8 @@ import { TRACER_NAME } from "../telemetry/telemetry";
 
 const log = Logger.withTopic("HTTP");
 
+const UNTRACED_PATHS = new Set(["/health", "/metrics"]);
+
 type RequestState = { span: Span; start: number };
 
 /** Creates a server span per request and logs each request's method, path, status and duration. */
@@ -15,6 +17,9 @@ export const telemetry = () => {
   return new Elysia({ name: "telemetry" })
     .onRequest(({ request }) => {
       const url = new URL(request.url);
+      if (UNTRACED_PATHS.has(url.pathname)) {
+        return;
+      }
       const span = trace.getTracer(TRACER_NAME).startSpan(
         `${request.method} ${url.pathname}`,
         {
