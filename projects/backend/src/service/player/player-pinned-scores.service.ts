@@ -17,7 +17,7 @@ export class PlayerPinnedScoresService {
     const scores = await Promise.all(
       pins.map(async ({ scoreId, message }) => {
         try {
-          const playerScore = await PlayerScoresService.getScore(scoreId, realmId);
+          const playerScore = await PlayerScoresService.getScore(scoreId, realmId, true);
           return message ? { ...playerScore, message } : playerScore;
         } catch (error) {
           if (error instanceof NotFoundError) {

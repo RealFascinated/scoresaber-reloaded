@@ -16,6 +16,7 @@ import { ScoreSaberV2PlayerToken } from "@ssr/common/schemas/scoresaber/tokens/v
 import { ScoreSaberV2PlayersPageToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/players-page";
 import { ScoreSaberV2RealmToken } from "@ssr/common/schemas/scoresaber/tokens/v2/realm/realm";
 import { ScoreSaberV2RealmPpCurveToken } from "@ssr/common/schemas/scoresaber/tokens/v2/realm/realm-pp-curve";
+import { ScoreSaberV2ScoreResponseToken } from "@ssr/common/schemas/scoresaber/tokens/v2/score/score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
 import { getScoreSaberLeaderboardFromV2PageToken } from "@ssr/common/token-creators";
 import { CoalescingLoader } from "@ssr/common/utils/coalescing-loader";
@@ -54,6 +55,7 @@ const RANKING_REQUESTS_ENDPOINT = `${API_BASE}/ranking/requests/:query`;
 const LOOKUP_LEADERBOARDS_V2_ENDPOINT = `${API_BASE}/v2/leaderboards`;
 
 const LOOKUP_LEADERBOARD_SCORES_V2_ENDPOINT = `${API_BASE}/v2/leaderboards/:id/scores`;
+const LOOKUP_SCORE_V2_ENDPOINT = `${API_BASE}/v2/scores/:id`;
 const LOOKUP_REALMS_V2_ENDPOINT = `${API_BASE}/v2/realms`;
 const LOOKUP_REALM_PP_CURVE_V2_ENDPOINT = `${API_BASE}/v2/realms/:id/pp-curve`;
 
@@ -101,6 +103,7 @@ const ENDPOINT_LABELS: [RegExp, string][] = [
   [/^ranking\/requests\/[^/]+$/, "ranking/requests/:query"],
   [/^v2\/leaderboards$/, "v2/leaderboards"],
   [/^v2\/leaderboards\/[^/]+\/scores$/, "v2/leaderboards/:id/scores"],
+  [/^v2\/scores\/[^/]+$/, "v2/scores/:id"],
   [/^v2\/realms$/, "v2/realms"],
   [/^v2\/realms\/[^/]+\/pp-curve$/, "v2/realms/:id/pp-curve"],
 ];
@@ -680,6 +683,30 @@ export class ScoreSaberApiService {
     ScoreSaberApiService.log(
       `Found ${response.data.length} realm "${realmId}" scores for leaderboard "${leaderboardId}" in ${formatDuration(performance.now() - before)}`
     );
+    return result;
+  }
+
+  /**
+   * Looks up a single score (v2), with the rank and weight ScoreSaber currently has for it.
+   *
+   * @param scoreId the ID of the score to look up
+   * @param realmId the realm to resolve rank, pp and weight for
+   * @returns the score and its leaderboard, or a failure
+   */
+  public static async lookupScore(scoreId: number, realmId: number) {
+    const before = performance.now();
+    ScoreSaberApiService.log(`Looking up score "${scoreId}"...`);
+    const result = await ScoreSaberApiService.fetch<ScoreSaberV2ScoreResponseToken>(
+      fillEndpoint(LOOKUP_SCORE_V2_ENDPOINT, { id: scoreId }),
+      {
+        searchParams: { includeScoreStats: "false", ...realmSearchParam(realmId) },
+        skipCache: true,
+      }
+    );
+    if (!result.ok) {
+      return result;
+    }
+    ScoreSaberApiService.log(`Found score "${scoreId}" in ${formatDuration(performance.now() - before)}`);
     return result;
   }
 

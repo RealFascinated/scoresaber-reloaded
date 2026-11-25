@@ -1,4 +1,5 @@
 import ApiServiceRegistry from "@ssr/common/api-service/api-service-registry";
+import { BadGatewayError } from "@ssr/common/error/bad-gateway-error";
 import { NotFoundError } from "@ssr/common/error/not-found-error";
 import Logger, { type ScopedLogger } from "@ssr/common/logger";
 import { Pagination } from "@ssr/common/pagination";
@@ -19,7 +20,11 @@ import { ScoreSaberPlayerScoresPageToken } from "@ssr/common/schemas/scoresaber/
 import type { ScoreSaberPlayerLookupToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
 import { PlayerScore } from "@ssr/common/score/player-score";
 import { ScoreSaberScoreSort } from "@ssr/common/score/score-sort";
-import { getScoreSaberLeaderboardFromToken, getScoreSaberScoreFromToken } from "@ssr/common/token-creators";
+import {
+  getScoreSaberLeaderboardFromToken,
+  getScoreSaberScoreFromToken,
+  getScoreSaberScoreFromV2Token,
+} from "@ssr/common/token-creators";
 import { accSaberDifficultyToMapDifficulty } from "@ssr/common/utils/accsaber-difficulty";
 import { formatNumberWithCommas } from "@ssr/common/utils/number-utils";
 import { formatDuration } from "@ssr/common/utils/time-utils";
@@ -518,9 +523,44 @@ export class PlayerScoresService {
    *
    * @param scoreId the id of the score
    * @param realmId the realm to resolve pp and leaderboard ranking for
+   * @param cached whether to read the locally stored score instead of ScoreSaber, whose rank and weight are not kept current locally
    * @returns the score
    */
-  public static async getScore(scoreId: number, realmId: number) {
+  public static async getScore(scoreId: number, realmId: number, cached: boolean = false) {
+    if (cached) {
+      return PlayerScoresService.getCachedScore(scoreId, realmId);
+    }
+
+    const result = await ScoreSaberApiService.lookupScore(scoreId, realmId);
+    if (!result.ok) {
+      if (result.error === "not_found") {
+        throw new NotFoundError("Score not found");
+      }
+      throw new BadGatewayError(`Unable to fetch score "${scoreId}": ${result.message}`);
+    }
+
+    const leaderboard = await ScoreSaberLeaderboardsService.getLeaderboard(
+      result.response.leaderboard.id,
+      realmId
+    );
+    const [score, beatSaver] = await Promise.all([
+      ScoreCoreService.insertScoreData(
+        getScoreSaberScoreFromV2Token(result.response.score, leaderboard),
+        leaderboard,
+        {
+          insertPlayerInfo: false,
+        }
+      ),
+      BeatSaverService.getMap(
+        leaderboard.songHash,
+        leaderboard.difficulty.difficulty,
+        leaderboard.difficulty.characteristic
+      ),
+    ]);
+    return { score, leaderboard, beatSaver };
+  }
+
+  private static async getCachedScore(scoreId: number, realmId: number) {
     const scoreRow = await ScoreSaberScoresRepository.findAnyRowByScoreId(scoreId, realmId);
     if (!scoreRow) {
       throw new NotFoundError("Score not found");

@@ -12,7 +12,8 @@ import { ScoreSaberScore, ScoreSaberScoreSchema } from "./schemas/scoresaber/sco
 import { ScoreSaberLeaderboardToken } from "./schemas/scoresaber/tokens/v1/leaderboard";
 import { ScoreSaberScoreToken } from "./schemas/scoresaber/tokens/v1/score";
 import { ScoreSaberV2LeaderboardPageToken } from "./schemas/scoresaber/tokens/v2/leaderboard/leaderboards-page";
-import { Modifier } from "./score/modifier";
+import { ScoreSaberV2ScoreToken } from "./schemas/scoresaber/tokens/v2/score/score";
+import { Modifier, normalizeModifiers } from "./score/modifier";
 import { getDifficultyFromScoreSaberDifficulty, ScoreSaberHMDs } from "./utils/scoresaber.util";
 import { parseDate } from "./utils/time-utils";
 
@@ -93,6 +94,44 @@ export function getScoreSaberLeaderboardFromV2PageToken(
     status: status,
     rankedDate: token.realm.rankedAt ? parseDate(token.realm.rankedAt) : undefined,
     qualifiedDate: token.realm.qualifiedAt ? parseDate(token.realm.qualifiedAt) : undefined,
+  });
+}
+
+/**
+ * Parses a {@link ScoreSaberV2ScoreToken} into a {@link ScoreSaberScore}.
+ */
+export function getScoreSaberScoreFromV2Token(
+  token: ScoreSaberV2ScoreToken,
+  leaderboard: ScoreSaberLeaderboard
+): ScoreSaberScore {
+  return parseScore({
+    playerId: token.player.id,
+    leaderboardId: leaderboard.id,
+    scoreId: token.id,
+    difficulty: leaderboard.difficulty.difficulty,
+    characteristic: leaderboard.difficulty.characteristic ?? "Standard",
+    score: token.unmodifiedScore,
+    accuracy: token.accuracy * 100,
+    pp: token.pp,
+    weight: token.weight,
+    rank: token.rank,
+    misses: token.missedNotes + token.badCuts,
+    missedNotes: token.missedNotes,
+    badCuts: token.badCuts,
+    maxCombo: token.maxCombo,
+    fullCombo: token.fullCombo,
+    modifiers: normalizeModifiers(token.mods),
+    hmd: (token.device?.hmd as HMD | null | undefined) ?? "Unknown",
+    rightController: token.device?.controllerRight ?? null,
+    leftController: token.device?.controllerLeft ?? null,
+    playerInfo: {
+      id: token.player.id,
+      name: token.player.name,
+      country: token.player.country,
+      role: token.player.role,
+      avatar: token.player.avatar,
+    },
+    timestamp: new Date(token.createdAt),
   });
 }
 
