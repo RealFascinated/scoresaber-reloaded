@@ -186,9 +186,9 @@ export function buildTakeaways(
   return [...good.slice(0, limits.good ?? MAX_GOOD), ...improve.slice(0, limits.improve ?? MAX_IMPROVE)];
 }
 
-type Part = "preSwing" | "postSwing" | "center";
+export type Part = "preSwing" | "postSwing" | "center";
 
-const PARTS: Record<Part, { max: number; name: string; short: string; rule: string; fix: string }> = {
+export const PARTS: Record<Part, { max: number; name: string; short: string; rule: string; fix: string }> = {
   preSwing: {
     max: 70,
     name: "the swing before the hit",
@@ -211,7 +211,7 @@ const PARTS: Record<Part, { max: number; name: string; short: string; rule: stri
     fix: "Aim for the middle of the block, not just any part of it.",
   },
 };
-const PART_KEYS = Object.keys(PARTS) as Part[];
+export const PART_KEYS = Object.keys(PARTS) as Part[];
 
 function share(details: CutDetail[], part: Part, atLeast = 0.99) {
   if (details.length === 0) {

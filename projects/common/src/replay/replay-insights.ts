@@ -45,6 +45,14 @@ export type CutDetail = {
   postSwing: number;
   /** Points for how central the cut was, out of 15. */
   center: number;
+  /** Seconds into the song. */
+  time: number;
+  /** How far from the beat the hit landed, in milliseconds (always positive). */
+  timing: number;
+  /** How far the cut direction was from the note's arrow, in degrees (always positive). */
+  angleError: number;
+  /** Saber speed at the hit. */
+  speed: number;
 };
 
 export type WeakMoment = { start: number; end: number; pointsLost: number; misses: number };
@@ -196,6 +204,8 @@ type CutRecord = {
   lane: number;
   layer: number;
   gap?: number;
+  timing: number;
+  angleError: number;
 };
 
 type MistakeRecord = {
@@ -258,6 +268,8 @@ export function computeReplayInsights(replay: Replay, options: ReplayInsightsOpt
         lane: decoded.lane,
         layer: decoded.layer,
         gap: previousTime === undefined ? undefined : note.eventTime - previousTime,
+        timing: Math.abs(cut.timeDeviation) * 1000,
+        angleError: Math.abs(cut.cutDirDeviation),
       });
     } else if (note.eventType === NoteEventType.bad || note.eventType === NoteEventType.miss) {
       const kind = note.eventType === NoteEventType.bad ? "bad" : "miss";
@@ -389,6 +401,10 @@ export function computeReplayInsights(replay: Replay, options: ReplayInsightsOpt
         preSwing: cut.pre,
         postSwing: cut.post,
         center: cut.center,
+        time: cut.time,
+        timing: cut.timing,
+        angleError: cut.angleError,
+        speed: cut.speed,
       })),
     weakMoments: findWeakMoments(lostEvents, options.weakMomentCount ?? WEAK_MOMENT_COUNT),
     greatShare: cuts.length > 0 ? greatCuts / cuts.length : 0,
