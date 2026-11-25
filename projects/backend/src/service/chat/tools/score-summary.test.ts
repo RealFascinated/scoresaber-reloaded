@@ -248,19 +248,26 @@ describe("buildScoreSummary", () => {
       { at: "00:20", kind: "wall", comboBefore: 8, energyAfter: 0.4 },
     ]);
     expect(replay.pausedAt).toEqual(["00:12"]);
-    expect(replay.directions).toHaveLength(9);
-    expect(replay.directions).toContainEqual(
-      expect.objectContaining({ direction: "down", cuts: 59, mistakes: 1 })
-    );
-    expect(replay.grid).toHaveLength(12);
+    expect(replay.directions).toEqual([
+      expect.objectContaining({ direction: "down", cuts: 59, mistakes: 1 }),
+    ]);
+    expect(replay.grid.every(cell => cell.cuts >= 20)).toBe(true);
     expect(replay.hands.left.partAverages).toEqual({ preSwing: 70, postSwing: 30, center: 15 });
     expect(replay.hands.right.partAverages?.center).toBeLessThan(15);
-    expect(replay.cutScoreCounts[0]).toEqual({ score: 115, count: 29 });
     expect(summary.result.scoresSetOnMap).toBe(3);
     expect(summary.accuracyBySecond?.source).toBe("replay");
     expect(summary.accuracyBySecond?.accuracy.length).toBeGreaterThan(30);
     expect(summary.accuracyBySecond?.pp?.length).toBe(summary.accuracyBySecond?.accuracy.length);
-    expect(replay.takeaways.length).toBeGreaterThan(0);
+    expect(replay.leaks.length).toBeGreaterThan(0);
+    expect(replay.leaks[0]).toMatchObject({
+      lostPart: expect.any(String),
+      accuracyIfFixed: expect.any(Number),
+    });
+    expect(replay.leaks[0].fix.length).toBeGreaterThan(0);
+    expect(replay.worstCuts).toMatchObject({
+      worstCuts: expect.any(Number),
+      accuracyIfGapHalved: expect.any(Number),
+    });
     expect(summary.replaySetup).toMatchObject({
       hmd: "Quest 3",
       jumpDistance: 18.23,

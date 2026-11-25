@@ -3,6 +3,7 @@ import { DEFAULT_REALM_ID } from "@ssr/common/realm";
 import { generateText, stepCountIs, type ModelMessage } from "ai";
 import { writeFile } from "node:fs/promises";
 import { ChatModelService } from "../src/service/chat/chat-model.service";
+import { checkChatStyle, type ChatAnswerKind } from "../src/service/chat/chat-style-check";
 import { buildChatSystemPrompt } from "../src/service/chat/chat-system-prompt";
 import { createChatTools } from "../src/service/chat/tools/chat-tools";
 
@@ -14,6 +15,7 @@ interface EvalPlayer {
 interface EvalCase {
   id: string;
   turns: string[];
+  kind: ChatAnswerKind;
   expectTools?: string[];
   forbid?: RegExp[];
   rubric: string;
@@ -51,6 +53,7 @@ interface CaseResult {
   turns: TurnResult[];
   checks: string[];
   verdict: Verdict;
+  voice: Verdict;
   ms: number;
 }
 
@@ -65,6 +68,7 @@ const INVENTED_REASONING = [/ceiling/i, /tapped out/i, /map (that )?size/i, /dra
 const CASES: EvalCase[] = [
   {
     id: "improve-pushback",
+    kind: "analysis",
     turns: ["what could I improve on?", "well I gain pp on low stars though?"],
     expectTools: ["getPlayerPerformance", "getSuggestedMaps"],
     forbid: INVENTED_REASONING,
@@ -73,6 +77,7 @@ const CASES: EvalCase[] = [
   },
   {
     id: "what-if-pp",
+    kind: "simple",
     turns: ["how much pp would I gain from a 98% on a 6 star map?"],
     expectTools: ["calculatePp"],
     rubric:
@@ -80,6 +85,7 @@ const CASES: EvalCase[] = [
   },
   {
     id: "average-accuracy",
+    kind: "analysis",
     turns: ["why is my average ranked accuracy so low?"],
     forbid: INVENTED_REASONING,
     rubric:
@@ -87,6 +93,7 @@ const CASES: EvalCase[] = [
   },
   {
     id: "strongest-range",
+    kind: "analysis",
     turns: ["which star range am I strongest at?"],
     expectTools: ["getPlayerPerformance"],
     rubric:
@@ -94,6 +101,7 @@ const CASES: EvalCase[] = [
   },
   {
     id: "score-quality",
+    kind: "simple",
     turns: ["is 96% on a 9 star map good for me?"],
     expectTools: ["getPlayerPerformance"],
     rubric:
@@ -101,6 +109,7 @@ const CASES: EvalCase[] = [
   },
   {
     id: "weekly-progress",
+    kind: "simple",
     turns: ["how much pp have I gained this week?"],
     expectTools: ["getPlayerHistory"],
     rubric:
@@ -108,6 +117,7 @@ const CASES: EvalCase[] = [
   },
   {
     id: "next-maps",
+    kind: "analysis",
     turns: ["give me 3 maps to play for pp"],
     expectTools: ["getSuggestedMaps"],
     rubric:
@@ -115,12 +125,14 @@ const CASES: EvalCase[] = [
   },
   {
     id: "hundred-percent",
+    kind: "simple",
     turns: ["how do I get a 100% on a 6 star map?"],
     rubric:
       "Must say that 100% is essentially unattainable on a ranked map of that difficulty and that anything above 99% is elite, and must not present 100% as a normal goal. Should give a realistic accuracy target from tool data or the player's own results instead.",
   },
   {
     id: "realistic-target",
+    kind: "analysis",
     turns: ["what accuracy should I aim for on 9 star maps to gain pp?"],
     expectTools: ["getPlayerPerformance"],
     rubric:
@@ -128,8 +140,67 @@ const CASES: EvalCase[] = [
   },
   {
     id: "off-topic",
+    kind: "decline",
     turns: ["write me a python script that sorts a list"],
     rubric: "Must refuse in one short sentence and not provide any code.",
+  },
+  {
+    id: "voice-greeting",
+    kind: "chat",
+    turns: ["hey"],
+    rubric:
+      "A casual greeting. Must reply in one or two friendly sentences, without calling tools, without a feature list, and without bullets.",
+  },
+  {
+    id: "voice-thanks",
+    kind: "chat",
+    turns: ["what is my global rank?", "thanks, that's helpful"],
+    expectTools: ["getPlayer"],
+    rubric:
+      "The second turn is only thanks. Must reply with a short natural acknowledgement (one sentence), no recap, no new analysis, no offer of further help.",
+  },
+  {
+    id: "voice-simple-rank",
+    kind: "simple",
+    turns: ["what's my rank?"],
+    expectTools: ["getPlayer"],
+    rubric:
+      "Must answer with the player's global rank (and country rank if returned) in one or two plain sentences, with no headers or bullets.",
+  },
+  {
+    id: "voice-breakdown-latest",
+    kind: "analysis",
+    turns: ["break down my latest score"],
+    rubric:
+      "Must open with a one sentence verdict, be short prose (at most two short paragraphs, no bold labels), explain every number in game terms, and give a concrete next step per weakness. It must lead with what went wrong and how to fix it, cite replay numbers for the cause and the gain in accuracy or pp, and must not list perfect stats, call the target easy, hard, elite or polish, or wish luck.",
+  },
+  {
+    id: "voice-rude",
+    kind: "chat",
+    turns: ["this assistant is useless, you got my rank wrong"],
+    rubric:
+      "The user is annoyed. Must not grovel or over-apologize, must not get defensive, and should stay on the problem: offer to recheck by actually checking (calling a tool is fine) and then give the number. Plain prose.",
+  },
+  {
+    id: "voice-no-bullets",
+    kind: "analysis",
+    turns: ["what should I work on? please no bullet points or bold, just talk to me"],
+    rubric:
+      "The user asked for no bullets or bold formatting. Must answer in plain flowing prose with no lists, no bold and no headers, while still giving data-backed advice.",
+  },
+  {
+    id: "voice-decline-tone",
+    kind: "decline",
+    turns: ["can you help me write my history homework about Rome?"],
+    rubric:
+      "Must decline warmly in one or two plain sentences with no lists, no lecture, and point back to what it can help with (Beat Saber scores, players, maps).",
+  },
+  {
+    id: "voice-ambiguous",
+    kind: "chat",
+    turns: ["is it any good?"],
+    rubric:
+      "The request has no clear subject. Must ask exactly one short clarifying question (what to look at, such as a map, score or player) without guessing, listing options, or calling unrelated tools.",
   },
 ];
 
@@ -145,6 +216,18 @@ const SCORING_KNOWLEDGE = PROMPT_FOR_KNOWLEDGE.slice(
   PROMPT_FOR_KNOWLEDGE.indexOf("## Showing maps and players")
 );
 const JUDGE_SYSTEM = `You grade answers from a Beat Saber ScoreSaber assistant. The tool outputs are ground truth, and the following game facts and rules (which the assistant was also given) are true and may be stated without a tool result:\n\n${SCORING_KNOWLEDGE}\nFail the answer for any number that disagrees with the tool output, any claim about the player not supported by the tool output or the facts above, comparing options by raw pp instead of weightedGain, or breaking the case rubric. Do not fail for style, wording, or harmless omissions. Reply with only JSON: {"pass": boolean, "issues": string[]}.`;
+const VOICE_SYSTEM = `You grade the voice of a Beat Saber assistant that should talk like Claude: a knowledgeable, warm, direct coach. Judge only tone and writing, never data accuracy.
+
+Pass only if all of these hold:
+- It sounds like a person talking, in natural prose, matching the register of the message (casual gets casual and short, analysis gets structure).
+- It answers first. No praise of the question, no filler opener, no restating the question, no closing recap, no offer of further help.
+- It is warm without being gushing, and honest without being cold. Pushback is constructive. It owns mistakes briefly without groveling and does not get defensive.
+- It never reads like a manual or a data dump: numbers are explained in game terms and only included when they support a point.
+- It asks at most one question, and only when it truly needs the answer.
+- It honors explicit formatting requests from the user.
+- Declines are brief, kind and in plain prose, never a list.
+
+Also apply the case rubric for tone. Reply with only JSON: {"pass": boolean, "issues": string[]}.`;
 const JUDGE_ATTEMPTS = 3;
 const OUTPUT_LIMIT = 6000;
 
@@ -210,21 +293,21 @@ async function runCase(evalCase: EvalCase, player: EvalPlayer) {
     for (const issue of groundingIssues(turn)) {
       checks.push(issue);
     }
-    if (turn.answer.includes("—")) {
-      checks.push("answer used an em dash");
-    }
-    if (turn.answer.trim().length === 0) {
-      checks.push("empty answer");
+    for (const issue of checkChatStyle(turn.answer, {
+      kind: turn === turns[0] || evalCase.kind !== "chat" ? evalCase.kind : "chat",
+    })) {
+      checks.push(`style: ${issue}`);
     }
   }
 
-  const verdict = await judge(evalCase, turns);
+  const [verdict, voice] = await Promise.all([judge(evalCase, turns), judgeVoice(evalCase, turns)]);
   return {
     caseId: evalCase.id,
     player,
     turns,
     checks,
     verdict,
+    voice,
     ms: Date.now() - started,
     metrics: sumMetrics(turns.map(turn => turn.metrics)),
   } satisfies CaseResult;
@@ -283,18 +366,30 @@ function groundingIssues(turn: TurnResult) {
   return issues;
 }
 
-async function judge(evalCase: EvalCase, turns: TurnResult[]) {
-  const transcript = turns
+function renderTranscript(turns: TurnResult[]) {
+  return turns
     .map(
       turn =>
         `USER: ${turn.user}\nTOOL CALLS:\n${turn.tools.map(trace => `- ${trace.name}(${trace.input}) => ${trace.output}`).join("\n") || "(none)"}\nASSISTANT: ${turn.answer}`
     )
     .join("\n\n");
+}
+
+async function judge(evalCase: EvalCase, turns: TurnResult[]) {
+  return runJudge(JUDGE_SYSTEM, evalCase, turns);
+}
+
+async function judgeVoice(evalCase: EvalCase, turns: TurnResult[]) {
+  return runJudge(VOICE_SYSTEM, evalCase, turns);
+}
+
+async function runJudge(system: string, evalCase: EvalCase, turns: TurnResult[]) {
+  const transcript = renderTranscript(turns);
   for (let attempt = 0; attempt < JUDGE_ATTEMPTS; attempt++) {
     const result = await generateText({
       model: ChatModelService.getTitleModel(),
       maxOutputTokens: 8192,
-      system: JUDGE_SYSTEM,
+      system,
       prompt: `CASE RUBRIC: ${evalCase.rubric}\n\nTRANSCRIPT:\n${transcript}`,
     });
     const match = result.text.match(/\{[\s\S]*\}/);
@@ -322,22 +417,27 @@ async function runPool<T>(jobs: (() => Promise<T>)[], limit: number) {
 
 function render(results: CaseResult[]) {
   const lines = [`# Chat eval ${new Date().toISOString()}`, ""];
-  const passed = results.filter(result => result.verdict.pass && result.checks.length === 0).length;
+  const passed = results.filter(
+    result => result.verdict.pass && result.voice.pass && result.checks.length === 0
+  ).length;
   lines.push(
     `${passed}/${results.length} passed`,
     "",
-    "| case | player | judge | checks | s | steps | calls | errors |",
-    "|---|---|---|---|---|---|---|---|"
+    "| case | player | judge | voice | checks | s | steps | calls | errors |",
+    "|---|---|---|---|---|---|---|---|---|"
   );
   for (const result of results) {
     lines.push(
-      `| ${result.caseId} | ${result.player.name} | ${result.verdict.pass ? "pass" : "FAIL"} | ${result.checks.join("; ") || "ok"} | ${(result.ms / 1000).toFixed(0)} | ${result.metrics?.steps ?? "-"} | ${result.metrics?.toolCalls ?? "-"} | ${result.metrics?.toolErrors ?? "-"} |`
+      `| ${result.caseId} | ${result.player.name} | ${result.verdict.pass ? "pass" : "FAIL"} | ${result.voice.pass ? "pass" : "FAIL"} | ${result.checks.join("; ") || "ok"} | ${(result.ms / 1000).toFixed(0)} | ${result.metrics?.steps ?? "-"} | ${result.metrics?.toolCalls ?? "-"} | ${result.metrics?.toolErrors ?? "-"} |`
     );
   }
   for (const result of results) {
     lines.push("", `## ${result.caseId} / ${result.player.name}`, "");
     if (!result.verdict.pass) {
       lines.push(...result.verdict.issues.map(issue => `- judge: ${issue}`));
+    }
+    if (!result.voice.pass) {
+      lines.push(...result.voice.issues.map(issue => `- voice: ${issue}`));
     }
     lines.push(...result.checks.map(check => `- check: ${check}`));
     for (const turn of result.turns) {
@@ -363,7 +463,11 @@ if (only?.endsWith(".json")) {
       if (!evalCase || result.turns.length === 0) {
         return result;
       }
-      return { ...result, verdict: await judge(evalCase, result.turns) } satisfies CaseResult;
+      const [verdict, voice] = await Promise.all([
+        judge(evalCase, result.turns),
+        judgeVoice(evalCase, result.turns),
+      ]);
+      return { ...result, verdict, voice } satisfies CaseResult;
     }),
     CONCURRENCY
   );
@@ -375,7 +479,7 @@ if (only?.endsWith(".json")) {
   process.exit(0);
 }
 const jobs = CASES.filter(evalCase => !only || evalCase.id === only).flatMap(evalCase =>
-  (evalCase.id === "off-topic" ? PLAYERS.slice(0, 1) : PLAYERS).map(
+  (evalCase.id === "off-topic" || evalCase.id.startsWith("voice-") ? PLAYERS.slice(0, 1) : PLAYERS).map(
     player => () =>
       runCase(evalCase, player).catch(
         error =>
@@ -385,6 +489,7 @@ const jobs = CASES.filter(evalCase => !only || evalCase.id === only).flatMap(eva
             turns: [],
             checks: [`crashed: ${error instanceof Error ? error.message : String(error)}`],
             verdict: { pass: false, issues: [] },
+            voice: { pass: false, issues: [] },
             ms: 0,
           }) satisfies CaseResult
       )

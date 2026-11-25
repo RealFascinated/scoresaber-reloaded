@@ -1,5 +1,6 @@
 import { ScoreSaberCurve } from "@ssr/common/leaderboard-curve/scoresaber-curve";
 import { computeAccuracyBySecond } from "@ssr/common/replay/replay-accuracy";
+import { findLeaks, findWorstCutPattern } from "@ssr/common/replay/replay-coaching";
 import { NoteEventType, type Replay } from "@ssr/common/replay/replay-decoder";
 import {
   CUT_DIRECTIONS,
@@ -8,8 +9,7 @@ import {
   type CutDetail,
   type ReplayInsights,
 } from "@ssr/common/replay/replay-insights";
-import { buildTakeaways, describeGridCell } from "@ssr/common/replay/replay-takeaways";
-import { computeReplayDerivedData } from "@ssr/common/replay/replay-utils";
+import { describeGridCell } from "@ssr/common/replay/replay-takeaways";
 import type { ScoreStatsToken } from "@ssr/common/schemas/beatleader/tokens/score-stats/score-stats";
 import type { ScoreSaberScore } from "@ssr/common/schemas/scoresaber/score/score";
 import type { PlayerScore } from "@ssr/common/score/player-score";
@@ -351,12 +351,68 @@ function summarizeCutQuality(replay: Replay) {
   return { left: hand(byHand.left), right: hand(byHand.right) };
 }
 
-function summarizeInsights(insights: ReplayInsights, replay: Replay, score: ScoreSaberScore) {
+const MIN_GROUP_CUTS = 20;
+const MAX_WEAK_MOMENTS = 3;
+
+function summarizeLeaks(insights: ReplayInsights, stars: number, accuracy: number) {
+  return findLeaks(insights).map(leak => ({
+    focus: leak.focus,
+    hits: leak.hits,
+    lostPart: leak.partName,
+    averagePointsInGroup: round(leak.groupAverage),
+    averagePointsElsewhere: round(leak.restAverage),
+    maxPoints: leak.maxPoints,
+    accuracyIfFixed: round(leak.accuracyGain, 2),
+    rawPpIfFixed:
+      stars > 0
+        ? round(
+            ScoreSaberCurve.getPp(stars, accuracy + leak.accuracyGain) -
+              ScoreSaberCurve.getPp(stars, accuracy)
+          )
+        : null,
+    evidence: leak.evidence.map(item => ({
+      metric: item.metric,
+      inGroup: round(item.group, 1),
+      elsewhere: round(item.rest, 1),
+      unit: item.unit,
+    })),
+    fix: leak.fix,
+    worstStretches: leak.worstStretches,
+  }));
+}
+
+function summarizeWorstCuts(insights: ReplayInsights, stars: number, accuracy: number) {
+  const pattern = findWorstCutPattern(insights);
+  if (!pattern) {
+    return null;
+  }
+  return {
+    lostPart: pattern.partName,
+    worstCuts: pattern.cuts,
+    accuracyIfGapHalved: round(pattern.accuracyGain, 2),
+    rawPpIfGapHalved:
+      stars > 0
+        ? round(
+            ScoreSaberCurve.getPp(stars, accuracy + pattern.accuracyGain) -
+              ScoreSaberCurve.getPp(stars, accuracy)
+          )
+        : null,
+    evidence: pattern.evidence.map(item => ({
+      metric: item.metric,
+      inWorstCuts: round(item.group, 1),
+      inOtherCuts: round(item.rest, 1),
+      unit: item.unit,
+    })),
+    fix: pattern.fix,
+    worstStretches: pattern.worstStretches,
+  };
+}
+
+function summarizeInsights(insights: ReplayInsights, replay: Replay, stars: number, accuracy: number) {
   const noteScore = insights.totalNotes * MAX_CUT;
   const accuracyCost = (points: number) => (noteScore > 0 ? round((points / noteScore) * 100, 3) : 0);
   const { loss, streaks, details } = insights;
   const quality = summarizeCutQuality(replay);
-  const derived = computeReplayDerivedData(replay);
   const hand = (side: "left" | "right") => {
     const summary = insights.hands[side];
     return {
@@ -373,10 +429,6 @@ function summarizeInsights(insights: ReplayInsights, replay: Replay, score: Scor
   };
   const streak = (run: { length: number; start: number; end: number }) =>
     run.length > 0 ? { length: run.length, from: clock(run.start), to: clock(run.end) } : null;
-  const cutScoreCounts = new Map<number, number>();
-  for (const detail of details) {
-    cutScoreCounts.set(detail.score, (cutScoreCounts.get(detail.score) ?? 0) + 1);
-  }
 
   return {
     lengthSeconds: round(insights.lengthSeconds, 1),
@@ -394,61 +446,38 @@ function summarizeInsights(insights: ReplayInsights, replay: Replay, score: Scor
       total: { points: Math.round(loss.total), accuracyCost: accuracyCost(loss.total) },
     },
     hands: { left: hand("left"), right: hand("right") },
-    directions: insights.directions.map(direction => ({
-      direction: direction.direction,
-      cuts: direction.cuts,
-      mistakes: direction.mistakes,
-      averageCutScore: round(direction.avgScore),
-      partAverages: partAverages(details.filter(detail => detail.direction === direction.direction)),
-    })),
-    grid: insights.grid.map(cell => ({
-      position: describeGridCell(cell),
-      cuts: cell.cuts,
-      mistakes: cell.mistakes,
-      averageCutScore: round(cell.avgScore),
-      partAverages: partAverages(
-        details.filter(detail => detail.lane === cell.lane && detail.layer === cell.layer)
-      ),
-    })),
-    cutScoreCounts: [...cutScoreCounts.entries()]
-      .sort((a, b) => b[0] - a[0])
-      .map(([cutScore, count]) => ({ score: cutScore, count })),
-    centerScoreCounts: derived.cutDistribution,
-    swingSpeedEvery2Seconds: {
-      left: derived.swingSpeed.leftSwingSpeed.map(speed => round(speed)),
-      right: derived.swingSpeed.rightSwingSpeed.map(speed => round(speed)),
-    },
-    sections: insights.sections.map(section => ({
-      from: clock(section.start),
-      to: clock(section.end),
-      notes: section.notes,
-      nps: round(section.nps, 1),
-      averageCutScore: round(section.avgScore),
-      pointsLost: Math.round(section.pointsLost),
-      mistakes: section.mistakes,
-    })),
-    density: insights.density.map(bucket => ({
-      label: bucket.label,
-      minNps: round(bucket.minNps, 1),
-      maxNps: round(bucket.maxNps, 1),
-      averageCutScore: round(bucket.avgScore),
-      pointsLostPer100Notes: Math.round(bucket.lostPer100Notes),
-    })),
+    directions: insights.directions
+      .filter(direction => direction.cuts >= MIN_GROUP_CUTS)
+      .map(direction => ({
+        direction: direction.direction,
+        cuts: direction.cuts,
+        mistakes: direction.mistakes,
+        averageCutScore: round(direction.avgScore),
+        partAverages: partAverages(details.filter(detail => detail.direction === direction.direction)),
+      })),
+    grid: insights.grid
+      .filter(cell => cell.cuts >= MIN_GROUP_CUTS)
+      .map(cell => ({
+        position: describeGridCell(cell),
+        cuts: cell.cuts,
+        mistakes: cell.mistakes,
+        averageCutScore: round(cell.avgScore),
+        partAverages: partAverages(
+          details.filter(detail => detail.lane === cell.lane && detail.layer === cell.layer)
+        ),
+      })),
     longestGreatStreak: streak(streaks.great),
     longestPerfectStreak: streak(streaks.perfect),
     mistakes: listMistakes(replay),
-    weakMoments: insights.weakMoments.map(moment => ({
+    weakMoments: insights.weakMoments.slice(0, MAX_WEAK_MOMENTS).map(moment => ({
       from: clock(moment.start),
       to: clock(moment.end),
       pointsLost: Math.round(moment.pointsLost),
       misses: moment.misses,
     })),
     pausedAt: insights.pauses.map(pause => clock(pause.time)),
-    takeaways: buildTakeaways(insights, score, {
-      good: Number.POSITIVE_INFINITY,
-      improve: Number.POSITIVE_INFINITY,
-      weakSpots: Number.POSITIVE_INFINITY,
-    }),
+    leaks: summarizeLeaks(insights, stars, accuracy),
+    worstCuts: summarizeWorstCuts(insights, stars, accuracy),
   };
 }
 
@@ -475,7 +504,7 @@ function summarizeSetup(replay: Replay) {
 
 /**
  * Builds the score summary the chat model reads: the score page's numbers, plus BeatLeader's score
- * stats and the full replay analysis when they are given. Nothing is capped.
+ * stats and a replay analysis trimmed to what is worth coaching: directions and grid cells with enough cuts, the three roughest moments and the biggest accuracy leaks with causes and fixes.
  */
 export function buildScoreSummary(
   playerScore: PlayerScore<ScoreSaberScore>,
@@ -498,9 +527,10 @@ export function buildScoreSummary(
     replaySetup: replay ? summarizeSetup(replay) : null,
     replay: replay
       ? summarizeInsights(
-          computeReplayInsights(replay, { weakMomentCount: Number.POSITIVE_INFINITY }),
+          computeReplayInsights(replay, { weakMomentCount: MAX_WEAK_MOMENTS }),
           replay,
-          score
+          playerScore.leaderboard.stars,
+          score.accuracy
         )
       : null,
   };

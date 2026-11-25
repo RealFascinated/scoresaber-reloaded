@@ -8,7 +8,10 @@ import CachePerformanceMetric from "../../metrics/impl/backend/cache-performance
 
 export default class StorageService {
   private static readonly logger: ScopedLogger = Logger.withTopic("Storage");
-  private static CACHE: SSRCache;
+  private static readonly CACHE = new SSRCache({
+    maxObjects: 5_000,
+    ttl: TimeUnit.toMillis(TimeUnit.Minute, 10),
+  });
   private static readonly STORAGE_FILE_CACHE_ID = "s3_file_content";
 
   private static readonly S3_CLIENT = new S3Client({
@@ -25,10 +28,6 @@ export default class StorageService {
   }
 
   constructor() {
-    StorageService.CACHE = new SSRCache({
-      maxObjects: 5_000,
-      ttl: TimeUnit.toMillis(TimeUnit.Minute, 10),
-    });
     this.initBuckets();
   }
 
