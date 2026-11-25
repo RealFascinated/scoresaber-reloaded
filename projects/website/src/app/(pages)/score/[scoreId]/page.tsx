@@ -91,6 +91,7 @@ export async function generateMetadata(props: ScorePageProps) {
 
   const title = `${playerName} · ${songTitle}`;
   const description = [
+    ...(score.rank > 0 ? [`#${formatNumberWithCommas(score.rank)}`] : []),
     `${score.accuracy.toFixed(2)}%`,
     ppOrScore,
     diffLabel,
