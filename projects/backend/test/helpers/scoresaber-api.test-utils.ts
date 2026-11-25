@@ -2,9 +2,16 @@ import { env } from "@ssr/common/env";
 import type { ScoreSaberLeaderboard } from "@ssr/common/schemas/scoresaber/leaderboard/leaderboard";
 import type { ScoreSaberV2LeaderboardPageToken } from "@ssr/common/schemas/scoresaber/tokens/v2/leaderboard/leaderboards-page";
 import type { ScoreSaberV2PlayerToken } from "@ssr/common/schemas/scoresaber/tokens/v2/player/player";
+import type { ScoreSaberV2ScoreResponseToken } from "@ssr/common/schemas/scoresaber/tokens/v2/score/score";
 import { HttpResponse, http } from "msw";
 import {
   INSERT_ACCOUNT_ID,
+  TEST_AVATAR,
+  TEST_LEADERBOARD_ID,
+  TEST_PLAYER_ID,
+  TEST_PLAYER_NAME,
+  TEST_SCORE_ID,
+  TEST_SONG_HASH,
   TEST_INACTIVE_PLAYER_ID,
   TEST_PLAYER_TWO_ID,
   TEST_PLAYER_TWO_NAME,
@@ -213,7 +220,80 @@ export function scoreSaberRankedLeaderboards(
   });
 }
 
+/** The seeded score as ScoreSaber returns it, with a rank and weight the local data does not have. */
+export function buildScoreSaberV2ScoreResponseToken() {
+  const built: ScoreSaberV2ScoreResponseToken = {
+    score: {
+      id: TEST_SCORE_ID,
+      rank: 3,
+      unmodifiedScore: 950,
+      modifiedScore: 950,
+      accuracy: 0.95,
+      pp: 250,
+      weight: 0.9,
+      mods: [],
+      badCuts: 1,
+      missedNotes: 0,
+      maxCombo: 500,
+      fullCombo: false,
+      hasReplay: false,
+      personalBest: true,
+      createdAt: "2024-06-01T12:00:00.000Z",
+      player: {
+        id: TEST_PLAYER_ID,
+        name: TEST_PLAYER_NAME,
+        country: "US",
+        role: null,
+        avatar: TEST_AVATAR,
+      },
+      device: { hmd: "Unknown", controllerLeft: null, controllerRight: null },
+    },
+    leaderboard: {
+      id: TEST_LEADERBOARD_ID,
+      map: {
+        id: TEST_LEADERBOARD_ID,
+        hash: TEST_SONG_HASH,
+        bsid: null,
+        songName: "Test Song",
+        songSubName: "Test Sub",
+        songAuthorName: "Test Author",
+        levelAuthorName: "Test Mapper",
+        bpm: 120,
+        coverUrl: "https://example.com/cover.png",
+        verified: true,
+      },
+      difficulty: {
+        id: TEST_LEADERBOARD_ID,
+        difficulty: 9,
+        rawDifficulty: "ExpertPlus",
+        gameMode: "SoloStandard",
+      },
+      maxScore: 1000,
+      totalScores: 100,
+      dailyScores: 10,
+      createdAt: "2024-06-01T12:00:00.000Z",
+      realm: {
+        realmId: 1,
+        realmName: "Steam",
+        leaderboardStatus: "RANKED",
+        positiveModifiers: false,
+        stars: 8.5,
+        rankedAt: "2024-06-01T12:00:00.000Z",
+        qualifiedAt: null,
+        lovedAt: null,
+      },
+    },
+  };
+  return built;
+}
+
 export const scoreSaberApiHandlers = [
+  scoreSaberApi("/v2/scores/:id", ({ params }) =>
+    Number(params.id) === TEST_SCORE_ID
+      ? HttpResponse.json(buildScoreSaberV2ScoreResponseToken())
+      : new HttpResponse(null, { status: 404 })
+  ),
+
   scoreSaberApi("/v2/players/:id", ({ params }) => {
     const token = TEST_PLAYER_TOKENS.find(candidate => candidate.id === params.id);
     return token ? HttpResponse.json(token) : new HttpResponse(null, { status: 404 });

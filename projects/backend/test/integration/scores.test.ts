@@ -33,6 +33,8 @@ describe("GET /scores/:scoreId", () => {
     expectPlayerScore(body);
     expect((body as { score: { scoreId: number } }).score.scoreId).toBe(TEST_SCORE_ID);
     expect((body as { score: { playerId: string } }).score.playerId).toBe(TEST_PLAYER_ID);
+    expect((body as { score: { rank: number; weight: number } }).score.rank).toBe(3);
+    expect((body as { score: { rank: number; weight: number } }).score.weight).toBe(0.9);
   });
 
   test("returns 404 for unknown score", async () => {
