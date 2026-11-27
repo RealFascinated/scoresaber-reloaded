@@ -81,7 +81,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@typescript/native": "npm:typescript@^7.0.2",
-    "baseline-browser-mapping": "^2.11.39",
+    "baseline-browser-mapping": "^2.11.40",
     "oxlint": "^1.95.0",
     "postcss": "^8.5.33",
     "tailwindcss": "^4.3.5",
